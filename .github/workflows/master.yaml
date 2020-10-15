@@ -52,7 +52,7 @@ jobs:
         uses: nais/deploy/actions/deploy@master
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-gcp
+          CLUSTER: dev-fss
           RESOURCE: naiserator-dev.yaml
       - name: Deploy to Prod
         uses: nais/deploy/actions/deploy@master
