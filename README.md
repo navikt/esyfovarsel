@@ -1,5 +1,5 @@
 # esyfovarsel
-Backend for forwarding and storing of health-related data
+Varsler for eSYFO
 
 ## Technologies (to be) used
 * Kotlin
