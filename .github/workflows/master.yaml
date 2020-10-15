@@ -26,6 +26,9 @@ jobs:
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-wrapper-
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
       - name: Run tests
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
