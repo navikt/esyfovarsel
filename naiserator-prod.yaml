@@ -34,5 +34,10 @@ spec:
   prometheus:
     enabled: true
     path: /prometheus
+  vault:
+    enabled: true
+    paths:
+      - kvPath: "/serviceuser/data/prod/srvesyfovarsel"
+        mountPath: "/secrets/credentials/srvesyfovarsel"
   ingresses:
     - "https://esyfovarsel.nais.adeo.no"
