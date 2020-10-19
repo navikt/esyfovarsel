@@ -34,5 +34,10 @@ spec:
   prometheus:
     enabled: true
     path: /prometheus
+  vault:
+    enabled: true
+    paths:
+      - kvPath: "/serviceuser/data/dev/srvesyfovarsel"
+        mountPath: "/var/run/secrets/serviceuser"
   ingresses:
     - "https://esyfovarsel.dev.adeo.no"
