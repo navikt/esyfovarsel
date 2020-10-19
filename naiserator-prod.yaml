@@ -38,6 +38,6 @@ spec:
     enabled: true
     paths:
       - kvPath: "/serviceuser/data/prod/srvesyfovarsel"
-        mountPath: "/secrets/credentials/srvesyfovarsel"
+        mountPath: "/var/run/secrets/serviceuser"
   ingresses:
     - "https://esyfovarsel.nais.adeo.no"
