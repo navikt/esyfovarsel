@@ -16,9 +16,6 @@ object MotebehovServiceTest : Spek({
     val motebehovService: MotebehovService = generateMotebehov
 
     describe("MotebehovServiceSpek") {
-        it("Should succceed") {
-            true shouldEqual true
-        }
 
         it("erSykmeldtPaaDatoEnPeriode") {
             // En periode ingen konflikt
