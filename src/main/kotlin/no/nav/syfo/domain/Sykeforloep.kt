@@ -17,7 +17,6 @@ class Sykeforloep() {
     }
 
     fun hentSykmeldingerGittDato(dato: LocalDate): List<Sykmelding> {
-        return sykmeldinger
-                .filter { s: Sykmelding -> s.periodeVedGittDato(dato).isPresent() }
+        return sykmeldinger.filter { s: Sykmelding -> s.periodeVedGittDato(dato) }
     }
 }

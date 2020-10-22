@@ -11,10 +11,10 @@ private fun iDatoIntervall(dato: LocalDate, tom: LocalDate, fom: LocalDate): Boo
     return dato.isAfter(fom) && dato.isBefore(tom)
 }
 
-fun antallDagerMellom(tidligst: LocalDate?, eldst: LocalDate?): Int {
-    return ChronoUnit.DAYS.between(tidligst, eldst).toInt() - 1
+fun antallDagerMellom(fom: LocalDate, tom: LocalDate): Int {
+    return ChronoUnit.DAYS.between(fom, tom).toInt() - 1
 }
 
-fun antallDager(fom: LocalDate?, tom: LocalDate?): Int {
+fun antallDager(fom: LocalDate, tom: LocalDate): Int {
     return ChronoUnit.DAYS.between(fom, tom).toInt()
 }

@@ -1,4 +1,3 @@
-
 package no.nav.syfo.domain
 
 import java.time.LocalDate

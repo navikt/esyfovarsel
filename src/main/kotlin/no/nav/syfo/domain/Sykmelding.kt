@@ -34,8 +34,10 @@ class Sykmelding() {
         return this
     }
 
-    fun periodeVedGittDato(dato: LocalDate): Optional<Periode> {
-        return perioder.stream().filter(Predicate<Periode> { p: Periode -> erDatoIPerioden(dato, p.fom, p.tom) }).findFirst()
+    fun periodeVedGittDato(dato: LocalDate): Boolean {
+        return perioder
+                .filter { p: Periode -> erDatoIPerioden(dato, p.fom, p.tom) }
+                .isNotEmpty()
     }
 
     fun withId(id: Long): Sykmelding {
