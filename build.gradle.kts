@@ -40,7 +40,9 @@ dependencies {
 
     testImplementation("org.amshove.kluent:kluent:$kluent_version")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spek_version")
-    testImplementation("io.ktor:ktor-server-test-host:$ktor_version")
+    testImplementation("io.ktor:ktor-server-test-host:$ktor_version") {
+        exclude(group = "ch.qos.logback", module = "logback-classic")
+    }
 
     testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spek_version")
     testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spek_version")
