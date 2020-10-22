@@ -1,7 +1,6 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.domain.*
-import no.nav.syfo.testutil.generator.generateMotebehov
 import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
@@ -12,10 +11,10 @@ import java.util.*
 
 object MotebehovServiceTest : Spek({
 
-    val SYKEFORLOEP_START_DAGER: Long = (SVAR_MOTEBEHOV_DAGER + 1).toLong()
-    val motebehovService: MotebehovService = generateMotebehov
 
     describe("MotebehovServiceSpek") {
+        val SYKEFORLOEP_START_DAGER: Long = (SVAR_MOTEBEHOV_DAGER + 1).toLong()
+        val motebehovService = MotebehovService()
 
         it("erSykmeldtPaaDatoEnPeriode") {
             // En periode ingen konflikt
