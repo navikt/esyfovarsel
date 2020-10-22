@@ -10,8 +10,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 object MotebehovServiceTest : Spek({
-
-
+    
     describe("MotebehovServiceSpek") {
         val SYKEFORLOEP_START_DAGER: Long = (SVAR_MOTEBEHOV_DAGER + 1).toLong()
         val motebehovService = MotebehovService()

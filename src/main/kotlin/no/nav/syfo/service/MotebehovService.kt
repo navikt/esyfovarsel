@@ -4,17 +4,16 @@ import no.nav.syfo.domain.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
-import java.util.function.Predicate
 
 const val SVAR_MOTEBEHOV_DAGER = 112
 
 class MotebehovService {
     val LOG = LoggerFactory.getLogger(this::class.simpleName)
 
-    fun datoForSvarMotebehov(sykmelding: Sykmelding, sykeforloep: Sykeforloep?): Optional<LocalDate> {
-        val svarmotebehovdato = finnSvarMotebehovdato(sykeforloep!!)
+    fun datoForSvarMotebehov(sykmelding: Sykmelding, sykeforloep: Sykeforloep): Optional<LocalDate> {
+        val svarmotebehovdato = finnSvarMotebehovdato(sykeforloep)
         if (!erSvarMotebehovDatoPassert(svarmotebehovdato)
-                && erSykmeldtPaaDato(sykeforloep, svarmotebehovdato!!)
+                && erSykmeldtPaaDato(sykeforloep, svarmotebehovdato)
                 && !erAlleredePlanlagt(sykmelding.bruker.aktoerId, sykeforloep)
                 && !harAlleredeBlittSendt(sykmelding.bruker.aktoerId, sykeforloep)) {
             LOG.info("Planlegger svarmotebehovvarsel med dato {}", svarmotebehovdato)
@@ -23,8 +22,8 @@ class MotebehovService {
         return Optional.empty()
     }
 
-    private fun erSvarMotebehovDatoPassert(svarmotebehovDato: LocalDate?): Boolean {
-        val motebehovdatoErPassert = svarmotebehovDato!!.isBefore(LocalDate.now())
+    private fun erSvarMotebehovDatoPassert(svarmotebehovDato: LocalDate): Boolean {
+        val motebehovdatoErPassert = svarmotebehovDato.isBefore(LocalDate.now())
         if (motebehovdatoErPassert) {
             LOG.info("Planlegger ikke svarmotebehovvarsel: MotebehovdatoErPassert er passert!")
         }
