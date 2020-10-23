@@ -183,7 +183,7 @@ object MotebehovServiceSpek : Spek({
                                     .withFom(now().plusDays(4))
                                     .withTom(now().plusDays(14))
                     ))
-                    .withSyketilfelleStartDatoFraInfotrygd(now().minusDays(SVAR_MOTEBEHOV_DAGER + 1))
+                    .withSyketilfelleStartDatoFraInfotrygd(now().minusDays(SVAR_MOTEBEHOV_DAGER + 1L))
                     .withBruker(Bruker().withAktoerId("id"))
             val sykeforloep = Sykeforloep()
                     .withSykmeldinger(listOf(sykmeldingDokument))
