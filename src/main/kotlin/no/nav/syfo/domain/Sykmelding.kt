@@ -3,8 +3,6 @@ package no.nav.syfo.domain
 import no.nav.syfo.util.erDatoIPerioden
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
-import java.util.function.Predicate
 
 class Sykmelding() {
     var perioder: List<Periode> = emptyList()
