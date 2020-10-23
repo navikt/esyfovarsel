@@ -15,7 +15,7 @@ object MotebehovServiceSpek : Spek({
         val motebehovService = MotebehovService()
         val SYKEFORLOEP_START_DAGER: Long = (SVAR_MOTEBEHOV_DAGER + 1)
 
-        it("erSykmeldtPaaDatoEnPeriode") {
+        it("erSykmeldtPaaDato skal returnere true for 1 sykmelding med 1 periode") {
             // En periode ingen konflikt
             val sykeforloep = Sykeforloep()
                     .withSykmeldinger(
@@ -37,7 +37,7 @@ object MotebehovServiceSpek : Spek({
             erSykmeldt shouldEqual true
         }
 
-        it("erSykmeldtPaaDatoEnSykmeldingToPerioder") {
+        it("erSykmeldtPaaDato skal returnere true for 1 sykmelding med 2 perioder") {
             // To periode ingen konflikt - er 100% ved 112 dager
             val sykeforloep1 = Sykeforloep()
                     .withSykmeldinger(listOf(
@@ -69,7 +69,7 @@ object MotebehovServiceSpek : Spek({
                                                     .withGrad(100),
                                             Periode()
                                                     .withFom(now().minusDays(24))
-                                                    .withTom(now().minusDays(0))
+                                                    .withTom(now())
                                                     .withGrad(50)
                                     ))
                                     .withSyketilfelleStartDatoFraInfotrygd(now().minusDays(50))
@@ -80,14 +80,14 @@ object MotebehovServiceSpek : Spek({
             erSykmeldt shouldEqual false
         }
 
-        it("erSykmeldtPaaDatoFlereSykmeldinger") {
+        it("erSykmeldtPaaDato skal returnere true for flere sykmeldinger") {
             val sykeforloep = Sykeforloep()
                     .withSykmeldinger(listOf(
                             Sykmelding()
                                     .withPerioder(listOf(
                                             Periode()
                                                     .withFom(now().minusDays(SYKEFORLOEP_START_DAGER))
-                                                    .withTom(now().minusDays(0))
+                                                    .withTom(now())
                                                     .withGrad(100)
                                     ))
                                     .withSyketilfelleStartDatoFraInfotrygd(now().minusDays(SYKEFORLOEP_START_DAGER)),
@@ -95,7 +95,7 @@ object MotebehovServiceSpek : Spek({
                                     .withPerioder(listOf(
                                             Periode()
                                                     .withFom(now().minusDays(24))
-                                                    .withTom(now().minusDays(0))
+                                                    .withTom(now())
                                                     .withGrad(50)
                                     ))
                                     .withSyketilfelleStartDatoFraInfotrygd(now().minusDays(SYKEFORLOEP_START_DAGER))
@@ -106,7 +106,7 @@ object MotebehovServiceSpek : Spek({
             erSykmeldt shouldEqual true
         }
 
-        it("erSykmeldtPaaDatoFlereSykmeldingerMedKonflikt") {
+        it("erSykmeldtPaaDato skal returnere true for flere sykmeldinger med konflikt") {
             val sykeforloep = Sykeforloep()
                     .withSykmeldinger(listOf(
                             Sykmelding()
@@ -117,7 +117,7 @@ object MotebehovServiceSpek : Spek({
                                                     .withGrad(100),
                                             Periode()
                                                     .withFom(now().minusDays(19))
-                                                    .withTom(now().minusDays(0))
+                                                    .withTom(now())
                                                     .withGrad(100)
                                     ))
                                     .withSyketilfelleStartDatoFraInfotrygd(now().minusDays(SYKEFORLOEP_START_DAGER))
@@ -126,7 +126,7 @@ object MotebehovServiceSpek : Spek({
                                     .withPerioder(listOf(
                                             Periode()
                                                     .withFom(now().minusDays(19))
-                                                    .withTom(now().minusDays(0))
+                                                    .withTom(now())
                                                     .withGrad(50)
                                     ))
                                     .withSyketilfelleStartDatoFraInfotrygd(now().minusDays(SYKEFORLOEP_START_DAGER))
@@ -135,7 +135,7 @@ object MotebehovServiceSpek : Spek({
                                     .withPerioder(listOf(
                                             Periode()
                                                     .withFom(now().minusDays(24))
-                                                    .withTom(now().minusDays(0))
+                                                    .withTom(now())
                                                     .withGrad(30)
                                     ))
                                     .withSyketilfelleStartDatoFraInfotrygd(now().minusDays(SYKEFORLOEP_START_DAGER))
@@ -148,18 +148,18 @@ object MotebehovServiceSpek : Spek({
             erSykmeldt shouldEqual true
         }
 
-        it("erSykmeldtPaaDatoOverlappendePerioderInnadISykmelding") {
+        it("erSykmeldtPaaDato skal returnere true for overlappende perioder innad i sykmelding") {
             val sykeforloep = Sykeforloep()
                     .withSykmeldinger(listOf(
                             Sykmelding()
                                     .withPerioder(listOf(
                                             Periode()
                                                     .withFom(now().minusDays(SYKEFORLOEP_START_DAGER))
-                                                    .withTom(now().minusDays(0))
+                                                    .withTom(now())
                                                     .withGrad(50),
                                             Periode()
                                                     .withFom(now().minusDays(24))
-                                                    .withTom(now().minusDays(0))
+                                                    .withTom(now())
                                                     .withGrad(100)
                                     ))
                                     .withSyketilfelleStartDatoFraInfotrygd(now().minusDays(SYKEFORLOEP_START_DAGER))
@@ -171,7 +171,7 @@ object MotebehovServiceSpek : Spek({
             erSykmeldt shouldEqual true
         }
 
-        it("emptyOmDatoForSvarMotebehovVarselErPassert") {
+        it("muligVarselDato skal returnere empty om dato for SvarMotebehovVarsel er passert") {
             val sykmeldingDokument: Sykmelding = Sykmelding()
                     .withPerioder(listOf(
                             Periode()
@@ -190,10 +190,10 @@ object MotebehovServiceSpek : Spek({
                     .withOppfolgingsdato(now().minusDays(SVAR_MOTEBEHOV_DAGER + 1))
             val muligVarselDato: Optional<LocalDate> = motebehovService.datoForSvarMotebehov(sykmeldingDokument, sykeforloep)
 
-            muligVarselDato shouldEqual Optional.empty<Any>()
+            muligVarselDato shouldEqual Optional.empty()
         }
 
-        it("emptyOmIngenAktivSykmelding") {
+        it("muligVarselDato skal returnere empty om ingen aktiv sykmelding") {
             val sykmeldingDokument: Sykmelding = Sykmelding()
                     .withPerioder(listOf(
                             Periode()
@@ -211,10 +211,10 @@ object MotebehovServiceSpek : Spek({
                     .withOppfolgingsdato(now().minusDays(10))
             val muligVarselDato: Optional<LocalDate> = motebehovService.datoForSvarMotebehov(sykmeldingDokument, sykeforloep)
 
-            muligVarselDato shouldEqual Optional.empty<Any>()
+            muligVarselDato shouldEqual Optional.empty()
         }
 
-        it("faarDatoDersomSykmeldingBryter112dagersGrenseOg100VedDag112") {
+        it("muligVarselDato får dato dersom sykmelding bryter 112-dagersgrense og 100% ved dag 112") {
             val dagerSidenIdentdato = 10L
             val sykmeldingDokument: Sykmelding = Sykmelding()
                     .withPerioder(listOf(
@@ -238,7 +238,7 @@ object MotebehovServiceSpek : Spek({
             muligVarselDato.get() shouldEqual now().plusDays(SVAR_MOTEBEHOV_DAGER - dagerSidenIdentdato)
         }
 
-        it("faarIkkeVarselForGammeltForloep") {
+        it("muligVarselDato får ikke dato for gammelt forløp") {
             val sykmeldingDokument: Sykmelding = Sykmelding()
                     .withPerioder(listOf(
                             Periode()
