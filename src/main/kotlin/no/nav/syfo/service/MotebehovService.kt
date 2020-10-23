@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 
-const val SVAR_MOTEBEHOV_DAGER = 112
+const val SVAR_MOTEBEHOV_DAGER: Long = 112L
 
 class MotebehovService {
     val LOG = LoggerFactory.getLogger(this::class.simpleName)

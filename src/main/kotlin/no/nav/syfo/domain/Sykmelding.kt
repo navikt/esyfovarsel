@@ -3,16 +3,12 @@ package no.nav.syfo.domain
 import no.nav.syfo.util.erDatoIPerioden
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
-import java.util.function.Predicate
 
 class Sykmelding() {
     var perioder: List<Periode> = emptyList()
     var behandletDato: LocalDateTime = LocalDateTime.now()
     var bruker: Bruker = Bruker()
     var syketilfelleStartDatoFraInfotrygd: LocalDate = LocalDate.now()
-    var id: Long? = null
-    var meldingId: String? = null
 
     fun withPerioder(perioder: List<Periode>): Sykmelding {
         this.perioder = perioder
@@ -38,15 +34,5 @@ class Sykmelding() {
         return perioder
                 .filter { p: Periode -> erDatoIPerioden(dato, p.fom, p.tom) }
                 .isNotEmpty()
-    }
-
-    fun withId(id: Long): Sykmelding {
-        this.id = id
-        return this
-    }
-
-    fun withMeldingId(meldingId: String): Sykmelding {
-        this.meldingId = meldingId
-        return this
     }
 }
