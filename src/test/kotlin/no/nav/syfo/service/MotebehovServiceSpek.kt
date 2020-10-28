@@ -1,6 +1,14 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.domain.*
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.syfo.domain.Bruker
+import no.nav.syfo.domain.HendelseSvarMotebehovVarsel
+import no.nav.syfo.domain.HendelseType.SVAR_MOTEBEHOV
+import no.nav.syfo.domain.Periode
+import no.nav.syfo.domain.PlanlagtVarsel
+import no.nav.syfo.domain.Sykeforloep
+import no.nav.syfo.domain.Sykmelding
 import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
@@ -12,7 +20,12 @@ import java.util.*
 object MotebehovServiceSpek : Spek({
 
     describe("MotebehovServiceSpek") {
-        val motebehovService = MotebehovService()
+
+        val hendelseService: HendelseService = mockk()
+        val planlagtVarselService: PlanlagtVarselService = mockk()
+        val varselStatusService = VarselStatusService(hendelseService, planlagtVarselService)
+        val motebehovService = MotebehovService(varselStatusService)
+
         val SYKEFORLOEP_START_DAGER: Long = (SVAR_MOTEBEHOV_DAGER + 1)
 
         it("erSykmeldtPaaDato skal returnere true for 1 sykmelding med 1 periode") {
@@ -172,7 +185,7 @@ object MotebehovServiceSpek : Spek({
         }
 
         it("muligVarselDato skal returnere empty om dato for SvarMotebehovVarsel er passert") {
-            val sykmeldingDokument: Sykmelding = Sykmelding()
+            val sykmelding: Sykmelding = Sykmelding()
                     .withPerioder(listOf(
                             Periode()
                                     .withGrad(SVAR_MOTEBEHOV_DAGER.toInt() + 1)
@@ -186,15 +199,15 @@ object MotebehovServiceSpek : Spek({
                     .withSyketilfelleStartDatoFraInfotrygd(now().minusDays(SVAR_MOTEBEHOV_DAGER + 1L))
                     .withBruker(Bruker().withAktoerId("id"))
             val sykeforloep = Sykeforloep()
-                    .withSykmeldinger(listOf(sykmeldingDokument))
+                    .withSykmeldinger(listOf(sykmelding))
                     .withOppfolgingsdato(now().minusDays(SVAR_MOTEBEHOV_DAGER + 1))
-            val muligVarselDato: Optional<LocalDate> = motebehovService.datoForSvarMotebehov(sykmeldingDokument, sykeforloep)
+            val muligVarselDato: Optional<LocalDate> = motebehovService.datoForSvarMotebehov(sykmelding, sykeforloep)
 
             muligVarselDato shouldEqual Optional.empty()
         }
 
         it("muligVarselDato skal returnere empty om ingen aktiv sykmelding") {
-            val sykmeldingDokument: Sykmelding = Sykmelding()
+            val sykmelding: Sykmelding = Sykmelding()
                     .withPerioder(listOf(
                             Periode()
                                     .withFom(now().minusDays(20))
@@ -207,16 +220,16 @@ object MotebehovServiceSpek : Spek({
                     .withSyketilfelleStartDatoFraInfotrygd(now().minusDays(10))
                     .withBehandletDato(LocalDateTime.now().minusDays(10))
             val sykeforloep = Sykeforloep()
-                    .withSykmeldinger(listOf(sykmeldingDokument))
+                    .withSykmeldinger(listOf(sykmelding))
                     .withOppfolgingsdato(now().minusDays(10))
-            val muligVarselDato: Optional<LocalDate> = motebehovService.datoForSvarMotebehov(sykmeldingDokument, sykeforloep)
+            val muligVarselDato: Optional<LocalDate> = motebehovService.datoForSvarMotebehov(sykmelding, sykeforloep)
 
             muligVarselDato shouldEqual Optional.empty()
         }
 
         it("muligVarselDato får dato dersom sykmelding bryter 112-dagersgrense og 100% ved dag 112") {
             val dagerSidenIdentdato = 10L
-            val sykmeldingDokument: Sykmelding = Sykmelding()
+            val sykmelding: Sykmelding = Sykmelding()
                     .withPerioder(listOf(
                             Periode()
                                     .withGrad(80)
@@ -229,17 +242,23 @@ object MotebehovServiceSpek : Spek({
                     ))
                     .withSyketilfelleStartDatoFraInfotrygd(now().minusDays(dagerSidenIdentdato))
                     .withBruker(Bruker().withAktoerId("id"))
+
             val sykeforloep = Sykeforloep()
-                    .withSykmeldinger(listOf(sykmeldingDokument))
+                    .withSykmeldinger(listOf(sykmelding))
                     .withOppfolgingsdato(now().minusDays(dagerSidenIdentdato))
-            val muligVarselDato: Optional<LocalDate> = motebehovService.datoForSvarMotebehov(sykmeldingDokument, sykeforloep)
+
+            every { hendelseService.finnHendelseTypeVarsler("id") } returns emptyList()
+
+            every { planlagtVarselService.finnPlanlagteVarsler("id") } returns emptyList()
+
+            val muligVarselDato: Optional<LocalDate> = motebehovService.datoForSvarMotebehov(sykmelding, sykeforloep)
 
             muligVarselDato.isPresent shouldEqual true
             muligVarselDato.get() shouldEqual now().plusDays(SVAR_MOTEBEHOV_DAGER - dagerSidenIdentdato)
         }
 
         it("muligVarselDato får ikke dato for gammelt forløp") {
-            val sykmeldingDokument: Sykmelding = Sykmelding()
+            val sykmelding: Sykmelding = Sykmelding()
                     .withPerioder(listOf(
                             Periode()
                                     .withGrad(100)
@@ -252,12 +271,72 @@ object MotebehovServiceSpek : Spek({
                     ))
                     .withSyketilfelleStartDatoFraInfotrygd(LocalDate.of(2016, 5, 1))
                     .withBruker(Bruker().withAktoerId("id"))
+
             val sykeforloep = Sykeforloep()
-                    .withSykmeldinger(listOf(sykmeldingDokument))
+                    .withSykmeldinger(listOf(sykmelding))
                     .withOppfolgingsdato(LocalDate.of(2016, 5, 1))
-            val muligVarselDato: Optional<LocalDate> = motebehovService.datoForSvarMotebehov(sykmeldingDokument, sykeforloep)
+
+            val muligVarselDato: Optional<LocalDate> = motebehovService.datoForSvarMotebehov(sykmelding, sykeforloep)
 
             muligVarselDato.isPresent shouldEqual false
+        }
+
+        it("datoForSvarMotebehov skal ikke lage duplikat varsel om det allerede finnes et planlagt") {
+            val dagerSidenIdentdato = 10L
+
+            val sykmelding: Sykmelding = Sykmelding()
+                    .withBruker(Bruker().withAktoerId("aktoerId"))
+
+            val sykeforloep = Sykeforloep()
+                    .withSykmeldinger(listOf(sykmelding))
+                    .withOppfolgingsdato(now().minusDays(dagerSidenIdentdato.toLong()))
+
+            every { hendelseService.finnHendelseTypeVarsler("aktoerId") } returns emptyList()
+
+            every { planlagtVarselService.finnPlanlagteVarsler("aktoerId") } returns listOf(
+                    PlanlagtVarsel()
+                            .withSendingsdato(now().minusDays(dagerSidenIdentdato.toLong()).plusDays(SVAR_MOTEBEHOV_DAGER))
+                            .withSykmelding(Sykmelding().withId(5L))
+                            .withType(SVAR_MOTEBEHOV)
+                            .withRessursId("meldingsId"))
+
+            val muligVarselDato = motebehovService.datoForSvarMotebehov(sykmelding, sykeforloep)
+
+            muligVarselDato shouldEqual Optional.empty()
+        }
+
+        it("datoForSvarMotebehov skal ikke lage duplikat varsel om det allerede finnes et planlagt") {
+            val dagerSidenIdentdato = 10
+
+            val sykmelding: Sykmelding = Sykmelding()
+                    .withPerioder(listOf(
+                            Periode()
+                                    .withGrad(80)
+                                    .withFom(now().minusDays(dagerSidenIdentdato.toLong()))
+                                    .withTom(now().minusDays(0)),
+                            Periode()
+                                    .withGrad(100)
+                                    .withFom(now().plusDays(4))
+                                    .withTom(now().plusDays(55))
+                    ))
+                    .withSyketilfelleStartDatoFraInfotrygd(now().minusDays(dagerSidenIdentdato.toLong()))
+                    .withId(5L).withBruker(Bruker().withAktoerId("aktoerId"))
+
+            val sykeforloep = Sykeforloep()
+                    .withSykmeldinger(listOf(sykmelding))
+                    .withOppfolgingsdato(now().minusDays(dagerSidenIdentdato.toLong()))
+
+            every  { hendelseService.finnHendelseTypeVarsler("aktoerId") } returns listOf(
+                    HendelseSvarMotebehovVarsel()
+                            .withInntruffetdato(now().minusDays(dagerSidenIdentdato.toLong()).plusDays(SVAR_MOTEBEHOV_DAGER))
+                            .withSykmelding(Sykmelding().withId(5L))
+                            .withType(SVAR_MOTEBEHOV))
+
+            every { planlagtVarselService.finnPlanlagteVarsler("aktoerId") } returns emptyList()
+
+            val muligVarselDato = motebehovService.datoForSvarMotebehov(sykmelding, sykeforloep)
+
+            muligVarselDato shouldEqual Optional.empty()
         }
     }
 })

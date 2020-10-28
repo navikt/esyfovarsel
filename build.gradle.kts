@@ -11,11 +11,15 @@ val prometheus_version = "0.8.1"
 val spek_version = "2.0.9"
 val slf4jVersion = "1.7.30"
 
-
 plugins {
     kotlin("jvm") version "1.3.61"
+    id("org.jetbrains.kotlin.plugin.allopen") version "1.3.61"
     id("com.diffplug.gradle.spotless") version "3.18.0"
     id("com.github.johnrengelman.shadow") version "5.0.0"
+}
+
+allOpen {
+    annotation("no.nav.syfo.annotation.Mockable")
 }
 
 repositories {
@@ -43,11 +47,11 @@ dependencies {
     testImplementation("io.ktor:ktor-server-test-host:$ktor_version") {
         exclude(group = "ch.qos.logback", module = "logback-classic")
     }
+    testImplementation("io.mockk:mockk:1.10.2")
 
     testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spek_version")
     testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spek_version")
 }
-
 
 tasks {
     create("printVersion") {
