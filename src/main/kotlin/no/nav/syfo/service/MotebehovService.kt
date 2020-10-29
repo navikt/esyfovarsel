@@ -1,18 +1,16 @@
 package no.nav.syfo.service
 
+import java.time.LocalDate
+import java.util.*
 import no.nav.syfo.domain.HendelseType.SVAR_MOTEBEHOV
 import no.nav.syfo.domain.Sykeforloep
 import no.nav.syfo.domain.Sykmelding
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.util.*
+import no.nav.syfo.logger
 
 const val SVAR_MOTEBEHOV_DAGER: Long = 112L
 
 class MotebehovService(varselStatusService: VarselStatusService) {
-    val LOGGER: Logger = LoggerFactory.getLogger(this::class.simpleName)
-
+    val LOGGER = logger()
     var varselStatusService = varselStatusService
 
     fun datoForSvarMotebehov(sykmelding: Sykmelding, sykeforloep: Sykeforloep): Optional<LocalDate> {

@@ -10,6 +10,7 @@ val ktor_version = "1.3.2"
 val prometheus_version = "0.8.1"
 val spek_version = "2.0.9"
 val slf4jVersion = "1.7.30"
+val ktor_client_apache_version = "1.3.0"
 
 plugins {
     kotlin("jvm") version "1.3.61"
@@ -39,6 +40,9 @@ dependencies {
     implementation("io.prometheus:simpleclient_hotspot:$prometheus_version")
     implementation("io.prometheus:simpleclient_common:$prometheus_version")
     implementation("io.ktor:ktor-server-netty:$ktor_version")
+    implementation("io.ktor:ktor-client:$ktor_version")
+    implementation("io.ktor:ktor-client-jackson:$ktor_version")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.3")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.slf4j:slf4j-simple:$slf4jVersion")
 

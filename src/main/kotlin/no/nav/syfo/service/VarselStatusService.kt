@@ -4,15 +4,13 @@ import no.nav.syfo.domain.Hendelse
 import no.nav.syfo.domain.HendelseType
 import no.nav.syfo.domain.PlanlagtVarsel
 import no.nav.syfo.domain.Sykmelding
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.syfo.logger
 
 class VarselStatusService(
         hendelseService: HendelseService,
         planlagtVarselService: PlanlagtVarselService
 ) {
-    val LOGGER: Logger = LoggerFactory.getLogger(this::class.simpleName)
-
+    val LOGGER = logger()
     var planlagtVarselService: PlanlagtVarselService = planlagtVarselService
     var hendelseService: HendelseService = hendelseService
 
@@ -26,7 +24,7 @@ class VarselStatusService(
                 }
 
         if (alleredePlanlagt) {
-            LOGGER.info("Planlegger ikke aktivitetskravvarsel: Varsel er allerede planlagt for sykeforløpet!")
+            LOGGER.info("Planlegger ikke {}: Varsel er allerede planlagt for sykeforløpet!", hendelseType)
         }
 
         return alleredePlanlagt
@@ -43,7 +41,7 @@ class VarselStatusService(
                 }
 
         if (alleredeSendt) {
-            LOGGER.info("Planlegger ikke aktivitetskravvarsel: Varsel er allerede sendt for sykeforløpet!")
+            LOGGER.info("Planlegger ikke {}: Varsel er allerede sendt for sykeforløpet!", hendelseType)
         }
 
         return alleredeSendt

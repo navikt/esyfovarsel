@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 import java.util.function.Predicate
+import no.nav.syfo.logger
 
 class MerVeiledningService(
         sykepengerRestController: SykepengerRestController,
@@ -17,7 +18,7 @@ class MerVeiledningService(
         hendelseDAO: HendelseDAO,
         planlagtVarselDAO: PlanlagtVarselDAO
 ) {
-    val LOGGER: Logger = LoggerFactory.getLogger(this::class.simpleName)
+    val LOGGER = logger()
 
     val sykepengerRestController = sykepengerRestController
     val planlagtVarselService = planlagtVarselService
