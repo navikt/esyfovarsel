@@ -34,12 +34,12 @@ class MerVeiledningService {
     private fun hendelseEllerVarselAlleredeOpprettet(): Predicate<Sykmelding> {
         val harEksisterendeHendelse: Predicate<Sykmelding> = Predicate { sd: Sykmelding ->
             hendelseDAO.finnHendelser(sd.bruker.aktoerId, HendelseMerVeiledning::class.simpleName).stream()
-                    .filter { hendelse: HendelseMerVeiledning -> hendelse.type == Hendelsestype.MER_VEILEDNING }
-                    .anyMatch { hendelse: HendelseMerVeiledning -> compare(hendelse.inntruffetdato).isEqualOrAfter(hentTidligsteFOM(sd).minusWeeks(13)) }
+                    .filter { hendelse: HendelseMerVeiledning -> hendelse.type == HendelseType.MER_VEILEDNING }
+                    .anyMatch { hendelse: HendelseMerVeiledning -> compare(hendelse.intruffetdato).isEqualOrAfter(hentTidligsteFOM(sd).minusWeeks(13)) }
         }
         val finnesPlanlagtVarsel: Predicate<Sykmelding> = Predicate { sd: Sykmelding ->
             planlagtVarselDAO.finnPlanlagteVarsler(sd.bruker.aktoerId).stream()
-                    .anyMatch { planlagtVarsel: PlanlagtVarsel -> Hendelsestype.MER_VEILEDNING == planlagtVarsel.type }
+                    .anyMatch { planlagtVarsel: PlanlagtVarsel -> HendelseType.MER_VEILEDNING == planlagtVarsel.type }
         }
 
         return harEksisterendeHendelse.or(finnesPlanlagtVarsel)

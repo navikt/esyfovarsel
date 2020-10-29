@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import no.nav.syfo.domain.HendelseType.AKTIVITETSKRAV_VARSEL
 import no.nav.syfo.domain.Sykeforloep
 import no.nav.syfo.domain.Sykmelding
 import no.nav.syfo.util.finnAvstandTilnaermestePeriode
@@ -12,16 +13,18 @@ import java.util.*
 
 const val AKTIVITETSKRAV_DAGER: Long = 42
 
-class AktivitetskravService {
-    val log: Logger = LoggerFactory.getLogger(this::class.simpleName)
+class AktivitetskravService(varselStatusService: VarselStatusService) {
+    val LOGGER: Logger = LoggerFactory.getLogger(this::class.simpleName)
+
+    var varselStatusService = varselStatusService
 
     fun datoForAktivitetskravvarsel(sykmelding: Sykmelding, sykeforloep: Sykeforloep): Optional<LocalDate> {
         val aktivitetskravdato: LocalDate = finnAktivitetskravdato(sykeforloep)
         if (!erAktivitetskravdatoPassert(aktivitetskravdato)
                 && er100prosentSykmeldtPaaDato(sykeforloep, aktivitetskravdato)
-                && !erAlleredePlanlagt(sykmelding.bruker.aktoerId, sykeforloep)
-                && !harAlleredeBlittSendt(sykmelding.bruker.aktoerId, sykeforloep)) {
-            log.info("Planlegger aktivitetskravvarsel med dato {}", aktivitetskravdato)
+                && !erAlleredePlanlagt(sykmelding.bruker.aktoerId, sykeforloep.sykmeldinger)
+                && !harAlleredeBlittSendt(sykmelding.bruker.aktoerId, sykeforloep.sykmeldinger)) {
+            LOGGER.info("Planlegger aktivitetskravvarsel med dato {}", aktivitetskravdato)
             return Optional.of(aktivitetskravdato)
         }
         return Optional.empty()
@@ -40,7 +43,7 @@ class AktivitetskravService {
         val er100ProsentSykmeldt = 100 == finnSykmeldingsgradPaGittDato(aktivitetskravdato, sykmelding?.perioder)
 
         if (!er100ProsentSykmeldt) {
-            log.info("Planlegger ikke aktivitetskravvarsel: Ikke 100% sykmeldt på aktivitetskravdato!")
+            LOGGER.info("Planlegger ikke aktivitetskravvarsel: Ikke 100% sykmeldt på aktivitetskravdato!")
         }
 
         return er100ProsentSykmeldt
@@ -49,7 +52,7 @@ class AktivitetskravService {
     private fun erAktivitetskravdatoPassert(aktivitetskravDato: LocalDate): Boolean {
         val aktivitetskravdatoErPassert = aktivitetskravDato.isBefore(LocalDate.now())
         if (aktivitetskravdatoErPassert) {
-            log.info("Planlegger ikke aktivitetskravvarsel: Aktivitetskravdato er passert!")
+            LOGGER.info("Planlegger ikke aktivitetskravvarsel: Aktivitetskravdato er passert!")
         }
         return aktivitetskravdatoErPassert
     }
@@ -58,11 +61,11 @@ class AktivitetskravService {
         return sykeforloep.oppfolgingsdato.plusDays(AKTIVITETSKRAV_DAGER)
     }
 
-    private fun erAlleredePlanlagt(aktoerId: String, sykeforloep: Sykeforloep): Boolean {
-        return false;
+    private fun harAlleredeBlittSendt(aktoerId: String, sykmeldinger: List<Sykmelding>): Boolean {
+        return varselStatusService.harAlleredeBlittSendt(aktoerId, sykmeldinger, AKTIVITETSKRAV_VARSEL)
     }
 
-    private fun harAlleredeBlittSendt(aktoerId: String, sykeforloep: Sykeforloep): Boolean {
-        return false;
+    private fun erAlleredePlanlagt(aktoerId: String, sykmeldinger: List<Sykmelding>): Boolean {
+        return varselStatusService.erAlleredePlanlagt(aktoerId, sykmeldinger, AKTIVITETSKRAV_VARSEL)
     }
 }

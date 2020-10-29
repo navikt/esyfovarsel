@@ -1,7 +1,12 @@
 package no.nav.syfo.service
 
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.syfo.domain.Bruker
+import no.nav.syfo.domain.HendelseAktivitetskravVarsel
+import no.nav.syfo.domain.HendelseType.AKTIVITETSKRAV_VARSEL
 import no.nav.syfo.domain.Periode
+import no.nav.syfo.domain.PlanlagtVarsel
 import no.nav.syfo.domain.Sykeforloep
 import no.nav.syfo.domain.Sykmelding
 import org.amshove.kluent.shouldEqual
@@ -13,8 +18,12 @@ import java.util.*
 
 object AktivitetskravServiceSpek : Spek({
 
+    val hendelseService: HendelseService = mockk()
+    val planlagtVarselService: PlanlagtVarselService = mockk()
+    val varselStatusService = VarselStatusService(hendelseService, planlagtVarselService)
+    val aktivitetskravService = AktivitetskravService(varselStatusService)
+
     describe("AktivitetskravServiceSpek") {
-        val aktivitetskravService = AktivitetskravService()
 
         it("er100prosentSykmeldtPaaDato skal returnere true for 1 sykmelding med 1 periode") {
             val sykeforloep: Sykeforloep = Sykeforloep()
@@ -235,32 +244,37 @@ object AktivitetskravServiceSpek : Spek({
         }
 
         it("datoForAktivitetskravvarsel skal returnere dato dersom sykmelding bryter 42 dagersgrense og 100 ved dag 42") {
-            val dagerSidenIdentdato = 10
+            val dagerSidenIdentdato: Long = 10L
+
             val sykmelding: Sykmelding = Sykmelding()
                     .withPerioder(listOf(
                             Periode()
                                     .withGrad(80)
-                                    .withFom(LocalDate.now().minusDays(dagerSidenIdentdato.toLong()))
+                                    .withFom(LocalDate.now().minusDays(dagerSidenIdentdato))
                                     .withTom(LocalDate.now().minusDays(0)),
                             Periode()
                                     .withGrad(100)
                                     .withFom(LocalDate.now().plusDays(4))
                                     .withTom(LocalDate.now().plusDays(55))
                     ))
-                    .withSyketilfelleStartDatoFraInfotrygd(LocalDate.now().minusDays(dagerSidenIdentdato.toLong()))
-                    .withBruker(Bruker().withAktoerId("id"))
+                    .withSyketilfelleStartDatoFraInfotrygd(LocalDate.now().minusDays(dagerSidenIdentdato))
+                    .withBruker(Bruker().withAktoerId("aktoerId"))
 
             val sykeforloep = Sykeforloep()
                     .withSykmeldinger(listOf(sykmelding))
-                    .withOppfolgingsdato(LocalDate.now().minusDays(dagerSidenIdentdato.toLong()))
+                    .withOppfolgingsdato(LocalDate.now().minusDays(dagerSidenIdentdato))
+
+            every { hendelseService.finnHendelseTypeVarsler("aktoerId") } returns emptyList()
+
+            every { planlagtVarselService.finnPlanlagteVarsler("aktoerId") } returns emptyList()
 
             val muligVarselDato = aktivitetskravService.datoForAktivitetskravvarsel(sykmelding, sykeforloep)
 
-            muligVarselDato shouldEqual Optional.of(LocalDate.now().plusDays(42 - dagerSidenIdentdato.toLong()))
+            muligVarselDato shouldEqual Optional.of(LocalDate.now().plusDays(42 - dagerSidenIdentdato))
         }
 
         it("datoForAktivitetskravvarsel skal returnere empty for gammelt forløp") {
-            val sykmeldingDokument: Sykmelding = Sykmelding()
+            val sykmelding: Sykmelding = Sykmelding()
                     .withPerioder(listOf(
                             Periode()
                                     .withGrad(100)
@@ -275,10 +289,81 @@ object AktivitetskravServiceSpek : Spek({
                     .withBruker(Bruker().withAktoerId("id"))
 
             val sykeforloep = Sykeforloep()
-                    .withSykmeldinger(listOf(sykmeldingDokument))
+                    .withSykmeldinger(listOf(sykmelding))
                     .withOppfolgingsdato(LocalDate.of(2016, 5, 1))
 
-            val muligVarselDato = aktivitetskravService.datoForAktivitetskravvarsel(sykmeldingDokument, sykeforloep)
+            val muligVarselDato = aktivitetskravService.datoForAktivitetskravvarsel(sykmelding, sykeforloep)
+
+            muligVarselDato shouldEqual Optional.empty()
+        }
+
+        it("datoForAktivitetskravvarsel skal ikke lage duplikat varsel om det allerede finnes et planlagt") {
+            val dagerSidenIdentdato = 10L
+
+            val sykmelding: Sykmelding = Sykmelding()
+                    .withMeldingId("meldingsId")
+                    .withPerioder(Arrays.asList(
+                            Periode()
+                                    .withGrad(80)
+                                    .withFom(LocalDate.now().minusDays(dagerSidenIdentdato))
+                                    .withTom(LocalDate.now().minusDays(0)),
+                            Periode()
+                                    .withGrad(100)
+                                    .withFom(LocalDate.now().plusDays(4))
+                                    .withTom(LocalDate.now().plusDays(55))
+                    ))
+                    .withSyketilfelleStartDatoFraInfotrygd(LocalDate.now().minusDays(dagerSidenIdentdato))
+                    .withId(5L)
+                    .withBruker(Bruker().withAktoerId("aktoerId"))
+
+            val sykeforloep = Sykeforloep()
+                    .withSykmeldinger(listOf(sykmelding))
+                    .withOppfolgingsdato(LocalDate.now().minusDays(dagerSidenIdentdato))
+
+            every { hendelseService.finnHendelseTypeVarsler("aktoerId") } returns emptyList()
+
+            every { planlagtVarselService.finnPlanlagteVarsler("aktoerId") } returns listOf(
+                    PlanlagtVarsel()
+                            .withSendingsdato(LocalDate.now().minusDays(dagerSidenIdentdato).plusDays(AKTIVITETSKRAV_DAGER))
+                            .withSykmelding(Sykmelding().withId(5L))
+                            .withType(AKTIVITETSKRAV_VARSEL)
+                            .withRessursId("meldingsId"))
+
+            val muligVarselDato = aktivitetskravService.datoForAktivitetskravvarsel(sykmelding, sykeforloep)
+
+            muligVarselDato shouldEqual Optional.empty()
+        }
+
+        it("datoForAktivitetskravvarsel skal ikke lage duplikat varsel om det allerede er sendt") {
+            val dagerSidenIdentdato = 10L
+
+            val sykmelding: Sykmelding = Sykmelding()
+                    .withPerioder(listOf(
+                            Periode()
+                                    .withGrad(80)
+                                    .withFom(LocalDate.now().minusDays(dagerSidenIdentdato))
+                                    .withTom(LocalDate.now().minusDays(0)),
+                            Periode()
+                                    .withGrad(100)
+                                    .withFom(LocalDate.now().plusDays(4))
+                                    .withTom(LocalDate.now().plusDays(55))
+                    ))
+                    .withSyketilfelleStartDatoFraInfotrygd(LocalDate.now().minusDays(dagerSidenIdentdato))
+                    .withId(5L).withBruker(Bruker().withAktoerId("aktoerId"))
+
+            val sykeforloep = Sykeforloep()
+                    .withSykmeldinger(listOf(sykmelding))
+                    .withOppfolgingsdato(LocalDate.now().minusDays(dagerSidenIdentdato))
+
+            every { hendelseService.finnHendelseTypeVarsler("aktoerId") } returns listOf(
+                    HendelseAktivitetskravVarsel()
+                            .withInntruffetdato(LocalDate.now().minusDays(dagerSidenIdentdato).plusDays(AKTIVITETSKRAV_DAGER))
+                            .withSykmelding(Sykmelding().withId(5L))
+                            .withType(AKTIVITETSKRAV_VARSEL))
+
+            every { planlagtVarselService.finnPlanlagteVarsler("aktoerId") } returns emptyList()
+
+            val muligVarselDato = aktivitetskravService.datoForAktivitetskravvarsel(sykmelding, sykeforloep)
 
             muligVarselDato shouldEqual Optional.empty()
         }

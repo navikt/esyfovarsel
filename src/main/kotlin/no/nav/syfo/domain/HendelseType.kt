@@ -1,7 +1,8 @@
 package no.nav.syfo.domain
 
-enum class Hendelsestype {
+enum class HendelseType {
     AKTIVITETSKRAV_VARSEL,
+    SVAR_MOTEBEHOV,
     MER_VEILEDNING,
-    SVAR_MOTEBEHOV
+    DEFAULT,
 }
