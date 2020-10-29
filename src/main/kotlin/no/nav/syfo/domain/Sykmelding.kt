@@ -9,6 +9,8 @@ class Sykmelding() {
     var behandletDato: LocalDateTime = LocalDateTime.now()
     var bruker: Bruker = Bruker()
     var syketilfelleStartDatoFraInfotrygd: LocalDate = LocalDate.now()
+    var meldingId: String = ""
+    var pasientFnr: String = ""
 
     fun withPerioder(perioder: List<Periode>): Sykmelding {
         this.perioder = perioder
@@ -31,8 +33,6 @@ class Sykmelding() {
     }
 
     fun periodeVedGittDato(dato: LocalDate): Boolean {
-        return perioder
-                .filter { p: Periode -> erDatoIPerioden(dato, p.fom, p.tom) }
-                .isNotEmpty()
+        return perioder.any { p: Periode -> erDatoIPerioden(dato, p.fom, p.tom) }
     }
 }
