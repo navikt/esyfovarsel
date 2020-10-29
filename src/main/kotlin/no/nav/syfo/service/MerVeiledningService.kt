@@ -11,15 +11,21 @@ import java.time.LocalDate
 import java.util.*
 import java.util.function.Predicate
 
-class MerVeiledningService {
-    val LOG: Logger = LoggerFactory.getLogger(this::class.simpleName)
-    val sykepengerRestController = SykepengerRestController()
-    val planlagtVarselService = PlanlagtVarselService()
-    val hendelseDAO = HendelseDAO()
-    val planlagtVarselDAO = PlanlagtVarselDAO()
+class MerVeiledningService(
+        sykepengerRestController: SykepengerRestController,
+        planlagtVarselService: PlanlagtVarselService,
+        hendelseDAO: HendelseDAO,
+        planlagtVarselDAO: PlanlagtVarselDAO
+) {
+    val LOGGER: Logger = LoggerFactory.getLogger(this::class.simpleName)
+
+    val sykepengerRestController = sykepengerRestController
+    val planlagtVarselService = planlagtVarselService
+    val hendelseDAO = hendelseDAO
+    val planlagtVarselDAO = planlagtVarselDAO
 
     fun planleggVarsel(sykmelding: Sykmelding, dato: LocalDate) {
-        LOG.info("MER_VEILEDNING: Planlegger varsel for sykmelding {}, på dato {}", sykmelding.meldingId, dato)
+        LOGGER.info("MER_VEILEDNING: Planlegger varsel for sykmelding {}, på dato {}", sykmelding.meldingId, dato)
         planlagtVarselService.planleggVarselMerVeiledning(sykmelding, dato)
     }
 

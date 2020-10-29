@@ -4,7 +4,7 @@ import no.nav.syfo.util.erDatoIPerioden
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class Sykmelding() {
+class Sykmelding {
     var id: Long = 0L
     var meldingId: String = ""
     var perioder: List<Periode> = emptyList()
