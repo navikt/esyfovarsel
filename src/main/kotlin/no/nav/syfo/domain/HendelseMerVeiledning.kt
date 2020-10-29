@@ -2,8 +2,7 @@ package no.nav.syfo.domain
 
 import java.time.LocalDate
 
-class HendelseMerVeiledning() : Hendelse {
-
+class HendelseMerVeiledning : Hendelse {
     override var sykmelding: Sykmelding? = null
     override var type: HendelseType = HendelseType.MER_VEILEDNING
     override var intruffetdato: LocalDate = LocalDate.now()
