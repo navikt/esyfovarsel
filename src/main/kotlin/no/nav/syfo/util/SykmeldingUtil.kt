@@ -34,9 +34,7 @@ fun hentNyestePeriode(perioder: List<Periode>): Periode {
 }
 
 fun nyestePeriodeFoerst(perioder: List<Periode>): List<Periode> {
-    return perioder.stream()
-            .sorted(nyestePeriodeFoerst())
-            .collect(Collectors.toList())
+    return perioder.sortedWith( nyestePeriodeFoerst() )
 }
 
 private fun nyestePeriodeFoerst(): Comparator<Periode> {
@@ -57,7 +55,8 @@ fun hentTidligsteFOMFraPerioder(perioder: List<Periode>): LocalDate {
 fun eldstePeriodeFOM(perioder: List<Periode>): LocalDate {
     return perioder
             .sortedWith( eldstePeriodeFoerst() )
-            .first().fom
+            .first()
+            .fom
 }
 
 private fun eldstePeriodeFoerst(): Comparator<Periode> {
