@@ -3,7 +3,6 @@ package no.nav.syfo.util
 import no.nav.syfo.domain.Periode
 import no.nav.syfo.domain.Sykmelding
 import java.time.LocalDate
-import java.util.*
 import java.util.stream.Collectors
 
 fun finnSykmeldingsgradPaGittDato(aktivitetskravdato: LocalDate, perioder: List<Periode>?): Int {
@@ -25,15 +24,13 @@ fun harPeriodeSomMatcherAvstandTilnaermestePeriode(sykmelding: Sykmelding, aktiv
             .any { avstand -> avstand == avstandTilnaermestePeriode }
 }
 
-fun hentSenesteTOM(sykmeldingDokument: Sykmelding): LocalDate {
-    val nyestePeriodeFoerst: List<Periode> = nyestePeriodeFoerst(sykmeldingDokument.perioder)
+fun hentSenesteTOM(sykmelding: Sykmelding): LocalDate {
+    val nyestePeriodeFoerst: List<Periode> = nyestePeriodeFoerst(sykmelding.perioder)
     return hentNyestePeriode(nyestePeriodeFoerst).tom
 }
 
 fun hentNyestePeriode(perioder: List<Periode>): Periode {
-    return nyestePeriodeFoerst(perioder)
-            .stream()
-            .findFirst().get()
+    return nyestePeriodeFoerst(perioder).first()
 }
 
 fun nyestePeriodeFoerst(perioder: List<Periode>): List<Periode> {
@@ -42,15 +39,15 @@ fun nyestePeriodeFoerst(perioder: List<Periode>): List<Periode> {
             .collect(Collectors.toList())
 }
 
-private fun nyestePeriodeFoerst(): Comparator<Periode>? {
+private fun nyestePeriodeFoerst(): Comparator<Periode> {
     return Comparator { p1: Periode, p2: Periode ->
         val i = p2.fom.compareTo(p1.fom)
         if (i == 0) p2.tom.compareTo(p1.tom) else i
     }
 }
 
-fun hentTidligsteFOM(sykmeldingDokument: Sykmelding): LocalDate {
-    return hentTidligsteFOMFraPerioder(sykmeldingDokument.perioder)
+fun hentTidligsteFOM(sykmelding: Sykmelding): LocalDate {
+    return hentTidligsteFOMFraPerioder(sykmelding.perioder)
 }
 
 fun hentTidligsteFOMFraPerioder(perioder: List<Periode>): LocalDate {
@@ -58,7 +55,9 @@ fun hentTidligsteFOMFraPerioder(perioder: List<Periode>): LocalDate {
 }
 
 fun eldstePeriodeFOM(perioder: List<Periode>): LocalDate {
-    return perioder.stream().sorted(eldstePeriodeFoerst()).findFirst().orElseThrow { RuntimeException("Mangler periode!") }.fom
+    return perioder
+            .sortedWith( eldstePeriodeFoerst() )
+            .first().fom
 }
 
 private fun eldstePeriodeFoerst(): Comparator<Periode> {

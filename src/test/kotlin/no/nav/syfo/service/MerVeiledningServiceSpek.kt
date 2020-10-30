@@ -20,8 +20,8 @@ object MerVeiledningServiceSpek : Spek({
     val planlagtVarselDAO: PlanlagtVarselDAO = mockk()
     val merVeiledningService = MerVeiledningService(sykepengerRestController, planlagtVarselService, hendelseDAO, planlagtVarselDAO)
 
-    val FOM = LocalDate.of(2018, 1, 1)
-    val TOM = LocalDate.of(2018, 1, 20)
+    val FOM = LocalDate.of(2020, 1, 1)
+    val TOM = LocalDate.of(2020, 1, 20)
 
     describe("MerVeiledningServiceSpek") {
 

@@ -38,14 +38,14 @@ class MerVeiledningService(
     }
 
     private fun hendelseEllerVarselAlleredeOpprettet(): Predicate<Sykmelding> {
-        val harEksisterendeHendelse: Predicate<Sykmelding> = Predicate { sd: Sykmelding ->
-            hendelseDAO.finnHendelser(sd.bruker.aktoerId, HendelseMerVeiledning::class.simpleName).stream()
-                    .filter { hendelse: HendelseMerVeiledning -> hendelse.type == HendelseType.MER_VEILEDNING }
-                    .anyMatch { hendelse: HendelseMerVeiledning -> compare(hendelse.intruffetdato).isEqualOrAfter(hentTidligsteFOM(sd).minusWeeks(13)) }
+        val harEksisterendeHendelse: Predicate<Sykmelding> = Predicate { sykmelding: Sykmelding ->
+            hendelseDAO.finnHendelser(sykmelding.bruker.aktoerId, HendelseMerVeiledning::class.simpleName)
+                    .filter { hendelse: Hendelse -> hendelse.type == HendelseType.MER_VEILEDNING }
+                    .any { hendelse: Hendelse -> compare(hendelse.intruffetdato).isEqualOrAfter(hentTidligsteFOM(sykmelding).minusWeeks(13)) }
         }
-        val finnesPlanlagtVarsel: Predicate<Sykmelding> = Predicate { sd: Sykmelding ->
-            planlagtVarselDAO.finnPlanlagteVarsler(sd.bruker.aktoerId).stream()
-                    .anyMatch { planlagtVarsel: PlanlagtVarsel -> HendelseType.MER_VEILEDNING == planlagtVarsel.type }
+        val finnesPlanlagtVarsel: Predicate<Sykmelding> = Predicate { sykmelding: Sykmelding ->
+            planlagtVarselDAO.finnPlanlagteVarsler(sykmelding.bruker.aktoerId)
+                    .any { planlagtVarsel: PlanlagtVarsel -> HendelseType.MER_VEILEDNING == planlagtVarsel.type }
         }
 
         return harEksisterendeHendelse.or(finnesPlanlagtVarsel)
