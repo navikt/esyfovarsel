@@ -4,13 +4,14 @@ import no.nav.syfo.util.erDatoIPerioden
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class Sykmelding() {
+class Sykmelding {
     var id: Long = 0L
     var meldingId: String = ""
     var perioder: List<Periode> = emptyList()
     var behandletDato: LocalDateTime = LocalDateTime.now()
     var bruker: Bruker = Bruker()
     var syketilfelleStartDatoFraInfotrygd: LocalDate = LocalDate.now()
+    var pasientFnr: String = ""
 
     fun withId(id: Long): Sykmelding {
         this.id = id
@@ -43,8 +44,6 @@ class Sykmelding() {
     }
 
     fun periodeVedGittDato(dato: LocalDate): Boolean {
-        return perioder
-                .filter { p: Periode -> erDatoIPerioden(dato, p.fom, p.tom) }
-                .isNotEmpty()
+        return perioder.any { p: Periode -> erDatoIPerioden(dato, p.fom, p.tom) }
     }
 }

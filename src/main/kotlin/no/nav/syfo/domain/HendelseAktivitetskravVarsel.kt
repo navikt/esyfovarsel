@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 class HendelseAktivitetskravVarsel : Hendelse {
     override var sykmelding: Sykmelding? = null
-    override var type: HendelseType = HendelseType.DEFAULT
+    override var type: HendelseType = HendelseType.AKTIVITETSKRAV_VARSEL
     override var intruffetdato: LocalDate = LocalDate.now()
 
     override fun withInntruffetdato(intruffetdato: LocalDate): HendelseAktivitetskravVarsel {
