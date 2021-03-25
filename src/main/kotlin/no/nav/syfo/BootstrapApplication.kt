@@ -1,6 +1,8 @@
 package no.nav.syfo
 
+import com.typesafe.config.ConfigFactory
 import io.ktor.application.Application
+import io.ktor.config.HoconApplicationConfig
 import io.ktor.routing.routing
 import io.ktor.server.engine.*
 import io.ktor.server.netty.Netty
@@ -8,16 +10,19 @@ import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 import no.nav.syfo.api.registerNaisApi
+import no.nav.syfo.db.*
 
 
 data class ApplicationState(var running: Boolean = true, var initialized: Boolean = false)
 
+val env: Environment = if (isLocal()) localEnvironment() else remoteEnvironment()
 val state: ApplicationState = ApplicationState(running = false, initialized = false)
-val env: Environment = Environment()
+lateinit var database: DatabaseInterface
 
 fun main() {
     val server = embeddedServer(Netty, applicationEngineEnvironment {
         log = LoggerFactory.getLogger("ktor.application")
+        config = HoconApplicationConfig(ConfigFactory.load())
 
         connector {
             port = env.applicationPort
@@ -35,8 +40,30 @@ fun main() {
     server.start(wait = false)
 }
 
+
+
 fun Application.init() {
-    state.running = true
+    runningLocally {
+        database = LocalDatabase(DbConfig(
+            jdbcUrl = env.databaseUrl,
+            databaseName = env.databaseName,
+            password = "password",
+            username = "username")
+        )
+
+        state.running = true
+    }
+
+    runningRemotely {
+        database = RemoteDatabase(DbConfig(
+            jdbcUrl = env.databaseUrl,
+            databaseName = env.databaseName,
+            password = "password",
+            username = "username",
+            runMigrationsOninit = false)) { remoteDatabase ->
+            state.running = true
+        }
+    }
 }
 
 fun Application.serverModule() {
@@ -49,13 +76,24 @@ fun Application.serverModule() {
 }
 
 
-fun CoroutineScope.createListener(applicationState: ApplicationState, action: suspend CoroutineScope.() -> Unit): Job =
-        launch {
-            try {
-                action()
-            } finally {
-                applicationState.running = false
-            }
+fun CoroutineScope.createListener(applicationState: ApplicationState, action: suspend CoroutineScope.() -> Unit): Job {
+    return launch {
+        try {
+            action()
+        } finally {
+            applicationState.running = false
         }
+    }
+}
 
+val Application.envKind get() = environment.config.property("ktor.environment").getString()
 
+fun Application.runningLocally(block: () -> Unit) {
+    if (envKind == "local") block()
+}
+
+fun Application.runningRemotely(block: () -> Unit) {
+    if (envKind == "remote") block()
+}
+
+fun isLocal(): Boolean = getEnvVar("KTOR_ENV", "local") == "local"
