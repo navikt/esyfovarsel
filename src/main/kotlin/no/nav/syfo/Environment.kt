@@ -1,22 +1,40 @@
 package no.nav.syfo
 
-import java.nio.file.Files
-import java.nio.file.Paths
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import java.io.File
+
+const val localEnvironmentPropertiesPath = "./src/main/resources/localEnv.json"
+
+fun getEnvironment(): Environment =
+    if (isLocal())
+        localEnvironment()
+    else
+        remoteEnvironment()
+
+private fun remoteEnvironment(): Environment {
+    return Environment(
+        getEnvVar("APPLICATION_PORT", "8080").toInt(),
+        getEnvVar("APPLICATION_THREADS", "4").toInt(),
+        getEnvVar("DATABASE_URL"),
+        getEnvVar("DATABASE_NAME", "esyfovarsel")
+    )
+}
+
+private fun localEnvironment() : Environment {
+    val objectMapper = ObjectMapper()
+    objectMapper.registerKotlinModule()
+    return objectMapper.readValue(File(localEnvironmentPropertiesPath), Environment::class.java)
+}
 
 data class Environment(
-        val applicationPort: Int = getEnvVar("APPLICATION_PORT", "8080").toInt(),
-        val applicationThreads: Int = getEnvVar("APPLICATION_THREADS", "4").toInt(),
-        val serviceUserSecrets: ServiceUserSecrets = ServiceUserSecrets()
+        val applicationPort: Int,
+        val applicationThreads: Int,
+        val databaseUrl: String,
+        val databaseName: String
 )
-
-data class ServiceUserSecrets (
-    val username: String = readFileFromPath("/var/run/secrets/serviceuser/username"),
-    val password: String = readFileFromPath("/var/run/secrets/serviceuser/password")
-)
-
-fun readFileFromPath(path: String) : String {
-    return Files.readString(Paths.get(path))
-}
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =
         System.getenv(varName) ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
+
+private fun isLocal(): Boolean = getEnvVar("KTOR_ENV", "local") == "local"
