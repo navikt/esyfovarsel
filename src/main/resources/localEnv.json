@@ -1,0 +1,6 @@
+{
+  "applicationPort": "8081",
+  "applicationThreads": "1",
+  "databaseUrl": "jdbc:postgresql://localhost:5432/esyfovarsel-db",
+  "databaseName": "esyfovarsel-db"
+}

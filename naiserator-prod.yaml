@@ -41,3 +41,10 @@ spec:
         mountPath: "/var/run/secrets/serviceuser"
   ingresses:
     - "https://esyfovarsel.nais.adeo.no"
+  env:
+    - name: KTOR_ENV
+      value: remote
+    - name: DATABASE_URL
+    - value: "URL"
+    - name: DATABASE_NAME
+    - value: "esyfovarsel-db"
