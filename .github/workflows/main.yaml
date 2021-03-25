@@ -1,19 +1,21 @@
-name: master
-on:
-  push:
-    branches:
-      - master
+name: main
+
+on: push
 
 env:
-  IMAGE: docker.pkg.github.com/${{ github.repository }}/${{ github.event.repository.name }}:${{ github.sha }}
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/esyfovarsel:${{ github.sha }}
 
 jobs:
-  build-push-deploy:
+  build:
     name: Checkout code and create docker tag
     runs-on: ubuntu-latest
     steps:
+      - name: Setup java
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11.x'
       - name: Checkout code
-        uses: actions/checkout@master
+        uses: actions/checkout@v1
       - uses: actions/cache@v1
         with:
           path: ~/.gradle/caches
@@ -26,9 +28,6 @@ jobs:
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-wrapper-
-      - uses: actions/setup-java@v1
-        with:
-          java-version: 11
       - name: Run tests
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
@@ -48,15 +47,46 @@ jobs:
           docker build --tag ${IMAGE} .
           docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
           docker push ${IMAGE}
-      - name: Deploy to Dev
-        uses: nais/deploy/actions/deploy@master
+          echo ${IMAGE}
+
+  deploy-dev:
+    if: github.ref == 'refs/heads/master'
+    name: Deploy to NAIS Dev-fss
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
           RESOURCE: naiserator-dev.yaml
-      - name: Deploy to Prod
-        uses: nais/deploy/actions/deploy@master
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/master'
+    name: Deploy to NAIS Prod-fss
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-fss
           RESOURCE: naiserator-prod.yaml
+
+  pling:
+    if: github.ref == 'refs/heads/master'
+    name: Pling!
+    needs: deploy-prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pling
+        run: |
+          APP=${{ github.event.repository.name }}
+          AUTHOR=${{ github.event.pusher.name }}
+          MESSAGE=$(echo "${{ github.event.head_commit.message }}" | tr -d '\n\r')
+          curl -s -H "Content-Type: application/json" \
+          -X POST \
+          -d '{"app":"'"$APP"'", "author":"'"$AUTHOR"'", "message":"'"$MESSAGE"'"}' \
+          https://syfoping.herokuapp.com/deploy
