@@ -4,7 +4,7 @@ metadata:
   name: esyfovarsel
   namespace: default
   labels:
-    team: teamsykefravr
+    team: team-esyfo
 spec:
   image: {{ image }}
   port: 8080
