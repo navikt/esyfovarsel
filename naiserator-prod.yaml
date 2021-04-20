@@ -48,3 +48,5 @@ spec:
       value: jdbc:postgresql://A01DBVL022.adeo.no:5432/esyfovarsel
     - name: DATABASE_NAME
       value: esyfovarsel
+    - name: DB_VAULT_MOUNT_PATH
+      value: postgresql/prod-fss"

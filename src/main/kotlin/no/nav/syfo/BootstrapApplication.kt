@@ -56,7 +56,8 @@ fun Application.init() {
     runningRemotely {
         database = RemoteDatabase(DbConfig(
             jdbcUrl = env.databaseUrl,
-            databaseName = env.databaseName)
+            databaseName = env.databaseName,
+            dbCredMountPath = env.dbVaultMountPath)
         )
         state.running = true
     }

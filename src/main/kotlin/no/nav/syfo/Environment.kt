@@ -17,7 +17,8 @@ private fun remoteEnvironment(): Environment {
         getEnvVar("APPLICATION_PORT", "8080").toInt(),
         getEnvVar("APPLICATION_THREADS", "4").toInt(),
         getEnvVar("DATABASE_URL"),
-        getEnvVar("DATABASE_NAME", "esyfovarsel")
+        getEnvVar("DATABASE_NAME", "esyfovarsel"),
+        getEnvVar("DB_VAULT_MOUNT_PATH")
     )
 }
 
@@ -31,7 +32,8 @@ data class Environment(
         val applicationPort: Int,
         val applicationThreads: Int,
         val databaseUrl: String,
-        val databaseName: String
+        val databaseName: String,
+        val dbVaultMountPath: String
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =

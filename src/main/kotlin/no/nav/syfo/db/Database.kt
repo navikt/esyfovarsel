@@ -21,8 +21,9 @@ data class DbConfig(
     val databaseName: String,
     val username: String = "",
     val password: String = "",
-    val remote: Boolean = true,
-    val poolSize: Int = 2
+    val dbCredMountPath: String = "",
+    val poolSize: Int = 2,
+    val remote: Boolean = true
 )
 
 class LocalDatabase(daoConfig: DbConfig) : Database(daoConfig)
