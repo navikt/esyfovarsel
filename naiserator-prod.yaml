@@ -49,4 +49,4 @@ spec:
     - name: DATABASE_NAME
       value: esyfovarsel
     - name: DB_VAULT_MOUNT_PATH
-      value: postgresql/prod-fss"
+      value: postgresql/prod-fss

@@ -68,7 +68,7 @@ abstract class Database(val daoConfig: DbConfig) : DatabaseInterface {
     private fun createDataSource(hikariConfig: HikariConfig, role: Role) : HikariDataSource {
         return HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration(
             hikariConfig,
-            "postgresql/preprod-fss",
+            daoConfig.dbCredMountPath,
             "${daoConfig.databaseName}-$role"
         )
     }
