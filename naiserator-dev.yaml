@@ -41,3 +41,12 @@ spec:
         mountPath: "/var/run/secrets/serviceuser"
   ingresses:
     - "https://esyfovarsel.dev.adeo.no"
+  env:
+    - name: KTOR_ENV
+      value: remote
+    - name: DATABASE_URL
+      value: jdbc:postgresql://b27dbvl024.preprod.local:5432/esyfovarsel
+    - name: DATABASE_NAME
+      value: esyfovarsel
+    - name: DB_VAULT_MOUNT_PATH
+      value: postgresql/preprod-fss"

@@ -41,3 +41,12 @@ spec:
         mountPath: "/var/run/secrets/serviceuser"
   ingresses:
     - "https://esyfovarsel.nais.adeo.no"
+  env:
+    - name: KTOR_ENV
+      value: remote
+    - name: DATABASE_URL
+      value: jdbc:postgresql://A01DBVL022.adeo.no:5432/esyfovarsel
+    - name: DATABASE_NAME
+      value: esyfovarsel
+    - name: DB_VAULT_MOUNT_PATH
+      value: postgresql/prod-fss"
