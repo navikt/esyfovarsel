@@ -10,13 +10,19 @@ import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 import no.nav.syfo.api.registerNaisApi
+import no.nav.syfo.auth.StsConsumer
+import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.db.*
+import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
+import no.nav.syfo.kafka.launchKafkaListener
+import java.util.concurrent.Executors
 
 
 data class ApplicationState(var running: Boolean = false, var initialized: Boolean = false)
 
 val env: Environment = getEnvironment()
 val state: ApplicationState = ApplicationState()
+val backgroundTasksContext = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
 lateinit var database: DatabaseInterface
 
 fun main() {
@@ -31,6 +37,7 @@ fun main() {
         module {
             init()
             serverModule()
+            kafkaModule()
         }
     })
     Runtime.getRuntime().addShutdownHook(Thread {
@@ -50,6 +57,7 @@ fun Application.init() {
             username = "esyfovarsel-admin",
             remote = false)
         )
+
         state.running = true
     }
 
@@ -72,13 +80,18 @@ fun Application.serverModule() {
     state.initialized = true
 }
 
+fun Application.kafkaModule() {
 
-fun CoroutineScope.createListener(applicationState: ApplicationState, action: suspend CoroutineScope.() -> Unit): Job {
-    return launch {
-        try {
-            action()
-        } finally {
-            applicationState.running = false
+    runningRemotely {
+        val stsConsumer = StsConsumer(env)
+        val oppfolgingstilfelleConsumer = SyfosyketilfelleConsumer(env, stsConsumer)
+        val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, oppfolgingstilfelleConsumer)
+
+        launch(backgroundTasksContext) {
+            launchKafkaListener(
+                state,
+                oppfolgingstilfelleKafkaConsumer
+            )
         }
     }
 }

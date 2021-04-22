@@ -1,4 +1,4 @@
-package no.nav.syfo.service
+package no.nav.syfo.db
 
 
 import no.nav.syfo.db.domain.PlanlagtVarsel

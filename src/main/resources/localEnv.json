@@ -3,5 +3,9 @@
   "applicationThreads": "1",
   "databaseUrl": "jdbc:postgresql://localhost:5432/esyfovarsel",
   "databaseName": "esyfovarsel",
-  "dbVaultMountPath": ""
+  "dbVaultMountPath": "",
+  "syfosyketilfelleUrl": "http://syketilfelle",
+  "serviceuserUsername": "srvesyfovarsel",
+  "serviceuserPassword": "password",
+  "stsUrl": "https://sts.test.no"
 }

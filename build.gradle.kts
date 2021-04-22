@@ -16,6 +16,7 @@ val flywayVersion = "7.5.2"
 val vaultJdbcVersion = "1.3.7"
 val jacksonVersion = "2.10.0"
 val postgresEmbeddedVersion = "0.13.3"
+val kafkaVersion = "2.7.0"
 
 plugins {
     kotlin("jvm") version "1.3.61"
@@ -47,6 +48,10 @@ dependencies {
     implementation("io.prometheus:simpleclient_hotspot:$prometheus_version")
     implementation("io.prometheus:simpleclient_common:$prometheus_version")
     implementation("io.ktor:ktor-server-netty:$ktor_version")
+    implementation("io.ktor:ktor-client-apache:$ktor_version")
+    implementation("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-cio:$ktor_version")
+    implementation("io.ktor:ktor-client-jackson:$ktor_version")
 
     // Logging
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
@@ -62,6 +67,9 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+
+    //Kafka
+    implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
 
     // Test
     testImplementation("org.amshove.kluent:kluent:$kluent_version")
