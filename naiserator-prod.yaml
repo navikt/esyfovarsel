@@ -39,6 +39,10 @@ spec:
     paths:
       - kvPath: "/serviceuser/data/prod/srvesyfovarsel"
         mountPath: "/var/run/secrets/serviceuser"
+  azure:
+    application:
+      enabled: true
+  webproxy: true
   ingresses:
     - "https://esyfovarsel.nais.adeo.no"
   env:
