@@ -14,7 +14,7 @@ import java.util.Base64
 class StsConsumer(env: Environment) {
     private val username = env.serviceuserUsername
     private val password = env.serviceuserPassword
-    private val stsUrl = env.stsUrl
+    private val stsEndpointUrl = "${env.stsUrl}/rest/v1/sts/token?grant_type=client_credentials&scope=openid"
     private var token: Token? = null
 
     private val client = HttpClient(CIO) {
@@ -35,7 +35,7 @@ class StsConsumer(env: Environment) {
             return token!!
         }
 
-        token = client.post<Token>(stsUrl) {
+        token = client.post<Token>(stsEndpointUrl) {
             headers{
                 append(HttpHeaders.Authorization, encodeCredentials(username, password))
             }
@@ -50,5 +50,5 @@ fun encodeCredentials(username: String, password: String): String {
 }
 
 data class Token(val access_token: String, val token_type: String, val expires_in: Int) {
-    val expiresAt: LocalDateTime = LocalDateTime.now().plusSeconds((expires_in - 10).toLong())
+    var expiresAt: LocalDateTime = LocalDateTime.now().plusSeconds(expires_in - 10L)
 }

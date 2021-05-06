@@ -8,15 +8,19 @@ const val localEnvironmentPropertiesPath = "./src/main/resources/localEnv.json"
 const val serviceuserMounthPath = "/var/run/secrets/serviceuser"
 val objectMapper = ObjectMapper().registerKotlinModule()
 
+fun testEnviornment(embeddedKafkaBrokerUrl: String) : Environment =
+    localEnvironment()
+    .copy(kafkaBootstrapServersUrl = embeddedKafkaBrokerUrl)
 
-fun getEnvironment(): Environment =
+fun getEnvironment() : Environment =
     if (isLocal())
         localEnvironment()
     else
         remoteEnvironment()
 
-private fun remoteEnvironment(): Environment {
+private fun remoteEnvironment() : Environment {
     return Environment(
+        true,
         getEnvVar("APPLICATION_PORT", "8080").toInt(),
         getEnvVar("APPLICATION_THREADS", "4").toInt(),
         getEnvVar("DATABASE_URL"),
@@ -35,6 +39,7 @@ private fun localEnvironment() : Environment {
 }
 
 data class Environment(
+        val remote: Boolean,
         val applicationPort: Int,
         val applicationThreads: Int,
         val databaseUrl: String,

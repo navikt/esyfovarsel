@@ -10,6 +10,7 @@ import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.kafka.KafkaListener
 import no.nav.syfo.varsel.VarselPlanner
 import no.nav.syfo.kafka.consumerProperties
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import no.nav.syfo.kafka.topicOppfolgingsTilfelle
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
@@ -44,7 +45,7 @@ class OppfolgingstilfelleKafkaConsumer(env: Environment, syfosyketilfelleConsume
                     val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle(peker.aktorId, peker.orgnummer)
 
                     oppfolgingstilfelle?.let {
-                        varselPlanners.forEach { planner -> planner.planVarsel(it) }
+                        varselPlanners.forEach { planner -> planner.processOppfolgingstilfelle(oppfolgingstilfelle) }
                     }
                 } catch (e: IOException) {
                     log.error("Error in [$topicOppfolgingsTilfelle] listener: Could not parse message | ${e.message}")
@@ -61,8 +62,4 @@ class OppfolgingstilfelleKafkaConsumer(env: Environment, syfosyketilfelleConsume
         return this
     }
 
-    data class KOppfolgingstilfellePeker(
-        val aktorId: String,
-        val orgnummer: String
-    )
 }

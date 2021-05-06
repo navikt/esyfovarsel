@@ -3,8 +3,6 @@ package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
-import no.nav.syfo.db.fetchPlanlagtVarselByFnr
-import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import org.amshove.kluent.shouldEqual

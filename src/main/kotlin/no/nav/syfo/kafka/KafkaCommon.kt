@@ -15,7 +15,7 @@ interface KafkaListener {
 }
 
 fun consumerProperties(env: Environment) : Properties {
-    return HashMap<String,String>().apply {
+    val properties = HashMap<String,String>().apply {
         put("group.id", "esyfovarsel-group-v00")
         put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
         put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
@@ -27,6 +27,11 @@ fun consumerProperties(env: Environment) : Properties {
         put(SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${env.serviceuserUsername}\" password=\"${env.serviceuserPassword}\";")
         put("bootstrap.servers", env.kafkaBootstrapServersUrl)
     }.toProperties()
+    if (!env.remote) {
+        properties.remove("security.protocol")
+        properties.remove("sasl.mechanism")
+    }
+    return properties
 }
 
 suspend fun CoroutineScope.launchKafkaListener(applicationState: ApplicationState, kafkaListener: KafkaListener) {

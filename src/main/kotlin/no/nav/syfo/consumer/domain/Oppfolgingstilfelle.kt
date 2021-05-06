@@ -1,6 +1,5 @@
 package no.nav.syfo.consumer.domain
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class Oppfolgingstilfelle(
