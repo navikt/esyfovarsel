@@ -59,4 +59,4 @@ spec:
     - name: SYFOSYKETILFELLE_URL
       value: https://syfosyketilfelle.nais.adeo.no
     - name: STS_URL
-      value: https://security-token-service.nais.adeo.no/rest/v1/sts/token?grant_type=client_credentials&scope=openid
+      value: https://security-token-service.nais.adeo.no

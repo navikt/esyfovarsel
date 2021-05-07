@@ -53,6 +53,7 @@ class OppfolgingstilfelleKafkaConsumer(env: Environment, syfosyketilfelleConsume
                     log.error("Error in [$topicOppfolgingsTilfelle] listener: Could not process message | ${e.message}")
                 }
             }
+            kafkaListener.commitSync()
             delay(100)
         }
     }
