@@ -4,18 +4,21 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 group = "no.nav.syfo"
 version = "1.0"
 
-val coroutines_version = "1.3.3"
-val kluent_version = "1.39"
-val ktor_version = "1.3.2"
-val prometheus_version = "0.8.1"
-val spek_version = "2.0.9"
+val coroutinesVersion = "1.3.3"
+val kluentVersion = "1.39"
+val ktorVersion = "1.3.2"
+val prometheusVersion = "0.8.1"
+val spekVersion = "2.0.9"
+val mockkVersion = "1.10.2"
 val slf4jVersion = "1.7.30"
 val postgresVersion = "42.2.13"
 val hikariVersion = "4.0.1"
 val flywayVersion = "7.5.2"
 val vaultJdbcVersion = "1.3.7"
-val jacksonVersion = "2.10.0"
+val jacksonVersion = "2.11.3"
 val postgresEmbeddedVersion = "0.13.3"
+val kafkaVersion = "2.7.0"
+val kafkaEmbeddedVersion = "2.4.0"
 
 plugins {
     kotlin("jvm") version "1.3.61"
@@ -34,7 +37,7 @@ repositories {
     maven(url = "https://dl.bintray.com/kotlin/ktor")
     maven(url = "https://dl.bintray.com/spekframework/spek-dev")
     maven(url = "https://dl.bintray.com/kotlin/kotlinx/")
-    maven(url = "http://packages.confluent.io/maven/")
+    maven(url = "https://packages.confluent.io/maven/")
     maven(url = "https://repo.adeo.no/repository/maven-releases/")
     maven(url = "https://github.com/navikt/vault-jdbc")
 }
@@ -43,10 +46,16 @@ dependencies {
 
     // Kotlin / Server
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version")
-    implementation("io.prometheus:simpleclient_hotspot:$prometheus_version")
-    implementation("io.prometheus:simpleclient_common:$prometheus_version")
-    implementation("io.ktor:ktor-server-netty:$ktor_version")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+    implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
+    implementation("io.prometheus:simpleclient_common:$prometheusVersion")
+    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-client-apache:$ktorVersion")
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
+    implementation("io.ktor:ktor-client-jackson:$ktorVersion")
+
 
     // Logging
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
@@ -63,16 +72,21 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
+    //Kafka
+    implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
+    implementation("org.apache.kafka:kafka_2.12:$kafkaVersion")
+
     // Test
-    testImplementation("org.amshove.kluent:kluent:$kluent_version")
-    testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spek_version")
-    testImplementation("io.ktor:ktor-server-test-host:$ktor_version") {
+    testImplementation("org.amshove.kluent:kluent:$kluentVersion")
+    testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
+    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion") {
         exclude(group = "ch.qos.logback", module = "logback-classic")
     }
-    testImplementation("io.mockk:mockk:1.10.2")
+    testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
-    testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spek_version")
-    testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spek_version")
+    testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion")
+    testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spekVersion")
+    testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spekVersion")
 }
 
 tasks {

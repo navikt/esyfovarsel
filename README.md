@@ -1,13 +1,13 @@
 # esyfovarsel
 Varsler for eSYFO
 
-## Technologies (to be) used
+## Technologies used
 * Kotlin
 * Ktor
 * Gradle
 * Spek
 * Postgres
-* (Kafka)
+* Kafka
 
 ### Building the application
 Run `./gradlew build`

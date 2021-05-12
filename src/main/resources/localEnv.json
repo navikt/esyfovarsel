@@ -1,7 +1,13 @@
 {
+  "remote": false,
   "applicationPort": "8081",
   "applicationThreads": "1",
   "databaseUrl": "jdbc:postgresql://localhost:5432/esyfovarsel",
   "databaseName": "esyfovarsel",
-  "dbVaultMountPath": ""
+  "dbVaultMountPath": "",
+  "kafkaBootstrapServersUrl": "localhost:kafka",
+  "syfosyketilfelleUrl": "http://localhost:9090",
+  "serviceuserUsername": "srvesyfovarsel",
+  "serviceuserPassword": "password",
+  "stsUrl": "http://localhost:9091"
 }

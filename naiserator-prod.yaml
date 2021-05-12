@@ -54,3 +54,9 @@ spec:
       value: esyfovarsel
     - name: DB_VAULT_MOUNT_PATH
       value: postgresql/prod-fss
+    - name: KAFKA_BOOTSTRAP_SERVERS_URL
+      value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
+    - name: SYFOSYKETILFELLE_URL
+      value: https://syfosyketilfelle.nais.adeo.no
+    - name: STS_URL
+      value: https://security-token-service.nais.adeo.no
