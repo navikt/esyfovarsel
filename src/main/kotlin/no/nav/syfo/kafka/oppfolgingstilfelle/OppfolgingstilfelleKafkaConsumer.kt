@@ -40,6 +40,7 @@ class OppfolgingstilfelleKafkaConsumer(env: Environment, syfosyketilfelleConsume
         log.info("Starting to listen to $topicOppfolgingsTilfelle")
         while (applicationState.running) {
             kafkaListener.poll(Duration.ofMillis(0)).forEach {
+                log.info("Received record from [$topicOppfolgingsTilfelle]")
                 try {
                     val peker: KOppfolgingstilfellePeker = objectMapper.readValue(it.value())
                     val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle(peker.aktorId, peker.orgnummer)
@@ -54,7 +55,7 @@ class OppfolgingstilfelleKafkaConsumer(env: Environment, syfosyketilfelleConsume
                 }
             }
             kafkaListener.commitSync()
-            delay(100)
+            delay(10)
         }
     }
 
