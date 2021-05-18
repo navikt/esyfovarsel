@@ -15,4 +15,5 @@ Run `./gradlew build`
 ### Running locally
 
 - Run `docker-compose up` in a terminal at the project root
+  
 - Start BootstrapApplication
