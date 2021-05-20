@@ -60,3 +60,5 @@ spec:
       value: https://syfosyketilfelle.nais.adeo.no
     - name: STS_URL
       value: https://security-token-service.nais.adeo.no
+    - name: PDL_URL
+      value: https://pdl-api.nais.adeo.no/graphql
