@@ -16,7 +16,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.syfo.Environment
 import no.nav.syfo.auth.StsConsumer
-import no.nav.syfo.consumer.domain.Oppfolgingstilfelle
+import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
 import org.slf4j.LoggerFactory
 
 @KtorExperimentalAPI
@@ -40,8 +40,8 @@ class SyfosyketilfelleConsumer(env: Environment, stsConsumer: StsConsumer) {
         basepath = env.syfosyketilfelleUrl
     }
 
-    suspend fun getOppfolgingstilfelle(aktorId: String, orgnr: String) : Oppfolgingstilfelle? {
-        val requestURL = "$basepath/kafka/oppfolgingstilfelle/beregn/$aktorId/$orgnr"
+    suspend fun getOppfolgingstilfelle(aktorId: String) : OppfolgingstilfellePerson? {
+        val requestURL = "$basepath/kafka/oppfolgingstilfelle/beregn/$aktorId"
         val stsToken = stsConsumer.getToken()
         val bearerTokenString = "Bearer ${stsToken.access_token}"
 
@@ -54,7 +54,7 @@ class SyfosyketilfelleConsumer(env: Environment, stsConsumer: StsConsumer) {
 
         return when (response.status) {
             HttpStatusCode.OK -> {
-                response.receive<Oppfolgingstilfelle>()
+                response.receive<OppfolgingstilfellePerson>()
             }
             HttpStatusCode.NoContent -> {
                 log.error("Could not get oppfolgingstilfelle: No content found in the response body")

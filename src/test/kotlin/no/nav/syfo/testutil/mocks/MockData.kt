@@ -1,6 +1,6 @@
 package no.nav.syfo.testutil.mocks
 
-import no.nav.syfo.consumer.domain.Oppfolgingstilfelle
+import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
 import no.nav.syfo.consumer.domain.Syketilfellebit
 import no.nav.syfo.consumer.domain.Syketilfelledag
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
@@ -35,9 +35,8 @@ val syketilfelledag = Syketilfelledag(
     prioritertSyketilfellebit = syketilfellebit
 )
 
-val oppfolgingstilfelleResponse = Oppfolgingstilfelle(
+val oppfolgingstilfelleResponse = OppfolgingstilfellePerson(
     aktorId = aktorId,
-    orgnummer = orgnummer,
     tidslinje = listOf(syketilfelledag),
     sisteDagIArbeidsgiverperiode = syketilfelledag,
     antallBrukteDager = 2,

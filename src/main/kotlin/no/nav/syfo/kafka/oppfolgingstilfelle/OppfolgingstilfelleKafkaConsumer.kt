@@ -43,7 +43,7 @@ class OppfolgingstilfelleKafkaConsumer(env: Environment, syfosyketilfelleConsume
                 log.info("Received record from [$topicOppfolgingsTilfelle]")
                 try {
                     val peker: KOppfolgingstilfellePeker = objectMapper.readValue(it.value())
-                    val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle(peker.aktorId, peker.orgnummer)
+                    val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle(peker.aktorId)
 
                     oppfolgingstilfelle?.let {
                         varselPlanners.forEach { planner -> planner.processOppfolgingstilfelle(oppfolgingstilfelle) }

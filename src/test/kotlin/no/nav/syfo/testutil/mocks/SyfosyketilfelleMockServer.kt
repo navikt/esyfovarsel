@@ -33,11 +33,10 @@ class SyfosyketilfelleMockServer(env: Environment)  {
                 }
             }
             routing {
-                get("/kafka/oppfolgingstilfelle/beregn/{aktorId}/{orgnr}") {
+                get("/kafka/oppfolgingstilfelle/beregn/{aktorId}") {
                     call.respond(oppfolgingstilfelleResponse
                         .copy(
-                            aktorId = call.parameters["aktorId"] ?: aktorId,
-                            orgnummer = call.parameters["orgnr"] ?: orgnummer
+                            aktorId = call.parameters["aktorId"] ?: aktorId
                         )
                     )
                 }
