@@ -13,11 +13,11 @@ import io.ktor.client.request.post
 import io.ktor.client.request.headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.runBlocking
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.Environment
 import no.nav.syfo.consumer.pdl.*
 import org.slf4j.LoggerFactory
-import java.io.File
 
 class PdlConsumer(env: Environment, stsConsumer: StsConsumer) {
     private val client: HttpClient
@@ -40,25 +40,7 @@ class PdlConsumer(env: Environment, stsConsumer: StsConsumer) {
     }
 
     suspend fun getFnr(aktorId: String) : String? {
-        val stsToken = stsConsumer.getToken()
-        val bearerTokenString = "Bearer ${stsToken.access_token}"
-        val graphQuery = this::class.java.getResource("/pdl/hentIdenter.graphql").readText().replace("[\n\r]", "")
-        val requestBody = PdlRequest(graphQuery, Variables(aktorId))
-
-        val response = try {
-            client.post<HttpResponse>(pdlBasepath) {
-                headers {
-                    append(TEMA_HEADER, OPPFOLGING_TEMA_HEADERVERDI)
-                    append(HttpHeaders.ContentType, APPLICATION_JSON)
-                    append(HttpHeaders.Authorization, bearerTokenString)
-                    append(NAV_CONSUMER_TOKEN_HEADER, bearerTokenString)
-                }
-                body = requestBody
-            }
-        }   catch (e: Exception) {
-            log.error("Error while calling PDL: ${e.message}")
-            null
-        }
+        val response = callPdl(IDENTER_QUERY, aktorId)
 
         return when (response?.status) {
             HttpStatusCode.OK -> {
@@ -77,6 +59,51 @@ class PdlConsumer(env: Environment, stsConsumer: StsConsumer) {
                 null
             }
         }
+    }
 
+    suspend fun isBrukerGradert(aktorId: String) : Boolean? {
+        val response = callPdl(PERSON_QUERY, aktorId)
+
+        return when (response?.status) {
+            HttpStatusCode.OK -> {
+                response.receive<PdlPersonResponse>().data?.isKode6Or7()
+            }
+            HttpStatusCode.NoContent -> {
+                log.error("Could not get oppfolgingstilfelle: No content found in the response body")
+                null
+            }
+            HttpStatusCode.Unauthorized -> {
+                log.error("Could not get oppfolgingstilfelle: Unable to authorize")
+                null
+            }
+            else -> {
+                log.error("Could not get oppfolgingstilfelle: $response")
+                null
+            }
+        }
+    }
+
+    fun callPdl(service: String, aktorId: String) : HttpResponse? {
+        return runBlocking {
+            val stsToken = stsConsumer.getToken()
+            val bearerTokenString = "Bearer ${stsToken.access_token}"
+            val graphQuery = this::class.java.getResource("$QUERY_PATH_PREFIX/$service").readText().replace("[\n\r]", "")
+            val requestBody = PdlRequest(graphQuery, Variables(aktorId))
+
+            try {
+                client.post<HttpResponse>(pdlBasepath) {
+                    headers {
+                        append(TEMA_HEADER, OPPFOLGING_TEMA_HEADERVERDI)
+                        append(HttpHeaders.ContentType, APPLICATION_JSON)
+                        append(HttpHeaders.Authorization, bearerTokenString)
+                        append(NAV_CONSUMER_TOKEN_HEADER, bearerTokenString)
+                    }
+                    body = requestBody
+                }
+            } catch (e: Exception) {
+                log.error("Error while calling PDL ($service): ${e.message}")
+                null
+            }
+        }
     }
 }
