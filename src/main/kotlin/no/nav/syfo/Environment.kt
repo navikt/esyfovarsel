@@ -27,10 +27,11 @@ private fun remoteEnvironment() : Environment {
         getEnvVar("DATABASE_NAME", "esyfovarsel"),
         getEnvVar("DB_VAULT_MOUNT_PATH"),
         getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
+        getEnvVar("STS_URL"),
         getEnvVar("SYFOSYKETILFELLE_URL"),
+        getEnvVar("PDL_URL"),
         File("$serviceuserMounthPath/username").readText(),
-        File("$serviceuserMounthPath/password").readText(),
-        getEnvVar("STS_URL")
+        File("$serviceuserMounthPath/password").readText()
     )
 }
 
@@ -46,10 +47,11 @@ data class Environment(
         val databaseName: String,
         val dbVaultMountPath: String,
         val kafkaBootstrapServersUrl: String,
+        val stsUrl: String,
         val syfosyketilfelleUrl: String,
+        val pdlUrl: String,
         val serviceuserUsername: String,
-        val serviceuserPassword: String,
-        val stsUrl: String
+        val serviceuserPassword: String
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =
