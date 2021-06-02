@@ -6,9 +6,10 @@
   "databaseName": "esyfovarsel",
   "dbVaultMountPath": "",
   "kafkaBootstrapServersUrl": "localhost:kafka",
+  "stsUrl": "http://localhost:9092",
   "syfosyketilfelleUrl": "http://localhost:9090",
+  "pdlUrl": "http://localhost:9091",
   "serviceuserUsername": "srvesyfovarsel",
   "serviceuserPassword": "password",
-  "stsUrl": "http://localhost:9091",
   "syfosmregisterUrl": "http://localhost:9393"
 }

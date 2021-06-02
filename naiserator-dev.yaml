@@ -60,5 +60,7 @@ spec:
       value: https://syfosyketilfelle.nais.preprod.local
     - name: STS_URL
       value: https://security-token-service.nais.preprod.local
+    - name: PDL_URL
+      value: https://pdl-api.nais.preprod.local/graphql
     - name: SYFOSMREGISTER_URL
       value: https://syfosmregister.nais.preprod.local
