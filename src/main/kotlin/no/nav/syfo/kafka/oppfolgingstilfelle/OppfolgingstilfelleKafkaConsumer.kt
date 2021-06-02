@@ -5,13 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import kotlinx.coroutines.delay
-import no.nav.syfo.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import no.nav.syfo.ApplicationState
+import no.nav.syfo.Environment
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.kafka.KafkaListener
-import no.nav.syfo.varsel.VarselPlanner
 import no.nav.syfo.kafka.consumerProperties
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import no.nav.syfo.kafka.topicOppfolgingsTilfelle
+import no.nav.syfo.varsel.VarselPlanner
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -46,7 +49,7 @@ class OppfolgingstilfelleKafkaConsumer(env: Environment, syfosyketilfelleConsume
                     val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle(peker.aktorId)
 
                     oppfolgingstilfelle?.let {
-                        varselPlanners.forEach { planner -> planner.processOppfolgingstilfelle(oppfolgingstilfelle) }
+                        varselPlanners.forEach { planner -> runBlocking { planner.processOppfolgingstilfelle(oppfolgingstilfelle) } }
                     }
                 } catch (e: IOException) {
                     log.error("Error in [$topicOppfolgingsTilfelle] listener: Could not parse message | ${e.message}")
@@ -59,7 +62,7 @@ class OppfolgingstilfelleKafkaConsumer(env: Environment, syfosyketilfelleConsume
         }
     }
 
-    fun addPlanner(varselPlanner: VarselPlanner) : OppfolgingstilfelleKafkaConsumer {
+    fun addPlanner(varselPlanner: VarselPlanner): OppfolgingstilfelleKafkaConsumer {
         varselPlanners.add(varselPlanner)
         return this
     }

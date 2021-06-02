@@ -9,5 +9,6 @@
   "syfosyketilfelleUrl": "http://localhost:9090",
   "serviceuserUsername": "srvesyfovarsel",
   "serviceuserPassword": "password",
-  "stsUrl": "http://localhost:9091"
+  "stsUrl": "http://localhost:9091",
+  "syfosmregisterUrl": "http://localhost:9393"
 }

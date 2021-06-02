@@ -1,8 +1,6 @@
 package no.nav.syfo.testutil.mocks
 
-import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
-import no.nav.syfo.consumer.domain.Syketilfellebit
-import no.nav.syfo.consumer.domain.Syketilfelledag
+import no.nav.syfo.consumer.domain.*
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import java.time.LocalDate
 
@@ -43,6 +41,13 @@ val oppfolgingstilfelleResponse = OppfolgingstilfellePerson(
     oppbruktArbeidsgvierperiode = false,
     utsendelsestidspunkt = fomStartOfDay
 )
+
+val syfosmregisterResponse = listOf(
+    Sykmelding(
+        id= "1",
+        sykmeldingsperioder = listOf(SykmeldingPeriode("", "", Gradert(100))),
+        sykmeldingStatus = SykmeldingStatus()
+))
 
 // Kafka - Oppfolgingstilfelle
 

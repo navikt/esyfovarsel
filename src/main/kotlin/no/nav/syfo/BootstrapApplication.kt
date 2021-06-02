@@ -6,15 +6,19 @@ import io.ktor.config.HoconApplicationConfig
 import io.ktor.routing.routing
 import io.ktor.server.engine.*
 import io.ktor.server.netty.Netty
+import io.ktor.util.*
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
+import no.nav.syfo.consumer.SykmeldingerConsumer
 import no.nav.syfo.db.*
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.kafka.launchKafkaListener
+import no.nav.syfo.service.SykmeldingService
+import no.nav.syfo.varsel.AktivitetskravVarselPlanner
 import java.util.concurrent.Executors
 
 
@@ -80,12 +84,18 @@ fun Application.serverModule() {
     state.initialized = true
 }
 
+@KtorExperimentalAPI
 fun Application.kafkaModule() {
 
     runningRemotely {
         val stsConsumer = StsConsumer(env)
         val oppfolgingstilfelleConsumer = SyfosyketilfelleConsumer(env, stsConsumer)
+
+        val sykmeldingerConsumer = SykmeldingerConsumer(env, stsConsumer)
+        val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
+
         val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, oppfolgingstilfelleConsumer)
+            .addPlanner(AktivitetskravVarselPlanner(database, sykmeldingService))
 
         launch(backgroundTasksContext) {
             launchKafkaListener(

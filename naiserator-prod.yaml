@@ -60,3 +60,5 @@ spec:
       value: https://syfosyketilfelle.nais.adeo.no
     - name: STS_URL
       value: https://security-token-service.nais.adeo.no
+    - name: SYFOSMREGISTER_URL
+      value: https://syfosmregister.nais.adeo.no

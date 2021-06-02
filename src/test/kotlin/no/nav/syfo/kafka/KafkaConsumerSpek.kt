@@ -43,8 +43,7 @@ object KafkaConsumerSpek : Spek({
 
     val stsConsumer = StsConsumer(testEnv)
     val syfosyketilfelleConsumer = SyfosyketilfelleConsumer(testEnv, stsConsumer)
-    val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(testEnv, syfosyketilfelleConsumer)
-        .addPlanner(MockVarselPlaner(fakeApplicationState))
+    val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(testEnv, syfosyketilfelleConsumer).addPlanner(MockVarselPlaner(fakeApplicationState))
 
 
     beforeGroup {

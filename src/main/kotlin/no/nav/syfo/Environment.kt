@@ -30,7 +30,8 @@ private fun remoteEnvironment() : Environment {
         getEnvVar("SYFOSYKETILFELLE_URL"),
         File("$serviceuserMounthPath/username").readText(),
         File("$serviceuserMounthPath/password").readText(),
-        getEnvVar("STS_URL")
+        getEnvVar("STS_URL"),
+        getEnvVar("SYFOSMREGISTER_URL")
     )
 }
 
@@ -49,7 +50,8 @@ data class Environment(
         val syfosyketilfelleUrl: String,
         val serviceuserUsername: String,
         val serviceuserPassword: String,
-        val stsUrl: String
+        val stsUrl: String,
+        val syfosmregisterUrl: String
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =

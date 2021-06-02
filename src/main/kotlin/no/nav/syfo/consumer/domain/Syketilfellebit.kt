@@ -2,6 +2,12 @@ package no.nav.syfo.consumer.domain
 
 import java.time.LocalDateTime
 
+enum class SyketilfellebitTag {
+    SYKMELDING,
+    SENDT,
+    PAPIRSYKMELDING,
+}
+
 data class Syketilfellebit(
     val id: String? = null,
     val aktorId: String,
@@ -13,3 +19,4 @@ data class Syketilfellebit(
     val fom: LocalDateTime,
     val tom: LocalDateTime
 )
+
