@@ -47,15 +47,15 @@ class PdlConsumer(env: Environment, stsConsumer: StsConsumer) {
                 response.receive<PdlIdentResponse>().data?.hentIdenter?.identer?.first()?.ident
             }
             HttpStatusCode.NoContent -> {
-                log.error("Could not get oppfolgingstilfelle: No content found in the response body")
+                log.error("Could not get fnr: No content found in the response body")
                 null
             }
             HttpStatusCode.Unauthorized -> {
-                log.error("Could not get oppfolgingstilfelle: Unable to authorize")
+                log.error("Could not get fnr: Unable to authorize")
                 null
             }
             else -> {
-                log.error("Could not get oppfolgingstilfelle: $response")
+                log.error("Could not get fnr: $response")
                 null
             }
         }
@@ -66,18 +66,18 @@ class PdlConsumer(env: Environment, stsConsumer: StsConsumer) {
 
         return when (response?.status) {
             HttpStatusCode.OK -> {
-                response.receive<PdlPersonResponse>().data?.isKode6Or7()
+                response.receive<PdlPersonResponse>().data?.isKode6Eller7()
             }
             HttpStatusCode.NoContent -> {
-                log.error("Could not get oppfolgingstilfelle: No content found in the response body")
+                log.error("Could not get adressesperre: No content found in the response body")
                 null
             }
             HttpStatusCode.Unauthorized -> {
-                log.error("Could not get oppfolgingstilfelle: Unable to authorize")
+                log.error("Could not get adressesperre: Unable to authorize")
                 null
             }
             else -> {
-                log.error("Could not get oppfolgingstilfelle: $response")
+                log.error("Could not get adressesperre: $response")
                 null
             }
         }

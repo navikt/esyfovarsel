@@ -59,7 +59,7 @@ data class PdlErrorExtension(
     val classification: String
 )
 
-fun PdlHentPerson.isKode6Or7() : Boolean {
+fun PdlHentPerson.isKode6Eller7() : Boolean {
     val adressebeskyttelse = this.hentPerson?.adressebeskyttelse
     return if (adressebeskyttelse.isNullOrEmpty()) {
         false
