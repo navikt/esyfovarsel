@@ -6,6 +6,10 @@ import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.SykmeldingerConsumer
 import no.nav.syfo.consumer.domain.*
+import no.nav.syfo.consumer.syfosmregister.Gradert
+import no.nav.syfo.consumer.syfosmregister.SyfosmregisterResponse
+import no.nav.syfo.consumer.syfosmregister.SykmeldingPeriode
+import no.nav.syfo.consumer.syfosmregister.SykmeldingStatus
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
@@ -27,7 +31,7 @@ const val arbeidstakerAktorId2 = "2345678901234"
 
 
 object AktivitetskravVarselPlannerSpek : Spek({
-     val AKTIVITETSKRAV_DAGER: Long = 42;
+    val AKTIVITETSKRAV_DAGER: Long = 42;
 
     //The default timeout of 10 seconds is not sufficient to initialise the embedded database
     defaultTimeout = 20000L
@@ -68,7 +72,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val syketilfelledag2 = Syketilfelledag(LocalDate.now().minusDays(2), syketilfellebit2)
             val syketilfelledag3 = Syketilfelledag(LocalDate.now().plusDays(100), syketilfellebit3)
 
-            val sykmelding = Sykmelding("1", listOf(SykmeldingPeriode("", "", Gradert(100))), SykmeldingStatus())
+            val sykmelding = SyfosmregisterResponse("1", listOf(SykmeldingPeriode("", "", Gradert(100))), SykmeldingStatus())
 
             coEvery { pdlConsumer.getFnr(any()) } returns arbeidstakerFnr1
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns listOf(sykmelding)
@@ -102,13 +106,14 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val syketilfelledag2 = Syketilfelledag(LocalDate.now().minusDays(2), syketilfellebit2)
             val syketilfelledag3 = Syketilfelledag(LocalDate.now().plusDays(100), syketilfellebit3)
 
-            val sykmelding = Sykmelding("1", listOf(SykmeldingPeriode("", "", Gradert(100))), SykmeldingStatus())
+            val sykmelding = SyfosmregisterResponse("1", listOf(SykmeldingPeriode("", "", Gradert(100))), SykmeldingStatus())
 
             coEvery { pdlConsumer.getFnr(any()) } returns arbeidstakerFnr1
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns listOf(sykmelding)
 
             runBlocking {
-                val oppfolgingstilfellePerson = OppfolgingstilfellePerson(arbeidstakerFnr1, listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3), syketilfelledag1, 0, false, LocalDateTime.now())
+                val oppfolgingstilfellePerson =
+                    OppfolgingstilfellePerson(arbeidstakerFnr1, listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3), syketilfelledag1, 0, false, LocalDateTime.now())
                 aktivitetskravVarselPlanner.processOppfolgingstilfelle(oppfolgingstilfellePerson)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
@@ -135,7 +140,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val syketilfelledag2 = Syketilfelledag(LocalDate.now().minusDays(2), syketilfellebit2)
             val syketilfelledag3 = Syketilfelledag(LocalDate.now().plusDays(6), syketilfellebit3)
 
-            val sykmelding = Sykmelding("1", listOf(SykmeldingPeriode("", "", Gradert(100))), SykmeldingStatus())
+            val sykmelding = SyfosmregisterResponse("1", listOf(SykmeldingPeriode("", "", Gradert(100))), SykmeldingStatus())
 
             coEvery { pdlConsumer.getFnr(any()) } returns arbeidstakerFnr1
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns listOf(sykmelding)
@@ -169,7 +174,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val syketilfelledag2 = Syketilfelledag(LocalDate.now().minusDays(2), syketilfellebit2)
             val syketilfelledag3 = Syketilfelledag(LocalDate.now().plusDays(100), syketilfellebit3)
 
-            val sykmelding = Sykmelding("1", listOf(SykmeldingPeriode("", "", Gradert(50))), SykmeldingStatus())
+            val sykmelding = SyfosmregisterResponse("1", listOf(SykmeldingPeriode("", "", Gradert(50))), SykmeldingStatus())
 
             coEvery { pdlConsumer.getFnr(any()) } returns arbeidstakerFnr1
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns listOf(sykmelding)
@@ -206,7 +211,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val syketilfelledag2 = Syketilfelledag(LocalDate.now().minusDays(2), syketilfellebit2)
             val syketilfelledag3 = Syketilfelledag(LocalDate.now().plusDays(100), syketilfellebit3)
 
-            val sykmelding = Sykmelding("1", listOf(SykmeldingPeriode("", "", Gradert(100))), SykmeldingStatus())
+            val sykmelding = SyfosmregisterResponse("1", listOf(SykmeldingPeriode("", "", Gradert(100))), SykmeldingStatus())
 
             coEvery { pdlConsumer.getFnr(any()) } returns arbeidstakerFnr1
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns listOf(sykmelding)
@@ -220,7 +225,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             nrOfRowsFetchedTotal shouldEqual 2
             nrOfRowsFetchedTotal shouldNotEqual 3
 
-            lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name }.size shouldEqual  1
+            lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name }.size shouldEqual 1
         }
 
         it("Aktivitetskrav varsel er allerede sendt ut, varsel skal ikke opprettes") {
@@ -241,7 +246,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val syketilfelledag2 = Syketilfelledag(LocalDate.now().minusDays(2), syketilfellebit2)
             val syketilfelledag3 = Syketilfelledag(LocalDate.now().plusDays(100), syketilfellebit3)
 
-            val sykmelding = Sykmelding("1", listOf(SykmeldingPeriode("", "", Gradert(100))), SykmeldingStatus())
+            val sykmelding = SyfosmregisterResponse("1", listOf(SykmeldingPeriode("", "", Gradert(100))), SykmeldingStatus())
 
             coEvery { pdlConsumer.getFnr(any()) } returns arbeidstakerFnr1
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns listOf(sykmelding)
@@ -255,7 +260,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             nrOfRowsFetchedTotal shouldEqual 2
             nrOfRowsFetchedTotal shouldNotEqual 3
 
-            lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name }.size shouldEqual  1
+            lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name }.size shouldEqual 1
         }
 
         it("AktivitetskravVarsel blir lagret i database, ett sykeforløp") {
@@ -263,18 +268,28 @@ object AktivitetskravVarselPlannerSpek : Spek({
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore3)
 
             val syketilfellebit1 =
-                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("SYKMELDING", "SENDT"), "3",LocalDateTime.now().minusDays(4), LocalDateTime.now())
+                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("SYKMELDING", "SENDT"), "3", LocalDateTime.now().minusDays(4), LocalDateTime.now())
             val syketilfellebit2 =
                 Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("ANNET_FRAVAR", "UTDANNING"), "3", LocalDateTime.now(), LocalDateTime.now())
-           //Ny sykmelding, samme forlop
+            //Ny sykmelding, samme forlop
             val syketilfellebit3 =
-                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("PAPIRSYKMELDING", "BEKREFTET", "SENDT"), "5", LocalDateTime.now().plusDays(15), LocalDateTime.now().plusDays(100))
+                Syketilfellebit(
+                    "1",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("PAPIRSYKMELDING", "BEKREFTET", "SENDT"),
+                    "5",
+                    LocalDateTime.now().plusDays(15),
+                    LocalDateTime.now().plusDays(100)
+                )
 
             val syketilfelledag1 = Syketilfelledag(LocalDate.now().minusDays(4), syketilfellebit1)
             val syketilfelledag2 = Syketilfelledag(LocalDate.now().minusDays(2), syketilfellebit2)
             val syketilfelledag3 = Syketilfelledag(LocalDate.now().plusDays(100), syketilfellebit3)
 
-            val sykmelding = Sykmelding("1", listOf(SykmeldingPeriode("", "", Gradert(100))), SykmeldingStatus())
+            val sykmelding = SyfosmregisterResponse("1", listOf(SykmeldingPeriode("", "", Gradert(100))), SykmeldingStatus())
 
             coEvery { pdlConsumer.getFnr(any()) } returns arbeidstakerFnr1
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns listOf(sykmelding)
@@ -284,10 +299,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
             val nrOfRowsFetchedTotal = lagreteVarsler.size
-            
+
             nrOfRowsFetchedTotal shouldEqual 2
 
-            lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name }.size shouldEqual  1
+            lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name }.size shouldEqual 1
         }
 
         it("AktivitetskravVarsler blir lagret i database ved nytt sykeforløp selv om det er allerede en varsel i DB som ikke er sendt ut") {
@@ -303,22 +318,43 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val syketilfellebit2 =
                 Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("ANNET_FRAVAR", "UTDANNING"), "3", LocalDateTime.now(), LocalDateTime.now())
             val syketilfellebit3 =
-                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("PAPIRSYKMELDING", "BEKREFTET", "SENDT"), "3", LocalDateTime.now().plusDays(5), LocalDateTime.now().plusDays(50))
+                Syketilfellebit(
+                    "1",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("PAPIRSYKMELDING", "BEKREFTET", "SENDT"),
+                    "3",
+                    LocalDateTime.now().plusDays(5),
+                    LocalDateTime.now().plusDays(50)
+                )
             // Ny sykmelding, nytt forlop
             val syketilfellebit4 =
-                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("PAPIRSYKMELDING", "BEKREFTET", "SENDT"), "5", LocalDateTime.now().plusDays(70), LocalDateTime.now().plusDays(140))
+                Syketilfellebit(
+                    "1",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("PAPIRSYKMELDING", "BEKREFTET", "SENDT"),
+                    "5",
+                    LocalDateTime.now().plusDays(70),
+                    LocalDateTime.now().plusDays(140)
+                )
 
             val syketilfelledag1 = Syketilfelledag(LocalDate.now().minusDays(4), syketilfellebit1)
             val syketilfelledag2 = Syketilfelledag(LocalDate.now().minusDays(2), syketilfellebit2)
             val syketilfelledag3 = Syketilfelledag(LocalDate.now().plusDays(50), syketilfellebit3)
             val syketilfelledag4 = Syketilfelledag(LocalDate.now().plusDays(140), syketilfellebit4)
 
-            val sykmelding = Sykmelding("1", listOf(SykmeldingPeriode("", "", Gradert(100))), SykmeldingStatus())
+            val sykmelding = SyfosmregisterResponse("1", listOf(SykmeldingPeriode("", "", Gradert(100))), SykmeldingStatus())
 
             coEvery { pdlConsumer.getFnr(any()) } returns arbeidstakerFnr1
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns listOf(sykmelding)
 
-            val oppfolgingstilfellePerson = OppfolgingstilfellePerson(arbeidstakerFnr1, listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3, syketilfelledag4), syketilfelledag1, 0, false, LocalDateTime.now())
+            val oppfolgingstilfellePerson =
+                OppfolgingstilfellePerson(arbeidstakerFnr1, listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3, syketilfelledag4), syketilfelledag1, 0, false, LocalDateTime.now())
             runBlocking { aktivitetskravVarselPlanner.processOppfolgingstilfelle(oppfolgingstilfellePerson) }
 
             val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
@@ -326,10 +362,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
             nrOfRowsFetchedTotal shouldEqual 3
 
             val aktivitetskravVarsler = lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name }
-            
-            aktivitetskravVarsler.size shouldEqual  2
-            aktivitetskravVarsler.filter { it.utsendingsdato == LocalDate.now().plusDays(AKTIVITETSKRAV_DAGER)}.size shouldEqual  1
-            aktivitetskravVarsler.filter { it.utsendingsdato == LocalDate.now().plusDays(70).plusDays(AKTIVITETSKRAV_DAGER)}.size shouldEqual  1
+
+            aktivitetskravVarsler.size shouldEqual 2
+            aktivitetskravVarsler.filter { it.utsendingsdato == LocalDate.now().plusDays(AKTIVITETSKRAV_DAGER) }.size shouldEqual 1
+            aktivitetskravVarsler.filter { it.utsendingsdato == LocalDate.now().plusDays(70).plusDays(AKTIVITETSKRAV_DAGER) }.size shouldEqual 1
         }
     }
 })

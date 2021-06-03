@@ -13,7 +13,7 @@ import io.ktor.http.*
 import io.ktor.util.*
 import no.nav.syfo.Environment
 import no.nav.syfo.auth.StsConsumer
-import no.nav.syfo.consumer.domain.Sykmelding
+import no.nav.syfo.consumer.syfosmregister.SyfosmregisterResponse
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -39,7 +39,7 @@ class SykmeldingerConsumer(env: Environment, stsConsumer: StsConsumer)  {
         basepath = env.syfosmregisterUrl
     }
 
-    suspend fun getSykmeldingerForVarslingDato(dato: LocalDate, fnr: String): List<Sykmelding>? {
+    suspend fun getSykmeldingerForVarslingDato(dato: LocalDate, fnr: String): List<SyfosmregisterResponse>? {
         val datoString = dato.toString()
         val requestURL = "$basepath/api/v2/sykmeldinger/?include=SENDT/?fom=/$datoString/?tom=/$datoString"
         val stsToken = stsConsumer.getToken()
@@ -55,7 +55,7 @@ class SykmeldingerConsumer(env: Environment, stsConsumer: StsConsumer)  {
 
         return when (response.status) {
             HttpStatusCode.OK -> {
-                response.receive<List<Sykmelding>>()
+                response.receive<List<SyfosmregisterResponse>>()
             }
             HttpStatusCode.NoContent -> {
                 log.error("Could not get sykmeldinger from syfosmregister: No content found in the response body")
