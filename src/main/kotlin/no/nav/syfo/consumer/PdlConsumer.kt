@@ -47,15 +47,15 @@ class PdlConsumer(env: Environment, stsConsumer: StsConsumer) {
                 response.receive<PdlIdentResponse>().data?.hentIdenter?.identer?.first()?.ident
             }
             HttpStatusCode.NoContent -> {
-                log.error("Could not get fnr: No content found in the response body")
+                log.error("Could not get fnr from PDL: No content found in the response body")
                 null
             }
             HttpStatusCode.Unauthorized -> {
-                log.error("Could not get fnr: Unable to authorize")
+                log.error("Could not get fnr from PDL: Unable to authorize")
                 null
             }
             else -> {
-                log.error("Could not get fnr: $response")
+                log.error("Could not get fnr from PDL: $response")
                 null
             }
         }
@@ -69,15 +69,15 @@ class PdlConsumer(env: Environment, stsConsumer: StsConsumer) {
                 response.receive<PdlPersonResponse>().data?.isKode6Eller7()
             }
             HttpStatusCode.NoContent -> {
-                log.error("Could not get adressesperre: No content found in the response body")
+                log.error("Could not get adressesperre from PDL: No content found in the response body")
                 null
             }
             HttpStatusCode.Unauthorized -> {
-                log.error("Could not get adressesperre: Unable to authorize")
+                log.error("Could not get adressesperre from PDL: Unable to authorize")
                 null
             }
             else -> {
-                log.error("Could not get adressesperre: $response")
+                log.error("Could not get adressesperre from PDL: $response")
                 null
             }
         }
