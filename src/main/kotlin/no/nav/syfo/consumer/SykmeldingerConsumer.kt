@@ -58,15 +58,15 @@ class SykmeldingerConsumer(env: Environment, stsConsumer: StsConsumer)  {
                 response.receive<List<Sykmelding>>()
             }
             HttpStatusCode.NoContent -> {
-                log.error("Could not get sykmeldinger: No content found in the response body")
+                log.error("Could not get sykmeldinger from syfosmregister: No content found in the response body")
                 null
             }
             HttpStatusCode.Unauthorized -> {
-                log.error("Could not get sykmeldinger: Unable to authorize")
+                log.error("Could not get sykmeldinger from syfosmregister: Unable to authorize")
                 null
             }
             else -> {
-                log.error("Could not get sykmeldinger: $response")
+                log.error("Could not get sykmeldinger from syfosmregister: $response")
                 null
             }
         }
