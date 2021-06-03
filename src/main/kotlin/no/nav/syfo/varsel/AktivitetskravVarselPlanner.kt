@@ -2,6 +2,7 @@ package no.nav.syfo.varsel
 
 import io.ktor.util.*
 import kotlinx.coroutines.coroutineScope
+import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.domain.*
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PlanlagtVarsel
@@ -14,7 +15,7 @@ import org.slf4j.LoggerFactory
 import java.time.temporal.ChronoUnit
 import kotlin.streams.toList
 
-class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val sykmeldingService: SykmeldingService) : VarselPlanner {
+class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val sykmeldingService: SykmeldingService, val pdlConsumer: PdlConsumer) : VarselPlanner {
 
     private val AKTIVITETSKRAV_DAGER: Long = 42;
     private val SYKEFORLOP_MIN_DIFF_DAGER: Long = 16;
@@ -25,7 +26,8 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
     @KtorExperimentalAPI
     override suspend fun processOppfolgingstilfelle(oppfolgingstilfellePerson: OppfolgingstilfellePerson) = coroutineScope {
         //TODO: implement pdl getFnrForAktorId
-        val arbeidstakerFnr = "07088621268"
+//        val arbeidstakerFnr = "07088621268"
+        val arbeidstakerFnr = pdlConsumer.getFnr(oppfolgingstilfellePerson.aktorId)
 
         val sisteSyketilfelledagObject = oppfolgingstilfellePerson.tidslinje.last()
 
@@ -62,7 +64,7 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
                     varselUtil.isVarselDatoEtterTilfelleSlutt(aktivitetskravVarselDato, forlopSluttDato) -> {
                         log.info("[AKTIVITETSKRAV_VARSEL]: Tilfelle er kortere enn 6 uker")
                     }
-                    sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, arbeidstakerFnr) -> {
+                    sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, arbeidstakerFnr!!) -> {
                         log.info("[AKTIVITETSKRAV_VARSEL]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato")
                     }
                     varselUtil.isVarselPlanlagt(arbeidstakerFnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {

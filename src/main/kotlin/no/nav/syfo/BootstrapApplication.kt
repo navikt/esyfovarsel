@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.StsConsumer
+import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.consumer.SykmeldingerConsumer
 import no.nav.syfo.db.*
@@ -92,10 +93,11 @@ fun Application.kafkaModule() {
         val oppfolgingstilfelleConsumer = SyfosyketilfelleConsumer(env, stsConsumer)
 
         val sykmeldingerConsumer = SykmeldingerConsumer(env, stsConsumer)
+        val pdlConsumer = PdlConsumer(env, stsConsumer)
         val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
 
         val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, oppfolgingstilfelleConsumer)
-            .addPlanner(AktivitetskravVarselPlanner(database, sykmeldingService))
+            .addPlanner(AktivitetskravVarselPlanner(database, sykmeldingService, pdlConsumer))
 
         launch(backgroundTasksContext) {
             launchKafkaListener(
