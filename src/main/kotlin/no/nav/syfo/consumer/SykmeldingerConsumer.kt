@@ -55,6 +55,7 @@ class SykmeldingerConsumer(env: Environment, stsConsumer: StsConsumer)  {
 
         return when (response.status) {
             HttpStatusCode.OK -> {
+                log.info("[AKTIVITETSKRAV_VARSEL]: SyfosmregisterResponse, response: [$response]")
                 response.receive<List<SyfosmregisterResponse>>()
             }
             HttpStatusCode.NoContent -> {

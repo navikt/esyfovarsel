@@ -25,8 +25,7 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
 
     @KtorExperimentalAPI
     override suspend fun processOppfolgingstilfelle(oppfolgingstilfellePerson: OppfolgingstilfellePerson) = coroutineScope {
-        //TODO: implement pdl getFnrForAktorId
-//        val arbeidstakerFnr = "07088621268"
+
         val arbeidstakerFnr = pdlConsumer.getFnr(oppfolgingstilfellePerson.aktorId)
 
         val sisteSyketilfelledagObject = oppfolgingstilfellePerson.tidslinje.last()
@@ -49,6 +48,8 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
             val sykeforlopOptional = sykeforloper.stream()
                 .filter { isSyketilfelledagInnenSykeforlop(gjeldendeSykmeldingtilfelle, it) }
                 .findAny()
+
+            log.info("[AKTIVITETSKRAV_VARSEL]: isSyketilfelledagInnenSykeforlop:  $sykeforlopOptional")
 
             if (sykeforlopOptional.isPresent) {
                 val sykeforlop = sykeforlopOptional.get()
@@ -81,7 +82,7 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
                     }
                 }
             } else {
-                log.info("[AKTIVITETSKRAV_VARSEL]: Tifellestart eller tilfelleslutt  dato er tom")
+                log.info("[AKTIVITETSKRAV_VARSEL]: Kunne ikke lage sykeforlop")
             }
         }
     }
@@ -101,10 +102,11 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
             val biter = syketilfelledager.filter { it.prioritertSyketilfellebit?.ressursId == id }
                 .map { i -> i.prioritertSyketilfellebit }
 
-            sykmeldingtilfeller = biter.stream().map { it1 ->
-                Sykmeldingtilfelle(id!!, it1!!.fom.toLocalDate(), it1.tom.toLocalDate())
+            sykmeldingtilfeller = biter.stream().map { bit ->
+                Sykmeldingtilfelle(id!!, bit!!.fom.toLocalDate(), bit.tom.toLocalDate())
             }.toList().toMutableList()
         }
+        log.info("[AKTIVITETSKRAV_VARSEL]: Laget sykmeldingtilfeller:  $sykmeldingtilfeller")
         return sykmeldingtilfeller
     }
 
@@ -126,6 +128,7 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
             prevTilf = currTilf
         }
         sykeforloper.add(sykeforlop)
+        log.info("[AKTIVITETSKRAV_VARSEL]: Laget sykeforloper:  $sykeforloper")
         return sykeforloper
     }
 

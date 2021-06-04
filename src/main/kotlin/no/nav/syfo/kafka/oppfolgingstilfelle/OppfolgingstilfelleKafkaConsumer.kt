@@ -48,6 +48,8 @@ class OppfolgingstilfelleKafkaConsumer(env: Environment, syfosyketilfelleConsume
                     val peker: KOppfolgingstilfellePeker = objectMapper.readValue(it.value())
                     val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle(peker.aktorId)
 
+                    log.info("[AKTIVITETSKRAV_VARSEL]: Response from syfosyketilfelleConsumer, oppfolgingstilfelle: [$oppfolgingstilfelle]")
+
                     oppfolgingstilfelle?.let {
                         varselPlanners.forEach { planner -> runBlocking { planner.processOppfolgingstilfelle(oppfolgingstilfelle) } }
                     }
