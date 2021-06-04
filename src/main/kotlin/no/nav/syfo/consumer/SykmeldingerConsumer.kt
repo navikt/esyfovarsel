@@ -52,7 +52,7 @@ class SykmeldingerConsumer(env: Environment, stsConsumer: StsConsumer)  {
                 append("fnr", fnr)
             }
         }
-
+        log.info("[AKTIVITETSKRAV_VARSEL]: SyfosmregisterResponse, response: [$response]")
         return when (response.status) {
             HttpStatusCode.OK -> {
                 log.info("[AKTIVITETSKRAV_VARSEL]: SyfosmregisterResponse, response: [$response]")
