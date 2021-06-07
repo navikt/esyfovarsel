@@ -5,7 +5,9 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.SykmeldingerConsumer
-import no.nav.syfo.consumer.domain.*
+import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
+import no.nav.syfo.consumer.domain.Syketilfellebit
+import no.nav.syfo.consumer.domain.Syketilfelledag
 import no.nav.syfo.consumer.syfosmregister.Gradert
 import no.nav.syfo.consumer.syfosmregister.SyfosmregisterResponse
 import no.nav.syfo.consumer.syfosmregister.SykmeldingPeriode
@@ -24,6 +26,7 @@ import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+val SYKEFORLOP_MIN_DIFF_DAGER: Long = 16L
 const val arbeidstakerFnr1 = "07088621268"
 const val arbeidstakerFnr2 = "23456789012"
 const val arbeidstakerAktorId1 = "1234567890123"
@@ -268,9 +271,29 @@ object AktivitetskravVarselPlannerSpek : Spek({
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore3)
 
             val syketilfellebit1 =
-                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("SYKMELDING", "SENDT"), "3", LocalDateTime.now().minusDays(4), LocalDateTime.now())
+                Syketilfellebit(
+                    "1",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("SYKMELDING", "SENDT"),
+                    "3",
+                    LocalDate.of(2021, 8, 31).atStartOfDay(),
+                    LocalDate.of(2021, 10, 31).atStartOfDay()
+                )
             val syketilfellebit2 =
-                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("ANNET_FRAVAR", "UTDANNING"), "3", LocalDateTime.now(), LocalDateTime.now())
+                Syketilfellebit(
+                    "1",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("ANNET_FRAVAR", "UTDANNING"),
+                    "3",
+                    LocalDate.of(2021, 9, 1).atStartOfDay(),
+                    LocalDate.of(2021, 10, 10).atStartOfDay()
+                )
             //Ny sykmelding, samme forlop
             val syketilfellebit3 =
                 Syketilfellebit(
@@ -279,10 +302,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf("PAPIRSYKMELDING", "BEKREFTET", "SENDT"),
-                    "5",
-                    LocalDateTime.now().plusDays(15),
-                    LocalDateTime.now().plusDays(100)
+                    listOf("SYKMELDING", "SENDT"),
+                    "4",
+                    LocalDate.of(2021, 9, 1).atStartOfDay(),
+                    LocalDate.of(2021, 10, 14).atStartOfDay()
                 )
 
             val syketilfelledag1 = Syketilfelledag(LocalDate.now().minusDays(4), syketilfellebit1)
@@ -307,16 +330,36 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
         it("AktivitetskravVarsler blir lagret i database ved nytt sykeforløp selv om det er allerede en varsel i DB som ikke er sendt ut") {
             //Gammelt varsel
-            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, VarselType.AKTIVITETSKRAV, LocalDate.now().plusDays(AKTIVITETSKRAV_DAGER))
+            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, VarselType.AKTIVITETSKRAV, LocalDate.now().plusDays(2))
 
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)//Gammel usendt AKTIVITETSKRAV
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
-            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore3)
 
             val syketilfellebit1 =
-                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("SYKMELDING", "SENDT"), "3", LocalDateTime.now().minusDays(4), LocalDateTime.now())
+                Syketilfellebit(
+                    "1",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("SYKMELDING", "SENDT"),
+                    "3",
+                    LocalDate.of(2021, 8, 31).atStartOfDay(),
+                    LocalDate.of(2021, 10, 31).atStartOfDay()
+                )
             val syketilfellebit2 =
-                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("ANNET_FRAVAR", "UTDANNING"), "3", LocalDateTime.now(), LocalDateTime.now())
+                Syketilfellebit(
+                    "1",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("ANNET_FRAVAR", "UTDANNING"),
+                    "3",
+                    LocalDate.of(2021, 9, 1).atStartOfDay(),
+                    LocalDate.of(2021, 10, 10).atStartOfDay()
+                )
+            //Ny sykmelding, nytt forlop
             val syketilfellebit3 =
                 Syketilfellebit(
                     "1",
@@ -324,29 +367,16 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf("PAPIRSYKMELDING", "BEKREFTET", "SENDT"),
-                    "3",
-                    LocalDateTime.now().plusDays(5),
-                    LocalDateTime.now().plusDays(50)
-                )
-            // Ny sykmelding, nytt forlop
-            val syketilfellebit4 =
-                Syketilfellebit(
-                    "1",
-                    arbeidstakerAktorId1,
-                    "2",
-                    LocalDateTime.now(),
-                    LocalDateTime.now(),
-                    listOf("PAPIRSYKMELDING", "BEKREFTET", "SENDT"),
-                    "5",
-                    LocalDateTime.now().plusDays(70),
-                    LocalDateTime.now().plusDays(140)
+                    listOf("SYKMELDING", "SENDT"),
+                    "4",
+                    LocalDate.of(2021, 10, 31).plusDays(SYKEFORLOP_MIN_DIFF_DAGER).plusDays(1).atStartOfDay(),
+                    LocalDate.of(2021, 10, 31).plusDays(SYKEFORLOP_MIN_DIFF_DAGER).plusDays(2).plusDays(AKTIVITETSKRAV_DAGER).atStartOfDay()
                 )
 
-            val syketilfelledag1 = Syketilfelledag(LocalDate.now().minusDays(4), syketilfellebit1)
-            val syketilfelledag2 = Syketilfelledag(LocalDate.now().minusDays(2), syketilfellebit2)
-            val syketilfelledag3 = Syketilfelledag(LocalDate.now().plusDays(50), syketilfellebit3)
-            val syketilfelledag4 = Syketilfelledag(LocalDate.now().plusDays(140), syketilfellebit4)
+
+            val syketilfelledag1 = Syketilfelledag(LocalDate.of(2021, 8, 31), syketilfellebit1)
+            val syketilfelledag2 = Syketilfelledag(LocalDate.of(2021, 9, 1), syketilfellebit2)
+            val syketilfelledag3 = Syketilfelledag(LocalDate.of(2021, 10, 31), syketilfellebit3)
 
             val sykmelding = SyfosmregisterResponse("1", listOf(SykmeldingPeriode("", "", Gradert(100))), SykmeldingStatus())
 
@@ -354,7 +384,8 @@ object AktivitetskravVarselPlannerSpek : Spek({
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns listOf(sykmelding)
 
             val oppfolgingstilfellePerson =
-                OppfolgingstilfellePerson(arbeidstakerFnr1, listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3, syketilfelledag4), syketilfelledag1, 0, false, LocalDateTime.now())
+                OppfolgingstilfellePerson(arbeidstakerFnr1, listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3), syketilfelledag1, 0, false, LocalDateTime.now())
+
             runBlocking { aktivitetskravVarselPlanner.processOppfolgingstilfelle(oppfolgingstilfellePerson) }
 
             val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
@@ -363,9 +394,16 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             val aktivitetskravVarsler = lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name }
 
+            val gammeltVarsel = planlagtVarselToStore1.utsendingsdato
+            val nyttVarsel = LocalDate.of(2021, 10, 31).plusDays(SYKEFORLOP_MIN_DIFF_DAGER).plusDays(1).plusDays(AKTIVITETSKRAV_DAGER)
+
             aktivitetskravVarsler.size shouldEqual 2
-            aktivitetskravVarsler.filter { it.utsendingsdato == LocalDate.now().plusDays(AKTIVITETSKRAV_DAGER) }.size shouldEqual 1
-            aktivitetskravVarsler.filter { it.utsendingsdato == LocalDate.now().plusDays(70).plusDays(AKTIVITETSKRAV_DAGER) }.size shouldEqual 1
+            aktivitetskravVarsler.filter { it.utsendingsdato.equals(gammeltVarsel) }.toList().size shouldEqual 1
+            aktivitetskravVarsler.filter { it.utsendingsdato.equals(nyttVarsel) }.toList().size shouldEqual 1
+        }
+        //TODO: Må implementere id for lagret varsel)som kobler sammen feks sykmelding id(s) og varsel id + sletting query
+        it("AktivitetskravVarsler blir slettet fra database ved nytt sykeforløp hvis sluttdato i ny sykmelding er før sykeforløpets startdato"){
+
         }
     }
 })

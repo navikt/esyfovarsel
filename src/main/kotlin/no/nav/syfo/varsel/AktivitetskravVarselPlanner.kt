@@ -49,6 +49,7 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
                 .filter { isSyketilfelledagInnenSykeforlop(gjeldendeSykmeldingtilfelle, it) }
                 .findAny()
 
+            log.info("[AKTIVITETSKRAV_VARSEL]: gjeldendeSykmeldingtilfelle:  $gjeldendeSykmeldingtilfelle")
             log.info("[AKTIVITETSKRAV_VARSEL]: isSyketilfelledagInnenSykeforlop:  $sykeforlopOptional")
 
             if (sykeforlopOptional.isPresent) {
@@ -57,6 +58,11 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
                 val forlopSluttDato = sykeforlop.tom
 
                 val aktivitetskravVarselDato = forlopStartDato.plusDays(AKTIVITETSKRAV_DAGER)
+
+                val forlopetsLengde = ChronoUnit.DAYS.between(forlopStartDato, forlopSluttDato)
+                log.info("[AKTIVITETSKRAV_VARSEL]: forlopStartDato:  $forlopStartDato")
+                log.info("[AKTIVITETSKRAV_VARSEL]: forlopetsLengde:  $forlopetsLengde")
+                log.info("[AKTIVITETSKRAV_VARSEL]: aktivitetskravVarselDato:  $aktivitetskravVarselDato")
 
                 when {
                     varselUtil.isVarselDatoForIDag(aktivitetskravVarselDato) -> {
@@ -94,7 +100,7 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
     }
 
     private fun groupByRessursId(syketilfelledager: List<Syketilfelledag>): List<Sykmeldingtilfelle> {
-        var sykmeldingtilfeller: MutableList<Sykmeldingtilfelle> = mutableListOf()
+        val sykmeldingtilfeller: MutableList<Sykmeldingtilfelle> = mutableListOf()
         val ressursIds: Set<String?> = syketilfelledager.map { i -> i.prioritertSyketilfellebit?.ressursId }.toSet()
 
         ressursIds.forEach {
@@ -102,8 +108,8 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
             val biter = syketilfelledager.filter { it.prioritertSyketilfellebit?.ressursId == id }
                 .map { i -> i.prioritertSyketilfellebit }
 
-            sykmeldingtilfeller = biter.stream().map { bit ->
-                Sykmeldingtilfelle(id!!, bit!!.fom.toLocalDate(), bit.tom.toLocalDate())
+            biter.stream().map { bit ->
+                sykmeldingtilfeller.add(Sykmeldingtilfelle(id!!, bit!!.fom.toLocalDate(), bit.tom.toLocalDate()))
             }.toList().toMutableList()
         }
         log.info("[AKTIVITETSKRAV_VARSEL]: Laget sykmeldingtilfeller:  $sykmeldingtilfeller")
@@ -133,6 +139,8 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
     }
 
     private fun isSyketilfelledagInnenSykeforlop(syketilfelledag: Syketilfelledag, sykeforlop: Sykeforlop): Boolean {
-        return syketilfelledag.dag.isAfter(sykeforlop.fom) && syketilfelledag.dag.isBefore(sykeforlop.fom) || syketilfelledag.dag.isEqual(sykeforlop.fom) || syketilfelledag.dag.isEqual(sykeforlop.tom)
+        return syketilfelledag.prioritertSyketilfellebit!!.fom.toLocalDate().isEqual(sykeforlop.fom)
+                || syketilfelledag.prioritertSyketilfellebit.tom.toLocalDate().isEqual(sykeforlop.tom)
+                || syketilfelledag.prioritertSyketilfellebit.fom.toLocalDate().isAfter(sykeforlop.fom) && syketilfelledag.prioritertSyketilfellebit.tom.toLocalDate().isBefore(sykeforlop.tom)
     }
 }
