@@ -329,6 +329,8 @@ object AktivitetskravVarselPlannerSpek : Spek({
         }
 
         it("AktivitetskravVarsler blir lagret i database ved nytt sykeforløp selv om det er allerede en varsel i DB som ikke er sendt ut") {
+//            val qw = LocalDate.of(2022, 1, 1).plusDays(SYKEFORLOP_MIN_DIFF_DAGER)
+//            val qw1 = qw.plusDays(AKTIVITETSKRAV_DAGER)
             //Gammelt varsel
             val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, VarselType.AKTIVITETSKRAV, LocalDate.now().plusDays(2))
 

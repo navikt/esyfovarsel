@@ -41,7 +41,7 @@ class SykmeldingerConsumer(env: Environment, stsConsumer: StsConsumer)  {
 
     suspend fun getSykmeldingerForVarslingDato(dato: LocalDate, fnr: String): List<SyfosmregisterResponse>? {
         val datoString = dato.toString()
-        val requestURL = "$basepath/api/v1/internal/sykmeldinger/?fom=/$datoString/?tom=/$datoString"//?include=SENDT/
+        val requestURL = "$basepath/api/v1/sykmelding/sykmeldinger/?fom=/$datoString/?tom=/$datoString"//?include=SENDT/
         log.info("[AKTIVITETSKRAV_VARSEL]: Syfosmregister requestURL: [$requestURL]")
         val stsToken = stsConsumer.getToken()
         val bearerTokenString = "Bearer ${stsToken.access_token}"
