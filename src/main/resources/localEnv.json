@@ -9,6 +9,7 @@
   "stsUrl": "http://localhost:9092",
   "syfosyketilfelleUrl": "http://localhost:9090",
   "pdlUrl": "http://localhost:9091",
+  "dkifUrl": "http://localhost:9093",
   "serviceuserUsername": "srvesyfovarsel",
   "serviceuserPassword": "password"
 }
