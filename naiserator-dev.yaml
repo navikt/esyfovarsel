@@ -39,6 +39,8 @@ spec:
     paths:
       - kvPath: "/serviceuser/data/dev/srvesyfovarsel"
         mountPath: "/var/run/secrets/serviceuser"
+      - kvPath: "/kv/preprod/fss/srvesyfovarsel/team-esyfo"
+        mountPath: "/var/run/secrets/nais.io/vault"
   azure:
     application:
       enabled: true
@@ -64,3 +66,7 @@ spec:
       value: https://pdl-api.nais.preprod.local/graphql
     - name: SYFOSMREGISTER_URL
       value: https://syfosmregister.nais.preprod.local
+    - name: AAD_ACCESSTOKEN_URL
+      value: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/token
+    - name: CLIENT_ID
+      value: 59c5717d-0021-4ab1-8467-4bb036e0af66

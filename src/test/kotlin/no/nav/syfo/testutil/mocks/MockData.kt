@@ -3,10 +3,7 @@ package no.nav.syfo.testutil.mocks
 import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
 import no.nav.syfo.consumer.domain.Syketilfellebit
 import no.nav.syfo.consumer.domain.Syketilfelledag
-import no.nav.syfo.consumer.syfosmregister.Gradert
-import no.nav.syfo.consumer.syfosmregister.SyfosmregisterResponse
-import no.nav.syfo.consumer.syfosmregister.SykmeldingPeriode
-import no.nav.syfo.consumer.syfosmregister.SykmeldingStatus
+import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import java.time.LocalDate
 
@@ -48,11 +45,12 @@ val oppfolgingstilfelleResponse = OppfolgingstilfellePerson(
     utsendelsestidspunkt = fomStartOfDay
 )
 
-val syfosmregisterResponse = listOf(
-    SyfosmregisterResponse(
-        id = "1",
-        sykmeldingsperioder = listOf(SykmeldingPeriode("", "", Gradert(100))),
-        sykmeldingStatus = SykmeldingStatus()
+val sykmeldtStatusResponse = listOf(
+    SykmeldtStatusResponse(
+        erSykmeldt = true,
+        gradert = false,
+        fom = LocalDate.now(),
+        tom = LocalDate.now()
     )
 )
 

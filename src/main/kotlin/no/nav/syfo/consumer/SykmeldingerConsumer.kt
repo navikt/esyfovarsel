@@ -12,16 +12,19 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.util.*
 import no.nav.syfo.Environment
+import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.auth.StsConsumer
-import no.nav.syfo.consumer.syfosmregister.SyfosmregisterResponse
+import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusRequest
+import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 @KtorExperimentalAPI
-class SykmeldingerConsumer(env: Environment, stsConsumer: StsConsumer)  {
+class SykmeldingerConsumer(env: Environment, stsConsumer: StsConsumer, azureAdTokenConsumer: AzureAdTokenConsumer) {
 
     private val client: HttpClient
     private val stsConsumer: StsConsumer
+    private val azureAdTokenConsumer: AzureAdTokenConsumer
     private val basepath: String
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.SyfosyketilfelleConsumer")
 
@@ -36,32 +39,31 @@ class SykmeldingerConsumer(env: Environment, stsConsumer: StsConsumer)  {
             }
         }
         this.stsConsumer = stsConsumer
+        this.azureAdTokenConsumer = azureAdTokenConsumer
         basepath = env.syfosmregisterUrl
     }
 
-    suspend fun getSykmeldingerForVarslingDato(dato: LocalDate, fnr: String): List<SyfosmregisterResponse>? {
-        val datoString = dato.toString()
-        val requestURL = "$basepath/api/v1/sykmelding/sykmeldinger/?fom=/$datoString/?tom=/$datoString"//?include=SENDT/
-        log.info("[AKTIVITETSKRAV_VARSEL]: Syfosmregister requestURL: [$requestURL]")
-        val stsToken = stsConsumer.getToken()
-        val bearerTokenString = "Bearer ${stsToken.access_token}"
+    suspend fun getSykmeldingerForVarslingDato(dato: LocalDate, fnr: String): SykmeldtStatusResponse? {
+        val requestURL = "$basepath/api/v1/docs/index.html#/default/sykmeldtStatus"
+        val requestBody = SykmeldtStatusRequest(fnr, dato)
+        val accessToken = azureAdTokenConsumer.hentAccessToken(fnr)
 
-        val response = client.get<HttpResponse>(requestURL) {
+        log.info("[AKTIVITETSKRAV_VARSEL]: Syfosmregister requestURL: [$requestURL]")
+
+        val response = client.post<HttpResponse>(requestURL) {
             headers {
-                append(HttpHeaders.Authorization, bearerTokenString)
-                append(HttpHeaders.Accept, "application/json")
-                append("fnr", fnr)
+                append(HttpHeaders.Authorization, accessToken)
+                append(HttpHeaders.Accept, ContentType.Application.Json)
+                append(HttpHeaders.ContentType, ContentType.Application.Json)
             }
+            body = requestBody
         }
+
         log.info("[AKTIVITETSKRAV_VARSEL]: SyfosmregisterResponse, response: [$response]")
         return when (response.status) {
             HttpStatusCode.OK -> {
                 log.info("[AKTIVITETSKRAV_VARSEL]: SyfosmregisterResponse, response: [$response]")
-                response.receive<List<SyfosmregisterResponse>>()
-            }
-            HttpStatusCode.NoContent -> {
-                log.error("Could not get sykmeldinger from syfosmregister: No content found in the response body")
-                null
+                response.receive<SykmeldtStatusResponse>()
             }
             HttpStatusCode.Unauthorized -> {
                 log.error("Could not get sykmeldinger from syfosmregister: Unable to authorize")

@@ -11,5 +11,8 @@
   "pdlUrl": "http://localhost:9091",
   "serviceuserUsername": "srvesyfovarsel",
   "serviceuserPassword": "password",
-  "syfosmregisterUrl": "http://localhost:9393"
+  "syfosmregisterUrl": "http://localhost:9394",
+  "aadAccessTokenUrl": "http://localhost:9595",
+  "clientId": "clientId",
+  "clientSecret": "clientSecret"
 }

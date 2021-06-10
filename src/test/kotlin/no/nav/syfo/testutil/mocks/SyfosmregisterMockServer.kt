@@ -30,9 +30,9 @@ class SyfosmregisterMockServer(env: Environment) {
                 }
             }
             routing {
-                get("/api/v2/sykmeldinger/?include=SENDT/?fom=/{datoString}/?tom=/{datoString}") {
+                post("/api/v1/docs/index.html#/default/sykmeldtStatus") {
                     call.respond(
-                        syfosmregisterResponse
+                        sykmeldtStatusResponse
                     )
                 }
             }

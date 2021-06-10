@@ -11,6 +11,7 @@ import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 import no.nav.syfo.api.registerNaisApi
+import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
@@ -90,9 +91,10 @@ fun Application.kafkaModule() {
 
     runningRemotely {
         val stsConsumer = StsConsumer(env)
+        val azureAdTokenConsumer = AzureAdTokenConsumer(env)
         val oppfolgingstilfelleConsumer = SyfosyketilfelleConsumer(env, stsConsumer)
 
-        val sykmeldingerConsumer = SykmeldingerConsumer(env, stsConsumer)
+        val sykmeldingerConsumer = SykmeldingerConsumer(env, stsConsumer, azureAdTokenConsumer)
         val pdlConsumer = PdlConsumer(env, stsConsumer)
         val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
 
