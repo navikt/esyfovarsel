@@ -66,5 +66,5 @@ spec:
       value: https://syfosmregister.nais.adeo.no
     - name: AAD_ACCESSTOKEN_URL
       value: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/token
-    - name: CLIENT_ID
+    - name: AZURE_APP_CLIENT_ID
       value: f866cd77-d99c-4bf3-ac5a-992d28e9aaeb

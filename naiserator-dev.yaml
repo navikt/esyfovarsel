@@ -66,5 +66,5 @@ spec:
       value: https://syfosmregister.nais.preprod.local
     - name: AAD_ACCESSTOKEN_URL
       value: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/token
-    - name: CLIENT_ID
+    - name: AZURE_APP_CLIENT_ID
       value: 59c5717d-0021-4ab1-8467-4bb036e0af66
