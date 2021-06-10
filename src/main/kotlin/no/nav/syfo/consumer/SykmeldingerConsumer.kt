@@ -52,7 +52,7 @@ class SykmeldingerConsumer(env: Environment, stsConsumer: StsConsumer, azureAdTo
 
         val response = client.post<HttpResponse>(requestURL) {
             headers {
-                append(HttpHeaders.Authorization, accessToken)
+                append(HttpHeaders.Authorization, accessToken!!)
                 append(HttpHeaders.Accept, ContentType.Application.Json)
                 append(HttpHeaders.ContentType, ContentType.Application.Json)
             }

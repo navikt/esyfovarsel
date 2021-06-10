@@ -17,6 +17,7 @@ import io.ktor.util.KtorExperimentalAPI
 import no.nav.syfo.Environment
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
+import no.nav.syfo.consumer.pdl.APPLICATION_JSON
 import org.slf4j.LoggerFactory
 
 @KtorExperimentalAPI
@@ -48,7 +49,7 @@ class SyfosyketilfelleConsumer(env: Environment, stsConsumer: StsConsumer) {
         val response = client.get<HttpResponse>(requestURL) {
             headers {
                 append(HttpHeaders.Authorization, bearerTokenString)
-                append(HttpHeaders.Accept, "application/json")
+                append(HttpHeaders.Accept, APPLICATION_JSON)
             }
         }
 

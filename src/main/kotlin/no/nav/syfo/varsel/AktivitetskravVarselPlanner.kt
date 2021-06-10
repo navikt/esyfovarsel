@@ -17,8 +17,8 @@ import kotlin.streams.toList
 
 class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val sykmeldingService: SykmeldingService, val pdlConsumer: PdlConsumer) : VarselPlanner {
 
-    private val AKTIVITETSKRAV_DAGER: Long = 42;
-    private val SYKEFORLOP_MIN_DIFF_DAGER: Long = 16;
+    private val AKTIVITETSKRAV_DAGER: Long = 42
+    private val SYKEFORLOP_MIN_DIFF_DAGER: Long = 16
 
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.AktivitetskravVarselPlanner")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
@@ -75,7 +75,7 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
                         log.info("[AKTIVITETSKRAV_VARSEL]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato")
                     }
                     varselUtil.isVarselPlanlagt(arbeidstakerFnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {
-                        log.info("[AKTIVITETSKRAV_VARSEL]: varlel er allerede planlagt")
+                        log.info("[AKTIVITETSKRAV_VARSEL]: varsel er allerede planlagt")
                     }
                     varselUtil.isVarselSendUt(arbeidstakerFnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {
                         log.info("[AKTIVITETSKRAV_VARSEL]: varlel var allerede sendt ut")
