@@ -8,6 +8,9 @@ const val localEnvironmentPropertiesPath = "./src/main/resources/localEnv.json"
 const val serviceuserMounthPath = "/var/run/secrets/serviceuser"
 val objectMapper = ObjectMapper().registerKotlinModule()
 
+fun testEnviornment() : Environment =
+    localEnvironment()
+
 fun testEnviornment(embeddedKafkaBrokerUrl: String) : Environment =
     localEnvironment()
     .copy(kafkaBootstrapServersUrl = embeddedKafkaBrokerUrl)
@@ -30,6 +33,7 @@ private fun remoteEnvironment() : Environment {
         getEnvVar("STS_URL"),
         getEnvVar("SYFOSYKETILFELLE_URL"),
         getEnvVar("PDL_URL"),
+        getEnvVar("DKIF_URL"),
         File("$serviceuserMounthPath/username").readText(),
         File("$serviceuserMounthPath/password").readText()
     )
@@ -50,6 +54,7 @@ data class Environment(
         val stsUrl: String,
         val syfosyketilfelleUrl: String,
         val pdlUrl: String,
+        val dkifUrl: String,
         val serviceuserUsername: String,
         val serviceuserPassword: String
 )
