@@ -29,14 +29,14 @@ private fun remoteEnvironment(): Environment {
         getEnvVar("DB_VAULT_MOUNT_PATH"),
         getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
         getEnvVar("STS_URL"),
-        getEnvVar("AAD_ACCESSTOKEN_URL"),
         getEnvVar("SYFOSYKETILFELLE_URL"),
         getEnvVar("PDL_URL"),
         File("$serviceuserMounthPath/username").readText(),
         File("$serviceuserMounthPath/password").readText(),
         getEnvVar("SYFOSMREGISTER_URL"),
-        getEnvVar("CLIENT_ID"),
-        File(vaultMounthPath).readText()
+        getEnvVar("AAD_ACCESSTOKEN_URL"),
+        getEnvVar("AZURE_APP_CLIENT_ID"),
+        getEnvVar("AZURE_APP_CLIENT_SECRET")
         )
 }
 
@@ -53,12 +53,12 @@ data class Environment(
     val dbVaultMountPath: String,
     val kafkaBootstrapServersUrl: String,
     val stsUrl: String,
-    val aadAccessTokenUrl: String,
     val syfosyketilfelleUrl: String,
     val pdlUrl: String,
     val serviceuserUsername: String,
     val serviceuserPassword: String,
     val syfosmregisterUrl: String,
+    val aadAccessTokenUrl: String,
     val clientId: String,
     val clientSecret: String
 )
