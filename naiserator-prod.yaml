@@ -39,7 +39,7 @@ spec:
     paths:
       - kvPath: "/serviceuser/data/prod/srvesyfovarsel"
         mountPath: "/var/run/secrets/serviceuser"
-      - kvPath: "/kv/prod/fss/srvesyfovarsel/team-esyfo"
+      - kvPath: "/kv/prod/fss/esyfovarsel/team-esyfo"
         mountPath: "/var/run/secrets/nais.io/vault"
   azure:
     application:
