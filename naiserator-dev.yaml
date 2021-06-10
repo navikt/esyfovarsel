@@ -39,8 +39,6 @@ spec:
     paths:
       - kvPath: "/serviceuser/data/dev/srvesyfovarsel"
         mountPath: "/var/run/secrets/serviceuser"
-      - kvPath: "/kv/preprod/fss/esyfovarsel/team-esyfo"
-        mountPath: "/var/run/secrets/nais.io/vault"
   azure:
     application:
       enabled: true
