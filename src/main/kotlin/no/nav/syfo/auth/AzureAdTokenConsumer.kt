@@ -67,7 +67,9 @@ class AzureAdTokenConsumer(env: Environment) {
 
     fun callAzureAd(resource: String): HttpResponse? {
         return runBlocking {
-            log.info("Henter nytt token fra Azure AD for ressurs {}", resource)
+            log.info("[AKTIVITETSKRAV_VARSEL]: Henter nytt token fra Azure AD for ressurs {}", resource)
+            log.info("[AKTIVITETSKRAV_VARSEL]: Henter nytt token fra Azure AD clientSecret {}", clientSecret)
+            log.info("[AKTIVITETSKRAV_VARSEL]: Henter nytt token fra Azure AD for clientId {}", clientId)
 
             val requestBody = AadRequest(clientId, resource, "client_credentials", clientSecret)
 
