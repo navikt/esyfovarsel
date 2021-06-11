@@ -71,10 +71,11 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
                     varselUtil.isVarselDatoEtterTilfelleSlutt(aktivitetskravVarselDato, forlopSluttDato) -> {
                         log.info("[AKTIVITETSKRAV_VARSEL]: Tilfelle er kortere enn 6 uker")
                     }
-                    sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, arbeidstakerFnr!!) -> {
-                        log.info("[AKTIVITETSKRAV_VARSEL]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato")
-                    }
-                    varselUtil.isVarselPlanlagt(arbeidstakerFnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {
+                    //TODO: uncomment when new AAD is implemented in team-sykmelding
+//                    sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, arbeidstakerFnr!!) -> {
+//                        log.info("[AKTIVITETSKRAV_VARSEL]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato")
+//                    }
+                    varselUtil.isVarselPlanlagt(arbeidstakerFnr!!, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {
                         log.info("[AKTIVITETSKRAV_VARSEL]: varsel er allerede planlagt")
                     }
                     varselUtil.isVarselSendUt(arbeidstakerFnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {
