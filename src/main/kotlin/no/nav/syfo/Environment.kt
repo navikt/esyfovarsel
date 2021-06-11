@@ -9,7 +9,10 @@ const val serviceuserMounthPath = "/var/run/secrets/serviceuser"
 const val vaultMounthPath = "/var/run/secrets/nais.io/vault"
 val objectMapper = ObjectMapper().registerKotlinModule()
 
-fun testEnviornment(embeddedKafkaBrokerUrl: String): Environment =
+fun testEnviornment() : Environment =
+    localEnvironment()
+
+fun testEnviornment(embeddedKafkaBrokerUrl: String) : Environment =
     localEnvironment()
         .copy(kafkaBootstrapServersUrl = embeddedKafkaBrokerUrl)
 
@@ -31,6 +34,7 @@ private fun remoteEnvironment(): Environment {
         getEnvVar("STS_URL"),
         getEnvVar("SYFOSYKETILFELLE_URL"),
         getEnvVar("PDL_URL"),
+        getEnvVar("DKIF_URL"),
         File("$serviceuserMounthPath/username").readText(),
         File("$serviceuserMounthPath/password").readText(),
         getEnvVar("SYFOSMREGISTER_URL"),
@@ -45,22 +49,23 @@ private fun localEnvironment(): Environment {
 }
 
 data class Environment(
-    val remote: Boolean,
-    val applicationPort: Int,
-    val applicationThreads: Int,
-    val databaseUrl: String,
-    val databaseName: String,
-    val dbVaultMountPath: String,
-    val kafkaBootstrapServersUrl: String,
-    val stsUrl: String,
-    val syfosyketilfelleUrl: String,
-    val pdlUrl: String,
-    val serviceuserUsername: String,
-    val serviceuserPassword: String,
-    val syfosmregisterUrl: String,
-    val aadAccessTokenUrl: String,
-    val clientId: String,
-    val clientSecret: String
+        val remote: Boolean,
+        val applicationPort: Int,
+        val applicationThreads: Int,
+        val databaseUrl: String,
+        val databaseName: String,
+        val dbVaultMountPath: String,
+        val kafkaBootstrapServersUrl: String,
+        val stsUrl: String,
+        val syfosyketilfelleUrl: String,
+        val pdlUrl: String,
+        val dkifUrl: String,
+        val serviceuserUsername: String,
+        val serviceuserPassword: String,
+        val syfosmregisterUrl: String,
+        val aadAccessTokenUrl: String,
+        val clientId: String,
+        val clientSecret: String
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =

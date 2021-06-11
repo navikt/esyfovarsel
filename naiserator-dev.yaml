@@ -62,6 +62,8 @@ spec:
       value: https://security-token-service.nais.preprod.local
     - name: PDL_URL
       value: https://pdl-api.nais.preprod.local/graphql
+    - name: DKIF_URL
+      value: https://dkif.dev.intern.nav.no
     - name: SYFOSMREGISTER_URL
       value: https://syfosmregister.nais.preprod.local
     - name: AAD_ACCESSTOKEN_URL
