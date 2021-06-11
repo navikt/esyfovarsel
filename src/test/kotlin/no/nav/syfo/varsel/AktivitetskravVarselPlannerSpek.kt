@@ -1,8 +1,10 @@
 package no.nav.syfo.varsel
 
+import io.ktor.util.*
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.syfo.consumer.DkifConsumer
 import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.SykmeldingerConsumer
 import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
@@ -30,6 +32,7 @@ const val arbeidstakerAktorId1 = "1234567890123"
 const val arbeidstakerAktorId2 = "2345678901234"
 
 
+@KtorExperimentalAPI
 object AktivitetskravVarselPlannerSpek : Spek({
     val AKTIVITETSKRAV_DAGER: Long = 42
 
@@ -39,8 +42,9 @@ object AktivitetskravVarselPlannerSpek : Spek({
     val embeddedDatabase by lazy { EmbeddedDatabase() }
     val sykmeldingerConsumer = mockk<SykmeldingerConsumer>()
     val pdlConsumer = mockk<PdlConsumer>()
+    val dkifConsumer = mockk<DkifConsumer>()
 
-    val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(embeddedDatabase, SykmeldingService(sykmeldingerConsumer), pdlConsumer)
+    val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(embeddedDatabase, SykmeldingService(sykmeldingerConsumer), pdlConsumer, dkifConsumer)
 
     describe("AktivitetskravVarselPlannerSpek") {
         val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, VarselType.MER_VEILEDNING)
@@ -55,6 +59,34 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
         afterGroup {
             embeddedDatabase.stop()
+        }
+
+        it("AktivitetskravVarsler blir ikke opprettet hvis bruker er reservert") {
+            val syketilfellebit1 =
+                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("ANNET_FRAVAR", "SENDT"), "3", LocalDateTime.now(), LocalDateTime.now())
+            val syketilfellebit2 =
+                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("ANNET_FRAVAR", "UTDANNING"), "3", LocalDateTime.now(), LocalDateTime.now())
+            val syketilfellebit3 =
+                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("ANNET_FRAVAR", "BEKREFTET"), "3", LocalDateTime.now(), LocalDateTime.now())
+
+            val syketilfelledag1 = Syketilfelledag(LocalDate.now().minusDays(4), syketilfellebit1)
+            val syketilfelledag2 = Syketilfelledag(LocalDate.now().minusDays(2), syketilfellebit2)
+            val syketilfelledag3 = Syketilfelledag(LocalDate.now().plusDays(100), syketilfellebit3)
+
+            coEvery { dkifConsumer.isBrukerReservert(any())?.kanVarsles } returns false
+
+            runBlocking {
+                val oppfolgingstilfellePerson =
+                    OppfolgingstilfellePerson(arbeidstakerFnr1, listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3), syketilfelledag1, 0, false, LocalDateTime.now())
+                aktivitetskravVarselPlanner.processOppfolgingstilfelle(oppfolgingstilfellePerson)
+
+                val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
+                val nrOfRowsFetchedTotal = lagreteVarsler.size
+
+                nrOfRowsFetchedTotal shouldEqual 0
+
+                lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name } shouldEqual listOf()
+            }
         }
 
         it("Kun sykmeldingtilfeller blir brukt for beregning av varslingdato, varsel skal ikke opprettes") {
@@ -75,6 +107,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val sykmeldtStatusResponse = SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
 
             coEvery { pdlConsumer.getFnr(any()) } returns arbeidstakerFnr1
+            coEvery { dkifConsumer.isBrukerReservert(any())?.kanVarsles } returns true
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns sykmeldtStatusResponse
 
             runBlocking {
@@ -109,6 +142,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val sykmeldtStatusResponse = SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
 
             coEvery { pdlConsumer.getFnr(any()) } returns arbeidstakerFnr1
+            coEvery { dkifConsumer.isBrukerReservert(any())?.kanVarsles } returns true
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns sykmeldtStatusResponse
 
             runBlocking {
@@ -143,6 +177,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val sykmeldtStatusResponse = SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
 
             coEvery { pdlConsumer.getFnr(any()) } returns arbeidstakerFnr1
+            coEvery { dkifConsumer.isBrukerReservert(any())?.kanVarsles } returns true
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns sykmeldtStatusResponse
 
             runBlocking {
@@ -177,6 +212,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val sykmeldtStatusResponse = SykmeldtStatusResponse(erSykmeldt = true, gradert = true, fom = LocalDate.now(), tom = LocalDate.now())
 
             coEvery { pdlConsumer.getFnr(any()) } returns arbeidstakerFnr1
+            coEvery { dkifConsumer.isBrukerReservert(any())?.kanVarsles } returns true
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns sykmeldtStatusResponse
 
             runBlocking {
@@ -214,6 +250,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val sykmeldtStatusResponse = SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
 
             coEvery { pdlConsumer.getFnr(any()) } returns arbeidstakerFnr1
+            coEvery { dkifConsumer.isBrukerReservert(any())?.kanVarsles } returns true
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns sykmeldtStatusResponse
 
             val oppfolgingstilfellePerson = OppfolgingstilfellePerson(arbeidstakerFnr1, listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3), syketilfelledag1, 0, false, LocalDateTime.now())
@@ -249,6 +286,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val sykmeldtStatusResponse = SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
 
             coEvery { pdlConsumer.getFnr(any()) } returns arbeidstakerFnr1
+            coEvery { dkifConsumer.isBrukerReservert(any())?.kanVarsles } returns true
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns sykmeldtStatusResponse
 
             val oppfolgingstilfellePerson = OppfolgingstilfellePerson(arbeidstakerFnr1, listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3), syketilfelledag1, 0, false, LocalDateTime.now())
@@ -312,6 +350,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val sykmeldtStatusResponse = SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
 
             coEvery { pdlConsumer.getFnr(any()) } returns arbeidstakerFnr1
+            coEvery { dkifConsumer.isBrukerReservert(any())?.kanVarsles } returns true
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns sykmeldtStatusResponse
 
             val oppfolgingstilfellePerson = OppfolgingstilfellePerson(arbeidstakerFnr1, listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3), syketilfelledag1, 0, false, LocalDateTime.now())
@@ -380,6 +419,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val sykmeldtStatusResponse = SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
 
             coEvery { pdlConsumer.getFnr(any()) } returns arbeidstakerFnr1
+            coEvery { dkifConsumer.isBrukerReservert(any())?.kanVarsles } returns true
             coEvery { sykmeldingerConsumer.getSykmeldingerForVarslingDato(any(), any()) } returns sykmeldtStatusResponse
 
             val oppfolgingstilfellePerson =

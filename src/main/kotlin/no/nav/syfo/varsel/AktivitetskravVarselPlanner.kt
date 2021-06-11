@@ -2,6 +2,7 @@ package no.nav.syfo.varsel
 
 import io.ktor.util.*
 import kotlinx.coroutines.coroutineScope
+import no.nav.syfo.consumer.DkifConsumer
 import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.domain.*
 import no.nav.syfo.db.DatabaseInterface
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory
 import java.time.temporal.ChronoUnit
 import kotlin.streams.toList
 
-class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val sykmeldingService: SykmeldingService, val pdlConsumer: PdlConsumer) : VarselPlanner {
+class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val sykmeldingService: SykmeldingService, val pdlConsumer: PdlConsumer, val dkifConsumer: DkifConsumer) : VarselPlanner {
 
     private val AKTIVITETSKRAV_DAGER: Long = 42
     private val SYKEFORLOP_MIN_DIFF_DAGER: Long = 16
@@ -25,6 +26,10 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
 
     @KtorExperimentalAPI
     override suspend fun processOppfolgingstilfelle(oppfolgingstilfellePerson: OppfolgingstilfellePerson) = coroutineScope {
+        if (dkifConsumer.isBrukerReservert(oppfolgingstilfellePerson.aktorId)?.kanVarsles == false) {
+            log.info("[AKTIVITETSKRAV_VARSEL]: Lager ikke aktivitetskrav varsel: bruker er reservert")
+            return@coroutineScope
+        }
 
         val arbeidstakerFnr = pdlConsumer.getFnr(oppfolgingstilfellePerson.aktorId)
 
