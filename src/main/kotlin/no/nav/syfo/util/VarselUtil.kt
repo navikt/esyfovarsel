@@ -14,18 +14,17 @@ class VarselUtil(private val databaseAccess: DatabaseInterface) {
         return tilfelleSluttDato.isEqual(varselDato) || varselDato.isAfter(tilfelleSluttDato)
     }
 
-    fun isVarselPlanlagt(fnr: String, varselType: VarselType, aktivitetskravVarselDato: LocalDate): Boolean {
+    fun isVarselPlanlagt(fnr: String, varselType: VarselType, varselDato: LocalDate): Boolean {
         return databaseAccess.fetchPlanlagtVarselByFnr(fnr)
             .filter { varselType.name == it.type }
-            .filter { it.utsendingsdato === aktivitetskravVarselDato }
+            .filter { it.utsendingsdato === varselDato }
             .any()
-
     }
 
-    fun isVarselSendUt(fnr: String, varselType: VarselType, aktivitetskravVarselDato: LocalDate): Boolean {
+    fun isVarselSendUt(fnr: String, varselType: VarselType, varselDato: LocalDate): Boolean {
         return databaseAccess.fetchPlanlagtVarselByFnr(fnr)
             .filter { varselType.name == it.type }
-            .filter { it.utsendingsdato === aktivitetskravVarselDato }
+            .filter { it.utsendingsdato === varselDato }
             .filter { it.utsendingsdato.isBefore(LocalDate.now()) || it.utsendingsdato == LocalDate.now() }
             .any()
     }
