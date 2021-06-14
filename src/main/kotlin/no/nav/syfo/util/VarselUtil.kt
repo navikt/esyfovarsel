@@ -5,7 +5,7 @@ import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
 import java.time.LocalDate
 
-class VarselUtil(val databaseAccess: DatabaseInterface) {
+class VarselUtil(private val databaseAccess: DatabaseInterface) {
     fun isVarselDatoForIDag(varselDato: LocalDate): Boolean {
         return varselDato.isBefore(LocalDate.now())
     }
