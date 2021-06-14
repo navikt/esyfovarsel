@@ -41,7 +41,7 @@ class AzureAdTokenConsumer(env: Environment) {
 
     suspend fun hentAccessToken(resource: String): String? {
         val omToMinutter = Instant.now().plusSeconds(120L)
-        val azureAdResponse: AadAccessToken? = azureAdTokenMap.get(resource)
+        val azureAdResponse: AadAccessToken? = azureAdTokenMap[resource]
 
         if (azureAdResponse == null || azureAdResponse.expires_on.isBefore(omToMinutter)) {
 
@@ -52,7 +52,7 @@ class AzureAdTokenConsumer(env: Environment) {
             return when (response?.status) {
                 HttpStatusCode.OK -> {
                     val aadAccessToken = response.receive<AadAccessToken>()
-                    azureAdTokenMap.put(resource, aadAccessToken)
+                    azureAdTokenMap[resource] = aadAccessToken
                     aadAccessToken.access_token
                 }
                 else -> {

@@ -13,6 +13,7 @@ import io.ktor.client.request.headers
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.util.*
 import no.nav.syfo.Environment
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.domain.DigitalKontaktinfo
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory
 import java.lang.RuntimeException
 import java.util.UUID.randomUUID
 
+@KtorExperimentalAPI
 class DkifConsumer(env: Environment, stsConsumer: StsConsumer) {
     private val client: HttpClient
     private val stsConsumer: StsConsumer
@@ -76,12 +78,12 @@ class DkifConsumer(env: Environment, stsConsumer: StsConsumer) {
     }
 
     companion object {
-        private val NAV_CONSUMER_ID_HEADER = "Nav-Consumer-Id"
-        private val NAV_CALL_ID_HEADER = "Nav-Call-Id"
-        private val ESYFOVARSEL_CONSUMER_ID = "srvesyfovarsel"
-        private val DKIF_IKKE_FUNNET_FEIL = "Ingen kontaktinformasjon er registrert på personen"
+        private const val NAV_CONSUMER_ID_HEADER = "Nav-Consumer-Id"
+        private const val NAV_CALL_ID_HEADER = "Nav-Call-Id"
+        private const val ESYFOVARSEL_CONSUMER_ID = "srvesyfovarsel"
+        private const val DKIF_IKKE_FUNNET_FEIL = "Ingen kontaktinformasjon er registrert på personen"
         private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.DkifConsumer")
-        val NAV_PERSONIDENTER_HEADER = "Nav-Personidenter"
+        const val NAV_PERSONIDENTER_HEADER = "Nav-Personidenter"
 
         private fun createCallId() : String {
             val randomUUID = randomUUID().toString()

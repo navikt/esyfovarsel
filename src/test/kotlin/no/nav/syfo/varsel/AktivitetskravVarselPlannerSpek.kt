@@ -10,7 +10,7 @@ import no.nav.syfo.consumer.SykmeldingerConsumer
 import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
 import no.nav.syfo.consumer.domain.Syketilfellebit
 import no.nav.syfo.consumer.domain.Syketilfelledag
-import no.nav.syfo.consumer.syfosmregister.*
+import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
@@ -437,8 +437,8 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val nyttVarsel = LocalDate.of(2021, 10, 31).plusDays(SYKEFORLOP_MIN_DIFF_DAGER).plusDays(1).plusDays(AKTIVITETSKRAV_DAGER)
 
             aktivitetskravVarsler.size shouldEqual 2
-            aktivitetskravVarsler.filter { it.utsendingsdato.equals(gammeltVarsel) }.toList().size shouldEqual 1
-            aktivitetskravVarsler.filter { it.utsendingsdato.equals(nyttVarsel) }.toList().size shouldEqual 1
+            aktivitetskravVarsler.filter { it.utsendingsdato == gammeltVarsel }.toList().size shouldEqual 1
+            aktivitetskravVarsler.filter { it.utsendingsdato == nyttVarsel }.toList().size shouldEqual 1
         }
         //TODO: Må implementere id for lagret varsel)som kobler sammen feks sykmelding id(s) og varsel id + sletting query
         it("AktivitetskravVarsler blir slettet fra database ved nytt sykeforløp hvis sluttdato i ny sykmelding er før sykeforløpets startdato") {

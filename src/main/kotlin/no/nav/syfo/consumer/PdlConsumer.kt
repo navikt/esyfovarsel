@@ -13,12 +13,14 @@ import io.ktor.client.request.post
 import io.ktor.client.request.headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.util.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.Environment
 import no.nav.syfo.consumer.pdl.*
 import org.slf4j.LoggerFactory
 
+@KtorExperimentalAPI
 class PdlConsumer(env: Environment, stsConsumer: StsConsumer) {
     private val client: HttpClient
     private val stsConsumer: StsConsumer

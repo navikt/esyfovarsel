@@ -6,7 +6,6 @@ import java.io.File
 
 const val localEnvironmentPropertiesPath = "./src/main/resources/localEnv.json"
 const val serviceuserMounthPath = "/var/run/secrets/serviceuser"
-const val vaultMounthPath = "/var/run/secrets/nais.io/vault"
 val objectMapper = ObjectMapper().registerKotlinModule()
 
 fun testEnviornment() : Environment =

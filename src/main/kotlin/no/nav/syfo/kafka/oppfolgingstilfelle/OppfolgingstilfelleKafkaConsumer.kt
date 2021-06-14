@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.ktor.util.*
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.time.Duration
 
+@KtorExperimentalAPI
 class OppfolgingstilfelleKafkaConsumer(env: Environment, syfosyketilfelleConsumer: SyfosyketilfelleConsumer) : KafkaListener {
 
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.OppfolgingstilfelleConsumer")

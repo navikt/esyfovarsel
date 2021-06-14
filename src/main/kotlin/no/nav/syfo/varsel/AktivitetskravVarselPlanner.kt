@@ -16,7 +16,8 @@ import org.slf4j.LoggerFactory
 import java.time.temporal.ChronoUnit
 import kotlin.streams.toList
 
-class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val sykmeldingService: SykmeldingService, val pdlConsumer: PdlConsumer, val dkifConsumer: DkifConsumer) : VarselPlanner {
+@KtorExperimentalAPI
+class AktivitetskravVarselPlanner(private val databaseAccess: DatabaseInterface, val sykmeldingService: SykmeldingService, private val pdlConsumer: PdlConsumer, private val dkifConsumer: DkifConsumer) : VarselPlanner {
 
     private val AKTIVITETSKRAV_DAGER: Long = 42
     private val SYKEFORLOP_MIN_DIFF_DAGER: Long = 16
@@ -24,7 +25,6 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.AktivitetskravVarselPlanner")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
 
-    @KtorExperimentalAPI
     override suspend fun processOppfolgingstilfelle(oppfolgingstilfellePerson: OppfolgingstilfellePerson) = coroutineScope {
         if (dkifConsumer.isBrukerReservert(oppfolgingstilfellePerson.aktorId)?.kanVarsles == false) {
             log.info("[AKTIVITETSKRAV_VARSEL]: Lager ikke aktivitetskrav varsel: bruker er reservert")
@@ -109,7 +109,7 @@ class AktivitetskravVarselPlanner(val databaseAccess: DatabaseInterface, val syk
         val sykmeldingtilfeller: MutableList<Sykmeldingtilfelle> = mutableListOf()
         val ressursIds: Set<String?> = syketilfelledager.map { i -> i.prioritertSyketilfellebit?.ressursId }.toSet()
 
-        ressursIds.forEach {
+        ressursIds.forEach { it ->
             val id = it
             val biter = syketilfelledager.filter { it.prioritertSyketilfellebit?.ressursId == id }
                 .map { i -> i.prioritertSyketilfellebit }
