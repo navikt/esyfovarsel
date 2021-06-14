@@ -17,7 +17,12 @@ import java.time.temporal.ChronoUnit
 import kotlin.streams.toList
 
 @KtorExperimentalAPI
-class AktivitetskravVarselPlanner(private val databaseAccess: DatabaseInterface, val sykmeldingService: SykmeldingService, private val pdlConsumer: PdlConsumer, private val dkifConsumer: DkifConsumer) : VarselPlanner {
+class AktivitetskravVarselPlanner(
+    private val databaseAccess: DatabaseInterface,
+    val sykmeldingService: SykmeldingService,
+    private val pdlConsumer: PdlConsumer,
+    private val dkifConsumer: DkifConsumer
+) : VarselPlanner {
 
     private val AKTIVITETSKRAV_DAGER: Long = 42
     private val SYKEFORLOP_MIN_DIFF_DAGER: Long = 16
@@ -74,7 +79,7 @@ class AktivitetskravVarselPlanner(private val databaseAccess: DatabaseInterface,
                         log.info("[AKTIVITETSKRAV_VARSEL]: Beregnet dato for varsel er før i dag")
                     }
                     varselUtil.isVarselDatoEtterTilfelleSlutt(aktivitetskravVarselDato, forlopSluttDato) -> {
-                        log.info("[AKTIVITETSKRAV_VARSEL]: Tilfelle er kortere enn 6 uker")
+                        log.info("[AKTIVITETSKRAV_VARSEL]: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB")//TODO
                     }
                     //TODO: uncomment when new AAD is implemented in team-sykmelding
 //                    sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, arbeidstakerFnr!!) -> {
