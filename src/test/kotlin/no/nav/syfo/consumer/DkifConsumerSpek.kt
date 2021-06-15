@@ -20,8 +20,10 @@ const val aktorIdInvalid = "${aktorId}-with-invalid-input"
 object DkifConsumerSpek : Spek({
 
     val testEnv = testEnviornment()
-    val stsMockServer = StsMockServer(testEnv).mockServer()
-    val dkifMockServer = DkifMockServer(testEnv).mockServer()
+    val mockServers = MockServers(testEnv)
+    val stsMockServer = mockServers.mockStsServer()
+    val dkifMockServer = mockServers.mockDkifServer()
+
     val stsConsumer = StsConsumer(testEnv)
     val dkifConsumer = DkifConsumer(testEnv, stsConsumer)
 
@@ -37,31 +39,31 @@ object DkifConsumerSpek : Spek({
 
     describe("DkifConsumerSpek") {
         it("Call DKIF for non-reserved user") {
-            val dkifResponse = runBlocking { dkifConsumer.isBrukerReservert(aktorIdNonReservedUser) }
+            val dkifResponse = runBlocking { dkifConsumer.kontaktinfo(aktorIdNonReservedUser) }
             dkifResponse shouldNotBe null
             dkifResponse!!.kanVarsles shouldEqual true
         }
 
         it("Call DKIF for reserved user") {
-            val dkifResponse = runBlocking { dkifConsumer.isBrukerReservert(aktorIdReservedUser) }
+            val dkifResponse = runBlocking { dkifConsumer.kontaktinfo(aktorIdReservedUser) }
             dkifResponse shouldNotBe null
             dkifResponse!!.kanVarsles shouldEqual false
         }
 
         it("DKIF consumer should throw RuntimeException when call fails") {
             assertFailsWith(RuntimeException::class) {
-                runBlocking { dkifConsumer.isBrukerReservert(aktorIdUnsuccessfulCall) }
+                runBlocking { dkifConsumer.kontaktinfo(aktorIdUnsuccessfulCall) }
             }
         }
 
         it("DKIF consumer should throw RuntimeException when requesting data for unknown user") {
             assertFailsWith(RuntimeException::class) {
-                runBlocking { dkifConsumer.isBrukerReservert(aktorIdUnknownUser) }
+                runBlocking { dkifConsumer.kontaktinfo(aktorIdUnknownUser) }
             }
         }
 
         it("DKIF consumer should return null on invalid aktorid") {
-            val dkifResponse = runBlocking { dkifConsumer.isBrukerReservert(aktorIdInvalid) }
+            val dkifResponse = runBlocking { dkifConsumer.kontaktinfo(aktorIdInvalid) }
             dkifResponse shouldEqual null
         }
     }

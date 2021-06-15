@@ -11,10 +11,13 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.StsConsumer
+import no.nav.syfo.consumer.DkifConsumer
+import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.db.*
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.kafka.launchKafkaListener
+import no.nav.syfo.service.AccessControl
 import java.util.concurrent.Executors
 
 
@@ -84,8 +87,11 @@ fun Application.kafkaModule() {
 
     runningRemotely {
         val stsConsumer = StsConsumer(env)
+        val pdlConsumer = PdlConsumer(env, stsConsumer)
+        val dkifConsumer = DkifConsumer(env, stsConsumer)
         val oppfolgingstilfelleConsumer = SyfosyketilfelleConsumer(env, stsConsumer)
-        val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, oppfolgingstilfelleConsumer)
+        val accessControl = AccessControl(pdlConsumer, dkifConsumer)
+        val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, oppfolgingstilfelleConsumer, accessControl)
 
         launch(backgroundTasksContext) {
             launchKafkaListener(

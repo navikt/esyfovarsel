@@ -13,6 +13,7 @@ import io.ktor.client.request.headers
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.runBlocking
 import no.nav.syfo.Environment
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.domain.DigitalKontaktinfo
@@ -41,36 +42,38 @@ class DkifConsumer(env: Environment, stsConsumer: StsConsumer) {
         dkifBasepath = env.dkifUrl
     }
 
-    suspend fun isBrukerReservert(aktorId: String) : DigitalKontaktinfo? {
+    fun kontaktinfo(aktorId: String) : DigitalKontaktinfo? {
         val requestUrl = "$dkifBasepath/api/v1/personer/kontaktinformasjon"
-        val stsTokenString = "Bearer ${stsConsumer.getToken().access_token}"
-        val response: HttpResponse? = try {
-            client.get<HttpResponse>(requestUrl) {
-                headers {
-                    append(HttpHeaders.ContentType, APPLICATION_JSON)
-                    append(HttpHeaders.Authorization, stsTokenString)
-                    append(NAV_CONSUMER_ID_HEADER, ESYFOVARSEL_CONSUMER_ID)
-                    append(NAV_PERSONIDENTER_HEADER, aktorId)
-                    append(NAV_CALL_ID_HEADER, createCallId())
+        return runBlocking {
+            val stsTokenString = "Bearer ${stsConsumer.getToken().access_token}"
+            val response: HttpResponse? = try {
+                client.get<HttpResponse>(requestUrl) {
+                    headers {
+                        append(HttpHeaders.ContentType, APPLICATION_JSON)
+                        append(HttpHeaders.Authorization, stsTokenString)
+                        append(NAV_CONSUMER_ID_HEADER, ESYFOVARSEL_CONSUMER_ID)
+                        append(NAV_PERSONIDENTER_HEADER, aktorId)
+                        append(NAV_CALL_ID_HEADER, createCallId())
+                    }
                 }
+            } catch (e: Exception) {
+                log.error("Error while calling DKIF: ${e.message}")
+                null
             }
-        } catch (e: Exception) {
-            log.error("Error while calling DKIF: ${e.message}")
-            null
-        }
 
-        return when (response?.status) {
-            HttpStatusCode.OK -> {
-                val content = response.receive<DigitalKontaktinfoBolk>()
-                extractDataFromContent(content, aktorId)
-            }
-            HttpStatusCode.Unauthorized -> {
-                log.error("Could not get kontaktinfo from DKIF: Unable to authorize")
-                null
-            }
-            else -> {
-                log.error("Could not get kontaktinfo from DKIF: $response")
-                null
+            when (response?.status) {
+                HttpStatusCode.OK -> {
+                    val content = response.receive<DigitalKontaktinfoBolk>()
+                    extractDataFromContent(content, aktorId)
+                }
+                HttpStatusCode.Unauthorized -> {
+                    log.error("Could not get kontaktinfo from DKIF: Unable to authorize")
+                    null
+                }
+                else -> {
+                    log.error("Could not get kontaktinfo from DKIF: $response")
+                    null
+                }
             }
         }
     }
