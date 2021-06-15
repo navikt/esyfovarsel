@@ -6,7 +6,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.consumer.SykmeldingerConsumer
-import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
 import no.nav.syfo.consumer.domain.Syketilfellebit
 import no.nav.syfo.consumer.domain.Syketilfelledag
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse

@@ -1,5 +1,6 @@
-package no.nav.syfo.consumer.domain
+package no.nav.syfo.kafka.oppfolgingstilfelle.domain
 
+import no.nav.syfo.consumer.domain.Syketilfelledag
 import java.time.LocalDateTime
 
 data class OppfolgingstilfellePerson(
