@@ -1,5 +1,6 @@
 package no.nav.syfo.kafka
 
+import io.ktor.util.*
 import kotlinx.coroutines.runBlocking
 import no.nav.common.KafkaEnvironment
 import no.nav.syfo.ApplicationState
@@ -18,6 +19,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
+@KtorExperimentalAPI
 object KafkaConsumerSpek : Spek({
 
     defaultTimeout = 20000L
