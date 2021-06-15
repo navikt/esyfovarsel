@@ -18,6 +18,7 @@ import no.nav.syfo.db.*
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.kafka.launchKafkaListener
 import no.nav.syfo.service.AccessControl
+import no.nav.syfo.varsel.Varsel39Uker
 import java.util.concurrent.Executors
 
 
@@ -92,6 +93,7 @@ fun Application.kafkaModule() {
         val oppfolgingstilfelleConsumer = SyfosyketilfelleConsumer(env, stsConsumer)
         val accessControl = AccessControl(pdlConsumer, dkifConsumer)
         val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, oppfolgingstilfelleConsumer, accessControl)
+            .addPlanner(Varsel39Uker(database))
 
         launch(backgroundTasksContext) {
             launchKafkaListener(
