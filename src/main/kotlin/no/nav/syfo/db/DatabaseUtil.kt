@@ -9,7 +9,7 @@ fun <T> ResultSet.toList(mapper: ResultSet.() -> T) = mutableListOf<T>().apply {
     }
 }
 
-fun ResultSet.toPPlanlagtVarsel() : PPlanlagtVarsel =
+fun ResultSet.toPPlanlagtVarsel(): PPlanlagtVarsel =
     PPlanlagtVarsel(
         uuid = getString("uuid"),
         fnr = getString("fnr"),
@@ -19,3 +19,10 @@ fun ResultSet.toPPlanlagtVarsel() : PPlanlagtVarsel =
         opprettet = getTimestamp("opprettet").toLocalDateTime(),
         sistEndret = getTimestamp("sist_endret").toLocalDateTime()
     )
+
+fun ResultSet.toSykmeldingerIdMap(): Map<String, List<String>> =
+    hashMapOf(getString("varsling_id") to parseSykmeldingerIds(getString("sykmelding_id")))
+
+fun parseSykmeldingerIds(ids: String): List<String> {
+    return ids.split(",").map { it.trim() }
+}
