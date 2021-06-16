@@ -6,6 +6,7 @@ import no.nav.syfo.consumer.DkifConsumer
 import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.domain.*
 import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.deletePlanlagtVarselBySykmeldingerId
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
@@ -79,7 +80,8 @@ class AktivitetskravVarselPlanner(
                         log.info("[AKTIVITETSKRAV_VARSEL]: Beregnet dato for varsel er før i dag")
                     }
                     varselUtil.isVarselDatoEtterTilfelleSlutt(aktivitetskravVarselDato, forlopSluttDato) -> {
-                        log.info("[AKTIVITETSKRAV_VARSEL]: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB")//TODO
+                        log.info("[AKTIVITETSKRAV_VARSEL]: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB")
+                        databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
                     }
                     //TODO: uncomment when new AAD is implemented in team-sykmelding
 //                    sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, arbeidstakerFnr!!) -> {
@@ -93,7 +95,7 @@ class AktivitetskravVarselPlanner(
                     }
                     else -> {
                         log.info("[AKTIVITETSKRAV_VARSEL]: Lagrer varsel til database")
-                        val aktivitetskravVarsel = PlanlagtVarsel(arbeidstakerFnr, oppfolgingstilfellePerson.aktorId, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
+                        val aktivitetskravVarsel = PlanlagtVarsel(arbeidstakerFnr, oppfolgingstilfellePerson.aktorId, sykeforlop.ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
 
                         databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
                     }

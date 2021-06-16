@@ -2,11 +2,14 @@ package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.*
 
+private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.db.PlanlagtVarselDAO")
 
 fun DatabaseInterface.storePlanlagtVarsel(planlagtVarsel: PlanlagtVarsel) {
     val insertStatement1 = """INSERT INTO PLANLAGT_VARSEL (
@@ -42,7 +45,7 @@ fun DatabaseInterface.storePlanlagtVarsel(planlagtVarsel: PlanlagtVarsel) {
             for (sykmeldingId: String in planlagtVarsel.sykmeldingerId) {
                 it.setObject(1, UUID.randomUUID())
                 it.setString(2, sykmeldingId)
-                it.setString(3, varselUUID.toString())
+                it.setObject(3, varselUUID)
 
                 it.addBatch()
             }
@@ -67,7 +70,7 @@ fun DatabaseInterface.fetchPlanlagtVarselByFnr(fnr: String): List<PPlanlagtVarse
     }
 }
 
-fun DatabaseInterface.fetchSykmeldingerIdByPlanlagtVarselsUUID(uuid: String): List<Map<String, List<String>>> {
+fun DatabaseInterface.fetchSykmeldingerIdByPlanlagtVarselsUUID(uuid: String): List<List<String>> {
     val queryStatement = """SELECT *
                             FROM SYKMELDING_IDS
                             WHERE varsling_id = ?
@@ -75,21 +78,28 @@ fun DatabaseInterface.fetchSykmeldingerIdByPlanlagtVarselsUUID(uuid: String): Li
 
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
-            it.setString(1, uuid)
-            it.executeQuery().toList { toSykmeldingerIdMap() }
+            it.setObject(1, UUID.fromString(uuid))
+            it.executeQuery().toList { toVarslingIdsListe() }
         }
     }
 }
 
-fun DatabaseInterface.deletePlanlagtVarsel(uuid: String) {
+fun DatabaseInterface.fetchAllSykmeldingIdsAndCount(): List<Int> {
+    val queryStatement = """SELECT *
+                            FROM SYKMELDING_IDS
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.executeQuery().toList { toVarslingIdsListeCount() }
+        }
+    }
+}
+
+fun DatabaseInterface.deletePlanlagtVarselByVarselId(uuid: String) {
     val queryStatement1 = """DELETE
                             FROM PLANLAGT_VARSEL
                             WHERE uuid = ?
-    """.trimIndent()
-
-    val queryStatement2 = """DELETE
-                            FROM SYKMELDING_IDS
-                            WHERE varsling_id = ?
     """.trimIndent()
 
     connection.use { connection ->
@@ -98,11 +108,26 @@ fun DatabaseInterface.deletePlanlagtVarsel(uuid: String) {
             it.executeUpdate()
         }
 
-        connection.prepareStatement(queryStatement2).use {
-            it.setObject(1, uuid)
-            it.executeUpdate()
+        connection.commit()
+    }
+}
+
+fun DatabaseInterface.deletePlanlagtVarselBySykmeldingerId(sykmeldingerId: List<String>) {
+    val st1 = """DELETE
+        FROM PLANLAGT_VARSEL
+        WHERE uuid IN (SELECT varsling_id FROM SYKMELDING_IDS WHERE sykmelding_id = ? )
+    """.trimMargin()
+
+    connection.use { connection ->
+        connection.prepareStatement(st1).use {
+            for (sykmeldingId: String in sykmeldingerId) {
+                it.setString(1, sykmeldingId)
+                it.addBatch()
+            }
+            it.executeBatch()
         }
 
         connection.commit()
     }
+    log.info("Sletter tidligere planlagt varsel fra DB")
 }

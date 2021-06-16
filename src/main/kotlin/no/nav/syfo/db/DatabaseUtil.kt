@@ -1,7 +1,11 @@
 package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PPlanlagtVarsel
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.sql.ResultSet
+
+private val log: Logger = LoggerFactory.getLogger("package no.nav.syfo.db.DatabaseUtil")
 
 fun <T> ResultSet.toList(mapper: ResultSet.() -> T) = mutableListOf<T>().apply {
     while (next()) {
@@ -20,9 +24,27 @@ fun ResultSet.toPPlanlagtVarsel(): PPlanlagtVarsel =
         sistEndret = getTimestamp("sist_endret").toLocalDateTime()
     )
 
-fun ResultSet.toSykmeldingerIdMap(): Map<String, List<String>> =
-    hashMapOf(getString("varsling_id") to parseSykmeldingerIds(getString("sykmelding_id")))
+fun ResultSet.toVarslingIdsListe(): List<String> {
+    val rows = ArrayList<String>()
+    while (this.next()) {
+        rows.add(getString("sykmelding_id"))
+    }
+    return rows
+}
 
-fun parseSykmeldingerIds(ids: String): List<String> {
-    return ids.split(",").map { it.trim() }
+fun ResultSet.toVarslingIdsListeCount(): Int {
+    try {
+        this.last()
+        return this.row
+    } catch (e: Exception) {
+        log.debug("Could process reult setØ ${e.message}")
+    } finally {
+        try {
+            this.beforeFirst()
+        } catch (e: Exception) {
+            log.debug("Could process reult setØ ${e.message}")
+        }
+    }
+
+    return 0
 }
