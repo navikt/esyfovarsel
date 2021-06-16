@@ -39,12 +39,12 @@ class PdlConsumer(env: Environment, stsConsumer: StsConsumer) {
         pdlBasepath = env.pdlUrl
     }
 
-    suspend fun getFnr(aktorId: String) : String? {
+    fun getFnr(aktorId: String) : String? {
         val response = callPdl(IDENTER_QUERY, aktorId)
 
         return when (response?.status) {
             HttpStatusCode.OK -> {
-                response.receive<PdlIdentResponse>().data?.hentIdenter?.identer?.first()?.ident
+                runBlocking { response.receive<PdlIdentResponse>().data?.hentIdenter?.identer?.first()?.ident }
             }
             HttpStatusCode.NoContent -> {
                 log.error("Could not get fnr from PDL: No content found in the response body")
@@ -61,12 +61,12 @@ class PdlConsumer(env: Environment, stsConsumer: StsConsumer) {
         }
     }
 
-    suspend fun isBrukerGradert(aktorId: String) : Boolean? {
+    fun isBrukerGradert(aktorId: String) : Boolean? {
         val response = callPdl(PERSON_QUERY, aktorId)
 
         return when (response?.status) {
             HttpStatusCode.OK -> {
-                response.receive<PdlPersonResponse>().data?.isKode6Eller7()
+                runBlocking { response.receive<PdlPersonResponse>().data?.isKode6Eller7() }
             }
             HttpStatusCode.NoContent -> {
                 log.error("Could not get adressesperre from PDL: No content found in the response body")
