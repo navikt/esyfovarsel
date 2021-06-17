@@ -8,10 +8,10 @@ const val localEnvironmentPropertiesPath = "./src/main/resources/localEnv.json"
 const val serviceuserMounthPath = "/var/run/secrets/serviceuser"
 val objectMapper = ObjectMapper().registerKotlinModule()
 
-fun testEnviornment() : Environment =
+fun testEnviornment(): Environment =
     localEnvironment()
 
-fun testEnviornment(embeddedKafkaBrokerUrl: String) : Environment =
+fun testEnviornment(embeddedKafkaBrokerUrl: String): Environment =
     localEnvironment()
         .copy(kafkaBootstrapServersUrl = embeddedKafkaBrokerUrl)
 
@@ -37,10 +37,11 @@ private fun remoteEnvironment(): Environment {
         File("$serviceuserMounthPath/username").readText(),
         File("$serviceuserMounthPath/password").readText(),
         getEnvVar("SYFOSMREGISTER_URL"),
+        getEnvVar("SYFOSMREGISTER_SCOPE"),
         getEnvVar("AAD_ACCESSTOKEN_URL"),
         getEnvVar("AZURE_APP_CLIENT_ID"),
         getEnvVar("AZURE_APP_CLIENT_SECRET")
-        )
+    )
 }
 
 private fun localEnvironment(): Environment {
@@ -48,23 +49,24 @@ private fun localEnvironment(): Environment {
 }
 
 data class Environment(
-        val remote: Boolean,
-        val applicationPort: Int,
-        val applicationThreads: Int,
-        val databaseUrl: String,
-        val databaseName: String,
-        val dbVaultMountPath: String,
-        val kafkaBootstrapServersUrl: String,
-        val stsUrl: String,
-        val syfosyketilfelleUrl: String,
-        val pdlUrl: String,
-        val dkifUrl: String,
-        val serviceuserUsername: String,
-        val serviceuserPassword: String,
-        val syfosmregisterUrl: String,
-        val aadAccessTokenUrl: String,
-        val clientId: String,
-        val clientSecret: String
+    val remote: Boolean,
+    val applicationPort: Int,
+    val applicationThreads: Int,
+    val databaseUrl: String,
+    val databaseName: String,
+    val dbVaultMountPath: String,
+    val kafkaBootstrapServersUrl: String,
+    val stsUrl: String,
+    val syfosyketilfelleUrl: String,
+    val pdlUrl: String,
+    val dkifUrl: String,
+    val serviceuserUsername: String,
+    val serviceuserPassword: String,
+    val syfosmregisterUrl: String,
+    val syfosmregisterScope: String,
+    val aadAccessTokenUrl: String,
+    val clientId: String,
+    val clientSecret: String
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =

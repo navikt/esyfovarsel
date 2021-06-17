@@ -65,8 +65,8 @@ spec:
     - name: DKIF_URL
       value: https://dkif.dev.intern.nav.no
     - name: SYFOSMREGISTER_URL
-      value: https://syfosmregister.nais.preprod.local
+      value: http://syfosmregister.teamsykmelding
+    - name: SYFOSMREGISTER_SCOPE
+      value: api://dev-fss.teamsykmelding.syfosmregister/.default
     - name: AAD_ACCESSTOKEN_URL
       value: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/token
-    - name: AZURE_APP_CLIENT_ID
-      value: 59c5717d-0021-4ab1-8467-4bb036e0af66

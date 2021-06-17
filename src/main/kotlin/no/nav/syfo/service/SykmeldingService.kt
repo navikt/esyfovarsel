@@ -9,7 +9,7 @@ import java.time.LocalDate
 class SykmeldingService constructor(private val sykmeldingerConsumer: SykmeldingerConsumer) {
 
     suspend fun isNot100SykmeldtPaVarlingsdato(varselDato: LocalDate, fnr: String): Boolean {
-        val sykmeldtStatus: SykmeldtStatusResponse? = sykmeldingerConsumer.getSykmeldingerForVarslingDato(varselDato, fnr)
+        val sykmeldtStatus: SykmeldtStatusResponse? = sykmeldingerConsumer.getSykmeldtStatusPaDato(varselDato, fnr)
 
         return if (sykmeldtStatus?.gradert != null) {
             sykmeldtStatus.gradert

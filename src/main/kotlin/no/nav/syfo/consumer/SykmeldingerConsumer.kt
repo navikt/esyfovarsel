@@ -13,20 +13,19 @@ import io.ktor.http.*
 import io.ktor.util.*
 import no.nav.syfo.Environment
 import no.nav.syfo.auth.AzureAdTokenConsumer
-import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusRequest
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 @KtorExperimentalAPI
-class SykmeldingerConsumer(env: Environment, stsConsumer: StsConsumer, azureAdTokenConsumer: AzureAdTokenConsumer) {
+class SykmeldingerConsumer(env: Environment, azureAdTokenConsumer: AzureAdTokenConsumer) {
 
     private val client: HttpClient
-    private val stsConsumer: StsConsumer
     private val azureAdTokenConsumer: AzureAdTokenConsumer
     private val basepath: String
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.SyfosyketilfelleConsumer")
+    private val scope = env.syfosmregisterScope
 
     init {
         client = HttpClient(CIO) {
@@ -38,23 +37,22 @@ class SykmeldingerConsumer(env: Environment, stsConsumer: StsConsumer, azureAdTo
                 }
             }
         }
-        this.stsConsumer = stsConsumer
         this.azureAdTokenConsumer = azureAdTokenConsumer
         basepath = env.syfosmregisterUrl
     }
 
-    suspend fun getSykmeldingerForVarslingDato(dato: LocalDate, fnr: String): SykmeldtStatusResponse? {
-        val requestURL = "$basepath/api/v1/docs/index.html#/default/sykmeldtStatus"
+    suspend fun getSykmeldtStatusPaDato(dato: LocalDate, fnr: String): SykmeldtStatusResponse? {
+        val requestURL = "$basepath/api/v2/sykmelding/sykmeldtStatus"
         val requestBody = SykmeldtStatusRequest(fnr, dato)
-        val accessToken = azureAdTokenConsumer.hentAccessToken(fnr)
+        val token = azureAdTokenConsumer.getAzureAdAccessToken(scope)
 
         log.info("[AKTIVITETSKRAV_VARSEL]: Syfosmregister requestURL: [$requestURL]")
 
         val response = client.post<HttpResponse>(requestURL) {
             headers {
-                append(HttpHeaders.Authorization, accessToken!!)
                 append(HttpHeaders.Accept, ContentType.Application.Json)
                 append(HttpHeaders.ContentType, ContentType.Application.Json)
+                append(HttpHeaders.Authorization, "Bearer $token")
             }
             body = requestBody
         }

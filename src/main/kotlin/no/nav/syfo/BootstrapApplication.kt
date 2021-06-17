@@ -106,7 +106,7 @@ fun Application.kafkaModule() {
         val azureAdTokenConsumer = AzureAdTokenConsumer(env)
         val oppfolgingstilfelleConsumer = SyfosyketilfelleConsumer(env, stsConsumer)
 
-        val sykmeldingerConsumer = SykmeldingerConsumer(env, stsConsumer, azureAdTokenConsumer)
+        val sykmeldingerConsumer = SykmeldingerConsumer(env, azureAdTokenConsumer)
         val pdlConsumer = PdlConsumer(env, stsConsumer)
         val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
 
