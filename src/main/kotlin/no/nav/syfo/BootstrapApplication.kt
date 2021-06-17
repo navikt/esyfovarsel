@@ -22,12 +22,12 @@ import no.nav.syfo.db.LocalDatabase
 import no.nav.syfo.db.RemoteDatabase
 import no.nav.syfo.kafka.launchKafkaListener
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
+import no.nav.syfo.service.AccessControl
 import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.varsel.AktivitetskravVarselPlanner
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-
 
 data class ApplicationState(var running: Boolean = false, var initialized: Boolean = false)
 
@@ -102,16 +102,17 @@ fun Application.kafkaModule() {
 
     runningRemotely {
         val stsConsumer = StsConsumer(env)
-        val dkifConsumer = DkifConsumer(env, stsConsumer)
         val azureAdTokenConsumer = AzureAdTokenConsumer(env)
-        val oppfolgingstilfelleConsumer = SyfosyketilfelleConsumer(env, stsConsumer)
-
-        val sykmeldingerConsumer = SykmeldingerConsumer(env, azureAdTokenConsumer)
         val pdlConsumer = PdlConsumer(env, stsConsumer)
+        val dkifConsumer = DkifConsumer(env, stsConsumer)
+        val oppfolgingstilfelleConsumer = SyfosyketilfelleConsumer(env, stsConsumer)
+        val accessControl = AccessControl(pdlConsumer, dkifConsumer)
+        val sykmeldingerConsumer = SykmeldingerConsumer(env, azureAdTokenConsumer)
         val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
 
-        val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, oppfolgingstilfelleConsumer)
-            .addPlanner(AktivitetskravVarselPlanner(database, sykmeldingService, pdlConsumer, dkifConsumer))
+        val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, oppfolgingstilfelleConsumer, accessControl)
+            .addPlanner(AktivitetskravVarselPlanner(database, sykmeldingService))
+
 
         launch(backgroundTasksContext) {
             launchKafkaListener(
@@ -123,7 +124,8 @@ fun Application.kafkaModule() {
 }
 
 @KtorExperimentalAPI
-val Application.envKind get() = environment.config.property("ktor.environment").getString()
+val Application.envKind
+    get() = environment.config.property("ktor.environment").getString()
 
 @KtorExperimentalAPI
 fun Application.runningLocally(block: () -> Unit) {

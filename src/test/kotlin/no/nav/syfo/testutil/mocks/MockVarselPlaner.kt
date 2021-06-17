@@ -6,7 +6,7 @@ import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
 import no.nav.syfo.varsel.VarselPlanner
 
 class MockVarselPlaner(val applicationState: ApplicationState) : VarselPlanner {
-    override suspend fun processOppfolgingstilfelle(oppfolgingstilfellePerson: OppfolgingstilfellePerson) = coroutineScope {
+    override suspend fun processOppfolgingstilfelle(oppfolgingstilfellePerson: OppfolgingstilfellePerson, fnr: String) = coroutineScope {
         applicationState.running = false
     }
 }

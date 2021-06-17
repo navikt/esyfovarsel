@@ -5,14 +5,16 @@ import kotlinx.coroutines.runBlocking
 import no.nav.common.KafkaEnvironment
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.auth.StsConsumer
+import no.nav.syfo.consumer.DkifConsumer
+import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
+import no.nav.syfo.service.AccessControl
 import no.nav.syfo.testEnviornment
 import no.nav.syfo.testutil.kafka.JacksonKafkaSerializer
+import no.nav.syfo.testutil.mocks.MockServers
 import no.nav.syfo.testutil.mocks.MockVarselPlaner
-import no.nav.syfo.testutil.mocks.StsMockServer
-import no.nav.syfo.testutil.mocks.SyfosyketilfelleMockServer
 import no.nav.syfo.testutil.mocks.kafkaOppfolgingstilfellePeker
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -40,24 +42,36 @@ object KafkaConsumerSpek : Spek({
 
     val fakeOppfolgingstilfelleKafkaProducer = KafkaProducer<String, KOppfolgingstilfellePeker>(producerProperties)
 
-    val mockSyfosyketilfelleServer = SyfosyketilfelleMockServer(testEnv).mockServer()
-    val stsServer = StsMockServer(testEnv).mockServer()
+    val mockServers = MockServers(testEnv)
+
+    val stsServer = mockServers.mockStsServer()
+    val dkifServer = mockServers.mockDkifServer()
+    val pdlServer = mockServers.mockPdlServer()
+    val syfosyketilfelleServer = mockServers.mockSyfosyketilfelleServer()
 
     val stsConsumer = StsConsumer(testEnv)
     val syfosyketilfelleConsumer = SyfosyketilfelleConsumer(testEnv, stsConsumer)
-    val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(testEnv, syfosyketilfelleConsumer).addPlanner(MockVarselPlaner(fakeApplicationState))
+    val pdlConsumer = PdlConsumer(testEnv, stsConsumer)
+    val dkifConsumer = DkifConsumer(testEnv, stsConsumer)
+    val accessControl = AccessControl(pdlConsumer, dkifConsumer)
+    val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(testEnv, syfosyketilfelleConsumer, accessControl)
+        .addPlanner(MockVarselPlaner(fakeApplicationState))
 
 
     beforeGroup {
         embeddedKafkaEnv.start()
-        mockSyfosyketilfelleServer.start()
         stsServer.start()
+        dkifServer.start()
+        pdlServer.start()
+        syfosyketilfelleServer.start()
     }
 
     afterGroup {
         embeddedKafkaEnv.tearDown()
-        mockSyfosyketilfelleServer.stop(1L, 10L)
         stsServer.stop(1L, 10L)
+        dkifServer.stop(1L, 10L)
+        pdlServer.stop(1L, 10L)
+        syfosyketilfelleServer.stop(1L, 10L)
     }
 
     describe("Test Kafka consumer with face producer") {

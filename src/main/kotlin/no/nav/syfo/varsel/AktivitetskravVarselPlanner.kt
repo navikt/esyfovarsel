@@ -2,8 +2,6 @@ package no.nav.syfo.varsel
 
 import io.ktor.util.*
 import kotlinx.coroutines.coroutineScope
-import no.nav.syfo.consumer.DkifConsumer
-import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.domain.*
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselBySykmeldingerId
@@ -20,9 +18,7 @@ import kotlin.streams.toList
 @KtorExperimentalAPI
 class AktivitetskravVarselPlanner(
     private val databaseAccess: DatabaseInterface,
-    val sykmeldingService: SykmeldingService,
-    private val pdlConsumer: PdlConsumer,
-    private val dkifConsumer: DkifConsumer
+    val sykmeldingService: SykmeldingService
 ) : VarselPlanner {
 
     private val AKTIVITETSKRAV_DAGER: Long = 42
@@ -31,13 +27,7 @@ class AktivitetskravVarselPlanner(
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.AktivitetskravVarselPlanner")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
 
-    override suspend fun processOppfolgingstilfelle(oppfolgingstilfellePerson: OppfolgingstilfellePerson) = coroutineScope {
-        if (dkifConsumer.isBrukerReservert(oppfolgingstilfellePerson.aktorId)?.kanVarsles == false) {
-            log.info("[AKTIVITETSKRAV_VARSEL]: Lager ikke aktivitetskrav varsel: bruker er reservert")
-            return@coroutineScope
-        }
-
-        val arbeidstakerFnr = pdlConsumer.getFnr(oppfolgingstilfellePerson.aktorId)
+    override suspend fun processOppfolgingstilfelle(oppfolgingstilfellePerson: OppfolgingstilfellePerson, fnr: String) = coroutineScope {
 
         val sisteSyketilfelledagObject = oppfolgingstilfellePerson.tidslinje.last()
 
@@ -83,18 +73,18 @@ class AktivitetskravVarselPlanner(
                         log.info("[AKTIVITETSKRAV_VARSEL]: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB")
                         databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
                     }
-                    sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, arbeidstakerFnr!!) -> {
+                    sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, fnr) -> {
                         log.info("[AKTIVITETSKRAV_VARSEL]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato")
                     }
-                    varselUtil.isVarselPlanlagt(arbeidstakerFnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {
+                    varselUtil.isVarselPlanlagt(fnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {
                         log.info("[AKTIVITETSKRAV_VARSEL]: varsel er allerede planlagt")
                     }
-                    varselUtil.isVarselSendUt(arbeidstakerFnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {
+                    varselUtil.isVarselSendUt(fnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {
                         log.info("[AKTIVITETSKRAV_VARSEL]: varlel var allerede sendt ut")
                     }
                     else -> {
                         log.info("[AKTIVITETSKRAV_VARSEL]: Lagrer varsel til database")
-                        val aktivitetskravVarsel = PlanlagtVarsel(arbeidstakerFnr, oppfolgingstilfellePerson.aktorId, sykeforlop.ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
+                        val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, sykeforlop.ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
 
                         databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
                     }
