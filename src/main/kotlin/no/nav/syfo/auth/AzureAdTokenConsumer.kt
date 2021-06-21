@@ -56,9 +56,7 @@ class AzureAdTokenConsumer(env: Environment) {
             log.info("Henter nytt token fra Azure AD for scope : $resource")
 
             val response = client.post<HttpResponse>(aadAccessTokenUrl) {
-                headers {
-                    append(HttpHeaders.ContentType, ContentType.Application.FormUrlEncoded)
-                }
+                contentType(ContentType.Application.FormUrlEncoded)
 
                 body = FormDataContent(Parameters.build {
                     append("client_id", clientId) //"543ceb1e-eb69-4089-9458-bdec61160afa"
