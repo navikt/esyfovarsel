@@ -42,11 +42,12 @@ class AzureAdTokenConsumer(env: Environment) {
 
     suspend fun getAzureAdAccessToken(resource: String): String {
         val omToMinutter = Instant.now().plusSeconds(120L)
+        log.info("Henter nytt token fra Azure AD1")
         return mutex.withLock {
             (tokenMap[resource]
                 ?.takeUnless { it.expiresOn.isBefore(omToMinutter) }
                 ?: run {
-                    log.debug("Henter nytt token fra Azure AD")
+                    log.info("Henter nytt token fra Azure AD")
                     val response: AadAccessTokenMedExpiry = client.post(aadAccessTokenUrl) {
                         accept(ContentType.Application.Json)
                         method = HttpMethod.Post
