@@ -13,7 +13,6 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.util.*
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import no.nav.syfo.Environment
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -49,31 +48,30 @@ class AzureAdTokenConsumer(env: Environment) {
         log.info("Henter nytt token fra Azure1, clientSecret: $clientSecret")
         log.info("Henter nytt token fra Azure1, tokenMap: $tokenMap")
         log.info("Henter nytt token fra Azure1, tokenMap[resource]: $tokenMap[$resource]")
-        return mutex.withLock {
-            (tokenMap[resource]
-                ?.takeUnless { it.expiresOn.isBefore(omToMinutter) }
-                ?: run {
-                    log.info("Henter nytt token fra Azure AD")
-                    val response: AadAccessTokenMedExpiry = client.post(aadAccessTokenUrl) {
-                        accept(ContentType.Application.Json)
-                        method = HttpMethod.Post
-                        body = FormDataContent(Parameters.build {
-                            append("client_id", clientId)
-                            append("scope", resource)
-                            append("grant_type", "client_credentials")
-                            append("client_secret", clientSecret)
-                        })
-                    }
-                    val tokenMedExpiry = AadAccessTokenMedExpiry(
-                        access_token = response.access_token,
-                        expires_in = response.expires_in,
-                        expiresOn = Instant.now().plusSeconds(response.expires_in.toLong())
-                    )
-                    tokenMap[resource] = tokenMedExpiry
-                    log.debug("Har hentet accesstoken")
-                    return@run tokenMedExpiry
-                }).access_token
+
+        val resp: AadAccessTokenMedExpiry? = tokenMap[resource]
+
+        if (resp == null || resp.expiresOn.isBefore(omToMinutter)) {
+            log.info("Henter nytt token fra Azure AD for scope : $resource")
+
+            val response = client.post<HttpResponse>(aadAccessTokenUrl) {
+                accept(ContentType.Application.Json)
+                method = HttpMethod.Post
+                body = FormDataContent(Parameters.build {
+                    append("client_id", "543ceb1e-eb69-4089-9458-bdec61160afa")
+                    append("scope", resource)
+                    append("grant_type", "client_credentials")
+                    append("client_secret", clientSecret)
+                })
+            }
+            if (response.status == HttpStatusCode.OK) {
+                tokenMap[resource] = response.receive<AadAccessTokenMedExpiry>()
+                log.info("Status from Azure AD is ok : $tokenMap[$resource] ")
+            } else {
+                log.error("Could not get sykmeldinger from Azure AD: $response")
+            }
         }
+        return tokenMap[resource]!!.access_token
     }
 }
 
