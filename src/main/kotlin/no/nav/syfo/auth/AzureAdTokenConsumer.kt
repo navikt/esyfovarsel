@@ -2,20 +2,23 @@ package no.nav.syfo.auth
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
+import io.ktor.client.engine.apache.*
 import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.util.*
-import kotlinx.coroutines.sync.Mutex
 import no.nav.syfo.Environment
+import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.ProxySelector
 import java.time.Instant
 
 
@@ -25,16 +28,28 @@ class AzureAdTokenConsumer(env: Environment) {
     private val clientId = env.clientId
     private val clientSecret = env.clientSecret
     private val log: Logger = LoggerFactory.getLogger("azureadtokenconsumer")
-    private val mutex = Mutex()
 
-    private val client = HttpClient(CIO) {
+    val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
         install(JsonFeature) {
             serializer = JacksonSerializer {
                 registerKotlinModule()
+                registerModule(JavaTimeModule())
+                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
                 configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             }
         }
     }
+
+    val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
+        config()
+        engine {
+            customizeClient {
+                setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
+            }
+        }
+    }
+
+    val httpClientWithProxy = HttpClient(Apache, proxyConfig)
 
     @Volatile
     private var tokenMap = HashMap<String, AadAccessTokenMedExpiry>()
@@ -55,12 +70,12 @@ class AzureAdTokenConsumer(env: Environment) {
         if (resp == null || resp.expiresOn.isBefore(omToMinutter)) {
             log.info("Henter nytt token fra Azure AD for scope : $resource")
 
-            val response = client.post<HttpResponse>(aadAccessTokenUrl) {
+            val response = httpClientWithProxy.post<HttpResponse>(aadAccessTokenUrl) {
 //                contentType(ContentType.Application.FormUrlEncoded)
                 accept(ContentType.Application.Json)
 
                 body = FormDataContent(Parameters.build {
-                    append("client_id", clientId) //"543ceb1e-eb69-4089-9458-bdec61160afa"
+                    append("client_id", clientId)
                     append("scope", resource)
                     append("grant_type", "client_credentials")
                     append("client_secret", clientSecret)
