@@ -68,5 +68,3 @@ spec:
       value: http://syfosmregister.teamsykmelding
     - name: SYFOSMREGISTER_SCOPE
       value: api://prod-fss.teamsykmelding.syfosmregister/.default
-    - name: AAD_ACCESSTOKEN_URL
-      value: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/token

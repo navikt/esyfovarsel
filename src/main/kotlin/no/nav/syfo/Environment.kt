@@ -38,7 +38,7 @@ private fun remoteEnvironment(): Environment {
         File("$serviceuserMounthPath/password").readText(),
         getEnvVar("SYFOSMREGISTER_URL"),
         getEnvVar("SYFOSMREGISTER_SCOPE"),
-        getEnvVar("AAD_ACCESSTOKEN_URL"),
+        getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
         getEnvVar("AZURE_APP_CLIENT_ID"),
         getEnvVar("AZURE_APP_CLIENT_SECRET")
     )
