@@ -43,13 +43,14 @@ class AzureAdTokenConsumer(env: Environment) {
         val omToMinutter = Instant.now().plusSeconds(120L)
         log.info("Henter nytt token fra Azure AD1")
 
-        log.info("Henter nytt token fra Azure1, clientId: $clientId")
-        log.info("Henter nytt token fra Azure1, resource: $resource")
-        log.info("Henter nytt token fra Azure1, clientSecret: $clientSecret")
-        log.info("Henter nytt token fra Azure1, tokenMap: $tokenMap")
-        log.info("Henter nytt token fra Azure1, tokenMap[resource]: $tokenMap[$resource]")
+        log.info(" nytt token fra Azure1, aadAccessTokenUrl: $aadAccessTokenUrl")
+        log.info(" nytt token fra Azure1, clientId: $clientId")
+        log.info(" nytt token fra Azure1, resource: $resource")
+        log.info(" nytt token fra Azure1, clientSecret: $clientSecret")
+        log.info(" nytt token fra Azure1, tokenMap: $tokenMap")
+        log.info(" nytt token fra Azure1, tokenMap[resource]: $tokenMap[$resource]")
 
-        val resp: AadAccessTokenMedExpiry? = tokenMap[resource]
+        val resp: AadAccessTokenMedExpiry? = tokenMap.get(resource)
 
         if (resp == null || resp.expiresOn.isBefore(omToMinutter)) {
             log.info("Henter nytt token fra Azure AD for scope : $resource")
@@ -58,12 +59,15 @@ class AzureAdTokenConsumer(env: Environment) {
                 accept(ContentType.Application.Json)
                 method = HttpMethod.Post
                 body = FormDataContent(Parameters.build {
-                    append("client_id", "543ceb1e-eb69-4089-9458-bdec61160afa")
+                    append("client_id", clientId) //"543ceb1e-eb69-4089-9458-bdec61160afa"
                     append("scope", resource)
                     append("grant_type", "client_credentials")
                     append("client_secret", clientSecret)
                 })
             }
+
+            log.info("Status from Azure AD response : $response ")
+
             if (response.status == HttpStatusCode.OK) {
                 tokenMap[resource] = response.receive<AadAccessTokenMedExpiry>()
                 log.info("Status from Azure AD is ok : $tokenMap[$resource] ")
