@@ -19,8 +19,8 @@ class SykmeldingService constructor(private val sykmeldingerConsumer: Sykmelding
             } else {
                 true
             }
-        } catch (e: Exception) {
-            log.error("[AKTIVITETSKRAV_VARSEL]: isNot100SykmeldtPaVarlingsdato error: $e")
+        } catch (exception: Exception) {
+            log.error("[AKTIVITETSKRAV_VARSEL]: isNot100SykmeldtPaVarlingsdato error: $exception")
         }
         return false
     }

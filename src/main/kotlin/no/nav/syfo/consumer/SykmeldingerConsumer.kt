@@ -44,10 +44,7 @@ class SykmeldingerConsumer(env: Environment, azureAdTokenConsumer: AzureAdTokenC
     suspend fun getSykmeldtStatusPaDato(dato: LocalDate, fnr: String): SykmeldtStatusResponse? {
         val requestURL = "$basepath/api/v2/sykmelding/sykmeldtStatus"
         val requestBody = SykmeldtStatusRequest(fnr, dato)
-        log.info("[AKTIVITETSKRAV_VARSEL]: about to call azureAdTokenConsumer")
         val token = azureAdTokenConsumer.getAzureAdAccessToken(scope)
-
-        log.info("[AKTIVITETSKRAV_VARSEL]: Syfosmregister requestURL: [$requestURL]")
 
         val response = client.post<HttpResponse>(requestURL) {
             headers {
@@ -58,10 +55,8 @@ class SykmeldingerConsumer(env: Environment, azureAdTokenConsumer: AzureAdTokenC
             body = requestBody
         }
 
-        log.info("[AKTIVITETSKRAV_VARSEL]: SyfosmregisterResponse, response: [$response]")
         return when (response.status) {
             HttpStatusCode.OK -> {
-                log.info("[AKTIVITETSKRAV_VARSEL]: SyfosmregisterResponse, response: [$response]")
                 response.receive<SykmeldtStatusResponse>()
             }
             HttpStatusCode.Unauthorized -> {

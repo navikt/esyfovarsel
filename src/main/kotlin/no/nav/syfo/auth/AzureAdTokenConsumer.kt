@@ -56,18 +56,10 @@ class AzureAdTokenConsumer(env: Environment) {
 
     suspend fun getAzureAdAccessToken(resource: String): String {
         val omToMinutter = Instant.now().plusSeconds(120L)
-        log.info("Henter nytt token fra Azure AD1")
 
-        log.info(" nytt token fra Azure1, aadAccessTokenUrl: $aadAccessTokenUrl")
-        log.info(" nytt token fra Azure1, clientId: $clientId")
-        log.info(" nytt token fra Azure1, resource: $resource")
-        log.info(" nytt token fra Azure1, clientSecret: $clientSecret")
-        log.info(" nytt token fra Azure1, tokenMap: $tokenMap")
-        log.info(" nytt token fra Azure1, tokenMap[resource]: $tokenMap[$resource]")
+        val token: AadAccessTokenMedExpiry? = tokenMap.get(resource)
 
-        val resp: AadAccessTokenMedExpiry? = tokenMap.get(resource)
-
-        if (resp == null || Instant.now().plusSeconds(resp.expires_in.toLong()).isBefore(omToMinutter)) {
+        if (token == null || Instant.now().plusSeconds(token.expires_in.toLong()).isBefore(omToMinutter)) {
             log.info("Henter nytt token fra Azure AD for scope : $resource")
 
             val response = httpClientWithProxy.post<HttpResponse>(aadAccessTokenUrl) {
@@ -80,12 +72,8 @@ class AzureAdTokenConsumer(env: Environment) {
                     append("client_secret", clientSecret)
                 })
             }
-
-            log.info("Status from Azure AD response : $response ")
-
             if (response.status == HttpStatusCode.OK) {
                 tokenMap[resource] = response.receive<AadAccessTokenMedExpiry>()
-                log.info("Status from Azure AD is ok : $tokenMap[$resource] ")
             } else {
                 log.error("Could not get sykmeldinger from Azure AD: $response")
             }

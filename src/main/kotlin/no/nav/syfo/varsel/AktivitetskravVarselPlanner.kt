@@ -65,6 +65,7 @@ class AktivitetskravVarselPlanner(
 
                 val forlopetsLengde = ChronoUnit.DAYS.between(forlopStartDato, forlopSluttDato)
                 log.info("[AKTIVITETSKRAV_VARSEL]: forlopStartDato:  $forlopStartDato")
+                log.info("[AKTIVITETSKRAV_VARSEL]: forlopSluttDato:  $forlopSluttDato")
                 log.info("[AKTIVITETSKRAV_VARSEL]: forlopetsLengde:  $forlopetsLengde")
                 log.info("[AKTIVITETSKRAV_VARSEL]: aktivitetskravVarselDato:  $aktivitetskravVarselDato")
 
@@ -76,9 +77,9 @@ class AktivitetskravVarselPlanner(
                         log.info("[AKTIVITETSKRAV_VARSEL]: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB")
                         databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
                     }
-                    sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, fnr) -> {
-                        log.info("[AKTIVITETSKRAV_VARSEL]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato")
-                    }
+//                    sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, fnr) -> {
+//                        log.info("[AKTIVITETSKRAV_VARSEL]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato")
+//                    }
                     varselUtil.isVarselPlanlagt(fnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {
                         log.info("[AKTIVITETSKRAV_VARSEL]: varsel er allerede planlagt")
                     }
