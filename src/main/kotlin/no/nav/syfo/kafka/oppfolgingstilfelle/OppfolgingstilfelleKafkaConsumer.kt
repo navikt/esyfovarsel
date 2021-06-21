@@ -51,8 +51,9 @@ class OppfolgingstilfelleKafkaConsumer(
                 try {
                     val peker: KOppfolgingstilfellePeker = objectMapper.readValue(it.value())
                     val aktorId = peker.aktorId
+                    log.info("inside try")
                     val fnr = accessControl.getFnrIfUserCanBeNotified(aktorId)
-
+                    log.info("Received fnr [$fnr]")
                     fnr?.let {
                         val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle(aktorId)
                         oppfolgingstilfelle?.let {
