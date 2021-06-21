@@ -28,7 +28,7 @@ class AktivitetskravVarselPlanner(
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
 
     override suspend fun processOppfolgingstilfelle(oppfolgingstilfellePerson: OppfolgingstilfellePerson, fnr: String) = coroutineScope {
-
+        log.info("[AKTIVITETSKRAV_VARSEL]: oppfolgingstilfellePerson:  $oppfolgingstilfellePerson")
         val sisteSyketilfelledagObject = oppfolgingstilfellePerson.tidslinje.last()
 
         if (isGyldigSykmeldingTilfelle(sisteSyketilfelledagObject)) {
