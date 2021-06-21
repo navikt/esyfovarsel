@@ -37,21 +37,24 @@ class AktivitetskravVarselPlanner(
             val gyldigeSykmeldingTifelledager = oppfolgingstilfellePerson.tidslinje.stream()
                 .filter { isGyldigSykmeldingTilfelle(it) }
                 .toList()
+            log.info("[AKTIVITETSKRAV_VARSEL]: gyldigeSykmeldingTifelledager:  $gyldigeSykmeldingTifelledager")
 
             val gjeldendeSykmeldingtilfelle = gyldigeSykmeldingTifelledager.stream()
                 .filter { it.prioritertSyketilfellebit?.ressursId == sisteRessursId }
                 .findAny()
                 .get()
+            log.info("[AKTIVITETSKRAV_VARSEL]: gjeldendeSykmeldingtilfelle:  $gjeldendeSykmeldingtilfelle")
 
             val grupperteSykmeldingTifelledager = groupByRessursId(gyldigeSykmeldingTifelledager)
+            log.info("[AKTIVITETSKRAV_VARSEL]: grupperteSykmeldingTifelledager:  $grupperteSykmeldingTifelledager")
+
             val sykeforloper = getSykeforloper(grupperteSykmeldingTifelledager)
+            log.info("[AKTIVITETSKRAV_VARSEL]: sykeforloper:  $sykeforloper")
 
             val sykeforlopOptional = sykeforloper.stream()
                 .filter { isSyketilfelledagInnenSykeforlop(gjeldendeSykmeldingtilfelle, it) }
                 .findAny()
-
-            log.info("[AKTIVITETSKRAV_VARSEL]: gjeldendeSykmeldingtilfelle:  $gjeldendeSykmeldingtilfelle")
-            log.info("[AKTIVITETSKRAV_VARSEL]: isSyketilfelledagInnenSykeforlop:  $sykeforlopOptional")
+            log.info("[AKTIVITETSKRAV_VARSEL]: sykeforlopOptional:  $sykeforlopOptional")
 
             if (sykeforlopOptional.isPresent) {
                 val sykeforlop = sykeforlopOptional.get()
