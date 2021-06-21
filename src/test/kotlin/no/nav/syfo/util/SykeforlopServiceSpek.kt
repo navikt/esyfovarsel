@@ -73,6 +73,8 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val forloper = sykeforlopService.getSykeforloper(listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3, syketilfelledag4))
 
             forloper.size shouldEqual 1
+            forloper[0].fom shouldEqual LocalDate.of(2021, 6, 1)
+            forloper[0].tom shouldEqual LocalDate.of(2021, 6, 5)
         }
 
         it("Skal lage 2 sykeforloper") {
