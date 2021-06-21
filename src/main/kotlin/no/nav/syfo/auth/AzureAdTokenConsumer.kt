@@ -43,6 +43,12 @@ class AzureAdTokenConsumer(env: Environment) {
     suspend fun getAzureAdAccessToken(resource: String): String {
         val omToMinutter = Instant.now().plusSeconds(120L)
         log.info("Henter nytt token fra Azure AD1")
+
+        log.info("Henter nytt token fra Azure1, clientId: $clientId")
+        log.info("Henter nytt token fra Azure1, resource: $resource")
+        log.info("Henter nytt token fra Azure1, clientSecret: $clientSecret")
+        log.info("Henter nytt token fra Azure1, tokenMap: $tokenMap")
+        log.info("Henter nytt token fra Azure1, tokenMap[resource]: $tokenMap[$resource]")
         return mutex.withLock {
             (tokenMap[resource]
                 ?.takeUnless { it.expiresOn.isBefore(omToMinutter) }
