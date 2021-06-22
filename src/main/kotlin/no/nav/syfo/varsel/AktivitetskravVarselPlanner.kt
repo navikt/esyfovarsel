@@ -39,43 +39,46 @@ class AktivitetskravVarselPlanner(
 
         val sykeforloper = sykeforlopService.getSykeforloper(gyldigeSykmeldingTifelledager)
 
-        for (sykeforlop in sykeforloper) {
-            val forlopStartDato = sykeforlop.fom
-            val forlopSluttDato = sykeforlop.tom
+        if (sykeforloper.isNotEmpty()){
+            for (sykeforlop in sykeforloper) {
+                val forlopStartDato = sykeforlop.fom
+                val forlopSluttDato = sykeforlop.tom
 
-            val aktivitetskravVarselDato = forlopStartDato.plusDays(AKTIVITETSKRAV_DAGER)
+                val aktivitetskravVarselDato = forlopStartDato.plusDays(AKTIVITETSKRAV_DAGER)
 
-            val forlopetsLengde = ChronoUnit.DAYS.between(forlopStartDato, forlopSluttDato)
-            log.info("[AKTIVITETSKRAV_VARSEL]: forlopStartDato:  $forlopStartDato")
-            log.info("[AKTIVITETSKRAV_VARSEL]: forlopSluttDato:  $forlopSluttDato")
-            log.info("[AKTIVITETSKRAV_VARSEL]: forlopetsLengde:  $forlopetsLengde")
-            log.info("[AKTIVITETSKRAV_VARSEL]: aktivitetskravVarselDato:  $aktivitetskravVarselDato")
+                val forlopetsLengde = ChronoUnit.DAYS.between(forlopStartDato, forlopSluttDato)
+                log.info("[AKTIVITETSKRAV_VARSEL]: forlopStartDato:  $forlopStartDato")
+                log.info("[AKTIVITETSKRAV_VARSEL]: forlopSluttDato:  $forlopSluttDato")
+                log.info("[AKTIVITETSKRAV_VARSEL]: forlopetsLengde:  $forlopetsLengde")
+                log.info("[AKTIVITETSKRAV_VARSEL]: aktivitetskravVarselDato:  $aktivitetskravVarselDato")
 
-            when {
-                varselUtil.isVarselDatoForIDag(aktivitetskravVarselDato) -> {
-                    log.info("[AKTIVITETSKRAV_VARSEL]: Beregnet dato for varsel er før i dag")
-                }
-                varselUtil.isVarselDatoEtterTilfelleSlutt(aktivitetskravVarselDato, forlopSluttDato) -> {
-                    log.info("[AKTIVITETSKRAV_VARSEL]: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB")
-                    databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
-                }
-//TODO                    sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, fnr) -> {
-//                        log.info("[AKTIVITETSKRAV_VARSEL]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato")
-//                    }
-                varselUtil.isVarselPlanlagt(fnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {
-                    log.info("[AKTIVITETSKRAV_VARSEL]: varsel er allerede planlagt")
-                }
-                varselUtil.isVarselSendUt(fnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {
-                    log.info("[AKTIVITETSKRAV_VARSEL]: varlel var allerede sendt ut")
-                }
-                else -> {
-                    log.info("[AKTIVITETSKRAV_VARSEL]: Lagrer varsel til database")
-                    val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, sykeforlop.ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
+                when {
+                    varselUtil.isVarselDatoForIDag(aktivitetskravVarselDato) -> {
+                        log.info("[AKTIVITETSKRAV_VARSEL]: Beregnet dato for varsel er før i dag")
+                    }
+                    varselUtil.isVarselDatoEtterTilfelleSlutt(aktivitetskravVarselDato, forlopSluttDato) -> {
+                        log.info("[AKTIVITETSKRAV_VARSEL]: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB")
+                        databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
+                    }
+                    sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, fnr) -> {
+                        log.info("[AKTIVITETSKRAV_VARSEL]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato")
+                    }
+                    varselUtil.isVarselPlanlagt(fnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {
+                        log.info("[AKTIVITETSKRAV_VARSEL]: varsel er allerede planlagt")
+                    }
+                    varselUtil.isVarselSendUt(fnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {
+                        log.info("[AKTIVITETSKRAV_VARSEL]: varlel var allerede sendt ut")
+                    }
+                    else -> {
+                        log.info("[AKTIVITETSKRAV_VARSEL]: Lagrer varsel til database")
+                        val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, sykeforlop.ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
 
-                    databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
+                        databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
+                    }
                 }
             }
         }
+        log.info("[AKTIVITETSKRAV_VARSEL]: Sykeforløperliste er tom")
     }
 
     private fun isGyldigSykmeldingTilfelle(syketilfelledag: Syketilfelledag): Boolean {

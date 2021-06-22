@@ -17,10 +17,10 @@ class SykeforlopService {
 
         ressursIds.forEach { it ->
             val id = it
-            val biter = syketilfelledager.filter { it.prioritertSyketilfellebit?.ressursId == id }
+            val biterMedSammeSykmeldingId = syketilfelledager.filter { it.prioritertSyketilfellebit?.ressursId == id }
                 .map { i -> i.prioritertSyketilfellebit }
 
-            val sisteBit = biter.sortedByDescending { it?.opprettet }[0]
+            val sisteBit = biterMedSammeSykmeldingId.sortedByDescending { it?.opprettet }[0]
 
             if (sisteBit != null) {
                 sykmeldingtilfeller.add(Sykmeldingtilfelle(id!!, sisteBit.fom.toLocalDate(), sisteBit.tom.toLocalDate()))
@@ -31,25 +31,28 @@ class SykeforlopService {
     }
 
     fun getSykeforloper(syketilfelledager: List<Syketilfelledag>): List<Sykeforlop> {
-        val grupperteSyketilfelledager = groupByRessursId(syketilfelledager)
-        val sykeforloper: MutableList<Sykeforlop> = mutableListOf()
+        if (syketilfelledager.isNotEmpty()) {
+            val grupperteSyketilfelledager = groupByRessursId(syketilfelledager)
+            val sykeforloper: MutableList<Sykeforlop> = mutableListOf()
 
-        var prevTilf: Sykmeldingtilfelle = grupperteSyketilfelledager[0]
-        var sykeforlop = Sykeforlop(mutableListOf(prevTilf.ressursId), prevTilf.fom, prevTilf.tom)
+            var prevTilf: Sykmeldingtilfelle = grupperteSyketilfelledager[0]
+            var sykeforlop = Sykeforlop(mutableListOf(prevTilf.ressursId), prevTilf.fom, prevTilf.tom)
 
-        for (i in 1..grupperteSyketilfelledager.size - 1) {
-            val currTilf: Sykmeldingtilfelle = grupperteSyketilfelledager[i]
-            if (ChronoUnit.DAYS.between(prevTilf.tom, currTilf.fom) <= SYKEFORLOP_MIN_DIFF_DAGER) {
-                sykeforlop.ressursIds.add(currTilf.ressursId)
-                sykeforlop.tom = currTilf.tom
-            } else {
-                sykeforloper.add(sykeforlop)
-                sykeforlop = Sykeforlop(mutableListOf(currTilf.ressursId), currTilf.fom, currTilf.tom)
+            for (i in 1..grupperteSyketilfelledager.size - 1) {
+                val currTilf: Sykmeldingtilfelle = grupperteSyketilfelledager[i]
+                if (ChronoUnit.DAYS.between(prevTilf.tom, currTilf.fom) <= SYKEFORLOP_MIN_DIFF_DAGER) {
+                    sykeforlop.ressursIds.add(currTilf.ressursId)
+                    sykeforlop.tom = currTilf.tom
+                } else {
+                    sykeforloper.add(sykeforlop)
+                    sykeforlop = Sykeforlop(mutableListOf(currTilf.ressursId), currTilf.fom, currTilf.tom)
+                }
+                prevTilf = currTilf
             }
-            prevTilf = currTilf
+            sykeforloper.add(sykeforlop)
+            log.info("[AKTIVITETSKRAV_VARSEL]: Laget sykeforloper:  $sykeforloper")
+            return sykeforloper
         }
-        sykeforloper.add(sykeforlop)
-        log.info("[AKTIVITETSKRAV_VARSEL]: Laget sykeforloper:  $sykeforloper")
-        return sykeforloper
+        return listOf()
     }
 }
