@@ -27,7 +27,7 @@ class AzureAdTokenConsumer(env: Environment) {
     private val aadAccessTokenUrl = env.aadAccessTokenUrl
     private val clientId = env.clientId
     private val clientSecret = env.clientSecret
-    private val log: Logger = LoggerFactory.getLogger("azureadtokenconsumer")
+    private val log: Logger = LoggerFactory.getLogger("AzureAdTokenConsumer")
 
     val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
         install(JsonFeature) {
@@ -52,12 +52,12 @@ class AzureAdTokenConsumer(env: Environment) {
     val httpClientWithProxy = HttpClient(Apache, proxyConfig)
 
     @Volatile
-    private var tokenMap = HashMap<String, AadAccessTokenMedExpiry>()
+    private var tokenMap = HashMap<String, AzureAdAccessToken>()
 
     suspend fun getAzureAdAccessToken(resource: String): String {
         val omToMinutter = Instant.now().plusSeconds(120L)
 
-        val token: AadAccessTokenMedExpiry? = tokenMap.get(resource)
+        val token: AzureAdAccessToken? = tokenMap.get(resource)
 
         if (token == null || Instant.now().plusSeconds(token.expires_in.toLong()).isBefore(omToMinutter)) {
             log.info("Henter nytt token fra Azure AD for scope : $resource")
@@ -73,9 +73,9 @@ class AzureAdTokenConsumer(env: Environment) {
                 })
             }
             if (response.status == HttpStatusCode.OK) {
-                tokenMap[resource] = response.receive<AadAccessTokenMedExpiry>()
+                tokenMap[resource] = response.receive()
             } else {
-                log.error("Could not get sykmeldinger from Azure AD: $response")
+                log.error("Could not get token from Azure AD: $response")
             }
         }
         return tokenMap[resource]!!.access_token
@@ -83,9 +83,7 @@ class AzureAdTokenConsumer(env: Environment) {
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class AadAccessTokenMedExpiry(
+data class AzureAdAccessToken(
     val access_token: String,
     val expires_in: Int
 )
-
-

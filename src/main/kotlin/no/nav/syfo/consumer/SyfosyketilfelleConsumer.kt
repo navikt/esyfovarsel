@@ -3,21 +3,17 @@ package no.nav.syfo.consumer
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.client.HttpClient
-import io.ktor.client.call.receive
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.request.get
-import io.ktor.client.request.headers
-import io.ktor.client.statement.HttpResponse
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
-import io.ktor.util.KtorExperimentalAPI
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.features.json.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.util.*
 import no.nav.syfo.Environment
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
-import no.nav.syfo.consumer.pdl.APPLICATION_JSON
 import org.slf4j.LoggerFactory
 
 @KtorExperimentalAPI
@@ -41,7 +37,7 @@ class SyfosyketilfelleConsumer(env: Environment, stsConsumer: StsConsumer) {
         basepath = env.syfosyketilfelleUrl
     }
 
-    suspend fun getOppfolgingstilfelle(aktorId: String) : OppfolgingstilfellePerson? {
+    suspend fun getOppfolgingstilfelle(aktorId: String): OppfolgingstilfellePerson? {
         val requestURL = "$basepath/kafka/oppfolgingstilfelle/beregn/$aktorId"
         val stsToken = stsConsumer.getToken()
         val bearerTokenString = "Bearer ${stsToken.access_token}"
@@ -49,7 +45,7 @@ class SyfosyketilfelleConsumer(env: Environment, stsConsumer: StsConsumer) {
         val response = client.get<HttpResponse>(requestURL) {
             headers {
                 append(HttpHeaders.Authorization, bearerTokenString)
-                append(HttpHeaders.Accept, APPLICATION_JSON)
+                append(HttpHeaders.Accept, ContentType.Application.Json)
             }
         }
 

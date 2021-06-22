@@ -26,7 +26,7 @@ class SykeforlopService {
                 sykmeldingtilfeller.add(Sykmeldingtilfelle(id!!, sisteBit.fom.toLocalDate(), sisteBit.tom.toLocalDate()))
             }
         }
-        log.info("[AKTIVITETSKRAV_VARSEL]: Laget sykmeldingtilfeller:  $sykmeldingtilfeller")
+        log.info("[AKTIVITETSKRAV_VARSEL]: Laget sykmeldingtilfeller:  $sykmeldingtilfeller")//Todo: delete
         return sykmeldingtilfeller
     }
 
@@ -35,22 +35,22 @@ class SykeforlopService {
             val grupperteSyketilfelledager = groupByRessursId(syketilfelledager)
             val sykeforloper: MutableList<Sykeforlop> = mutableListOf()
 
-            var prevTilf: Sykmeldingtilfelle = grupperteSyketilfelledager[0]
-            var sykeforlop = Sykeforlop(mutableListOf(prevTilf.ressursId), prevTilf.fom, prevTilf.tom)
+            var forrigeTilfelle: Sykmeldingtilfelle = grupperteSyketilfelledager[0]
+            var sykeforlop = Sykeforlop(mutableListOf(forrigeTilfelle.ressursId), forrigeTilfelle.fom, forrigeTilfelle.tom)
 
             for (i in 1..grupperteSyketilfelledager.size - 1) {
-                val currTilf: Sykmeldingtilfelle = grupperteSyketilfelledager[i]
-                if (ChronoUnit.DAYS.between(prevTilf.tom, currTilf.fom) <= SYKEFORLOP_MIN_DIFF_DAGER) {
-                    sykeforlop.ressursIds.add(currTilf.ressursId)
-                    sykeforlop.tom = currTilf.tom
+                val navarendeTilfelle: Sykmeldingtilfelle = grupperteSyketilfelledager[i]
+                if (ChronoUnit.DAYS.between(forrigeTilfelle.tom, navarendeTilfelle.fom) <= SYKEFORLOP_MIN_DIFF_DAGER) {
+                    sykeforlop.ressursIds.add(navarendeTilfelle.ressursId)
+                    sykeforlop.tom = navarendeTilfelle.tom
                 } else {
                     sykeforloper.add(sykeforlop)
-                    sykeforlop = Sykeforlop(mutableListOf(currTilf.ressursId), currTilf.fom, currTilf.tom)
+                    sykeforlop = Sykeforlop(mutableListOf(navarendeTilfelle.ressursId), navarendeTilfelle.fom, navarendeTilfelle.tom)
                 }
-                prevTilf = currTilf
+                forrigeTilfelle = navarendeTilfelle
             }
             sykeforloper.add(sykeforlop)
-            log.info("[AKTIVITETSKRAV_VARSEL]: Laget sykeforloper:  $sykeforloper")
+            log.info("[AKTIVITETSKRAV_VARSEL]: Laget sykeforloper:  $sykeforloper")//TODO: delete
             return sykeforloper
         }
         return listOf()

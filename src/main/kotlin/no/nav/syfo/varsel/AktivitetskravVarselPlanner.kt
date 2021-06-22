@@ -30,12 +30,12 @@ class AktivitetskravVarselPlanner(
     private val sykeforlopService: SykeforlopService = SykeforlopService()
 
     override suspend fun processOppfolgingstilfelle(oppfolgingstilfellePerson: OppfolgingstilfellePerson, fnr: String) = coroutineScope {
-        log.info("[AKTIVITETSKRAV_VARSEL]: oppfolgingstilfellePerson:  $oppfolgingstilfellePerson")
+        log.info("[AKTIVITETSKRAV_VARSEL]: oppfolgingstilfellePerson:  $oppfolgingstilfellePerson")//TODO: delete
 
         val gyldigeSykmeldingTifelledager = oppfolgingstilfellePerson.tidslinje.stream()
             .filter { isGyldigSykmeldingTilfelle(it) }
             .toList()
-        log.info("[AKTIVITETSKRAV_VARSEL]: gyldigeSykmeldingTifelledager:  $gyldigeSykmeldingTifelledager")
+        log.info("[AKTIVITETSKRAV_VARSEL]: gyldigeSykmeldingTifelledager:  $gyldigeSykmeldingTifelledager")//TODO: delete
 
         val sykeforloper = sykeforlopService.getSykeforloper(gyldigeSykmeldingTifelledager)
 
@@ -47,10 +47,10 @@ class AktivitetskravVarselPlanner(
                 val aktivitetskravVarselDato = forlopStartDato.plusDays(AKTIVITETSKRAV_DAGER)
 
                 val forlopetsLengde = ChronoUnit.DAYS.between(forlopStartDato, forlopSluttDato)
-                log.info("[AKTIVITETSKRAV_VARSEL]: forlopStartDato:  $forlopStartDato")
-                log.info("[AKTIVITETSKRAV_VARSEL]: forlopSluttDato:  $forlopSluttDato")
-                log.info("[AKTIVITETSKRAV_VARSEL]: forlopetsLengde:  $forlopetsLengde")
-                log.info("[AKTIVITETSKRAV_VARSEL]: aktivitetskravVarselDato:  $aktivitetskravVarselDato")
+                log.info("[AKTIVITETSKRAV_VARSEL]: forlopStartDato:  $forlopStartDato")//TODO: delete
+                log.info("[AKTIVITETSKRAV_VARSEL]: forlopSluttDato:  $forlopSluttDato")//TODO: delete
+                log.info("[AKTIVITETSKRAV_VARSEL]: forlopetsLengde:  $forlopetsLengde")//TODO: delete
+                log.info("[AKTIVITETSKRAV_VARSEL]: aktivitetskravVarselDato:  $aktivitetskravVarselDato")//TODO: delete
 
                 when {
                     varselUtil.isVarselDatoForIDag(aktivitetskravVarselDato) -> {
@@ -60,7 +60,7 @@ class AktivitetskravVarselPlanner(
                         log.info("[AKTIVITETSKRAV_VARSEL]: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB")
                         databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
                     }
-                    sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, fnr) -> {
+                    sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, fnr) == true -> {
                         log.info("[AKTIVITETSKRAV_VARSEL]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato")
                     }
                     varselUtil.isVarselPlanlagt(fnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {

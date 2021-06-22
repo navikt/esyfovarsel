@@ -11,17 +11,12 @@ import java.time.LocalDate
 class SykmeldingService constructor(private val sykmeldingerConsumer: SykmeldingerConsumer) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.SykmeldingService")
 
-    suspend fun isNot100SykmeldtPaVarlingsdato(varselDato: LocalDate, fnr: String): Boolean {
-        try {
-            val sykmeldtStatus: SykmeldtStatusResponse? = sykmeldingerConsumer.getSykmeldtStatusPaDato(varselDato, fnr)
-            return if (sykmeldtStatus?.gradert != null) {
-                sykmeldtStatus.gradert
-            } else {
-                true
-            }
-        } catch (exception: Exception) {
-            log.error("[AKTIVITETSKRAV_VARSEL]: isNot100SykmeldtPaVarlingsdato error: $exception")
+    suspend fun isNot100SykmeldtPaVarlingsdato(varselDato: LocalDate, fnr: String): Boolean? {
+        val sykmeldtStatus: SykmeldtStatusResponse? = sykmeldingerConsumer.getSykmeldtStatusPaDato(varselDato, fnr)
+        return if (sykmeldtStatus!!.gradert != null) {
+            sykmeldtStatus.gradert
+        } else {
+            null
         }
-        return false
     }
 }

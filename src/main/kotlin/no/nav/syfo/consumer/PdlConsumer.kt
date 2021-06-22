@@ -93,7 +93,7 @@ class PdlConsumer(env: Environment, stsConsumer: StsConsumer) {
                 client.post<HttpResponse>(pdlBasepath) {
                     headers {
                         append(TEMA_HEADER, OPPFOLGING_TEMA_HEADERVERDI)
-                        append(HttpHeaders.ContentType, APPLICATION_JSON)
+                        append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, bearerTokenString)
                         append(NAV_CONSUMER_TOKEN_HEADER, bearerTokenString)
                     }

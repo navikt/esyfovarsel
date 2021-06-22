@@ -16,7 +16,6 @@ import no.nav.syfo.Environment
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.domain.DigitalKontaktinfo
 import no.nav.syfo.consumer.domain.DigitalKontaktinfoBolk
-import no.nav.syfo.consumer.pdl.APPLICATION_JSON
 import org.slf4j.LoggerFactory
 import java.util.UUID.randomUUID
 
@@ -47,7 +46,7 @@ class DkifConsumer(env: Environment, stsConsumer: StsConsumer) {
             val response: HttpResponse? = try {
                 client.get<HttpResponse>(requestUrl) {
                     headers {
-                        append(HttpHeaders.ContentType, APPLICATION_JSON)
+                        append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, stsTokenString)
                         append(NAV_CONSUMER_ID_HEADER, ESYFOVARSEL_CONSUMER_ID)
                         append(NAV_PERSONIDENTER_HEADER, aktorId)

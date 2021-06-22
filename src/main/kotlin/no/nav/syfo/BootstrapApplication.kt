@@ -113,7 +113,6 @@ fun Application.kafkaModule() {
         val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, oppfolgingstilfelleConsumer, accessControl)
             .addPlanner(AktivitetskravVarselPlanner(database, sykmeldingService))
 
-
         launch(backgroundTasksContext) {
             launchKafkaListener(
                 state,

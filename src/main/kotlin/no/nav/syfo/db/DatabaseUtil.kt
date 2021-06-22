@@ -25,11 +25,11 @@ fun ResultSet.toPPlanlagtVarsel(): PPlanlagtVarsel =
     )
 
 fun ResultSet.toVarslingIdsListe(): List<String> {
-    val rows = ArrayList<String>()
+    val rader = ArrayList<String>()
     while (this.next()) {
-        rows.add(getString("sykmelding_id"))
+        rader.add(getString("sykmelding_id"))
     }
-    return rows
+    return rader
 }
 
 fun ResultSet.toVarslingIdsListeCount(): Int {
@@ -37,14 +37,13 @@ fun ResultSet.toVarslingIdsListeCount(): Int {
         this.last()
         return this.row
     } catch (e: Exception) {
-        log.debug("Could process reult setØ ${e.message}")
+        log.debug("Could process result set: ${e.message}")
     } finally {
         try {
             this.beforeFirst()
         } catch (e: Exception) {
-            log.debug("Could process reult setØ ${e.message}")
+            log.debug("Could process result set: ${e.message}")
         }
     }
-
     return 0
 }
