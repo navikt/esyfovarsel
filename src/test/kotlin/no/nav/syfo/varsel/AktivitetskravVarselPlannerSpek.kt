@@ -344,7 +344,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name }.size shouldEqual 1
         }
 
-        it("AktivitetskravVarsler blir lagret i database ved nytt sykeforløp selv om det er allerede en varsel i DB som ikke er sendt ut") {
+        it("To AktivitetskravVarsler blir lagret i database ved nytt sykeforløp selv om det er allerede en varsel i DB som ikke er sendt ut") {
             //Gammel varsel
             val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, listOf("1"), VarselType.AKTIVITETSKRAV, LocalDate.now().plusDays(2))
 
@@ -411,7 +411,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val gammeltVarsel = planlagtVarselToStore1.utsendingsdato
             val nyttVarsel = LocalDate.of(2021, 10, 31).plusDays(SYKEFORLOP_MIN_DIFF_DAGER).plusDays(1).plusDays(AKTIVITETSKRAV_DAGER)
 
-            aktivitetskravVarsler.size shouldEqual 2
+            aktivitetskravVarsler.size shouldEqual 3
             aktivitetskravVarsler.filter { it.utsendingsdato == gammeltVarsel }.toList().size shouldEqual 1
             aktivitetskravVarsler.filter { it.utsendingsdato == nyttVarsel }.toList().size shouldEqual 1
         }
