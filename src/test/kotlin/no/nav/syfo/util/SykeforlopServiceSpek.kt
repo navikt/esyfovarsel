@@ -132,6 +132,77 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             forloper.size shouldEqual 2
         }
+
+        it("Skal lage 1 sykeforlop med fom og tom fra siste tilfellebit") {
+            val syketilfellebit1 = Syketilfellebit(
+                "1",
+                arbeidstakerAktorId1,
+                "2",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                listOf("[SYKMELDING, ", "SENDT", "PERIODE", "INGEN_AKTIVITET"),
+                "3",
+                LocalDate.of(2021, 6, 1).atStartOfDay(),
+                LocalDate.of(2021, 6, 3).atStartOfDay()
+            )
+            val syketilfellebit2 = Syketilfellebit(
+                "1",
+                arbeidstakerAktorId1,
+                "2",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                listOf("[SYKMELDING, ", "SENDT", "PERIODE", "INGEN_AKTIVITET"),
+                "3",
+                LocalDate.of(2021, 6, 1).atStartOfDay(),
+                LocalDate.of(2021, 6, 3).atStartOfDay()
+            )
+            val syketilfellebit22 = Syketilfellebit(
+                "1",
+                arbeidstakerAktorId1,
+                "2",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                listOf("[SYKMELDING, ", "SENDT", "PERIODE", "INGEN_AKTIVITET"),
+                "3",
+                LocalDate.of(2021, 6, 1).atStartOfDay(),
+                LocalDate.of(2021, 6, 3).atStartOfDay()
+            )
+            // Sykmelding med tidligere tom
+            val syketilfellebit3 = Syketilfellebit(
+                "2",
+                arbeidstakerAktorId1,
+                "2",
+                LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusHours(1),
+                listOf("[SYKMELDING, ", "SENDT", "PERIODE", "INGEN_AKTIVITET"),
+                "8",
+                LocalDate.of(2021, 6, 1).atStartOfDay(),
+                LocalDate.of(2021, 6, 2).atStartOfDay()
+            )
+            val syketilfellebit4 = Syketilfellebit(
+                "2",
+                arbeidstakerAktorId1,
+                "2",
+                LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusHours(1),
+                listOf("[SYKMELDING, ", "SENDT", "PERIODE", "INGEN_AKTIVITET"),
+                "8",
+                LocalDate.of(2021, 6, 1).atStartOfDay(),
+                LocalDate.of(2021, 6, 2).atStartOfDay()
+            )
+
+            val syketilfelledag1 = Syketilfelledag(LocalDate.of(2021, 6, 1), syketilfellebit1)
+            val syketilfelledag2 = Syketilfelledag(LocalDate.of(2021, 6, 2), syketilfellebit2)
+            val syketilfelledag22 = Syketilfelledag(LocalDate.of(2021, 6, 3), syketilfellebit22)
+            val syketilfelledag3 = Syketilfelledag(LocalDate.of(2021, 6, 1), syketilfellebit3)
+            val syketilfelledag4 = Syketilfelledag(LocalDate.of(2021, 6, 2), syketilfellebit4)
+
+            val forloper = sykeforlopService.getSykeforloper(listOf(syketilfelledag1, syketilfelledag2, syketilfelledag22, syketilfelledag3, syketilfelledag4))
+
+            forloper.size shouldEqual 1
+            forloper[0].fom shouldEqual LocalDate.of(2021, 6, 1)
+            forloper[0].tom shouldEqual LocalDate.of(2021, 6, 2)
+        }
     }
 })
 

@@ -39,7 +39,7 @@ class AktivitetskravVarselPlanner(
 
         val sykeforloper = sykeforlopService.getSykeforloper(gyldigeSykmeldingTifelledager)
 
-        if (sykeforloper.isNotEmpty()){
+        if (sykeforloper.isNotEmpty()) {
             for (sykeforlop in sykeforloper) {
                 val forlopStartDato = sykeforlop.fom
                 val forlopSluttDato = sykeforlop.tom
@@ -77,8 +77,9 @@ class AktivitetskravVarselPlanner(
                     }
                 }
             }
+        } else {
+            log.info("[AKTIVITETSKRAV_VARSEL]: Sykeforløperliste er tom")
         }
-        log.info("[AKTIVITETSKRAV_VARSEL]: Sykeforløperliste er tom")
     }
 
     private fun isGyldigSykmeldingTilfelle(syketilfelledag: Syketilfelledag): Boolean {
