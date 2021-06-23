@@ -24,7 +24,7 @@ class VarselUtil(private val databaseAccess: DatabaseInterface) {
         log.info("[AKTIVITETSKRAV_VARSEL]: tidligere lagrete varsler:  $varsler")//TODO: delete
 
         return varsler.filter { varselType.name == it.type }
-            .filter { it.utsendingsdato === varselDato }
+            .filter { it.utsendingsdato == varselDato }
             .any()
     }
 

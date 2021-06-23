@@ -20,7 +20,10 @@ class SykeforlopService {
             val biterMedSammeSykmeldingId = syketilfelledager.filter { it.prioritertSyketilfellebit?.ressursId == id }
                 .map { i -> i.prioritertSyketilfellebit }
 
-            val sisteBit = biterMedSammeSykmeldingId.sortedBy { it?.opprettet }[0]
+            log.info("[AKTIVITETSKRAV_VARSEL]: biterMedSammeSykmeldingId, id:  $biterMedSammeSykmeldingId, $id")//Todo: delete
+
+            val sisteBit = biterMedSammeSykmeldingId.sortedByDescending { it?.opprettet }[0]
+            log.info("[AKTIVITETSKRAV_VARSEL]: sisteBit, id: $sisteBit")//Todo: delete
 
             if (sisteBit != null) {
                 sykmeldingtilfeller.add(Sykmeldingtilfelle(id!!, sisteBit.fom.toLocalDate(), sisteBit.tom.toLocalDate()))

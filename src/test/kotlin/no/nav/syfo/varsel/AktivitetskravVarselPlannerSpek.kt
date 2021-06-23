@@ -216,37 +216,43 @@ object AktivitetskravVarselPlannerSpek : Spek({
         }
 
         it("Aktivitetskrav varsel er allerede lagret, varsel skal ikke opprettes") {
-            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, listOf("1"), VarselType.AKTIVITETSKRAV)
+            val initPlanlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, listOf("1", "2"), VarselType.AKTIVITETSKRAV, LocalDate.of(2021, 6, 27))
 
-            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)
-            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
-            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore3)
+            embeddedDatabase.storePlanlagtVarsel(initPlanlagtVarselToStore)
 
             val syketilfellebit1 =
-                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("SYKMELDING", "SENDT"), "3", LocalDateTime.now(), LocalDateTime.now())
-            val syketilfellebit2 =
-                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("ANNET_FRAVAR", "UTDANNING"), "3", LocalDateTime.now(), LocalDateTime.now())
-            val syketilfellebit3 =
-                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("PAPIRSYKMELDING", "BEKREFTET"), "3", LocalDateTime.now(), LocalDateTime.now())
+                Syketilfellebit(
+                    "1",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("SYKMELDING", "SENDT"),
+                    "1",
+                    LocalDate.of(2021, 5, 16).atStartOfDay(),
+                    LocalDate.of(2021, 8, 1).atStartOfDay()//  Varsel blir 27.06.2021
+                )
 
-            val syketilfelledag1 = Syketilfelledag(LocalDate.now().minusDays(4), syketilfellebit1)
-            val syketilfelledag2 = Syketilfelledag(LocalDate.now().minusDays(2), syketilfellebit2)
-            val syketilfelledag3 = Syketilfelledag(LocalDate.now().plusDays(100), syketilfellebit3)
+            val syketilfelledag1 = Syketilfelledag(LocalDate.now(), syketilfellebit1)
 
             val sykmeldtStatusResponse = SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
 
-            val oppfolgingstilfellePerson = OppfolgingstilfellePerson(arbeidstakerFnr1, listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3), syketilfelledag1, 0, false, LocalDateTime.now())
+            val lagreteVarsler1 = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
+            val nrOfRowsFetchedTotal1 = lagreteVarsler1.size
+
+            nrOfRowsFetchedTotal1 shouldEqual 1
+
+            val oppfolgingstilfellePerson = OppfolgingstilfellePerson(arbeidstakerFnr1, listOf(syketilfelledag1), syketilfelledag1, 0, false, LocalDateTime.now())
+
+            // Skal lagre varsel
             runBlocking { aktivitetskravVarselPlanner.processOppfolgingstilfelle(oppfolgingstilfellePerson, arbeidstakerFnr1) }
 
             val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
             val nrOfRowsFetchedTotal = lagreteVarsler.size
 
-            nrOfRowsFetchedTotal shouldEqual 2
-            nrOfRowsFetchedTotal shouldNotEqual 3
-
-            lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name }.size shouldEqual 1
+            nrOfRowsFetchedTotal shouldEqual 1
         }
 
         it("Aktivitetskrav varsel er allerede sendt ut, varsel skal ikke opprettes") {
@@ -417,69 +423,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
         }
 
         it("AktivitetskravVarsler blir slettet fra database ved nytt sykeforløp hvis sluttdato i ny sykmelding er før sykeforløpets startdato") {
-            val initPlanlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, listOf("1", "2"), VarselType.AKTIVITETSKRAV)
 
-            embeddedDatabase.storePlanlagtVarsel(initPlanlagtVarselToStore)
-
-            // Lager tidslinje:
-            val syketilfellebit1 =
-                Syketilfellebit(
-                    "1",
-                    arbeidstakerAktorId1,
-                    "2",
-                    LocalDateTime.now(),
-                    LocalDateTime.now(),
-                    listOf("SYKMELDING", "SENDT"),
-                    "1",
-                    LocalDate.of(2021, 8, 31).atStartOfDay(),
-                    LocalDate.of(2021, 10, 31).atStartOfDay()
-                )
-
-            //Ny sykmelding, samme forlop
-            val syketilfellebit3 =
-                Syketilfellebit(
-                    "2",
-                    arbeidstakerAktorId1,
-                    "2",
-                    LocalDateTime.now(),
-                    LocalDateTime.now(),
-                    listOf("SYKMELDING", "SENDT"),
-                    "4",
-                    LocalDate.of(2021, 9, 1).atStartOfDay(),
-                    LocalDate.of(2021, 10, 14).atStartOfDay()
-                )
-
-            //Ny korrigerende sykmelding, varsel skal fjernes:
-            val syketilfellebit4 =
-                Syketilfellebit(
-                    "1",
-                    arbeidstakerAktorId1,
-                    "2",
-                    LocalDateTime.now(),
-                    LocalDateTime.now(),
-                    listOf("SYKMELDING", "SENDT"),
-                    "5",
-                    LocalDate.of(2021, 8, 31).plusDays(1).atStartOfDay(),
-                    LocalDate.of(2021, 9, 30).atStartOfDay() //kortere tom
-                )
-            val syketilfelledag4 = Syketilfelledag(LocalDate.now().plusDays(100), syketilfellebit4)
-
-
-            val syketilfelledag1 = Syketilfelledag(LocalDate.now().minusDays(4), syketilfellebit1)
-            val syketilfelledag3 = Syketilfelledag(LocalDate.now().plusDays(100), syketilfellebit3)
-
-            val sykmeldtStatusResponse = SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
-
-            coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
-
-            val oppfolgingstilfellePerson = OppfolgingstilfellePerson(arbeidstakerFnr1, listOf(syketilfelledag1, syketilfelledag3, syketilfelledag4), syketilfelledag1, 0, false, LocalDateTime.now())
-            // Skal lagre varsel
-            runBlocking { aktivitetskravVarselPlanner.processOppfolgingstilfelle(oppfolgingstilfellePerson, arbeidstakerFnr1) }
-
-            val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
-            val nrOfRowsFetchedTotal = lagreteVarsler.size
-
-            nrOfRowsFetchedTotal shouldEqual 0
         }
     }
 })
