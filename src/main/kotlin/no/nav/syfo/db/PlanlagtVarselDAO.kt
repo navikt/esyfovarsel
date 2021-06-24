@@ -112,7 +112,7 @@ fun DatabaseInterface.deletePlanlagtVarselByVarselId(uuid: String) {
     }
 }
 
-fun DatabaseInterface.deletePlanlagtVarselBySykmeldingerId(sykmeldingerId: List<String>) {
+fun DatabaseInterface.deletePlanlagtVarselBySykmeldingerId(sykmeldingerId: Set<String>) {
     val st1 = """DELETE
         FROM PLANLAGT_VARSEL
         WHERE uuid IN (SELECT varsling_id FROM SYKMELDING_IDS WHERE sykmelding_id = ? )

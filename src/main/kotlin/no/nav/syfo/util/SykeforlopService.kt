@@ -11,7 +11,7 @@ class SykeforlopService {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.SykeforlopService")
     private val SYKEFORLOP_MIN_DIFF_DAGER: Long = 16
 
-    private fun groupByRessursId(syketilfelledager: List<Syketilfelledag>): List<Sykmeldingtilfelle> {
+    private fun getsisteSykmeldingtilfellerForRessursId(syketilfelledager: List<Syketilfelledag>): List<Sykmeldingtilfelle> {
         val sykmeldingtilfeller: MutableList<Sykmeldingtilfelle> = mutableListOf()
         val ressursIds: Set<String?> = syketilfelledager.map { i -> i.prioritertSyketilfellebit?.ressursId }.toSet()
 
@@ -22,11 +22,11 @@ class SykeforlopService {
 
             log.info("[AKTIVITETSKRAV_VARSEL]: biterMedSammeSykmeldingId, id:  $biterMedSammeSykmeldingId, $ressursId")//Todo: delete
 
-            val sisteBit = biterMedSammeSykmeldingId.sortedBy { it?.opprettet }[0]
+            val sisteBit = biterMedSammeSykmeldingId.sortedByDescending { it?.opprettet }[0]
             log.info("[AKTIVITETSKRAV_VARSEL]: sisteBit, id: $sisteBit")//Todo: delete
 
             if (sisteBit != null) {
-                sykmeldingtilfeller.add(Sykmeldingtilfelle(ressursId!!, sisteBit.fom.toLocalDate(), sisteBit.tom.toLocalDate()))
+                sykmeldingtilfeller.add(Sykmeldingtilfelle(ressursId!!, sisteBit.fom.toLocalDate(), sisteBit.tom.toLocalDate(), sisteBit.opprettet))
             }
         }
         log.info("[AKTIVITETSKRAV_VARSEL]: Laget sykmeldingtilfeller:  $sykmeldingtilfeller")//Todo: delete
@@ -35,20 +35,24 @@ class SykeforlopService {
 
     fun getSykeforloper(syketilfelledager: List<Syketilfelledag>): List<Sykeforlop> {
         if (syketilfelledager.isNotEmpty()) {
-            val grupperteSyketilfelledager = groupByRessursId(syketilfelledager)
+            val sorterteSisteSykmeldingtilfellerForRessursId = getsisteSykmeldingtilfellerForRessursId(syketilfelledager).sortedBy { it.opprettet }//Nyeste sist
             val sykeforloper: MutableList<Sykeforlop> = mutableListOf()
 
-            var forrigeTilfelle: Sykmeldingtilfelle = grupperteSyketilfelledager[0]
-            var sykeforlop = Sykeforlop(mutableListOf(forrigeTilfelle.ressursId), forrigeTilfelle.fom, forrigeTilfelle.tom)
+            var forrigeTilfelle: Sykmeldingtilfelle = sorterteSisteSykmeldingtilfellerForRessursId[0]
+            var sykeforlop = Sykeforlop(mutableSetOf(forrigeTilfelle.ressursId), forrigeTilfelle.fom, forrigeTilfelle.tom)
 
-            for (i in 1..grupperteSyketilfelledager.size - 1) {
-                val navarendeTilfelle: Sykmeldingtilfelle = grupperteSyketilfelledager[i]
+            for (i in 1..sorterteSisteSykmeldingtilfellerForRessursId.size - 1) {
+                val navarendeTilfelle: Sykmeldingtilfelle = sorterteSisteSykmeldingtilfellerForRessursId[i]
+                if (navarendeTilfelle.fom.isAfter(forrigeTilfelle.fom)) {
+                    sykeforlop.fom = navarendeTilfelle.fom
+                    sykeforlop.ressursIds.add(navarendeTilfelle.ressursId)
+                }
                 if (ChronoUnit.DAYS.between(forrigeTilfelle.tom, navarendeTilfelle.fom) <= SYKEFORLOP_MIN_DIFF_DAGER) {
                     sykeforlop.ressursIds.add(navarendeTilfelle.ressursId)
                     sykeforlop.tom = navarendeTilfelle.tom
                 } else {
                     sykeforloper.add(sykeforlop)
-                    sykeforlop = Sykeforlop(mutableListOf(navarendeTilfelle.ressursId), navarendeTilfelle.fom, navarendeTilfelle.tom)
+                    sykeforlop = Sykeforlop(mutableSetOf(navarendeTilfelle.ressursId), navarendeTilfelle.fom, navarendeTilfelle.tom)
                 }
                 forrigeTilfelle = navarendeTilfelle
             }

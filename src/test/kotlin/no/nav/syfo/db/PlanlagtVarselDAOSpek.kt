@@ -33,9 +33,9 @@ object PlanlagtVarselDAOSpek : Spek({
         }
 
         it("Store and fetch PlanlagtVarsel") {
-            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, listOf("1", "2" ), VarselType.AKTIVITETSKRAV)
-            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, listOf("3"), VarselType.MER_VEILEDNING)
-            val planlagtVarselToStore3 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, listOf("4"), VarselType.AKTIVITETSKRAV)
+            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1", "2" ), VarselType.AKTIVITETSKRAV)
+            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("3"), VarselType.MER_VEILEDNING)
+            val planlagtVarselToStore3 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, setOf("4"), VarselType.AKTIVITETSKRAV)
 
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
@@ -66,9 +66,9 @@ object PlanlagtVarselDAOSpek : Spek({
         }
 
         it("Delete PlanlagtVarsel by varsel uuid") {
-            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, listOf("1", " 2"), VarselType.AKTIVITETSKRAV)
-            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, listOf("3"), VarselType.MER_VEILEDNING)
-            val planlagtVarselToStore3 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, listOf("4"), VarselType.AKTIVITETSKRAV)
+            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1", "2"), VarselType.AKTIVITETSKRAV)
+            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("3"), VarselType.MER_VEILEDNING)
+            val planlagtVarselToStore3 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, setOf("4"), VarselType.AKTIVITETSKRAV)
 
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
@@ -102,9 +102,9 @@ object PlanlagtVarselDAOSpek : Spek({
         }
 
         it("Delete PlanlagtVarsel by sykmelding ids") {
-            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, listOf("1", " 2"), VarselType.AKTIVITETSKRAV)
-            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, listOf("3"), VarselType.MER_VEILEDNING)
-            val planlagtVarselToStore3 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, listOf("4"), VarselType.AKTIVITETSKRAV)
+            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1", "2"), VarselType.AKTIVITETSKRAV)
+            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("3"), VarselType.MER_VEILEDNING)
+            val planlagtVarselToStore3 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, setOf("4"), VarselType.AKTIVITETSKRAV)
 
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
@@ -125,7 +125,7 @@ object PlanlagtVarselDAOSpek : Spek({
             embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(merveiledningPlanlagtVarselUuid).size shouldNotBe 0
 
             //Delete
-            embeddedDatabase.deletePlanlagtVarselBySykmeldingerId(listOf("1", " 2"))
+            embeddedDatabase.deletePlanlagtVarselBySykmeldingerId(setOf("1", "2"))
 
             //Etter delete
             val planlagtVarselFetchedList1EtterDelete = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
