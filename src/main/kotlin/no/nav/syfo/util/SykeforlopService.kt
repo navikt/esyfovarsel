@@ -22,7 +22,7 @@ class SykeforlopService {
 
             log.info("[AKTIVITETSKRAV_VARSEL]: biterMedSammeSykmeldingId, id:  $biterMedSammeSykmeldingId, $ressursId")//Todo: delete
 
-            val sisteBit = biterMedSammeSykmeldingId.sortedByDescending { it?.opprettet }[0]
+            val sisteBit = biterMedSammeSykmeldingId.sortedBy { it?.opprettet }[0]
             log.info("[AKTIVITETSKRAV_VARSEL]: sisteBit, id: $sisteBit")//Todo: delete
 
             if (sisteBit != null) {
