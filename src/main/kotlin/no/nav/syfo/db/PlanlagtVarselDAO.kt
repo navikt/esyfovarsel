@@ -5,6 +5,7 @@ import no.nav.syfo.db.domain.PlanlagtVarsel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.sql.Date
+import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.*
@@ -70,7 +71,7 @@ fun DatabaseInterface.fetchPlanlagtVarselByFnr(fnr: String): List<PPlanlagtVarse
     }
 }
 
-fun DatabaseInterface.fetchSykmeldingerIdByPlanlagtVarselsUUID(uuid: String): List<List<String>> {
+fun DatabaseInterface.fetchSykmeldingerIdByPlanlagtVarselsUUID(uuid: String): List<String> {
     val queryStatement = """SELECT *
                             FROM SYKMELDING_IDS
                             WHERE varsling_id = ?
@@ -79,19 +80,19 @@ fun DatabaseInterface.fetchSykmeldingerIdByPlanlagtVarselsUUID(uuid: String): Li
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
             it.setObject(1, UUID.fromString(uuid))
-            it.executeQuery().toList { toVarslingIdsListe() }
+            it.executeQuery().toVarslingIdsListe()
         }
     }
 }
 
-fun DatabaseInterface.fetchAllSykmeldingIdsAndCount(): List<Int> {
+fun DatabaseInterface.fetchAllSykmeldingIdsAndCount(): Int {
     val queryStatement = """SELECT *
                             FROM SYKMELDING_IDS
     """.trimIndent()
 
     return connection.use { connection ->
-        connection.prepareStatement(queryStatement).use {
-            it.executeQuery().toList { toVarslingIdsListeCount() }
+        connection.prepareStatement(queryStatement, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE).use {
+            it.executeQuery().toVarslingIdsListeCount()
         }
     }
 }

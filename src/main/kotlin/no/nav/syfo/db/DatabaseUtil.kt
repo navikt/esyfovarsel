@@ -33,17 +33,6 @@ fun ResultSet.toVarslingIdsListe(): List<String> {
 }
 
 fun ResultSet.toVarslingIdsListeCount(): Int {
-    try {
-        this.last()
-        return this.row
-    } catch (e: Exception) {
-        log.debug("Could process result set: ${e.message}")
-    } finally {
-        try {
-            this.beforeFirst()
-        } catch (e: Exception) {
-            log.debug("Could process result set: ${e.message}")
-        }
-    }
-    return 0
+    this.last()
+    return this.row
 }

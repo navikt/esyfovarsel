@@ -52,28 +52,41 @@ class AktivitetskravVarselPlanner(
                 log.info("[AKTIVITETSKRAV_VARSEL]: forlopetsLengde:  $forlopetsLengde")//TODO: delete
                 log.info("[AKTIVITETSKRAV_VARSEL]: aktivitetskravVarselDato:  $aktivitetskravVarselDato")//TODO: delete
 
+                val lagreteVarsler = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.AKTIVITETSKRAV)
+
                 when {
                     varselUtil.isVarselDatoForIDag(aktivitetskravVarselDato) -> {
-                        log.info("[AKTIVITETSKRAV_VARSEL]: Beregnet dato for varsel er før i dag")
+                        log.info("[AKTIVITETSKRAV_VARSEL]: Beregnet dato for varsel er før i dag, sletter tidligere planlagt varsel om det finnes i DB")
                     }
                     varselUtil.isVarselDatoEtterTilfelleSlutt(aktivitetskravVarselDato, forlopSluttDato) -> {
                         log.info("[AKTIVITETSKRAV_VARSEL]: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB")
                         databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
                     }
                     sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, fnr) == true -> {
-                        log.info("[AKTIVITETSKRAV_VARSEL]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato")
-                    }
-                    varselUtil.isVarselPlanlagt(fnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {
-                        log.info("[AKTIVITETSKRAV_VARSEL]: varsel er allerede planlagt")
+                        log.info("[AKTIVITETSKRAV_VARSEL]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, sletter tidligere planlagt varsel om det finnes i DB")
+                        databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
                     }
                     varselUtil.isVarselSendUt(fnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato) -> {
-                        log.info("[AKTIVITETSKRAV_VARSEL]: varlel var allerede sendt ut")
+                        log.info("[AKTIVITETSKRAV_VARSEL]: varsel var allerede sendt ut")
                     }
-                    else -> {
-                        log.info("[AKTIVITETSKRAV_VARSEL]: Lagrer varsel til database")
-                        val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, sykeforlop.ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
+                    lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }.isNotEmpty() -> {
+                        log.info("[AKTIVITETSKRAV_VARSEL]: varsel med samme utsendingsdato er allerede planlagt")
+                    }
+                    lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }.isEmpty() -> {
+                        log.info("[AKTIVITETSKRAV_VARSEL]: sjekker om det finnes varsler med samme id")
+                        if (varselUtil.hasLagreteVarslerForForrespurteSykmeldinger(lagreteVarsler, sykeforlop.ressursIds)) {
+                            log.info("[AKTIVITETSKRAV_VARSEL]: sletter tidligere varsler")
+                            databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
 
-                        databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
+                            log.info("[AKTIVITETSKRAV_VARSEL]: Lagrer ny varsel")
+                            val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, sykeforlop.ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
+                            databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
+                        } else {
+                            log.info("[AKTIVITETSKRAV_VARSEL]: Lagrer varsel til database")
+
+                            val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, sykeforlop.ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
+                            databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
+                        }
                     }
                 }
             }

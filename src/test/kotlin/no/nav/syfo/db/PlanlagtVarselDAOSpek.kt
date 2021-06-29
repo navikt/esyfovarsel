@@ -60,7 +60,7 @@ object PlanlagtVarselDAOSpek : Spek({
             val aktivitetskravPlanlagtVarselUuid = planlagtVarselFetchedList1.find { it.type == VarselType.AKTIVITETSKRAV.name }!!.uuid
             val merveiledningPlanlagtVarselUuid = planlagtVarselFetchedList1.find { it.type == VarselType.MER_VEILEDNING.name }!!.uuid
 
-            embeddedDatabase.fetchAllSykmeldingIdsAndCount().size shouldEqual 4
+            embeddedDatabase.fetchAllSykmeldingIdsAndCount() shouldEqual 4
             embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(aktivitetskravPlanlagtVarselUuid).size shouldNotBe 0
             embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(merveiledningPlanlagtVarselUuid).size shouldNotBe 0
         }
@@ -84,7 +84,7 @@ object PlanlagtVarselDAOSpek : Spek({
             planlagtVarselFetchedList1.filter { it.uuid == aktivitetskravPlanlagtVarselUuid }.size shouldEqual 1
             planlagtVarselFetchedList1.filter { it.uuid == merveiledningPlanlagtVarselUuid }.size shouldEqual 1
 
-            embeddedDatabase.fetchAllSykmeldingIdsAndCount().size shouldEqual 4
+            embeddedDatabase.fetchAllSykmeldingIdsAndCount() shouldEqual 4
             embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(aktivitetskravPlanlagtVarselUuid).size shouldNotBe 0
             embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(merveiledningPlanlagtVarselUuid).size shouldNotBe 0
 
@@ -96,7 +96,7 @@ object PlanlagtVarselDAOSpek : Spek({
             planlagtVarselFetchedList1EtterDelete.filter { it.uuid == aktivitetskravPlanlagtVarselUuid }.size shouldEqual 0
             planlagtVarselFetchedList1EtterDelete.filter { it.uuid == merveiledningPlanlagtVarselUuid }.size shouldEqual 1
 
-            embeddedDatabase.fetchAllSykmeldingIdsAndCount().size shouldEqual 2
+            embeddedDatabase.fetchAllSykmeldingIdsAndCount() shouldEqual 2
             embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(aktivitetskravPlanlagtVarselUuid).size shouldEqual 0
             embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(merveiledningPlanlagtVarselUuid).size shouldNotBe 0
         }
@@ -120,7 +120,7 @@ object PlanlagtVarselDAOSpek : Spek({
             planlagtVarselFetchedList1.filter { it.uuid == aktivitetskravPlanlagtVarselUuid }.size shouldEqual 1
             planlagtVarselFetchedList1.filter { it.uuid == merveiledningPlanlagtVarselUuid }.size shouldEqual 1
 
-            embeddedDatabase.fetchAllSykmeldingIdsAndCount().size shouldEqual 4
+            embeddedDatabase.fetchAllSykmeldingIdsAndCount() shouldEqual 4
             embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(aktivitetskravPlanlagtVarselUuid).size shouldNotBe 0
             embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(merveiledningPlanlagtVarselUuid).size shouldNotBe 0
 
@@ -132,7 +132,7 @@ object PlanlagtVarselDAOSpek : Spek({
             planlagtVarselFetchedList1EtterDelete.filter { it.uuid == aktivitetskravPlanlagtVarselUuid }.size shouldEqual 0
             planlagtVarselFetchedList1EtterDelete.filter { it.uuid == merveiledningPlanlagtVarselUuid }.size shouldEqual 1
 
-            embeddedDatabase.fetchAllSykmeldingIdsAndCount().size shouldEqual 2
+            embeddedDatabase.fetchAllSykmeldingIdsAndCount() shouldEqual 2
             embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(aktivitetskravPlanlagtVarselUuid).size shouldEqual 0
             embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(merveiledningPlanlagtVarselUuid).size shouldNotBe 0
         }

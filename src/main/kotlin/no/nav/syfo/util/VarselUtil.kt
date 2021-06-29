@@ -1,8 +1,10 @@
 package no.nav.syfo.util
 
 import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
+import no.nav.syfo.db.fetchSykmeldingerIdByPlanlagtVarselsUUID
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -18,14 +20,20 @@ class VarselUtil(private val databaseAccess: DatabaseInterface) {
         return tilfelleSluttDato.isEqual(varselDato) || varselDato.isAfter(tilfelleSluttDato)
     }
 
-    fun isVarselPlanlagt(fnr: String, varselType: VarselType, varselDato: LocalDate): Boolean {
-        val varsler = databaseAccess.fetchPlanlagtVarselByFnr(fnr)
+    fun getPlanlagteVarslerAvType(fnr: String, varselType: VarselType): List<PPlanlagtVarsel> {
+        return databaseAccess.fetchPlanlagtVarselByFnr(fnr)
+            .filter { it.type == varselType.name }
+    }
 
-        log.info("[AKTIVITETSKRAV_VARSEL]: tidligere lagrete varsler:  $varsler")//TODO: delete
-
-        return varsler.filter { varselType.name == it.type }
-            .filter { it.utsendingsdato == varselDato }
-            .any()
+    fun hasLagreteVarslerForForrespurteSykmeldinger(planlagteVarsler: List<PPlanlagtVarsel>, ressursIds: Set<String>): Boolean {
+        val gjeldendeSykmeldinger = mutableSetOf<Set<String>>()
+        for (v: PPlanlagtVarsel in planlagteVarsler) {
+            val sm = databaseAccess.fetchSykmeldingerIdByPlanlagtVarselsUUID(v.uuid)
+            gjeldendeSykmeldinger.add(sm.toSet())
+        }
+        val gjeldendeSykmeldingerSet = gjeldendeSykmeldinger.flatten().toSet()
+        log.info("[AKTIVITETSKRAV_VARSEL]: gjeldendeSykmeldingerSet:  $gjeldendeSykmeldingerSet")//TODO: delete
+        return (ressursIds intersect gjeldendeSykmeldingerSet).isNotEmpty()
     }
 
     fun isVarselSendUt(fnr: String, varselType: VarselType, varselDato: LocalDate): Boolean {

@@ -43,16 +43,16 @@ class SykeforlopService {
 
             for (i in 1..sorterteSisteSykmeldingtilfellerForRessursId.size - 1) {
                 val navarendeTilfelle: Sykmeldingtilfelle = sorterteSisteSykmeldingtilfellerForRessursId[i]
-                if (navarendeTilfelle.fom.isAfter(forrigeTilfelle.fom)) {
-                    sykeforlop.fom = navarendeTilfelle.fom
-                    sykeforlop.ressursIds.add(navarendeTilfelle.ressursId)
-                }
-                if (ChronoUnit.DAYS.between(forrigeTilfelle.tom, navarendeTilfelle.fom) <= SYKEFORLOP_MIN_DIFF_DAGER) {
-                    sykeforlop.ressursIds.add(navarendeTilfelle.ressursId)
-                    sykeforlop.tom = navarendeTilfelle.tom
-                } else {
+
+                if (ChronoUnit.DAYS.between(forrigeTilfelle.tom, navarendeTilfelle.fom) > SYKEFORLOP_MIN_DIFF_DAGER) {
                     sykeforloper.add(sykeforlop)
                     sykeforlop = Sykeforlop(mutableSetOf(navarendeTilfelle.ressursId), navarendeTilfelle.fom, navarendeTilfelle.tom)
+                } else if (ChronoUnit.DAYS.between(forrigeTilfelle.tom, navarendeTilfelle.fom) <= SYKEFORLOP_MIN_DIFF_DAGER) {
+                    if (navarendeTilfelle.fom.isBefore(forrigeTilfelle.tom) && navarendeTilfelle.opprettet.isAfter(forrigeTilfelle.opprettet)) {
+                        sykeforlop.fom = navarendeTilfelle.fom
+                    }
+                    sykeforlop.ressursIds.add(navarendeTilfelle.ressursId)
+                    sykeforlop.tom = navarendeTilfelle.tom
                 }
                 forrigeTilfelle = navarendeTilfelle
             }
