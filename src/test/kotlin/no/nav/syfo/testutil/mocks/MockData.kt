@@ -50,6 +50,11 @@ val oppfolgingstilfelleResponse = OppfolgingstilfellePerson(
     utsendelsestidspunkt = fomStartOfDay
 )
 
+val sykeforlop = Sykeforlop(
+    oppfolgingsdato = LocalDate.now(),
+    sykmeldinger = emptyList()
+)
+
 // DKIF
 
 val dkifResponseSuccessKanVarsles = DigitalKontaktinfoBolk(
