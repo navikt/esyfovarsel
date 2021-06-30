@@ -93,7 +93,7 @@ fun Application.kafkaModule() {
         val oppfolgingstilfelleConsumer = SyfosyketilfelleConsumer(env, stsConsumer)
         val accessControl = AccessControl(pdlConsumer, dkifConsumer)
         val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, oppfolgingstilfelleConsumer, accessControl)
-            .addPlanner(Varsel39Uker(database))
+            .addPlanner(Varsel39Uker(database, oppfolgingstilfelleConsumer))
 
         launch(backgroundTasksContext) {
             launchKafkaListener(
