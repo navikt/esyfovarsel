@@ -73,6 +73,11 @@ class MockServers(val env: Environment) {
                     )
                 )
             }
+            get("/syfosoknad/v2/{aktorId}/sykeforloep") {
+                call.respond(
+                    listOf(sykeforlop)
+                )
+            }
         }
     }
 

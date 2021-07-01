@@ -17,6 +17,7 @@ import io.ktor.util.KtorExperimentalAPI
 import no.nav.syfo.Environment
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
+import no.nav.syfo.consumer.domain.Sykeforlop
 import org.slf4j.LoggerFactory
 
 @KtorExperimentalAPI
@@ -67,6 +68,37 @@ class SyfosyketilfelleConsumer(env: Environment, stsConsumer: StsConsumer) {
             else -> {
                 log.error("Could not get oppfolgingstilfelle: $response")
                 null
+            }
+        }
+    }
+
+    suspend fun getSykeforlop(aktorId: String) : List<Sykeforlop> {
+        val requestURL = "$basepath/syfosoknad/v2/$aktorId/sykeforloep"
+        val stsToken = stsConsumer.getToken()
+        val bearerTokenString = "Bearer ${stsToken.access_token}"
+
+        val response = client.get<HttpResponse>(requestURL) {
+            headers {
+                append(HttpHeaders.Authorization, bearerTokenString)
+                append(HttpHeaders.Accept, "application/json")
+            }
+        }
+
+        return when (response.status) {
+            HttpStatusCode.OK -> {
+                response.receive()
+            }
+            HttpStatusCode.NoContent -> {
+                log.error("Could not get sykeforloep: No content found in the response body")
+                emptyList()
+            }
+            HttpStatusCode.Unauthorized -> {
+                log.error("Could not get sykeforloep: Unable to authorize")
+                emptyList()
+            }
+            else -> {
+                log.error("Could not get sykeforloep: $response")
+                emptyList()
             }
         }
     }

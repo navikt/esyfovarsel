@@ -45,12 +45,16 @@ class OppfolgingstilfelleKafkaConsumer(val env: Environment,
                 try {
                     val peker: KOppfolgingstilfellePeker = objectMapper.readValue(it.value())
                     val aktorId = peker.aktorId
+                    log.info("inside try")
                     val fnr = accessControl.getFnrIfUserCanBeNotified(aktorId)
-
+                    log.info("Received fnr [$fnr]")
                     fnr?.let {
                         val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle(aktorId)
+                        log.info("Oppfolgingstilfelle $oppfolgingstilfelle")
                         oppfolgingstilfelle?.let {
-                            varselPlanners.forEach { planner -> planner.processOppfolgingstilfelle(oppfolgingstilfelle, fnr) }
+                            varselPlanners.forEach { planner ->
+                                log.info("Planner $planner")
+                                planner.processOppfolgingstilfelle(oppfolgingstilfelle, fnr) }
                         }
                     }
                 } catch (e: IOException) {
