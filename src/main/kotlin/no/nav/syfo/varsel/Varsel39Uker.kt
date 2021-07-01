@@ -27,6 +27,12 @@ class Varsel39Uker(val databaseAccess: DatabaseInterface, val syfosyketilfelleCo
         val varselDato = LocalDate.now().plusDays(antallDagerIgjenTilVarsling)
         val sluttDatoForSisteSykmelding = sykeforlopListe.last().sykmeldinger.last().tom
 
+        //TODO: Fjerne logging
+        log.info("[39UKER_VARSEL]: sykeforlopListe:  $sykeforlopListe")
+        log.info("[39UKER_VARSEL]: antallDagerSykmeldt:  $antallDagerSykmeldt")
+        log.info("[39UKER_VARSEL]: varselDato:  $varselDato")
+        log.info("[39UKER_VARSEL]: sluttDatoForSisteSykmelding:  $sluttDatoForSisteSykmelding")
+
         if (sluttDatoForSisteSykmelding.isEqualOrAfter(varselDato)) {
             val varsel = PlanlagtVarsel(
                 fnr,
