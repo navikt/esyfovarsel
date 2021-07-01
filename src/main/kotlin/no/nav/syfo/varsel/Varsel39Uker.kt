@@ -21,6 +21,7 @@ class Varsel39Uker(val databaseAccess: DatabaseInterface, val syfosyketilfelleCo
 
     override fun processOppfolgingstilfelle(oppfolgingstilfelle: OppfolgingstilfellePerson, fnr: String) {
 
+        log.info("[39UKER_VARSEL]: Starter behandling")
         val sykeforlopListe = runBlocking { syfosyketilfelleConsumer.getSykeforlop(oppfolgingstilfelle.aktorId) }
         val antallDagerSykmeldt = beregnDagerSykmeldt(sykeforlopListe)
         val antallDagerIgjenTilVarsling = maxOf(antallDageri39Uker - antallDagerSykmeldt, 0)
