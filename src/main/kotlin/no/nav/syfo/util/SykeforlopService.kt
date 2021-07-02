@@ -33,7 +33,7 @@ class SykeforlopService {
         return sykmeldingtilfeller
     }
 
-    fun getSykeforloper(syketilfelledager: List<Syketilfelledag>): List<Sykeforlop> {
+    fun getSykeforlopList(syketilfelledager: List<Syketilfelledag>): List<Sykeforlop> {
         if (syketilfelledager.isNotEmpty()) {
             val sorterteSisteSykmeldingtilfellerForRessursId = getsisteSykmeldingtilfellerForRessursId(syketilfelledager).sortedBy { it.opprettet }//Nyeste sist
             val sykeforloper: MutableList<Sykeforlop> = mutableListOf()

@@ -25,7 +25,7 @@ class VarselUtil(private val databaseAccess: DatabaseInterface) {
             .filter { it.type == varselType.name }
     }
 
-    fun hasLagreteVarslerForForrespurteSykmeldinger(planlagteVarsler: List<PPlanlagtVarsel>, ressursIds: Set<String>): Boolean {
+    fun hasLagreteVarslerForForespurteSykmeldinger(planlagteVarsler: List<PPlanlagtVarsel>, ressursIds: Set<String>): Boolean {
         val gjeldendeSykmeldinger = mutableSetOf<Set<String>>()
         for (v: PPlanlagtVarsel in planlagteVarsler) {
             val sm = databaseAccess.fetchSykmeldingerIdByPlanlagtVarselsUUID(v.uuid)

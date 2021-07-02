@@ -70,14 +70,14 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val syketilfelledag3 = Syketilfelledag(LocalDate.of(2021, 6, 4), syketilfellebit3)
             val syketilfelledag4 = Syketilfelledag(LocalDate.of(2021, 6, 5), syketilfellebit4)
 
-            val forloper = sykeforlopService.getSykeforloper(listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3, syketilfelledag4))
+            val forlopliste = sykeforlopService.getSykeforlopList(listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3, syketilfelledag4))
 
-            forloper.size shouldEqual 1
-            forloper[0].fom shouldEqual LocalDate.of(2021, 6, 1)
-            forloper[0].tom shouldEqual LocalDate.of(2021, 6, 5)
+            forlopliste.size shouldEqual 1
+            forlopliste[0].fom shouldEqual LocalDate.of(2021, 6, 1)
+            forlopliste[0].tom shouldEqual LocalDate.of(2021, 6, 5)
         }
 
-        it("Skal lage 2 sykeforloper") {
+        it("Skal lage 2 sykeforlop") {
             val syketilfellebit1 = Syketilfellebit(
                 "1",
                 arbeidstakerAktorId1,
@@ -128,9 +128,9 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val syketilfelledag3 = Syketilfelledag(LocalDate.of(2021, 6, 4).plusDays(SYKEFORLOP_MIN_DIFF_DAGER).plusDays(1), syketilfellebit3)
             val syketilfelledag4 = Syketilfelledag(LocalDate.of(2021, 6, 5).plusDays(SYKEFORLOP_MIN_DIFF_DAGER).plusDays(1), syketilfellebit4)
 
-            val forloper = sykeforlopService.getSykeforloper(listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3, syketilfelledag4))
+            val forlopliste = sykeforlopService.getSykeforlopList(listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3, syketilfelledag4))
 
-            forloper.size shouldEqual 2
+            forlopliste.size shouldEqual 2
         }
 
         it("Skal lage 1 sykeforlop med fom og tom fra siste tilfellebit") {
@@ -197,11 +197,11 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val syketilfelledag3 = Syketilfelledag(LocalDate.of(2021, 6, 1), syketilfellebit3)
             val syketilfelledag4 = Syketilfelledag(LocalDate.of(2021, 6, 2), syketilfellebit4)
 
-            val forloper = sykeforlopService.getSykeforloper(listOf(syketilfelledag1, syketilfelledag2, syketilfelledag22, syketilfelledag3, syketilfelledag4))
+            val forlopliste = sykeforlopService.getSykeforlopList(listOf(syketilfelledag1, syketilfelledag2, syketilfelledag22, syketilfelledag3, syketilfelledag4))
 
-            forloper.size shouldEqual 1
-            forloper[0].fom shouldEqual LocalDate.of(2021, 6, 1)
-            forloper[0].tom shouldEqual LocalDate.of(2021, 6, 2)
+            forlopliste.size shouldEqual 1
+            forlopliste[0].fom shouldEqual LocalDate.of(2021, 6, 1)
+            forlopliste[0].tom shouldEqual LocalDate.of(2021, 6, 2)
         }
     }
 })

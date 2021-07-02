@@ -32,15 +32,15 @@ class AktivitetskravVarselPlanner(
     override suspend fun processOppfolgingstilfelle(oppfolgingstilfellePerson: OppfolgingstilfellePerson, fnr: String) = coroutineScope {
         log.info("[AKTIVITETSKRAV_VARSEL]: oppfolgingstilfellePerson:  $oppfolgingstilfellePerson")//TODO: delete
 
-        val gyldigeSykmeldingTifelledager = oppfolgingstilfellePerson.tidslinje.stream()
+        val gyldigeSykmeldingTilfelledager = oppfolgingstilfellePerson.tidslinje.stream()
             .filter { isGyldigSykmeldingTilfelle(it) }
             .toList()
-        log.info("[AKTIVITETSKRAV_VARSEL]: gyldigeSykmeldingTifelledager:  $gyldigeSykmeldingTifelledager")//TODO: delete
+        log.info("[AKTIVITETSKRAV_VARSEL]: gyldigeSykmeldingTifelledager:  $gyldigeSykmeldingTilfelledager")//TODO: delete
 
-        val sykeforloper = sykeforlopService.getSykeforloper(gyldigeSykmeldingTifelledager)
+        val sykeforlopList = sykeforlopService.getSykeforlopList(gyldigeSykmeldingTilfelledager)
 
-        if (sykeforloper.isNotEmpty()) {
-            for (sykeforlop in sykeforloper) {
+        if (sykeforlopList.isNotEmpty()) {
+            for (sykeforlop in sykeforlopList) {
                 val forlopStartDato = sykeforlop.fom
                 val forlopSluttDato = sykeforlop.tom
 
@@ -74,7 +74,7 @@ class AktivitetskravVarselPlanner(
                     }
                     lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }.isEmpty() -> {
                         log.info("[AKTIVITETSKRAV_VARSEL]: sjekker om det finnes varsler med samme id")
-                        if (varselUtil.hasLagreteVarslerForForrespurteSykmeldinger(lagreteVarsler, sykeforlop.ressursIds)) {
+                        if (varselUtil.hasLagreteVarslerForForespurteSykmeldinger(lagreteVarsler, sykeforlop.ressursIds)) {
                             log.info("[AKTIVITETSKRAV_VARSEL]: sletter tidligere varsler")
                             databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
 
