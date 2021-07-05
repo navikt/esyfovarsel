@@ -14,10 +14,10 @@ const val arbeidstakerAktorId1 = "1234567890123"
 
 
 @KtorExperimentalAPI
-object AktivitetskravVarselPlannerSpek : Spek({
+object SykeforlopServiceSpek : Spek({
     val sykeforlopService = SykeforlopService()
 
-    describe("AktivitetskravVarselPlannerSpek") {
+    describe("SykeforlopServiceSpek") {
 
         it("Skal lage 1 sykeforlop") {
             val fom1 = LocalDate.now()
@@ -65,7 +65,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             forlopliste[1].fom shouldEqual fom2
         }
 
-        it("Skal lage 1 sykeforlop med tom fra siste tilfellebit") {
+        it("Skal lage 1 sykeforlop med fom og tom fra siste tilfellebit") {
             val fom1 = LocalDate.now()
             val tom1 = LocalDate.now().plusDays(2)
             val fom2 = LocalDate.now().minusDays(1)
@@ -86,7 +86,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val forlopliste = sykeforlopService.getSykeforlopList(listOf(syketilfelledag1, syketilfelledag2, syketilfelledag4, syketilfelledag5))
 
             forlopliste.size shouldEqual 1
-            forlopliste[0].fom shouldEqual fom1
+            forlopliste[0].fom shouldEqual fom2
             forlopliste[0].tom shouldEqual tom2
         }
     }
