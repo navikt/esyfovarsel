@@ -20,16 +20,12 @@ class SykeforlopService {
             val biterMedSammeSykmeldingId = syketilfelledager.filter { it.prioritertSyketilfellebit?.ressursId == ressursId }
                 .map { i -> i.prioritertSyketilfellebit }
 
-            log.info("[AKTIVITETSKRAV_VARSEL]: biterMedSammeSykmeldingId, id:  $biterMedSammeSykmeldingId, $ressursId")//Todo: delete
-
             val sisteBit = biterMedSammeSykmeldingId.sortedByDescending { it?.opprettet }[0]
-            log.info("[AKTIVITETSKRAV_VARSEL]: sisteBit, id: $sisteBit")//Todo: delete
 
             if (sisteBit != null) {
                 sykmeldingtilfeller.add(Sykmeldingtilfelle(ressursId!!, sisteBit.fom.toLocalDate(), sisteBit.tom.toLocalDate(), sisteBit.opprettet))
             }
         }
-        log.info("[AKTIVITETSKRAV_VARSEL]: Laget sykmeldingtilfeller:  $sykmeldingtilfeller")//Todo: delete
         return sykmeldingtilfeller
     }
 
@@ -57,7 +53,6 @@ class SykeforlopService {
                 forrigeTilfelle = navarendeTilfelle
             }
             sykeforloper.add(sykeforlop)
-            log.info("[AKTIVITETSKRAV_VARSEL]: Laget sykeforloper:  $sykeforloper")//TODO: delete
             return sykeforloper
         }
         return listOf()

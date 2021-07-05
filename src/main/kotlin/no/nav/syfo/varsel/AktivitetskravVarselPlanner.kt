@@ -30,12 +30,9 @@ class AktivitetskravVarselPlanner(
     private val sykeforlopService: SykeforlopService = SykeforlopService()
 
     override suspend fun processOppfolgingstilfelle(oppfolgingstilfellePerson: OppfolgingstilfellePerson, fnr: String) = coroutineScope {
-        log.info("[AKTIVITETSKRAV_VARSEL]: oppfolgingstilfellePerson:  $oppfolgingstilfellePerson")//TODO: delete
-
         val gyldigeSykmeldingTilfelledager = oppfolgingstilfellePerson.tidslinje.stream()
             .filter { isGyldigSykmeldingTilfelle(it) }
             .toList()
-        log.info("[AKTIVITETSKRAV_VARSEL]: gyldigeSykmeldingTifelledager:  $gyldigeSykmeldingTilfelledager")//TODO: delete
 
         val sykeforlopList = sykeforlopService.getSykeforlopList(gyldigeSykmeldingTilfelledager)
 
@@ -45,13 +42,6 @@ class AktivitetskravVarselPlanner(
                 val forlopSluttDato = sykeforlop.tom
 
                 val aktivitetskravVarselDato = forlopStartDato.plusDays(AKTIVITETSKRAV_DAGER)
-
-                val forlopetsLengde = ChronoUnit.DAYS.between(forlopStartDato, forlopSluttDato)
-                log.info("[AKTIVITETSKRAV_VARSEL]: forlopStartDato:  $forlopStartDato")//TODO: delete
-                log.info("[AKTIVITETSKRAV_VARSEL]: forlopSluttDato:  $forlopSluttDato")//TODO: delete
-                log.info("[AKTIVITETSKRAV_VARSEL]: forlopetsLengde:  $forlopetsLengde")//TODO: delete
-                log.info("[AKTIVITETSKRAV_VARSEL]: aktivitetskravVarselDato:  $aktivitetskravVarselDato")//TODO: delete
-
                 val lagreteVarsler = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.AKTIVITETSKRAV)
 
                 when {

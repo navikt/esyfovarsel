@@ -32,7 +32,6 @@ class VarselUtil(private val databaseAccess: DatabaseInterface) {
             gjeldendeSykmeldinger.add(sm.toSet())
         }
         val gjeldendeSykmeldingerSet = gjeldendeSykmeldinger.flatten().toSet()
-        log.info("[AKTIVITETSKRAV_VARSEL]: gjeldendeSykmeldingerSet:  $gjeldendeSykmeldingerSet")//TODO: delete
         return (ressursIds intersect gjeldendeSykmeldingerSet).isNotEmpty()
     }
 

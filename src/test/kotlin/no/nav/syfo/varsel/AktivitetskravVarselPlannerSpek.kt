@@ -9,6 +9,7 @@ import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
 import no.nav.syfo.consumer.domain.Syketilfellebit
 import no.nav.syfo.consumer.domain.Syketilfelledag
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
+import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchAllSykmeldingIdsAndCount
@@ -17,8 +18,8 @@ import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
+import org.amshove.kluent.should
 import org.amshove.kluent.shouldEqual
-import org.amshove.kluent.shouldNotEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
@@ -81,11 +82,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
                 aktivitetskravVarselPlanner.processOppfolgingstilfelle(oppfolgingstilfellePerson, arbeidstakerFnr1)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
-                val nrOfRowsFetchedTotal = lagreteVarsler.size
-
-                nrOfRowsFetchedTotal shouldEqual 1
-
-                lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name } shouldEqual listOf()
+                lagreteVarsler.skalIkkeHaAktivitetskravVarsel()
             }
         }
 
@@ -114,11 +111,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
                 aktivitetskravVarselPlanner.processOppfolgingstilfelle(oppfolgingstilfellePerson, arbeidstakerFnr1)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
-                val nrOfRowsFetchedTotal = lagreteVarsler.size
-
-                nrOfRowsFetchedTotal shouldEqual 1
-
-                lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name } shouldEqual listOf()
+                lagreteVarsler.skalIkkeHaAktivitetskravVarsel()
             }
         }
 
@@ -147,11 +140,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
                 aktivitetskravVarselPlanner.processOppfolgingstilfelle(oppfolgingstilfellePerson, arbeidstakerFnr1)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
-                val nrOfRowsFetchedTotal = lagreteVarsler.size
-
-                nrOfRowsFetchedTotal shouldEqual 1
-
-                lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name } shouldEqual listOf()
+                lagreteVarsler.skalIkkeHaAktivitetskravVarsel()
             }
         }
 
@@ -180,15 +169,11 @@ object AktivitetskravVarselPlannerSpek : Spek({
                 aktivitetskravVarselPlanner.processOppfolgingstilfelle(oppfolgingstilfellePerson, arbeidstakerFnr1)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
-                val nrOfRowsFetchedTotal = lagreteVarsler.size
-
-                nrOfRowsFetchedTotal shouldEqual 1
-
-                lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name } shouldEqual listOf()
+                lagreteVarsler.skalIkkeHaAktivitetskravVarsel()
             }
         }
 
-        it("Aktivitetskrav varsel er allerede lagret, varsel skal ikke opprettes") {
+        it("Aktivitetskrav varsel er allerede lagret, nytt varsel skal ikke opprettes") {
             val utsendingsdato = LocalDate.now().plusDays(1)
             val initPlanlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1", "2"), VarselType.AKTIVITETSKRAV, utsendingsdato)
 
@@ -214,22 +199,18 @@ object AktivitetskravVarselPlannerSpek : Spek({
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
 
             val lagreteVarsler1 = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
-            val nrOfRowsFetchedTotal1 = lagreteVarsler1.size
-
-            nrOfRowsFetchedTotal1 shouldEqual 1
+            lagreteVarsler1.size shouldEqual 1
 
             val oppfolgingstilfellePerson = OppfolgingstilfellePerson(arbeidstakerFnr1, listOf(syketilfelledag1), syketilfelledag1, 0, false, LocalDateTime.now())
 
-            // Skal lagre varsel
+            // Skal prøve å lagre varsel
             runBlocking { aktivitetskravVarselPlanner.processOppfolgingstilfelle(oppfolgingstilfellePerson, arbeidstakerFnr1) }
 
             val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
-            val nrOfRowsFetchedTotal = lagreteVarsler.size
-
-            nrOfRowsFetchedTotal shouldEqual 1
+            lagreteVarsler.skalHaAktivitetskravVarsel()
         }
 
-        it("Aktivitetskrav varsel er allerede sendt ut, varsel skal ikke opprettes") {
+        it("Aktivitetskrav varsel er allerede sendt ut, nytt varsel skal ikke opprettes") {
             val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1"), VarselType.AKTIVITETSKRAV, LocalDate.now().minusDays(7))
 
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)
@@ -255,20 +236,15 @@ object AktivitetskravVarselPlannerSpek : Spek({
             runBlocking { aktivitetskravVarselPlanner.processOppfolgingstilfelle(oppfolgingstilfellePerson, arbeidstakerFnr1) }
 
             val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
-            val nrOfRowsFetchedTotal = lagreteVarsler.size
-
-            nrOfRowsFetchedTotal shouldEqual 2
-            nrOfRowsFetchedTotal shouldNotEqual 3
-
-            lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name }.size shouldEqual 1
+            lagreteVarsler.skalIkkeHaNyttAktivitetskravVarsel()
         }
 
         it("Aktivitetskrav varsel blir lagret i database, ett sykeforløp") {
             val utsendingsdato1 = LocalDate.now().plusDays(2)
-            //Gammel varsel
+            //Gammelt varsel
             val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1"), VarselType.AKTIVITETSKRAV, utsendingsdato1)
 
-            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)//Gammel usendt AKTIVITETSKRAV
+            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)//Gammelt usendt AKTIVITETSKRAV
 
             val fom1 = utsendingsdato1.minusDays(AKTIVITETSKRAV_DAGER)
             val tom1 = utsendingsdato1.plusDays(20)
@@ -353,10 +329,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
         it("Aktivitetskrav varsel blir lagret i database for hvert beregnet sykeforlop") {
             val utsendingsdato1 = LocalDate.now().plusDays(2)
-            //Gammel varsel
+            //Gammelt varsel
             val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1"), VarselType.AKTIVITETSKRAV, utsendingsdato1)
 
-            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)//Gammel usendt AKTIVITETSKRAV
+            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)//Gammelt usendt AKTIVITETSKRAV
 
             val fom1 = utsendingsdato1.minusDays(AKTIVITETSKRAV_DAGER)
             val tom1 = utsendingsdato1.plusDays(20)
@@ -441,9 +417,9 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
         it("Aktivitetskrav varsel blir slettet fra database ved nytt sykeforløp hvis sluttdato i ny sykmelding er før sykeforløpets startdato") {
             val utsendingsdato1 = LocalDate.now().plusDays(2)
-            //Gammel varsel
+            //Gammelt varsel
             val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("3"), VarselType.AKTIVITETSKRAV, utsendingsdato1)
-            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)//Gammel AKTIVITETSKRAV
+            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)//Gammelt AKTIVITETSKRAV
 
             embeddedDatabase.fetchAllSykmeldingIdsAndCount()
 
@@ -501,9 +477,9 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
         it("Aktivitetskrav varsel dato blir beregnet på nytt hvis nyere sykmelding har senere fom dato") {
             val utsendingsdato1 = LocalDate.now().plusDays(2)
-            //Gammel varsel
+            //Gammelt varsel
             val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("3"), VarselType.AKTIVITETSKRAV, utsendingsdato1)
-            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)//Gammel AKTIVITETSKRAV
+            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)//Gammelt AKTIVITETSKRAV
 
             val fom1 = utsendingsdato1.minusDays(AKTIVITETSKRAV_DAGER)
             val tom1 = utsendingsdato1.plusDays(20)
@@ -559,3 +535,14 @@ object AktivitetskravVarselPlannerSpek : Spek({
     }
 })
 
+private fun List<PPlanlagtVarsel>.skalHaAktivitetskravVarsel() = this.should("Skal ha aktititetskrav varsel") {
+    size == 1 && filter { it.type == VarselType.AKTIVITETSKRAV.name }.size == 1
+}
+
+private fun List<PPlanlagtVarsel>.skalIkkeHaNyttAktivitetskravVarsel() = this.should("Skal ha aktititetskrav varsel") {
+    size > 1 && filter { it.type == VarselType.AKTIVITETSKRAV.name }.size == 1
+}
+
+private fun List<PPlanlagtVarsel>.skalIkkeHaAktivitetskravVarsel() = this.should("Skal ikke ha aktititetskrav varsel") {
+    size == 1 && filter { it.type == VarselType.AKTIVITETSKRAV.name }.size == 0
+}
