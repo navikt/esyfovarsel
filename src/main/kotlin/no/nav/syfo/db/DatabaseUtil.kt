@@ -20,9 +20,15 @@ fun ResultSet.toPPlanlagtVarsel(): PPlanlagtVarsel =
         sistEndret = getTimestamp("sist_endret").toLocalDateTime()
     )
 
-fun ResultSet.toSykmeldingerIdMap(): Map<String, List<String>> =
-    hashMapOf(getString("varsling_id") to parseSykmeldingerIds(getString("sykmelding_id")))
+fun ResultSet.toVarslingIdsListe(): List<String> {
+    val rader = ArrayList<String>()
+    while (this.next()) {
+        rader.add(getString("sykmelding_id"))
+    }
+    return rader
+}
 
-fun parseSykmeldingerIds(ids: String): List<String> {
-    return ids.split(",").map { it.trim() }
+fun ResultSet.toVarslingIdsListeCount(): Int {
+    this.last()
+    return this.row
 }

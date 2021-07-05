@@ -12,16 +12,20 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.util.*
 import no.nav.syfo.Environment
-import no.nav.syfo.auth.StsConsumer
-import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
+import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusRequest
+import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 @KtorExperimentalAPI
-class SyfosyketilfelleConsumer(env: Environment, stsConsumer: StsConsumer) {
+class SykmeldingerConsumer(env: Environment, azureAdTokenConsumer: AzureAdTokenConsumer) {
+
     private val client: HttpClient
-    private val stsConsumer: StsConsumer
+    private val azureAdTokenConsumer: AzureAdTokenConsumer
     private val basepath: String
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.SyfosyketilfelleConsumer")
+    private val scope = env.syfosmregisterScope
 
     init {
         client = HttpClient(CIO) {
@@ -33,39 +37,36 @@ class SyfosyketilfelleConsumer(env: Environment, stsConsumer: StsConsumer) {
                 }
             }
         }
-        this.stsConsumer = stsConsumer
-        basepath = env.syfosyketilfelleUrl
+        this.azureAdTokenConsumer = azureAdTokenConsumer
+        basepath = env.syfosmregisterUrl
     }
 
-    suspend fun getOppfolgingstilfelle(aktorId: String): OppfolgingstilfellePerson? {
-        val requestURL = "$basepath/kafka/oppfolgingstilfelle/beregn/$aktorId"
-        val stsToken = stsConsumer.getToken()
-        val bearerTokenString = "Bearer ${stsToken.access_token}"
+    suspend fun getSykmeldtStatusPaDato(dato: LocalDate, fnr: String): SykmeldtStatusResponse? {
+        val requestURL = "$basepath/api/v2/sykmelding/sykmeldtStatus"
+        val requestBody = SykmeldtStatusRequest(fnr, dato)
+        val token = azureAdTokenConsumer.getAzureAdAccessToken(scope)
 
-        val response = client.get<HttpResponse>(requestURL) {
+        val response = client.post<HttpResponse>(requestURL) {
             headers {
-                append(HttpHeaders.Authorization, bearerTokenString)
                 append(HttpHeaders.Accept, ContentType.Application.Json)
+                append(HttpHeaders.ContentType, ContentType.Application.Json)
+                append(HttpHeaders.Authorization, "Bearer $token")
             }
+            body = requestBody
         }
 
         return when (response.status) {
             HttpStatusCode.OK -> {
-                response.receive<OppfolgingstilfellePerson>()
-            }
-            HttpStatusCode.NoContent -> {
-                log.error("Could not get oppfolgingstilfelle: No content found in the response body")
-                null
+                response.receive<SykmeldtStatusResponse>()
             }
             HttpStatusCode.Unauthorized -> {
-                log.error("Could not get oppfolgingstilfelle: Unable to authorize")
+                log.error("Could not get sykmeldinger from syfosmregister: Unable to authorize")
                 null
             }
             else -> {
-                log.error("Could not get oppfolgingstilfelle: $response")
+                log.error("Could not get sykmeldinger from syfosmregister: $response")
                 null
             }
         }
     }
-
 }

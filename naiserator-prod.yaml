@@ -64,3 +64,7 @@ spec:
       value: https://pdl-api.nais.adeo.no/graphql
     - name: DKIF_URL
       value: https://dkif.intern.nav.no
+    - name: SYFOSMREGISTER_URL
+      value: http://syfosmregister.teamsykmelding
+    - name: SYFOSMREGISTER_SCOPE
+      value: api://prod-fss.teamsykmelding.syfosmregister/.default

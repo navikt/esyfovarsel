@@ -2,6 +2,7 @@ package no.nav.syfo.testutil.mocks
 
 import no.nav.syfo.consumer.domain.*
 import no.nav.syfo.consumer.pdl.*
+import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import java.time.LocalDate
 
@@ -48,6 +49,17 @@ val oppfolgingstilfelleResponse = OppfolgingstilfellePerson(
     antallBrukteDager = 2,
     oppbruktArbeidsgvierperiode = false,
     utsendelsestidspunkt = fomStartOfDay
+)
+
+//syfosmregister
+
+val sykmeldtStatusResponse = listOf(
+    SykmeldtStatusResponse(
+        erSykmeldt = true,
+        gradert = false,
+        fom = LocalDate.now(),
+        tom = LocalDate.now()
+    )
 )
 
 // DKIF
@@ -128,7 +140,7 @@ val pdlGetBrukerReservert = mapOf(
         listOf(
             PdlError(
                 message = "Cannot find person in PDL",
-                locations = listOf(PdlErrorLocation(line=0, column = 0)),
+                locations = listOf(PdlErrorLocation(line = 0, column = 0)),
                 path = null,
                 extensions = PdlErrorExtension(code = "code", classification = "classification")
             )
@@ -141,33 +153,49 @@ val pdlGetFnrResponseMap = mapOf(
     aktorId to PdlIdentResponse(
         null,
         PdlHentIdenter(
-            PdlIdenter(listOf(PdlIdent(
-                ident = fnr1
-            )))
+            PdlIdenter(
+                listOf(
+                    PdlIdent(
+                        ident = fnr1
+                    )
+                )
+            )
         )
     ),
     aktorId2 to PdlIdentResponse(
         null,
         PdlHentIdenter(
-            PdlIdenter(listOf(PdlIdent(
-                ident = fnr2
-            )))
+            PdlIdenter(
+                listOf(
+                    PdlIdent(
+                        ident = fnr2
+                    )
+                )
+            )
         )
     ),
     aktorId3 to PdlIdentResponse(
         null,
         PdlHentIdenter(
-            PdlIdenter(listOf(PdlIdent(
-                ident = fnr3
-            )))
+            PdlIdenter(
+                listOf(
+                    PdlIdent(
+                        ident = fnr3
+                    )
+                )
+            )
         )
     ),
     aktorId4 to PdlIdentResponse(
         null,
         PdlHentIdenter(
-            PdlIdenter(listOf(PdlIdent(
-                ident = fnr4
-            )))
+            PdlIdenter(
+                listOf(
+                    PdlIdent(
+                        ident = fnr4
+                    )
+                )
+            )
         )
     )
 )

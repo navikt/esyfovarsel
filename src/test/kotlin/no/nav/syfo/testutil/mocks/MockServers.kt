@@ -6,17 +6,15 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.features.ContentNegotiation
-import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.jackson
-import io.ktor.request.receiveText
-import io.ktor.response.respond
+import io.ktor.application.*
+import io.ktor.features.*
+import io.ktor.http.*
+import io.ktor.jackson.*
+import io.ktor.request.*
+import io.ktor.response.*
 import io.ktor.routing.*
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
-import io.ktor.server.netty.NettyApplicationEngine
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import no.nav.syfo.Environment
 import no.nav.syfo.consumer.DkifConsumer
 import no.nav.syfo.consumer.pdl.IDENTER_QUERY
@@ -67,10 +65,11 @@ class MockServers(val env: Environment) {
     fun mockSyfosyketilfelleServer(): NettyApplicationEngine {
         return mockServer(env.syfosyketilfelleUrl) {
             get("/kafka/oppfolgingstilfelle/beregn/{aktorId}") {
-                call.respond(oppfolgingstilfelleResponse
-                    .copy(
-                        aktorId = call.parameters["aktorId"] ?: aktorId
-                    )
+                call.respond(
+                    oppfolgingstilfelleResponse
+                        .copy(
+                            aktorId = call.parameters["aktorId"] ?: aktorId
+                        )
                 )
             }
         }
@@ -95,7 +94,7 @@ class MockServers(val env: Environment) {
     }
 }
 
-fun String.isValidHeader() : Boolean {
+fun String.isValidHeader(): Boolean {
     return this.all { char -> char.isDigit() }
 }
 

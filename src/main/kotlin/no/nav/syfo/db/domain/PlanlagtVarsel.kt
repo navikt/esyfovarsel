@@ -9,7 +9,7 @@ enum class VarselType {
 data class PlanlagtVarsel (
     val fnr: String,
     val aktorId: String,
-    val sykmeldingerId: List<String>,
+    val sykmeldingerId: Set<String>,
     val type: VarselType,
     val utsendingsdato: LocalDate = LocalDate.now()
 )

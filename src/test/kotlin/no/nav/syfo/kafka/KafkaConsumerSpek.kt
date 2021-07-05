@@ -13,7 +13,9 @@ import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import no.nav.syfo.service.AccessControl
 import no.nav.syfo.testEnviornment
 import no.nav.syfo.testutil.kafka.JacksonKafkaSerializer
-import no.nav.syfo.testutil.mocks.*
+import no.nav.syfo.testutil.mocks.MockServers
+import no.nav.syfo.testutil.mocks.MockVarselPlaner
+import no.nav.syfo.testutil.mocks.kafkaOppfolgingstilfellePeker
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.spekframework.spek2.Spek

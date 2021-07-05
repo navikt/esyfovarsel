@@ -3,22 +3,21 @@ package no.nav.syfo.consumer
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.HttpClient
-import io.ktor.client.call.receive
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.request.post
-import io.ktor.client.request.headers
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.features.json.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.util.*
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.Environment
+import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.pdl.*
 import org.slf4j.LoggerFactory
 
+@KtorExperimentalAPI
 class PdlConsumer(env: Environment, stsConsumer: StsConsumer) {
     private val client: HttpClient
     private val stsConsumer: StsConsumer
@@ -39,7 +38,7 @@ class PdlConsumer(env: Environment, stsConsumer: StsConsumer) {
         pdlBasepath = env.pdlUrl
     }
 
-    fun getFnr(aktorId: String) : String? {
+    fun getFnr(aktorId: String): String? {
         val response = callPdl(IDENTER_QUERY, aktorId)
 
         return when (response?.status) {
@@ -61,7 +60,7 @@ class PdlConsumer(env: Environment, stsConsumer: StsConsumer) {
         }
     }
 
-    fun isBrukerGradert(aktorId: String) : Boolean? {
+    fun isBrukerGradert(aktorId: String): Boolean? {
         val response = callPdl(PERSON_QUERY, aktorId)
 
         return when (response?.status) {
@@ -83,7 +82,7 @@ class PdlConsumer(env: Environment, stsConsumer: StsConsumer) {
         }
     }
 
-    fun callPdl(service: String, aktorId: String) : HttpResponse? {
+    fun callPdl(service: String, aktorId: String): HttpResponse? {
         return runBlocking {
             val stsToken = stsConsumer.getToken()
             val bearerTokenString = "Bearer ${stsToken.access_token}"
@@ -94,7 +93,7 @@ class PdlConsumer(env: Environment, stsConsumer: StsConsumer) {
                 client.post<HttpResponse>(pdlBasepath) {
                     headers {
                         append(TEMA_HEADER, OPPFOLGING_TEMA_HEADERVERDI)
-                        append(HttpHeaders.ContentType, APPLICATION_JSON)
+                        append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, bearerTokenString)
                         append(NAV_CONSUMER_TOKEN_HEADER, bearerTokenString)
                     }

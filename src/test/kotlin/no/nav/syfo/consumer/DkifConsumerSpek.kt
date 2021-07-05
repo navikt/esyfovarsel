@@ -3,12 +3,11 @@ package no.nav.syfo.consumer
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.testEnviornment
+import no.nav.syfo.testutil.mocks.*
 import org.amshove.kluent.shouldEqual
+import org.amshove.kluent.shouldNotBe
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import no.nav.syfo.testutil.mocks.*
-import org.amshove.kluent.shouldNotBe
-import java.lang.RuntimeException
 import kotlin.test.assertFailsWith
 
 const val aktorIdNonReservedUser = aktorId
