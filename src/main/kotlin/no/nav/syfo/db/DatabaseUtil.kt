@@ -1,11 +1,7 @@
 package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PPlanlagtVarsel
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.sql.ResultSet
-
-private val log: Logger = LoggerFactory.getLogger("package no.nav.syfo.db.DatabaseUtil")
 
 fun <T> ResultSet.toList(mapper: ResultSet.() -> T) = mutableListOf<T>().apply {
     while (next()) {
