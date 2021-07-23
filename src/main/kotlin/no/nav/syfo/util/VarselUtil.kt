@@ -34,12 +34,4 @@ class VarselUtil(private val databaseAccess: DatabaseInterface) {
         val gjeldendeSykmeldingerSet = gjeldendeSykmeldinger.flatten().toSet()
         return (ressursIds intersect gjeldendeSykmeldingerSet).isNotEmpty()
     }
-
-    fun isVarselSendUt(fnr: String, varselType: VarselType, varselDato: LocalDate): Boolean {
-        return databaseAccess.fetchPlanlagtVarselByFnr(fnr)
-            .filter { varselType.name == it.type }
-            .filter { it.utsendingsdato == varselDato }
-            .filter { it.utsendingsdato.isBefore(LocalDate.now()) || it.utsendingsdato == LocalDate.now() }
-            .any()
-    }
 }

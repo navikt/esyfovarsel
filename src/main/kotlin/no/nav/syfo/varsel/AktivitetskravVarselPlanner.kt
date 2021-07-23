@@ -2,7 +2,7 @@ package no.nav.syfo.varsel
 
 import io.ktor.util.*
 import kotlinx.coroutines.coroutineScope
-import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
+import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.consumer.domain.SyketilfellebitTag
 import no.nav.syfo.consumer.domain.Syketilfelledag
 import no.nav.syfo.db.DatabaseInterface
@@ -20,6 +20,7 @@ import kotlin.streams.toList
 @KtorExperimentalAPI
 class AktivitetskravVarselPlanner(
     private val databaseAccess: DatabaseInterface,
+    private val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
     val sykmeldingService: SykmeldingService
 ) : VarselPlanner {
     private val AKTIVITETSKRAV_DAGER: Long = 42
@@ -28,7 +29,10 @@ class AktivitetskravVarselPlanner(
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
     private val sykeforlopService: SykeforlopService = SykeforlopService()
 
-    override suspend fun processOppfolgingstilfelle(oppfolgingstilfellePerson: OppfolgingstilfellePerson, fnr: String) = coroutineScope {
+    override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String) = coroutineScope {
+        val oppfolgingstilfellePerson = syfosyketilfelleConsumer.getOppfolgingstilfelle(aktorId)
+            ?: throw RuntimeException("[AKTIVITETSKRAV_VARSEL]: Oppfolgingstilfelle is null")
+
         val gyldigeSykmeldingTilfelledager = oppfolgingstilfellePerson.tidslinje.stream()
             .filter { isGyldigSykmeldingTilfelle(it) }
             .toList()
@@ -51,8 +55,6 @@ class AktivitetskravVarselPlanner(
                 } else if (sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, fnr) == true){
                     log.info("[AKTIVITETSKRAV_VARSEL]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, sletter tidligere planlagt varsel om det finnes i DB")
                     databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
-                } else if(varselUtil.isVarselSendUt(fnr, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)) {
-                    log.info("[AKTIVITETSKRAV_VARSEL]: varsel var allerede sendt ut")
                 } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }.isNotEmpty()){
                     log.info("[AKTIVITETSKRAV_VARSEL]: varsel med samme utsendingsdato er allerede planlagt")
                 } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }.isEmpty()){
