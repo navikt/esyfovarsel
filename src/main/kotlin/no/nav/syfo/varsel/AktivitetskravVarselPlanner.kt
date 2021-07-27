@@ -49,6 +49,7 @@ class AktivitetskravVarselPlanner(
 
                 if (varselUtil.isVarselDatoForIDag(aktivitetskravVarselDato)) {
                     log.info("[AKTIVITETSKRAV_VARSEL]: Beregnet dato for varsel er før i dag, sletter tidligere planlagt varsel om det finnes i DB")
+                    databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
                 } else if (varselUtil.isVarselDatoEtterTilfelleSlutt(aktivitetskravVarselDato, forlopSluttDato)) {
                     log.info("[AKTIVITETSKRAV_VARSEL]: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB")
                     databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
