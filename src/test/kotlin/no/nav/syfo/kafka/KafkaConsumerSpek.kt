@@ -7,7 +7,6 @@ import no.nav.syfo.ApplicationState
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.DkifConsumer
 import no.nav.syfo.consumer.PdlConsumer
-import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import no.nav.syfo.service.AccessControl
@@ -50,11 +49,10 @@ object KafkaConsumerSpek : Spek({
     val syfosyketilfelleServer = mockServers.mockSyfosyketilfelleServer()
 
     val stsConsumer = StsConsumer(testEnv)
-    val syfosyketilfelleConsumer = SyfosyketilfelleConsumer(testEnv, stsConsumer)
     val pdlConsumer = PdlConsumer(testEnv, stsConsumer)
     val dkifConsumer = DkifConsumer(testEnv, stsConsumer)
     val accessControl = AccessControl(pdlConsumer, dkifConsumer)
-    val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(testEnv, syfosyketilfelleConsumer, accessControl)
+    val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(testEnv, accessControl)
         .addPlanner(MockVarselPlaner(fakeApplicationState))
 
 

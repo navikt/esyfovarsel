@@ -9,7 +9,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
-import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.kafka.KafkaListener
 import no.nav.syfo.kafka.consumerProperties
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
@@ -25,7 +24,6 @@ import java.time.Duration
 @KtorExperimentalAPI
 class OppfolgingstilfelleKafkaConsumer(
     val env: Environment,
-    val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
     val accessControl: AccessControl
 ) : KafkaListener {
 
@@ -53,10 +51,7 @@ class OppfolgingstilfelleKafkaConsumer(
                     val aktorId = peker.aktorId
                     val fnr = accessControl.getFnrIfUserCanBeNotified(aktorId)
                     fnr?.let {
-                        val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle(aktorId)
-                        oppfolgingstilfelle?.let {
-                            varselPlanners.forEach { planner -> runBlocking { planner.processOppfolgingstilfelle(oppfolgingstilfelle, fnr) } }
-                        }
+                        varselPlanners.forEach { planner -> runBlocking { planner.processOppfolgingstilfelle(aktorId, fnr) } }
                     }
                 } catch (e: IOException) {
                     log.error("Error in [$topicOppfolgingsTilfelle] listener: Could not parse message | ${e.message}")

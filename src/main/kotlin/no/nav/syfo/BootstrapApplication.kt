@@ -110,8 +110,8 @@ fun Application.kafkaModule() {
         val sykmeldingerConsumer = SykmeldingerConsumer(env, azureAdTokenConsumer)
         val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
 
-        val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, oppfolgingstilfelleConsumer, accessControl)
-            .addPlanner(AktivitetskravVarselPlanner(database, sykmeldingService))
+        val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, accessControl)
+            .addPlanner(AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService))
 
         launch(backgroundTasksContext) {
             launchKafkaListener(
