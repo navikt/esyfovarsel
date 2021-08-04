@@ -1,14 +1,17 @@
 package no.nav.syfo.db
 
 
+import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
+import org.amshove.kluent.should
 import org.amshove.kluent.shouldEqual
 import org.amshove.kluent.shouldNotBe
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.LocalDate
 
 const val arbeidstakerFnr1 = "12345678901"
 const val arbeidstakerFnr2 = "23456789012"
@@ -136,5 +139,43 @@ object PlanlagtVarselDAOSpek : Spek({
             embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(aktivitetskravPlanlagtVarselUuid).size shouldEqual 0
             embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(merveiledningPlanlagtVarselUuid).size shouldNotBe 0
         }
+
+        it("Finn PlanlagtVarsel som skal sendes") {
+            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1", "2"), VarselType.AKTIVITETSKRAV, LocalDate.now())
+            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("3"), VarselType.MER_VEILEDNING, LocalDate.now().minusDays(1))
+            val planlagtVarselToStore3 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, setOf("4"), VarselType.AKTIVITETSKRAV, LocalDate.now().plusDays(1))
+            val planlagtVarselToStore4 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, setOf("5"), VarselType.MER_VEILEDNING, LocalDate.now().plusWeeks(1))
+
+            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)
+            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
+            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore3)
+            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore4)
+
+            val varslerSomSkalSendes = embeddedDatabase.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
+
+            varslerSomSkalSendes.skalBareHaVarslerMedUtsendingsdatoPaEllerFor(LocalDate.now())
+            varslerSomSkalSendes.skalInneholdeVarsel(planlagtVarselToStore1)
+            varslerSomSkalSendes.skalInneholdeVarsel(planlagtVarselToStore2)
+            varslerSomSkalSendes.skalIkkeInneholdeVarsel(planlagtVarselToStore3)
+            varslerSomSkalSendes.skalIkkeInneholdeVarsel(planlagtVarselToStore4)
+        }
     }
 })
+
+private fun Collection<PPlanlagtVarsel>.skalBareHaVarslerMedUtsendingsdatoPaEllerFor(dato: LocalDate) = this.should("Varsel skal ha utsendingsdato på eller før $dato. Varsel $this") {
+    all { it.utsendingsdato.isBefore(dato) || it.utsendingsdato.isEqual(dato) }
+}
+
+private fun Collection<PPlanlagtVarsel>.skalInneholdeVarsel(expectedVarsel: PlanlagtVarsel) = this.should("$this skal inneholde varsel med fnr[${expectedVarsel.fnr}], aktorId[${expectedVarsel.aktorId}], utsendingsdato[${expectedVarsel.utsendingsdato}], type[${expectedVarsel.type}]") {
+    any { it.fnr == expectedVarsel.fnr &&
+            it.aktorId == expectedVarsel.aktorId &&
+            it.utsendingsdato == expectedVarsel.utsendingsdato &&
+            it.type == expectedVarsel.type.name }
+}
+
+private fun Collection<PPlanlagtVarsel>.skalIkkeInneholdeVarsel(expectedVarsel: PlanlagtVarsel) = this.should("$this skal ikke inneholde varsel med fnr[${expectedVarsel.fnr}], aktorId[${expectedVarsel.aktorId}], utsendingsdato[${expectedVarsel.utsendingsdato}], type[${expectedVarsel.type}]") {
+    ! any { it.fnr == expectedVarsel.fnr &&
+            it.aktorId == expectedVarsel.aktorId &&
+            it.utsendingsdato == expectedVarsel.utsendingsdato &&
+            it.type == expectedVarsel.type.name }
+}
