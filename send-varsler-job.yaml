@@ -1,0 +1,13 @@
+apiVersion: nais.io/v1
+kind: Naisjob
+metadata:
+  name: send-varsler-job
+  namespace: team-esyfo
+  labels:
+    team: team-esyfo
+spec:
+  image: {{ image }}
+  schedule: "*/1 * * * *"
+  env:
+    - name: SEND_VARSLER
+      value: "JA"

@@ -20,6 +20,7 @@ import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.DbConfig
 import no.nav.syfo.db.LocalDatabase
 import no.nav.syfo.db.RemoteDatabase
+import no.nav.syfo.job.SendVarslerJobb
 import no.nav.syfo.kafka.launchKafkaListener
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.service.AccessControl
@@ -38,26 +39,35 @@ lateinit var database: DatabaseInterface
 
 @KtorExperimentalAPI
 fun main() {
-    val server = embeddedServer(Netty, applicationEngineEnvironment {
-        log = LoggerFactory.getLogger("ktor.application")
-        config = HoconApplicationConfig(ConfigFactory.load())
 
-        connector {
-            port = env.applicationPort
-        }
+    val sendeVarsler = System.getenv("SEND_VARSLER") ?: "NEI"
+    if (sendeVarsler == "JA") {
+        val jobb = SendVarslerJobb()
+        sendVarsler(jobb)
+    } else {
+        val server = embeddedServer(Netty, applicationEngineEnvironment {
+            log = LoggerFactory.getLogger("ktor.application")
+            config = HoconApplicationConfig(ConfigFactory.load())
 
-        module {
-            init()
-            serverModule()
-            kafkaModule()
-        }
-    })
-    Runtime.getRuntime().addShutdownHook(Thread {
-        server.stop(10, 10, TimeUnit.SECONDS)
-    })
+            connector {
+                port = env.applicationPort
+            }
 
-    server.start(wait = false)
+            module {
+                init()
+                serverModule()
+                kafkaModule()
+            }
+        })
+        Runtime.getRuntime().addShutdownHook(Thread {
+            server.stop(10, 10, TimeUnit.SECONDS)
+        })
+
+        server.start(wait = false)
+    }
 }
+
+fun sendVarsler(jobb: SendVarslerJobb) = jobb.sendVarsler()
 
 @KtorExperimentalAPI
 fun Application.init() {
