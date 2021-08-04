@@ -40,8 +40,7 @@ lateinit var database: DatabaseInterface
 @KtorExperimentalAPI
 fun main() {
 
-    val sendeVarsler = System.getenv("SEND_VARSLER") ?: "NEI"
-    if (sendeVarsler == "JA") {
+    if (env.sendVarsler) {
         val jobb = SendVarslerJobb()
         sendVarsler(jobb)
     } else {

@@ -40,7 +40,8 @@ private fun remoteEnvironment(): Environment {
         getEnvVar("SYFOSMREGISTER_SCOPE"),
         getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
         getEnvVar("AZURE_APP_CLIENT_ID"),
-        getEnvVar("AZURE_APP_CLIENT_SECRET")
+        getEnvVar("AZURE_APP_CLIENT_SECRET"),
+        getEnvVar("SEND_VARSLER", "false").toBoolean()
     )
 }
 
@@ -66,7 +67,8 @@ data class Environment(
     val syfosmregisterScope: String,
     val aadAccessTokenUrl: String,
     val clientId: String,
-    val clientSecret: String
+    val clientSecret: String,
+    val sendVarsler: Boolean
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =
