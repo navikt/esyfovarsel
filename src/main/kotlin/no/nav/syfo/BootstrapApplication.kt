@@ -32,18 +32,18 @@ import java.util.concurrent.TimeUnit
 
 data class ApplicationState(var running: Boolean = false, var initialized: Boolean = false)
 
-val env: Environment = getEnvironment()
 val state: ApplicationState = ApplicationState()
 val backgroundTasksContext = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
 lateinit var database: DatabaseInterface
 
 @KtorExperimentalAPI
 fun main() {
-
-    if (env.sendVarsler) {
+    val sendeVarsler = System.getenv("SEND_VARSLER") ?: "NEI"
+    if (sendeVarsler == "JA") {
         val jobb = SendVarslerJobb()
         sendVarsler(jobb)
     } else {
+        val env: Environment = getEnvironment()
         val server = embeddedServer(Netty, applicationEngineEnvironment {
             log = LoggerFactory.getLogger("ktor.application")
             config = HoconApplicationConfig(ConfigFactory.load())
@@ -53,9 +53,9 @@ fun main() {
             }
 
             module {
-                init()
+                init(env)
                 serverModule()
-                kafkaModule()
+                kafkaModule(env)
             }
         })
         Runtime.getRuntime().addShutdownHook(Thread {
@@ -69,7 +69,7 @@ fun main() {
 fun sendVarsler(jobb: SendVarslerJobb) = jobb.sendVarsler()
 
 @KtorExperimentalAPI
-fun Application.init() {
+fun Application.init(env: Environment) {
 
     runningLocally {
         database = LocalDatabase(
@@ -107,7 +107,7 @@ fun Application.serverModule() {
 }
 
 @KtorExperimentalAPI
-fun Application.kafkaModule() {
+fun Application.kafkaModule(env: Environment) {
 
     runningRemotely {
         val stsConsumer = StsConsumer(env)

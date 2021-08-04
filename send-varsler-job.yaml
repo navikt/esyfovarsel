@@ -6,10 +6,10 @@ metadata:
   labels:
     team: team-esyfo
 spec:
-  image: ghcr.io/navikt/esyfovarsel:6a07803f1c0f6f2b657bad5055555b274bd26ec1
+  image: {{ image }}
   schedule: "*/15 * * * *"
   env:
     - name: KTOR_ENV
       value: remote
     - name: SEND_VARSLER
-      value: "true"
+      value: "JA"
