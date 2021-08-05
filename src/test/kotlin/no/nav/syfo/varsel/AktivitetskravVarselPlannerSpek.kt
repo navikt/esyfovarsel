@@ -25,13 +25,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.test.assertFailsWith
 
-const val SYKEFORLOP_MIN_DIFF_DAGER: Long = 16L
-const val AKTIVITETSKRAV_DAGER: Long = 42L
-const val arbeidstakerFnr1 = "07088621268"
-const val arbeidstakerFnr2 = "23456789012"
-const val arbeidstakerAktorId1 = "1234567890123"
-const val arbeidstakerAktorId2 = "2345678901234"
-
 @KtorExperimentalAPI
 object AktivitetskravVarselPlannerSpek : Spek({
     //The default timeout of 10 seconds is not sufficient to initialise the embedded database
