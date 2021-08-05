@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
 import java.sql.Timestamp
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -66,6 +67,20 @@ fun DatabaseInterface.fetchPlanlagtVarselByFnr(fnr: String): List<PPlanlagtVarse
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
             it.setString(1, fnr)
+            it.executeQuery().toList { toPPlanlagtVarsel() }
+        }
+    }
+}
+
+fun DatabaseInterface.fetchPlanlagtVarselByUtsendingsdato(utsendingsdato: LocalDate): List<PPlanlagtVarsel> {
+    val queryStatement = """SELECT *
+                            FROM PLANLAGT_VARSEL
+                            WHERE utsendingsdato <= ?
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setTimestamp(1, Timestamp.valueOf(utsendingsdato.atStartOfDay()))
             it.executeQuery().toList { toPPlanlagtVarsel() }
         }
     }
