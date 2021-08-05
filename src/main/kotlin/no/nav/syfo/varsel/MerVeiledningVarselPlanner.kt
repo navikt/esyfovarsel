@@ -19,14 +19,13 @@ class MerVeiledningVarselPlanner(val databaseAccess: DatabaseInterface, val syfo
 
     override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String) = coroutineScope {
         val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle39Uker(aktorId)
-            ?: throw RuntimeException("[AKTIVITETSKRAV_VARSEL]: Oppfolgingstilfelle is null")
+            ?: throw RuntimeException("[39-UKER_VARSEL]: Oppfolgingstilfelle is null")
 
         val tilfelleFom = oppfolgingstilfelle.fom
         val tilfelleTom = oppfolgingstilfelle.tom
-        val antallDagerBetaltAvAG = oppfolgingstilfelle.arbeidsgiverperiodeTotalt.toLong()
 
         if (todayIsBetweenFomAndTom(tilfelleFom, tilfelleTom)) {
-            varselDate39Uker(tilfelleFom, tilfelleTom, antallDagerBetaltAvAG)?.let {
+            varselDate39Uker(tilfelleFom, tilfelleTom)?.let {
                 val arbeidstakerAktorId = oppfolgingstilfelle.aktorId
 
                 val varsel = PlanlagtVarsel(
@@ -45,11 +44,10 @@ class MerVeiledningVarselPlanner(val databaseAccess: DatabaseInterface, val syfo
         }
     }
 
-    private fun varselDate39Uker(fom: LocalDate, tom: LocalDate, nrDaysPaidByAG: Long): LocalDate? {
-        val tilfelleFomPlus39Weeks = fom.plusWeeks(nrOfWeeksThreshold)
-        val varselThresholdDate = tilfelleFomPlus39Weeks.plusDays(nrDaysPaidByAG)
-        return if (tom.isEqualOrAfter(varselThresholdDate))
-                varselThresholdDate
+    private fun varselDate39Uker(fom: LocalDate, tom: LocalDate): LocalDate? {
+        val fomPlus39Weeks = fom.plusWeeks(nrOfWeeksThreshold)
+        return if (tom.isEqualOrAfter(fomPlus39Weeks))
+            fomPlus39Weeks
             else
                 null
     }

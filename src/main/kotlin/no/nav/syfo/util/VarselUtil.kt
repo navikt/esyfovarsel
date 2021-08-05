@@ -5,8 +5,6 @@ import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
 import no.nav.syfo.db.fetchSykmeldingerIdByPlanlagtVarselsUUID
-import no.nav.syfo.utils.isEqualOrAfter
-import no.nav.syfo.utils.isEqualOrBefore
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
