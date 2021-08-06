@@ -99,7 +99,7 @@ fun DatabaseInterface.fetchAllSykmeldingIdsAndCount(): Int {
 }
 
 fun DatabaseInterface.updateUtsendingsdatoByVarselId(uuid: String, utsendingsdato: LocalDate) {
-    val today = LocalDate.now()
+    val now = LocalDateTime.now()
     val updateStatement = """UPDATE PLANLAGT_VARSEL
                              SET UTSENDINGSDATO = ?,
                                  SIST_ENDRET = ?
@@ -109,7 +109,7 @@ fun DatabaseInterface.updateUtsendingsdatoByVarselId(uuid: String, utsendingsdat
     connection.use { connection ->
         connection.prepareStatement(updateStatement).use {
             it.setDate(1, Date.valueOf(utsendingsdato))
-            it.setDate(2, Date.valueOf(today))
+            it.setTimestamp(2, Timestamp.valueOf(now))
             it.setObject(3, UUID.fromString(uuid))
             it.executeUpdate()
         }
