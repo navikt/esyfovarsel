@@ -13,7 +13,8 @@ import io.ktor.http.*
 import io.ktor.util.*
 import no.nav.syfo.Environment
 import no.nav.syfo.auth.StsConsumer
-import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
 import org.slf4j.LoggerFactory
 
 @KtorExperimentalAPI
@@ -68,4 +69,34 @@ class SyfosyketilfelleConsumer(env: Environment, stsConsumer: StsConsumer) {
         }
     }
 
+    suspend fun getOppfolgingstilfelle39Uker(aktorId: String): Oppfolgingstilfelle39Uker? {
+        val requestURL = "$basepath/kafka/oppfolgingstilfelle/beregn/$aktorId/39ukersvarsel"
+        val stsToken = stsConsumer.getToken()
+        val bearerTokenString = "Bearer ${stsToken.access_token}"
+
+        val response = client.get<HttpResponse>(requestURL) {
+            headers {
+                append(HttpHeaders.Authorization, bearerTokenString)
+                append(HttpHeaders.Accept, ContentType.Application.Json)
+            }
+        }
+
+        return when (response.status) {
+            HttpStatusCode.OK -> {
+                response.receive<Oppfolgingstilfelle39Uker>()
+            }
+            HttpStatusCode.NoContent -> {
+                log.error("Could not get Oppfolgingstilfelle (39 uker): No content found in the response body")
+                null
+            }
+            HttpStatusCode.Unauthorized -> {
+                log.error("Could not get oppfolgingstilfelle (39 uker): Unable to authorize")
+                null
+            }
+            else -> {
+                log.error("Could not get oppfolgingstilfelle (39 uker): $response")
+                null
+            }
+        }
+    }
 }

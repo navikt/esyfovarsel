@@ -4,6 +4,7 @@ import no.nav.syfo.consumer.domain.*
 import no.nav.syfo.consumer.pdl.*
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
 import java.time.LocalDate
 
 // Syfosyketilfelle

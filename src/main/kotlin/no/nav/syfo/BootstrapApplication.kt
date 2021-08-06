@@ -9,6 +9,7 @@ import io.ktor.server.netty.*
 import io.ktor.util.*
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
+import org.slf4j.LoggerFactory
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.auth.StsConsumer
@@ -28,6 +29,7 @@ import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.varsel.AktivitetskravVarselPlanner
 import no.nav.syfo.varsel.VarselSender
 import org.slf4j.LoggerFactory
+import no.nav.syfo.varsel.MerVeiledningVarselPlanner
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -122,6 +124,7 @@ fun Application.kafkaModule(env: Environment) {
 
         val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, accessControl)
             .addPlanner(AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService))
+            .addPlanner(MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer))
 
         launch(backgroundTasksContext) {
             launchKafkaListener(
