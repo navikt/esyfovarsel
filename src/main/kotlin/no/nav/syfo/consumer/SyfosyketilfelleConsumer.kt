@@ -70,7 +70,7 @@ class SyfosyketilfelleConsumer(env: Environment, stsConsumer: StsConsumer) {
     }
 
     suspend fun getOppfolgingstilfelle39Uker(aktorId: String): Oppfolgingstilfelle39Uker? {
-        val requestURL = "$basepath/kafka/oppfolgingstilfelle/beregn/$aktorId/39uker"
+        val requestURL = "$basepath/kafka/oppfolgingstilfelle/beregn/$aktorId/39ukersvarsel"
         val stsToken = stsConsumer.getToken()
         val bearerTokenString = "Bearer ${stsToken.access_token}"
 
