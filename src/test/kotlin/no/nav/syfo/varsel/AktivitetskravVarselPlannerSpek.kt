@@ -6,7 +6,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.consumer.SykmeldingerConsumer
-import no.nav.syfo.consumer.domain.OppfolgingstilfellePerson
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
 import no.nav.syfo.consumer.domain.Syketilfellebit
 import no.nav.syfo.consumer.domain.Syketilfelledag
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
@@ -24,13 +24,6 @@ import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.test.assertFailsWith
-
-const val SYKEFORLOP_MIN_DIFF_DAGER: Long = 16L
-const val AKTIVITETSKRAV_DAGER: Long = 42L
-const val arbeidstakerFnr1 = "07088621268"
-const val arbeidstakerFnr2 = "23456789012"
-const val arbeidstakerAktorId1 = "1234567890123"
-const val arbeidstakerAktorId2 = "2345678901234"
 
 @KtorExperimentalAPI
 object AktivitetskravVarselPlannerSpek : Spek({
