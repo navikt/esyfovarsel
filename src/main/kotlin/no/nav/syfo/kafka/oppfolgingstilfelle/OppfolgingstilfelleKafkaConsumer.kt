@@ -51,7 +51,13 @@ class OppfolgingstilfelleKafkaConsumer(
                     val aktorId = peker.aktorId
                     val fnr = accessControl.getFnrIfUserCanBeNotified(aktorId)
                     fnr?.let {
-                        varselPlanners.forEach { planner -> runBlocking { planner.processOppfolgingstilfelle(aktorId, fnr) } }
+                        varselPlanners.forEach { planner ->
+                            try {
+                                runBlocking { planner.processOppfolgingstilfelle(aktorId, fnr) }
+                            } catch (e: Exception) {
+                                log.error("Error in [${planner.name}] planner: | ${e.message}")
+                            }
+                        }
                     }
                 } catch (e: IOException) {
                     log.error("Error in [$topicOppfolgingsTilfelle] listener: Could not parse message | ${e.message}")

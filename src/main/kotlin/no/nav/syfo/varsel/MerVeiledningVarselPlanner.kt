@@ -16,10 +16,11 @@ class MerVeiledningVarselPlanner(val databaseAccess: DatabaseInterface, val syfo
     private val nrOfWeeksThreshold = 39L
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.Varsel39Uker")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
+    override val name: String = "MER_VEILEDNING_VARSEL"
 
     override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String) = coroutineScope {
         val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle39Uker(aktorId)
-            ?: throw RuntimeException("[39-UKER_VARSEL]: Oppfolgingstilfelle er null")
+            ?: throw RuntimeException("[$name]: Oppfolgingstilfelle er null")
 
         val tilfelleFom = oppfolgingstilfelle.fom
         val tilfelleTom = oppfolgingstilfelle.tom
@@ -43,16 +44,16 @@ class MerVeiledningVarselPlanner(val databaseAccess: DatabaseInterface, val syfo
                         .lastOrNull { it.ikkeUtsendtEnna() }
 
                     sisteUsendteVarsel?.let {
-                        log.info("[39-UKER_VARSEL]: Oppdaterer tidligere usendt 39-ukers varsel i samme sykeforlop")
+                        log.info("[$name]: Oppdaterer tidligere usendt 39-ukers varsel i samme sykeforlop")
                         databaseAccess.updateUtsendingsdatoByVarselId(sisteUsendteVarsel.uuid, utsendingsdato)
-                    } ?: log.info("[39-UKER_VARSEL]: Varsel har allerede blitt sendt ut til bruker i dette sykeforløpet. Planlegger ikke varsel")
+                    } ?: log.info("[$name]: Varsel har allerede blitt sendt ut til bruker i dette sykeforløpet. Planlegger ikke varsel")
                 } else {
-                    log.info("[39-UKER_VARSEL]: Planlegger 39-ukers varsel")
+                    log.info("[$name]: Planlegger 39-ukers varsel")
                     databaseAccess.storePlanlagtVarsel(varsel)
                 }
-            } ?: log.info("[39-UKER_VARSEL]: Antall dager utbetalt er færre enn 39 uker tilsammen i sykefraværet. Planlegger ikke varsel")
+            } ?: log.info("[$name]: Antall dager utbetalt er færre enn 39 uker tilsammen i sykefraværet. Planlegger ikke varsel")
         } else {
-            log.info("[39-UKER_VARSEL]: Dagens dato er utenfor [fom,tom] intervall til oppfølgingstilfelle. Planlegger ikke varsel")
+            log.info("[$name]: Dagens dato er utenfor [fom,tom] intervall til oppfølgingstilfelle. Planlegger ikke varsel")
         }
     }
 

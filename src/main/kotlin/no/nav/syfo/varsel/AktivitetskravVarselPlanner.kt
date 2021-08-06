@@ -21,7 +21,8 @@ import kotlin.streams.toList
 class AktivitetskravVarselPlanner(
     private val databaseAccess: DatabaseInterface,
     private val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
-    val sykmeldingService: SykmeldingService
+    val sykmeldingService: SykmeldingService,
+    override val name: String = "AKTIVITETSKRAV_VARSEL"
 ) : VarselPlanner {
     private val AKTIVITETSKRAV_DAGER: Long = 42
 
@@ -31,7 +32,7 @@ class AktivitetskravVarselPlanner(
 
     override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String) = coroutineScope {
         val oppfolgingstilfellePerson = syfosyketilfelleConsumer.getOppfolgingstilfelle(aktorId)
-            ?: throw RuntimeException("[AKTIVITETSKRAV_VARSEL]: Oppfolgingstilfelle is null")
+            ?: throw RuntimeException("[$name]: Oppfolgingstilfelle is null")
 
         val gyldigeSykmeldingTilfelledager = oppfolgingstilfellePerson.tidslinje.stream()
             .filter { isGyldigSykmeldingTilfelle(it) }
@@ -48,42 +49,42 @@ class AktivitetskravVarselPlanner(
                 val lagreteVarsler = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.AKTIVITETSKRAV)
 
                 if (varselUtil.isVarselDatoForIDag(aktivitetskravVarselDato)) {
-                    log.info("[AKTIVITETSKRAV_VARSEL]: Beregnet dato for varsel er før i dag, sletter tidligere planlagt varsel om det finnes i DB")
+                    log.info("[$name]: Beregnet dato for varsel er før i dag, sletter tidligere planlagt varsel om det finnes i DB")
                     databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
                 } else if (varselUtil.isVarselDatoEtterTilfelleSlutt(aktivitetskravVarselDato, forlopSluttDato)) {
-                    log.info("[AKTIVITETSKRAV_VARSEL]: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB")
+                    log.info("[$name]: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB")
                     databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
                 } else if (sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, fnr) == true){
-                    log.info("[AKTIVITETSKRAV_VARSEL]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, sletter tidligere planlagt varsel om det finnes i DB")
+                    log.info("[$name]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, sletter tidligere planlagt varsel om det finnes i DB")
                     databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
                 } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }.isNotEmpty()){
-                    log.info("[AKTIVITETSKRAV_VARSEL]: varsel med samme utsendingsdato er allerede planlagt")
+                    log.info("[$name]: varsel med samme utsendingsdato er allerede planlagt")
                 } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }.isEmpty()){
-                    log.info("[AKTIVITETSKRAV_VARSEL]: sjekker om det finnes varsler med samme id")
+                    log.info("[$name]: sjekker om det finnes varsler med samme id")
                     if (varselUtil.hasLagreteVarslerForForespurteSykmeldinger(lagreteVarsler, sykeforlop.ressursIds)) {
-                        log.info("[AKTIVITETSKRAV_VARSEL]: sletter tidligere varsler")
+                        log.info("[$name]: sletter tidligere varsler")
                         databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
 
-                        log.info("[AKTIVITETSKRAV_VARSEL]: Lagrer ny varsel")
+                        log.info("[$name]: Lagrer ny varsel")
                         val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, sykeforlop.ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
                         databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
                         break@loop
                     } else {
-                        log.info("[AKTIVITETSKRAV_VARSEL]: Lagrer varsel til database")
+                        log.info("[$name]: Lagrer varsel til database")
 
                         val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, sykeforlop.ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
                         databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
                         break@loop
                     }
                 } else {
-                    log.info("[AKTIVITETSKRAV_VARSEL]: Lagrer varsel til database")
+                    log.info("[$name]: Lagrer varsel til database")
 
                     val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, sykeforlop.ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
                     databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
                 }
             }
         } else {
-            log.info("[AKTIVITETSKRAV_VARSEL]: Sykeforløperliste er tom")
+            log.info("[$name]: Sykeforløperliste er tom")
         }
     }
 
