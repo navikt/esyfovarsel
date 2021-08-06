@@ -39,7 +39,7 @@ class MerVeiledningVarselPlanner(val databaseAccess: DatabaseInterface, val syfo
                 val tidligereVarsler39UkersVarslerPaFnr = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.MER_VEILEDNING)
                 if (tidligereVarsler39UkersVarslerPaFnr.isNotEmpty()) {
                     val sisteUsendteVarsel = tidligereVarsler39UkersVarslerPaFnr
-                        .sortedBy { varsel -> varsel.utsendingsdato }
+                        .sortedBy { tidligereVarsel -> tidligereVarsel.utsendingsdato }
                         .lastOrNull { it.ikkeUtsendtEnna() }
 
                     sisteUsendteVarsel?.let {
