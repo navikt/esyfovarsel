@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
 import java.sql.Timestamp
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -94,6 +95,25 @@ fun DatabaseInterface.fetchAllSykmeldingIdsAndCount(): Int {
         connection.prepareStatement(queryStatement, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE).use {
             it.executeQuery().toVarslingIdsListeCount()
         }
+    }
+}
+
+fun DatabaseInterface.updateUtsendingsdatoByVarselId(uuid: String, utsendingsdato: LocalDate) {
+    val today = LocalDate.now()
+    val updateStatement = """UPDATE PLANLAGT_VARSEL
+                             SET UTSENDINGSDATO = ?,
+                                 SIST_ENDRET = ?
+                             WHERE UUID = ?
+    """.trimIndent()
+
+    connection.use { connection ->
+        connection.prepareStatement(updateStatement).use {
+            it.setDate(1, Date.valueOf(utsendingsdato))
+            it.setDate(2, Date.valueOf(today))
+            it.setObject(3, UUID.fromString(uuid))
+            it.executeUpdate()
+        }
+        connection.commit()
     }
 }
 
