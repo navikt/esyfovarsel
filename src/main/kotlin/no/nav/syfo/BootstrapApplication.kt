@@ -26,6 +26,7 @@ import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.service.AccessControl
 import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.varsel.AktivitetskravVarselPlanner
+import no.nav.syfo.varsel.VarselSender
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -40,7 +41,7 @@ lateinit var database: DatabaseInterface
 fun main() {
     val sendeVarsler = System.getenv("SEND_VARSLER") ?: "NEI"
     if (sendeVarsler == "JA") {
-        val jobb = SendVarslerJobb()
+        val jobb = SendVarslerJobb(database, VarselSender())
         sendVarsler(jobb)
     } else {
         val env: Environment = getEnvironment()
