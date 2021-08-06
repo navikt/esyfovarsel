@@ -129,10 +129,6 @@ object MerVeiledningVarselPlannerSpek : Spek({
 
             val lagredeVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
 
-            lagredeVarsler.forEach {
-                println("${it.aktorId}\n${it.utsendingsdato}\n${it.sistEndret}")
-            }
-
             lagredeVarsler.skalHaEt39UkersVarsel()
             lagredeVarsler.skalHaUtsendingPaDato(utsendingsdatoTidligereVarsel)
 
