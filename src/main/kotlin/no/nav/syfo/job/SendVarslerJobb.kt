@@ -2,6 +2,7 @@ package no.nav.syfo.job
 
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.fetchPlanlagtVarselByUtsendingsdato
+import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.varsel.VarselSender
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -18,6 +19,9 @@ class SendVarslerJobb(
         databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now()).forEach {
             log.info("Sender varsel $it")
             varselSender.send(it)
+            //TODO: lagre som sendt
+            // databaseAccess.storeUtsendtVarsel(it)
+            //TODO: Slette varsel fra PLANLAGT_VARSEL
         }
 
         log.info("Avslutter SendVarslerJobb")

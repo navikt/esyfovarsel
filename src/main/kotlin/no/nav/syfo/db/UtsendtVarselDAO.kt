@@ -1,11 +1,11 @@
 package no.nav.syfo.db
 
-import no.nav.syfo.db.domain.PlanlagtVarsel
+import no.nav.syfo.db.domain.PPlanlagtVarsel
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.*
 
-fun DatabaseInterface.storeUtsendtVarsel(planlagtVarsel: PlanlagtVarsel) {
+fun DatabaseInterface.storeUtsendtVarsel(planlagtVarsel: PPlanlagtVarsel) {
     val insertStatement1 = """INSERT INTO UTSENDT_VARSEL (
         uuid,
         fnr,
@@ -21,7 +21,7 @@ fun DatabaseInterface.storeUtsendtVarsel(planlagtVarsel: PlanlagtVarsel) {
             it.setObject(1, varselUUID)
             it.setString(2, planlagtVarsel.fnr)
             it.setString(3, planlagtVarsel.aktorId)
-            it.setString(4, planlagtVarsel.type.name)
+            it.setString(4, planlagtVarsel.type)
             it.setTimestamp(5, now)
             it.executeUpdate()
         }

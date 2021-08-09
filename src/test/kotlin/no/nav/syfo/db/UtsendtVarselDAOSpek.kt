@@ -1,12 +1,16 @@
 package no.nav.syfo.db
 
 
+import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 object UtsendtVarselDAOSpek : Spek({
 
@@ -26,13 +30,9 @@ object UtsendtVarselDAOSpek : Spek({
         }
 
         it("Store utsendt varsel") {
-            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1", "2" ), VarselType.AKTIVITETSKRAV)
-            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("3"), VarselType.MER_VEILEDNING)
-            val planlagtVarselToStore3 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, setOf("4"), VarselType.AKTIVITETSKRAV)
+            val planlagtVarselToStore1 = PPlanlagtVarsel(UUID.randomUUID().toString(), arbeidstakerFnr1, arbeidstakerAktorId1, VarselType.AKTIVITETSKRAV.name, LocalDate.now(), LocalDateTime.now(), LocalDateTime.now())
 
             embeddedDatabase.storeUtsendtVarsel(planlagtVarselToStore1)
-            embeddedDatabase.storeUtsendtVarsel(planlagtVarselToStore2)
-            embeddedDatabase.storeUtsendtVarsel(planlagtVarselToStore3)
 
         }
     }
