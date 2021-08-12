@@ -26,9 +26,6 @@ private fun remoteEnvironment(): Environment {
         true,
         getEnvVar("APPLICATION_PORT", "8080").toInt(),
         getEnvVar("APPLICATION_THREADS", "4").toInt(),
-        getEnvVar("DATABASE_URL"),
-        getEnvVar("DATABASE_NAME", "esyfovarsel"),
-        getEnvVar("DB_VAULT_MOUNT_PATH"),
         getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
         getEnvVar("STS_URL"),
         getEnvVar("SYFOSYKETILFELLE_URL"),
@@ -40,7 +37,16 @@ private fun remoteEnvironment(): Environment {
         getEnvVar("SYFOSMREGISTER_SCOPE"),
         getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
         getEnvVar("AZURE_APP_CLIENT_ID"),
-        getEnvVar("AZURE_APP_CLIENT_SECRET")
+        getEnvVar("AZURE_APP_CLIENT_SECRET"),
+        getDbConfig()
+    )
+}
+
+fun getDbConfig(): DbEnvironment {
+    return DbEnvironment(
+        getEnvVar("DATABASE_URL"),
+        getEnvVar("DATABASE_NAME", "esyfovarsel"),
+        getEnvVar("DB_VAULT_MOUNT_PATH")
     )
 }
 
@@ -52,9 +58,6 @@ data class Environment(
     val remote: Boolean,
     val applicationPort: Int,
     val applicationThreads: Int,
-    val databaseUrl: String,
-    val databaseName: String,
-    val dbVaultMountPath: String,
     val kafkaBootstrapServersUrl: String,
     val stsUrl: String,
     val syfosyketilfelleUrl: String,
@@ -66,10 +69,17 @@ data class Environment(
     val syfosmregisterScope: String,
     val aadAccessTokenUrl: String,
     val clientId: String,
-    val clientSecret: String
+    val clientSecret: String,
+    val dbEnvironment: DbEnvironment
+)
+
+data class DbEnvironment(
+    val databaseUrl: String,
+    val databaseName: String,
+    val dbVaultMountPath: String
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =
     System.getenv(varName) ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
 
-private fun isLocal(): Boolean = getEnvVar("KTOR_ENV", "local") == "local"
+fun isLocal(): Boolean = getEnvVar("KTOR_ENV", "local") == "local"

@@ -16,11 +16,10 @@ import no.nav.syfo.consumer.DkifConsumer
 import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.consumer.SykmeldingerConsumer
-import no.nav.syfo.db.DatabaseInterface
-import no.nav.syfo.db.DbConfig
-import no.nav.syfo.db.LocalDatabase
-import no.nav.syfo.db.RemoteDatabase
+import no.nav.syfo.db.*
+import no.nav.syfo.job.JobEnvironment
 import no.nav.syfo.job.SendVarslerJobb
+import no.nav.syfo.job.getJobEnvironment
 import no.nav.syfo.kafka.launchKafkaListener
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.service.AccessControl
@@ -42,8 +41,15 @@ lateinit var database: DatabaseInterface
 fun main() {
     val sendeVarsler = System.getenv("SEND_VARSLER") ?: "NEI"
     if (sendeVarsler == "JA") {
+        val env: JobEnvironment = getJobEnvironment()
+        if(env.remote) {
+            database = remoteDatabase(env.dbEnvironment)
+        } else {
+            database = localDatabase(env.dbEnvironment)
+        }
         val jobb = SendVarslerJobb(database, VarselSender())
         sendVarsler(jobb)
+
     } else {
         val env: Environment = getEnvironment()
         val server = embeddedServer(Netty, applicationEngineEnvironment {
@@ -55,7 +61,7 @@ fun main() {
             }
 
             module {
-                init(env)
+                init(env.dbEnvironment)
                 serverModule()
                 kafkaModule(env)
             }
@@ -71,33 +77,37 @@ fun main() {
 fun sendVarsler(jobb: SendVarslerJobb) = jobb.sendVarsler()
 
 @KtorExperimentalAPI
-fun Application.init(env: Environment) {
+fun Application.init(dbEnv: DbEnvironment) {
 
     runningLocally {
-        database = LocalDatabase(
-            DbConfig(
-                jdbcUrl = env.databaseUrl,
-                databaseName = env.databaseName,
-                password = "password",
-                username = "esyfovarsel-admin",
-                remote = false
-            )
-        )
 
+        database = localDatabase(dbEnv)
         state.running = true
     }
 
     runningRemotely {
-        database = RemoteDatabase(
-            DbConfig(
-                jdbcUrl = env.databaseUrl,
-                databaseName = env.databaseName,
-                dbCredMountPath = env.dbVaultMountPath
-            )
-        )
+        database = remoteDatabase(dbEnv)
         state.running = true
     }
 }
+
+private fun localDatabase(env: DbEnvironment): Database = LocalDatabase(
+    DbConfig(
+        jdbcUrl = env.databaseUrl,
+        databaseName = env.databaseName,
+        password = "password",
+        username = "esyfovarsel-admin",
+        remote = false
+    )
+)
+
+private fun remoteDatabase(env: DbEnvironment): Database = RemoteDatabase(
+    DbConfig(
+        jdbcUrl = env.databaseUrl,
+        databaseName = env.databaseName,
+        dbCredMountPath = env.dbVaultMountPath
+    )
+)
 
 fun Application.serverModule() {
 
