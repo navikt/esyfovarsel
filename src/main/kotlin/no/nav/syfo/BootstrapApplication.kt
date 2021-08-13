@@ -17,17 +17,15 @@ import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.consumer.SykmeldingerConsumer
 import no.nav.syfo.db.*
-import no.nav.syfo.job.JobEnvironment
 import no.nav.syfo.job.SendVarslerJobb
-import no.nav.syfo.job.getJobEnvironment
-import no.nav.syfo.job.isJob
+import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.launchKafkaListener
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.service.AccessControl
+import no.nav.syfo.service.SendVarselService
 import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.varsel.AktivitetskravVarselPlanner
 import no.nav.syfo.varsel.MerVeiledningVarselPlanner
-import no.nav.syfo.varsel.VarselSender
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -38,21 +36,31 @@ val state: ApplicationState = ApplicationState()
 val backgroundTasksContext = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
 lateinit var database: DatabaseInterface
 
+
 @KtorExperimentalAPI
 fun main() {
     if (isJob()) {
-        val env: JobEnvironment = getJobEnvironment()
+        val env = jobEnvironment()
+
+        val stsConsumer = StsConsumer(env)
+        val pdlConsumer = PdlConsumer(env, stsConsumer)
+        val dkifConsumer = DkifConsumer(env, stsConsumer)
+
+        val accessControl = AccessControl(pdlConsumer, dkifConsumer)
+        val beskjedKafkaProducer = BeskjedKafkaProducer(env)
+        val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl)
+
         database = initDb(env.dbEnvironment)
+
         val jobb = SendVarslerJobb(
             database,
-            VarselSender(),
-            env.toggleMarkerVarslerSomSendt,
-            env.toggleSendMerVeiledningVarsler,
-            env.toggleSendAktivitetskravVarsler
+            sendVarselService,
+            env.Toggles
         )
+
         jobb.sendVarsler()
     } else {
-        val env: Environment = getEnvironment()
+        val env: AppEnvironment = getEnvironment()
         val server = embeddedServer(Netty, applicationEngineEnvironment {
             log = LoggerFactory.getLogger("ktor.application")
             config = HoconApplicationConfig(ConfigFactory.load())
@@ -106,7 +114,7 @@ fun Application.serverModule() {
 }
 
 @KtorExperimentalAPI
-fun Application.kafkaModule(env: Environment) {
+fun Application.kafkaModule(env: AppEnvironment) {
 
     runningRemotely {
         val stsConsumer = StsConsumer(env)

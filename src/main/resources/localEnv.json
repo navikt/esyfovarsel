@@ -3,6 +3,7 @@
   "applicationPort": "8081",
   "applicationThreads": "1",
   "kafkaBootstrapServersUrl": "localhost:kafka",
+  "kafkaSchemaRegistryUrl": "http://localhost:8081",
   "stsUrl": "http://localhost:9092",
   "syfosyketilfelleUrl": "http://localhost:9090",
   "pdlUrl": "http://localhost:9091",

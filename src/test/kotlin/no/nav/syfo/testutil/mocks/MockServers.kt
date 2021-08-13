@@ -15,7 +15,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import no.nav.syfo.Environment
+import no.nav.syfo.AppEnvironment
 import no.nav.syfo.consumer.DkifConsumer
 import no.nav.syfo.consumer.pdl.IDENTER_QUERY
 import no.nav.syfo.consumer.pdl.PERSON_QUERY
@@ -23,7 +23,7 @@ import no.nav.syfo.testutil.extractPortFromUrl
 import java.io.Serializable
 
 
-class MockServers(val env: Environment) {
+class MockServers(val env: AppEnvironment) {
     private val mapper = ObjectMapper().registerModule(KotlinModule())
 
     fun mockPdlServer(): NettyApplicationEngine {

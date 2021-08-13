@@ -2,7 +2,7 @@ package no.nav.syfo.consumer
 
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.auth.StsConsumer
-import no.nav.syfo.testEnviornment
+import no.nav.syfo.testEnvironment
 import no.nav.syfo.testutil.mocks.*
 import org.amshove.kluent.shouldEqual
 import org.amshove.kluent.shouldNotBe
@@ -18,7 +18,7 @@ const val aktorIdInvalid = "${aktorId}-with-invalid-input"
 
 object DkifConsumerSpek : Spek({
 
-    val testEnv = testEnviornment()
+    val testEnv = testEnvironment()
     val mockServers = MockServers(testEnv)
     val stsMockServer = mockServers.mockStsServer()
     val dkifMockServer = mockServers.mockDkifServer()

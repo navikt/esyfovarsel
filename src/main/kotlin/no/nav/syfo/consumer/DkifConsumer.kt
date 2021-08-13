@@ -12,7 +12,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.util.*
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.Environment
+import no.nav.syfo.CommonEnvironment
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.domain.DigitalKontaktinfo
 import no.nav.syfo.consumer.domain.DigitalKontaktinfoBolk
@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID.randomUUID
 
 @KtorExperimentalAPI
-class DkifConsumer(env: Environment, stsConsumer: StsConsumer) {
+class DkifConsumer(env: CommonEnvironment, stsConsumer: StsConsumer) {
     private val client: HttpClient
     private val stsConsumer: StsConsumer
     private val dkifBasepath: String

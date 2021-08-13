@@ -1,0 +1,71 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: esyfovarsel
+  namespace: team-esyfo
+  labels:
+    team: team-esyfo
+spec:
+  image: {{ image }}
+  port: 8080
+  liveness:
+    path: /isAlive
+    initialDelay: 10
+    timeout: 5
+    periodSeconds: 10
+    failureThreshold: 5
+  readiness:
+    path: /isReady
+    initialDelay: 10
+    periodSeconds: 5
+    timeout: 5
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  replicas:
+    min: 1
+    max: 2
+    cpuThresholdPercentage: 90
+  prometheus:
+    enabled: true
+    path: /prometheus
+  vault:
+    enabled: true
+    paths:
+      - kvPath: "/serviceuser/data/dev/srvesyfovarsel"
+        mountPath: "/var/run/secrets/serviceuser"
+  azure:
+    application:
+      enabled: true
+  webproxy: true
+  ingresses:
+    - "https://esyfovarsel.dev.adeo.no"
+  env:
+    - name: KTOR_ENV
+      value: remote
+    - name: DATABASE_URL
+      value: jdbc:postgresql://b27dbvl024.preprod.local:5432/esyfovarsel
+    - name: DATABASE_NAME
+      value: esyfovarsel
+    - name: DB_VAULT_MOUNT_PATH
+      value: postgresql/preprod-fss
+    - name: KAFKA_BOOTSTRAP_SERVERS_URL
+      value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
+    - name: KAFKA_SCHEMA_REGISTRY_URL
+      value: https://kafka-schema-registry.nais-q.adeo.no
+    - name: SYFOSYKETILFELLE_URL
+      value: https://syfosyketilfelle.nais.preprod.local
+    - name: STS_URL
+      value: https://security-token-service.nais.preprod.local
+    - name: PDL_URL
+      value: https://pdl-api.nais.preprod.local/graphql
+    - name: DKIF_URL
+      value: https://dkif.dev.intern.nav.no
+    - name: SYFOSMREGISTER_URL
+      value: http://syfosmregister.teamsykmelding
+    - name: SYFOSMREGISTER_SCOPE
+      value: api://dev-fss.teamsykmelding.syfosmregister/.default
