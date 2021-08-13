@@ -20,6 +20,7 @@ import no.nav.syfo.db.*
 import no.nav.syfo.job.JobEnvironment
 import no.nav.syfo.job.SendVarslerJobb
 import no.nav.syfo.job.getJobEnvironment
+import no.nav.syfo.job.isJob
 import no.nav.syfo.kafka.launchKafkaListener
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.service.AccessControl
@@ -39,14 +40,9 @@ lateinit var database: DatabaseInterface
 
 @KtorExperimentalAPI
 fun main() {
-    val sendeVarsler = System.getenv("SEND_VARSLER") ?: "NEI"
-    if (sendeVarsler == "JA") {
+    if (isJob()) {
         val env: JobEnvironment = getJobEnvironment()
-        if(env.remote) {
-            database = remoteDatabase(env.dbEnvironment)
-        } else {
-            database = localDatabase(env.dbEnvironment)
-        }
+        database = initDb(env.dbEnvironment)
         val jobb = SendVarslerJobb(database, VarselSender())
         sendVarsler(jobb)
 
@@ -61,7 +57,8 @@ fun main() {
             }
 
             module {
-                init(env.dbEnvironment)
+                state.running = true
+                database = initDb(env.dbEnvironment)
                 serverModule()
                 kafkaModule(env)
             }
@@ -76,20 +73,7 @@ fun main() {
 
 fun sendVarsler(jobb: SendVarslerJobb) = jobb.sendVarsler()
 
-@KtorExperimentalAPI
-fun Application.init(dbEnv: DbEnvironment) {
-
-    runningLocally {
-
-        database = localDatabase(dbEnv)
-        state.running = true
-    }
-
-    runningRemotely {
-        database = remoteDatabase(dbEnv)
-        state.running = true
-    }
-}
+fun initDb(dbEnv: DbEnvironment): Database = if(isLocal()) localDatabase(dbEnv) else remoteDatabase(dbEnv)
 
 private fun localDatabase(env: DbEnvironment): Database = LocalDatabase(
     DbConfig(
@@ -147,11 +131,6 @@ fun Application.kafkaModule(env: Environment) {
 @KtorExperimentalAPI
 val Application.envKind
     get() = environment.config.property("ktor.environment").getString()
-
-@KtorExperimentalAPI
-fun Application.runningLocally(block: () -> Unit) {
-    if (envKind == "local") block()
-}
 
 @KtorExperimentalAPI
 fun Application.runningRemotely(block: () -> Unit) {

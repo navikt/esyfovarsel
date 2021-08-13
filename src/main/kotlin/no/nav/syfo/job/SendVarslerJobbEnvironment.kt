@@ -4,10 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.syfo.DbEnvironment
 import no.nav.syfo.getDbConfig
+import no.nav.syfo.getEnvVar
 import no.nav.syfo.isLocal
 import java.io.File
 
-const val localEnvironmentPropertiesPath = "./src/main/resources/localEnv.json"
+const val localEnvironmentPropertiesPath = "./src/main/resources/localEnvJob.json"
 val objectMapper = ObjectMapper().registerKotlinModule()
 
 fun getJobEnvironment(): JobEnvironment =
@@ -18,7 +19,6 @@ fun getJobEnvironment(): JobEnvironment =
 
 private fun remoteEnvironment(): JobEnvironment {
     return JobEnvironment(
-        true,
         getDbConfig()
     )
 }
@@ -28,6 +28,7 @@ private fun localEnvironment(): JobEnvironment {
 }
 
 data class JobEnvironment(
-    val remote: Boolean,
     val dbEnvironment: DbEnvironment
 )
+
+fun isJob(): Boolean = getEnvVar("SEND_VARSLER", "NEI") == "JA"
