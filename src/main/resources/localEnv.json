@@ -2,9 +2,6 @@
   "remote": false,
   "applicationPort": "8081",
   "applicationThreads": "1",
-  "databaseUrl": "jdbc:postgresql://localhost:5432/esyfovarsel",
-  "databaseName": "esyfovarsel",
-  "dbVaultMountPath": "",
   "kafkaBootstrapServersUrl": "localhost:kafka",
   "stsUrl": "http://localhost:9092",
   "syfosyketilfelleUrl": "http://localhost:9090",
@@ -16,5 +13,10 @@
   "aadAccessTokenUrl": "http://localhost:9595",
   "clientId": "clientId",
   "clientSecret": "clientSecret",
-  "syfosmregisterScope": "syfosmregisterScope"
+  "syfosmregisterScope": "syfosmregisterScope",
+  "dbEnvironment": {
+    "databaseUrl": "jdbc:postgresql://localhost:5432/esyfovarsel",
+    "databaseName": "esyfovarsel",
+    "dbVaultMountPath": ""
+  }
 }

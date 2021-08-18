@@ -72,6 +72,20 @@ fun DatabaseInterface.fetchPlanlagtVarselByFnr(fnr: String): List<PPlanlagtVarse
     }
 }
 
+fun DatabaseInterface.fetchPlanlagtVarselByUtsendingsdato(utsendingsdato: LocalDate): List<PPlanlagtVarsel> {
+    val queryStatement = """SELECT *
+                            FROM PLANLAGT_VARSEL
+                            WHERE utsendingsdato <= ?
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setTimestamp(1, Timestamp.valueOf(utsendingsdato.atStartOfDay()))
+            it.executeQuery().toList { toPPlanlagtVarsel() }
+        }
+    }
+}
+
 fun DatabaseInterface.fetchSykmeldingerIdByPlanlagtVarselsUUID(uuid: String): List<String> {
     val queryStatement = """SELECT *
                             FROM SYKMELDING_IDS
