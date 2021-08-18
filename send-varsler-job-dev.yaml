@@ -5,8 +5,6 @@ metadata:
   namespace: team-esyfo
   labels:
     team: team-esyfo
-vault:
-  enabled: true
 spec:
   image: {{ image }}
   schedule: "*/15 * * * *"
