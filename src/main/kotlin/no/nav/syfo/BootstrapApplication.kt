@@ -44,8 +44,7 @@ fun main() {
         val env: JobEnvironment = getJobEnvironment()
         database = initDb(env.dbEnvironment)
         val jobb = SendVarslerJobb(database, VarselSender())
-        sendVarsler(jobb)
-
+        jobb.sendVarsler()
     } else {
         val env: Environment = getEnvironment()
         val server = embeddedServer(Netty, applicationEngineEnvironment {
@@ -70,8 +69,6 @@ fun main() {
         server.start(wait = false)
     }
 }
-
-fun sendVarsler(jobb: SendVarslerJobb) = jobb.sendVarsler()
 
 fun initDb(dbEnv: DbEnvironment): Database = if(isLocal()) localDatabase(dbEnv) else remoteDatabase(dbEnv)
 
