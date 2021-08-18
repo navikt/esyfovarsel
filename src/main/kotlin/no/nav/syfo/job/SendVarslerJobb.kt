@@ -15,10 +15,9 @@ class SendVarslerJobb(
     fun sendVarsler() {
         log.info("Starter SendVarslerJobb")
 
-        databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now()).forEach {
-            log.info("Sender varsel $it")
-            varselSender.send(it)
-        }
+        val varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
+
+        log.info("Planlegger å sende ${varslerToSendToday.size} i dag")
 
         log.info("Avslutter SendVarslerJobb")
 
