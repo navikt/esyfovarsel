@@ -16,8 +16,11 @@ class SendVarslerJobb(
         log.info("Starter SendVarslerJobb")
 
         val varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
-
         log.info("Planlegger å sende ${varslerToSendToday.size} i dag")
+
+        varslerToSendToday.forEach {
+            varselSender.send(it)
+        }
 
         log.info("Avslutter SendVarslerJobb")
 
