@@ -16,7 +16,7 @@ object SendVarslerJobbSpek: Spek( {
 
     val embeddedDatabase by lazy { EmbeddedDatabase() }
     val varselSender = mockk<VarselSender>(relaxed = true)
-    val sendVarselJobb = SendVarslerJobb(embeddedDatabase, varselSender)
+    val sendVarselJobb = SendVarslerJobb(embeddedDatabase, varselSender, false)
 
     describe("SendVarslerJobbSpek") {
         it("Sender varsler") {

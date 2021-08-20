@@ -10,7 +10,8 @@ import java.time.LocalDate
 
 class SendVarslerJobb(
     private val databaseAccess: DatabaseInterface,
-    private val varselSender: VarselSender
+    private val varselSender: VarselSender,
+    private val markerVarslerSomSendt: Boolean
 ) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
 
@@ -18,12 +19,14 @@ class SendVarslerJobb(
         log.info("Starter SendVarslerJobb")
 
         val varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
-        log.info("Planlegger å sende ${varslerToSendToday.size} i dag")
+        log.info("Planlegger å sende ${varslerToSendToday.size} varsler i dag")
 
         varslerToSendToday.forEach {
             varselSender.send(it)
-            databaseAccess.storeUtsendtVarsel(it)
-            databaseAccess.deletePlanlagtVarselByVarselId(it.uuid)
+            if (markerVarslerSomSendt) {
+                databaseAccess.storeUtsendtVarsel(it)
+                databaseAccess.deletePlanlagtVarselByVarselId(it.uuid)
+            }
         }
 
         log.info("Avslutter SendVarslerJobb")

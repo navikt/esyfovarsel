@@ -21,3 +21,5 @@ spec:
       value: esyfovarsel
     - name: DB_VAULT_MOUNT_PATH
       value: postgresql/prod-fss
+    - name: MARKER_VARSLER_SOM_SENDT
+      value: false
