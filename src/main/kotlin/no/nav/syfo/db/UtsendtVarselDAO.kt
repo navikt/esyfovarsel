@@ -1,6 +1,7 @@
 package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PPlanlagtVarsel
+import no.nav.syfo.db.domain.UtsendtVarsel
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.*
@@ -27,6 +28,20 @@ fun DatabaseInterface.storeUtsendtVarsel(planlagtVarsel: PPlanlagtVarsel) {
         }
 
         connection.commit()
+    }
+}
+
+fun DatabaseInterface.fetchUtsendtVarselByFnr(fnr: String): List<UtsendtVarsel> {
+    val queryStatement = """SELECT *
+                            FROM UTSENDT_VARSEL
+                            WHERE fnr = ?
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, fnr)
+            it.executeQuery().toList { toUtsendtVarsel() }
+        }
     }
 }
 

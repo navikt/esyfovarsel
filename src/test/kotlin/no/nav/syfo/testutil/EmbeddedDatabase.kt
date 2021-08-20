@@ -28,10 +28,12 @@ class EmbeddedDatabase : DatabaseInterface {
 fun Connection.dropData() {
     val query1 = "DELETE FROM PLANLAGT_VARSEL"
     val query2 = "DELETE FROM SYKMELDING_IDS"
+    val query3 = "DELETE FROM UTSENDT_VARSEL"
 
     use { connection ->
         connection.prepareStatement(query1).executeUpdate()
         connection.prepareStatement(query2).executeUpdate()
+        connection.prepareStatement(query3).executeUpdate()
         connection.commit()
     }
 }
