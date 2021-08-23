@@ -4,5 +4,7 @@
     "databaseName": "esyfovarsel",
     "dbVaultMountPath": ""
   },
-  "markerVarslerSomSendt": true
+  "toggleMarkerVarslerSomSendt": true,
+  "toggleSendMerVeiledningVarsler": true,
+  "toggleSendAktivitetskravVarsler": true
 }

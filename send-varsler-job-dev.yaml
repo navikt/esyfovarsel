@@ -21,5 +21,9 @@ spec:
       value: esyfovarsel
     - name: DB_VAULT_MOUNT_PATH
       value: postgresql/preprod-fss
-    - name: MARKER_VARSLER_SOM_SENDT
+    - name: TOGGLE_MARKER_VARSLER_SOM_SENDT
+      value: true
+    - name: TOGGLE_SEND_MERVEILEDNING_VARSLER
+      value: true
+    - name: TOGGLE_SEND_AKTIVITETSKRAV_VARSLER
       value: true
