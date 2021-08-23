@@ -7,7 +7,7 @@ metadata:
     team: team-esyfo
 spec:
   image: {{ image }}
-  schedule: "5 9 * * *"
+  schedule: "*/15 * * * *"
   vault:
     enabled: true
   env:
@@ -22,8 +22,8 @@ spec:
     - name: DB_VAULT_MOUNT_PATH
       value: postgresql/preprod-fss
     - name: TOGGLE_MARKER_VARSLER_SOM_SENDT
-      value: true
+      value: 'true'
     - name: TOGGLE_SEND_MERVEILEDNING_VARSLER
-      value: true
+      value: 'true'
     - name: TOGGLE_SEND_AKTIVITETSKRAV_VARSLER
-      value: true
+      value: 'true'
