@@ -27,8 +27,10 @@ class SendVarslerJobb(
 
         varslerToSendToday.forEach {
             if(skalSendeVarsel(it)){
+                log.info("Sender varsel $it")
                 varselSender.send(it)
                 if (markerVarslerSomSendt) {
+                    log.info("Markerer varsel som sendt $it")
                     databaseAccess.storeUtsendtVarsel(it)
                     databaseAccess.deletePlanlagtVarselByVarselId(it.uuid)
                 }
