@@ -7,6 +7,7 @@ import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.util.VarselUtil
 import no.nav.syfo.utils.isEqualOrAfter
+import no.nav.syfo.utils.isEqualOrBefore
 import no.nav.syfo.utils.todayIsBetweenFomAndTom
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -59,7 +60,8 @@ class MerVeiledningVarselPlanner(val databaseAccess: DatabaseInterface, val syfo
 
     private fun varselDate39Uker(fom: LocalDate, tom: LocalDate): LocalDate? {
         val fomPlus39Weeks = fom.plusWeeks(nrOfWeeksThreshold)
-        return if (tom.isEqualOrAfter(fomPlus39Weeks))
+        val today = LocalDate.now()
+        return if (tom.isEqualOrAfter(fomPlus39Weeks) && today.isEqualOrBefore(fomPlus39Weeks))
             fomPlus39Weeks
         else
             null
