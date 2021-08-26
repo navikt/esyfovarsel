@@ -84,11 +84,10 @@ object MerVeiledningVarselPlannerSpek : Spek({
             }
         }
 
-        it("Varsel blir planlagt selv om arbeidstaker har vært sykmeldt over 39 uker allerede") {
+        it("Varsel skal ikke planlegges dersom utsendingsdatoen er eldre enn dagens dato") {
 
             val fom = LocalDate.now().minusWeeks(40)
             val tom = LocalDate.now().plusWeeks(1)
-            val utsendingsdato = fom.plusWeeks(39)
 
             val oppfolgingstilfelle39Uker = Oppfolgingstilfelle39Uker(
                 arbeidstakerAktorId1,
@@ -104,8 +103,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
                 merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
 
-                lagreteVarsler.skalHaEt39UkersVarsel()
-                lagreteVarsler.skalHaUtsendingPaDato(utsendingsdato)
+                lagreteVarsler.skalIkkeHa39UkersVarsel()
             }
         }
 
