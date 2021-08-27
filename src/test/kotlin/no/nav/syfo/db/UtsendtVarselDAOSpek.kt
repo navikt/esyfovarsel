@@ -2,7 +2,6 @@ package no.nav.syfo.db
 
 
 import no.nav.syfo.db.domain.PPlanlagtVarsel
-import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
 import no.nav.syfo.testutil.EmbeddedDatabase
@@ -35,12 +34,15 @@ object UtsendtVarselDAOSpek : Spek({
             val planlagtVarselToStore1 = PPlanlagtVarsel(UUID.randomUUID().toString(), arbeidstakerFnr1, arbeidstakerAktorId1, AKTIVITETSKRAV.name, LocalDate.now(), LocalDateTime.now(), LocalDateTime.now())
 
             embeddedDatabase.storeUtsendtVarsel(planlagtVarselToStore1)
-            embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
+            embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV, planlagtVarselToStore1.uuid)
 
         }
     }
 })
 
-private fun DatabaseInterface.skalHaUtsendtVarsel(fnr: String, type: VarselType) = this.should("Skal ha utsendt varsel av type $type") {
-    this.fetchUtsendtVarselByFnr(fnr).filter { it.type.equals(type.name) }.isNotEmpty()
+private fun DatabaseInterface.skalHaUtsendtVarsel(fnr: String, type: VarselType, planlagtVarselId: String) = this.should("Skal ha utsendt varsel av type $type og planlagtVarselId $planlagtVarselId") {
+    this.fetchUtsendtVarselByFnr(fnr)
+        .filter { it.type.equals(type.name) }
+        .filter { it.planlagtVarselId.equals(planlagtVarselId) }
+        .isNotEmpty()
 }

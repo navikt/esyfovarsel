@@ -12,7 +12,8 @@ fun DatabaseInterface.storeUtsendtVarsel(planlagtVarsel: PPlanlagtVarsel) {
         fnr,
         aktor_id,
         type,
-        utsendt_tidspunkt) VALUES (?, ?, ?, ?, ?)""".trimIndent()
+        utsendt_tidspunkt,
+        planlagt_varsel_id) VALUES (?, ?, ?, ?, ?, ?)""".trimIndent()
 
     val now = Timestamp.valueOf(LocalDateTime.now())
     val varselUUID = UUID.randomUUID()
@@ -24,6 +25,7 @@ fun DatabaseInterface.storeUtsendtVarsel(planlagtVarsel: PPlanlagtVarsel) {
             it.setString(3, planlagtVarsel.aktorId)
             it.setString(4, planlagtVarsel.type)
             it.setTimestamp(5, now)
+            it.setObject(6, UUID.fromString(planlagtVarsel.uuid))
             it.executeUpdate()
         }
 

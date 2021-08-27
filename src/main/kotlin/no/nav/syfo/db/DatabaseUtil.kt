@@ -26,7 +26,8 @@ fun ResultSet.toUtsendtVarsel(): UtsendtVarsel =
         fnr = getString("fnr"),
         aktorId = getString("aktor_id"),
         type = getString("type"),
-        utsendtTidspunkt = getTimestamp("utsendt_tidspunkt").toLocalDateTime()
+        utsendtTidspunkt = getTimestamp("utsendt_tidspunkt").toLocalDateTime(),
+        planlagtVarselId = getString("planlagt_varsel_id")
     )
 
 fun ResultSet.toVarslingIdsListe(): List<String> {

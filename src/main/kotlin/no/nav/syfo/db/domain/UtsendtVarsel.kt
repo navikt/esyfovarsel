@@ -6,5 +6,6 @@ data class UtsendtVarsel (
     val fnr: String,
     val aktorId: String,
     val type: String,
-    val utsendtTidspunkt: LocalDateTime
+    val utsendtTidspunkt: LocalDateTime,
+    val planlagtVarselId: String
 )
