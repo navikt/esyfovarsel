@@ -43,7 +43,13 @@ fun main() {
     if (isJob()) {
         val env: JobEnvironment = getJobEnvironment()
         database = initDb(env.dbEnvironment)
-        val jobb = SendVarslerJobb(database, VarselSender())
+        val jobb = SendVarslerJobb(
+            database,
+            VarselSender(),
+            env.toggleMarkerVarslerSomSendt,
+            env.toggleSendMerVeiledningVarsler,
+            env.toggleSendAktivitetskravVarsler
+        )
         jobb.sendVarsler()
     } else {
         val env: Environment = getEnvironment()

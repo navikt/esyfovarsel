@@ -1,6 +1,7 @@
 package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PPlanlagtVarsel
+import no.nav.syfo.db.domain.UtsendtVarsel
 import java.sql.ResultSet
 
 fun <T> ResultSet.toList(mapper: ResultSet.() -> T) = mutableListOf<T>().apply {
@@ -18,6 +19,15 @@ fun ResultSet.toPPlanlagtVarsel(): PPlanlagtVarsel =
         utsendingsdato = getDate("utsendingsdato").toLocalDate(),
         opprettet = getTimestamp("opprettet").toLocalDateTime(),
         sistEndret = getTimestamp("sist_endret").toLocalDateTime()
+    )
+
+fun ResultSet.toUtsendtVarsel(): UtsendtVarsel =
+    UtsendtVarsel(
+        fnr = getString("fnr"),
+        aktorId = getString("aktor_id"),
+        type = getString("type"),
+        utsendtTidspunkt = getTimestamp("utsendt_tidspunkt").toLocalDateTime(),
+        planlagtVarselId = getString("planlagt_varsel_id")
     )
 
 fun ResultSet.toVarslingIdsListe(): List<String> {

@@ -12,7 +12,13 @@ Varsler for eSYFO
 ### Building the application
 Run `./gradlew build`
 
-### Running locally
+### Running app locally
 
 - Run `docker-compose up` in a terminal at the project root
 - Start BootstrapApplication
+
+### Running job locally
+
+- Run `docker-compose up` in a terminal at the project root
+- Start BootstrapApplication with enivronment variable `SEND_VARSLER=JA`
+- This will run the job once

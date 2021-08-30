@@ -3,5 +3,8 @@
     "databaseUrl": "jdbc:postgresql://localhost:5432/esyfovarsel",
     "databaseName": "esyfovarsel",
     "dbVaultMountPath": ""
-  }
+  },
+  "toggleMarkerVarslerSomSendt": true,
+  "toggleSendMerVeiledningVarsler": true,
+  "toggleSendAktivitetskravVarsler": true
 }

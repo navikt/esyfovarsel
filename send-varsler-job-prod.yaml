@@ -21,3 +21,9 @@ spec:
       value: esyfovarsel
     - name: DB_VAULT_MOUNT_PATH
       value: postgresql/prod-fss
+    - name: TOGGLE_MARKER_VARSLER_SOM_SENDT
+      value: 'false'
+    - name: TOGGLE_SEND_MERVEILEDNING_VARSLER
+      value: 'false'
+    - name: TOGGLE_SEND_AKTIVITETSKRAV_VARSLER
+      value: 'false'

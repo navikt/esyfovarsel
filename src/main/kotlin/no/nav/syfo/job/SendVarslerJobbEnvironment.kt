@@ -19,7 +19,10 @@ fun getJobEnvironment(): JobEnvironment =
 
 private fun remoteEnvironment(): JobEnvironment {
     return JobEnvironment(
-        getDbConfig()
+        getDbConfig(),
+        getEnvVar("TOGGLE_MARKER_VARSLER_SOM_SENDT").toBoolean(),
+        getEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER").toBoolean(),
+        getEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER").toBoolean()
     )
 }
 
@@ -28,7 +31,10 @@ private fun localEnvironment(): JobEnvironment {
 }
 
 data class JobEnvironment(
-    val dbEnvironment: DbEnvironment
+    val dbEnvironment: DbEnvironment,
+    val toggleMarkerVarslerSomSendt: Boolean,
+    val toggleSendMerVeiledningVarsler: Boolean,
+    val toggleSendAktivitetskravVarsler: Boolean
 )
 
 fun isJob(): Boolean = getEnvVar("SEND_VARSLER", "NEI") == "JA"
