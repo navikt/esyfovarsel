@@ -1,0 +1,32 @@
+{
+  "name": "esyfovarsel",
+  "namespace": "team-esyfo",
+  "team-label": "team-esyfo",
+  "ingresses": [
+    "https://esyfovarsel.dev.adeo.no"
+  ],
+  "vault-enabled": "true",
+  "env": {
+    "common": {
+      "KTOR_ENV": "remote",
+      "DATABASE_URL": "jdbc:postgresql://b27dbvl024.preprod.local:5432/esyfovarsel",
+      "DATABASE_NAME": "esyfovarsel",
+      "DB_VAULT_MOUNT_PATH": "postgresql/preprod-fss"
+    },
+    "app": {
+      "KAFKA_BOOTSTRAP_SERVERS_URL": "SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443",
+      "SYFOSYKETILFELLE_URL": "https://syfosyketilfelle.nais.preprod.local",
+      "STS_URL": "https://security-token-service.nais.preprod.local",
+      "PDL_URL": "https://pdl-api.nais.preprod.local/graphql",
+      "DKIF_URL": "https://dkif.dev.intern.nav.no",
+      "SYFOSMREGISTER_URL": "http://syfosmregister.teamsykmelding",
+      "SYFOSMREGISTER_SCOPE": "api://dev-fss.teamsykmelding.syfosmregister/.default"
+    },
+    "job": {
+      "SEND_VARSLER": "JA",
+      "TOGGLE_MARKER_VARSLER_SOM_SENDT": "JA",
+      "TOGGLE_SEND_MERVEILEDNING_VARSLER": "JA",
+      "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "JA"
+    }
+  }
+}

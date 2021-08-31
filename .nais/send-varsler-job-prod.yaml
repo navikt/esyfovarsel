@@ -1,0 +1,21 @@
+apiVersion: nais.io/v1
+kind: Naisjob
+metadata:
+  name: {{ name }}
+  namespace: {{ namespace }}
+  labels:
+    team: {{ team-label }}
+spec:
+  image: {{ image }}
+  schedule: "5 9 * * *"
+  vault:
+    enabled: {{ vault-enabled }}
+  env:
+  {{#each env.common}}
+    - name: {{@key}}
+      value: {{this}}
+  {{/each}}
+  {{#each env.job}}
+    - name: {{@key}}
+      value: {{this}}
+  {{/each}}

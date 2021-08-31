@@ -61,13 +61,15 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
-          RESOURCE: naiserator-dev.yaml
+          RESOURCE: .nais/naiserator-dev.yaml
+          VARS: .nais/dev.json
       - name: Deploy jobb
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
-          RESOURCE: send-varsler-job-dev.yaml
+          RESOURCE: .nais/send-varsler-job-dev.yaml
+          VARS: .nais/dev.json
 
       # Notify Slack
       - name: Unsuccessful deploy notification dev
@@ -92,13 +94,15 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-fss
-          RESOURCE: naiserator-prod.yaml
+          RESOURCE: .nais/naiserator-prod.yaml
+          VARS: .nais/prod.json
       - name: Deploy jobb
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-fss
-          RESOURCE: send-varsler-job-prod.yaml
+          RESOURCE: .nais/send-varsler-job-prod.yaml
+          VARS: .nais/prod.json
 
       # Notify Slack
       - name: Unsuccessful deploy notification prod
