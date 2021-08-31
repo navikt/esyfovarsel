@@ -1,10 +1,10 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: {{ name }}
-  namespace: {{ namespace }}
+  name: esyfovarsel
+  namespace: team-esyfo
   labels:
-    team: {{ team-label }}
+    team: team-esyfo
 spec:
   image: {{ image }}
   port: 8080
@@ -34,7 +34,7 @@ spec:
     enabled: true
     path: /prometheus
   vault:
-    enabled: {{ vault-enabled }}
+    enabled: true
     paths:
       - kvPath: "/serviceuser/data/dev/srvesyfovarsel"
         mountPath: "/var/run/secrets/serviceuser"
@@ -43,9 +43,7 @@ spec:
       enabled: true
   webproxy: true
   ingresses:
-  {{#each ingresses as |url|}}
-    - {{url}}
-  {{/each}}
+    - "https://esyfovarsel.dev.adeo.no"
   env:
   {{#each env.common}}
     - name: {{@key}}

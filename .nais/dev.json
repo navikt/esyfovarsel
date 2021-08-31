@@ -1,11 +1,4 @@
 {
-  "name": "esyfovarsel",
-  "namespace": "team-esyfo",
-  "team-label": "team-esyfo",
-  "ingresses": [
-    "https://esyfovarsel.dev.adeo.no"
-  ],
-  "vault-enabled": "true",
   "env": {
     "common": {
       "KTOR_ENV": "remote",

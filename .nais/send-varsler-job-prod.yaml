@@ -1,15 +1,15 @@
 apiVersion: nais.io/v1
 kind: Naisjob
 metadata:
-  name: {{ name }}
-  namespace: {{ namespace }}
+  name: esyfovarsel-job
+  namespace: team-esyfo
   labels:
-    team: {{ team-label }}
+    team: team-esyfo
 spec:
   image: {{ image }}
   schedule: "5 9 * * *"
   vault:
-    enabled: {{ vault-enabled }}
+    enabled: true
   env:
   {{#each env.common}}
     - name: {{@key}}
