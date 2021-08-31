@@ -4,13 +4,11 @@ import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import io.prometheus.client.hotspot.DefaultExports
 import no.nav.syfo.ApplicationState
 
 fun Routing.registerNaisApi(
         applicationState: ApplicationState
 ) {
-    DefaultExports.initialize()
 
     get("/isAlive") {
         if (applicationState.running) {
