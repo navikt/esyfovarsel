@@ -68,6 +68,9 @@ dependencies {
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.slf4j:slf4j-simple:$slf4jVersion")
 
+    // Metrics and Prometheus
+    implementation("io.micrometer:micrometer-registry-prometheus:1.0.6")
+
     // Database
     implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")

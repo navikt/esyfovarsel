@@ -10,6 +10,7 @@ import io.ktor.util.*
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import no.nav.syfo.api.registerNaisApi
+import no.nav.syfo.api.registerPrometheusApi
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.DkifConsumer
@@ -108,6 +109,7 @@ fun Application.serverModule() {
 
     routing {
         registerNaisApi(state)
+        registerPrometheusApi()
     }
 
     state.initialized = true
