@@ -1,0 +1,55 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: esyfovarsel
+  namespace: team-esyfo
+  labels:
+    team: team-esyfo
+spec:
+  image: {{ image }}
+  port: 8080
+  liveness:
+    path: /isAlive
+    initialDelay: 10
+    timeout: 5
+    periodSeconds: 10
+    failureThreshold: 5
+  readiness:
+    path: /isReady
+    initialDelay: 10
+    periodSeconds: 5
+    timeout: 5
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  replicas:
+    min: 1
+    max: 2
+    cpuThresholdPercentage: 90
+  prometheus:
+    enabled: true
+    path: /prometheus
+  vault:
+    enabled: true
+    paths:
+      - kvPath: "/serviceuser/data/prod/srvesyfovarsel"
+        mountPath: "/var/run/secrets/serviceuser"
+  azure:
+    application:
+      enabled: true
+  webproxy: true
+  ingresses:
+    - "https://esyfovarsel.nais.adeo.no"
+  env:
+  {{#each env.common}}
+    - name: {{@key}}
+      value: {{this}}
+  {{/each}}
+  {{#each env.app}}
+    - name: {{@key}}
+      value: {{this}}
+  {{/each}}

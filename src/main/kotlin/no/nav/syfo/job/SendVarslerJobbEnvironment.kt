@@ -20,10 +20,14 @@ fun getJobEnvironment(): JobEnvironment =
 private fun remoteEnvironment(): JobEnvironment {
     return JobEnvironment(
         getDbConfig(),
-        getEnvVar("TOGGLE_MARKER_VARSLER_SOM_SENDT").toBoolean(),
-        getEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER").toBoolean(),
-        getEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER").toBoolean()
+        getEnvVar("TOGGLE_MARKER_VARSLER_SOM_SENDT").tilBoolean(),
+        getEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER").tilBoolean(),
+        getEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER").tilBoolean()
     )
+}
+
+private fun String.tilBoolean(): Boolean {
+    return this.toUpperCase() == "JA"
 }
 
 private fun localEnvironment(): JobEnvironment {
