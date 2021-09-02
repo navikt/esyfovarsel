@@ -22,6 +22,7 @@ import no.nav.syfo.job.SendVarslerJobb
 import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.launchKafkaListener
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
+import no.nav.syfo.metrics.withPrometheus
 import no.nav.syfo.service.AccessControl
 import no.nav.syfo.service.SendVarselService
 import no.nav.syfo.service.SykmeldingService
@@ -59,7 +60,9 @@ fun main() {
             env.toggles
         )
 
-        jobb.sendVarsler()
+        withPrometheus(env.prometheusPushGateway) {
+            jobb.sendVarsler()
+        }
     } else {
         val env: AppEnvironment = appEnvironment()
         val server = embeddedServer(Netty, applicationEngineEnvironment {

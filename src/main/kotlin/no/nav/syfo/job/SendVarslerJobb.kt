@@ -7,6 +7,8 @@ import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByUtsendingsdato
 import no.nav.syfo.db.storeUtsendtVarsel
+import no.nav.syfo.metrics.tellAktivitetskravVarselSendt
+import no.nav.syfo.metrics.tellMerVeiledningVarselSendt
 import no.nav.syfo.metrics.tellVarselSendt
 import no.nav.syfo.service.SendVarselService
 import org.slf4j.LoggerFactory
@@ -31,7 +33,6 @@ class SendVarslerJobb(
                 log.info("Sender varsel $it")
                 val type = sendVarselService.sendVarsel(it)
                 incrementVarselCountMap(varslerSendt, type)
-                tellVarselSendt(it.type)
                 if (toggles.markerVarslerSomSendt) {
                     log.info("Markerer varsel som sendt $it")
                     databaseAccess.storeUtsendtVarsel(it)
@@ -44,6 +45,9 @@ class SendVarslerJobb(
             varslerSendt.forEach { (key, value) ->
                 log.info("Sendte $value varsler av type $key")
             }
+
+            tellMerVeiledningVarselSendt(varslerSendt.get(VarselType.MER_VEILEDNING.name))
+            tellAktivitetskravVarselSendt(varslerSendt.get(VarselType.AKTIVITETSKRAV.name))
 
             log.info("Avslutter SendVarslerJobb")
         }
