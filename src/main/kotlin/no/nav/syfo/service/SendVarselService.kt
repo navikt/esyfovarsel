@@ -36,14 +36,4 @@ class SendVarselService(
             else -> null
         }
     }
-
-    private fun stringToVarselType(type: String): VarselType? {
-        return when (type) {
-            VarselType.AKTIVITETSKRAV.toString() -> VarselType.AKTIVITETSKRAV
-            VarselType.MER_VEILEDNING.toString() -> VarselType.MER_VEILEDNING
-            else -> null
-        }
-    }
-
-
 }
