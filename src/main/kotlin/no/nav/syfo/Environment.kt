@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.io.File
 
-const val localEnvironmentPropertiesPath = "./src/main/resources/localCommonEnv.json"
 const val localAppPropertiesPath = "./src/main/resources/localAppEnv.json"
 const val localJobPropertiesPath = "./src/main/resources/localJobEnv.json"
 const val serviceuserMounthPath = "/var/run/secrets/serviceuser"
