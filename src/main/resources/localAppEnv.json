@@ -9,7 +9,7 @@
   "syfosmregisterScope": "syfosmregisterScope",
   "commonEnv": {
     "remote": false,
-    "kafkaBootstrapServersUrl": "localhost:kafka",
+    "kafkaBootstrapServersUrl": "http://localhost:9092",
     "kafkaSchemaRegistryUrl": "http://localhost:8081",
     "stsUrl": "http://localhost:9092",
     "pdlUrl": "http://localhost:9091",
