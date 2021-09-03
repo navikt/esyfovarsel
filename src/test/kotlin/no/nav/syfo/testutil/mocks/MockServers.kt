@@ -27,7 +27,7 @@ class MockServers(val env: AppEnvironment) {
     private val mapper = ObjectMapper().registerModule(KotlinModule())
 
     fun mockPdlServer(): NettyApplicationEngine {
-        return mockServer(env.pdlUrl) {
+        return mockServer(env.commonEnv.pdlUrl) {
             post("/") {
                 val content = call.receiveText()
                 val queryType = content.queryType()
@@ -44,7 +44,7 @@ class MockServers(val env: AppEnvironment) {
     }
 
     fun mockDkifServer(): NettyApplicationEngine {
-        return mockServer(env.dkifUrl) {
+        return mockServer(env.commonEnv.dkifUrl) {
             get("/api/v1/personer/kontaktinformasjon") {
                 if (call.request.headers[DkifConsumer.NAV_PERSONIDENTER_HEADER]?.isValidHeader() == true)
                     call.respond(dkifResponseMap[call.request.headers[DkifConsumer.NAV_PERSONIDENTER_HEADER]] ?: dkifResponseSuccessKanVarsles)
@@ -55,7 +55,7 @@ class MockServers(val env: AppEnvironment) {
     }
 
     fun mockStsServer(): NettyApplicationEngine {
-        return mockServer(env.stsUrl) {
+        return mockServer(env.commonEnv.stsUrl) {
             post("/rest/v1/sts/token") {
                 call.respond(tokenFromStsServer)
             }

@@ -34,7 +34,7 @@ object KafkaConsumerSpek : Spek({
     val testEnv = testEnvironment(embeddedKafkaEnv.brokersURL)
     val recordKey = "dummykey"
     val fakeProducerRecord = ProducerRecord(topicOppfolgingsTilfelle, recordKey, kafkaOppfolgingstilfellePeker)
-    val producerProperties = consumerProperties(testEnv).apply {
+    val producerProperties = consumerProperties(testEnv.commonEnv).apply {
         put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
         put("value.serializer", JacksonKafkaSerializer::class.java)
     }
@@ -48,9 +48,9 @@ object KafkaConsumerSpek : Spek({
     val pdlServer = mockServers.mockPdlServer()
     val syfosyketilfelleServer = mockServers.mockSyfosyketilfelleServer()
 
-    val stsConsumer = StsConsumer(testEnv)
-    val pdlConsumer = PdlConsumer(testEnv, stsConsumer)
-    val dkifConsumer = DkifConsumer(testEnv, stsConsumer)
+    val stsConsumer = StsConsumer(testEnv.commonEnv)
+    val pdlConsumer = PdlConsumer(testEnv.commonEnv, stsConsumer)
+    val dkifConsumer = DkifConsumer(testEnv.commonEnv, stsConsumer)
     val accessControl = AccessControl(pdlConsumer, dkifConsumer)
     val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(testEnv, accessControl)
         .addPlanner(MockVarselPlaner(fakeApplicationState))

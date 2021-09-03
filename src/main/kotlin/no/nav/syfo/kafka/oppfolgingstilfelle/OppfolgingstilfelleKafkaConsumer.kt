@@ -36,7 +36,7 @@ class OppfolgingstilfelleKafkaConsumer(
     }
 
     init {
-        val kafkaConfig = consumerProperties(env)
+        val kafkaConfig = consumerProperties(env.commonEnv)
         kafkaListener = KafkaConsumer(kafkaConfig)
         kafkaListener.subscribe(listOf(topicOppfolgingsTilfelle))
     }

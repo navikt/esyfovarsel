@@ -42,25 +42,25 @@ fun main() {
     if (isJob()) {
         val env = jobEnvironment()
 
-        val stsConsumer = StsConsumer(env)
-        val pdlConsumer = PdlConsumer(env, stsConsumer)
-        val dkifConsumer = DkifConsumer(env, stsConsumer)
+        val stsConsumer = StsConsumer(env.commonEnv)
+        val pdlConsumer = PdlConsumer(env.commonEnv, stsConsumer)
+        val dkifConsumer = DkifConsumer(env.commonEnv, stsConsumer)
 
         val accessControl = AccessControl(pdlConsumer, dkifConsumer)
-        val beskjedKafkaProducer = BeskjedKafkaProducer(env)
+        val beskjedKafkaProducer = BeskjedKafkaProducer(env.commonEnv)
         val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl)
 
-        database = initDb(env.dbEnvironment)
+        database = initDb(env.commonEnv.dbEnvironment)
 
         val jobb = SendVarslerJobb(
             database,
             sendVarselService,
-            env.Toggles
+            env.toggles
         )
 
         jobb.sendVarsler()
     } else {
-        val env: AppEnvironment = getEnvironment()
+        val env: AppEnvironment = appEnvironment()
         val server = embeddedServer(Netty, applicationEngineEnvironment {
             log = LoggerFactory.getLogger("ktor.application")
             config = HoconApplicationConfig(ConfigFactory.load())
@@ -71,7 +71,7 @@ fun main() {
 
             module {
                 state.running = true
-                database = initDb(env.dbEnvironment)
+                database = initDb(env.commonEnv.dbEnvironment)
                 serverModule()
                 kafkaModule(env)
             }
@@ -117,10 +117,10 @@ fun Application.serverModule() {
 fun Application.kafkaModule(env: AppEnvironment) {
 
     runningRemotely {
-        val stsConsumer = StsConsumer(env)
+        val stsConsumer = StsConsumer(env.commonEnv)
         val azureAdTokenConsumer = AzureAdTokenConsumer(env)
-        val pdlConsumer = PdlConsumer(env, stsConsumer)
-        val dkifConsumer = DkifConsumer(env, stsConsumer)
+        val pdlConsumer = PdlConsumer(env.commonEnv, stsConsumer)
+        val dkifConsumer = DkifConsumer(env.commonEnv, stsConsumer)
         val oppfolgingstilfelleConsumer = SyfosyketilfelleConsumer(env, stsConsumer)
         val accessControl = AccessControl(pdlConsumer, dkifConsumer)
         val sykmeldingerConsumer = SykmeldingerConsumer(env, azureAdTokenConsumer)

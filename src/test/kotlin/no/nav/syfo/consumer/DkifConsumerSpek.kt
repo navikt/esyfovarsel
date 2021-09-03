@@ -23,8 +23,8 @@ object DkifConsumerSpek : Spek({
     val stsMockServer = mockServers.mockStsServer()
     val dkifMockServer = mockServers.mockDkifServer()
 
-    val stsConsumer = StsConsumer(testEnv)
-    val dkifConsumer = DkifConsumer(testEnv, stsConsumer)
+    val stsConsumer = StsConsumer(testEnv.commonEnv)
+    val dkifConsumer = DkifConsumer(testEnv.commonEnv, stsConsumer)
 
     beforeGroup {
         stsMockServer.start()

@@ -1,0 +1,22 @@
+{
+  "toggles": {
+    "markerVarslerSomSendt": "true",
+    "sendMerVeiledningVarsler": "true",
+    "sendAktivitetskravVarsler": "true"
+  },
+  "commonEnv": {
+    "remote": false,
+    "kafkaBootstrapServersUrl": "localhost:kafka",
+    "kafkaSchemaRegistryUrl": "http://localhost:8081",
+    "stsUrl": "http://localhost:9092",
+    "pdlUrl": "http://localhost:9091",
+    "dkifUrl": "http://localhost:9093",
+    "serviceuserUsername": "srvesyfovarsel",
+    "serviceuserPassword": "password",
+    "dbEnvironment": {
+      "databaseUrl": "jdbc:postgresql://localhost:5432/esyfovarsel",
+      "databaseName": "esyfovarsel",
+      "dbVaultMountPath": ""
+    }
+  }
+}
