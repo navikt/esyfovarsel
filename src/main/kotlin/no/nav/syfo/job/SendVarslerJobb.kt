@@ -9,7 +9,6 @@ import no.nav.syfo.db.fetchPlanlagtVarselByUtsendingsdato
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.metrics.tellAktivitetskravVarselSendt
 import no.nav.syfo.metrics.tellMerVeiledningVarselSendt
-import no.nav.syfo.metrics.tellVarselSendt
 import no.nav.syfo.service.SendVarselService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -46,8 +45,8 @@ class SendVarslerJobb(
                 log.info("Sendte $value varsler av type $key")
             }
 
-            tellMerVeiledningVarselSendt(varslerSendt.get(VarselType.MER_VEILEDNING.name))
-            tellAktivitetskravVarselSendt(varslerSendt.get(VarselType.AKTIVITETSKRAV.name))
+            varslerSendt[VarselType.MER_VEILEDNING.name]?.let(::tellMerVeiledningVarselSendt)
+            varslerSendt[VarselType.AKTIVITETSKRAV.name]?.let(::tellAktivitetskravVarselSendt)
 
             log.info("Avslutter SendVarslerJobb")
         }

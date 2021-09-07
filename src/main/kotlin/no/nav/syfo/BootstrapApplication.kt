@@ -59,7 +59,7 @@ fun main() {
             env.toggles
         )
 
-        withPrometheus(env.prometheusPushGateway) {
+        withPrometheus(env.prometheusPushGatewayUrl) {
             jobb.sendVarsler()
         }
     } else {
