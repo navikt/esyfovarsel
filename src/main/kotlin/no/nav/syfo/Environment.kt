@@ -60,6 +60,7 @@ fun jobEnvironment(): JobEnvironment =
                 getEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER").tilBoolean(),
                 getEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER").tilBoolean()
             ),
+            getEnvVar("BASE_URL_DITT_SYKEFRAVAER"),
             remoteCommonEnvironment()
         )
 
@@ -77,6 +78,7 @@ data class AppEnvironment(
 
 data class JobEnvironment(
     val toggles: Toggles,
+    val baseUrlDittSykefravaer: String,
     var commonEnv: CommonEnvironment
 )
 

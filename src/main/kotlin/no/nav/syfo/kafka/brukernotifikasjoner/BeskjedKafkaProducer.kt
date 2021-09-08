@@ -10,12 +10,14 @@ import no.nav.syfo.CommonEnvironment
 import no.nav.syfo.kafka.producerProperties
 import no.nav.syfo.kafka.topicBrukernotifikasjonBeskjed
 import org.apache.kafka.clients.producer.ProducerRecord
+import java.net.URL
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
 
 class BeskjedKafkaProducer(
-    val env: CommonEnvironment
+    val env: CommonEnvironment,
+    val baseUrlSykefravaer: String
 ) {
     private val kafkaProducer = KafkaProducer<Nokkel, Beskjed>(producerProperties(env))
     private val UTCPlus1 = ZoneId.of("Europe/Oslo")
@@ -49,6 +51,7 @@ class BeskjedKafkaProducer(
             .withEksternVarsling(true)
             .withTidspunkt(LocalDateTime.now(UTCPlus1))
             .withTekst(content)
+            .withLink(URL(baseUrlSykefravaer))
             .withSikkerhetsnivaa(sikkerhetsNiva3)
             .withPrefererteKanaler(PreferertKanal.SMS)
             .withGrupperingsId(groupingId)
@@ -58,6 +61,8 @@ class BeskjedKafkaProducer(
     private fun generateUniqueEventId(): String {
         return "esyfovarsel_${UUID.randomUUID()}"
     }
+
+    // TODO: SKRU OPP NIVÅ TIL 4 FØR PRODSETTING!!
 
     companion object {
         val sikkerhetsNiva3 = 3

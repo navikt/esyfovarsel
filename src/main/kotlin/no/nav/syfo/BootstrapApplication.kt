@@ -47,7 +47,7 @@ fun main() {
         val dkifConsumer = DkifConsumer(env.commonEnv, stsConsumer)
 
         val accessControl = AccessControl(pdlConsumer, dkifConsumer)
-        val beskjedKafkaProducer = BeskjedKafkaProducer(env.commonEnv)
+        val beskjedKafkaProducer = BeskjedKafkaProducer(env.commonEnv, env.baseUrlDittSykefravaer)
         val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl)
 
         database = initDb(env.commonEnv.dbEnvironment)

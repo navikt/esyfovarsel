@@ -2,7 +2,8 @@
   "toggles": {
     "markerVarslerSomSendt": "true",
     "sendMerVeiledningVarsler": "true",
-    "sendAktivitetskravVarsler": "true"
+    "sendAktivitetskravVarsler": "true",
+    "baseUrlDittSykefravaer": "http:localhost:8080/syk/sykefravaer"
   },
   "commonEnv": {
     "remote": false,
