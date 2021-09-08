@@ -32,15 +32,6 @@ val COUNT_ALL_NOTICE_SENT: Counter = Counter
     .description("Counts the number of all types of notice sent")
     .register(METRICS_REGISTRY)
 
-
-fun tellVarselSendt(varselType: String) {
-    COUNT_ALL_NOTICE_SENT.increment()
-    when(varselType){
-        MER_VEILEDNING.name -> COUNT_MER_VEILEDNING_NOTICE_SENT.increment()
-        AKTIVITETSKRAV.name -> COUNT_AKTIVITETSPLIKT_NOTICE_SENT.increment()
-    }
-}
-
 fun tellMerVeiledningVarselSendt(varslerSendt: Int) {
     COUNT_ALL_NOTICE_SENT.increment(varslerSendt.toDouble())
     COUNT_MER_VEILEDNING_NOTICE_SENT.increment(varslerSendt.toDouble())
