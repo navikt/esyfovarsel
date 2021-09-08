@@ -15,7 +15,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import no.nav.syfo.Environment
+import no.nav.syfo.AppEnvironment
 import no.nav.syfo.consumer.DkifConsumer
 import no.nav.syfo.consumer.pdl.IDENTER_QUERY
 import no.nav.syfo.consumer.pdl.PERSON_QUERY
@@ -23,11 +23,11 @@ import no.nav.syfo.testutil.extractPortFromUrl
 import java.io.Serializable
 
 
-class MockServers(val env: Environment) {
+class MockServers(val env: AppEnvironment) {
     private val mapper = ObjectMapper().registerModule(KotlinModule())
 
     fun mockPdlServer(): NettyApplicationEngine {
-        return mockServer(env.pdlUrl) {
+        return mockServer(env.commonEnv.pdlUrl) {
             post("/") {
                 val content = call.receiveText()
                 val queryType = content.queryType()
@@ -44,7 +44,7 @@ class MockServers(val env: Environment) {
     }
 
     fun mockDkifServer(): NettyApplicationEngine {
-        return mockServer(env.dkifUrl) {
+        return mockServer(env.commonEnv.dkifUrl) {
             get("/api/v1/personer/kontaktinformasjon") {
                 if (call.request.headers[DkifConsumer.NAV_PERSONIDENTER_HEADER]?.isValidHeader() == true)
                     call.respond(dkifResponseMap[call.request.headers[DkifConsumer.NAV_PERSONIDENTER_HEADER]] ?: dkifResponseSuccessKanVarsles)
@@ -55,7 +55,7 @@ class MockServers(val env: Environment) {
     }
 
     fun mockStsServer(): NettyApplicationEngine {
-        return mockServer(env.stsUrl) {
+        return mockServer(env.commonEnv.stsUrl) {
             post("/rest/v1/sts/token") {
                 call.respond(tokenFromStsServer)
             }

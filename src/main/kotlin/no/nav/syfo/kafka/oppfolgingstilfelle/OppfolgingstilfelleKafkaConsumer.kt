@@ -8,7 +8,7 @@ import io.ktor.util.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.ApplicationState
-import no.nav.syfo.Environment
+import no.nav.syfo.AppEnvironment
 import no.nav.syfo.kafka.KafkaListener
 import no.nav.syfo.kafka.consumerProperties
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
@@ -23,7 +23,7 @@ import java.time.Duration
 
 @KtorExperimentalAPI
 class OppfolgingstilfelleKafkaConsumer(
-    val env: Environment,
+    val env: AppEnvironment,
     val accessControl: AccessControl
 ) : KafkaListener {
 
@@ -36,8 +36,8 @@ class OppfolgingstilfelleKafkaConsumer(
     }
 
     init {
-        val kafkaConfig = consumerProperties(env)
-        kafkaListener = KafkaConsumer<String, String>(kafkaConfig)
+        val kafkaConfig = consumerProperties(env.commonEnv)
+        kafkaListener = KafkaConsumer(kafkaConfig)
         kafkaListener.subscribe(listOf(topicOppfolgingsTilfelle))
     }
 

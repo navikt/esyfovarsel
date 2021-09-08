@@ -4,14 +4,15 @@
       "KTOR_ENV": "remote",
       "DATABASE_URL": "jdbc:postgresql://A01DBVL022.adeo.no:5432/esyfovarsel",
       "DATABASE_NAME": "esyfovarsel",
-      "DB_VAULT_MOUNT_PATH": "postgresql/prod-fss"
-    },
-    "app": {
+      "DB_VAULT_MOUNT_PATH": "postgresql/prod-fss",
       "KAFKA_BOOTSTRAP_SERVERS_URL": "SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443",
-      "SYFOSYKETILFELLE_URL": "https://syfosyketilfelle.nais.adeo.no",
+      "KAFKA_SCHEMA_REGISTRY_URL": "http://kafka-schema-registry.tpa:8081",
       "STS_URL": "https://security-token-service.nais.adeo.no",
       "PDL_URL": "https://pdl-api.nais.adeo.no/graphql",
-      "DKIF_URL": "https://dkif.intern.nav.no",
+      "DKIF_URL": "https://dkif.intern.nav.no"
+    },
+    "app": {
+      "SYFOSYKETILFELLE_URL": "https://syfosyketilfelle.nais.adeo.no",
       "SYFOSMREGISTER_URL": "http://syfosmregister.teamsykmelding",
       "SYFOSMREGISTER_SCOPE": "api://prod-fss.teamsykmelding.syfosmregister/.default"
     },
@@ -19,7 +20,8 @@
       "SEND_VARSLER": "JA",
       "TOGGLE_MARKER_VARSLER_SOM_SENDT": "NEI",
       "TOGGLE_SEND_MERVEILEDNING_VARSLER": "NEI",
-      "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "NEI"
+      "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "NEI",
+      "BASE_URL_DITT_SYKEFRAVAER": "https://www.nav.no/syk/sykefravaer"
     }
   }
 }

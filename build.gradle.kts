@@ -19,6 +19,12 @@ val jacksonVersion = "2.11.3"
 val postgresEmbeddedVersion = "0.13.3"
 val kafkaVersion = "2.7.0"
 val kafkaEmbeddedVersion = "2.4.0"
+val avroVersion = "1.8.2"
+val confluentVersion = "5.5.0"
+val brukernotifikasjonerSchemaVersion = "1.2021.06.21-08.21-7998a39f216a"
+
+val githubUser: String by project
+val githubPassword: String by project
 
 plugins {
     kotlin("jvm") version "1.3.61"
@@ -34,6 +40,7 @@ allOpen {
 repositories {
     mavenCentral()
     jcenter()
+    maven(url = "https://jitpack.io")
     maven(url = "https://dl.bintray.com/kotlin/ktor")
     maven(url = "https://dl.bintray.com/spekframework/spek-dev")
     maven(url = "https://dl.bintray.com/kotlin/kotlinx/")
@@ -76,6 +83,10 @@ dependencies {
     //Kafka
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
     implementation("org.apache.kafka:kafka_2.12:$kafkaVersion")
+    implementation("io.confluent:kafka-streams-avro-serde:$confluentVersion")
+    implementation("io.confluent:kafka-schema-registry:$confluentVersion")
+    implementation("org.apache.avro:avro:$avroVersion")
+    implementation("com.github.navikt:brukernotifikasjon-schemas:$brukernotifikasjonerSchemaVersion")
 
     // Test
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")

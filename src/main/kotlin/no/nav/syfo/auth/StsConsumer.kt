@@ -7,11 +7,11 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import no.nav.syfo.Environment
+import no.nav.syfo.CommonEnvironment
 import java.time.LocalDateTime
 import java.util.Base64
 
-class StsConsumer(env: Environment) {
+class StsConsumer(env: CommonEnvironment) {
     private val username = env.serviceuserUsername
     private val password = env.serviceuserPassword
     private val stsEndpointUrl = "${env.stsUrl}/rest/v1/sts/token?grant_type=client_credentials&scope=openid"

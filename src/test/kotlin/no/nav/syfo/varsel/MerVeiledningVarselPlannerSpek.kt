@@ -5,7 +5,6 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
-import no.nav.syfo.consumer.domain.*
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
@@ -15,11 +14,9 @@ import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import org.amshove.kluent.should
-import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 object MerVeiledningVarselPlannerSpek : Spek({

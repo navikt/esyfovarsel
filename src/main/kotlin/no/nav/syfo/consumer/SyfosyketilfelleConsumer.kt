@@ -11,14 +11,14 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.util.*
-import no.nav.syfo.Environment
+import no.nav.syfo.AppEnvironment
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
 import org.slf4j.LoggerFactory
 
 @KtorExperimentalAPI
-class SyfosyketilfelleConsumer(env: Environment, stsConsumer: StsConsumer) {
+class SyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsumer) {
     private val client: HttpClient
     private val stsConsumer: StsConsumer
     private val basepath: String

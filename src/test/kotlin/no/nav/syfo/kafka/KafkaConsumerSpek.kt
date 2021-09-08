@@ -10,7 +10,7 @@ import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import no.nav.syfo.service.AccessControl
-import no.nav.syfo.testEnviornment
+import no.nav.syfo.testEnvironment
 import no.nav.syfo.testutil.kafka.JacksonKafkaSerializer
 import no.nav.syfo.testutil.mocks.MockServers
 import no.nav.syfo.testutil.mocks.MockVarselPlaner
@@ -31,10 +31,10 @@ object KafkaConsumerSpek : Spek({
 
     val fakeApplicationState = ApplicationState(running = true, initialized = true)
 
-    val testEnv = testEnviornment(embeddedKafkaEnv.brokersURL)
+    val testEnv = testEnvironment(embeddedKafkaEnv.brokersURL)
     val recordKey = "dummykey"
     val fakeProducerRecord = ProducerRecord(topicOppfolgingsTilfelle, recordKey, kafkaOppfolgingstilfellePeker)
-    val producerProperties = consumerProperties(testEnv).apply {
+    val producerProperties = consumerProperties(testEnv.commonEnv).apply {
         put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
         put("value.serializer", JacksonKafkaSerializer::class.java)
     }
@@ -48,9 +48,9 @@ object KafkaConsumerSpek : Spek({
     val pdlServer = mockServers.mockPdlServer()
     val syfosyketilfelleServer = mockServers.mockSyfosyketilfelleServer()
 
-    val stsConsumer = StsConsumer(testEnv)
-    val pdlConsumer = PdlConsumer(testEnv, stsConsumer)
-    val dkifConsumer = DkifConsumer(testEnv, stsConsumer)
+    val stsConsumer = StsConsumer(testEnv.commonEnv)
+    val pdlConsumer = PdlConsumer(testEnv.commonEnv, stsConsumer)
+    val dkifConsumer = DkifConsumer(testEnv.commonEnv, stsConsumer)
     val accessControl = AccessControl(pdlConsumer, dkifConsumer)
     val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(testEnv, accessControl)
         .addPlanner(MockVarselPlaner(fakeApplicationState))
@@ -72,11 +72,12 @@ object KafkaConsumerSpek : Spek({
         syfosyketilfelleServer.stop(1L, 10L)
     }
 
-    describe("Test Kafka consumer with face producer") {
+    describe("Test Kafka consumer with fake producer") {
         it("Consume record from $topicOppfolgingsTilfelle") {
             fakeOppfolgingstilfelleKafkaProducer.send(fakeProducerRecord)
             runBlocking { oppfolgingstilfelleKafkaConsumer.listen(fakeApplicationState) }
         }
     }
+
 
 })

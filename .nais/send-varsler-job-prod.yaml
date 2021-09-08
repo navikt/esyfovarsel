@@ -10,6 +10,9 @@ spec:
   schedule: "5 9 * * *"
   vault:
     enabled: true
+    paths:
+      - kvPath: "/serviceuser/data/prod/srvesyfovarsel"
+        mountPath: "/var/run/secrets/serviceuser"
   env:
   {{#each env.common}}
     - name: {{@key}}
