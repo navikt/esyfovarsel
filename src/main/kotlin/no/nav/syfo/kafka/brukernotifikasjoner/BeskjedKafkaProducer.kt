@@ -33,9 +33,14 @@ class BeskjedKafkaProducer(
             beskjed
         )
 
+        // TODO: Uncomment here as soon as we are ready to go live
+
+        /*
         kafkaProducer
             .send(record)
             .get()              // Block until record has been sent
+
+        */
     }
 
     private fun buildNewNokkel(): Nokkel {
@@ -52,7 +57,7 @@ class BeskjedKafkaProducer(
             .withTidspunkt(LocalDateTime.now(UTCPlus1))
             .withTekst(content)
             .withLink(URL(baseUrlSykefravaer))
-            .withSikkerhetsnivaa(sikkerhetsNiva3)
+            .withSikkerhetsnivaa(sikkerhetsNiva)
             .withPrefererteKanaler(PreferertKanal.SMS)
             .withGrupperingsId(groupingId)
             .build()
@@ -62,9 +67,7 @@ class BeskjedKafkaProducer(
         return "esyfovarsel_${UUID.randomUUID()}"
     }
 
-    // TODO: SKRU OPP NIVÅ TIL 4 FØR PRODSETTING!!
-
     companion object {
-        val sikkerhetsNiva3 = 3
+        val sikkerhetsNiva = 4
     }
 }
