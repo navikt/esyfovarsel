@@ -40,16 +40,16 @@ class SendVarslerJobb(
             } else {
                 log.info("Varsel ble ikke sendt fordi utsending av ${it.type} ikke er aktivert")
             }
-
-            varslerSendt.forEach { (key, value) ->
-                log.info("Sendte $value varsler av type $key")
-            }
-
-            varslerSendt[VarselType.MER_VEILEDNING.name]?.let(::tellMerVeiledningVarselSendt)
-            varslerSendt[VarselType.AKTIVITETSKRAV.name]?.let(::tellAktivitetskravVarselSendt)
-
-            log.info("Avslutter SendVarslerJobb")
         }
+
+        varslerSendt.forEach { (key, value) ->
+            log.info("Sendte $value varsler av type $key")
+        }
+
+        varslerSendt[VarselType.MER_VEILEDNING.name]?.let(::tellMerVeiledningVarselSendt)
+        varslerSendt[VarselType.AKTIVITETSKRAV.name]?.let(::tellAktivitetskravVarselSendt)
+
+        log.info("Avslutter SendVarslerJobb")
     }
 
     private fun incrementVarselCountMap(map: HashMap<String, Int>, type: String) {
