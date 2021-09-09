@@ -23,8 +23,8 @@ class BeskjedKafkaProducer(
     private val UTCPlus1 = ZoneId.of("Europe/Oslo")
     private val groupingId = "ESYFOVARSEL"
 
-    fun sendBeskjed(fnr: String, content: String) {
-        val nokkel = buildNewNokkel()
+    fun sendBeskjed(fnr: String, content: String, uuid: String) {
+        val nokkel = buildNewNokkel(uuid)
         val beskjed = buildNewBeskjed(fnr, content)
 
         val record = ProducerRecord<Nokkel, Beskjed>(
@@ -43,10 +43,10 @@ class BeskjedKafkaProducer(
         */
     }
 
-    private fun buildNewNokkel(): Nokkel {
+    private fun buildNewNokkel(uuid: String): Nokkel {
         return NokkelBuilder()
             .withSystembruker(env.serviceuserUsername)
-            .withEventId(generateUniqueEventId())
+            .withEventId(uuid)
             .build()
     }
 
@@ -62,11 +62,7 @@ class BeskjedKafkaProducer(
             .withGrupperingsId(groupingId)
             .build()
     }
-
-    private fun generateUniqueEventId(): String {
-        return "esyfovarsel_${UUID.randomUUID()}"
-    }
-
+    
     companion object {
         val sikkerhetsNiva = 4
     }

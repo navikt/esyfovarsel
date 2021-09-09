@@ -11,4 +11,4 @@ data class PPlanlagtVarsel(
     val utsendingsdato: LocalDate,
     val opprettet: LocalDateTime,
     val sistEndret: LocalDateTime
-) { fun ikkeUtsendtEnna(): Boolean = utsendingsdato.isAfter(LocalDate.now()) }
+)

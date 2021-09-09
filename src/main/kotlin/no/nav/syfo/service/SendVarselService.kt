@@ -17,9 +17,10 @@ class SendVarselService(
         // Recheck if user can be notified in case of recent 'Addressesperre'
         try {
             val fodselnummer = accessControl.getFnrIfUserCanBeNotified(pPlanlagtVarsel.aktorId)
+            val uuid = pPlanlagtVarsel.uuid
             fodselnummer?.let { fnr ->
                 varselContentFromType(pPlanlagtVarsel.type)?.let { content ->
-                    beskjedKafkaProducer.sendBeskjed(fnr, content)
+                    beskjedKafkaProducer.sendBeskjed(fnr, content, uuid)
                 } ?: throw RuntimeException("Klarte ikke mappe typestreng til innholdstekst")
             }
         } catch (e: RuntimeException) {

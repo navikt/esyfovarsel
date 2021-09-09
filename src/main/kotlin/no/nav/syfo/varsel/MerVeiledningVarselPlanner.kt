@@ -38,16 +38,17 @@ class MerVeiledningVarselPlanner(val databaseAccess: DatabaseInterface, val syfo
                     utsendingsdato
                 )
 
-                val tidligereVarsler39UkersVarslerPaFnr = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.MER_VEILEDNING)
-                if (tidligereVarsler39UkersVarslerPaFnr.isNotEmpty()) {
-                    val sisteUsendteVarsel = tidligereVarsler39UkersVarslerPaFnr
-                        .sortedBy { tidligereVarsel -> tidligereVarsel.utsendingsdato }
-                        .lastOrNull { it.ikkeUtsendtEnna() }
+                if (!varselUtil.kanNyttVarselSendes(fnr, VarselType.MER_VEILEDNING)) {
+                    log.info("[$name]: Varsel har allerede blitt sendt ut til bruker i dette sykeforløpet. Planlegger ikke nytt varsel")
+                    return@coroutineScope
+                }
 
-                    sisteUsendteVarsel?.let {
-                        log.info("[$name]: Oppdaterer tidligere usendt 39-ukers varsel i samme sykeforlop")
-                        databaseAccess.updateUtsendingsdatoByVarselId(sisteUsendteVarsel.uuid, utsendingsdato)
-                    } ?: log.info("[$name]: Varsel har allerede blitt sendt ut til bruker i dette sykeforløpet. Planlegger ikke varsel")
+                val tidligerePlanlagteVarslerPaFnr = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.MER_VEILEDNING)
+
+                if (tidligerePlanlagteVarslerPaFnr.isNotEmpty()) {
+                    val sisteUsendteVarsel = tidligerePlanlagteVarslerPaFnr.first()
+                    databaseAccess.updateUtsendingsdatoByVarselId(sisteUsendteVarsel.uuid, utsendingsdato)
+                    log.info("[$name]: Oppdaterte tidligere usendt 39-ukers varsel i samme sykeforlop")
                 } else {
                     log.info("[$name]: Planlegger 39-ukers varsel")
                     databaseAccess.storePlanlagtVarsel(varsel)
