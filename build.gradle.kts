@@ -8,6 +8,7 @@ val coroutinesVersion = "1.3.3"
 val kluentVersion = "1.39"
 val ktorVersion = "1.3.2"
 val prometheusVersion = "0.8.1"
+val micrometerVersion = "1.7.3"
 val spekVersion = "2.0.9"
 val mockkVersion = "1.10.2"
 val slf4jVersion = "1.7.30"
@@ -54,8 +55,6 @@ dependencies {
     // Kotlin / Server
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
-    implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
-    implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-jackson:$ktorVersion")
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
@@ -67,6 +66,12 @@ dependencies {
     // Logging
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.slf4j:slf4j-simple:$slf4jVersion")
+
+    // Metrics and Prometheus
+    implementation("io.micrometer:micrometer-registry-prometheus:$micrometerVersion")
+    implementation("io.prometheus:simpleclient_common:$prometheusVersion")
+    implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
+    implementation("io.prometheus:simpleclient_pushgateway:$prometheusVersion")
 
     // Database
     implementation("org.postgresql:postgresql:$postgresVersion")

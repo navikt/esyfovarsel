@@ -7,6 +7,8 @@ import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByUtsendingsdato
 import no.nav.syfo.db.storeUtsendtVarsel
+import no.nav.syfo.metrics.tellAktivitetskravVarselSendt
+import no.nav.syfo.metrics.tellMerVeiledningVarselSendt
 import no.nav.syfo.service.SendVarselService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -38,13 +40,16 @@ class SendVarslerJobb(
             } else {
                 log.info("Varsel ble ikke sendt fordi utsending av ${it.type} ikke er aktivert")
             }
-
-            varslerSendt.forEach { (key, value) ->
-                log.info("Sendte $value varsler av type $key")
-            }
-
-            log.info("Avslutter SendVarslerJobb")
         }
+
+        varslerSendt.forEach { (key, value) ->
+            log.info("Sendte $value varsler av type $key")
+        }
+
+        varslerSendt[VarselType.MER_VEILEDNING.name]?.let(::tellMerVeiledningVarselSendt)
+        varslerSendt[VarselType.AKTIVITETSKRAV.name]?.let(::tellAktivitetskravVarselSendt)
+
+        log.info("Avslutter SendVarslerJobb")
     }
 
     private fun incrementVarselCountMap(map: HashMap<String, Int>, type: String) {

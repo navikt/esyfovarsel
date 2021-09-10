@@ -60,8 +60,9 @@ fun jobEnvironment(): JobEnvironment =
                 getEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER").tilBoolean(),
                 getEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER").tilBoolean()
             ),
+            remoteCommonEnvironment(),
             getEnvVar("BASE_URL_DITT_SYKEFRAVAER"),
-            remoteCommonEnvironment()
+            getEnvVar("PROMETHEUS_PUSH_GATEWAY_URL")
         )
 
 data class AppEnvironment(
@@ -78,8 +79,9 @@ data class AppEnvironment(
 
 data class JobEnvironment(
     val toggles: Toggles,
+    var commonEnv: CommonEnvironment,
     val baseUrlDittSykefravaer: String,
-    var commonEnv: CommonEnvironment
+    val prometheusPushGatewayUrl: String
 )
 
 data class CommonEnvironment(

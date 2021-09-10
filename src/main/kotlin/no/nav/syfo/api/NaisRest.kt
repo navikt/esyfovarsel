@@ -1,22 +1,14 @@
 package no.nav.syfo.api
 
-import io.ktor.application.call
-import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.response.respondText
-import io.ktor.response.respondTextWriter
-import io.ktor.routing.Routing
-import io.ktor.routing.get
-import io.prometheus.client.CollectorRegistry
-import io.prometheus.client.exporter.common.TextFormat
-import io.prometheus.client.hotspot.DefaultExports
+import io.ktor.application.*
+import io.ktor.http.*
+import io.ktor.response.*
+import io.ktor.routing.*
 import no.nav.syfo.ApplicationState
 
 fun Routing.registerNaisApi(
-        applicationState: ApplicationState,
-        collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
+        applicationState: ApplicationState
 ) {
-    DefaultExports.initialize()
 
     get("/isAlive") {
         if (applicationState.running) {
@@ -33,12 +25,4 @@ fun Routing.registerNaisApi(
             call.respondText("Application is not ready", status = HttpStatusCode.InternalServerError)
         }
     }
-
-    get("/prometheus") {
-        val names = call.request.queryParameters.getAll("name[]")?.toSet() ?: setOf()
-        call.respondTextWriter(ContentType.parse(TextFormat.CONTENT_TYPE_004)) {
-            TextFormat.write004(this, collectorRegistry.filteredMetricFamilySamples(names))
-        }
-    }
-
 }
