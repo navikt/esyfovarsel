@@ -26,8 +26,8 @@ class SendVarslerJobb(
         val varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
         log.info("Planlegger å sende ${varslerToSendToday.size} varsler")
 
-        toggles.sendAktivitetskravVarsler.not().let { log.info("Utsending av Aktivitetskrav er ikke aktivert, og varsler av denne typen blir ikke sendt") }
-        toggles.sendMerVeiledningVarsler.not().let { log.info("Utsending av Mer veiledning er ikke aktivert, og varsler av denne typen blir ikke sendt") }
+        if (toggles.sendAktivitetskravVarsler) log.info("Utsending av Aktivitetskrav er ikke aktivert, og varsler av denne typen blir ikke sendt")
+        if (toggles.sendMerVeiledningVarsler) log.info("Utsending av Mer veiledning er ikke aktivert, og varsler av denne typen blir ikke sendt")
 
         val varslerSendt = HashMap<String, Int>()
         varslerToSendToday.forEach {
