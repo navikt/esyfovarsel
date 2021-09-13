@@ -24,21 +24,22 @@ class SendVarslerJobb(
         log.info("Starter SendVarslerJobb")
 
         val varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
-        log.info("Planlegger å sende ${varslerToSendToday.size} varsler i dag")
+        log.info("Planlegger å sende ${varslerToSendToday.size} varsler")
+
+        if (!toggles.sendAktivitetskravVarsler) log.info("Utsending av Aktivitetskrav er ikke aktivert, og varsler av denne typen blir ikke sendt")
+        if (!toggles.sendMerVeiledningVarsler) log.info("Utsending av Mer veiledning er ikke aktivert, og varsler av denne typen blir ikke sendt")
 
         val varslerSendt = HashMap<String, Int>()
         varslerToSendToday.forEach {
             if (skalSendeVarsel(it)) {
-                log.info("Sender varsel $it")
+                log.info("Sender varsel med UUID ${it.uuid}")
                 val type = sendVarselService.sendVarsel(it)
                 incrementVarselCountMap(varslerSendt, type)
                 if (toggles.markerVarslerSomSendt) {
-                    log.info("Markerer varsel som sendt $it")
+                    log.info("Markerer varsel med UUID ${it.uuid} som sendt")
                     databaseAccess.storeUtsendtVarsel(it)
                     databaseAccess.deletePlanlagtVarselByVarselId(it.uuid)
                 }
-            } else {
-                log.info("Varsel ble ikke sendt fordi utsending av ${it.type} ikke er aktivert")
             }
         }
 
