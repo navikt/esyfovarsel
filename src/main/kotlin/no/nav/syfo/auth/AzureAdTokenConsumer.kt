@@ -59,7 +59,7 @@ class AzureAdTokenConsumer(env: AppEnvironment) {
 
         val token: AzureAdAccessToken? = tokenMap.get(resource)
 
-        if (token == null || Instant.now().plusSeconds(token.expires_in.toLong()).isBefore(omToMinutter)) {
+        if (token == null || token.issuedOn!!.plusSeconds(token.expires_in).isBefore(omToMinutter)) {
             log.info("Henter nytt token fra Azure AD for scope : $resource")
 
             val response = httpClientWithProxy.post<HttpResponse>(aadAccessTokenUrl) {
@@ -85,5 +85,6 @@ class AzureAdTokenConsumer(env: AppEnvironment) {
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class AzureAdAccessToken(
     val access_token: String,
-    val expires_in: Int
+    val expires_in: Long,
+    val issuedOn: Instant? = Instant.now()
 )

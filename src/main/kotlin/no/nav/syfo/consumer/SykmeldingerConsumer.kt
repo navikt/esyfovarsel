@@ -24,7 +24,7 @@ class SykmeldingerConsumer(env: AppEnvironment, azureAdTokenConsumer: AzureAdTok
     private val client: HttpClient
     private val azureAdTokenConsumer: AzureAdTokenConsumer
     private val basepath: String
-    private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.SyfosyketilfelleConsumer")
+    private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.SykmeldingerConsumer")
     private val scope = env.syfosmregisterScope
 
     init {
