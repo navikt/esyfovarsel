@@ -1,0 +1,18 @@
+apiVersion: "nais.io/v1"
+kind: "Alert"
+metadata:
+  name: esyfovarsel-alerts
+  namespace: team-esyfo
+  labels:
+    team: team-esyfo
+spec:
+  receivers: # receivers for all alerts below
+    slack:
+      channel: '#esyfo-alarm'
+      prependText: '<!here> | ' # this text will be prepended to the Slack alert title
+  alerts:
+    - alert: esyfovarsel er nede
+        expr: kube_deployment_status_replicas_available{deployment="esyfovarsel"} == 0
+        for: 2m
+        description: "App {{ $labels.app }} er nede i namespace {{ $labels.kubernetes_namespace }}"
+        action: "`kubectl describe pod {{ $labels.kubernetes_pod_name }} -n {{ $labels.kubernetes_namespace }}` for events, og `kubectl logs {{ $labels.kubernetes_pod_name }} -n {{ $labels.kubernetes_namespace }}` for logger"
