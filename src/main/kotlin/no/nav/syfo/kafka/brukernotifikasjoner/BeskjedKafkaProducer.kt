@@ -33,14 +33,10 @@ class BeskjedKafkaProducer(
             beskjed
         )
 
-        // TODO: Uncomment here as soon as we are ready to go live
-
-        /*
         kafkaProducer
             .send(record)
             .get()              // Block until record has been sent
 
-        */
     }
 
     private fun buildNewNokkel(): Nokkel {
