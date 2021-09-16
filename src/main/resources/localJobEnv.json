@@ -1,9 +1,8 @@
 {
   "toggles": {
-    "markerVarslerSomSendt": "true",
+    "startJobb": "true",
     "sendMerVeiledningVarsler": "true",
-    "sendAktivitetskravVarsler": "true",
-    "baseUrlDittSykefravaer": "http:localhost:8080/syk/sykefravaer"
+    "sendAktivitetskravVarsler": "true"
   },
   "commonEnv": {
     "remote": false,
@@ -19,5 +18,7 @@
       "databaseName": "esyfovarsel",
       "dbVaultMountPath": ""
     }
-  }
+  },
+  "baseUrlDittSykefravaer": "http:localhost:8080/syk/sykefravaer",
+  "prometheusPushGatewayUrl": "localhost:9091"
 }

@@ -37,7 +37,6 @@ val state: ApplicationState = ApplicationState()
 val backgroundTasksContext = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
 lateinit var database: DatabaseInterface
 
-
 @KtorExperimentalAPI
 fun main() {
     if (isJob()) {
@@ -63,6 +62,8 @@ fun main() {
             withPrometheus(env.prometheusPushGatewayUrl) {
                 jobb.sendVarsler()
             }
+        } else {
+            LoggerFactory.getLogger("no.nav.syfo.BootstrapApplication").info("Jobb togglet av")
         }
 
     } else {
