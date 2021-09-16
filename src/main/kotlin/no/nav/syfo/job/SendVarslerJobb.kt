@@ -35,11 +35,9 @@ class SendVarslerJobb(
                 log.info("Sender varsel med UUID ${it.uuid}")
                 val type = sendVarselService.sendVarsel(it)
                 incrementVarselCountMap(varslerSendt, type)
-                if (toggles.markerVarslerSomSendt) {
-                    log.info("Markerer varsel med UUID ${it.uuid} som sendt")
-                    databaseAccess.storeUtsendtVarsel(it)
-                    databaseAccess.deletePlanlagtVarselByVarselId(it.uuid)
-                }
+                log.info("Markerer varsel med UUID ${it.uuid} som sendt")
+                databaseAccess.storeUtsendtVarsel(it)
+                databaseAccess.deletePlanlagtVarselByVarselId(it.uuid)
             }
         }
 

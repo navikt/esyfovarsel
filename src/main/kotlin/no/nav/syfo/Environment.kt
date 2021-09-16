@@ -56,7 +56,7 @@ fun jobEnvironment(): JobEnvironment =
     else
         JobEnvironment(
             Toggles(
-                getEnvVar("TOGGLE_MARKER_VARSLER_SOM_SENDT").tilBoolean(),
+                getEnvVar("TOGGLE_START_JOBB").tilBoolean(),
                 getEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER").tilBoolean(),
                 getEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER").tilBoolean()
             ),
@@ -103,7 +103,7 @@ data class DbEnvironment(
 )
 
 data class Toggles(
-    val markerVarslerSomSendt: Boolean,
+    val startJobb: Boolean,
     val sendMerVeiledningVarsler: Boolean,
     val sendAktivitetskravVarsler: Boolean
 )
