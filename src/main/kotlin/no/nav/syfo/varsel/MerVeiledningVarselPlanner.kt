@@ -38,7 +38,7 @@ class MerVeiledningVarselPlanner(val databaseAccess: DatabaseInterface, val syfo
                     utsendingsdato
                 )
 
-                if (!varselUtil.kanNyttVarselSendes(fnr, VarselType.MER_VEILEDNING)) {
+                if (!varselUtil.kanNyttVarselSendes(fnr, VarselType.MER_VEILEDNING, tilfelleFom, tilfelleTom)) {
                     log.info("[$name]: Varsel har allerede blitt sendt ut til bruker i dette sykeforløpet. Planlegger ikke nytt varsel")
                     return@coroutineScope
                 }

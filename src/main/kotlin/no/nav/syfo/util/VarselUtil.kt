@@ -27,7 +27,7 @@ class VarselUtil(private val databaseAccess: DatabaseInterface) {
             .filter { it.type == varselType.name }
     }
 
-    fun kanNyttVarselSendes(fnr: String, varselType: VarselType): Boolean {
+    fun kanNyttVarselSendes(fnr: String, varselType: VarselType, tilfelleFom: LocalDate, tilfelleTom: LocalDate): Boolean {
         val utsendtVarsel = databaseAccess.fetchUtsendtVarselByFnr(fnr)
             .filter { it.type == varselType.name }
 
@@ -38,9 +38,8 @@ class VarselUtil(private val databaseAccess: DatabaseInterface) {
         utsendtVarsel.sortedBy { it.utsendtTidspunkt }
         val sisteUtsendeVarsel = utsendtVarsel.last()
         val sisteGangVarselBleUtsendt = sisteUtsendeVarsel.utsendtTidspunkt.toLocalDate()
-        val sisteDagISykefravaeret = sisteGangVarselBleUtsendt.plusWeeks(13L)
-        val dagsDato = LocalDate.now()
-        return !dateIsInInterval(dagsDato, sisteGangVarselBleUtsendt, sisteDagISykefravaeret)
+
+        return !dateIsInInterval(sisteGangVarselBleUtsendt, tilfelleFom, tilfelleTom)
     }
 
     fun hasLagreteVarslerForForespurteSykmeldinger(planlagteVarsler: List<PPlanlagtVarsel>, ressursIds: Set<String>): Boolean {
