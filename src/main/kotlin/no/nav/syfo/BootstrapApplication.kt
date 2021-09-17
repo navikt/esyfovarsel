@@ -37,31 +37,35 @@ val state: ApplicationState = ApplicationState()
 val backgroundTasksContext = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
 lateinit var database: DatabaseInterface
 
-
 @KtorExperimentalAPI
 fun main() {
     if (isJob()) {
         val env = jobEnvironment()
 
-        val stsConsumer = StsConsumer(env.commonEnv)
-        val pdlConsumer = PdlConsumer(env.commonEnv, stsConsumer)
-        val dkifConsumer = DkifConsumer(env.commonEnv, stsConsumer)
+        if(env.toggles.startJobb) {
+            val stsConsumer = StsConsumer(env.commonEnv)
+            val pdlConsumer = PdlConsumer(env.commonEnv, stsConsumer)
+            val dkifConsumer = DkifConsumer(env.commonEnv, stsConsumer)
 
-        val accessControl = AccessControl(pdlConsumer, dkifConsumer)
-        val beskjedKafkaProducer = BeskjedKafkaProducer(env.commonEnv, env.baseUrlDittSykefravaer)
-        val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl)
+            val accessControl = AccessControl(pdlConsumer, dkifConsumer)
+            val beskjedKafkaProducer = BeskjedKafkaProducer(env.commonEnv, env.baseUrlDittSykefravaer)
+            val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl)
 
-        database = initDb(env.commonEnv.dbEnvironment)
+            database = initDb(env.commonEnv.dbEnvironment)
 
-        val jobb = SendVarslerJobb(
-            database,
-            sendVarselService,
-            env.toggles
-        )
+            val jobb = SendVarslerJobb(
+                database,
+                sendVarselService,
+                env.toggles
+            )
 
-        withPrometheus(env.prometheusPushGatewayUrl) {
-            jobb.sendVarsler()
+            withPrometheus(env.prometheusPushGatewayUrl) {
+                jobb.sendVarsler()
+            }
+        } else {
+            LoggerFactory.getLogger("no.nav.syfo.BootstrapApplication").info("Jobb togglet av")
         }
+
     } else {
         val env: AppEnvironment = appEnvironment()
         val server = embeddedServer(Netty, applicationEngineEnvironment {

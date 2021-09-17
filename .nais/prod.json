@@ -18,7 +18,7 @@
     },
     "job": {
       "SEND_VARSLER": "JA",
-      "TOGGLE_MARKER_VARSLER_SOM_SENDT": "NEI",
+      "TOGGLE_START_JOBB": "NEI",
       "TOGGLE_SEND_MERVEILEDNING_VARSLER": "NEI",
       "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "NEI",
       "BASE_URL_DITT_SYKEFRAVAER": "https://www.nav.no/syk/sykefravaer",

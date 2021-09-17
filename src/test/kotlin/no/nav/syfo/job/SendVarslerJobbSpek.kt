@@ -50,18 +50,6 @@ object SendVarslerJobbSpek: Spek( {
             embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
         }
 
-        it("Skal ikke markere som sendt hvis toggle er false") {
-            val sendVarselJobb = SendVarslerJobb(embeddedDatabase, sendVarselService, Toggles(false,true,true))
-            val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1"), AKTIVITETSKRAV)
-            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
-
-            sendVarselJobb.sendVarsler()
-            verify {sendVarselService.sendVarsel(any())}
-
-            embeddedDatabase.skalHaPlanlagtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
-            embeddedDatabase.skalIkkeHaUtsendtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
-        }
-
         it("Skal ikke sende mer veiledning-varsel hvis toggle er false") {
             val sendVarselJobb = SendVarslerJobb(embeddedDatabase, sendVarselService, Toggles(true,false,true))
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, emptySet(), MER_VEILEDNING)
