@@ -13,6 +13,9 @@ import no.nav.syfo.kafka.KafkaListener
 import no.nav.syfo.kafka.consumerProperties
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import no.nav.syfo.kafka.topicOppfolgingsTilfelle
+import no.nav.syfo.metrics.tellFeilIParsing
+import no.nav.syfo.metrics.tellFeilIPlanner
+import no.nav.syfo.metrics.tellFeilIProsessering
 import no.nav.syfo.service.AccessControl
 import no.nav.syfo.varsel.VarselPlanner
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -56,13 +59,16 @@ class OppfolgingstilfelleKafkaConsumer(
                                 runBlocking { planner.processOppfolgingstilfelle(aktorId, fnr) }
                             } catch (e: Exception) {
                                 log.error("Error in [${planner.name}] planner: | ${e.message}")
+                                tellFeilIPlanner()
                             }
                         }
                     }
                 } catch (e: IOException) {
                     log.error("Error in [$topicOppfolgingsTilfelle] listener: Could not parse message | ${e.message}")
+                    tellFeilIParsing()
                 } catch (e: Exception) {
                     log.error("Error in [$topicOppfolgingsTilfelle] listener: Could not process message | ${e.message}")
+                    tellFeilIProsessering()
                 }
             }
             kafkaListener.commitSync()

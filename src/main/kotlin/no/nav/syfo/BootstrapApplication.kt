@@ -21,6 +21,7 @@ import no.nav.syfo.job.SendVarslerJobb
 import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.launchKafkaListener
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
+import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.metrics.withPrometheus
 import no.nav.syfo.service.AccessControl
 import no.nav.syfo.service.SendVarselService
@@ -115,6 +116,7 @@ fun Application.serverModule() {
 
     routing {
         registerNaisApi(state)
+        registerPrometheusApi()
     }
 
     state.initialized = true
