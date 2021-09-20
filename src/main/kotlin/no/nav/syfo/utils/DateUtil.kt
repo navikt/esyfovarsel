@@ -12,5 +12,9 @@ fun LocalDate.isEqualOrBefore(other: LocalDate): Boolean {
 
 fun todayIsBetweenFomAndTom(fom: LocalDate, tom: LocalDate): Boolean {
     val today = LocalDate.now()
-    return today.isEqualOrAfter(fom) && today.isEqualOrBefore(tom)
+    return dateIsInInterval(today, fom, tom)
+}
+
+fun dateIsInInterval(date: LocalDate, start: LocalDate, end: LocalDate): Boolean {
+    return date.isEqualOrAfter(start) && date.isEqualOrBefore(end)
 }

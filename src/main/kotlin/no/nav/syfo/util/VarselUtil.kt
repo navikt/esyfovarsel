@@ -5,6 +5,8 @@ import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
 import no.nav.syfo.db.fetchSykmeldingerIdByPlanlagtVarselsUUID
+import no.nav.syfo.db.fetchUtsendtVarselByFnr
+import no.nav.syfo.utils.dateIsInInterval
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -23,6 +25,21 @@ class VarselUtil(private val databaseAccess: DatabaseInterface) {
     fun getPlanlagteVarslerAvType(fnr: String, varselType: VarselType): List<PPlanlagtVarsel> {
         return databaseAccess.fetchPlanlagtVarselByFnr(fnr)
             .filter { it.type == varselType.name }
+    }
+
+    fun kanNyttVarselSendes(fnr: String, varselType: VarselType, tilfelleFom: LocalDate, tilfelleTom: LocalDate): Boolean {
+        val utsendtVarsel = databaseAccess.fetchUtsendtVarselByFnr(fnr)
+            .filter { it.type == varselType.name }
+
+        if (utsendtVarsel.isEmpty()) {
+            return true
+        }
+
+        utsendtVarsel.sortedBy { it.utsendtTidspunkt }
+        val sisteUtsendeVarsel = utsendtVarsel.last()
+        val sisteGangVarselBleUtsendt = sisteUtsendeVarsel.utsendtTidspunkt.toLocalDate()
+
+        return !dateIsInInterval(sisteGangVarselBleUtsendt, tilfelleFom, tilfelleTom)
     }
 
     fun hasLagreteVarslerForForespurteSykmeldinger(planlagteVarsler: List<PPlanlagtVarsel>, ressursIds: Set<String>): Boolean {
