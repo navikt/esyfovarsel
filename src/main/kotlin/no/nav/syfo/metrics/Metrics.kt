@@ -3,9 +3,11 @@ package no.nav.syfo.metrics
 import io.ktor.application.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import io.micrometer.core.instrument.Clock
 import io.micrometer.core.instrument.Counter
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Gauge
 import io.prometheus.client.exporter.PushGateway
 import io.prometheus.client.hotspot.DefaultExports
@@ -19,7 +21,7 @@ const val ERROR_IN_PLANNER = "${METRICS_NS}_error_in_planner"
 const val ERROR_IN_PARSING = "${METRICS_NS}_error_in_parser"
 const val ERROR_IN_PROCESSING = "${METRICS_NS}_error_in_processing"
 
-val METRICS_REGISTRY = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+val METRICS_REGISTRY = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, CollectorRegistry.defaultRegistry, Clock.SYSTEM)
 
 val COUNT_MER_VEILEDNING_NOTICE_SENT: Counter = Counter
     .builder(MER_VEILEDNING_NOTICE_SENT)
@@ -94,6 +96,8 @@ fun withPrometheus(pushGatewayUrl: String, block: () -> Unit) {
 }
 
 fun Routing.registerPrometheusApi() {
+    DefaultExports.initialize()
+
     get("/prometheus") {
         call.respondText(METRICS_REGISTRY.scrape())
     }
