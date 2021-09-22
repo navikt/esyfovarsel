@@ -12,6 +12,8 @@ val micrometerVersion = "1.7.3"
 val spekVersion = "2.0.9"
 val mockkVersion = "1.10.2"
 val slf4jVersion = "1.7.30"
+val logbackVersion = "1.2.3"
+val logstashEncoderVersion = "6.3"
 val postgresVersion = "42.2.13"
 val hikariVersion = "4.0.1"
 val flywayVersion = "7.5.2"
@@ -66,6 +68,8 @@ dependencies {
     // Logging
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.slf4j:slf4j-simple:$slf4jVersion")
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
+    implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
 
     // Metrics and Prometheus
     implementation("io.micrometer:micrometer-registry-prometheus:$micrometerVersion")
@@ -89,7 +93,9 @@ dependencies {
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
     implementation("org.apache.kafka:kafka_2.12:$kafkaVersion")
     implementation("io.confluent:kafka-streams-avro-serde:$confluentVersion")
-    implementation("io.confluent:kafka-schema-registry:$confluentVersion")
+    implementation("io.confluent:kafka-schema-registry:$confluentVersion") {
+          exclude(group = "org.slf4j", module = "slf4j-log4j12")
+    }
     implementation("org.apache.avro:avro:$avroVersion")
     implementation("com.github.navikt:brukernotifikasjon-schemas:$brukernotifikasjonerSchemaVersion")
 
