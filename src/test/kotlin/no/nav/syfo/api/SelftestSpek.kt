@@ -1,10 +1,10 @@
-package no.nav.syfo
+package no.nav.syfo.api
 
 import io.ktor.http.*
 import io.ktor.routing.routing
 import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.handleRequest
-import no.nav.syfo.api.registerNaisApi
+import no.nav.syfo.ApplicationState
 import org.amshove.kluent.shouldEqual
 import org.amshove.kluent.shouldNotEqual
 import org.spekframework.spek2.Spek
@@ -12,9 +12,6 @@ import org.spekframework.spek2.style.specification.describe
 import java.net.ServerSocket
 
 object SelftestSpek : Spek({
-    fun getRandomPort() = ServerSocket(0).use {
-        it.localPort
-    }
 
     val applicationState = ApplicationState()
 

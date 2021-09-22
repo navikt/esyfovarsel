@@ -1,21 +1,21 @@
 package no.nav.syfo
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.typesafe.config.ConfigFactory
 import io.ktor.application.*
 import io.ktor.config.*
-import io.ktor.routing.*
+import io.ktor.features.*
+import io.ktor.jackson.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.util.*
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
-import no.nav.syfo.api.registerNaisApi
-import no.nav.syfo.auth.AzureAdTokenConsumer
-import no.nav.syfo.auth.StsConsumer
-import no.nav.syfo.consumer.DkifConsumer
-import no.nav.syfo.consumer.PdlConsumer
-import no.nav.syfo.consumer.SyfosyketilfelleConsumer
-import no.nav.syfo.consumer.SykmeldingerConsumer
+import no.nav.syfo.auth.*
+import no.nav.syfo.consumer.*
 import no.nav.syfo.db.*
 import no.nav.syfo.job.SendVarslerJobb
 import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
@@ -26,6 +26,7 @@ import no.nav.syfo.metrics.withPrometheus
 import no.nav.syfo.service.AccessControl
 import no.nav.syfo.service.SendVarselService
 import no.nav.syfo.service.SykmeldingService
+import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.varsel.AktivitetskravVarselPlanner
 import no.nav.syfo.varsel.MerVeiledningVarselPlanner
 import org.slf4j.LoggerFactory
@@ -72,6 +73,18 @@ fun main() {
         val server = embeddedServer(Netty, applicationEngineEnvironment {
             log = LoggerFactory.getLogger("ktor.application")
             config = HoconApplicationConfig(ConfigFactory.load())
+            database = initDb(env.commonEnv.dbEnvironment)
+
+            val stsConsumer = getStsConsumer(env.commonEnv)
+            val pdlConsumer = getPdlConsumer(env.commonEnv, stsConsumer)
+            val dkifConsumer = DkifConsumer(env.commonEnv, stsConsumer)
+            val oppfolgingstilfelleConsumer = getSyfosyketilfelleConsumer(env, stsConsumer)
+            val azureAdTokenConsumer = AzureAdTokenConsumer(env)
+            val sykmeldingerConsumer = SykmeldingerConsumer(env, azureAdTokenConsumer)
+
+            val accessControl = AccessControl(pdlConsumer, dkifConsumer)
+            val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
+            val varselSendtService = VarselSendtService(pdlConsumer, oppfolgingstilfelleConsumer, database)
 
             connector {
                 port = env.applicationPort
@@ -79,9 +92,19 @@ fun main() {
 
             module {
                 state.running = true
-                database = initDb(env.commonEnv.dbEnvironment)
-                serverModule()
-                kafkaModule(env)
+
+                serverModule(
+                    env,
+                    varselSendtService
+
+                )
+                kafkaModule(
+                    env,
+                    accessControl,
+                    oppfolgingstilfelleConsumer,
+                    sykmeldingService,
+                    varselSendtService
+                )
             }
         })
         Runtime.getRuntime().addShutdownHook(Thread {
@@ -112,32 +135,63 @@ private fun remoteDatabase(env: DbEnvironment): Database = RemoteDatabase(
     )
 )
 
-fun Application.serverModule() {
+private fun getStsConsumer(env: CommonEnvironment): StsConsumer {
+    if (isLocal()) {
+        return LocalStsConsumer(env)
+    }
+    return StsConsumer(env)
+}
 
-    routing {
-        registerNaisApi(state)
-        registerPrometheusApi()
+private fun getPdlConsumer(env: CommonEnvironment, stsConsumer: StsConsumer): PdlConsumer {
+    if (isLocal()) {
+        return LocalPdlConsumer(env, stsConsumer)
+    }
+    return PdlConsumer(env, stsConsumer)
+}
+
+private fun getSyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsumer): SyfosyketilfelleConsumer {
+    if (isLocal()) {
+        return LocalSyfosyketilfelleConsumer(env, stsConsumer)
+    }
+    return SyfosyketilfelleConsumer(env, stsConsumer)
+}
+
+fun Application.serverModule(
+    appEnv: AppEnvironment,
+    varselSendtService: VarselSendtService
+) {
+    install(ContentNegotiation) {
+        jackson {
+            registerKotlinModule()
+            registerModule(JavaTimeModule())
+            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        }
+    }
+
+    runningRemotely {
+        setupRoutesWithAuthentication(varselSendtService, appEnv)
+    }
+
+    runningLocally {
+        setupRoutesWithoutAuthentication(varselSendtService)
     }
 
     state.initialized = true
 }
 
 @KtorExperimentalAPI
-fun Application.kafkaModule(env: AppEnvironment) {
-
+fun Application.kafkaModule(
+    env: AppEnvironment,
+    accessControl: AccessControl,
+    oppfolgingstilfelleConsumer: SyfosyketilfelleConsumer,
+    sykmeldingService: SykmeldingService,
+    varselSendtService: VarselSendtService
+) {
     runningRemotely {
-        val stsConsumer = StsConsumer(env.commonEnv)
-        val azureAdTokenConsumer = AzureAdTokenConsumer(env)
-        val pdlConsumer = PdlConsumer(env.commonEnv, stsConsumer)
-        val dkifConsumer = DkifConsumer(env.commonEnv, stsConsumer)
-        val oppfolgingstilfelleConsumer = SyfosyketilfelleConsumer(env, stsConsumer)
-        val accessControl = AccessControl(pdlConsumer, dkifConsumer)
-        val sykmeldingerConsumer = SykmeldingerConsumer(env, azureAdTokenConsumer)
-        val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
-
         val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, accessControl)
             .addPlanner(AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService))
-            .addPlanner(MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer))
+            .addPlanner(MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService))
 
         launch(backgroundTasksContext) {
             launchKafkaListener(
@@ -155,4 +209,8 @@ val Application.envKind
 @KtorExperimentalAPI
 fun Application.runningRemotely(block: () -> Unit) {
     if (envKind == "remote") block()
+}
+
+fun Application.runningLocally(block: () -> Unit) {
+    if (envKind == "local") block()
 }

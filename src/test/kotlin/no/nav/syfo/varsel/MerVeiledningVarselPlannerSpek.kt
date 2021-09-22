@@ -4,6 +4,7 @@ package no.nav.syfo.varsel
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
@@ -12,6 +13,7 @@ import no.nav.syfo.db.fetchPlanlagtVarselByFnr
 import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.db.storeUtsendtVarselTest
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
+import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import org.amshove.kluent.should
@@ -27,8 +29,10 @@ object MerVeiledningVarselPlannerSpek : Spek({
     describe("Varsel39UkerSpek") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
         val syketilfelleConsumer = mockk<SyfosyketilfelleConsumer>()
+        val pdlConsumer = mockk<PdlConsumer>()
+        val varselSendtService = VarselSendtService(pdlConsumer, syketilfelleConsumer, embeddedDatabase)
 
-        val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(embeddedDatabase, syketilfelleConsumer)
+        val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(embeddedDatabase, syketilfelleConsumer, varselSendtService)
 
         afterEachTest {
             embeddedDatabase.connection.dropData()
@@ -49,7 +53,6 @@ object MerVeiledningVarselPlannerSpek : Spek({
                 fom,
                 tom
             )
-
 
             coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
 

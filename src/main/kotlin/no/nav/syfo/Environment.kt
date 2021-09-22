@@ -15,7 +15,6 @@ fun testEnvironment(): AppEnvironment =
 fun testEnvironment(embeddedKafkaBrokerUrl: String): AppEnvironment =
     objectMapper.readValue(File(localAppPropertiesPath), AppEnvironment::class.java).apply { commonEnv.kafkaBootstrapServersUrl = embeddedKafkaBrokerUrl }
 
-
 private fun remoteCommonEnvironment(): CommonEnvironment {
     return CommonEnvironment(
         true,
@@ -47,6 +46,8 @@ fun appEnvironment(): AppEnvironment =
             getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
             getEnvVar("AZURE_APP_CLIENT_ID"),
             getEnvVar("AZURE_APP_CLIENT_SECRET"),
+            getEnvVar("LOGINSERVICE_IDPORTEN_DISCOVERY_URL"),
+            getEnvVar("LOGINSERVICE_IDPORTEN_AUDIENCE").split(","),
             remoteCommonEnvironment()
         )
 
@@ -74,6 +75,8 @@ data class AppEnvironment(
     val aadAccessTokenUrl: String,
     val clientId: String,
     val clientSecret: String,
+    val loginserviceDiscoveryUrl: String,
+    val loginserviceAudience: List<String>,
     var commonEnv: CommonEnvironment
 )
 

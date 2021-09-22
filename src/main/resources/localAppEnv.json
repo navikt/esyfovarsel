@@ -1,5 +1,5 @@
 {
-  "applicationPort": "8081",
+  "applicationPort": "8080",
   "applicationThreads": "1",
   "syfosyketilfelleUrl": "http://localhost:9090",
   "syfosmregisterUrl": "http://localhost:9494",
@@ -7,6 +7,8 @@
   "clientId": "clientId",
   "clientSecret": "clientSecret",
   "syfosmregisterScope": "syfosmregisterScope",
+  "loginserviceDiscoveryUrl": "https://loginservice.no/.well-known/openid-configuration",
+  "loginserviceAudience": ["aud1", "aud2", "aud3"],
   "commonEnv": {
     "remote": false,
     "kafkaBootstrapServersUrl": "http://localhost:9092",
