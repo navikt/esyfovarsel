@@ -90,7 +90,9 @@ dependencies {
 
     //Kafka
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
-    implementation("org.apache.kafka:kafka_2.12:$kafkaVersion")
+    implementation("org.apache.kafka:kafka_2.12:$kafkaVersion"){
+        exclude(group = "com.fasterxml.jackson.module", module = "jackson-module-scala_2")
+    }
     implementation("io.confluent:kafka-streams-avro-serde:$confluentVersion")
     implementation("io.confluent:kafka-schema-registry:$confluentVersion") {
           exclude(group = "org.slf4j", module = "slf4j-log4j12")
