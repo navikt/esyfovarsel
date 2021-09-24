@@ -109,6 +109,12 @@ jobs:
           CLUSTER: prod-fss
           RESOURCE: .nais/send-varsler-job-prod.yaml
           VARS: .nais/prod.json
+      - name: Deploy alerts
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-fss
+          RESOURCE: .nais/alerts.yaml
 
       # Notify Slack
       - name: Unsuccessful deploy notification prod
