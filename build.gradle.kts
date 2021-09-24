@@ -64,7 +64,6 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-jackson:$ktorVersion")
 
-
     // Logging
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
@@ -90,9 +89,7 @@ dependencies {
 
     //Kafka
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
-    implementation("org.apache.kafka:kafka_2.12:$kafkaVersion"){
-        exclude(group = "com.fasterxml.jackson.module", module = "jackson-module-scala_2")
-    }
+    implementation("org.apache.kafka:kafka_2.12:$kafkaVersion")
     implementation("io.confluent:kafka-streams-avro-serde:$confluentVersion")
     implementation("io.confluent:kafka-schema-registry:$confluentVersion") {
           exclude(group = "org.slf4j", module = "slf4j-log4j12")
@@ -111,6 +108,10 @@ dependencies {
     testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion")
     testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spekVersion")
     testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spekVersion")
+}
+
+configurations.implementation {
+    exclude(group = "com.fasterxml.jackson.module", module = "jackson-module-scala_2.12")
 }
 
 tasks {
