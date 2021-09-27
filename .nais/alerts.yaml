@@ -1,0 +1,33 @@
+apiVersion: "nais.io/v1"
+kind: "Alert"
+metadata:
+  name: esyfovarsel-alerts
+  namespace: team-esyfo
+  labels:
+    team: team-esyfo
+spec:
+  receivers: # receivers for all alerts below
+    slack:
+      channel: '#esyfo-alarm'
+      prependText: '<!here> | ' # this text will be prepended to the Slack alert title
+  alerts:
+    - alert: esyfovarsel er nede
+      expr: kube_deployment_status_replicas_available{deployment="esyfovarsel"} == 0
+      for: 2m
+      description: "App \{{ $labels.app }} er nede i namespace \{{ $labels.kubernetes_namespace }}"
+      action: "`kubectl describe pod \{{ $labels.kubernetes_pod_name }} -n \{{ $labels.kubernetes_namespace }}` for events, og `kubectl logs \{{ $labels.kubernetes_pod_name }} -n \{{ $labels.kubernetes_namespace }}` for logger"
+    - alert: høy feilrate i logger
+      expr: (100 * sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="esyfovarsel",log_level=~"Warning|Error"}[3m])) / sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="esyfovarsel"}[3m]))) > 10
+      for: 3m
+      description: "App \{{ $labels.log_app }} i namespace \{{ $labels.log_namespace }} har en høy andel logging av Warning/Error"
+      action: "Sjekk loggene til app \{{ $labels.log_app }} i namespace \{{ $labels.log_namespace }}, for å se hvorfor det er så mye feil"
+    - alert: esyfovarsel-job har feilet
+      expr: kube_job_failed{job_name=~"esyfovarsel-job.*", namespace="team-esyfo"} > 0
+      for: 2m
+      description: "\{{ $labels.job_name }} har feilet i namespace \{{ $labels.namespace }}"
+      action: "Sjekk i logger hvorfor \{{ $labels.job_name }} feiler. Slett den feilede jobben med `kubectl delete job \{{ $labels.job_name }}` for å stoppe denne alerten."
+    - alert: høy feilrate i logger
+      expr: (100 * sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="esyfovarsel-job",log_level=~"Warning|Error"}[3m])) / sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="esyfovarsel-job"}[3m]))) > 10
+      for: 3m
+      description: "Jobb \{{ $labels.log_app }} i namespace \{{ $labels.log_namespace }} har en høy andel logging av Warning/Error"
+      action: "Sjekk loggene til jobb \{{ $labels.log_app }} i namespace \{{ $labels.log_namespace }}, for å se hvorfor det er så mye feil"

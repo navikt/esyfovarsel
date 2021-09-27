@@ -1,36 +1,36 @@
 package no.nav.syfo.metrics
 
+import io.micrometer.core.instrument.Clock
 import io.micrometer.core.instrument.Counter
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Gauge
 import io.prometheus.client.exporter.PushGateway
 import io.prometheus.client.hotspot.DefaultExports
-import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
-import no.nav.syfo.db.domain.VarselType.MER_VEILEDNING
 
-const val METRICS_NS = "esyfovarsel"
+const val JOB_METRICS_NS = "esyfovarsel"
 
-const val MER_VEILEDNING_NOTICE_SENT = "${METRICS_NS}_mer_veiledning_notice_sent"
-const val AKTIVITETSPLIKT_NOTICE_SENT = "${METRICS_NS}_aktivitetsplikt_notice_sent"
-const val NOTICE_SENT = "${METRICS_NS}_notice_sent"
+const val MER_VEILEDNING_NOTICE_SENT = "${JOB_METRICS_NS}_mer_veiledning_notice_sent"
+const val AKTIVITETSPLIKT_NOTICE_SENT = "${JOB_METRICS_NS}_aktivitetsplikt_notice_sent"
+const val NOTICE_SENT = "${JOB_METRICS_NS}_notice_sent"
 
-val METRICS_REGISTRY = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+val JOB_METRICS_REGISTRY = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, CollectorRegistry.defaultRegistry, Clock.SYSTEM)
 
 val COUNT_MER_VEILEDNING_NOTICE_SENT: Counter = Counter
     .builder(MER_VEILEDNING_NOTICE_SENT)
     .description("Counts the number of Mer veiledning notice sent")
-    .register(METRICS_REGISTRY)
+    .register(JOB_METRICS_REGISTRY)
 
 val COUNT_AKTIVITETSPLIKT_NOTICE_SENT: Counter = Counter
     .builder(AKTIVITETSPLIKT_NOTICE_SENT)
     .description("Counts the number of Aktivitetsplikt notice sent")
-    .register(METRICS_REGISTRY)
+    .register(JOB_METRICS_REGISTRY)
 
 val COUNT_ALL_NOTICE_SENT: Counter = Counter
     .builder(NOTICE_SENT)
     .description("Counts the number of all types of notice sent")
-    .register(METRICS_REGISTRY)
+    .register(JOB_METRICS_REGISTRY)
 
 fun tellMerVeiledningVarselSendt(varslerSendt: Int) {
     COUNT_ALL_NOTICE_SENT.increment(varslerSendt.toDouble())
@@ -47,7 +47,7 @@ fun withPrometheus(pushGatewayUrl: String, block: () -> Unit) {
 
     val durationTimer = Gauge
         .build("total_duration_seconds", "Duration of esyfovarsel-job in seconds.")
-        .register(METRICS_REGISTRY.prometheusRegistry)
+        .register(JOB_METRICS_REGISTRY.prometheusRegistry)
         .startTimer()
 
     try {
@@ -55,10 +55,9 @@ fun withPrometheus(pushGatewayUrl: String, block: () -> Unit) {
     } finally {
         durationTimer.setDuration()
         PushGateway(pushGatewayUrl).pushAdd(
-           METRICS_REGISTRY.prometheusRegistry,
+           JOB_METRICS_REGISTRY.prometheusRegistry,
             "kubernetes-pods",
             mapOf("cronjob" to "esyfovarsel-job")
         )
     }
 }
-
