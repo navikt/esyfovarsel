@@ -86,16 +86,16 @@ class SyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsumer) {
                 response.receive<Oppfolgingstilfelle39Uker>()
             }
             HttpStatusCode.NoContent -> {
-                log.error("Could not get Oppfolgingstilfelle (39 uker): No content found in the response body")
+                log.info("Could not get Oppfolgingstilfelle (39 uker): No content found in the response body")
                 null
             }
             HttpStatusCode.Unauthorized -> {
                 log.error("Could not get oppfolgingstilfelle (39 uker): Unable to authorize")
-                null
+                throw RuntimeException("Could not get oppfolgingstilfelle (39 uker): Unable to authorize")
             }
             else -> {
                 log.error("Could not get oppfolgingstilfelle (39 uker): $response")
-                null
+                throw RuntimeException("Could not get oppfolgingstilfelle (39 uker): $response")
             }
         }
     }

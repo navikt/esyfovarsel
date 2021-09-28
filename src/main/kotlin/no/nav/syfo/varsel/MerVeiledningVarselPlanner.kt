@@ -21,7 +21,11 @@ class MerVeiledningVarselPlanner(val databaseAccess: DatabaseInterface, val syfo
 
     override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String) = coroutineScope {
         val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle39Uker(aktorId)
-            ?: throw RuntimeException("[$name]: Oppfolgingstilfelle er null")
+
+        if(oppfolgingstilfelle == null) {
+            log.info("[$name]: Fant ikke oppfolgingstilfelle for denne brukeren. Planlegger ikke nytt varsel")
+            return@coroutineScope
+        }
 
         val tilfelleFom = oppfolgingstilfelle.fom
         val tilfelleTom = oppfolgingstilfelle.tom
