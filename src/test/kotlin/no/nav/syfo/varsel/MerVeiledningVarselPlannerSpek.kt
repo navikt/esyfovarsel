@@ -222,11 +222,10 @@ object MerVeiledningVarselPlannerSpek : Spek({
             }
         }
 
-        it("Exception når syfosyketilfelle feiler") {
-
-            coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } throws RuntimeException()
+        it("MerVeiledningVarselPlanner kaster RuntimeException dersom syfosyketilfelleConsumer kaster exception") {
 
             assertFailsWith<RuntimeException> {
+                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } throws RuntimeException()
                 runBlocking {
                     merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
                 }
@@ -234,7 +233,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
 
         }
 
-        it("Når syfosyketilfelle returnerer null skal planlegger avslutte") {
+        it("MerVeiledningVarselPlanner dropper planlegging når syfosyketilfelle returnerer null") {
 
             coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns null
 

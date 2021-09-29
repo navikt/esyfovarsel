@@ -55,16 +55,16 @@ class SyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsumer) {
                 response.receive<OppfolgingstilfellePerson>()
             }
             HttpStatusCode.NoContent -> {
-                log.error("Could not get oppfolgingstilfelle: No content found in the response body")
+                log.info("Could not get oppfolgingstilfelle: No content found in the response body")
                 null
             }
             HttpStatusCode.Unauthorized -> {
                 log.error("Could not get oppfolgingstilfelle: Unable to authorize")
-                null
+                throw RuntimeException("Could not get oppfolgingstilfelle: Unable to authorize")
             }
             else -> {
                 log.error("Could not get oppfolgingstilfelle: $response")
-                null
+                throw RuntimeException("Could not get oppfolgingstilfelle: $response")
             }
         }
     }
