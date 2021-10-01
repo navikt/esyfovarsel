@@ -56,11 +56,41 @@ object AktivitetskravVarselPlannerSpek : Spek({
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore3)
 
             val syketilfellebit1 =
-                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("ANNET_FRAVAR", "SENDT"), "3", LocalDateTime.now(), LocalDateTime.now().plusDays(7))
+                Syketilfellebit(
+                    "1",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("ANNET_FRAVAR", "SENDT"),
+                    "3",
+                    LocalDateTime.now(),
+                    LocalDateTime.now().plusDays(7)
+                )
             val syketilfellebit2 =
-                Syketilfellebit("2", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("ANNET_FRAVAR", "SENDT"), "3", LocalDateTime.now().plusDays(8), LocalDateTime.now().plusDays(16))
+                Syketilfellebit(
+                    "2",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("ANNET_FRAVAR", "SENDT"),
+                    "3",
+                    LocalDateTime.now().plusDays(8),
+                    LocalDateTime.now().plusDays(16)
+                )
             val syketilfellebit3 =
-                Syketilfellebit("3", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("ANNET_FRAVAR", "SENDT"), "3", LocalDateTime.now().plusDays(17), LocalDateTime.now().plusDays(50))
+                Syketilfellebit(
+                    "3",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("ANNET_FRAVAR", "SENDT"),
+                    "3",
+                    LocalDateTime.now().plusDays(17),
+                    LocalDateTime.now().plusDays(50)
+                )
 
             val syketilfelledag1 = Syketilfelledag(LocalDate.now(), syketilfellebit1)
             val syketilfelledag2 = Syketilfelledag(LocalDate.now().plusDays(16), syketilfellebit2)
@@ -89,14 +119,16 @@ object AktivitetskravVarselPlannerSpek : Spek({
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
 
             val syketilfellebit1 =
-                Syketilfellebit("1",
+                Syketilfellebit(
+                    "1",
                     arbeidstakerAktorId1,
                     "2", LocalDateTime.now(),
                     LocalDateTime.now(),
                     listOf("SYKMELDING", "SENDT"),
                     "3",
                     LocalDateTime.now().minusDays(100),
-                    LocalDateTime.now().minusDays(100))
+                    LocalDateTime.now().minusDays(100)
+                )
 
             val syketilfelledag1 = Syketilfelledag(LocalDate.now().minusDays(60), syketilfellebit1)
             val oppfolgingstilfellePerson =
@@ -124,11 +156,41 @@ object AktivitetskravVarselPlannerSpek : Spek({
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore3)
 
             val syketilfellebit1 =
-                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("SYKMELDING", "SENDT"), "3", LocalDateTime.now(), LocalDateTime.now())
+                Syketilfellebit(
+                    "1",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("SYKMELDING", "SENDT"),
+                    "3",
+                    LocalDateTime.now(),
+                    LocalDateTime.now()
+                )
             val syketilfellebit2 =
-                Syketilfellebit("2", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("SYKMELDING", "SENDT"), "3", LocalDateTime.now(), LocalDateTime.now())
+                Syketilfellebit(
+                    "2",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("SYKMELDING", "SENDT"),
+                    "3",
+                    LocalDateTime.now(),
+                    LocalDateTime.now()
+                )
             val syketilfellebit3 =
-                Syketilfellebit("3", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("PAPIRSYKMELDING", "SENDT"), "3", LocalDateTime.now(), LocalDateTime.now())
+                Syketilfellebit(
+                    "3",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("PAPIRSYKMELDING", "SENDT"),
+                    "3",
+                    LocalDateTime.now(),
+                    LocalDateTime.now()
+                )
 
             val syketilfelledag1 = Syketilfelledag(LocalDate.now().minusDays(4), syketilfellebit1)
             val syketilfelledag2 = Syketilfelledag(LocalDate.now().minusDays(2), syketilfellebit2)
@@ -159,11 +221,41 @@ object AktivitetskravVarselPlannerSpek : Spek({
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore3)
 
             val syketilfellebit1 =
-                Syketilfellebit("1", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("SYKMELDING", "SENDT"), "3", LocalDateTime.now(), LocalDateTime.now().plusDays(7))
+                Syketilfellebit(
+                    "1",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("SYKMELDING", "SENDT"),
+                    "3",
+                    LocalDateTime.now(),
+                    LocalDateTime.now().plusDays(7)
+                )
             val syketilfellebit2 =
-                Syketilfellebit("2", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("SYKMELDING", "SENDT"), "3", LocalDateTime.now().plusDays(8), LocalDateTime.now().plusDays(16))
+                Syketilfellebit(
+                    "2",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("SYKMELDING", "SENDT"),
+                    "3",
+                    LocalDateTime.now().plusDays(8),
+                    LocalDateTime.now().plusDays(16)
+                )
             val syketilfellebit3 =
-                Syketilfellebit("3", arbeidstakerAktorId1, "2", LocalDateTime.now(), LocalDateTime.now(), listOf("SYKMELDING", "SENDT"), "3", LocalDateTime.now().plusDays(17), LocalDateTime.now().plusDays(50))
+                Syketilfellebit(
+                    "3",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("SYKMELDING", "SENDT"),
+                    "3",
+                    LocalDateTime.now().plusDays(17),
+                    LocalDateTime.now().plusDays(50)
+                )
 
             val syketilfelledag1 = Syketilfelledag(LocalDate.now(), syketilfellebit1)
             val syketilfelledag2 = Syketilfelledag(LocalDate.now().plusDays(16), syketilfellebit2)
@@ -530,11 +622,24 @@ object AktivitetskravVarselPlannerSpek : Spek({
             lagreteVarsler2[0].utsendingsdato shouldEqual utsendingsdato2
         }
 
-        it("AkvitietskravVarselPlanner kaster RuntimeException dersom syfosyketilfelleConsumer returnerer 'null'") {
+        it("AkvitietskravVarselPlanner kaster RuntimeException dersom syfosyketilfelleConsumer kaster exception") {
             assertFailsWith(RuntimeException::class) {
-                coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns null
+                coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } throws RuntimeException()
                 runBlocking { aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1) }
             }
+        }
+
+        it("AkvitietskravVarselPlanner dropper planlegging når syfosyketilfelle returnerer null") {
+
+            coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns null
+
+            runBlocking {
+                aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
+                val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
+
+                lagreteVarsler.size shouldEqual 0
+            }
+
         }
     }
 })

@@ -32,7 +32,11 @@ class AktivitetskravVarselPlanner(
 
     override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String) = coroutineScope {
         val oppfolgingstilfellePerson = syfosyketilfelleConsumer.getOppfolgingstilfelle(aktorId)
-            ?: throw RuntimeException("[$name]: Oppfolgingstilfelle is null")
+
+        if(oppfolgingstilfellePerson == null) {
+            log.info("[$name]: Fant ikke oppfolgingstilfelle for denne brukeren. Planlegger ikke nytt varsel")
+            return@coroutineScope
+        }
 
         val gyldigeSykmeldingTilfelledager = oppfolgingstilfellePerson.tidslinje.stream()
             .filter { isGyldigSykmeldingTilfelle(it) }

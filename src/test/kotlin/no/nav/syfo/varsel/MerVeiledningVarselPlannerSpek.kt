@@ -5,22 +5,22 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
-import no.nav.syfo.db.*
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
+import no.nav.syfo.db.fetchPlanlagtVarselByFnr
+import no.nav.syfo.db.storePlanlagtVarsel
+import no.nav.syfo.db.storeUtsendtVarselTest
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import org.amshove.kluent.should
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import java.sql.Timestamp
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Month
 import java.time.temporal.ChronoUnit
 import java.util.*
+import kotlin.test.assertFailsWith
 
 object MerVeiledningVarselPlannerSpek : Spek({
 
@@ -222,6 +222,29 @@ object MerVeiledningVarselPlannerSpek : Spek({
             }
         }
 
+        it("MerVeiledningVarselPlanner kaster RuntimeException dersom syfosyketilfelleConsumer kaster exception") {
+
+            assertFailsWith<RuntimeException> {
+                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } throws RuntimeException()
+                runBlocking {
+                    merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
+                }
+            }
+
+        }
+
+        it("MerVeiledningVarselPlanner dropper planlegging når syfosyketilfelle returnerer null") {
+
+            coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns null
+
+            runBlocking {
+                merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
+                val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
+
+                lagreteVarsler.skalIkkeHa39UkersVarsel()
+            }
+
+        }
     }
 })
 
