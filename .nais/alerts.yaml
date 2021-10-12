@@ -31,3 +31,8 @@ spec:
       for: 3m
       description: "Jobb \{{ $labels.log_app }} i namespace \{{ $labels.log_namespace }} har en høy andel logging av Warning/Error"
       action: "Sjekk loggene til jobb \{{ $labels.log_app }} i namespace \{{ $labels.log_namespace }}, for å se hvorfor det er så mye feil"
+    - alert: esyfovarsel kafka-lag er høyt
+      expr: kafka_consumergroup_group_sum_lag{group=~"esyfovarsel-group-.*"} > 100
+      for: 1m
+      description: "Kafka-gruppen \{{ $labels.group }} i cluster \{{ $labels.cluster_name }} har et høyt antall uleste meldinger"
+      action: Sjekk i logger om esyfovarsel leser fra kafka
