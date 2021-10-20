@@ -9,7 +9,6 @@ import no.nav.syfo.ApplicationState
 fun Routing.registerNaisApi(
         applicationState: ApplicationState
 ) {
-
     get("/isAlive") {
         if (applicationState.running) {
             call.respondText("Application is alive")

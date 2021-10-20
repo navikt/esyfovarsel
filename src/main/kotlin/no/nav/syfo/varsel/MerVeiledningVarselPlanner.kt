@@ -5,6 +5,7 @@ import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.db.*
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
+import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.util.VarselUtil
 import no.nav.syfo.utils.isEqualOrAfter
 import no.nav.syfo.utils.isEqualOrBefore
@@ -13,7 +14,11 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-class MerVeiledningVarselPlanner(val databaseAccess: DatabaseInterface, val syfosyketilfelleConsumer: SyfosyketilfelleConsumer) : VarselPlanner {
+class MerVeiledningVarselPlanner(
+    val databaseAccess: DatabaseInterface,
+    val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
+    val varselSendtService: VarselSendtService
+) : VarselPlanner {
     private val nrOfWeeksThreshold = 39L
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.Varsel39Uker")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
@@ -42,11 +47,10 @@ class MerVeiledningVarselPlanner(val databaseAccess: DatabaseInterface, val syfo
                     utsendingsdato
                 )
 
-                if (!varselUtil.kanNyttVarselSendes(fnr, VarselType.MER_VEILEDNING, tilfelleFom, tilfelleTom)) {
+                if (varselSendtService.erVarselSendt(fnr, VarselType.MER_VEILEDNING, tilfelleFom, tilfelleTom)) {
                     log.info("[$name]: Varsel har allerede blitt sendt ut til bruker i dette sykeforløpet. Planlegger ikke nytt varsel")
                     return@coroutineScope
                 }
-
                 val tidligerePlanlagteVarslerPaFnr = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.MER_VEILEDNING)
 
                 if (tidligerePlanlagteVarslerPaFnr.isNotEmpty()) {

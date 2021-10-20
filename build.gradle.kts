@@ -30,8 +30,8 @@ val githubUser: String by project
 val githubPassword: String by project
 
 plugins {
-    kotlin("jvm") version "1.3.61"
-    id("org.jetbrains.kotlin.plugin.allopen") version "1.3.61"
+    kotlin("jvm") version "1.5.31"
+    id("org.jetbrains.kotlin.plugin.allopen") version "1.5.31"
     id("com.diffplug.gradle.spotless") version "3.18.0"
     id("com.github.johnrengelman.shadow") version "5.0.0"
 }
@@ -63,6 +63,9 @@ dependencies {
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-serialization:$ktorVersion")
+    implementation("io.ktor:ktor-auth:$ktorVersion")
+    implementation("io.ktor:ktor-auth-jwt:$ktorVersion")
 
     // Logging
     implementation("org.slf4j:slf4j-api:$slf4jVersion")

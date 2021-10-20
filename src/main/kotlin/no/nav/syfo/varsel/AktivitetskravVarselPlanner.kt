@@ -11,7 +11,7 @@ import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.service.SykmeldingService
-import no.nav.syfo.util.SykeforlopService
+import no.nav.syfo.service.SykeforlopService
 import no.nav.syfo.util.VarselUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

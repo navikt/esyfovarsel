@@ -11,7 +11,7 @@ import no.nav.syfo.CommonEnvironment
 import java.time.LocalDateTime
 import java.util.Base64
 
-class StsConsumer(env: CommonEnvironment) {
+open class StsConsumer(env: CommonEnvironment) {
     private val username = env.serviceuserUsername
     private val password = env.serviceuserPassword
     private val stsEndpointUrl = "${env.stsUrl}/rest/v1/sts/token?grant_type=client_credentials&scope=openid"
@@ -30,7 +30,7 @@ class StsConsumer(env: CommonEnvironment) {
         return token?.expiresAt?.isAfter(LocalDateTime.now()) ?: false
     }
 
-    suspend fun getToken(): Token {
+    open suspend fun getToken(): Token {
         if(isValidToken(token)) {
             return token!!
         }
@@ -43,6 +43,14 @@ class StsConsumer(env: CommonEnvironment) {
 
         return token!!
     }
+}
+
+class LocalStsConsumer(env: CommonEnvironment): StsConsumer(env) {
+    override suspend fun getToken(): Token = Token(
+        "access_token_string",
+        "access_token",
+        3600
+    )
 }
 
 fun encodeCredentials(username: String, password: String): String {

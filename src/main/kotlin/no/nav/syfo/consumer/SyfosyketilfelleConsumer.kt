@@ -16,9 +16,10 @@ import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 @KtorExperimentalAPI
-class SyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsumer) {
+open class SyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsumer) {
     private val client: HttpClient
     private val stsConsumer: StsConsumer
     private val basepath: String
@@ -69,7 +70,7 @@ class SyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsumer) {
         }
     }
 
-    suspend fun getOppfolgingstilfelle39Uker(aktorId: String): Oppfolgingstilfelle39Uker? {
+    open suspend fun getOppfolgingstilfelle39Uker(aktorId: String): Oppfolgingstilfelle39Uker? {
         val requestURL = "$basepath/kafka/oppfolgingstilfelle/beregn/$aktorId/39ukersvarsel"
         val stsToken = stsConsumer.getToken()
         val bearerTokenString = "Bearer ${stsToken.access_token}"
@@ -98,5 +99,17 @@ class SyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsumer) {
                 throw RuntimeException("Could not get oppfolgingstilfelle (39 uker): $response")
             }
         }
+    }
+}
+
+class LocalSyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsumer): SyfosyketilfelleConsumer(env, stsConsumer) {
+    override suspend fun getOppfolgingstilfelle39Uker(aktorId: String): Oppfolgingstilfelle39Uker? {
+        return Oppfolgingstilfelle39Uker(
+            aktorId,
+            16,
+            287,
+            LocalDate.now().minusWeeks(40),
+            LocalDate.now().plusWeeks(1)
+        )
     }
 }

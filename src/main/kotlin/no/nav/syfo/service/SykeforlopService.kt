@@ -1,4 +1,4 @@
-package no.nav.syfo.util
+package no.nav.syfo.service
 
 import no.nav.syfo.consumer.domain.Sykeforlop
 import no.nav.syfo.consumer.domain.Syketilfelledag

@@ -18,7 +18,7 @@ import no.nav.syfo.consumer.pdl.*
 import org.slf4j.LoggerFactory
 
 @KtorExperimentalAPI
-class PdlConsumer(env: CommonEnvironment, stsConsumer: StsConsumer) {
+open class PdlConsumer(env: CommonEnvironment, stsConsumer: StsConsumer) {
     private val client: HttpClient
     private val stsConsumer: StsConsumer
     private val pdlBasepath: String
@@ -38,7 +38,7 @@ class PdlConsumer(env: CommonEnvironment, stsConsumer: StsConsumer) {
         pdlBasepath = env.pdlUrl
     }
 
-    fun getFnr(aktorId: String): String? {
+    open fun getFnr(aktorId: String): String? {
         val response = callPdl(IDENTER_QUERY, aktorId)
 
         return when (response?.status) {
@@ -104,5 +104,11 @@ class PdlConsumer(env: CommonEnvironment, stsConsumer: StsConsumer) {
                 null
             }
         }
+    }
+}
+
+class LocalPdlConsumer(env: CommonEnvironment, stsConsumer: StsConsumer): PdlConsumer(env, stsConsumer) {
+    override fun getFnr(aktorId: String): String {
+        return aktorId.substring(0,11)
     }
 }
