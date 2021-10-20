@@ -9,11 +9,13 @@ import io.ktor.application.*
 import io.ktor.config.*
 import io.ktor.features.*
 import io.ktor.jackson.*
+import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.util.*
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
+import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.*
 import no.nav.syfo.consumer.*
 import no.nav.syfo.db.*
@@ -173,8 +175,9 @@ fun Application.serverModule(
         setupRoutesWithAuthentication(varselSendtService, appEnv)
     }
 
-    runningLocally {
-        setupRoutesWithoutAuthentication(varselSendtService)
+    routing {
+        registerPrometheusApi()
+        registerNaisApi(state)
     }
 
     state.initialized = true

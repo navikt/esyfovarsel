@@ -14,7 +14,9 @@
     "app": {
       "SYFOSYKETILFELLE_URL": "https://syfosyketilfelle.nais.adeo.no",
       "SYFOSMREGISTER_URL": "http://syfosmregister.teamsykmelding",
-      "SYFOSMREGISTER_SCOPE": "api://prod-fss.teamsykmelding.syfosmregister/.default"
+      "SYFOSMREGISTER_SCOPE": "api://prod-fss.teamsykmelding.syfosmregister/.default",
+      "LOGINSERVICE_IDPORTEN_DISCOVERY_URL": "https://navnob2c.b2clogin.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten",
+      "LOGINSERVICE_IDPORTEN_AUDIENCE": "45104d6a-f5bc-4e8c-b352-4bbfc9381f25"
     },
     "job": {
       "SEND_VARSLER": "JA",

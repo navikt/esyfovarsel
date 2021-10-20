@@ -52,19 +52,8 @@ fun Application.setupRoutesWithAuthentication(
 ) {
     setupAuthentication(appEnv)
     routing {
-        registerPrometheusApi()
-        registerNaisApi(state)
         authenticate("loginservice") {
             registerBrukerApi(varselSendtService)
         }
-    }
-}
-
-fun Application.setupRoutesWithoutAuthentication(
-    varselSendtService: VarselSendtService
-) {
-    routing {
-        registerNaisApi(state)
-        registerBrukerApi(varselSendtService)
     }
 }
