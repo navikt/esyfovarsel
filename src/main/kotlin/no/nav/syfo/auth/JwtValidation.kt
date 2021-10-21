@@ -22,11 +22,7 @@ val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.JwtValidation")
 fun Application.setupAuthentication(
     env: AppEnvironment
 ) {
-
-    log.info("DISCOVERY URL: ${env.loginserviceDiscoveryUrl} | ${env.loginserviceAudience}")
-
     val wellKnown = getWellKnown(env.loginserviceDiscoveryUrl)
-    log.info("wellKnown: ${wellKnown.issuer} | ${wellKnown.authorization_endpoint}")
     val jwkProvider = JwkProviderBuilder(URL(wellKnown.jwks_uri))
         .cached(10, 24, TimeUnit.HOURS)
         .rateLimited(10, 1, TimeUnit.MINUTES)
