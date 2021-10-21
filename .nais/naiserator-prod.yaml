@@ -44,8 +44,6 @@ spec:
   webproxy: true
   ingresses:
     - "https://esyfovarsel.nais.adeo.no"
-  envFrom:
-    - configmap: loginservice-idporten
   env:
   {{#each env.common}}
     - name: {{@key}}
