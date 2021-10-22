@@ -10,6 +10,7 @@ import no.nav.syfo.db.deletePlanlagtVarselBySykmeldingerId
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
+import no.nav.syfo.metrics.tellAktivitetskravPlanlagt
 import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.service.SykeforlopService
 import no.nav.syfo.util.VarselUtil
@@ -78,6 +79,7 @@ class AktivitetskravVarselPlanner(
 
                         val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, sykeforlop.ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
                         databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
+                        tellAktivitetskravPlanlagt()
                         break@loop
                     }
                 } else {
@@ -85,10 +87,11 @@ class AktivitetskravVarselPlanner(
 
                     val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, sykeforlop.ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
                     databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
+                    tellAktivitetskravPlanlagt()
                 }
             }
         } else {
-            log.info("[$name]: Sykeforløperliste er tom")
+            log.info("[$name]: Sykeforløpliste er tom")
         }
     }
 

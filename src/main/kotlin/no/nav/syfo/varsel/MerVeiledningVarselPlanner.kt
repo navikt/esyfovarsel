@@ -5,6 +5,7 @@ import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.db.*
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
+import no.nav.syfo.metrics.tellMerVeiledningPlanlagt
 import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.util.VarselUtil
 import no.nav.syfo.utils.isEqualOrAfter
@@ -60,6 +61,7 @@ class MerVeiledningVarselPlanner(
                 } else {
                     log.info("[$name]: Planlegger 39-ukers varsel")
                     databaseAccess.storePlanlagtVarsel(varsel)
+                    tellMerVeiledningPlanlagt()
                 }
             } ?: log.info("[$name]: Antall dager utbetalt er færre enn 39 uker tilsammen i sykefraværet. Planlegger ikke varsel")
         } else {
