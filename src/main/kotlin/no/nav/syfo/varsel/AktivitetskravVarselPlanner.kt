@@ -13,7 +13,7 @@ import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.metrics.tellAktivitetskravPlanlagt
 import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.service.SykeforlopService
-import no.nav.syfo.util.VarselUtil
+import no.nav.syfo.utils.VarselUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.streams.toList

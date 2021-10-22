@@ -6,23 +6,17 @@ import no.nav.syfo.db.*
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.metrics.tellMerVeiledningPlanlagt
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.service.VarselSendtService
-import no.nav.syfo.util.VarselUtil
-import no.nav.syfo.utils.isEqualOrAfter
-import no.nav.syfo.utils.isEqualOrBefore
+import no.nav.syfo.utils.VarselUtil
 import no.nav.syfo.utils.todayIsBetweenFomAndTom
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
 class MerVeiledningVarselPlanner(
     val databaseAccess: DatabaseInterface,
     val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
     val varselSendtService: VarselSendtService
 ) : VarselPlanner {
-    private val nrOfWeeksThreshold = 39L * 7L
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.Varsel39Uker")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
     override val name: String = "MER_VEILEDNING_VARSEL"
@@ -39,7 +33,7 @@ class MerVeiledningVarselPlanner(
         val tilfelleTom = oppfolgingstilfelle.tom
 
         if (todayIsBetweenFomAndTom(tilfelleFom, tilfelleTom)) {
-            varselDate39Uker(oppfolgingstilfelle)?.let { utsendingsdato ->
+            varselUtil.varselDate39Uker(oppfolgingstilfelle)?.let { utsendingsdato ->
                 val arbeidstakerAktorId = oppfolgingstilfelle.aktorId
 
                 val varsel = PlanlagtVarsel(
@@ -71,20 +65,4 @@ class MerVeiledningVarselPlanner(
         }
     }
 
-    private fun varselDate39Uker(tilfelle: Oppfolgingstilfelle39Uker): LocalDate? {
-        val fom = tilfelle.fom
-        val tom =  tilfelle.tom
-
-        val dagerITilfelleTotalt = ChronoUnit.DAYS.between(fom, tom)
-        val dagerSykmeldt = tilfelle.antallSykefravaersDagerTotalt
-        val varselDatoTomOffset = (dagerITilfelleTotalt - (dagerSykmeldt - 273))
-        val varselDato = tom.minusDays(varselDatoTomOffset)
-
-        val fomPlus39Weeks = fom.plusWeeks(nrOfWeeksThreshold)
-        val today = LocalDate.now()
-        return if (tom.isEqualOrAfter(fomPlus39Weeks) && today.isEqualOrBefore(fomPlus39Weeks))
-            varselDato
-        else
-            null
-    }
 }
