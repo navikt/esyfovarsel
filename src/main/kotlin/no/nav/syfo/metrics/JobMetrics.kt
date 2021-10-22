@@ -12,7 +12,7 @@ import io.prometheus.client.hotspot.DefaultExports
 const val JOB_METRICS_NS = "esyfovarsel"
 
 const val MER_VEILEDNING_NOTICE_SENT = "${JOB_METRICS_NS}_mer_veiledning_notice_sent"
-const val AKTIVITETSPLIKT_NOTICE_SENT = "${JOB_METRICS_NS}_aktivitetsplikt_notice_sent"
+const val AKTIVITETSKRAV_NOTICE_SENT = "${JOB_METRICS_NS}_aktivitetskrav_notice_sent"
 const val NOTICE_SENT = "${JOB_METRICS_NS}_notice_sent"
 
 val JOB_METRICS_REGISTRY = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, CollectorRegistry.defaultRegistry, Clock.SYSTEM)
@@ -22,9 +22,9 @@ val COUNT_MER_VEILEDNING_NOTICE_SENT: Counter = Counter
     .description("Counts the number of Mer veiledning notice sent")
     .register(JOB_METRICS_REGISTRY)
 
-val COUNT_AKTIVITETSPLIKT_NOTICE_SENT: Counter = Counter
-    .builder(AKTIVITETSPLIKT_NOTICE_SENT)
-    .description("Counts the number of Aktivitetsplikt notice sent")
+val COUNT_AKTIVITETSKRAV_NOTICE_SENT: Counter = Counter
+    .builder(AKTIVITETSKRAV_NOTICE_SENT)
+    .description("Counts the number of Aktivitetskrav notice sent")
     .register(JOB_METRICS_REGISTRY)
 
 val COUNT_ALL_NOTICE_SENT: Counter = Counter
@@ -39,7 +39,7 @@ fun tellMerVeiledningVarselSendt(varslerSendt: Int) {
 
 fun tellAktivitetskravVarselSendt(varslerSendt: Int) {
     COUNT_ALL_NOTICE_SENT.increment(varslerSendt.toDouble())
-    COUNT_AKTIVITETSPLIKT_NOTICE_SENT.increment(varslerSendt.toDouble())
+    COUNT_AKTIVITETSKRAV_NOTICE_SENT.increment(varslerSendt.toDouble())
 }
 
 fun withPrometheus(pushGatewayUrl: String, block: () -> Unit) {
