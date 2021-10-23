@@ -10,6 +10,7 @@ import no.nav.syfo.testutil.dropData
 import no.nav.syfo.varsel.arbeidstakerAktorId1
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.Month
 
 object VarselUtilSpek: Spek( {
 
@@ -71,6 +72,26 @@ object VarselUtilSpek: Spek( {
             val utsendingsdato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
 
             utsendingsdato shouldEqual forventetUtsendingsdato
+        }
+
+
+        it("Dersom antall dager sykmeldt er færre enn $antallDager39UkersVarsel skal varselDato returnere null") {
+            val fom = LocalDate.of(2021, Month.JANUARY, 23)
+            val tom = LocalDate.of(2021, Month.NOVEMBER, 19)
+            val antallDagerSykmeldtTotalt = 272
+
+
+            val oppfolgingstilfelle = Oppfolgingstilfelle39Uker(
+                arbeidstakerAktorId1,
+                16,
+                antallDagerSykmeldtTotalt,
+                fom,
+                tom
+            )
+
+            val utsendingsdato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
+
+            utsendingsdato shouldEqual null
         }
 
     }

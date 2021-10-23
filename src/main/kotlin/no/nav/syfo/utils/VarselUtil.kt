@@ -17,17 +17,15 @@ class VarselUtil(private val databaseAccess: DatabaseInterface) {
     }
 
     fun varselDate39Uker(tilfelle: Oppfolgingstilfelle39Uker): LocalDate? {
-        val fom = tilfelle.fom
+        val dagerSykmeldt = tilfelle.antallSykefravaersDagerTotalt
         val tom =  tilfelle.tom
 
-        val dagerSykmeldt = tilfelle.antallSykefravaersDagerTotalt
         val varselDatoTomOffset = (dagerSykmeldt - antallDager39UkersVarsel)
         val varselDato = tom.minusDays(varselDatoTomOffset)
 
-        val fomPlus39Weeks = fom.plusWeeks(antallUker39UkersVarsel)
         val today = LocalDate.now()
 
-        return if (tom.isEqualOrAfter(fomPlus39Weeks) && today.isEqualOrBefore(fomPlus39Weeks))
+        return if (tom.isEqualOrAfter(varselDato) && today.isEqualOrBefore(varselDato))
             varselDato
         else
             null
