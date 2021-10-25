@@ -17,20 +17,14 @@ class VarselUtil(private val databaseAccess: DatabaseInterface) {
     }
 
     fun varselDate39Uker(tilfelle: Oppfolgingstilfelle39Uker): LocalDate? {
-        val dagerSykmeldt = tilfelle.antallSykefravaersDagerTotalt
-        if (dagerSykmeldt < antallDager39UkersVarsel)
-            return null
-        val tom =  tilfelle.tom
+        val varselDatoTomOffset = (tilfelle.antallSykefravaersDagerTotalt - antallDager39UkersVarsel)
+        val varselDato = tilfelle.tom.minusDays(varselDatoTomOffset)
 
-        val varselDatoTomOffset = (dagerSykmeldt - antallDager39UkersVarsel)
-        val varselDato = tom.minusDays(varselDatoTomOffset)
+        val isAntallSykedagerPast39Uker = tilfelle.antallSykefravaersDagerTotalt >= antallDager39UkersVarsel
+        val isTomAfterVarselDato = tilfelle.tom.isEqualOrAfter(varselDato)
+        val isVarselDatoExpired = varselDato.isBefore(LocalDate.now())
 
-        val today = LocalDate.now()
-
-        return if (tom.isEqualOrAfter(varselDato) && today.isEqualOrBefore(varselDato))
-            varselDato
-        else
-            null
+        return if (isAntallSykedagerPast39Uker && isTomAfterVarselDato && !isVarselDatoExpired) varselDato else null
     }
 
     fun isVarselDatoEtterTilfelleSlutt(varselDato: LocalDate, tilfelleSluttDato: LocalDate): Boolean {
