@@ -7,20 +7,16 @@ import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.metrics.tellMerVeiledningPlanlagt
 import no.nav.syfo.service.VarselSendtService
-import no.nav.syfo.util.VarselUtil
-import no.nav.syfo.utils.isEqualOrAfter
-import no.nav.syfo.utils.isEqualOrBefore
+import no.nav.syfo.utils.VarselUtil
 import no.nav.syfo.utils.todayIsBetweenFomAndTom
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 class MerVeiledningVarselPlanner(
     val databaseAccess: DatabaseInterface,
     val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
     val varselSendtService: VarselSendtService
 ) : VarselPlanner {
-    private val nrOfWeeksThreshold = 39L
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.Varsel39Uker")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
     override val name: String = "MER_VEILEDNING_VARSEL"
@@ -37,7 +33,7 @@ class MerVeiledningVarselPlanner(
         val tilfelleTom = oppfolgingstilfelle.tom
 
         if (todayIsBetweenFomAndTom(tilfelleFom, tilfelleTom)) {
-            varselDate39Uker(tilfelleFom, tilfelleTom)?.let { utsendingsdato ->
+            varselUtil.varselDate39Uker(oppfolgingstilfelle)?.let { utsendingsdato ->
                 val arbeidstakerAktorId = oppfolgingstilfelle.aktorId
 
                 val varsel = PlanlagtVarsel(
@@ -69,12 +65,4 @@ class MerVeiledningVarselPlanner(
         }
     }
 
-    private fun varselDate39Uker(fom: LocalDate, tom: LocalDate): LocalDate? {
-        val fomPlus39Weeks = fom.plusWeeks(nrOfWeeksThreshold)
-        val today = LocalDate.now()
-        return if (tom.isEqualOrAfter(fomPlus39Weeks) && today.isEqualOrBefore(fomPlus39Weeks))
-            fomPlus39Weeks
-        else
-            null
-    }
 }
