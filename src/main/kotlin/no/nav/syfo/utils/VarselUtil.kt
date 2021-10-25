@@ -18,6 +18,8 @@ class VarselUtil(private val databaseAccess: DatabaseInterface) {
 
     fun varselDate39Uker(tilfelle: Oppfolgingstilfelle39Uker): LocalDate? {
         val dagerSykmeldt = tilfelle.antallSykefravaersDagerTotalt
+        if (dagerSykmeldt < antallDager39UkersVarsel)
+            return null
         val tom =  tilfelle.tom
 
         val varselDatoTomOffset = (dagerSykmeldt - antallDager39UkersVarsel)
