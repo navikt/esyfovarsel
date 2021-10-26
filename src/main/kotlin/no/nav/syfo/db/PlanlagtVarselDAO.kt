@@ -75,7 +75,7 @@ fun DatabaseInterface.fetchPlanlagtVarselByFnr(fnr: String): List<PPlanlagtVarse
 fun DatabaseInterface.fetchPlanlagtVarselByUtsendingsdato(utsendingsdato: LocalDate): List<PPlanlagtVarsel> {
     val queryStatement = """SELECT *
                             FROM PLANLAGT_VARSEL
-                            WHERE utsendingsdato <= ?
+                            WHERE utsendingsdato = ?
     """.trimIndent()
 
     return connection.use { connection ->
