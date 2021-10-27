@@ -153,17 +153,17 @@ object PlanlagtVarselDAOSpek : Spek({
 
             val varslerSomSkalSendes = embeddedDatabase.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
 
-            varslerSomSkalSendes.skalBareHaVarslerMedUtsendingsdatoPaEllerFor(LocalDate.now())
+            varslerSomSkalSendes.skalBareHaVarslerMedUtsendingsdatoPa(LocalDate.now())
             varslerSomSkalSendes.skalInneholdeVarsel(planlagtVarselToStore1)
-            varslerSomSkalSendes.skalInneholdeVarsel(planlagtVarselToStore2)
+            varslerSomSkalSendes.skalIkkeInneholdeVarsel(planlagtVarselToStore2)
             varslerSomSkalSendes.skalIkkeInneholdeVarsel(planlagtVarselToStore3)
             varslerSomSkalSendes.skalIkkeInneholdeVarsel(planlagtVarselToStore4)
         }
     }
 })
 
-private fun Collection<PPlanlagtVarsel>.skalBareHaVarslerMedUtsendingsdatoPaEllerFor(dato: LocalDate) = this.should("Varsel skal ha utsendingsdato på eller før $dato. Varsel $this") {
-    all { it.utsendingsdato.isBefore(dato) || it.utsendingsdato.isEqual(dato) }
+private fun Collection<PPlanlagtVarsel>.skalBareHaVarslerMedUtsendingsdatoPa(dato: LocalDate) = this.should("Varsel skal ha utsendingsdato nøyaktig på $dato. Varsel $this") {
+    all { it.utsendingsdato.isEqual(dato) }
 }
 
 private fun Collection<PPlanlagtVarsel>.skalInneholdeVarsel(expectedVarsel: PlanlagtVarsel) = this.should("$this skal inneholde varsel med fnr[${expectedVarsel.fnr}], aktorId[${expectedVarsel.aktorId}], utsendingsdato[${expectedVarsel.utsendingsdato}], type[${expectedVarsel.type}]") {
