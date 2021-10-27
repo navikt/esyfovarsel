@@ -162,7 +162,7 @@ object PlanlagtVarselDAOSpek : Spek({
     }
 })
 
-private fun Collection<PPlanlagtVarsel>.skalBareHaVarslerMedUtsendingsdatoPa(dato: LocalDate) = this.should("Varsel skal ha utsendingsdato på eller før $dato. Varsel $this") {
+private fun Collection<PPlanlagtVarsel>.skalBareHaVarslerMedUtsendingsdatoPa(dato: LocalDate) = this.should("Varsel skal ha utsendingsdato nøyaktig på $dato. Varsel $this") {
     all { it.utsendingsdato.isEqual(dato) }
 }
 
