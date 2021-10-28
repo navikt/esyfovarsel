@@ -5,7 +5,7 @@ import java.sql.Timestamp
 import java.util.*
 
 fun DatabaseInterface.storeUtsendtVarselTest(planlagtVarsel: PPlanlagtVarsel) {
-    val insertStatement1 = """INSERT INTO UTSENDT_VARSEL (
+    val insertStatement1 = """INSERT INTO $utsendtVarselTableName (
         uuid,
         fnr,
         aktor_id,

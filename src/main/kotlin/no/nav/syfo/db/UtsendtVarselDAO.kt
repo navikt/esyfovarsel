@@ -6,8 +6,10 @@ import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.*
 
+val utsendtVarselTableName = "UTSENDT_VARSEL_NEW"
+
 fun DatabaseInterface.storeUtsendtVarsel(planlagtVarsel: PPlanlagtVarsel) {
-    val insertStatement1 = """INSERT INTO UTSENDT_VARSEL (
+    val insertStatement1 = """INSERT INTO $utsendtVarselTableName (
         uuid,
         fnr,
         aktor_id,
@@ -35,7 +37,7 @@ fun DatabaseInterface.storeUtsendtVarsel(planlagtVarsel: PPlanlagtVarsel) {
 
 fun DatabaseInterface.fetchUtsendtVarselByFnr(fnr: String): List<UtsendtVarsel> {
     val queryStatement = """SELECT *
-                            FROM UTSENDT_VARSEL
+                            FROM $utsendtVarselTableName
                             WHERE fnr = ?
     """.trimIndent()
 

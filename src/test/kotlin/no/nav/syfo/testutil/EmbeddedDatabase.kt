@@ -2,6 +2,9 @@ package no.nav.syfo.testutil
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.planlagtVarselTableName
+import no.nav.syfo.db.sykmeldingerIdTableName
+import no.nav.syfo.db.utsendtVarselTableName
 import org.flywaydb.core.Flyway
 import java.sql.Connection
 
@@ -26,9 +29,9 @@ class EmbeddedDatabase : DatabaseInterface {
 }
 
 fun Connection.dropData() {
-    val query1 = "DELETE FROM PLANLAGT_VARSEL"
-    val query2 = "DELETE FROM SYKMELDING_IDS"
-    val query3 = "DELETE FROM UTSENDT_VARSEL"
+    val query1 = "DELETE FROM $planlagtVarselTableName"
+    val query2 = "DELETE FROM $sykmeldingerIdTableName"
+    val query3 = "DELETE FROM $utsendtVarselTableName"
 
     use { connection ->
         connection.prepareStatement(query1).executeUpdate()

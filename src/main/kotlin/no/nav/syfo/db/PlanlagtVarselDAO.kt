@@ -13,8 +13,11 @@ import java.util.*
 
 private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.db.PlanlagtVarselDAO")
 
+val planlagtVarselTableName = "PLANLAGT_VARSEL_NEW"
+val sykmeldingerIdTableName = "SYKMELDING_IDS_NEW"
+
 fun DatabaseInterface.storePlanlagtVarsel(planlagtVarsel: PlanlagtVarsel) {
-    val insertStatement1 = """INSERT INTO PLANLAGT_VARSEL (
+    val insertStatement1 = """INSERT INTO $planlagtVarselTableName (
         uuid,
         fnr,
         aktor_id,
@@ -23,7 +26,7 @@ fun DatabaseInterface.storePlanlagtVarsel(planlagtVarsel: PlanlagtVarsel) {
         opprettet,
         sist_endret) VALUES (?, ?, ?, ?, ?, ?, ?)""".trimIndent()
 
-    val insertStatement2 = """INSERT INTO SYKMELDING_IDS (
+    val insertStatement2 = """INSERT INTO $sykmeldingerIdTableName (
         uuid,
         sykmelding_id,
         varsling_id) VALUES (?, ?, ?)""".trimIndent()
@@ -60,7 +63,7 @@ fun DatabaseInterface.storePlanlagtVarsel(planlagtVarsel: PlanlagtVarsel) {
 
 fun DatabaseInterface.fetchPlanlagtVarselByFnr(fnr: String): List<PPlanlagtVarsel> {
     val queryStatement = """SELECT *
-                            FROM PLANLAGT_VARSEL
+                            FROM $planlagtVarselTableName
                             WHERE fnr = ?
     """.trimIndent()
 
@@ -74,7 +77,7 @@ fun DatabaseInterface.fetchPlanlagtVarselByFnr(fnr: String): List<PPlanlagtVarse
 
 fun DatabaseInterface.fetchPlanlagtVarselByUtsendingsdato(utsendingsdato: LocalDate): List<PPlanlagtVarsel> {
     val queryStatement = """SELECT *
-                            FROM PLANLAGT_VARSEL
+                            FROM $planlagtVarselTableName
                             WHERE utsendingsdato = ?
     """.trimIndent()
 
@@ -88,7 +91,7 @@ fun DatabaseInterface.fetchPlanlagtVarselByUtsendingsdato(utsendingsdato: LocalD
 
 fun DatabaseInterface.fetchSykmeldingerIdByPlanlagtVarselsUUID(uuid: String): List<String> {
     val queryStatement = """SELECT *
-                            FROM SYKMELDING_IDS
+                            FROM $sykmeldingerIdTableName
                             WHERE varsling_id = ?
     """.trimIndent()
 
@@ -102,7 +105,7 @@ fun DatabaseInterface.fetchSykmeldingerIdByPlanlagtVarselsUUID(uuid: String): Li
 
 fun DatabaseInterface.fetchAllSykmeldingIdsAndCount(): Int {
     val queryStatement = """SELECT *
-                            FROM SYKMELDING_IDS
+                            FROM $sykmeldingerIdTableName
     """.trimIndent()
 
     return connection.use { connection ->
@@ -114,7 +117,7 @@ fun DatabaseInterface.fetchAllSykmeldingIdsAndCount(): Int {
 
 fun DatabaseInterface.updateUtsendingsdatoByVarselId(uuid: String, utsendingsdato: LocalDate) {
     val now = LocalDateTime.now()
-    val updateStatement = """UPDATE PLANLAGT_VARSEL
+    val updateStatement = """UPDATE $planlagtVarselTableName
                              SET UTSENDINGSDATO = ?,
                                  SIST_ENDRET = ?
                              WHERE UUID = ?
@@ -133,7 +136,7 @@ fun DatabaseInterface.updateUtsendingsdatoByVarselId(uuid: String, utsendingsdat
 
 fun DatabaseInterface.deletePlanlagtVarselByVarselId(uuid: String) {
     val queryStatement1 = """DELETE
-                            FROM PLANLAGT_VARSEL
+                            FROM $planlagtVarselTableName
                             WHERE uuid = ?
     """.trimIndent()
 
@@ -149,8 +152,8 @@ fun DatabaseInterface.deletePlanlagtVarselByVarselId(uuid: String) {
 
 fun DatabaseInterface.deletePlanlagtVarselBySykmeldingerId(sykmeldingerId: Set<String>) {
     val st1 = """DELETE
-        FROM PLANLAGT_VARSEL
-        WHERE uuid IN (SELECT varsling_id FROM SYKMELDING_IDS WHERE sykmelding_id = ? )
+        FROM $planlagtVarselTableName
+        WHERE uuid IN (SELECT varsling_id FROM $sykmeldingerIdTableName WHERE sykmelding_id = ? )
     """.trimMargin()
 
     connection.use { connection ->

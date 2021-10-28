@@ -34,6 +34,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.allopen") version "1.5.31"
     id("com.diffplug.gradle.spotless") version "3.18.0"
     id("com.github.johnrengelman.shadow") version "5.0.0"
+    id("org.gradle.gradle-profiler") version "0.0.2"
 }
 
 allOpen {
