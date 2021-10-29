@@ -96,7 +96,7 @@ object VarselUtilSpek: Spek( {
         it("Dersom sykeforløpet startet for akkurat 39 uker siden skal varseldato være i dag") {
             val antallDagerSykmeldtTotalt = 306
             val fom = LocalDate.now().minusWeeks(39)
-            val tom = LocalDate.now().plusDays(antallDagerSykmeldtTotalt - 39L * 7)
+            val tom = LocalDate.now().plusDays(antallDagerSykmeldtTotalt - (39L * 7) - 1)
 
 
             val oppfolgingstilfelle = Oppfolgingstilfelle39Uker(
