@@ -9,7 +9,7 @@ import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
 import java.time.LocalDate
 
 val antallUker39UkersVarsel = 39L
-val antallDager39UkersVarsel = antallUker39UkersVarsel * 7L
+val antallDager39UkersVarsel = antallUker39UkersVarsel * 7L + 1
 
 class VarselUtil(private val databaseAccess: DatabaseInterface) {
     fun isVarselDatoForIDag(varselDato: LocalDate): Boolean {

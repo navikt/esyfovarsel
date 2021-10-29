@@ -43,13 +43,13 @@ object MerVeiledningVarselPlannerSpek : Spek({
         }
 
         it("Varsel blir planlagt når sykmeldingen strekker seg over 39 uker") {
-            val fom = LocalDate.now().minusWeeks(38).minusDays(6)
+            val fom = LocalDate.now().minusWeeks(39)
             val tom = LocalDate.now().plusDays(1)
 
             val oppfolgingstilfelle39Uker = Oppfolgingstilfelle39Uker(
                 arbeidstakerAktorId1,
                 FULL_AG_PERIODE,
-                ChronoUnit.DAYS.between(fom, tom).toInt(),
+                ChronoUnit.DAYS.between(fom, tom).toInt() + 1,
                 fom,
                 tom
             )
@@ -66,7 +66,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
 
         it("Skal planlegge varsel dersom tidligere utsendt varsel er i et annet sykeforløp") {
             val idag = LocalDate.now()
-            val fom = idag.minusWeeks(38).minusDays(6)
+            val fom = idag.minusWeeks(39)
             val tom = idag.plusDays(1)
 
 
@@ -104,7 +104,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
 
         it("Skal IKKE planlegge varsel dersom tidligere utsendt varsel er i samme sykeforløp") {
             val idag = LocalDate.now()
-            val fom = idag.minusWeeks(38).minusDays(6)
+            val fom = idag.minusWeeks(39)
             val tom = idag.plusDays(1)
 
 
@@ -140,7 +140,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
 
         it("Varsel blir IKKE planlagt når sykmeldingen ikke strekker seg over 39 uker") {
             val fom = LocalDate.now().minusWeeks(38)
-            val tom = LocalDate.now().plusDays(6)
+            val tom = LocalDate.now().plusWeeks(1)
 
             val oppfolgingstilfelle39Uker = Oppfolgingstilfelle39Uker(
                 arbeidstakerAktorId1,
@@ -209,7 +209,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
             val oppfolgingstilfelle39Uker = Oppfolgingstilfelle39Uker(
                 arbeidstakerAktorId1,
                 FULL_AG_PERIODE,
-                ChronoUnit.DAYS.between(fom, tom).toInt(),
+                ChronoUnit.DAYS.between(fom, tom).toInt() + 1,
                 fom,
                 tom
             )
