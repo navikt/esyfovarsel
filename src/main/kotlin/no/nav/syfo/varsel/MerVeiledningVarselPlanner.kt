@@ -32,8 +32,21 @@ class MerVeiledningVarselPlanner(
         val tilfelleFom = oppfolgingstilfelle.fom
         val tilfelleTom = oppfolgingstilfelle.tom
 
+        log.info("[$name]: PROSESSERER OPPFOLGINGSTILFELLE,  [FOM,TOM,ANT]: [$tilfelleFom,$tilfelleTom,${oppfolgingstilfelle.antallSykefravaersDagerTotalt}]")
+
         if (todayIsBetweenFomAndTom(tilfelleFom, tilfelleTom)) {
-            varselUtil.varselDate39Uker(oppfolgingstilfelle)?.let { utsendingsdato ->
+            val varselDato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
+            if(varselDato == null){
+                val tidligerePlanlagteVarslerPaFnr = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.MER_VEILEDNING)
+
+                if (tidligerePlanlagteVarslerPaFnr.isNotEmpty()) {
+                    val sistePlanlagteVarsel = tidligerePlanlagteVarslerPaFnr.first()
+                    databaseAccess.deletePlanlagtVarselByVarselId(sistePlanlagteVarsel.uuid)
+                    log.info("[$name]: Antall dager utbetalt er færre enn 39 uker tilsammen i sykefraværet. Sletter tidligere planlagt varsel.")
+                } else {
+                    log.info("[$name]: Antall dager utbetalt er færre enn 39 uker tilsammen i sykefraværet. Planlegger ikke varsel")
+                }
+            } else {
                 val arbeidstakerAktorId = oppfolgingstilfelle.aktorId
 
                 val varsel = PlanlagtVarsel(
@@ -41,7 +54,7 @@ class MerVeiledningVarselPlanner(
                     arbeidstakerAktorId,
                     emptySet(),
                     VarselType.MER_VEILEDNING,
-                    utsendingsdato
+                    varselDato
                 )
 
                 if (varselSendtService.erVarselSendt(fnr, VarselType.MER_VEILEDNING, tilfelleFom, tilfelleTom)) {
@@ -52,14 +65,14 @@ class MerVeiledningVarselPlanner(
 
                 if (tidligerePlanlagteVarslerPaFnr.isNotEmpty()) {
                     val sisteUsendteVarsel = tidligerePlanlagteVarslerPaFnr.first()
-                    databaseAccess.updateUtsendingsdatoByVarselId(sisteUsendteVarsel.uuid, utsendingsdato)
+                    databaseAccess.updateUtsendingsdatoByVarselId(sisteUsendteVarsel.uuid, varselDato)
                     log.info("[$name]: Oppdaterte tidligere usendt 39-ukers varsel i samme sykeforlop")
                 } else {
                     log.info("[$name]: Planlegger 39-ukers varsel")
                     databaseAccess.storePlanlagtVarsel(varsel)
                     tellMerVeiledningPlanlagt()
                 }
-            } ?: log.info("[$name]: Antall dager utbetalt er færre enn 39 uker tilsammen i sykefraværet. Planlegger ikke varsel")
+            }
         } else {
             log.info("[$name]: Dagens dato er utenfor [fom,tom] intervall til oppfølgingstilfelle. Planlegger ikke varsel")
         }
