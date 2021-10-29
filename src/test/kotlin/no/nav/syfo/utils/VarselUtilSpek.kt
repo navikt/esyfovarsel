@@ -8,6 +8,7 @@ import kotlin.math.min
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.varsel.arbeidstakerAktorId1
+import no.nav.syfo.varsel.varselDate39Uker
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.Month
@@ -76,9 +77,9 @@ object VarselUtilSpek: Spek( {
 
 
         it("Dersom antall dager sykmeldt er færre enn $antallDager39UkersVarsel skal varselDato returnere null") {
-            val fom = LocalDate.of(2021, Month.JANUARY, 23)
-            val tom = LocalDate.of(2021, Month.NOVEMBER, 19)
-            val antallDagerSykmeldtTotalt = 272
+            val fom = LocalDate.now().minusWeeks(39)
+            val tom = LocalDate.now().plusWeeks(1)
+            val antallDagerSykmeldtTotalt = 273
 
 
             val oppfolgingstilfelle = Oppfolgingstilfelle39Uker(
@@ -91,6 +92,60 @@ object VarselUtilSpek: Spek( {
 
             val utsendingsdato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
 
+            utsendingsdato shouldEqual null
+        }
+
+
+        it("Dersom sykeforløpet startet for akkurat 39 uker siden skal varseldato være i dag") {
+            val antallDagerSykmeldtTotalt = 306
+            val fom = LocalDate.now().minusWeeks(39)
+            val tom = LocalDate.now().plusDays(antallDagerSykmeldtTotalt - 39L * 7)
+
+
+            val oppfolgingstilfelle = Oppfolgingstilfelle39Uker(
+                arbeidstakerAktorId1,
+                16,
+                antallDagerSykmeldtTotalt,
+                fom,
+                tom
+            )
+            val utsendingsdato = varselDate39Uker(oppfolgingstilfelle)
+
+            val forventetUtsendingsdato = LocalDate.now()
+            utsendingsdato shouldEqual forventetUtsendingsdato
+        }
+
+        it("Dersom sykefraværet er akkurat 39 uker (273 dager) skal utsendingsdato bli null, fordi varselet sendes dagen etter (på dag 274)") {
+            val fom = LocalDate.now().minusWeeks(38)
+            val tom = fom.plusWeeks(39)
+            val antallDagerSykmeldtTotalt = 273
+
+
+            val oppfolgingstilfelle = Oppfolgingstilfelle39Uker(
+                arbeidstakerAktorId1,
+                16,
+                antallDagerSykmeldtTotalt,
+                fom,
+                tom
+            )
+            val utsendingsdato = varselDate39Uker(oppfolgingstilfelle)
+            utsendingsdato shouldEqual null
+        }
+
+        it("Dersom sykefraværet er under 39 uker skal utsendingsdato bli null") {
+            val fom = LocalDate.now().minusWeeks(34)
+            val tom = LocalDate.now().plusDays(5)
+            val antallDagerSykmeldtTotalt = 245
+
+
+            val oppfolgingstilfelle = Oppfolgingstilfelle39Uker(
+                arbeidstakerAktorId1,
+                16,
+                antallDagerSykmeldtTotalt,
+                fom,
+                tom
+            )
+            val utsendingsdato = varselDate39Uker(oppfolgingstilfelle)
             utsendingsdato shouldEqual null
         }
 
