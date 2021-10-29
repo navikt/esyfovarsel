@@ -32,6 +32,8 @@ class MerVeiledningVarselPlanner(
         val tilfelleFom = oppfolgingstilfelle.fom
         val tilfelleTom = oppfolgingstilfelle.tom
 
+        log.info("[$name]: PROSESSERER OPPFOLGINGSTILFELLE,  [FOM,TOM,ANT]: [$tilfelleFom,$tilfelleTom,${oppfolgingstilfelle.antallSykefravaersDagerTotalt}]")
+
         if (todayIsBetweenFomAndTom(tilfelleFom, tilfelleTom)) {
             val varselDato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
             if(varselDato == null){
