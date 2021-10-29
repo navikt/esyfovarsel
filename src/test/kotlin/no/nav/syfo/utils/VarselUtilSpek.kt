@@ -1,17 +1,14 @@
 package no.nav.syfo.utils
 
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
-import org.amshove.kluent.shouldEqual
-import java.time.LocalDate
-import kotlin.math.min
-
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.varsel.arbeidstakerAktorId1
-import no.nav.syfo.varsel.varselDate39Uker
+import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import java.time.Month
+import java.time.LocalDate
+import kotlin.math.min
 
 object VarselUtilSpek: Spek( {
 
