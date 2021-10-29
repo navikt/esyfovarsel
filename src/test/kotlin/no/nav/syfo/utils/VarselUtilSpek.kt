@@ -109,7 +109,7 @@ object VarselUtilSpek: Spek( {
                 fom,
                 tom
             )
-            val utsendingsdato = varselDate39Uker(oppfolgingstilfelle)
+            val utsendingsdato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
 
             val forventetUtsendingsdato = LocalDate.now()
             utsendingsdato shouldEqual forventetUtsendingsdato
@@ -128,7 +128,7 @@ object VarselUtilSpek: Spek( {
                 fom,
                 tom
             )
-            val utsendingsdato = varselDate39Uker(oppfolgingstilfelle)
+            val utsendingsdato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
             utsendingsdato shouldEqual null
         }
 
@@ -145,7 +145,7 @@ object VarselUtilSpek: Spek( {
                 fom,
                 tom
             )
-            val utsendingsdato = varselDate39Uker(oppfolgingstilfelle)
+            val utsendingsdato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
             utsendingsdato shouldEqual null
         }
 
