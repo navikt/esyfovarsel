@@ -33,7 +33,7 @@ class SendVarselService(
     private fun varselContentFromType(type: String): String? {
         return when (type) {
             VarselType.AKTIVITETSKRAV.toString() -> "NAV skal nå vurdere aktivitetsplikten din"
-            VarselType.MER_VEILEDNING.toString() -> "Det nærmer seg datoen da du ikke lenger kan få sykepenger. Gå til Ditt Sykefravær og se hva du kan gjøre."
+            VarselType.MER_VEILEDNING.toString() -> "Det nærmer seg datoen da du ikke lenger kan få sykepenger."
             else -> null
         }
     }
