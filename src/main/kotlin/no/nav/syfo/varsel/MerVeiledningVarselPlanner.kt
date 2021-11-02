@@ -32,10 +32,9 @@ class MerVeiledningVarselPlanner(
         val tilfelleFom = oppfolgingstilfelle.fom
         val tilfelleTom = oppfolgingstilfelle.tom
 
-        log.info("[$name]: PROSESSERER OPPFOLGINGSTILFELLE,  [FOM,TOM,ANT]: [$tilfelleFom,$tilfelleTom,${oppfolgingstilfelle.antallSykefravaersDagerTotalt}]")
         if (todayIsBetweenFomAndTom(tilfelleFom, tilfelleTom)) {
             val varselDato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
-            log.info("[$name]: [FOM,TOM,ANT,DATO]: [$tilfelleFom,$tilfelleTom,${oppfolgingstilfelle.antallSykefravaersDagerTotalt},$varselDato]")
+
             if(varselDato == null){
                 val tidligerePlanlagteVarslerPaFnr = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.MER_VEILEDNING)
 
@@ -47,6 +46,8 @@ class MerVeiledningVarselPlanner(
                     log.info("[$name]: Antall dager utbetalt er færre enn 39 uker tilsammen i sykefraværet. Planlegger ikke varsel")
                 }
             } else {
+                log.info("[$name]: [FOM,TOM,ANT,DATO]: [$tilfelleFom,$tilfelleTom,${oppfolgingstilfelle.antallSykefravaersDagerTotalt},$varselDato]")
+
                 val arbeidstakerAktorId = oppfolgingstilfelle.aktorId
 
                 val varsel = PlanlagtVarsel(

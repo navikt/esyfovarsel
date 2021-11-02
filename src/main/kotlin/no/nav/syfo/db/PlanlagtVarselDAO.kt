@@ -164,5 +164,4 @@ fun DatabaseInterface.deletePlanlagtVarselBySykmeldingerId(sykmeldingerId: Set<S
 
         connection.commit()
     }
-    log.info("Sletter tidligere planlagt varsel fra DB")
 }
