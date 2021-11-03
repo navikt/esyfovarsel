@@ -14,8 +14,6 @@ import no.nav.syfo.metrics.tellAktivitetskravPlanlagt
 import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.service.SykeforlopService
 import no.nav.syfo.utils.VarselUtil
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import kotlin.streams.toList
 
 @KtorExperimentalAPI
@@ -27,7 +25,6 @@ class AktivitetskravVarselPlanner(
 ) : VarselPlanner {
     private val AKTIVITETSKRAV_DAGER: Long = 42
 
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.AktivitetskravVarselPlanner")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
     private val sykeforlopService: SykeforlopService = SykeforlopService()
 
@@ -35,7 +32,6 @@ class AktivitetskravVarselPlanner(
         val oppfolgingstilfellePerson = syfosyketilfelleConsumer.getOppfolgingstilfelle(aktorId)
 
         if(oppfolgingstilfellePerson == null) {
-            log.info("[$name]: Fant ikke oppfolgingstilfelle for denne brukeren. Planlegger ikke nytt varsel")
             return@coroutineScope
         }
 
@@ -54,28 +50,20 @@ class AktivitetskravVarselPlanner(
                 val lagreteVarsler = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.AKTIVITETSKRAV)
 
                 if (varselUtil.isVarselDatoForIDag(aktivitetskravVarselDato)) {
-                    log.info("[$name]: Beregnet dato for varsel er før i dag, sletter tidligere planlagt varsel om det finnes i DB")
                     databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
                 } else if (varselUtil.isVarselDatoEtterTilfelleSlutt(aktivitetskravVarselDato, forlopSluttDato)) {
-                    log.info("[$name]: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB")
                     databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
                 } else if (sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, fnr) == true){
-                    log.info("[$name]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, sletter tidligere planlagt varsel om det finnes i DB")
                     databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
                 } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }.isNotEmpty()){
-                    log.info("[$name]: varsel med samme utsendingsdato er allerede planlagt")
                 } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }.isEmpty()){
-                    log.info("[$name]: sjekker om det finnes varsler med samme id")
                     if (varselUtil.hasLagreteVarslerForForespurteSykmeldinger(lagreteVarsler, sykeforlop.ressursIds)) {
-                        log.info("[$name]: sletter tidligere varsler")
                         databaseAccess.deletePlanlagtVarselBySykmeldingerId(sykeforlop.ressursIds)
 
-                        log.info("[$name]: Lagrer ny varsel")
                         val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, sykeforlop.ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
                         databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
                         break@loop
                     } else {
-                        log.info("[$name]: Lagrer varsel til database")
 
                         val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, sykeforlop.ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
                         databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
@@ -83,7 +71,6 @@ class AktivitetskravVarselPlanner(
                         break@loop
                     }
                 } else {
-                    log.info("[$name]: Lagrer varsel til database")
 
                     val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, sykeforlop.ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
                     databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
@@ -91,7 +78,6 @@ class AktivitetskravVarselPlanner(
                 }
             }
         } else {
-            log.info("[$name]: Sykeforløpliste er tom")
         }
     }
 
