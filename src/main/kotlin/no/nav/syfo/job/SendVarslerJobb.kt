@@ -4,6 +4,7 @@ import no.nav.syfo.Toggles
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselByVarselId
 import no.nav.syfo.db.domain.PPlanlagtVarsel
+import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByUtsendingsdato
 import no.nav.syfo.db.storeUtsendtVarsel
@@ -35,9 +36,11 @@ class SendVarslerJobb(
                 log.info("Sender varsel med UUID ${it.uuid}")
                 val type = sendVarselService.sendVarsel(it)
                 incrementVarselCountMap(varslerSendt, type)
-                log.info("Markerer varsel med UUID ${it.uuid} som sendt")
-                databaseAccess.storeUtsendtVarsel(it)
-                databaseAccess.deletePlanlagtVarselByVarselId(it.uuid)
+                if (type.sendtUtenFeil()) {
+                    log.info("Markerer varsel med UUID ${it.uuid} som sendt")
+                    databaseAccess.storeUtsendtVarsel(it)
+                    databaseAccess.deletePlanlagtVarselByVarselId(it.uuid)
+                }
             }
         }
 
@@ -58,4 +61,9 @@ class SendVarslerJobb(
 
     private fun skalSendeVarsel(it: PPlanlagtVarsel) = (it.type.equals(VarselType.MER_VEILEDNING.name) && toggles.sendMerVeiledningVarsler) ||
             (it.type.equals(VarselType.AKTIVITETSKRAV.name) && toggles.sendAktivitetskravVarsler)
+
+    private fun String.sendtUtenFeil(): Boolean {
+        return this == UTSENDING_FEILET
+    }
+
 }
