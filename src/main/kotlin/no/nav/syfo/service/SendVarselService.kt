@@ -1,6 +1,7 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.db.domain.PPlanlagtVarsel
+import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
 import org.slf4j.Logger
@@ -25,7 +26,7 @@ class SendVarselService(
             }
         } catch (e: RuntimeException) {
             log.error("Feil i utsending av varsel med UUID: ${pPlanlagtVarsel.uuid} | ${e.message}")
-            return "Feil"
+            return UTSENDING_FEILET
         }
         return pPlanlagtVarsel.type
     }

@@ -1,10 +1,12 @@
 package no.nav.syfo.job
 
+import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.Toggles
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PlanlagtVarsel
+import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
 import no.nav.syfo.db.domain.VarselType.MER_VEILEDNING
@@ -84,6 +86,20 @@ object SendVarslerJobbSpek: Spek( {
             embeddedDatabase.skalHaPlanlagtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
             embeddedDatabase.skalIkkeHaUtsendtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
             verify {sendVarselService.sendVarsel(any())}
+        }
+
+        it ("Skal ikke markere varsel som sendt dersom utsending feiler"){
+            val sendVarselJobb = SendVarslerJobb(embeddedDatabase, sendVarselService, Toggles(true,true,true))
+            val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1"), MER_VEILEDNING)
+            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
+
+            coEvery { sendVarselService.sendVarsel(any()) } returns UTSENDING_FEILET
+
+            sendVarselJobb.sendVarsler()
+            verify {sendVarselService.sendVarsel(any())}
+
+            embeddedDatabase.skalHaPlanlagtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
+            embeddedDatabase.skalIkkeHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
         }
     }
 })
