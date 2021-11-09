@@ -63,7 +63,7 @@ class SendVarslerJobb(
             (it.type.equals(VarselType.AKTIVITETSKRAV.name) && toggles.sendAktivitetskravVarsler)
 
     private fun String.sendtUtenFeil(): Boolean {
-        return this == UTSENDING_FEILET
+        return this != UTSENDING_FEILET
     }
 
 }
