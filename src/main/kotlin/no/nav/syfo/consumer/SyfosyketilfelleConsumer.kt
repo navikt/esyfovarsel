@@ -44,10 +44,12 @@ open class SyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsume
         val stsToken = stsConsumer.getToken()
         val bearerTokenString = "Bearer ${stsToken.access_token}"
 
-        val response = client.get<HttpResponse>(requestURL) {
-            headers {
-                append(HttpHeaders.Authorization, bearerTokenString)
-                append(HttpHeaders.Accept, ContentType.Application.Json)
+        val response = client.use { connection ->
+            connection.get<HttpResponse>(requestURL) {
+                headers {
+                    append(HttpHeaders.Authorization, bearerTokenString)
+                    append(HttpHeaders.Accept, ContentType.Application.Json)
+                }
             }
         }
 
@@ -75,10 +77,12 @@ open class SyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsume
         val stsToken = stsConsumer.getToken()
         val bearerTokenString = "Bearer ${stsToken.access_token}"
 
-        val response = client.get<HttpResponse>(requestURL) {
-            headers {
-                append(HttpHeaders.Authorization, bearerTokenString)
-                append(HttpHeaders.Accept, ContentType.Application.Json)
+        val response = client.use { connection ->
+            connection.get<HttpResponse>(requestURL) {
+                headers {
+                    append(HttpHeaders.Authorization, bearerTokenString)
+                    append(HttpHeaders.Accept, ContentType.Application.Json)
+                }
             }
         }
 

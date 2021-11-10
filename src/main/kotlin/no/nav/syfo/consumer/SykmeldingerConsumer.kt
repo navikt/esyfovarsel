@@ -46,13 +46,15 @@ class SykmeldingerConsumer(env: AppEnvironment, azureAdTokenConsumer: AzureAdTok
         val requestBody = SykmeldtStatusRequest(fnr, dato)
         val token = azureAdTokenConsumer.getAzureAdAccessToken(scope)
 
-        val response = client.post<HttpResponse>(requestURL) {
-            headers {
-                append(HttpHeaders.Accept, ContentType.Application.Json)
-                append(HttpHeaders.ContentType, ContentType.Application.Json)
-                append(HttpHeaders.Authorization, "Bearer $token")
+        val response = client.use { connection ->
+            connection.post<HttpResponse>(requestURL) {
+                headers {
+                    append(HttpHeaders.Accept, ContentType.Application.Json)
+                    append(HttpHeaders.ContentType, ContentType.Application.Json)
+                    append(HttpHeaders.Authorization, "Bearer $token")
+                }
+                body = requestBody
             }
-            body = requestBody
         }
 
         return when (response.status) {

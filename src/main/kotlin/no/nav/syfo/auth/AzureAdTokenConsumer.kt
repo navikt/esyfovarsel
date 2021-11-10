@@ -62,15 +62,17 @@ class AzureAdTokenConsumer(env: AppEnvironment) {
         if (token == null || token.issuedOn!!.plusSeconds(token.expires_in).isBefore(omToMinutter)) {
             log.info("Henter nytt token fra Azure AD for scope : $resource")
 
-            val response = httpClientWithProxy.post<HttpResponse>(aadAccessTokenUrl) {
-                accept(ContentType.Application.Json)
+            val response = httpClientWithProxy.use { connection ->
+                connection.post<HttpResponse>(aadAccessTokenUrl) {
+                    accept(ContentType.Application.Json)
 
-                body = FormDataContent(Parameters.build {
-                    append("client_id", clientId)
-                    append("scope", resource)
-                    append("grant_type", "client_credentials")
-                    append("client_secret", clientSecret)
-                })
+                    body = FormDataContent(Parameters.build {
+                        append("client_id", clientId)
+                        append("scope", resource)
+                        append("grant_type", "client_credentials")
+                        append("client_secret", clientSecret)
+                    })
+                }
             }
             if (response.status == HttpStatusCode.OK) {
                 tokenMap[resource] = response.receive()

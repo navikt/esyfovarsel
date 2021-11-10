@@ -90,14 +90,16 @@ open class PdlConsumer(env: CommonEnvironment, stsConsumer: StsConsumer) {
             val requestBody = PdlRequest(graphQuery, Variables(aktorId))
 
             try {
-                client.post<HttpResponse>(pdlBasepath) {
-                    headers {
-                        append(TEMA_HEADER, OPPFOLGING_TEMA_HEADERVERDI)
-                        append(HttpHeaders.ContentType, ContentType.Application.Json)
-                        append(HttpHeaders.Authorization, bearerTokenString)
-                        append(NAV_CONSUMER_TOKEN_HEADER, bearerTokenString)
+                client.use { connection ->
+                    connection.post<HttpResponse>(pdlBasepath) {
+                        headers {
+                            append(TEMA_HEADER, OPPFOLGING_TEMA_HEADERVERDI)
+                            append(HttpHeaders.ContentType, ContentType.Application.Json)
+                            append(HttpHeaders.Authorization, bearerTokenString)
+                            append(NAV_CONSUMER_TOKEN_HEADER, bearerTokenString)
+                        }
+                        body = requestBody
                     }
-                    body = requestBody
                 }
             } catch (e: Exception) {
                 log.error("Error while calling PDL ($service): ${e.message}")

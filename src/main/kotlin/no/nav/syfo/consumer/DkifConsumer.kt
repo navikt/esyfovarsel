@@ -44,13 +44,15 @@ class DkifConsumer(env: CommonEnvironment, stsConsumer: StsConsumer) {
         return runBlocking {
             val stsTokenString = "Bearer ${stsConsumer.getToken().access_token}"
             val response: HttpResponse? = try {
-                client.get<HttpResponse>(requestUrl) {
-                    headers {
-                        append(HttpHeaders.ContentType, ContentType.Application.Json)
-                        append(HttpHeaders.Authorization, stsTokenString)
-                        append(NAV_CONSUMER_ID_HEADER, ESYFOVARSEL_CONSUMER_ID)
-                        append(NAV_PERSONIDENTER_HEADER, aktorId)
-                        append(NAV_CALL_ID_HEADER, createCallId())
+                client.use { connection ->
+                    connection.get<HttpResponse>(requestUrl) {
+                        headers {
+                            append(HttpHeaders.ContentType, ContentType.Application.Json)
+                            append(HttpHeaders.Authorization, stsTokenString)
+                            append(NAV_CONSUMER_ID_HEADER, ESYFOVARSEL_CONSUMER_ID)
+                            append(NAV_PERSONIDENTER_HEADER, aktorId)
+                            append(NAV_CALL_ID_HEADER, createCallId())
+                        }
                     }
                 }
             } catch (e: Exception) {

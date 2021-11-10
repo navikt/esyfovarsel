@@ -35,9 +35,11 @@ open class StsConsumer(env: CommonEnvironment) {
             return token!!
         }
 
-        token = client.post<Token>(stsEndpointUrl) {
-            headers{
-                append(HttpHeaders.Authorization, encodeCredentials(username, password))
+        token = client.use { connection ->
+            connection.post<Token>(stsEndpointUrl) {
+                headers {
+                    append(HttpHeaders.Authorization, encodeCredentials(username, password))
+                }
             }
         }
 
