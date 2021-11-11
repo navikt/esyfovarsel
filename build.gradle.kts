@@ -4,9 +4,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.syfo"
 version = "1.0"
 
-val coroutinesVersion = "1.3.3"
 val kluentVersion = "1.39"
-val ktorVersion = "1.3.2"
+val ktorVersion = "1.6.0"
 val prometheusVersion = "0.8.1"
 val micrometerVersion = "1.7.3"
 val spekVersion = "2.0.9"
@@ -33,7 +32,7 @@ plugins {
     kotlin("jvm") version "1.5.31"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.5.31"
     id("com.diffplug.gradle.spotless") version "3.18.0"
-    id("com.github.johnrengelman.shadow") version "5.0.0"
+    id("com.github.johnrengelman.shadow") version "7.1.0"
 }
 
 allOpen {
@@ -55,8 +54,6 @@ repositories {
 dependencies {
 
     // Kotlin / Server
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-jackson:$ktorVersion")
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
@@ -127,7 +124,7 @@ tasks {
     }
 
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "11"
+        kotlinOptions.jvmTarget = "14"
     }
 
     withType<Test> {
