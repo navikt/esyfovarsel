@@ -26,6 +26,7 @@ open class PdlConsumer(env: CommonEnvironment, stsConsumer: StsConsumer) {
 
     init {
         client = HttpClient(CIO) {
+            expectSuccess = false
             install(JsonFeature) {
                 serializer = JacksonSerializer {
                     registerKotlinModule()
@@ -100,7 +101,7 @@ open class PdlConsumer(env: CommonEnvironment, stsConsumer: StsConsumer) {
                     body = requestBody
                 }
             } catch (e: Exception) {
-                log.error("Error while calling PDL ($service): ${e.message}")
+                log.error("Error while calling PDL ($service): ${e.message}", e)
                 null
             }
         }

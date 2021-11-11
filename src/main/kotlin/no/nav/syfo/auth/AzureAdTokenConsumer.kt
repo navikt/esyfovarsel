@@ -31,6 +31,7 @@ class AzureAdTokenConsumer(env: AppEnvironment) {
 
     val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
         install(JsonFeature) {
+            expectSuccess = false
             serializer = JacksonSerializer {
                 registerKotlinModule()
                 registerModule(JavaTimeModule())

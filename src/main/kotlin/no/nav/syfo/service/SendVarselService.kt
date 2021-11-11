@@ -25,7 +25,7 @@ class SendVarselService(
                 } ?: throw RuntimeException("Klarte ikke mappe typestreng til innholdstekst")
             }
         } catch (e: RuntimeException) {
-            log.error("Feil i utsending av varsel med UUID: ${pPlanlagtVarsel.uuid} | ${e.message}")
+            log.error("Feil i utsending av varsel med UUID: ${pPlanlagtVarsel.uuid} | ${e.message}", e)
             return UTSENDING_FEILET
         }
         return pPlanlagtVarsel.type

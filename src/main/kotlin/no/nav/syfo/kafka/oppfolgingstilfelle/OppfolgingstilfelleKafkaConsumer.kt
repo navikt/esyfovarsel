@@ -58,16 +58,16 @@ class OppfolgingstilfelleKafkaConsumer(
                             try {
                                 runBlocking { planner.processOppfolgingstilfelle(aktorId, fnr) }
                             } catch (e: Exception) {
-                                log.error("Error in [${planner.name}] planner: | ${e.message}")
+                                log.error("Error in [${planner.name}] planner: | ${e.message}", e)
                                 tellFeilIPlanner()
                             }
                         }
                     }
                 } catch (e: IOException) {
-                    log.error("Error in [$topicOppfolgingsTilfelle] listener: Could not parse message | ${e.message}")
+                    log.error("Error in [$topicOppfolgingsTilfelle] listener: Could not parse message | ${e.message}", e)
                     tellFeilIParsing()
                 } catch (e: Exception) {
-                    log.error("Error in [$topicOppfolgingsTilfelle] listener: Could not process message | ${e.message}")
+                    log.error("Error in [$topicOppfolgingsTilfelle] listener: Could not process message | ${e.message}", e)
                     tellFeilIProsessering()
                 }
             }
