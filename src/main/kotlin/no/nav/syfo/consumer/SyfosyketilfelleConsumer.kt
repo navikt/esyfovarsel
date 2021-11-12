@@ -27,6 +27,7 @@ open class SyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsume
 
     init {
         client = HttpClient(CIO) {
+            expectSuccess = false
             install(JsonFeature) {
                 serializer = JacksonSerializer {
                     registerKotlinModule()

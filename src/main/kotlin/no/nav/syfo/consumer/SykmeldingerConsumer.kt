@@ -29,6 +29,7 @@ class SykmeldingerConsumer(env: AppEnvironment, azureAdTokenConsumer: AzureAdTok
 
     init {
         client = HttpClient(CIO) {
+            expectSuccess = false
             install(JsonFeature) {
                 serializer = JacksonSerializer {
                     registerKotlinModule()

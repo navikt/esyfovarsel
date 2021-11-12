@@ -27,6 +27,7 @@ class DkifConsumer(env: CommonEnvironment, stsConsumer: StsConsumer) {
 
     init {
         client = HttpClient(CIO) {
+            expectSuccess = false
             install(JsonFeature) {
                 serializer = JacksonSerializer {
                     registerKotlinModule()
@@ -54,7 +55,7 @@ class DkifConsumer(env: CommonEnvironment, stsConsumer: StsConsumer) {
                     }
                 }
             } catch (e: Exception) {
-                log.error("Error while calling DKIF: ${e.message}")
+                log.error("Error while calling DKIF: ${e.message}", e)
                 null
             }
 

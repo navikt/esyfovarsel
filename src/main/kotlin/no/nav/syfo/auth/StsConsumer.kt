@@ -18,6 +18,7 @@ open class StsConsumer(env: CommonEnvironment) {
     private var token: Token? = null
 
     private val client = HttpClient(CIO) {
+        expectSuccess = false
         install(JsonFeature) {
             serializer = JacksonSerializer {
                 registerKotlinModule()
