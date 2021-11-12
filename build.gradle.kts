@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.syfo"
 version = "1.0"
 
-val kluentVersion = "1.39"
+val kluentVersion = "1.59"
 val ktorVersion = "1.6.0"
 val prometheusVersion = "0.8.1"
 val micrometerVersion = "1.7.3"
@@ -41,11 +41,7 @@ allOpen {
 
 repositories {
     mavenCentral()
-    jcenter()
     maven(url = "https://jitpack.io")
-    maven(url = "https://dl.bintray.com/kotlin/ktor")
-    maven(url = "https://dl.bintray.com/spekframework/spek-dev")
-    maven(url = "https://dl.bintray.com/kotlin/kotlinx/")
     maven(url = "https://packages.confluent.io/maven/")
     maven(url = "https://repo.adeo.no/repository/maven-releases/")
     maven(url = "https://github.com/navikt/vault-jdbc")
