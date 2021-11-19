@@ -2,6 +2,7 @@ package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
+import no.nav.syfo.db.domain.VarselType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.sql.Date
@@ -81,6 +82,20 @@ fun DatabaseInterface.fetchPlanlagtVarselByUtsendingsdato(utsendingsdato: LocalD
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
             it.setTimestamp(1, Timestamp.valueOf(utsendingsdato.atStartOfDay()))
+            it.executeQuery().toList { toPPlanlagtVarsel() }
+        }
+    }
+}
+
+fun DatabaseInterface.fetchPlanlagtVarselByType(type: VarselType): List<PPlanlagtVarsel> {
+    val queryStatement = """SELECT *
+                            FROM PLANLAGT_VARSEL
+                            WHERE TYPE = ?
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, type.name)
             it.executeQuery().toList { toPPlanlagtVarsel() }
         }
     }
