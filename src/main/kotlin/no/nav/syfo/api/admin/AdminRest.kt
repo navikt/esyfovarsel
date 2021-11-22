@@ -13,4 +13,9 @@ fun Route.registerAdminApi(
         replanleggingService.planleggMerVeiledningVarslerPaNytt()
         call.respond(HttpStatusCode.OK)
     }
+
+    get("/admin/replanleggAktivitetskravVarsler") {
+        replanleggingService.planleggAktivitetskravVarslerPaNytt()
+        call.respond(HttpStatusCode.OK)
+    }
 }

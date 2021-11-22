@@ -85,7 +85,9 @@ fun main() {
             val accessControl = AccessControl(pdlConsumer, dkifConsumer)
             val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
             val varselSendtService = VarselSendtService(pdlConsumer, oppfolgingstilfelleConsumer, database)
-            val replanleggingService = ReplanleggingService(database, MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService))
+            val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService)
+            val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
+            val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
 
             connector {
                 port = env.applicationPort
@@ -102,9 +104,8 @@ fun main() {
                 kafkaModule(
                     env,
                     accessControl,
-                    oppfolgingstilfelleConsumer,
-                    sykmeldingService,
-                    varselSendtService
+                    aktivitetskravVarselPlanner,
+                    merVeiledningVarselPlanner
                 )
             }
         })
@@ -186,14 +187,13 @@ fun Application.serverModule(
 fun Application.kafkaModule(
     env: AppEnvironment,
     accessControl: AccessControl,
-    oppfolgingstilfelleConsumer: SyfosyketilfelleConsumer,
-    sykmeldingService: SykmeldingService,
-    varselSendtService: VarselSendtService
+    aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
+    merVeiledningVarselPlanner: MerVeiledningVarselPlanner
 ) {
     runningRemotely {
         val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, accessControl)
-            .addPlanner(AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService))
-            .addPlanner(MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService))
+            .addPlanner(aktivitetskravVarselPlanner)
+            .addPlanner(merVeiledningVarselPlanner)
 
         launch(backgroundTasksContext) {
             launchKafkaListener(
