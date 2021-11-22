@@ -10,7 +10,6 @@ import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.util.*
 import no.nav.syfo.AppEnvironment
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusRequest
@@ -18,7 +17,6 @@ import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-@KtorExperimentalAPI
 class SykmeldingerConsumer(env: AppEnvironment, azureAdTokenConsumer: AzureAdTokenConsumer) {
 
     private val client: HttpClient

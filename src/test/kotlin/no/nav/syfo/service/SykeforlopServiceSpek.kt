@@ -1,9 +1,7 @@
 package no.nav.syfo.service
 
-import io.ktor.util.*
 import no.nav.syfo.consumer.domain.Syketilfellebit
 import no.nav.syfo.consumer.domain.Syketilfelledag
-import no.nav.syfo.service.SykeforlopService
 import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
@@ -14,7 +12,6 @@ const val SYKEFORLOP_MIN_DIFF_DAGER: Long = 16L
 const val arbeidstakerAktorId1 = "1234567890123"
 
 
-@KtorExperimentalAPI
 object SykeforlopServiceSpek : Spek({
     val sykeforlopService = SykeforlopService()
 
