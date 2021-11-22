@@ -1,4 +1,4 @@
-package no.nav.syfo.api
+package no.nav.syfo.api.admin
 
 import io.ktor.application.*
 import io.ktor.http.*
@@ -6,11 +6,11 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import no.nav.syfo.service.ReplanleggingService
 
-fun Routing.registerAdminApi(
+fun Route.registerAdminApi(
     replanleggingService: ReplanleggingService
 ) {
     get("/admin/replanleggMerVeiledningVarsler") {
-       replanleggingService.planleggMerVeiledningVarslerPaNytt()
+        replanleggingService.planleggMerVeiledningVarslerPaNytt()
         call.respond(HttpStatusCode.OK)
     }
 }

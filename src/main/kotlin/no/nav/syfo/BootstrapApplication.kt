@@ -12,12 +12,13 @@ import io.ktor.jackson.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.util.*
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
-import no.nav.syfo.api.registerAdminApi
 import no.nav.syfo.api.registerNaisApi
-import no.nav.syfo.auth.*
+import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.auth.LocalStsConsumer
+import no.nav.syfo.auth.StsConsumer
+import no.nav.syfo.auth.setupRoutesWithAuthentication
 import no.nav.syfo.consumer.*
 import no.nav.syfo.db.*
 import no.nav.syfo.job.SendVarslerJobb
@@ -39,7 +40,6 @@ val state: ApplicationState = ApplicationState()
 val backgroundTasksContext = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
 lateinit var database: DatabaseInterface
 
-@KtorExperimentalAPI
 fun main() {
     if (isJob()) {
         val env = jobEnvironment()
@@ -172,19 +172,17 @@ fun Application.serverModule(
     }
 
     runningRemotely {
-        setupRoutesWithAuthentication(varselSendtService, appEnv)
+        setupRoutesWithAuthentication(varselSendtService, replanleggingService, appEnv)
     }
 
     routing {
         registerPrometheusApi()
         registerNaisApi(state)
-        registerAdminApi(replanleggingService)
     }
 
     state.initialized = true
 }
 
-@KtorExperimentalAPI
 fun Application.kafkaModule(
     env: AppEnvironment,
     accessControl: AccessControl,
@@ -206,11 +204,9 @@ fun Application.kafkaModule(
     }
 }
 
-@KtorExperimentalAPI
 val Application.envKind
     get() = environment.config.property("ktor.environment").getString()
 
-@KtorExperimentalAPI
 fun Application.runningRemotely(block: () -> Unit) {
     if (envKind == "remote") block()
 }
