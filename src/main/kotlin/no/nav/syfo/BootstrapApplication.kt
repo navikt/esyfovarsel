@@ -15,6 +15,7 @@ import io.ktor.server.netty.*
 import io.ktor.util.*
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
+import no.nav.syfo.api.registerAdminApi
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.*
 import no.nav.syfo.consumer.*
@@ -25,10 +26,7 @@ import no.nav.syfo.kafka.launchKafkaListener
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.metrics.withPrometheus
-import no.nav.syfo.service.AccessControl
-import no.nav.syfo.service.SendVarselService
-import no.nav.syfo.service.SykmeldingService
-import no.nav.syfo.service.VarselSendtService
+import no.nav.syfo.service.*
 import no.nav.syfo.varsel.AktivitetskravVarselPlanner
 import no.nav.syfo.varsel.MerVeiledningVarselPlanner
 import org.slf4j.LoggerFactory
@@ -87,6 +85,7 @@ fun main() {
             val accessControl = AccessControl(pdlConsumer, dkifConsumer)
             val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
             val varselSendtService = VarselSendtService(pdlConsumer, oppfolgingstilfelleConsumer, database)
+            val replanleggingService = ReplanleggingService(database, MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService))
 
             connector {
                 port = env.applicationPort
@@ -97,8 +96,8 @@ fun main() {
 
                 serverModule(
                     env,
-                    varselSendtService
-
+                    varselSendtService,
+                    replanleggingService
                 )
                 kafkaModule(
                     env,
@@ -160,7 +159,8 @@ private fun getSyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsCon
 
 fun Application.serverModule(
     appEnv: AppEnvironment,
-    varselSendtService: VarselSendtService
+    varselSendtService: VarselSendtService,
+    replanleggingService: ReplanleggingService
 ) {
     install(ContentNegotiation) {
         jackson {
@@ -178,6 +178,7 @@ fun Application.serverModule(
     routing {
         registerPrometheusApi()
         registerNaisApi(state)
+        registerAdminApi(replanleggingService)
     }
 
     state.initialized = true
