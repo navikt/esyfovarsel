@@ -14,6 +14,8 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
+import no.nav.syfo.api.admin.registerAdminApi
+import no.nav.syfo.api.bruker.registerBrukerApi
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.auth.LocalStsConsumer
@@ -174,6 +176,12 @@ fun Application.serverModule(
 
     runningRemotely {
         setupRoutesWithAuthentication(varselSendtService, replanleggingService, appEnv)
+    }
+    runningLocally {
+        routing {
+            registerBrukerApi(varselSendtService)
+            registerAdminApi(replanleggingService)
+        }
     }
 
     routing {

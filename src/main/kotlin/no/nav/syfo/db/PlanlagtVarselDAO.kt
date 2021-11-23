@@ -87,15 +87,18 @@ fun DatabaseInterface.fetchPlanlagtVarselByUtsendingsdato(utsendingsdato: LocalD
     }
 }
 
-fun DatabaseInterface.fetchPlanlagtVarselByType(type: VarselType): List<PPlanlagtVarsel> {
+fun DatabaseInterface.fetchPlanlagtVarselByTypeAndUtsendingsdato(type: VarselType, fromDate: LocalDate, toDate: LocalDate): List<PPlanlagtVarsel> {
     val queryStatement = """SELECT *
                             FROM PLANLAGT_VARSEL
-                            WHERE TYPE = ?
+                            WHERE type = ?
+                            AND utsendingsdato BETWEEN ? AND ?
     """.trimIndent()
 
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
             it.setString(1, type.name)
+            it.setTimestamp(2, Timestamp.valueOf(fromDate.atStartOfDay()))
+            it.setTimestamp(3, Timestamp.valueOf(toDate.atStartOfDay()))
             it.executeQuery().toList { toPPlanlagtVarsel() }
         }
     }
