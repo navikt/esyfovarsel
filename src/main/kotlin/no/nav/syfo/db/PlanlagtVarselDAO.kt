@@ -10,6 +10,7 @@ import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.util.*
 
 private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.db.PlanlagtVarselDAO")
@@ -91,14 +92,15 @@ fun DatabaseInterface.fetchPlanlagtVarselByTypeAndUtsendingsdato(type: VarselTyp
     val queryStatement = """SELECT *
                             FROM PLANLAGT_VARSEL
                             WHERE type = ?
-                            AND utsendingsdato BETWEEN ? AND ?
+                            AND utsendingsdato >= ? 
+                            AND utsendingsdato <= ?
     """.trimIndent()
 
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
             it.setString(1, type.name)
             it.setTimestamp(2, Timestamp.valueOf(fromDate.atStartOfDay()))
-            it.setTimestamp(3, Timestamp.valueOf(toDate.atStartOfDay()))
+            it.setTimestamp(3, Timestamp.valueOf(toDate.atTime(LocalTime.MAX)))
             it.executeQuery().toList { toPPlanlagtVarsel() }
         }
     }
