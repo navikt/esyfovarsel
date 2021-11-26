@@ -99,8 +99,8 @@ fun DatabaseInterface.fetchPlanlagtVarselByTypeAndUtsendingsdato(type: VarselTyp
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
             it.setString(1, type.name)
-            it.setTimestamp(2, Timestamp.valueOf(fromDate.atStartOfDay()))
-            it.setTimestamp(3, Timestamp.valueOf(toDate.atTime(LocalTime.MAX)))
+            it.setDate(2, Date.valueOf(fromDate))
+            it.setDate(3, Date.valueOf(toDate))
             it.executeQuery().toList { toPPlanlagtVarsel() }
         }
     }
