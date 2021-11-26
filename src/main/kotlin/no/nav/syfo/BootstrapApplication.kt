@@ -12,11 +12,15 @@ import io.ktor.jackson.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.util.*
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
+import no.nav.syfo.api.admin.registerAdminApi
+import no.nav.syfo.api.bruker.registerBrukerApi
 import no.nav.syfo.api.registerNaisApi
-import no.nav.syfo.auth.*
+import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.auth.LocalStsConsumer
+import no.nav.syfo.auth.StsConsumer
+import no.nav.syfo.auth.setupRoutesWithAuthentication
 import no.nav.syfo.consumer.*
 import no.nav.syfo.db.*
 import no.nav.syfo.job.SendVarslerJobb
@@ -25,10 +29,7 @@ import no.nav.syfo.kafka.launchKafkaListener
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.metrics.withPrometheus
-import no.nav.syfo.service.AccessControl
-import no.nav.syfo.service.SendVarselService
-import no.nav.syfo.service.SykmeldingService
-import no.nav.syfo.service.VarselSendtService
+import no.nav.syfo.service.*
 import no.nav.syfo.varsel.AktivitetskravVarselPlanner
 import no.nav.syfo.varsel.MerVeiledningVarselPlanner
 import org.slf4j.LoggerFactory
@@ -41,7 +42,6 @@ val state: ApplicationState = ApplicationState()
 val backgroundTasksContext = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
 lateinit var database: DatabaseInterface
 
-@KtorExperimentalAPI
 fun main() {
     if (isJob()) {
         val env = jobEnvironment()
@@ -87,6 +87,9 @@ fun main() {
             val accessControl = AccessControl(pdlConsumer, dkifConsumer)
             val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
             val varselSendtService = VarselSendtService(pdlConsumer, oppfolgingstilfelleConsumer, database)
+            val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService)
+            val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
+            val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
 
             connector {
                 port = env.applicationPort
@@ -97,15 +100,14 @@ fun main() {
 
                 serverModule(
                     env,
-                    varselSendtService
-
+                    varselSendtService,
+                    replanleggingService
                 )
                 kafkaModule(
                     env,
                     accessControl,
-                    oppfolgingstilfelleConsumer,
-                    sykmeldingService,
-                    varselSendtService
+                    aktivitetskravVarselPlanner,
+                    merVeiledningVarselPlanner
                 )
             }
         })
@@ -160,7 +162,8 @@ private fun getSyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsCon
 
 fun Application.serverModule(
     appEnv: AppEnvironment,
-    varselSendtService: VarselSendtService
+    varselSendtService: VarselSendtService,
+    replanleggingService: ReplanleggingService
 ) {
     install(ContentNegotiation) {
         jackson {
@@ -172,7 +175,13 @@ fun Application.serverModule(
     }
 
     runningRemotely {
-        setupRoutesWithAuthentication(varselSendtService, appEnv)
+        setupRoutesWithAuthentication(varselSendtService, replanleggingService, appEnv)
+    }
+    runningLocally {
+        routing {
+            registerBrukerApi(varselSendtService)
+            registerAdminApi(replanleggingService)
+        }
     }
 
     routing {
@@ -183,18 +192,16 @@ fun Application.serverModule(
     state.initialized = true
 }
 
-@KtorExperimentalAPI
 fun Application.kafkaModule(
     env: AppEnvironment,
     accessControl: AccessControl,
-    oppfolgingstilfelleConsumer: SyfosyketilfelleConsumer,
-    sykmeldingService: SykmeldingService,
-    varselSendtService: VarselSendtService
+    aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
+    merVeiledningVarselPlanner: MerVeiledningVarselPlanner
 ) {
     runningRemotely {
         val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, accessControl)
-            .addPlanner(AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService))
-            .addPlanner(MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService))
+            .addPlanner(aktivitetskravVarselPlanner)
+            .addPlanner(merVeiledningVarselPlanner)
 
         launch(backgroundTasksContext) {
             launchKafkaListener(
@@ -205,11 +212,9 @@ fun Application.kafkaModule(
     }
 }
 
-@KtorExperimentalAPI
 val Application.envKind
     get() = environment.config.property("ktor.environment").getString()
 
-@KtorExperimentalAPI
 fun Application.runningRemotely(block: () -> Unit) {
     if (envKind == "remote") block()
 }

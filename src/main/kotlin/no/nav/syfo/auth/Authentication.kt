@@ -6,11 +6,10 @@ import io.ktor.auth.*
 import io.ktor.auth.jwt.*
 import io.ktor.routing.*
 import no.nav.syfo.AppEnvironment
+import no.nav.syfo.api.admin.registerAdminApi
 import no.nav.syfo.api.bruker.registerBrukerApi
-import no.nav.syfo.api.registerNaisApi
-import no.nav.syfo.metrics.registerPrometheusApi
+import no.nav.syfo.service.ReplanleggingService
 import no.nav.syfo.service.VarselSendtService
-import no.nav.syfo.state
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
@@ -27,7 +26,7 @@ fun Application.setupAuthentication(
         .cached(10, 24, TimeUnit.HOURS)
         .rateLimited(10, 1, TimeUnit.MINUTES)
         .build()
-    
+
 
     install(Authentication) {
         jwt(name = "loginservice") {
@@ -39,17 +38,31 @@ fun Application.setupAuthentication(
                 }
             }
         }
+        basic("auth-basic") {
+            realm = "Access to the '/admin/' path"
+            validate { credentials ->
+                if (credentials.name == env.commonEnv.serviceuserUsername && credentials.password == env.commonEnv.serviceuserPassword) {
+                    UserIdPrincipal(credentials.name)
+                } else {
+                    null
+                }
+            }
+        }
     }
 }
 
 fun Application.setupRoutesWithAuthentication(
     varselSendtService: VarselSendtService,
+    replanleggingService: ReplanleggingService,
     appEnv: AppEnvironment
 ) {
     setupAuthentication(appEnv)
     routing {
         authenticate("loginservice") {
             registerBrukerApi(varselSendtService)
+        }
+        authenticate("auth-basic") {
+            registerAdminApi(replanleggingService)
         }
     }
 }

@@ -2,6 +2,7 @@ package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
+import no.nav.syfo.db.domain.VarselType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.sql.Date
@@ -9,6 +10,7 @@ import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.util.*
 
 private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.db.PlanlagtVarselDAO")
@@ -81,6 +83,24 @@ fun DatabaseInterface.fetchPlanlagtVarselByUtsendingsdato(utsendingsdato: LocalD
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
             it.setTimestamp(1, Timestamp.valueOf(utsendingsdato.atStartOfDay()))
+            it.executeQuery().toList { toPPlanlagtVarsel() }
+        }
+    }
+}
+
+fun DatabaseInterface.fetchPlanlagtVarselByTypeAndUtsendingsdato(type: VarselType, fromDate: LocalDate, toDate: LocalDate): List<PPlanlagtVarsel> {
+    val queryStatement = """SELECT *
+                            FROM PLANLAGT_VARSEL
+                            WHERE type = ?
+                            AND utsendingsdato >= ? 
+                            AND utsendingsdato <= ?
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, type.name)
+            it.setTimestamp(2, Timestamp.valueOf(fromDate.atStartOfDay()))
+            it.setTimestamp(3, Timestamp.valueOf(toDate.atTime(LocalTime.MAX)))
             it.executeQuery().toList { toPPlanlagtVarsel() }
         }
     }

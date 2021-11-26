@@ -1,16 +1,11 @@
 package no.nav.syfo.api.bruker
 
 import io.ktor.application.*
+import io.ktor.auth.*
+import io.ktor.auth.jwt.*
 import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
-
-import io.ktor.application.call
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
-import io.ktor.features.*
-import io.ktor.routing.get
-import io.ktor.util.*
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.service.VarselSendtService
 import javax.ws.rs.ForbiddenException

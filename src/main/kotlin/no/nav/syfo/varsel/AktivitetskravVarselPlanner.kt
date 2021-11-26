@@ -1,6 +1,5 @@
 package no.nav.syfo.varsel
 
-import io.ktor.util.*
 import kotlinx.coroutines.coroutineScope
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.consumer.domain.SyketilfellebitTag
@@ -11,14 +10,13 @@ import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.metrics.tellAktivitetskravPlanlagt
-import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.service.SykeforlopService
+import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.utils.VarselUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.streams.toList
 
-@KtorExperimentalAPI
 class AktivitetskravVarselPlanner(
     private val databaseAccess: DatabaseInterface,
     private val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,

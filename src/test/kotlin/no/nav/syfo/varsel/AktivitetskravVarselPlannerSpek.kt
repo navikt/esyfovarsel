@@ -1,12 +1,10 @@
 package no.nav.syfo.varsel
 
-import io.ktor.util.*
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.consumer.SykmeldingerConsumer
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
 import no.nav.syfo.consumer.domain.Syketilfellebit
 import no.nav.syfo.consumer.domain.Syketilfelledag
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
@@ -15,6 +13,7 @@ import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchAllSykmeldingIdsAndCount
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
 import no.nav.syfo.db.storePlanlagtVarsel
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
 import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
@@ -25,7 +24,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.test.assertFailsWith
 
-@KtorExperimentalAPI
 object AktivitetskravVarselPlannerSpek : Spek({
     //The default timeout of 10 seconds is not sufficient to initialise the embedded database
     defaultTimeout = 20000L

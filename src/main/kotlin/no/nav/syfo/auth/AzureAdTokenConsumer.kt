@@ -13,7 +13,6 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.util.*
 import no.nav.syfo.AppEnvironment
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.Logger
@@ -21,8 +20,6 @@ import org.slf4j.LoggerFactory
 import java.net.ProxySelector
 import java.time.Instant
 
-
-@KtorExperimentalAPI
 class AzureAdTokenConsumer(env: AppEnvironment) {
     private val aadAccessTokenUrl = env.aadAccessTokenUrl
     private val clientId = env.clientId

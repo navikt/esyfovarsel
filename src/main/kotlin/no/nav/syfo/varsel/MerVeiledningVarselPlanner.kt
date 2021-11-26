@@ -67,7 +67,7 @@ class MerVeiledningVarselPlanner(
                 if (tidligerePlanlagteVarslerPaFnr.isNotEmpty()) {
                     val sisteUsendteVarsel = tidligerePlanlagteVarslerPaFnr.first()
                     databaseAccess.updateUtsendingsdatoByVarselId(sisteUsendteVarsel.uuid, varselDato)
-                    log.info("[$name]: Oppdaterte tidligere usendt 39-ukers varsel i samme sykeforlop")
+                    log.info("[$name]: Oppdaterte tidligere usendt 39-ukers varsel i samme sykeforløp")
                 } else {
                     log.info("[$name]: Planlegger 39-ukers varsel")
                     databaseAccess.storePlanlagtVarsel(varsel)
