@@ -26,7 +26,6 @@ class AktivitetskravVarselPlanner(
 
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.AktivitetskravVarselPlanner")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
-    private val sykeforlopService: SykeforlopService = SykeforlopService()
 
     override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String) = coroutineScope {
         val oppfolgingstilfellePerson = syfosyketilfelleConsumer.getOppfolgingstilfelle(aktorId)
@@ -42,18 +41,17 @@ class AktivitetskravVarselPlanner(
 
         log.info("-$name-: gyldigeSykmeldingTilfelledager i tidslinjen for -$aktorId- aktor id er -$gyldigeSykmeldingTilfelledager-")
 
-        val sortedOppT = gyldigeSykmeldingTilfelledager.sortedBy { it.tidslinje.dag } //TODO
-        val nyestOppT = sortedOppT.lastOrNull()
-        val eldsteOppT = sortedOppT.firstOrNull()
+        val nyestOppT = gyldigeSykmeldingTilfelledager.lastOrNull()
+        val eldsteOppT = gyldigeSykmeldingTilfelledager.firstOrNull()
 
-        val fom = eldsteOppT.dag
-        val tom = nyestOppT.dag
+        val fom = eldsteOppT!!.dag
+        val tom = nyestOppT!!.dag
         val aktivitetskravVarselDato = fom.plusDays(AKTIVITETSKRAV_DAGER)
         log.info("-$name-: oppfolgingstilfellePerson.fom for -$aktorId- aktor id er -$fom-")
         log.info("-$name-: oppfolgingstilfellePerson.tom for -$aktorId- aktor id er -$tom-")
 
-        val ressursIds = listOf()
-        gyldigeSykmeldingTilfelledager.stream() { it -> ressursIds.add(it.prioritertSyketilfellebit.ressursId) }
+        val ressursIds: Set<String> = mutableSetOf()
+        gyldigeSykmeldingTilfelledager.forEach {ressursIds.add(it.prioritertSyketilfellebit!!.ressursId!!) }
         val lagreteVarsler = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.AKTIVITETSKRAV)
 
         if (varselUtil.isVarselDatoForIDag(aktivitetskravVarselDato)) {
