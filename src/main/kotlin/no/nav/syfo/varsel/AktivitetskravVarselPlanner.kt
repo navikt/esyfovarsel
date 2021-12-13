@@ -69,27 +69,47 @@ class AktivitetskravVarselPlanner(
             } else if (sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, fnr) == true) {
                 log.info("-$name-: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, sletter tidligere planlagt varsel for -$aktorId- aktor id om det finnes i DB")
                 databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
-            } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }.isNotEmpty()) {
+            } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }
+                    .isNotEmpty()) {
                 log.info("-$name-: varsel med samme utsendingsdato er allerede planlagt for -$aktorId- aktor id")
-            } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }.isEmpty())  {
+            } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }
+                    .isEmpty()) {
                 log.info("-$name-: sjekker om det finnes varsler med samme id for -$aktorId- aktor id")
                 if (varselUtil.hasLagreteVarslerForForespurteSykmeldinger(lagreteVarsler, ressursIds)) {
                     log.info("-$name-: sletter tidligere varsler for -$aktorId- aktor id")
                     databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
 
                     log.info("-$name-: Lagrer ny varsel etter sletting for -$aktorId- aktor id med dato: -$aktivitetskravVarselDato-")
-                    val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
+                    val aktivitetskravVarsel = PlanlagtVarsel(
+                        fnr,
+                        oppfolgingstilfellePerson.aktorId,
+                        ressursIds,
+                        VarselType.AKTIVITETSKRAV,
+                        aktivitetskravVarselDato
+                    )
                     databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
                 } else {
                     log.info("-$name-: Lagrer ny varsel for -$aktorId- aktor id med dato: -$aktivitetskravVarselDato-")
-                    val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
+                    val aktivitetskravVarsel = PlanlagtVarsel(
+                        fnr,
+                        oppfolgingstilfellePerson.aktorId,
+                        ressursIds,
+                        VarselType.AKTIVITETSKRAV,
+                        aktivitetskravVarselDato
+                    )
                     databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
                     tellAktivitetskravPlanlagt()
                 }
             } else {
                 log.info("-$name-: Lagrer ny varsel for -$aktorId- aktor id med dato: -$aktivitetskravVarselDato-")
 
-                val aktivitetskravVarsel = PlanlagtVarsel(fnr, oppfolgingstilfellePerson.aktorId, ressursIds, VarselType.AKTIVITETSKRAV, aktivitetskravVarselDato)
+                val aktivitetskravVarsel = PlanlagtVarsel(
+                    fnr,
+                    oppfolgingstilfellePerson.aktorId,
+                    ressursIds,
+                    VarselType.AKTIVITETSKRAV,
+                    aktivitetskravVarselDato
+                )
                 databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
                 tellAktivitetskravPlanlagt()
             }
