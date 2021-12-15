@@ -50,7 +50,7 @@ jobs:
           echo ${IMAGE}
 
   deploy-dev:
-    name: Deploy to NAIS Dev-fss
+    name: Deploy to dev-gcp
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -59,14 +59,14 @@ jobs:
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
+          CLUSTER: dev-gcp
           RESOURCE: .nais/naiserator-dev.yaml
           VARS: .nais/dev.json
       - name: Deploy jobb
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
+          CLUSTER: dev-gcp
           RESOURCE: .nais/send-varsler-job-dev.yaml
           VARS: .nais/dev.json
 

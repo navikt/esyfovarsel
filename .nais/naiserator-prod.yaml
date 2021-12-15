@@ -43,7 +43,7 @@ spec:
       enabled: true
   webproxy: true
   ingresses:
-    - "https://esyfovarsel.nais.adeo.no"
+    - "https://esyfovarsel.intern.nav.no"
   env:
   {{#each env.common}}
     - name: {{@key}}
