@@ -36,9 +36,7 @@ class AktivitetskravVarselPlanner(
             return@coroutineScope
         }
 
-        val gyldigeSykmeldingTilfelledager = oppfolgingstilfellePerson.tidslinje.stream()
-            .filter { isGyldigSykmeldingTilfelle(it) }
-            .toList()
+        val gyldigeSykmeldingTilfelledager = oppfolgingstilfellePerson.tidslinje .filter { isGyldigSykmeldingTilfelle(it) }
 
         log.info("-$name-: gyldigeSykmeldingTilfelledager i tidslinjen for -$aktorId- aktor id er -$gyldigeSykmeldingTilfelledager-")
 
