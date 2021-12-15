@@ -10,4 +10,6 @@ data class OppfolgingstilfellePerson(
     val antallBrukteDager: Int,
     val oppbruktArbeidsgvierperiode: Boolean,
     val utsendelsestidspunkt: LocalDateTime
-)
+) {
+    override fun toString(): String = "tidslinje: " + tidslinje.toString()
+}
