@@ -16,7 +16,6 @@ val logstashEncoderVersion = "6.3"
 val postgresVersion = "42.2.13"
 val hikariVersion = "4.0.1"
 val flywayVersion = "7.5.2"
-val vaultJdbcVersion = "1.3.7"
 val jacksonVersion = "2.11.3"
 val postgresEmbeddedVersion = "0.13.3"
 val kafkaVersion = "2.7.0"
@@ -44,7 +43,6 @@ repositories {
     maven(url = "https://jitpack.io")
     maven(url = "https://packages.confluent.io/maven/")
     maven(url = "https://repo.adeo.no/repository/maven-releases/")
-    maven(url = "https://github.com/navikt/vault-jdbc")
 }
 
 dependencies {
@@ -75,7 +73,6 @@ dependencies {
     implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("org.flywaydb:flyway-core:$flywayVersion")
-    implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
 
     // JSON parsing
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")

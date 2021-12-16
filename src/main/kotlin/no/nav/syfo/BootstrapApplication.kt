@@ -22,7 +22,8 @@ import no.nav.syfo.auth.LocalStsConsumer
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.auth.setupRoutesWithAuthentication
 import no.nav.syfo.consumer.*
-import no.nav.syfo.db.*
+import no.nav.syfo.db.Database
+import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.job.SendVarslerJobb
 import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.launchKafkaListener
@@ -46,7 +47,7 @@ fun main() {
     if (isJob()) {
         val env = jobEnvironment()
 
-        if(env.toggles.startJobb) {
+        if (env.toggles.startJobb) {
             val stsConsumer = StsConsumer(env.commonEnv)
             val pdlConsumer = PdlConsumer(env.commonEnv, stsConsumer)
             val dkifConsumer = DkifConsumer(env.commonEnv, stsConsumer)
@@ -55,7 +56,7 @@ fun main() {
             val beskjedKafkaProducer = BeskjedKafkaProducer(env.commonEnv, env.baseUrlDittSykefravaer)
             val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl)
 
-            database = initDb(env.commonEnv.dbEnvironment)
+            database = Database(env.commonEnv.dbEnvironment.dbname, env.commonEnv.dbEnvironment.urlWithCredentials)
 
             val jobb = SendVarslerJobb(
                 database,
@@ -75,7 +76,7 @@ fun main() {
         val server = embeddedServer(Netty, applicationEngineEnvironment {
             log = LoggerFactory.getLogger("ktor.application")
             config = HoconApplicationConfig(ConfigFactory.load())
-            database = initDb(env.commonEnv.dbEnvironment)
+            database = Database(env.commonEnv.dbEnvironment.dbname, env.commonEnv.dbEnvironment.urlWithCredentials)
 
             val stsConsumer = getStsConsumer(env.commonEnv)
             val pdlConsumer = getPdlConsumer(env.commonEnv, stsConsumer)
@@ -87,9 +88,12 @@ fun main() {
             val accessControl = AccessControl(pdlConsumer, dkifConsumer)
             val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
             val varselSendtService = VarselSendtService(pdlConsumer, oppfolgingstilfelleConsumer, database)
-            val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService)
-            val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
-            val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
+            val merVeiledningVarselPlanner =
+                MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService)
+            val aktivitetskravVarselPlanner =
+                AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
+            val replanleggingService =
+                ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
 
             connector {
                 port = env.applicationPort
@@ -118,26 +122,6 @@ fun main() {
         server.start(wait = false)
     }
 }
-
-fun initDb(dbEnv: DbEnvironment): Database = if(isLocal()) localDatabase(dbEnv) else remoteDatabase(dbEnv)
-
-private fun localDatabase(env: DbEnvironment): Database = LocalDatabase(
-    DbConfig(
-        jdbcUrl = env.databaseUrl,
-        databaseName = env.databaseName,
-        password = "password",
-        username = "esyfovarsel-admin",
-        remote = false
-    )
-)
-
-private fun remoteDatabase(env: DbEnvironment): Database = RemoteDatabase(
-    DbConfig(
-        jdbcUrl = env.databaseUrl,
-        databaseName = env.databaseName,
-        dbCredMountPath = env.dbVaultMountPath
-    )
-)
 
 private fun getStsConsumer(env: CommonEnvironment): StsConsumer {
     if (isLocal()) {

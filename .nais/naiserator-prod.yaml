@@ -33,14 +33,31 @@ spec:
   prometheus:
     enabled: true
     path: /prometheus
-  vault:
-    enabled: true
-    paths:
-      - kvPath: "/serviceuser/data/prod/srvesyfovarsel"
-        mountPath: "/var/run/secrets/serviceuser"
   azure:
     application:
       enabled: true
+  gcp:
+    sqlInstances:
+      - autoBackupHour: 1
+        cascadingDelete: true
+        collation: nb_NO.UTF8
+        databases:
+          - name: db
+        diskAutoresize: true
+        diskSize: 30
+        diskType: SSD
+        highAvailability: true
+        insights:
+          enabled: true
+          queryStringLength: 4500
+          recordApplicationTags: true
+          recordClientAddress: true
+        maintenance:
+          day: 1
+          hour: 4
+        pointInTimeRecovery: true
+        tier: db-f1-micro
+        type: POSTGRES_14
   webproxy: true
   ingresses:
     - "https://esyfovarsel.intern.nav.no"

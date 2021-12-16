@@ -3,6 +3,7 @@ package no.nav.syfo
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.io.File
+import java.util.*
 
 const val localAppPropertiesPath = "./src/main/resources/localAppEnv.json"
 const val localJobPropertiesPath = "./src/main/resources/localJobEnv.json"
@@ -17,18 +18,21 @@ fun testEnvironment(embeddedKafkaBrokerUrl: String): AppEnvironment =
 
 private fun remoteCommonEnvironment(): CommonEnvironment {
     return CommonEnvironment(
-        true,
-        getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
-        getEnvVar("KAFKA_SCHEMA_REGISTRY_URL"),
-        getEnvVar("STS_URL"),
-        getEnvVar("PDL_URL"),
-        getEnvVar("DKIF_URL"),
-        File("$serviceuserMounthPath/username").readText(),
-        File("$serviceuserMounthPath/password").readText(),
-        DbEnvironment (
-            getEnvVar("DATABASE_URL"),
-            getEnvVar("DATABASE_NAME", "esyfovarsel"),
-            getEnvVar("DB_VAULT_MOUNT_PATH")
+        remote = true,
+        kafkaBootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
+        kafkaSchemaRegistryUrl = getEnvVar("KAFKA_SCHEMA_REGISTRY_URL"),
+        stsUrl = getEnvVar("STS_URL"),
+        pdlUrl = getEnvVar("PDL_URL"),
+        dkifUrl = getEnvVar("DKIF_URL"),
+        serviceuserUsername = File("$serviceuserMounthPath/username").readText(),
+        serviceuserPassword = File("$serviceuserMounthPath/password").readText(),
+        dbEnvironment = DbEnvironment (
+            hostname = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_HOST"),
+            port = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PORT"),
+            dbname = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_DATABASE", "esyfovarsel"),
+            username = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_USERNAME"),
+            password = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PASSWORD"),
+            urlWithCredentials = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_URL"),
         )
     )
 }
@@ -38,17 +42,17 @@ fun appEnvironment(): AppEnvironment =
         objectMapper.readValue(File(localAppPropertiesPath), AppEnvironment::class.java)
     else
         AppEnvironment(
-            getEnvVar("APPLICATION_PORT", "8080").toInt(),
-            getEnvVar("APPLICATION_THREADS", "4").toInt(),
-            getEnvVar("SYFOSYKETILFELLE_URL"),
-            getEnvVar("SYFOSMREGISTER_URL"),
-            getEnvVar("SYFOSMREGISTER_SCOPE"),
-            getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
-            getEnvVar("AZURE_APP_CLIENT_ID"),
-            getEnvVar("AZURE_APP_CLIENT_SECRET"),
-            getEnvVar("LOGINSERVICE_IDPORTEN_DISCOVERY_URL"),
-            getEnvVar("LOGINSERVICE_IDPORTEN_AUDIENCE").split(","),
-            remoteCommonEnvironment()
+            applicationPort = getEnvVar("APPLICATION_PORT", "8080").toInt(),
+            applicationThreads = getEnvVar("APPLICATION_THREADS", "4").toInt(),
+            syfosyketilfelleUrl = getEnvVar("SYFOSYKETILFELLE_URL"),
+            syfosmregisterUrl = getEnvVar("SYFOSMREGISTER_URL"),
+            syfosmregisterScope = getEnvVar("SYFOSMREGISTER_SCOPE"),
+            aadAccessTokenUrl = getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
+            clientId = getEnvVar("AZURE_APP_CLIENT_ID"),
+            clientSecret = getEnvVar("AZURE_APP_CLIENT_SECRET"),
+            loginserviceDiscoveryUrl = getEnvVar("LOGINSERVICE_IDPORTEN_DISCOVERY_URL"),
+            loginserviceAudience = getEnvVar("LOGINSERVICE_IDPORTEN_AUDIENCE").split(","),
+            commonEnv = remoteCommonEnvironment()
         )
 
 fun jobEnvironment(): JobEnvironment =
@@ -100,9 +104,13 @@ data class CommonEnvironment(
 )
 
 data class DbEnvironment(
-    val databaseUrl: String,
-    val databaseName: String,
-    val dbVaultMountPath: String
+    val hostname: String,
+    val port: String,
+    val dbname: String,
+    val username: String,
+    val password: String,
+    val urlWithCredentials: String
+
 )
 
 data class Toggles(
@@ -119,5 +127,5 @@ fun isLocal(): Boolean = getEnvVar("KTOR_ENV", "local") == "local"
 fun isJob(): Boolean = getEnvVar("SEND_VARSLER", "NEI") == "JA"
 
 private fun String.tilBoolean(): Boolean {
-    return this.toUpperCase() == "JA"
+    return this.uppercase(Locale.getDefault()) == "JA"
 }

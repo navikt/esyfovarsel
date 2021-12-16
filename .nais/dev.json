@@ -4,7 +4,6 @@
       "KTOR_ENV": "remote",
       "DATABASE_URL": "jdbc:postgresql://b27dbvl024.preprod.local:5432/esyfovarsel",
       "DATABASE_NAME": "esyfovarsel",
-      "DB_VAULT_MOUNT_PATH": "postgresql/preprod-fss",
       "KAFKA_BOOTSTRAP_SERVERS_URL": "SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443",
       "KAFKA_SCHEMA_REGISTRY_URL": "http://kafka-schema-registry.tpa:8081",
       "STS_URL": "https://security-token-service.nais.preprod.local",
