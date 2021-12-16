@@ -19,9 +19,8 @@
     "serviceuserUsername": "srvesyfovarsel",
     "serviceuserPassword": "password",
     "dbEnvironment": {
-      "databaseUrl": "jdbc:postgresql://localhost:5432/esyfovarsel",
-      "databaseName": "esyfovarsel",
-      "dbVaultMountPath": ""
+      "dbname": "esyfovarsel",
+      "urlWithCredentials":  "postgres://esyfovarsel-admin:password@127.0.0.1:5432/db"
     }
   }
 }
