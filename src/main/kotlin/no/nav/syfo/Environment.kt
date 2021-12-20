@@ -7,7 +7,7 @@ import java.util.*
 
 const val localAppPropertiesPath = "./src/main/resources/localAppEnv.json"
 const val localJobPropertiesPath = "./src/main/resources/localJobEnv.json"
-const val serviceuserMounthPath = "/var/run/secrets/serviceuser"
+const val serviceuserMounthPath = "/var/run/secrets"
 val objectMapper = ObjectMapper().registerKotlinModule()
 
 fun testEnvironment(): AppEnvironment =
@@ -24,8 +24,8 @@ private fun remoteCommonEnvironment(): CommonEnvironment {
         stsUrl = getEnvVar("STS_URL"),
         pdlUrl = getEnvVar("PDL_URL"),
         dkifUrl = getEnvVar("DKIF_URL"),
-        serviceuserUsername = File("$serviceuserMounthPath/username").readText(),
-        serviceuserPassword = File("$serviceuserMounthPath/password").readText(),
+        serviceuserUsername = File("$serviceuserMounthPath/username").readAndDecodeText(),
+        serviceuserPassword = File("$serviceuserMounthPath/password").readAndDecodeText(),
         dbEnvironment = DbEnvironment (
             dbname = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_DATABASE", "esyfovarsel"),
             urlWithCredentials = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_URL"),
@@ -119,4 +119,10 @@ fun isJob(): Boolean = getEnvVar("SEND_VARSLER", "NEI") == "JA"
 
 private fun String.tilBoolean(): Boolean {
     return this.uppercase(Locale.getDefault()) == "JA"
+}
+
+private fun File.readAndDecodeText(): String {
+    val encodedContent = this.readText()
+    val decodedContent = Base64.getDecoder().decode(encodedContent).toString()
+    return decodedContent
 }

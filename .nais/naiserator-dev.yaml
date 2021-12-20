@@ -8,6 +8,8 @@ metadata:
 spec:
   image: {{ image }}
   port: 8080
+  filesFrom:
+    - secret: esyfovarsel-serviceuser
   liveness:
     path: /isAlive
     initialDelay: 10

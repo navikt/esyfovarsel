@@ -73,6 +73,7 @@ fun main() {
 
     } else {
         val env: AppEnvironment = appEnvironment()
+        
         val server = embeddedServer(Netty, applicationEngineEnvironment {
             log = LoggerFactory.getLogger("ktor.application")
             config = HoconApplicationConfig(ConfigFactory.load())
