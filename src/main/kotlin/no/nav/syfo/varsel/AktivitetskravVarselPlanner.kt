@@ -72,12 +72,12 @@ class AktivitetskravVarselPlanner(
                 databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
             } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }
                     .isNotEmpty()) {
-                log.info("-$name-: varsel med samme utsendingsdato er allerede planlagt. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDato")
+                log.info("-$name-: varsel med samme utsendingsdato er allerede planlagt. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDato-")
             } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }
                     .isEmpty()) {
-                log.info("-$name-: sjekker om det finnes varsler med samme id. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDato")
+                log.info("-$name-: sjekker om det finnes varsler med samme id. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDato-")
                 if (varselUtil.hasLagreteVarslerForForespurteSykmeldinger(lagreteVarsler, ressursIds)) {
-                    log.info("-$name-: sletter tidligere varsler for. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDato")
+                    log.info("-$name-: sletter tidligere varsler for. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDato-")
                     databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
 
                     log.info("-$name-: Lagrer ny varsel etter sletting med dato: -$aktivitetskravVarselDato-. -FOM, TOM: , $fom, $tom-")
