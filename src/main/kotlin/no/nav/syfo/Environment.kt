@@ -27,8 +27,11 @@ private fun remoteCommonEnvironment(): CommonEnvironment {
         serviceuserUsername = File("$serviceuserMounthPath/username").readAndDecodeText(),
         serviceuserPassword = File("$serviceuserMounthPath/password").readAndDecodeText(),
         dbEnvironment = DbEnvironment (
-            dbname = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_DATABASE", "esyfovarsel"),
-            urlWithCredentials = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_URL"),
+            dbHost = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_HOST", "127.0.0.1"),
+            dbPort = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PORT", "5432"),
+            dbName = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_DATABASE"),
+            dbUsername = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_USERNAME"),
+            dbPassword = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PASSWORD")
         )
     )
 }
@@ -100,8 +103,11 @@ data class CommonEnvironment(
 )
 
 data class DbEnvironment(
-    val dbname: String,
-    val urlWithCredentials: String
+    val dbHost: String,
+    val dbPort: String,
+    val dbName: String,
+    val dbUsername: String,
+    val dbPassword: String
 )
 
 data class Toggles(

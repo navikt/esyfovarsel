@@ -56,7 +56,7 @@ fun main() {
             val beskjedKafkaProducer = BeskjedKafkaProducer(env.commonEnv, env.baseUrlDittSykefravaer)
             val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl)
 
-            database = Database(env.commonEnv.dbEnvironment.dbname, env.commonEnv.dbEnvironment.urlWithCredentials)
+            database = Database(env.commonEnv.dbEnvironment)
 
             val jobb = SendVarslerJobb(
                 database,
@@ -77,7 +77,7 @@ fun main() {
         val server = embeddedServer(Netty, applicationEngineEnvironment {
             log = LoggerFactory.getLogger("ktor.application")
             config = HoconApplicationConfig(ConfigFactory.load())
-            database = Database(env.commonEnv.dbEnvironment.dbname, env.commonEnv.dbEnvironment.urlWithCredentials)
+            database = Database(env.commonEnv.dbEnvironment)
 
             val stsConsumer = getStsConsumer(env.commonEnv)
             val pdlConsumer = getPdlConsumer(env.commonEnv, stsConsumer)

@@ -2,6 +2,7 @@ package no.nav.syfo.db
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import no.nav.syfo.DbEnvironment
 import org.flywaydb.core.Flyway
 import java.sql.Connection
 import java.util.*
@@ -20,11 +21,11 @@ enum class Role {
  * Base Database implementation.
  * Hooks up the database with the provided configuration/credentials
  */
-class Database(val dbname: String, val urlWithCredentials: String) : DatabaseInterface {
+class Database(val env: DbEnvironment) : DatabaseInterface {
 
     private var hikariDataSource: HikariDataSource
     val hikariConfig: HikariConfig = HikariConfig().apply {
-        jdbcUrl = urlWithCredentials
+        jdbcUrl = generateJdbcUrlFromEnv()
         maximumPoolSize = 2
         minimumIdle = 1
         isAutoCommit = false
@@ -33,7 +34,10 @@ class Database(val dbname: String, val urlWithCredentials: String) : DatabaseInt
     }
 
     init {
-        hikariDataSource = HikariDataSource(hikariConfig)
+        hikariDataSource = HikariDataSource(hikariConfig.apply {
+            username = env.dbUsername
+            password = env.dbPassword
+        })
         runFlywayMigrations(hikariDataSource)
     }
 
@@ -43,7 +47,11 @@ class Database(val dbname: String, val urlWithCredentials: String) : DatabaseInt
 
     private fun runFlywayMigrations(hikariDataSource: HikariDataSource) = Flyway.configure().run {
         dataSource(hikariDataSource)
-        initSql("SET ROLE \"${dbname}-${Role.ADMIN}\"") //
+        initSql("SET ROLE \"${env.dbName}-${Role.ADMIN}\"") //
         load().migrate().migrationsExecuted
+    }
+
+    private fun generateJdbcUrlFromEnv(): String {
+        return "jdbc:postgresql://${env.dbHost}:${env.dbPort}/${env.dbName}"
     }
 }
