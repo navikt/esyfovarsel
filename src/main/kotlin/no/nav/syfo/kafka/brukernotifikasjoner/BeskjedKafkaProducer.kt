@@ -13,7 +13,6 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.util.*
 
 class BeskjedKafkaProducer(
     val env: CommonEnvironment,
