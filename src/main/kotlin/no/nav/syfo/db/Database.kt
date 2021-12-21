@@ -47,7 +47,6 @@ class Database(val env: DbEnvironment) : DatabaseInterface {
 
     private fun runFlywayMigrations(hikariDataSource: HikariDataSource) = Flyway.configure().run {
         dataSource(hikariDataSource)
-        initSql("SET ROLE \"${env.dbName}-${Role.ADMIN}\"") //
         load().migrate().migrationsExecuted
     }
 

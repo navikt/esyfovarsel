@@ -61,6 +61,8 @@ spec:
   webproxy: true
   ingresses:
     - "https://esyfovarsel.intern.nav.no"
+  filesFrom:
+    - secret: esyfovarsel-serviceuser
   env:
   {{#each env.common}}
     - name: {{@key}}

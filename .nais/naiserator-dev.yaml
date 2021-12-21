@@ -8,8 +8,6 @@ metadata:
 spec:
   image: {{ image }}
   port: 8080
-  filesFrom:
-    - secret: esyfovarsel-serviceuser
   liveness:
     path: /isAlive
     initialDelay: 10
@@ -63,6 +61,8 @@ spec:
   webproxy: true
   ingresses:
     - "https://esyfovarsel.dev.intern.nav.no"
+  filesFrom:
+    - secret: esyfovarsel-serviceuser
   env:
   {{#each env.common}}
     - name: {{@key}}
