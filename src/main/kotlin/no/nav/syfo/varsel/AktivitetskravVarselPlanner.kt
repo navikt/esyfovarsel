@@ -14,7 +14,6 @@ import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.utils.VarselUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import kotlin.streams.toList
 
 class AktivitetskravVarselPlanner(
     private val databaseAccess: DatabaseInterface,
@@ -32,7 +31,7 @@ class AktivitetskravVarselPlanner(
         log.info("-$name-: oppfolgingstilfellePerson er -$oppfolgingstilfellePerson-")
 
         if (oppfolgingstilfellePerson == null) {
-            log.info("-$name-: Fant ikke oppfolgingstilfelle for -$aktorId- aktor id. Planlegger ikke nytt varsel")
+            log.info("-$name-: Fant ikke oppfolgingstilfelle. Planlegger ikke nytt varsel")
             return@coroutineScope
         }
 
@@ -56,28 +55,32 @@ class AktivitetskravVarselPlanner(
                 ressursIds.add(it.prioritertSyketilfellebit!!.ressursId)
             }
 
+            log.info("-$name-: eldsteOppT: $eldsteOppT")
+            log.info("-$name-: nyestOppT: $nyestOppT")
+            log.info("-$name-: relevante -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDato-")
+
             val lagreteVarsler = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.AKTIVITETSKRAV)
 
             if (varselUtil.isVarselDatoForIDag(aktivitetskravVarselDato)) {
-                log.info("-$name-: Beregnet dato for varsel er før i dag, sletter tidligere planlagt varsel om det finnes i DB")
+                log.info("-$name-: Beregnet dato for varsel er før i dag, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDato-")
                 databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
             } else if (varselUtil.isVarselDatoEtterTilfelleSlutt(aktivitetskravVarselDato, tom)) {
-                log.info("-$name-: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB")
+                log.info("-$name-: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDato-")
                 databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
             } else if (sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDato, fnr) == true) {
-                log.info("-$name-: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, sletter tidligere planlagt varsel om det finnes i DB")
+                log.info("-$name-: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDato-")
                 databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
             } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }
                     .isNotEmpty()) {
-                log.info("-$name-: varsel med samme utsendingsdato er allerede planlagt for -$aktorId- aktor id")
+                log.info("-$name-: varsel med samme utsendingsdato er allerede planlagt. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDato-")
             } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDato }
                     .isEmpty()) {
-                log.info("-$name-: sjekker om det finnes varsler med samme id for -$aktorId- aktor id")
+                log.info("-$name-: sjekker om det finnes varsler med samme id. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDato-")
                 if (varselUtil.hasLagreteVarslerForForespurteSykmeldinger(lagreteVarsler, ressursIds)) {
-                    log.info("-$name-: sletter tidligere varsler for -$aktorId- aktor id")
+                    log.info("-$name-: sletter tidligere varsler for. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDato-")
                     databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
 
-                    log.info("-$name-: Lagrer ny varsel etter sletting med dato: -$aktivitetskravVarselDato-")
+                    log.info("-$name-: Lagrer ny varsel etter sletting med dato: -$aktivitetskravVarselDato-. -FOM, TOM: , $fom, $tom-")
                     val aktivitetskravVarsel = PlanlagtVarsel(
                         fnr,
                         oppfolgingstilfellePerson.aktorId,
@@ -87,7 +90,7 @@ class AktivitetskravVarselPlanner(
                     )
                     databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
                 } else {
-                    log.info("-$name-: Lagrer ny varsel med dato: -$aktivitetskravVarselDato-")
+                    log.info("-$name-: Lagrer ny varsel med dato: -$aktivitetskravVarselDato-. -FOM, TOM: , $fom, $tom-")
                     val aktivitetskravVarsel = PlanlagtVarsel(
                         fnr,
                         oppfolgingstilfellePerson.aktorId,
@@ -112,7 +115,7 @@ class AktivitetskravVarselPlanner(
                 tellAktivitetskravPlanlagt()
             }
         }
-        log.info("-$name-: Ingen gyldigeSykmeldingTilfelledager. Lagrer ny varsel for -$aktorId- aktor id")
+        log.info("-$name-: Ingen gyldigeSykmeldingTilfelledager. Planlegger ikke nytt varsel")
     }
 
     private fun isGyldigSykmeldingTilfelle(syketilfelledag: Syketilfelledag): Boolean {
