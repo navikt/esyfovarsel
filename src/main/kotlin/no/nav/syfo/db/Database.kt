@@ -22,22 +22,18 @@ enum class Role {
  * Hooks up the database with the provided configuration/credentials
  */
 class Database(val env: DbEnvironment) : DatabaseInterface {
-
-    private var hikariDataSource: HikariDataSource
-    val hikariConfig: HikariConfig = HikariConfig().apply {
+    val hikariDataSource = HikariDataSource(HikariConfig().apply {
         jdbcUrl = generateJdbcUrlFromEnv()
+        username = env.dbUsername
+        password = env.dbPassword
         maximumPoolSize = 2
         minimumIdle = 1
         isAutoCommit = false
         transactionIsolation = "TRANSACTION_REPEATABLE_READ"
         validate()
-    }
+    })
 
     init {
-        hikariDataSource = HikariDataSource(hikariConfig.apply {
-            username = env.dbUsername
-            password = env.dbPassword
-        })
         runFlywayMigrations(hikariDataSource)
     }
 
