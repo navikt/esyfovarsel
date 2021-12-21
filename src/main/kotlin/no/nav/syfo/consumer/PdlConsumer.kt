@@ -59,7 +59,7 @@ open class PdlConsumer(env: CommonEnvironment, stsConsumer: StsConsumer) {
         }
     }
 
-    fun isBrukerGradert(aktorId: String): Boolean? {
+    fun isBrukerGradertForInformasjon(aktorId: String): Boolean? {
         val response = callPdl(PERSON_QUERY, aktorId)
 
         return when (response?.status) {

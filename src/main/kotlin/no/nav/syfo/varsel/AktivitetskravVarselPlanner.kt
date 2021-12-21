@@ -35,7 +35,7 @@ class AktivitetskravVarselPlanner(
             return@coroutineScope
         }
 
-        val gyldigeSykmeldingTilfelledager = oppfolgingstilfellePerson.tidslinje .filter { isGyldigSykmeldingTilfelle(it) }
+        val gyldigeSykmeldingTilfelledager = oppfolgingstilfellePerson.tidslinje .filter { isGyldigSykmeldingTilfelle(it) } .sortedBy { it.dag }
 
         log.info("-$name-: gyldigeSykmeldingTilfelledager i tidslinjen er -$gyldigeSykmeldingTilfelledager-")
 
@@ -57,7 +57,7 @@ class AktivitetskravVarselPlanner(
 
             log.info("-$name-: eldsteOppT: $eldsteOppT")
             log.info("-$name-: nyestOppT: $nyestOppT")
-            log.info("-$name-: relevante -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDato-")
+            log.info("-$name-: relevante -FOM, TOM, DATO: $fom, $tom, $aktivitetskravVarselDato-")
 
             val lagreteVarsler = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.AKTIVITETSKRAV)
 
