@@ -35,28 +35,27 @@ class AktivitetskravVarselPlanner(
             return@coroutineScope
         }
 
-        val gyldigeSykmeldingTilfelledager = oppfolgingstilfellePerson.tidslinje .filter { isGyldigSykmeldingTilfelle(it) } .sortedBy { it.dag }
+        val gyldigeSyketilfelledager = oppfolgingstilfellePerson.tidslinje .filter { isGyldigSyketilfelledag(it) } .sortedBy { it.dag }
 
-        log.info("-$name-: gyldigeSykmeldingTilfelledager i tidslinjen er -$gyldigeSykmeldingTilfelledager-")
+        log.info("-$name-: gyldigeSyketilfelledager i tidslinjen er -$gyldigeSyketilfelledager-")
 
-        if (gyldigeSykmeldingTilfelledager.isNotEmpty()) {
-            val nyestOppT = gyldigeSykmeldingTilfelledager.lastOrNull()
-            val eldsteOppT = gyldigeSykmeldingTilfelledager.firstOrNull()
+        if (gyldigeSyketilfelledager.isNotEmpty()) {
+            val nyesteSyketilfelledag = gyldigeSyketilfelledager.last()
 
-            val fom = eldsteOppT!!.dag
-            val tom = nyestOppT!!.dag
+            val fom = nyesteSyketilfelledag.prioritertSyketilfellebit!!.fom.toLocalDate()
+            val tom = nyesteSyketilfelledag.prioritertSyketilfellebit.tom.toLocalDate()
             val aktivitetskravVarselDato = fom.plusDays(AKTIVITETSKRAV_DAGER)
+
             log.info("-$name-: oppfolgingstilfellePerson.fom er -$fom-")
             log.info("-$name-: oppfolgingstilfellePerson.tom er -$tom-")
 
             var ressursIds: MutableSet<String> = HashSet()
 
-            gyldigeSykmeldingTilfelledager.forEach {
+            gyldigeSyketilfelledager.forEach {
                 ressursIds.add(it.prioritertSyketilfellebit!!.ressursId)
             }
 
-            log.info("-$name-: eldsteOppT: $eldsteOppT")
-            log.info("-$name-: nyestOppT: $nyestOppT")
+            log.info("-$name-: nyestOppT: $nyesteSyketilfelledag")
             log.info("-$name-: relevante -FOM, TOM, DATO: $fom, $tom, $aktivitetskravVarselDato-")
 
             val lagreteVarsler = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.AKTIVITETSKRAV)
@@ -118,7 +117,7 @@ class AktivitetskravVarselPlanner(
         log.info("-$name-: Ingen gyldigeSykmeldingTilfelledager. Planlegger ikke nytt varsel")
     }
 
-    private fun isGyldigSykmeldingTilfelle(syketilfelledag: Syketilfelledag): Boolean {
+    private fun isGyldigSyketilfelledag(syketilfelledag: Syketilfelledag): Boolean {
         return (syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.SYKMELDING.name) == true
                 || syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.PAPIRSYKMELDING.name) == true)
                 && syketilfelledag.prioritertSyketilfellebit.tags.contains(SyketilfellebitTag.SENDT.name)

@@ -32,6 +32,7 @@ class ReplanleggingService(
         val size = planlagteVarsler.size
         log.info("[ReplanleggingService]: Replanlegger $size varsler av type $varselType")
         planlagteVarsler.forEach { planlegger.processOppfolgingstilfelle(it.aktorId, it.fnr) }
+        log.info("[ReplanleggingService]: Planla $size varsler av type $varselType")
         return size
     }
 }
