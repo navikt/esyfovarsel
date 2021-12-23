@@ -367,7 +367,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             nrOfRowsFetchedTotal1 shouldBeEqualTo 1
 
-            // Skal lagre varsel
+            // Skal ikke lagre varsel
             runBlocking {
                 aktivitetskravVarselPlanner.processOppfolgingstilfelle(
                     arbeidstakerAktorId1,
@@ -404,6 +404,112 @@ object AktivitetskravVarselPlannerSpek : Spek({
                 lagreteVarsler.size shouldBeEqualTo 0
             }
 
+        }
+
+        it("Aktivitetskrav varsel skal ikke opprettes, arbeidstaker er eldre enn 70 år") {
+            val utsendingsdato = LocalDate.now().plusDays(1)
+
+            embeddedDatabase.storePlanlagtVarsel(PlanlagtVarsel(arbeidstakerFnr3, arbeidstakerAktorId2, setOf("2"), VarselType.AKTIVITETSKRAV))
+
+            val syketilfellebit1 =
+                Syketilfellebit(
+                    "1",
+                    arbeidstakerAktorId2,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("SYKMELDING", "SENDT"),
+                    "2",
+                    utsendingsdato.minusDays(AKTIVITETSKRAV_DAGER).atStartOfDay(),
+                    utsendingsdato.plusDays(30).atStartOfDay()
+                )
+
+            val syketilfelledag1 = Syketilfelledag(utsendingsdato.minusDays(AKTIVITETSKRAV_DAGER), syketilfellebit1)
+            val syketilfelledag2 = Syketilfelledag(LocalDate.now().plusMonths(1), syketilfellebit1)
+
+            val sykmeldtStatusResponse =
+                SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
+            val oppfolgingstilfellePerson = OppfolgingstilfellePerson(
+                arbeidstakerAktorId2,
+                listOf(syketilfelledag1, syketilfelledag2),
+                syketilfelledag1,
+                0,
+                false,
+                LocalDateTime.now()
+            )
+
+            coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
+            coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+
+            val lagreteVarsler1 = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr3)
+            val nrOfRowsFetchedTotal1 = lagreteVarsler1.size
+
+            nrOfRowsFetchedTotal1 shouldBeEqualTo 1
+
+            // Skal ikke lagre varsel
+            runBlocking {
+                aktivitetskravVarselPlanner.processOppfolgingstilfelle(
+                    arbeidstakerAktorId1,
+                    arbeidstakerFnr3
+                )
+            }
+
+            val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr3)
+            val nrOfRowsFetchedTotal = lagreteVarsler.size
+
+            nrOfRowsFetchedTotal shouldBeEqualTo 0
+        }
+
+        it("Aktivitetskrav varsel skal opprettes") {
+            val utsendingsdato = LocalDate.now().plusDays(1)
+
+            val syketilfellebit1 =
+                Syketilfellebit(
+                    "1",
+                    arbeidstakerAktorId1,
+                    "2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    listOf("SYKMELDING", "SENDT"),
+                    "1",
+                    utsendingsdato.minusDays(AKTIVITETSKRAV_DAGER).atStartOfDay(),
+                    utsendingsdato.plusDays(30).atStartOfDay()
+                )
+
+            val syketilfelledag1 = Syketilfelledag(utsendingsdato.minusDays(AKTIVITETSKRAV_DAGER), syketilfellebit1)
+            val syketilfelledag2 = Syketilfelledag(LocalDate.now().plusMonths(1), syketilfellebit1)
+
+            val sykmeldtStatusResponse =
+                SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
+            val oppfolgingstilfellePerson = OppfolgingstilfellePerson(
+                arbeidstakerAktorId1,
+                listOf(syketilfelledag1, syketilfelledag2),
+                syketilfelledag1,
+                0,
+                false,
+                LocalDateTime.now()
+            )
+
+            coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
+            coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+
+            val lagreteVarsler1 = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
+            val nrOfRowsFetchedTotal1 = lagreteVarsler1.size
+
+            nrOfRowsFetchedTotal1 shouldBeEqualTo 0
+
+            // Skal lagre varsel
+            runBlocking {
+                aktivitetskravVarselPlanner.processOppfolgingstilfelle(
+                    arbeidstakerAktorId1,
+                    arbeidstakerFnr1
+                )
+            }
+
+            val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
+            val nrOfRowsFetchedTotal = lagreteVarsler.size
+
+            nrOfRowsFetchedTotal shouldBeEqualTo 1
         }
     }
 })

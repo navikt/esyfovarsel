@@ -11,6 +11,7 @@ import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.metrics.tellAktivitetskravPlanlagt
 import no.nav.syfo.service.SykmeldingService
+import no.nav.syfo.utils.PersonUtil
 import no.nav.syfo.utils.VarselUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -25,6 +26,7 @@ class AktivitetskravVarselPlanner(
 
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.AktivitetskravVarselPlanner")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
+    private val personUtil: PersonUtil = PersonUtil()
 
     override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String) = coroutineScope {
         val oppfolgingstilfellePerson = syfosyketilfelleConsumer.getOppfolgingstilfelle(aktorId)
@@ -60,7 +62,10 @@ class AktivitetskravVarselPlanner(
 
             val lagreteVarsler = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.AKTIVITETSKRAV)
 
-            if (varselUtil.isVarselDatoForIDag(aktivitetskravVarselDato)) {
+            if (personUtil.isNotNotifiableByAge(fnr, aktivitetskravVarselDato)) {
+                log.info("-$name-: Person er eldre enn 70 år på varslingsdato og skal ikke varsles, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDato-")
+                databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
+            } else if (varselUtil.isVarselDatoForIDag(aktivitetskravVarselDato)) {
                 log.info("-$name-: Beregnet dato for varsel er før i dag, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDato-")
                 databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
             } else if (varselUtil.isVarselDatoEtterTilfelleSlutt(aktivitetskravVarselDato, tom)) {
