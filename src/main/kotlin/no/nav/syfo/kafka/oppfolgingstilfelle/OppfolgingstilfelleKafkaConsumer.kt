@@ -40,14 +40,12 @@ class OppfolgingstilfelleKafkaConsumer(
     init {
         val kafkaConfig = consumerProperties(env.commonEnv)
         kafkaListener = KafkaConsumer(kafkaConfig)
-        if (!env.commonEnv.remote)
-            kafkaListener.subscribe(listOf(topicOppfolgingsTilfelle))       // TODO: Disable temporarily
+        kafkaListener.subscribe(listOf(topicOppfolgingsTilfelle))
     }
 
     override suspend fun listen(applicationState: ApplicationState) {
         log.info("Starting to listen to $topicOppfolgingsTilfelle")
             while (applicationState.running) {
-                if (!env.commonEnv.remote) {                                         // TODO: Disable temporarily
                     kafkaListener.poll(Duration.ofMillis(0)).forEach {
                         log.info("Received record from [$topicOppfolgingsTilfelle]")
                         try {
@@ -80,7 +78,6 @@ class OppfolgingstilfelleKafkaConsumer(
                     }
                     kafkaListener.commitSync()
                     delay(10)
-            }
         }
         log.info("Stopped listening to $topicOppfolgingsTilfelle")
     }
