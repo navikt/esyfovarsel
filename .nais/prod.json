@@ -16,7 +16,9 @@
       "SYFOSMREGISTER_URL": "http://syfosmregister.teamsykmelding",
       "SYFOSMREGISTER_SCOPE": "api://prod-fss.teamsykmelding.syfosmregister/.default",
       "LOGINSERVICE_IDPORTEN_DISCOVERY_URL": "https://navnob2c.b2clogin.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten",
-      "LOGINSERVICE_IDPORTEN_AUDIENCE": "45104d6a-f5bc-4e8c-b352-4bbfc9381f25"
+      "LOGINSERVICE_IDPORTEN_AUDIENCE": "45104d6a-f5bc-4e8c-b352-4bbfc9381f25",
+      "NARMESTELEDER_URL": "https://narmesteleder.intern.nav.no",
+      "NARMESTELEDER_SCOPE": "api://prod-gcp.teamsykmelding.narmesteleder/.default"
     },
     "job": {
       "SEND_VARSLER": "JA",

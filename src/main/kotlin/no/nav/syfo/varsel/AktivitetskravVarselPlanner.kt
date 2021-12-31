@@ -1,6 +1,7 @@
 package no.nav.syfo.varsel
 
 import kotlinx.coroutines.coroutineScope
+import no.nav.syfo.consumer.NarmesteLederConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.consumer.domain.SyketilfellebitTag
 import no.nav.syfo.consumer.domain.Syketilfelledag
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory
 class AktivitetskravVarselPlanner(
     private val databaseAccess: DatabaseInterface,
     private val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
+    private val narmesteLederConsumer: NarmesteLederConsumer,
     val sykmeldingService: SykmeldingService,
     override val name: String = "AKTIVITETSKRAV_VARSEL"
 ) : VarselPlanner {
@@ -38,6 +40,9 @@ class AktivitetskravVarselPlanner(
         val gyldigeSyketilfelledager = oppfolgingstilfellePerson.tidslinje .filter { isGyldigSyketilfelledag(it) } .sortedBy { it.dag }
 
         log.info("-$name-: gyldigeSyketilfelledager i tidslinjen er -$gyldigeSyketilfelledager-")
+        //TODO: This is for testing, to be deleteed
+        val narmesteLederFnr = narmesteLederConsumer.getNarmesteLeder(ansattFnr = "20108121018", orgnummer = "947064649")?.narmesteLederRelasjon?.narmesteLederFnr
+        log.info("-$name-: narmesteLederFnr -$narmesteLederFnr-")
 
         if (gyldigeSyketilfelledager.isNotEmpty()) {
             val nyesteSyketilfelledag = gyldigeSyketilfelledager.last()
