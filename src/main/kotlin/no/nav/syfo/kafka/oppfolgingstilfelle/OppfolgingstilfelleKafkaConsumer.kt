@@ -44,6 +44,7 @@ class OppfolgingstilfelleKafkaConsumer(
     }
 
     override suspend fun listen(applicationState: ApplicationState) {
+        log.info("USR: ${env.commonEnv.serviceuserUsername} | PWD: ${env.commonEnv.serviceuserPassword.substring(0,5)}")
         log.info("Starting to listen to $topicOppfolgingsTilfelle")
             while (applicationState.running) {
                     kafkaListener.poll(Duration.ofMillis(0)).forEach {
