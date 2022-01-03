@@ -8,6 +8,8 @@ metadata:
 spec:
   image: {{ image }}
   schedule: "*/15 * * * *"
+  filesFrom:
+    - secret: esyfovarsel-serviceuser
   env:
   {{#each env.common}}
     - name: {{@key}}
