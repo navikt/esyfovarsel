@@ -2,7 +2,6 @@ package no.nav.syfo
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.*
 
@@ -10,7 +9,6 @@ const val localAppPropertiesPath = "./src/main/resources/localAppEnv.json"
 const val localJobPropertiesPath = "./src/main/resources/localJobEnv.json"
 const val serviceuserMounthPath = "/var/run/secrets"
 val objectMapper = ObjectMapper().registerKotlinModule()
-val log = LoggerFactory.getLogger("no.nav.syfo.Environment")
 
 fun testEnvironment(): AppEnvironment =
     appEnvironment()
@@ -26,8 +24,8 @@ private fun remoteCommonEnvironment(): CommonEnvironment {
         stsUrl = getEnvVar("STS_URL"),
         pdlUrl = getEnvVar("PDL_URL"),
         dkifUrl = getEnvVar("DKIF_URL"),
-        serviceuserUsername = File("$serviceuserMounthPath/username").readAndDecodeText(),
-        serviceuserPassword = File("$serviceuserMounthPath/password").readAndDecodeText(),
+        serviceuserUsername = File("$serviceuserMounthPath/username").readText(),
+        serviceuserPassword = File("$serviceuserMounthPath/password").readText(),
         dbEnvironment = DbEnvironment (
             dbHost = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_HOST", "127.0.0.1"),
             dbPort = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PORT", "5432"),
@@ -127,12 +125,4 @@ fun isJob(): Boolean = getEnvVar("SEND_VARSLER", "NEI") == "JA"
 
 private fun String.tilBoolean(): Boolean {
     return this.uppercase(Locale.getDefault()) == "JA"
-}
-
-private fun File.readAndDecodeText(): String {
-    val encodedContent = this.readText()
-    log.info("DEBUG (enc): $encodedContent")
-    val decodedContent = Base64.getDecoder().decode(encodedContent).toString()
-    log.info("DEBUG (dec): $decodedContent")
-    return decodedContent
 }
