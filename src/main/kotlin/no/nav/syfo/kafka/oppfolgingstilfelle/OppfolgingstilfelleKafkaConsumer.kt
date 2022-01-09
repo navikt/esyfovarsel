@@ -4,11 +4,10 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.util.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.ApplicationState
-import no.nav.syfo.AppEnvironment
+import no.nav.syfo.Environment
 import no.nav.syfo.kafka.KafkaListener
 import no.nav.syfo.kafka.consumerProperties
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
@@ -25,7 +24,7 @@ import java.io.IOException
 import java.time.Duration
 
 class OppfolgingstilfelleKafkaConsumer(
-    val env: AppEnvironment,
+    val env: Environment,
     val accessControl: AccessControl
 ) : KafkaListener {
 
@@ -38,7 +37,7 @@ class OppfolgingstilfelleKafkaConsumer(
     }
 
     init {
-        val kafkaConfig = consumerProperties(env.commonEnv)
+        val kafkaConfig = consumerProperties(env)
         kafkaListener = KafkaConsumer(kafkaConfig)
         kafkaListener.subscribe(listOf(topicOppfolgingsTilfelle))
     }

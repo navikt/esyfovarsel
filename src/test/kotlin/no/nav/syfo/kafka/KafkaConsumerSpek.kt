@@ -6,10 +6,10 @@ import no.nav.syfo.ApplicationState
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.DkifConsumer
 import no.nav.syfo.consumer.PdlConsumer
+import no.nav.syfo.getTestEnv
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import no.nav.syfo.service.AccessControl
-import no.nav.syfo.testEnvironment
 import no.nav.syfo.testutil.kafka.JacksonKafkaSerializer
 import no.nav.syfo.testutil.mocks.MockServers
 import no.nav.syfo.testutil.mocks.MockVarselPlaner
@@ -29,26 +29,26 @@ object KafkaConsumerSpek : Spek({
 
     val fakeApplicationState = ApplicationState(running = true, initialized = true)
 
-    val testEnv = testEnvironment(embeddedKafkaEnv.brokersURL)
+    val testEnv = getTestEnv(embeddedKafkaEnv.brokersURL)
     val recordKey = "dummykey"
     val fakeProducerRecord = ProducerRecord(topicOppfolgingsTilfelle, recordKey, kafkaOppfolgingstilfellePeker)
-    val producerProperties = consumerProperties(testEnv.commonEnv).apply {
+    val producerProperties = consumerProperties(testEnv).apply {
         put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
         put("value.serializer", JacksonKafkaSerializer::class.java)
     }
 
     val fakeOppfolgingstilfelleKafkaProducer = KafkaProducer<String, KOppfolgingstilfellePeker>(producerProperties)
 
-    val mockServers = MockServers(testEnv)
+    val mockServers = MockServers(testEnv.urlEnv)
 
     val stsServer = mockServers.mockStsServer()
     val dkifServer = mockServers.mockDkifServer()
     val pdlServer = mockServers.mockPdlServer()
     val syfosyketilfelleServer = mockServers.mockSyfosyketilfelleServer()
 
-    val stsConsumer = StsConsumer(testEnv.commonEnv)
-    val pdlConsumer = PdlConsumer(testEnv.commonEnv, stsConsumer)
-    val dkifConsumer = DkifConsumer(testEnv.commonEnv, stsConsumer)
+    val stsConsumer = StsConsumer(testEnv.urlEnv, testEnv.authEnv)
+    val pdlConsumer = PdlConsumer(testEnv.urlEnv, stsConsumer)
+    val dkifConsumer = DkifConsumer(testEnv.urlEnv, stsConsumer)
     val accessControl = AccessControl(pdlConsumer, dkifConsumer)
     val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(testEnv, accessControl)
         .addPlanner(MockVarselPlaner(fakeApplicationState))

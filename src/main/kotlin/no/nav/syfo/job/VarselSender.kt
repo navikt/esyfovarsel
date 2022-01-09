@@ -1,6 +1,6 @@
 package no.nav.syfo.job
 
-import no.nav.syfo.Toggles
+import no.nav.syfo.ToggleEnv
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselByVarselId
 import no.nav.syfo.db.domain.PPlanlagtVarsel
@@ -14,10 +14,10 @@ import no.nav.syfo.service.SendVarselService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-class SendVarslerJobb(
+class VarselSender(
     private val databaseAccess: DatabaseInterface,
     private val sendVarselService: SendVarselService,
-    private val toggles: Toggles
+    private val toggles: ToggleEnv
 ) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
 

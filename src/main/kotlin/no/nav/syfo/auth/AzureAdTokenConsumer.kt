@@ -13,17 +13,18 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import no.nav.syfo.AppEnvironment
+import no.nav.syfo.AuthEnv
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.ProxySelector
 import java.time.Instant
 
-class AzureAdTokenConsumer(env: AppEnvironment) {
-    private val aadAccessTokenUrl = env.aadAccessTokenUrl
-    private val clientId = env.clientId
-    private val clientSecret = env.clientSecret
+
+class AzureAdTokenConsumer(authEnv: AuthEnv) {
+    private val aadAccessTokenUrl = authEnv.aadAccessTokenUrl
+    private val clientId = authEnv.clientId
+    private val clientSecret = authEnv.clientSecret
     private val log: Logger = LoggerFactory.getLogger("AzureAdTokenConsumer")
 
     val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {

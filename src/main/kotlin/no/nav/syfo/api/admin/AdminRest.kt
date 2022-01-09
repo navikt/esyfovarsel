@@ -8,18 +8,22 @@ import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.service.ReplanleggingService
 import java.time.LocalDate
 
+const val urlBasePathAdmin = "/admin"
+const val merVeiledningPath = "replanleggMerVeiledningVarsler"
+const val aktivetskravPath = "replanleggAktivitetskravVarsler"
+
 fun Route.registerAdminApi(
     replanleggingService: ReplanleggingService
 ) {
     val fromParam = "from"
     val toParam = "to"
-    get("/admin/replanleggMerVeiledningVarsler") {
+    get("$urlBasePathAdmin/$merVeiledningPath") {
         // from og to parametere må være på formatet "2007-12-03"
         val antallVarsler = replanleggingService.planleggMerVeiledningVarslerPaNytt(parseDate(fromParam), parseDate(toParam))
         call.respondText("Planla $antallVarsler av typen ${VarselType.MER_VEILEDNING}")
     }
 
-    get("/admin/replanleggAktivitetskravVarsler") {
+    get("$urlBasePathAdmin/$aktivetskravPath") {
         // from og to parametere må være på formatet "2007-12-03"
         val antallVarsler = replanleggingService.planleggAktivitetskravVarslerPaNytt(parseDate(fromParam), parseDate(toParam))
         call.respondText("Planla $antallVarsler av typen ${VarselType.AKTIVITETSKRAV}")

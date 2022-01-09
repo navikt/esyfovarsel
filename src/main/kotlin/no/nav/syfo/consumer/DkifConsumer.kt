@@ -1,42 +1,21 @@
 package no.nav.syfo.consumer
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.CommonEnvironment
+import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.domain.DigitalKontaktinfo
 import no.nav.syfo.consumer.domain.DigitalKontaktinfoBolk
+import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 import java.util.UUID.randomUUID
 
-class DkifConsumer(env: CommonEnvironment, stsConsumer: StsConsumer) {
-    private val client: HttpClient
-    private val stsConsumer: StsConsumer
-    private val dkifBasepath: String
-
-    init {
-        client = HttpClient(CIO) {
-            expectSuccess = false
-            install(JsonFeature) {
-                serializer = JacksonSerializer {
-                    registerKotlinModule()
-                    registerModule(JavaTimeModule())
-                    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                }
-            }
-        }
-        this.stsConsumer = stsConsumer
-        dkifBasepath = env.dkifUrl
-    }
+class DkifConsumer(urlEnv: UrlEnv, private val stsConsumer: StsConsumer) {
+    private val client = httpClient()
+    private val dkifBasepath = urlEnv.dkifUrl
 
     fun kontaktinfo(aktorId: String): DigitalKontaktinfo? {
         val requestUrl = "$dkifBasepath/api/v1/personer/kontaktinformasjon"

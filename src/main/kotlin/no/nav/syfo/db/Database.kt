@@ -2,26 +2,21 @@ package no.nav.syfo.db
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import no.nav.syfo.DbEnvironment
+import no.nav.syfo.DbEnv
 import org.flywaydb.core.Flyway
 import java.sql.Connection
-import java.util.*
+
+const val postgresJdbcPrefix = "jdbc:postgresql"
 
 interface DatabaseInterface {
     val connection: Connection
-}
-
-enum class Role {
-    ADMIN, USER;
-
-    override fun toString() = name.lowercase(Locale.getDefault())
 }
 
 /**
  * Base Database implementation.
  * Hooks up the database with the provided configuration/credentials
  */
-class Database(val env: DbEnvironment) : DatabaseInterface {
+class Database(val env: DbEnv) : DatabaseInterface {
     val hikariDataSource = HikariDataSource(HikariConfig().apply {
         jdbcUrl = generateJdbcUrlFromEnv()
         username = env.dbUsername
@@ -47,6 +42,6 @@ class Database(val env: DbEnvironment) : DatabaseInterface {
     }
 
     private fun generateJdbcUrlFromEnv(): String {
-        return "jdbc:postgresql://${env.dbHost}:${env.dbPort}/${env.dbName}"
+        return "$postgresJdbcPrefix://${env.dbHost}:${env.dbPort}/${env.dbName}"
     }
 }

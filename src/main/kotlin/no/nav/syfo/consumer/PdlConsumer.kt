@@ -1,41 +1,20 @@
 package no.nav.syfo.consumer
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.CommonEnvironment
+import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.pdl.*
+import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 
-open class PdlConsumer(env: CommonEnvironment, stsConsumer: StsConsumer) {
-    private val client: HttpClient
-    private val stsConsumer: StsConsumer
-    private val pdlBasepath: String
+open class PdlConsumer(urlEnv: UrlEnv, private val stsConsumer: StsConsumer) {
+    private val client = httpClient()
+    private val pdlBasepath = urlEnv.pdlUrl
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.PdlConsuner")
-
-    init {
-        client = HttpClient(CIO) {
-            expectSuccess = false
-            install(JsonFeature) {
-                serializer = JacksonSerializer {
-                    registerKotlinModule()
-                    registerModule(JavaTimeModule())
-                    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                }
-            }
-        }
-        this.stsConsumer = stsConsumer
-        pdlBasepath = env.pdlUrl
-    }
 
     open fun getFnr(aktorId: String): String? {
         val response = callPdl(IDENTER_QUERY, aktorId)
@@ -106,7 +85,7 @@ open class PdlConsumer(env: CommonEnvironment, stsConsumer: StsConsumer) {
     }
 }
 
-class LocalPdlConsumer(env: CommonEnvironment, stsConsumer: StsConsumer): PdlConsumer(env, stsConsumer) {
+class LocalPdlConsumer(urlEnv: UrlEnv, stsConsumer: StsConsumer): PdlConsumer(urlEnv, stsConsumer) {
     override fun getFnr(aktorId: String): String {
         return aktorId.substring(0,11)
     }

@@ -64,11 +64,7 @@ spec:
   filesFrom:
     - secret: esyfovarsel-serviceuser
   env:
-  {{#each env.common}}
-    - name: {{@key}}
-      value: {{this}}
-  {{/each}}
-  {{#each env.app}}
+  {{#each env}}
     - name: {{@key}}
       value: {{this}}
   {{/each}}
