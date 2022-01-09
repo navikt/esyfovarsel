@@ -45,38 +45,38 @@ class OppfolgingstilfelleKafkaConsumer(
     override suspend fun listen(applicationState: ApplicationState) {
         log.info("Starting to listen to $topicOppfolgingsTilfelle")
             while (applicationState.running) {
-                    kafkaListener.poll(Duration.ofMillis(0)).forEach {
-                        log.info("Received record from [$topicOppfolgingsTilfelle]")
-                        try {
-                            val peker: KOppfolgingstilfellePeker = objectMapper.readValue(it.value())
-                            val aktorId = peker.aktorId
-                            val fnr = accessControl.getFnrIfUserCanBeNotified(aktorId)
-                            fnr?.let {
-                                varselPlanners.forEach { planner ->
-                                    try {
-                                        runBlocking { planner.processOppfolgingstilfelle(aktorId, fnr) }
-                                    } catch (e: Exception) {
-                                        log.error("Error in [${planner.name}] planner: | ${e.message}", e)
-                                        tellFeilIPlanner()
-                                    }
+                kafkaListener.poll(Duration.ofMillis(0)).forEach {
+                    log.info("Received record from [$topicOppfolgingsTilfelle]")
+                    try {
+                        val peker: KOppfolgingstilfellePeker = objectMapper.readValue(it.value())
+                        val aktorId = peker.aktorId
+                        val fnr = accessControl.getFnrIfUserCanBeNotified(aktorId)
+                        fnr?.let {
+                            varselPlanners.forEach { planner ->
+                                try {
+                                    runBlocking { planner.processOppfolgingstilfelle(aktorId, fnr) }
+                                } catch (e: Exception) {
+                                    log.error("Error in [${planner.name}] planner: | ${e.message}", e)
+                                    tellFeilIPlanner()
                                 }
                             }
-                        } catch (e: IOException) {
-                            log.error(
-                                "Error in [$topicOppfolgingsTilfelle] listener: Could not parse message | ${e.message}",
-                                e
-                            )
-                            tellFeilIParsing()
-                        } catch (e: Exception) {
-                            log.error(
-                                "Error in [$topicOppfolgingsTilfelle] listener: Could not process message | ${e.message}",
-                                e
-                            )
-                            tellFeilIProsessering()
                         }
+                    } catch (e: IOException) {
+                        log.error(
+                            "Error in [$topicOppfolgingsTilfelle] listener: Could not parse message | ${e.message}",
+                            e
+                        )
+                        tellFeilIParsing()
+                    } catch (e: Exception) {
+                        log.error(
+                            "Error in [$topicOppfolgingsTilfelle] listener: Could not process message | ${e.message}",
+                            e
+                        )
+                        tellFeilIProsessering()
                     }
-                    kafkaListener.commitSync()
-                    delay(10)
+                }
+                kafkaListener.commitSync()
+                delay(10)
         }
         log.info("Stopped listening to $topicOppfolgingsTilfelle")
     }

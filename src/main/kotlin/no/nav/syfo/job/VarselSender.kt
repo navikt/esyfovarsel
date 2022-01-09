@@ -21,7 +21,7 @@ class VarselSender(
 ) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
 
-    fun sendVarsler() {
+    fun sendVarsler(): Int {
         log.info("Starter SendVarslerJobb")
 
         val varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
@@ -48,10 +48,15 @@ class VarselSender(
             log.info("Sendte $value varsler av type $key")
         }
 
-        varslerSendt[VarselType.MER_VEILEDNING.name]?.let(::tellMerVeiledningVarselSendt)
-        varslerSendt[VarselType.AKTIVITETSKRAV.name]?.let(::tellAktivitetskravVarselSendt)
+        val antallMerVeiledningSendt = varslerSendt[VarselType.MER_VEILEDNING.name] ?: 0
+        val antallAktivitetskravSendt = varslerSendt[VarselType.AKTIVITETSKRAV.name] ?: 0
+
+        tellMerVeiledningVarselSendt(antallMerVeiledningSendt)
+        tellAktivitetskravVarselSendt(antallAktivitetskravSendt)
 
         log.info("Avslutter SendVarslerJobb")
+
+        return antallMerVeiledningSendt + antallAktivitetskravSendt
     }
 
     private fun incrementVarselCountMap(map: HashMap<String, Int>, type: String) {
