@@ -66,6 +66,8 @@ fun main() {
             config = HoconApplicationConfig(ConfigFactory.load())
             database = Database(env.dbEnv)
 
+
+
             val stsConsumer = getStsConsumer(env.urlEnv, env.authEnv)
             val pdlConsumer = getPdlConsumer(env.urlEnv, stsConsumer)
             val dkifConsumer = DkifConsumer(env.urlEnv, stsConsumer)
