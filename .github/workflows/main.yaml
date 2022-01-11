@@ -68,7 +68,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: .nais/send-varsler-job-dev.yaml
+          RESOURCE: .nais/job-trigger-dev.yaml
           VARS: .nais/dev.json
 
       # Notify Slack
@@ -101,7 +101,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: .nais/send-varsler-job-prod.yaml
+          RESOURCE: .nais/job-trigger-prod.yaml
           VARS: .nais/prod.json
       - name: Deploy alerts
         uses: nais/deploy/actions/deploy@v1
