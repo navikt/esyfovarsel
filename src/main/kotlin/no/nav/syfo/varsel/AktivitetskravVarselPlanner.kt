@@ -41,8 +41,8 @@ class AktivitetskravVarselPlanner(
 
         log.info("-$name-: gyldigeSyketilfelledager i tidslinjen er -$gyldigeSyketilfelledager-")
         //TODO: This is for testing, to be deleteed
-        val narmesteLederFnr = narmesteLederConsumer.getNarmesteLeder(ansattFnr = "20108121018", orgnummer = "947064649")?.narmesteLederRelasjon?.narmesteLederFnr
-        log.info("-$name-: narmesteLederFnr -$narmesteLederFnr-")
+        val narmesteLederRelasjon = narmesteLederConsumer.getNarmesteLeder(ansattFnr = "20108121018", orgnummer = "947064649")?.narmesteLederRelasjon
+        log.info("-$name-: narmesteLederRelasjon -$narmesteLederRelasjon-")
 
         if (gyldigeSyketilfelledager.isNotEmpty()) {
             val nyesteSyketilfelledag = gyldigeSyketilfelledager.last()
