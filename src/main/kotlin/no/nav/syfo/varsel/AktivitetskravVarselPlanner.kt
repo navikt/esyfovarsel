@@ -40,9 +40,6 @@ class AktivitetskravVarselPlanner(
         val gyldigeSyketilfelledager = oppfolgingstilfellePerson.tidslinje .filter { isGyldigSyketilfelledag(it) } .sortedBy { it.dag }
 
         log.info("-$name-: gyldigeSyketilfelledager i tidslinjen er -$gyldigeSyketilfelledager-")
-        //TODO: This is for testing, to be deleteed
-        val narmesteLederRelasjon = narmesteLederConsumer.getNarmesteLeder(ansattFnr = "20108121018", orgnummer = "947064649")?.narmesteLederRelasjon
-        log.info("-$name-: narmesteLederRelasjon -$narmesteLederRelasjon-")
 
         if (gyldigeSyketilfelledager.isNotEmpty()) {
             val nyesteSyketilfelledag = gyldigeSyketilfelledager.last()
