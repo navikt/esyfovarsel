@@ -50,7 +50,7 @@ class NarmesteLederConsumer(env: AppEnvironment, azureAdTokenConsumer: AzureAdTo
                 append("Sykmeldt-Fnr", ansattFnr)
             }
         }
-
+        log.info("-AKTIVITETSKRAV_VARSEL-: response -$response-")
         return when (response.status) {
             HttpStatusCode.OK -> {
                 response.receive<NarmestelederResponse>()
