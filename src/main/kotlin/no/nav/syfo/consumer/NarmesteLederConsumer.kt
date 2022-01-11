@@ -42,7 +42,7 @@ class NarmesteLederConsumer(env: AppEnvironment, azureAdTokenConsumer: AzureAdTo
         val requestURL = "$basepath/sykmeldt/narmesteleder?orgnummer=$orgnummer"
         val token = azureAdTokenConsumer.getAzureAdAccessToken(scope)
 
-        val response = client.post<HttpResponse>(requestURL) {
+        val response = client.get<HttpResponse>(requestURL) {
             headers {
                 append(HttpHeaders.Accept, ContentType.Application.Json)
                 append(HttpHeaders.ContentType, ContentType.Application.Json)
