@@ -4,6 +4,10 @@ services:
     image: postgres:12
     ports:
       - "5432:5432"
+    environment:
+      - POSTGRES_DB=esyfovarsel
+      - POSTGRES_USER=esyfovarsel-admin
+      - POSTGRES_PASSWORD=password
   zookeeper:
     image: confluentinc/cp-zookeeper:6.2.0
     hostname: zookeeper

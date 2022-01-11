@@ -11,54 +11,58 @@ const val serviceuserMounthPath = "/var/run/secrets"
 val objectMapper = ObjectMapper().registerKotlinModule()
 
 
-fun getEnv() = Environment(
-    AppEnv(
-        applicationPort = getEnvVar("APPLICATION_PORT", "8080").toInt(),
-        applicationThreads = getEnvVar("APPLICATION_THREADS", "4").toInt(),
-        remote = true
-    ),
-    AuthEnv(
-        serviceuserUsername = File("$serviceuserMounthPath/username").readText(),
-        serviceuserPassword = File("$serviceuserMounthPath/password").readText(),
-        clientId = getEnvVar("AZURE_APP_CLIENT_ID"),
-        clientSecret = getEnvVar("AZURE_APP_CLIENT_SECRET"),
-        aadAccessTokenUrl = getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
-        loginserviceDiscoveryUrl = getEnvVar("LOGINSERVICE_IDPORTEN_DISCOVERY_URL"),
-        loginserviceAudience = getEnvVar("LOGINSERVICE_IDPORTEN_AUDIENCE").split(",")
-    ),
-    UrlEnv(
-        syfosyketilfelleUrl = getEnvVar("SYFOSYKETILFELLE_URL"),
-        syfosmregisterUrl = getEnvVar("SYFOSMREGISTER_URL"),
-        syfosmregisterScope = getEnvVar("SYFOSMREGISTER_SCOPE"),
-        baseUrlDittSykefravaer = getEnvVar("BASE_URL_DITT_SYKEFRAVAER"),
-        jobTriggerUrl = getEnvVar("ESYFOVARSEL_JOB_TRIGGER_URL"),
-        stsUrl = getEnvVar("STS_URL"),
-        pdlUrl = getEnvVar("PDL_URL"),
-        dkifUrl = getEnvVar("DKIF_URL")
-    ),
-    KafkaEnv(
-        kafkaBootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
-        kafkaSchemaRegistryUrl = getEnvVar("KAFKA_SCHEMA_REGISTRY_URL")
-    ),
-    DbEnv(
-        dbHost = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_HOST", "127.0.0.1"),
-        dbPort = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PORT", "5432"),
-        dbName = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_DATABASE"),
-        dbUsername = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_USERNAME"),
-        dbPassword = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PASSWORD")
-    ),
-    ToggleEnv(
-        startJobb = getEnvVar("TOGGLE_START_JOBB").tilBoolean(),
-        sendMerVeiledningVarsler = getEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER").tilBoolean(),
-        sendAktivitetskravVarsler = getEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER").tilBoolean()
-    )
+fun getEnv() =
+    if (isLocal())
+        getTestEnv()
+    else
+        Environment(
+            AppEnv(
+                applicationPort = getEnvVar("APPLICATION_PORT", "8080").toInt(),
+                applicationThreads = getEnvVar("APPLICATION_THREADS", "4").toInt(),
+                remote = true
+            ),
+            AuthEnv(
+                serviceuserUsername = File("$serviceuserMounthPath/username").readText(),
+                serviceuserPassword = File("$serviceuserMounthPath/password").readText(),
+                clientId = getEnvVar("AZURE_APP_CLIENT_ID"),
+                clientSecret = getEnvVar("AZURE_APP_CLIENT_SECRET"),
+                aadAccessTokenUrl = getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
+                loginserviceDiscoveryUrl = getEnvVar("LOGINSERVICE_IDPORTEN_DISCOVERY_URL"),
+                loginserviceAudience = getEnvVar("LOGINSERVICE_IDPORTEN_AUDIENCE").split(",")
+            ),
+            UrlEnv(
+                syfosyketilfelleUrl = getEnvVar("SYFOSYKETILFELLE_URL"),
+                syfosmregisterUrl = getEnvVar("SYFOSMREGISTER_URL"),
+                syfosmregisterScope = getEnvVar("SYFOSMREGISTER_SCOPE"),
+                baseUrlDittSykefravaer = getEnvVar("BASE_URL_DITT_SYKEFRAVAER"),
+                jobTriggerUrl = getEnvVar("ESYFOVARSEL_JOB_TRIGGER_URL"),
+                stsUrl = getEnvVar("STS_URL"),
+                pdlUrl = getEnvVar("PDL_URL"),
+                dkifUrl = getEnvVar("DKIF_URL")
+            ),
+            KafkaEnv(
+                kafkaBootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
+                kafkaSchemaRegistryUrl = getEnvVar("KAFKA_SCHEMA_REGISTRY_URL")
+            ),
+            DbEnv(
+                dbHost = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_HOST", "127.0.0.1"),
+                dbPort = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PORT", "5432"),
+                dbName = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_DATABASE"),
+                dbUsername = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_USERNAME"),
+                dbPassword = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PASSWORD")
+            ),
+            ToggleEnv(
+                startJobb = getEnvVar("TOGGLE_START_JOBB").tilBoolean(),
+                sendMerVeiledningVarsler = getEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER").tilBoolean(),
+                sendAktivitetskravVarsler = getEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER").tilBoolean()
+            )
 )
 
-fun getTestEnv(embeddedKafkaBrokerUrl: String = "") =
-    if (isLocal())
-        objectMapper.readValue(File(localPropertiesPath), Environment::class.java).apply { kafkaEnv.kafkaBootstrapServersUrl = embeddedKafkaBrokerUrl }
-    else
-        getEnv()
+fun getTestEnv() =
+    objectMapper.readValue(File(localPropertiesPath), Environment::class.java)
+
+fun getTestEnv(embeddedKafkaBrokerUrl: String) =
+    getTestEnv().apply { kafkaEnv.kafkaBootstrapServersUrl = embeddedKafkaBrokerUrl }
 
 data class Environment(
     val appEnv: AppEnv,

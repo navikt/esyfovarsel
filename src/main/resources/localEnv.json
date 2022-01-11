@@ -18,20 +18,20 @@
     "syfosmregisterScope": "syfosmregisterScope",
     "baseUrlDittSykefravaer": "http://ditt-sykefravaer:8080",
     "jobTriggerUrl": "http://localhost:8080",
-    "stsUrl": "http://localhost:9092",
+    "stsUrl": "http://localhost:9094",
     "pdlUrl": "http://localhost:9091",
     "dkifUrl": "http://localhost:9093"
   },
   "kafkaEnv": {
-    "kafkaBootstrapServersUrl": "",
+    "kafkaBootstrapServersUrl": "http://localhost:9092",
     "kafkaSchemaRegistryUrl": "http://localhost:8081"
   },
   "dbEnv": {
     "dbHost": "127.0.0.1",
     "dbPort": "5432",
     "dbName": "esyfovarsel",
-    "dbUsername": "",
-    "dbPassword": ""
+    "dbUsername": "esyfovarsel-admin",
+    "dbPassword": "password"
   },
   "toggleEnv": {
     "startJobb": "true",

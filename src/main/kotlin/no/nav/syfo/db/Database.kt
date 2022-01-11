@@ -17,6 +17,7 @@ interface DatabaseInterface {
  * Hooks up the database with the provided configuration/credentials
  */
 class Database(val env: DbEnv) : DatabaseInterface {
+
     val hikariDataSource = HikariDataSource(HikariConfig().apply {
         jdbcUrl = generateJdbcUrlFromEnv()
         username = env.dbUsername
