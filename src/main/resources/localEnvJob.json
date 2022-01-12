@@ -1,4 +1,4 @@
 {
-  "sendVarsler": "JA",
-  "jobTriggerUrl": "localhost:8080/job/trigger"
+  "sendVarsler": "true",
+  "jobTriggerUrl": "http://localhost:8080/job/trigger"
 }

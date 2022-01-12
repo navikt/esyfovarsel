@@ -18,6 +18,7 @@
     "BASE_URL_DITT_SYKEFRAVAER": "https://www.nav.no/syk/sykefravaer"
   },
   "job": {
+    "KTOR_ENV": "remote",
     "JOB": "JA",
     "SEND_VARSLER": "JA",
     "ESYFOVARSEL_JOB_TRIGGER_URL": "https://esyfovarsel.intern.nav.no/job/trigger"
