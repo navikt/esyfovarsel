@@ -19,6 +19,6 @@ data class Syketilfellebit(
     val fom: LocalDateTime,
     val tom: LocalDateTime
 ) {
-    override fun toString(): String = "ressursId: " + ressursId + "tags: " + tags + "fom: " + fom + "tom: " + tom + "orgnummer: " + orgnummer
+    override fun toString(): String = "ressursId: " + ressursId + ", tags: " + tags + ", fom: " + fom + ", tom: " + tom + ", orgnummer: " + orgnummer
 }
 

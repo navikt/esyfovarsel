@@ -41,9 +41,10 @@ class AktivitetskravVarselPlanner(
 
         if (gyldigeSyketilfelledager.isNotEmpty()) {
             val nyesteSyketilfelledag = gyldigeSyketilfelledager.last()
+            val eldsteSyketilfelledag = gyldigeSyketilfelledager.first()
 
-            val fom = nyesteSyketilfelledag.prioritertSyketilfellebit!!.fom.toLocalDate()
-            val tom = nyesteSyketilfelledag.prioritertSyketilfellebit.tom.toLocalDate()
+            val fom = eldsteSyketilfelledag.prioritertSyketilfellebit!!.fom.toLocalDate()
+            val tom = nyesteSyketilfelledag.prioritertSyketilfellebit!!.tom.toLocalDate()
             val aktivitetskravVarselDato = fom.plusDays(AKTIVITETSKRAV_DAGER)
 
             log.info("-$name-: oppfolgingstilfellePerson.fom er -$fom-")
