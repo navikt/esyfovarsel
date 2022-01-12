@@ -16,6 +16,6 @@ spec:
       value: {{this}}
   {{/each}}
   {{#each job}}
-     - name: {{@key}}
-       value: {{this}}
+    - name: {{@key}}
+      value: {{this}}
   {{/each}}
