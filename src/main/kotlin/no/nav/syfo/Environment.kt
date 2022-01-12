@@ -124,7 +124,7 @@ fun getEnvVar(varName: String, defaultValue: String? = null) =
 
 fun isLocal(): Boolean = getEnvVar("KTOR_ENV", "local") == "local"
 
-fun isJob(): Boolean = getEnvVar("SEND_VARSLER", "NEI") == "JA"
+fun isJob(): Boolean = getEnvVar("JOB", "NEI") == "JA"
 
 private fun String.tilBoolean(): Boolean {
     return this.toUpperCase(Locale.getDefault()) == "JA"

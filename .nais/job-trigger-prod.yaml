@@ -15,3 +15,7 @@ spec:
     - name: {{@key}}
       value: {{this}}
   {{/each}}
+  {{#each job}}
+     - name: {{@key}}
+       value: {{this}}
+  {{/each}}
