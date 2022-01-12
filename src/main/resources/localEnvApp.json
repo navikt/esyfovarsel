@@ -17,7 +17,6 @@
     "syfosmregisterUrl": "http://localhost:9494",
     "syfosmregisterScope": "syfosmregisterScope",
     "baseUrlDittSykefravaer": "http://ditt-sykefravaer:8080",
-    "jobTriggerUrl": "http://localhost:8080",
     "stsUrl": "http://localhost:9094",
     "pdlUrl": "http://localhost:9091",
     "dkifUrl": "http://localhost:9093"
@@ -34,7 +33,6 @@
     "dbPassword": "password"
   },
   "toggleEnv": {
-    "startJobb": "true",
     "sendMerVeiledningVarsler": "true",
     "sendAktivitetskravVarsler": "true"
   }

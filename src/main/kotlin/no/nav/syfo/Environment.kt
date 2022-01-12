@@ -6,10 +6,19 @@ import java.io.File
 import java.util.*
 
 
-const val localPropertiesPath = "./src/main/resources/localEnv.json"
+const val localAppPropertiesPath = "./src/main/resources/localEnvApp.json"
+const val localJobPropertiesPath = "./src/main/resources/localEnvJob.json"
 const val serviceuserMounthPath = "/var/run/secrets"
 val objectMapper = ObjectMapper().registerKotlinModule()
 
+fun getJobEnv() =
+    if (isLocal())
+        objectMapper.readValue(File(localJobPropertiesPath), JobEnv::class.java)
+    else
+        JobEnv(
+            sendVarsler = getEnvVar("SEND_VARSLER").tilBoolean(),
+            jobTriggerUrl = getEnvVar("ESYFOVARSEL_JOB_TRIGGER_URL")
+        )
 
 fun getEnv() =
     if (isLocal())
@@ -35,7 +44,6 @@ fun getEnv() =
                 syfosmregisterUrl = getEnvVar("SYFOSMREGISTER_URL"),
                 syfosmregisterScope = getEnvVar("SYFOSMREGISTER_SCOPE"),
                 baseUrlDittSykefravaer = getEnvVar("BASE_URL_DITT_SYKEFRAVAER"),
-                jobTriggerUrl = getEnvVar("ESYFOVARSEL_JOB_TRIGGER_URL"),
                 stsUrl = getEnvVar("STS_URL"),
                 pdlUrl = getEnvVar("PDL_URL"),
                 dkifUrl = getEnvVar("DKIF_URL")
@@ -52,14 +60,13 @@ fun getEnv() =
                 dbPassword = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PASSWORD")
             ),
             ToggleEnv(
-                startJobb = getEnvVar("TOGGLE_START_JOBB").tilBoolean(),
                 sendMerVeiledningVarsler = getEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER").tilBoolean(),
                 sendAktivitetskravVarsler = getEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER").tilBoolean()
             )
 )
 
 fun getTestEnv() =
-    objectMapper.readValue(File(localPropertiesPath), Environment::class.java)
+    objectMapper.readValue(File(localAppPropertiesPath), Environment::class.java)
 
 fun getTestEnv(embeddedKafkaBrokerUrl: String) =
     getTestEnv().apply { kafkaEnv.kafkaBootstrapServersUrl = embeddedKafkaBrokerUrl }
@@ -94,7 +101,6 @@ data class UrlEnv(
     val syfosmregisterUrl: String,
     val syfosmregisterScope: String,
     val baseUrlDittSykefravaer: String,
-    val jobTriggerUrl: String,
     val stsUrl: String,
     val pdlUrl: String,
     val dkifUrl: String
@@ -114,9 +120,13 @@ data class DbEnv(
 )
 
 data class ToggleEnv(
-    val startJobb: Boolean,
     val sendMerVeiledningVarsler: Boolean,
     val sendAktivitetskravVarsler: Boolean
+)
+
+data class JobEnv(
+    val sendVarsler: Boolean,
+    val jobTriggerUrl: String
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =

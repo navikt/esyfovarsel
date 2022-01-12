@@ -1,5 +1,5 @@
 {
-  "env": {
+  "app": {
     "KTOR_ENV": "remote",
     "DATABASE_URL": "jdbc:postgresql://A01DBVL022.adeo.no:5432/esyfovarsel",
     "DATABASE_NAME": "esyfovarsel",
@@ -8,19 +8,18 @@
     "STS_URL": "https://security-token-service.nais.adeo.no",
     "PDL_URL": "https://pdl-api.nais.adeo.no/graphql",
     "DKIF_URL": "https://dkif.intern.nav.no",
-    "ESYFOVARSEL_JOB_TRIGGER_URL": "https://esyfovarsel.intern.nav.no",
     "SYFOSYKETILFELLE_URL": "https://syfosyketilfelle.nais.adeo.no",
     "SYFOSMREGISTER_URL": "http://syfosmregister.teamsykmelding",
     "SYFOSMREGISTER_SCOPE": "api://prod-fss.teamsykmelding.syfosmregister/.default",
     "LOGINSERVICE_IDPORTEN_DISCOVERY_URL": "https://navnob2c.b2clogin.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten",
     "LOGINSERVICE_IDPORTEN_AUDIENCE": "45104d6a-f5bc-4e8c-b352-4bbfc9381f25",
-    "SEND_VARSLER": "JA",
-    "TOGGLE_START_JOBB": "JA",
     "TOGGLE_SEND_MERVEILEDNING_VARSLER": "JA",
     "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "NEI",
     "BASE_URL_DITT_SYKEFRAVAER": "https://www.nav.no/syk/sykefravaer"
   },
   "job": {
-    "JOB": "JA"
+    "JOB": "JA",
+    "SEND_VARSLER": "JA",
+    "ESYFOVARSEL_JOB_TRIGGER_URL": "https://esyfovarsel.intern.nav.no/job/trigger"
   }
 }

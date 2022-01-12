@@ -41,7 +41,7 @@ object VarselSenderSpek: Spek( {
 
 
         it("Sender varsler") {
-            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true,true,true))
+            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true,true))
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1"), MER_VEILEDNING)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
 
@@ -53,7 +53,7 @@ object VarselSenderSpek: Spek( {
         }
 
         it("Skal ikke sende mer veiledning-varsel hvis toggle er false") {
-            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true,false,true))
+            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(false,true))
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, emptySet(), MER_VEILEDNING)
             val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1"), AKTIVITETSKRAV)
 
@@ -71,7 +71,7 @@ object VarselSenderSpek: Spek( {
         }
 
         it("Skal ikke sende aktivitetskrav-varsel hvis toggle er false") {
-            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true,true,false))
+            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true,false))
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1"), MER_VEILEDNING)
             val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1"), AKTIVITETSKRAV)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
@@ -89,7 +89,7 @@ object VarselSenderSpek: Spek( {
         }
 
         it ("Skal ikke markere varsel som sendt dersom utsending feiler"){
-            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true,true,true))
+            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true,true))
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1"), MER_VEILEDNING)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
 

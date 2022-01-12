@@ -6,9 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.typesafe.config.ConfigFactory
 import io.ktor.application.*
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.config.*
 import io.ktor.features.*
@@ -21,7 +18,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.api.admin.registerAdminApi
 import no.nav.syfo.api.bruker.registerBrukerApi
-import no.nav.syfo.api.job.urlPathJobTrigger
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.auth.LocalStsConsumer
@@ -50,22 +46,21 @@ val backgroundTasksContext = Executors.newFixedThreadPool(4).asCoroutineDispatch
 lateinit var database: DatabaseInterface
 
 fun main() {
-    val env = getEnv()
-
     if (isJob()) {
-        if (env.toggleEnv.startJobb) {
+        val env = getJobEnv()
+        if (env.sendVarsler) {
             runBlocking {
-                httpClient().post("${env.urlEnv.jobTriggerUrl}$urlPathJobTrigger")
+                httpClient().post(env.jobTriggerUrl)
             }
         } else {
             LoggerFactory.getLogger("no.nav.syfo.BootstrapApplication").info("Jobb togglet av")
         }
     } else {
+        val env = getEnv()
         val server = embeddedServer(Netty, applicationEngineEnvironment {
             log = LoggerFactory.getLogger("ktor.application")
             config = HoconApplicationConfig(ConfigFactory.load())
             database = Database(env.dbEnv)
-
 
             val stsConsumer = getStsConsumer(env.urlEnv, env.authEnv)
             val pdlConsumer = getPdlConsumer(env.urlEnv, stsConsumer)
