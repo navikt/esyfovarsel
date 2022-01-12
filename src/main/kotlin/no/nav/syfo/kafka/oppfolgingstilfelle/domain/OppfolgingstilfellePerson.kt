@@ -11,5 +11,5 @@ data class OppfolgingstilfellePerson(
     val oppbruktArbeidsgvierperiode: Boolean,
     val utsendelsestidspunkt: LocalDateTime
 ) {
-    override fun toString(): String = "tidslinje: " + tidslinje.toString()
+    override fun toString(): String = "tidslinje: " + "[" + tidslinje.toString() + "]"
 }
