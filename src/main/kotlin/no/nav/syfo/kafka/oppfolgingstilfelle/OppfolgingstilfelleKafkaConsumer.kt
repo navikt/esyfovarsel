@@ -52,7 +52,9 @@ class OppfolgingstilfelleKafkaConsumer(
                     try {
                         val peker: KOppfolgingstilfellePeker = objectMapper.readValue(it.value())
                         val aktorId = peker.aktorId
+                        log.info("aktorId: $aktorId")
                         val fnr = accessControl.getFnrIfUserCanBeNotified(aktorId)
+                        log.info("fnr: $fnr")
                         fnr?.let {
                             varselPlanners.forEach { planner ->
                                 try {
@@ -69,12 +71,6 @@ class OppfolgingstilfelleKafkaConsumer(
                             e
                         )
                         tellFeilIParsing()
-                    } catch (e: Exception) {
-                        log.error(
-                            "Error in [$topicOppfolgingsTilfelle] listener: Could not process message | ${e.message}",
-                            e
-                        )
-                        tellFeilIProsessering()
                     }
                 }
                 kafkaListener.commitSync()

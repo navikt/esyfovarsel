@@ -61,6 +61,7 @@ open class PdlConsumer(urlEnv: UrlEnv, private val stsConsumer: StsConsumer) {
     }
 
     fun callPdl(service: String, aktorId: String): HttpResponse? {
+        log.info("CALL PDL: $service|$aktorId|$pdlBasepath")
         return runBlocking {
             val stsToken = stsConsumer.getToken()
             val bearerTokenString = "Bearer ${stsToken.access_token}"

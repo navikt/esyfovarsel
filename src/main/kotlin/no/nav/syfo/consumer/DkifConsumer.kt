@@ -19,6 +19,7 @@ class DkifConsumer(urlEnv: UrlEnv, private val stsConsumer: StsConsumer) {
 
     fun kontaktinfo(aktorId: String): DigitalKontaktinfo? {
         val requestUrl = "$dkifBasepath/api/v1/personer/kontaktinformasjon"
+        log.info("DKIF: $aktorId|$dkifBasepath")
         return runBlocking {
             val stsTokenString = "Bearer ${stsConsumer.getToken().access_token}"
             val response: HttpResponse? = try {
@@ -35,7 +36,7 @@ class DkifConsumer(urlEnv: UrlEnv, private val stsConsumer: StsConsumer) {
                 log.error("Error while calling DKIF: ${e.message}", e)
                 null
             }
-
+            log.info("DKIF END")
             when (response?.status) {
                 HttpStatusCode.OK -> {
                     val content = response.receive<DigitalKontaktinfoBolk>()
