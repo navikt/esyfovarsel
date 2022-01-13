@@ -52,6 +52,33 @@ fun Application.setupAuthentication(
     }
 }
 
+fun Application.setupLocalRoutesWithAuthentication(
+    varselSender: VarselSender,
+    varselSendtService: VarselSendtService,
+    replanleggingService: ReplanleggingService,
+    authEnv: AuthEnv
+) {
+    install(Authentication) {
+        basic("auth-basic") {
+            realm = "Access to the '/admin/' path"
+            validate { credentials ->
+                when {
+                    validBasicAuthCredentials(authEnv, credentials) -> UserIdPrincipal(credentials.name)
+                    else -> null
+                }
+            }
+        }
+    }
+
+    routing {
+        registerBrukerApi(varselSendtService)
+        registerAdminApi(replanleggingService)
+        authenticate("auth-basic") {
+            registerJobTriggerApi(varselSender)
+        }
+    }
+}
+
 fun Application.setupRoutesWithAuthentication(
     varselSender: VarselSender,
     varselSendtService: VarselSendtService,

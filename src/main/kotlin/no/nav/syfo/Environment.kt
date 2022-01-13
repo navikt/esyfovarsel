@@ -17,7 +17,9 @@ fun getJobEnv() =
     else
         JobEnv(
             sendVarsler = getEnvVar("SEND_VARSLER").tilBoolean(),
-            jobTriggerUrl = getEnvVar("ESYFOVARSEL_JOB_TRIGGER_URL")
+            jobTriggerUrl = getEnvVar("ESYFOVARSEL_JOB_TRIGGER_URL"),
+            serviceuserUsername = File("$serviceuserMounthPath/username").readText(),
+            serviceuserPassword = File("$serviceuserMounthPath/password").readText()
         )
 
 fun getEnv() =
@@ -126,7 +128,9 @@ data class ToggleEnv(
 
 data class JobEnv(
     val sendVarsler: Boolean,
-    val jobTriggerUrl: String
+    val jobTriggerUrl: String,
+    val serviceuserUsername: String,
+    val serviceuserPassword: String
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =

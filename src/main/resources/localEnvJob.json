@@ -1,4 +1,6 @@
 {
   "sendVarsler": "true",
-  "jobTriggerUrl": "http://localhost:8080/job/trigger"
+  "jobTriggerUrl": "http://localhost:8080/job/trigger",
+  "serviceuserUsername": "srvesyfovarsel",
+  "serviceuserPassword": "password"
 }
