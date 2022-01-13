@@ -119,8 +119,7 @@ class AktivitetskravVarselPlanner(
     }
 
     private fun isGyldigSyketilfelledag(syketilfelledag: Syketilfelledag): Boolean {
-        return (syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.SYKMELDING.name) == true
-                || syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.PAPIRSYKMELDING.name) == true)
-                && syketilfelledag.prioritertSyketilfellebit.tags.contains(SyketilfellebitTag.SENDT.name)
+        return (syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.SYKMELDING.name) == true || syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.PAPIRSYKMELDING.name) == true)
+                && (syketilfelledag.prioritertSyketilfellebit.tags.contains(SyketilfellebitTag.SENDT.name) || syketilfelledag.prioritertSyketilfellebit.tags.contains(SyketilfellebitTag.BEKREFTET.name))
     }
 }

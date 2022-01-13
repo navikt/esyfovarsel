@@ -6,6 +6,7 @@ enum class SyketilfellebitTag {
     SYKMELDING,
     SENDT,
     PAPIRSYKMELDING,
+    BEKREFTET,
 }
 
 data class Syketilfellebit(
