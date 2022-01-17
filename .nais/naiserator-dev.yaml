@@ -36,6 +36,10 @@ spec:
   azure:
     application:
       enabled: true
+  accessPolicy:
+    outbound:
+      external:
+        - host: pdl-api.dev.intern.nav.no
   gcp:
     sqlInstances:
       - autoBackupHour: 1
