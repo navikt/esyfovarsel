@@ -35,7 +35,7 @@ class AktivitetskravVarselPlanner(
             return@coroutineScope
         }
 
-        val gyldigeSyketilfelledager = oppfolgingstilfellePerson.tidslinje .filter { isGyldigSyketilfelledag(it) } .sortedBy { it.dag }
+        val gyldigeSyketilfelledager = oppfolgingstilfellePerson.tidslinje.filter { isGyldigSyketilfelledag(it) }.sortedBy { it.dag }
 
         log.info("-$name-: gyldigeSyketilfelledager i tidslinjen er -$gyldigeSyketilfelledager-")
 
@@ -57,7 +57,7 @@ class AktivitetskravVarselPlanner(
             }
 
             log.info("-$name-: nyestOppT: $nyesteSyketilfelledag")
-            log.info("-$name-: relevante -FOM, TOM, DATO: $fom, $tom, $aktivitetskravVarselDato-")
+            log.info("-$name-: relevante -FOM, TOM, DATO, RESSURS_IDS: $fom, $tom, $aktivitetskravVarselDato, $ressursIds-")
 
             val lagreteVarsler = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.AKTIVITETSKRAV)
 
@@ -119,7 +119,10 @@ class AktivitetskravVarselPlanner(
     }
 
     private fun isGyldigSyketilfelledag(syketilfelledag: Syketilfelledag): Boolean {
-        return (syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.SYKMELDING.name) == true || syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.PAPIRSYKMELDING.name) == true)
-                && (syketilfelledag.prioritertSyketilfellebit.tags.contains(SyketilfellebitTag.SENDT.name) || syketilfelledag.prioritertSyketilfellebit.tags.contains(SyketilfellebitTag.BEKREFTET.name))
+        val isSykmelding = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.SYKMELDING.name) == true ||
+                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.PAPIRSYKMELDING.name) == true
+        val isUsableSykmelding = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.SENDT.name) == true ||
+                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.BEKREFTET.name) == true
+        return isSykmelding && isUsableSykmelding
     }
 }
