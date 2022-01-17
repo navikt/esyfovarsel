@@ -39,7 +39,7 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: pdl-api.dev.intern.nav.no
+        - host: pdl-api.dev-fss-pub.nais.io
   gcp:
     sqlInstances:
       - autoBackupHour: 1
