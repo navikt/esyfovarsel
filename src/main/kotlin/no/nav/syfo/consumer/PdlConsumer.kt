@@ -40,7 +40,7 @@ open class PdlConsumer(urlEnv: UrlEnv, private val stsConsumer: StsConsumer) {
 
     fun isBrukerGradert(aktorId: String): Boolean? {
         val response = callPdl(PERSON_QUERY, aktorId)
-
+        log.info("GRADERT: $aktorId")
         return when (response?.status) {
             HttpStatusCode.OK -> {
                 runBlocking { response.receive<PdlPersonResponse>().data?.isKode6Eller7() }
@@ -65,6 +65,7 @@ open class PdlConsumer(urlEnv: UrlEnv, private val stsConsumer: StsConsumer) {
         return runBlocking {
             val stsToken = stsConsumer.getToken()
             val bearerTokenString = "Bearer ${stsToken.access_token}"
+            log.info("PDL BEARER fetched")
             val graphQuery = this::class.java.getResource("$QUERY_PATH_PREFIX/$service").readText().replace("[\n\r]", "")
             val requestBody = PdlRequest(graphQuery, Variables(aktorId))
 
