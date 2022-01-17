@@ -7,6 +7,8 @@
   "clientId": "clientId",
   "clientSecret": "clientSecret",
   "syfosmregisterScope": "syfosmregisterScope",
+  "narmestelederScope": "narmestelederScope",
+  "narmestelederUrl": "http://localhost:9598",
   "loginserviceDiscoveryUrl": "https://loginservice.no/.well-known/openid-configuration",
   "loginserviceAudience": ["aud1", "aud2", "aud3"],
   "commonEnv": {

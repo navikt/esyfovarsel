@@ -46,7 +46,7 @@ fun main() {
     if (isJob()) {
         val env = jobEnvironment()
 
-        if(env.toggles.startJobb) {
+        if (env.toggles.startJobb) {
             val stsConsumer = StsConsumer(env.commonEnv)
             val pdlConsumer = PdlConsumer(env.commonEnv, stsConsumer)
             val dkifConsumer = DkifConsumer(env.commonEnv, stsConsumer)
@@ -80,15 +80,16 @@ fun main() {
             val stsConsumer = getStsConsumer(env.commonEnv)
             val pdlConsumer = getPdlConsumer(env.commonEnv, stsConsumer)
             val dkifConsumer = DkifConsumer(env.commonEnv, stsConsumer)
-            val oppfolgingstilfelleConsumer = getSyfosyketilfelleConsumer(env, stsConsumer)
+            val syfosyketilfelleConsumer = getSyfosyketilfelleConsumer(env, stsConsumer)
             val azureAdTokenConsumer = AzureAdTokenConsumer(env)
             val sykmeldingerConsumer = SykmeldingerConsumer(env, azureAdTokenConsumer)
+            val narmesteLederConsumer = NarmesteLederConsumer(env, azureAdTokenConsumer)
 
             val accessControl = AccessControl(pdlConsumer, dkifConsumer)
             val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
-            val varselSendtService = VarselSendtService(pdlConsumer, oppfolgingstilfelleConsumer, database)
-            val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService)
-            val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
+            val varselSendtService = VarselSendtService(pdlConsumer, syfosyketilfelleConsumer, database)
+            val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, syfosyketilfelleConsumer, varselSendtService)
+            val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, syfosyketilfelleConsumer, narmesteLederConsumer, sykmeldingService)
             val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
 
             connector {
@@ -119,7 +120,7 @@ fun main() {
     }
 }
 
-fun initDb(dbEnv: DbEnvironment): Database = if(isLocal()) localDatabase(dbEnv) else remoteDatabase(dbEnv)
+fun initDb(dbEnv: DbEnvironment): Database = if (isLocal()) localDatabase(dbEnv) else remoteDatabase(dbEnv)
 
 private fun localDatabase(env: DbEnvironment): Database = LocalDatabase(
     DbConfig(
