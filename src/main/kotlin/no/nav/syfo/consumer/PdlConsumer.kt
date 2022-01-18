@@ -6,15 +6,17 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
+import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.pdl.*
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 
-open class PdlConsumer(urlEnv: UrlEnv, private val stsConsumer: StsConsumer) {
+open class PdlConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client = httpClient()
     private val pdlBasepath = urlEnv.pdlUrl
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.PdlConsuner")
+    private val tokenScope = "api://dev-fss.pdl.pdl-api/.default"
 
     open fun getFnr(aktorId: String): String? {
         val response = callPdl(IDENTER_QUERY, aktorId)
@@ -40,7 +42,6 @@ open class PdlConsumer(urlEnv: UrlEnv, private val stsConsumer: StsConsumer) {
 
     fun isBrukerGradert(aktorId: String): Boolean? {
         val response = callPdl(PERSON_QUERY, aktorId)
-        log.info("GRADERT: $aktorId")
         return when (response?.status) {
             HttpStatusCode.OK -> {
                 runBlocking { response.receive<PdlPersonResponse>().data?.isKode6Eller7() }
@@ -61,11 +62,9 @@ open class PdlConsumer(urlEnv: UrlEnv, private val stsConsumer: StsConsumer) {
     }
 
     fun callPdl(service: String, aktorId: String): HttpResponse? {
-        log.info("CALL PDL: $service|$aktorId|$pdlBasepath")
         return runBlocking {
-            val stsToken = stsConsumer.getToken()
-            val bearerTokenString = "Bearer ${stsToken.access_token}"
-            log.info("PDL BEARER fetched")
+            val ADToken = azureAdTokenConsumer.getAzureAdAccessToken(tokenScope)
+            val bearerTokenString = "Bearer ${ADToken}"
             val graphQuery = this::class.java.getResource("$QUERY_PATH_PREFIX/$service").readText().replace("[\n\r]", "")
             val requestBody = PdlRequest(graphQuery, Variables(aktorId))
 
@@ -87,7 +86,7 @@ open class PdlConsumer(urlEnv: UrlEnv, private val stsConsumer: StsConsumer) {
     }
 }
 
-class LocalPdlConsumer(urlEnv: UrlEnv, stsConsumer: StsConsumer): PdlConsumer(urlEnv, stsConsumer) {
+class LocalPdlConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer): PdlConsumer(urlEnv, azureAdTokenConsumer) {
     override fun getFnr(aktorId: String): String {
         return aktorId.substring(0,11)
     }

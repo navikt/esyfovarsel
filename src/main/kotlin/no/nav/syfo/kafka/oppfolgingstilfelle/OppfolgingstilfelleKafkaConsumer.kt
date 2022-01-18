@@ -47,14 +47,10 @@ class OppfolgingstilfelleKafkaConsumer(
             while (applicationState.running) {
                 kafkaListener.poll(Duration.ofMillis(0)).forEach {
                     log.info("Received record from [$topicOppfolgingsTilfelle]")
-                    log.info("Key: ${it.key()} | Top: ${it.topic()}")
-                    log.info("Value: ${it.value()}")
                     try {
                         val peker: KOppfolgingstilfellePeker = objectMapper.readValue(it.value())
                         val aktorId = peker.aktorId
-                        log.info("aktorId: $aktorId")
                         val fnr = accessControl.getFnrIfUserCanBeNotified(aktorId)
-                        log.info("fnr: $fnr")
                         fnr?.let {
                             varselPlanners.forEach { planner ->
                                 try {

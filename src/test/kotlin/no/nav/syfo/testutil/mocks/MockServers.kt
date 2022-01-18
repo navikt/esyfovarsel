@@ -15,6 +15,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import no.nav.syfo.AuthEnv
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.consumer.DkifConsumer
 import no.nav.syfo.consumer.pdl.IDENTER_QUERY
@@ -23,7 +24,7 @@ import no.nav.syfo.testutil.extractPortFromUrl
 import java.io.Serializable
 
 
-class MockServers(val urlEnv: UrlEnv) {
+class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
     private val mapper = ObjectMapper().registerModule(KotlinModule())
 
     fun mockPdlServer(): NettyApplicationEngine {
@@ -58,6 +59,14 @@ class MockServers(val urlEnv: UrlEnv) {
         return mockServer(urlEnv.stsUrl) {
             post("/rest/v1/sts/token") {
                 call.respond(tokenFromStsServer)
+            }
+        }
+    }
+
+    fun mockAADServer(): NettyApplicationEngine {
+        return mockServer(authEnv.aadAccessTokenUrl) {
+            post {
+                call.respond(tokenFromAzureServer)
             }
         }
     }

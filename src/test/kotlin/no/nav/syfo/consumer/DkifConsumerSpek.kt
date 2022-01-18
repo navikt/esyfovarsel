@@ -19,7 +19,7 @@ const val aktorIdInvalid = "${aktorId}-with-invalid-input"
 object DkifConsumerSpek : Spek({
 
     val testEnv = getTestEnv()
-    val mockServers = MockServers(testEnv.urlEnv)
+    val mockServers = MockServers(testEnv.urlEnv, testEnv.authEnv)
     val stsMockServer = mockServers.mockStsServer()
     val dkifMockServer = mockServers.mockDkifServer()
 

@@ -20,25 +20,19 @@ open class StsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv) {
 
     fun isValidToken(token: Token?) : Boolean {
         val valid = token?.expiresAt?.isAfter(LocalDateTime.now()) ?: false
-        log.info("TOKEN VALID: $valid")
         return token?.expiresAt?.isAfter(LocalDateTime.now()) ?: false
     }
 
     open suspend fun getToken(): Token {
-        log.info("STS: getToken")
         if(isValidToken(token)) {
             return token!!
         }
-
-        log.info("STS: Call endpoint")
 
         token = client.post<Token>(stsEndpointUrl) {
             headers{
                 append(HttpHeaders.Authorization, encodeCredentials(username, password))
             }
         }
-
-        log.info("STS: Done")
 
         return token!!
     }

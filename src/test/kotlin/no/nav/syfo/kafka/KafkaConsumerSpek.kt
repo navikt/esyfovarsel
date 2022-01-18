@@ -3,6 +3,7 @@ package no.nav.syfo.kafka
 import kotlinx.coroutines.runBlocking
 import no.nav.common.KafkaEnvironment
 import no.nav.syfo.ApplicationState
+import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.DkifConsumer
 import no.nav.syfo.consumer.PdlConsumer
@@ -39,15 +40,17 @@ object KafkaConsumerSpek : Spek({
 
     val fakeOppfolgingstilfelleKafkaProducer = KafkaProducer<String, KOppfolgingstilfellePeker>(producerProperties)
 
-    val mockServers = MockServers(testEnv.urlEnv)
+    val mockServers = MockServers(testEnv.urlEnv, testEnv.authEnv)
 
     val stsServer = mockServers.mockStsServer()
+    val azureADServer = mockServers.mockAADServer()
     val dkifServer = mockServers.mockDkifServer()
     val pdlServer = mockServers.mockPdlServer()
     val syfosyketilfelleServer = mockServers.mockSyfosyketilfelleServer()
 
     val stsConsumer = StsConsumer(testEnv.urlEnv, testEnv.authEnv)
-    val pdlConsumer = PdlConsumer(testEnv.urlEnv, stsConsumer)
+    val azureAdTokenConsumer = AzureAdTokenConsumer(testEnv.authEnv)
+    val pdlConsumer = PdlConsumer(testEnv.urlEnv, azureAdTokenConsumer)
     val dkifConsumer = DkifConsumer(testEnv.urlEnv, stsConsumer)
     val accessControl = AccessControl(pdlConsumer, dkifConsumer)
     val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(testEnv, accessControl)
@@ -57,6 +60,7 @@ object KafkaConsumerSpek : Spek({
     beforeGroup {
         embeddedKafkaEnv.start()
         stsServer.start()
+        azureADServer.start()
         dkifServer.start()
         pdlServer.start()
         syfosyketilfelleServer.start()
@@ -65,6 +69,7 @@ object KafkaConsumerSpek : Spek({
     afterGroup {
         embeddedKafkaEnv.tearDown()
         stsServer.stop(1L, 10L)
+        azureADServer.stop(1L, 10L)
         dkifServer.stop(1L, 10L)
         pdlServer.stop(1L, 10L)
         syfosyketilfelleServer.stop(1L, 10L)

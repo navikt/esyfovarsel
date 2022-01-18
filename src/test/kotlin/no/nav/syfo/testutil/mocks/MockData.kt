@@ -210,13 +210,19 @@ val kafkaOppfolgingstilfellePeker = KOppfolgingstilfellePeker(
 
 // STS
 
-val tokenFromStsServer = STSToken(
+val tokenFromStsServer = Token(
     access_token = "default access token",
     token_type = "Bearer",
     expires_in = 3600
 )
 
-data class STSToken(
+val tokenFromAzureServer = Token(
+    access_token = "AAD access token",
+    token_type = "Bearer",
+    expires_in = 3600
+)
+
+data class Token(
     val access_token: String,
     val token_type: String,
     val expires_in: Long

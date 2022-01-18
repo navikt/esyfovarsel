@@ -49,10 +49,11 @@ fun main() {
             database = Database(env.dbEnv)
 
             val stsConsumer = getStsConsumer(env.urlEnv, env.authEnv)
-            val pdlConsumer = getPdlConsumer(env.urlEnv, stsConsumer)
+            val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
+
+            val pdlConsumer = getPdlConsumer(env.urlEnv, azureAdTokenConsumer)
             val dkifConsumer = DkifConsumer(env.urlEnv, stsConsumer)
             val oppfolgingstilfelleConsumer = getSyfosyketilfelleConsumer(env.urlEnv, stsConsumer)
-            val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
             val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
 
             val accessControl = AccessControl(pdlConsumer, dkifConsumer)
@@ -103,11 +104,11 @@ private fun getStsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv): StsConsumer {
     return StsConsumer(urlEnv, authEnv)
 }
 
-private fun getPdlConsumer(urlEnv: UrlEnv, stsConsumer: StsConsumer): PdlConsumer {
+private fun getPdlConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer): PdlConsumer {
     if (isLocal()) {
-        return LocalPdlConsumer(urlEnv, stsConsumer)
+        return LocalPdlConsumer(urlEnv, azureAdTokenConsumer)
     }
-    return PdlConsumer(urlEnv, stsConsumer)
+    return PdlConsumer(urlEnv, azureAdTokenConsumer)
 }
 
 private fun getSyfosyketilfelleConsumer(urlEnv: UrlEnv, stsConsumer: StsConsumer): SyfosyketilfelleConsumer {
