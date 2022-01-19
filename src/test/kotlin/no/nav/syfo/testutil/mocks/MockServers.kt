@@ -18,6 +18,7 @@ import io.ktor.server.netty.*
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.consumer.DkifConsumer
+import no.nav.syfo.consumer.kontaktinfoPathKRR
 import no.nav.syfo.consumer.pdl.IDENTER_QUERY
 import no.nav.syfo.consumer.pdl.PERSON_QUERY
 import no.nav.syfo.testutil.extractPortFromUrl
@@ -46,9 +47,9 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
 
     fun mockDkifServer(): NettyApplicationEngine {
         return mockServer(urlEnv.dkifUrl) {
-            get("/api/v1/personer/kontaktinformasjon") {
-                if (call.request.headers[DkifConsumer.NAV_PERSONIDENTER_HEADER]?.isValidHeader() == true)
-                    call.respond(dkifResponseMap[call.request.headers[DkifConsumer.NAV_PERSONIDENTER_HEADER]] ?: dkifResponseSuccessKanVarsles)
+            get(kontaktinfoPathKRR) {
+                if (call.request.headers[DkifConsumer.NAV_PERSONIDENT_HEADER]?.isValidHeader() == true)
+                    call.respond(dkifResponseMap[call.request.headers[DkifConsumer.NAV_PERSONIDENT_HEADER]] ?: dkifResponseSuccessKanVarsles)
                 else
                     call.response.status(HttpStatusCode(500, "Server error"))
             }

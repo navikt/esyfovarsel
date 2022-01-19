@@ -40,6 +40,8 @@ spec:
     outbound:
       external:
         - host: pdl-api.dev-fss-pub.nais.io
+      rules:
+        - application: digdir-krr-proxy
   gcp:
     sqlInstances:
       - autoBackupHour: 1

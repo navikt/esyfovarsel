@@ -7,7 +7,6 @@ import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
-import no.nav.syfo.auth.StsConsumer
 import no.nav.syfo.consumer.pdl.*
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory

@@ -52,7 +52,7 @@ fun main() {
             val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
 
             val pdlConsumer = getPdlConsumer(env.urlEnv, azureAdTokenConsumer)
-            val dkifConsumer = DkifConsumer(env.urlEnv, stsConsumer)
+            val dkifConsumer = DkifConsumer(env.urlEnv, azureAdTokenConsumer)
             val oppfolgingstilfelleConsumer = getSyfosyketilfelleConsumer(env.urlEnv, stsConsumer)
             val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
 

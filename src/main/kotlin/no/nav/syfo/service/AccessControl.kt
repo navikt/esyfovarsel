@@ -6,7 +6,6 @@ import no.nav.syfo.consumer.PdlConsumer
 class AccessControl(val pdlConsumer: PdlConsumer, val dkifConsumer: DkifConsumer) {
 
     fun getFnrIfUserCanBeNotified(aktorId: String): String? {
-        println("AccessControl: $aktorId")
         return if (pdlConsumer.isBrukerGradert(aktorId) == false && dkifConsumer.kontaktinfo(aktorId)?.kanVarsles == true)
             return pdlConsumer.getFnr(aktorId)
         else
