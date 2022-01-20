@@ -24,7 +24,7 @@ interface KafkaListener {
 
 fun consumerProperties(env: Environment) : Properties {
     val properties = HashMap<String,String>().apply {
-        put(GROUP_ID_CONFIG, "esyfovarsel-group-gcp")
+        put(GROUP_ID_CONFIG, "esyfovarsel-group-gcp-devtest3")
         put(AUTO_OFFSET_RESET_CONFIG, "earliest")
         put(MAX_POLL_RECORDS_CONFIG, "1")
         put(ENABLE_AUTO_COMMIT_CONFIG, "false")

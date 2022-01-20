@@ -50,8 +50,11 @@ class OppfolgingstilfelleKafkaConsumer(
                     try {
                         val peker: KOppfolgingstilfellePeker = objectMapper.readValue(it.value())
                         val aktorId = peker.aktorId
+                        println("Checkaccess BEGIN")
                         val fnr = accessControl.getFnrIfUserCanBeNotified(aktorId)
+                        println("Checkaccess[FNR]: $fnr")
                         fnr?.let {
+                            println("process: $fnr")
                             varselPlanners.forEach { planner ->
                                 try {
                                     runBlocking { planner.processOppfolgingstilfelle(aktorId, fnr) }
@@ -61,6 +64,7 @@ class OppfolgingstilfelleKafkaConsumer(
                                 }
                             }
                         }
+                        println("Checkaccess DONE")
                     } catch (e: IOException) {
                         log.error(
                             "Error in [$topicOppfolgingsTilfelle] listener: Could not parse message | ${e.message}",
