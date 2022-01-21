@@ -42,6 +42,7 @@ spec:
         - host: pdl-api.dev-fss-pub.nais.io
       rules:
         - application: digdir-krr-proxy
+        - application: security-token-service
   gcp:
     sqlInstances:
       - autoBackupHour: 1
