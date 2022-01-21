@@ -19,10 +19,16 @@ open class PdlConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAd
 
     open fun getFnr(aktorId: String): String? {
         val response = callPdl(IDENTER_QUERY, aktorId)
+        log.info("BEGIN getFnr($aktorId)")
 
         return when (response?.status) {
             HttpStatusCode.OK -> {
-                runBlocking { response.receive<PdlIdentResponse>().data?.hentIdenter?.identer?.first()?.ident }
+                runBlocking {
+                    log.info("Response OK")
+                    val pdlResponse = response.receive<PdlIdentResponse>().data?.hentIdenter?.identer?.first()?.ident
+                    log.info("Response: ${pdlResponse.toString()}")
+                    pdlResponse
+                }
             }
             HttpStatusCode.NoContent -> {
                 log.error("Could not get fnr from PDL: No content found in the response body")
@@ -41,6 +47,7 @@ open class PdlConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAd
 
     fun isBrukerGradert(aktorId: String): Boolean? {
         val response = callPdl(PERSON_QUERY, aktorId)
+
         return when (response?.status) {
             HttpStatusCode.OK -> {
                 runBlocking { response.receive<PdlPersonResponse>().data?.isKode6Eller7() }
