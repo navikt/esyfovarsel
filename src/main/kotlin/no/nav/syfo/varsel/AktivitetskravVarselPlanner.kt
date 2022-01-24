@@ -133,7 +133,9 @@ class AktivitetskravVarselPlanner(
 
         val isBehandlingsdag = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.BEHANDLINGSDAGER.name) == true
 
-        return hasValidDocumentType && isAcceptedDocument && !isBehandlingsdag
+        val isFravarForSykmelding = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.FRAVAR_FOR_SYKMELDING.name) == true
+
+        return hasValidDocumentType && isAcceptedDocument && !isBehandlingsdag && !isFravarForSykmelding
     }
 
     fun calculateActualNumberOfDaysInTimeline(validSyketilfelledager: List<Syketilfelledag>): Int {
