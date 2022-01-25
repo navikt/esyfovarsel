@@ -7,6 +7,9 @@ enum class SyketilfellebitTag {
     SENDT,
     PAPIRSYKMELDING,
     BEKREFTET,
+    BEHANDLINGSDAGER,
+    SYKEPENGESOKNAD,
+    FRAVAR_FOR_SYKMELDING,
 }
 
 data class Syketilfellebit(

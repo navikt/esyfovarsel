@@ -7,6 +7,7 @@ import no.nav.syfo.consumer.NarmesteLederConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.consumer.SykmeldingerConsumer
 import no.nav.syfo.consumer.domain.Syketilfellebit
+import no.nav.syfo.consumer.domain.SyketilfellebitTag
 import no.nav.syfo.consumer.domain.Syketilfelledag
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederRelasjon
 import no.nav.syfo.consumer.narmesteLeder.NarmestelederResponse
@@ -21,10 +22,12 @@ import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldNotBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import kotlin.test.assertFailsWith
 
 object AktivitetskravVarselPlannerSpek : Spek({
@@ -119,7 +122,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
             coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
-            coEvery { narmesteLederConsumer.getNarmesteLeder(any(), any()) } returns NarmestelederResponse(dummyNarmesteLederRelasjon())
+            coEvery { narmesteLederConsumer.getNarmesteLeder(any(), any()) } returns NarmestelederResponse(createDummyNarmesteLederRelasjon())
 
             runBlocking {
                 aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
@@ -164,7 +167,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
             coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
-            coEvery { narmesteLederConsumer.getNarmesteLeder(any(), any()) } returns NarmestelederResponse(dummyNarmesteLederRelasjon())
+            coEvery { narmesteLederConsumer.getNarmesteLeder(any(), any()) } returns NarmestelederResponse(createDummyNarmesteLederRelasjon())
 
             runBlocking {
                 aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
@@ -237,7 +240,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
             coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
-            coEvery { narmesteLederConsumer.getNarmesteLeder(any(), any()) } returns NarmestelederResponse(dummyNarmesteLederRelasjon())
+            coEvery { narmesteLederConsumer.getNarmesteLeder(any(), any()) } returns NarmestelederResponse(createDummyNarmesteLederRelasjon())
 
             runBlocking {
 
@@ -315,7 +318,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
             coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
-            coEvery { narmesteLederConsumer.getNarmesteLeder(any(), any()) } returns NarmestelederResponse(dummyNarmesteLederRelasjon())
+            coEvery { narmesteLederConsumer.getNarmesteLeder(any(), any()) } returns NarmestelederResponse(createDummyNarmesteLederRelasjon())
 
             runBlocking {
                 aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
@@ -370,7 +373,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
             coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
-            coEvery { narmesteLederConsumer.getNarmesteLeder(any(), any()) } returns NarmestelederResponse(dummyNarmesteLederRelasjon())
+            coEvery { narmesteLederConsumer.getNarmesteLeder(any(), any()) } returns NarmestelederResponse(createDummyNarmesteLederRelasjon())
 
             val lagreteVarsler1 = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
             val nrOfRowsFetchedTotal1 = lagreteVarsler1.size
@@ -415,9 +418,44 @@ object AktivitetskravVarselPlannerSpek : Spek({
             }
 
         }
+
+        it("AkvitietskravVarselPlanner fjerner perioder uten sykmelding når den faktiske fraværlengde blir beregnet") {
+
+            val validSyketilfelledager: List<Syketilfelledag> = listOf(
+                createValidSyketilfelledag(LocalDate.of(2021, 12, 8).atStartOfDay(), LocalDate.of(2021, 12, 10).atStartOfDay()),
+                createValidSyketilfelledag(LocalDate.of(2021, 12, 8).atStartOfDay(), LocalDate.of(2021, 12, 10).atStartOfDay()),
+                createValidSyketilfelledag(LocalDate.of(2021, 12, 8).atStartOfDay(), LocalDate.of(2021, 12, 10).atStartOfDay()),
+
+                createValidSyketilfelledag(LocalDate.of(2021, 12, 11).atStartOfDay(), LocalDate.of(2021, 12, 23).atStartOfDay()),
+
+                createValidSyketilfelledag(LocalDate.of(2021, 12, 24).atStartOfDay(), LocalDate.of(2022, 1, 2).atStartOfDay()),
+                createValidSyketilfelledag(LocalDate.of(2021, 12, 24).atStartOfDay(), LocalDate.of(2022, 1, 2).atStartOfDay()),
+                createValidSyketilfelledag(LocalDate.of(2021, 12, 24).atStartOfDay(), LocalDate.of(2022, 1, 2).atStartOfDay()),
+
+                createValidSyketilfelledag(LocalDate.of(2022, 1, 17).atStartOfDay(), LocalDate.of(2022, 1, 23).atStartOfDay()),
+            )
+
+            val numberOfDaysActual = aktivitetskravVarselPlanner.calculateActualNumberOfDaysInTimeline(validSyketilfelledager)
+            val numberOfDaysExpected = (ChronoUnit.DAYS.between(LocalDate.of(2021, 12, 8), LocalDate.of(2021, 12, 10)).toInt()
+                    + ChronoUnit.DAYS.between(LocalDate.of(2021, 12, 11), LocalDate.of(2021, 12, 23)).toInt()
+                    + ChronoUnit.DAYS.between(LocalDate.of(2021, 12, 24), LocalDate.of(2022, 1, 2)).toInt()
+                    + ChronoUnit.DAYS.between(LocalDate.of(2022, 1, 17), LocalDate.of(2022, 1, 23)).toInt())
+
+            numberOfDaysActual.shouldNotBeEqualTo(ChronoUnit.DAYS.between(LocalDate.of(2021, 12, 8), LocalDate.of(2022, 1, 23)).toInt())
+            numberOfDaysActual.shouldBeEqualTo(numberOfDaysExpected)
+        }
     }
 })
 
-fun dummyNarmesteLederRelasjon(): NarmesteLederRelasjon {
+fun createValidSyketilfelledag(fom: LocalDateTime, tom: LocalDateTime): Syketilfelledag {
+    return Syketilfelledag(
+        LocalDate.now(),
+        Syketilfellebit(
+            "", "", "", LocalDateTime.now(), LocalDateTime.now(), listOf(SyketilfellebitTag.SYKMELDING.name, SyketilfellebitTag.BEKREFTET.name), "", fom, tom
+        )
+    )
+}
+
+fun createDummyNarmesteLederRelasjon(): NarmesteLederRelasjon {
     return NarmesteLederRelasjon(null, "123", null, null, null, null, null, null, false, false, Tilgang.SYKMELDING)
 }
