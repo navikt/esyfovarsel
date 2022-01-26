@@ -23,7 +23,13 @@
   },
   "kafkaEnv": {
     "kafkaBootstrapServersUrl": "http://localhost:9092",
-    "kafkaSchemaRegistryUrl": "http://localhost:8081"
+    "kafkaSchemaRegistryUrl": "http://localhost:8081",
+    "aivenBroker": "http://localhost:9093",
+    "sslConfig": {
+      "truststoreLocation": "ts.loc",
+      "keystoreLocation": "ks.loc",
+      "credstorePassword": "password"
+    }
   },
   "dbEnv": {
     "dbHost": "127.0.0.1",

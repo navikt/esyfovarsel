@@ -68,6 +68,8 @@ spec:
   webproxy: true
   ingresses:
     - "https://esyfovarsel.dev.intern.nav.no"
+  kafka:
+    pool: nav-dev
   filesFrom:
     - secret: esyfovarsel-serviceuser
   env:

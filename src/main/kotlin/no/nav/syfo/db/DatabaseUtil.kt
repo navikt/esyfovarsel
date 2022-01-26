@@ -1,8 +1,15 @@
 package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PPlanlagtVarsel
+import no.nav.syfo.db.domain.PSyketilfellebit
+import no.nav.syfo.db.domain.Syketilfellebit
 import no.nav.syfo.db.domain.UtsendtVarsel
-import java.sql.ResultSet
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KSyketilfellebit
+import java.time.LocalDateTime
+import java.sql.*
+import java.sql.Date
+import java.util.*
+import kotlin.collections.ArrayList
 
 fun <T> ResultSet.toList(mapper: ResultSet.() -> T) = mutableListOf<T>().apply {
     while (next()) {
@@ -41,4 +48,30 @@ fun ResultSet.toVarslingIdsListe(): List<String> {
 fun ResultSet.toVarslingIdsListeCount(): Int {
     this.last()
     return this.row
+}
+
+fun ResultSet.toSyketilfellebit() = Syketilfellebit(
+    getString("fnr"),
+    getString("orgnummer"),
+    getString("ressurs_id"),
+    getDate("fom").toLocalDate(),
+    getDate("tom").toLocalDate()
+)
+
+
+fun KSyketilfellebit.toPSyketilfellebit(): PSyketilfellebit {
+    return PSyketilfellebit (
+        UUID.randomUUID(),
+        this.id,
+        this.fnr,
+        this.orgnummer,
+        Timestamp.valueOf(LocalDateTime.now()),
+        Timestamp.valueOf(this.opprettet.toLocalDateTime()),
+        Timestamp.valueOf(this.inntruffet.toLocalDateTime()),
+        this.tags.reduce{acc, tag -> "$acc,$tag" },
+        this.ressursId,
+        Date.valueOf(this.fom),
+        Date.valueOf(this.tom),
+        this.korrigererSendtSoknad
+    )
 }

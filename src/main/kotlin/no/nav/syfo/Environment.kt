@@ -52,7 +52,13 @@ fun getEnv() =
             ),
             KafkaEnv(
                 kafkaBootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
-                kafkaSchemaRegistryUrl = getEnvVar("KAFKA_SCHEMA_REGISTRY_URL")
+                kafkaSchemaRegistryUrl = getEnvVar("KAFKA_SCHEMA_REGISTRY_URL"),
+                aivenBroker = getEnvVar("KAFKA_BROKERS"),
+                KafkaSslEnv(
+                    truststoreLocation = getEnvVar("KAFKA_TRUSTSTORE_PATH"),
+                    keystoreLocation = getEnvVar("KAFKA_KEYSTORE_PATH"),
+                    credstorePassword = getEnvVar("KAFKA_CREDSTORE_PASSWORD")
+                )
             ),
             DbEnv(
                 dbHost = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_HOST", "127.0.0.1"),
@@ -110,7 +116,15 @@ data class UrlEnv(
 
 data class KafkaEnv(
     var kafkaBootstrapServersUrl: String,
-    val kafkaSchemaRegistryUrl: String
+    val kafkaSchemaRegistryUrl: String,
+    val aivenBroker: String,
+    val sslConfig: KafkaSslEnv
+)
+
+data class KafkaSslEnv(
+    val truststoreLocation: String,
+    val keystoreLocation: String,
+    val credstorePassword: String
 )
 
 data class DbEnv(

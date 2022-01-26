@@ -24,6 +24,7 @@ import no.nav.syfo.job.sendNotificationsJob
 import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.launchKafkaListener
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
+import no.nav.syfo.kafka.oppfolgingstilfelle.SyketilfelleKafkaConsumer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.service.*
 import no.nav.syfo.varsel.AktivitetskravVarselPlanner
@@ -168,11 +169,19 @@ fun Application.kafkaModule(
         val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, accessControl)
             .addPlanner(aktivitetskravVarselPlanner)
             .addPlanner(merVeiledningVarselPlanner)
+        val syketilfellebitKafkaConsumer = SyketilfelleKafkaConsumer(env, database)
 
         launch(backgroundTasksContext) {
             launchKafkaListener(
                 state,
                 oppfolgingstilfelleKafkaConsumer
+            )
+        }
+
+        launch(backgroundTasksContext) {
+            launchKafkaListener(
+                state,
+                syketilfellebitKafkaConsumer
             )
         }
     }

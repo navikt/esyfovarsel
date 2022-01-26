@@ -14,7 +14,6 @@ import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import no.nav.syfo.kafka.topicOppfolgingsTilfelle
 import no.nav.syfo.metrics.tellFeilIParsing
 import no.nav.syfo.metrics.tellFeilIPlanner
-import no.nav.syfo.metrics.tellFeilIProsessering
 import no.nav.syfo.service.AccessControl
 import no.nav.syfo.varsel.VarselPlanner
 import org.apache.kafka.clients.consumer.KafkaConsumer
