@@ -25,35 +25,29 @@ class AktivitetskravVarselPlanner(
     val sykmeldingService: SykmeldingService,
     override val name: String = "AKTIVITETSKRAV_VARSEL"
 ) : VarselPlanner {
-    private val AKTIVITETSKRAV_DAGER: Long = 42
+    private val ANTALL_DAGER_AKTIVITETSKRAV: Long = 42
 
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.AktivitetskravVarselPlanner")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
 
     override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String) = coroutineScope {
         val oppfolgingstilfellePerson = syfosyketilfelleConsumer.getOppfolgingstilfelle(aktorId)
-        log.info("-$name-: oppfolgingstilfellePerson er -$oppfolgingstilfellePerson-")
 
         if (oppfolgingstilfellePerson == null) {
-            log.info("-$name-: Fant ikke oppfolgingstilfelle. Planlegger ikke nytt varsel")
+            log.info("[$name]: Fant ikke oppfolgingstilfelle for denne brukeren. Planlegger ikke nytt varsel")
             return@coroutineScope
         }
 
         val validSyketilfelledager = oppfolgingstilfellePerson.tidslinje.filter { isValidSyketilfelledag(it) }.sortedBy { it.dag }
 
-        log.info("-$name-: gyldigeSyketilfelledager i tidslinjen er -$validSyketilfelledager-")
-
-        if (validSyketilfelledager.isNotEmpty() && calculateActualNumberOfDaysInTimeline(validSyketilfelledager) >= AKTIVITETSKRAV_DAGER) {
+        if (validSyketilfelledager.isNotEmpty() && calculateActualNumberOfDaysInTimeline(validSyketilfelledager) >= ANTALL_DAGER_AKTIVITETSKRAV) {
             val newestSyketilfelledag = validSyketilfelledager.last()
             val oldestSyketilfelledag = validSyketilfelledager.first()
 
             val fom = oldestSyketilfelledag.prioritertSyketilfellebit!!.fom.toLocalDate()
             val tom = newestSyketilfelledag.prioritertSyketilfellebit!!.tom.toLocalDate()
 
-            val aktivitetskravVarselDate = fom.plusDays(AKTIVITETSKRAV_DAGER)
-
-            log.info("-$name-: oppfolgingstilfellePerson.fom er -$fom-")
-            log.info("-$name-: oppfolgingstilfellePerson.tom er -$tom-")
+            val aktivitetskravVarselDate = fom.plusDays(ANTALL_DAGER_AKTIVITETSKRAV)
 
             var ressursIds: MutableSet<String> = HashSet()
 
@@ -61,31 +55,28 @@ class AktivitetskravVarselPlanner(
                 ressursIds.add(it.prioritertSyketilfellebit!!.ressursId)
             }
 
-            log.info("-$name-: nyestOppT: $newestSyketilfelledag")
-            log.info("-$name-: relevante -FOM, TOM, DATO, RESSURS_IDS: $fom, $tom, $aktivitetskravVarselDate, $ressursIds-")
+            val savedVarsler = varselUtil.getPlanlagteVarslerOfType(fnr, VarselType.AKTIVITETSKRAV)
 
-            val lagreteVarsler = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.AKTIVITETSKRAV)
-
-            if (varselUtil.isVarselDatoForIDag(aktivitetskravVarselDate)) {
-                log.info("-$name-: Beregnet dato for varsel er før i dag, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
+            if (varselUtil.isVarselDateBeforeToday(aktivitetskravVarselDate)) {
+                log.info("[$name]: Beregnet dato for varsel er før i dag, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
                 databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
-            } else if (varselUtil.isVarselDatoEtterTilfelleSlutt(aktivitetskravVarselDate, tom)) {
-                log.info("-$name-: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
+            } else if (varselUtil.isVarselDateAfterTilfelleEnd(aktivitetskravVarselDate, tom)) {
+                log.info("[$name]: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
                 databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
             } else if (sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDate, fnr) == true) {
-                log.info("-$name-: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
+                log.info("[$name]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
                 databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
-            } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDate }
+            } else if (savedVarsler.isNotEmpty() && savedVarsler.filter { it.utsendingsdato == aktivitetskravVarselDate }
                     .isNotEmpty()) {
-                log.info("-$name-: varsel med samme utsendingsdato er allerede planlagt. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
-            } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDate }
+                log.info("[$name]: varsel med samme utsendingsdato er allerede planlagt. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
+            } else if (savedVarsler.isNotEmpty() && savedVarsler.filter { it.utsendingsdato == aktivitetskravVarselDate }
                     .isEmpty()) {
-                log.info("-$name-: sjekker om det finnes varsler med samme id. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
-                if (varselUtil.hasLagreteVarslerForForespurteSykmeldinger(lagreteVarsler, ressursIds)) {
-                    log.info("-$name-: sletter tidligere varsler for. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
+                log.info("[$name]: sjekker om det finnes varsler med samme id. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
+                if (varselUtil.hasSavedVarslerWithRequestedRessursIds(savedVarsler, ressursIds)) {
+                    log.info("[$name]: sletter tidligere varsler for. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
                     databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
 
-                    log.info("-$name-: Lagrer ny varsel etter sletting med dato: -$aktivitetskravVarselDate-. -FOM, TOM: , $fom, $tom-")
+                    log.info("[$name]: Lagrer ny varsel etter sletting med dato: -$aktivitetskravVarselDate-. -FOM, TOM: , $fom, $tom-")
                     val aktivitetskravVarsel = PlanlagtVarsel(
                         fnr,
                         oppfolgingstilfellePerson.aktorId,
@@ -95,7 +86,7 @@ class AktivitetskravVarselPlanner(
                     )
                     databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
                 } else {
-                    log.info("-$name-: Lagrer ny varsel med dato: -$aktivitetskravVarselDate-. -FOM, TOM: , $fom, $tom-")
+                    log.info("[$name]: Lagrer ny varsel med dato: -$aktivitetskravVarselDate-. -FOM, TOM: , $fom, $tom-")
                     val aktivitetskravVarsel = PlanlagtVarsel(
                         fnr,
                         oppfolgingstilfellePerson.aktorId,
@@ -107,7 +98,7 @@ class AktivitetskravVarselPlanner(
                     tellAktivitetskravPlanlagt()
                 }
             } else {
-                log.info("-$name-: Lagrer ny varsel med dato: -$aktivitetskravVarselDate-")
+                log.info("[$name]: Lagrer ny varsel med dato: -$aktivitetskravVarselDate-")
 
                 val aktivitetskravVarsel = PlanlagtVarsel(
                     fnr,
@@ -120,7 +111,7 @@ class AktivitetskravVarselPlanner(
                 tellAktivitetskravPlanlagt()
             }
         }
-        log.info("-$name-: Ingen gyldigeSykmeldingTilfelledager. Planlegger ikke nytt varsel")
+        log.info("[$name]: Ingen gyldige sykmeldingTilfelledager. Planlegger ikke nytt varsel")
     }
 
     private fun isValidSyketilfelledag(syketilfelledag: Syketilfelledag): Boolean {
@@ -140,7 +131,7 @@ class AktivitetskravVarselPlanner(
 
     fun calculateActualNumberOfDaysInTimeline(validSyketilfelledager: List<Syketilfelledag>): Int {
         val first = validSyketilfelledager[0].prioritertSyketilfellebit
-        var actualNumberOfDaysInTimeline =  ChronoUnit.DAYS.between(first!!.fom, first.tom).toInt()
+        var actualNumberOfDaysInTimeline = ChronoUnit.DAYS.between(first!!.fom, first.tom).toInt()
 
         for (i in 1 until validSyketilfelledager.size) {
             val currentFom = validSyketilfelledager[i].prioritertSyketilfellebit!!.fom.toLocalDate()

@@ -36,7 +36,7 @@ class MerVeiledningVarselPlanner(
             val varselDato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
 
             if(varselDato == null){
-                val tidligerePlanlagteVarslerPaFnr = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.MER_VEILEDNING)
+                val tidligerePlanlagteVarslerPaFnr = varselUtil.getPlanlagteVarslerOfType(fnr, VarselType.MER_VEILEDNING)
 
                 if (tidligerePlanlagteVarslerPaFnr.isNotEmpty()) {
                     val sistePlanlagteVarsel = tidligerePlanlagteVarslerPaFnr.first()
@@ -62,7 +62,7 @@ class MerVeiledningVarselPlanner(
                     log.info("[$name]: Varsel har allerede blitt sendt ut til bruker i dette sykeforløpet. Planlegger ikke nytt varsel")
                     return@coroutineScope
                 }
-                val tidligerePlanlagteVarslerPaFnr = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.MER_VEILEDNING)
+                val tidligerePlanlagteVarslerPaFnr = varselUtil.getPlanlagteVarslerOfType(fnr, VarselType.MER_VEILEDNING)
 
                 if (tidligerePlanlagteVarslerPaFnr.isNotEmpty()) {
                     val sisteUsendteVarsel = tidligerePlanlagteVarslerPaFnr.first()

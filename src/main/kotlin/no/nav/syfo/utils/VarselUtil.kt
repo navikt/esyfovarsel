@@ -12,7 +12,7 @@ val antallUker39UkersVarsel = 39L
 val antallDager39UkersVarsel = antallUker39UkersVarsel * 7L + 1
 
 class VarselUtil(private val databaseAccess: DatabaseInterface) {
-    fun isVarselDatoForIDag(varselDato: LocalDate): Boolean {
+    fun isVarselDateBeforeToday(varselDato: LocalDate): Boolean {
         return varselDato.isBefore(LocalDate.now())
     }
 
@@ -27,22 +27,22 @@ class VarselUtil(private val databaseAccess: DatabaseInterface) {
         return if (isAntallSykedagerPast39Uker && isTomAfterVarselDato && !isVarselDatoExpired) varselDato else null
     }
 
-    fun isVarselDatoEtterTilfelleSlutt(varselDato: LocalDate, tilfelleSluttDato: LocalDate): Boolean {
-        return tilfelleSluttDato.isEqual(varselDato) || varselDato.isAfter(tilfelleSluttDato)
+    fun isVarselDateAfterTilfelleEnd(varselDate: LocalDate, tilfelleEndDate: LocalDate): Boolean {
+        return tilfelleEndDate.isEqual(varselDate) || varselDate.isAfter(tilfelleEndDate)
     }
 
-    fun getPlanlagteVarslerAvType(fnr: String, varselType: VarselType): List<PPlanlagtVarsel> {
+    fun getPlanlagteVarslerOfType(fnr: String, varselType: VarselType): List<PPlanlagtVarsel> {
         return databaseAccess.fetchPlanlagtVarselByFnr(fnr)
             .filter { it.type == varselType.name }
     }
 
-    fun hasLagreteVarslerForForespurteSykmeldinger(planlagteVarsler: List<PPlanlagtVarsel>, ressursIds: Set<String>): Boolean {
-        val gjeldendeSykmeldinger = mutableSetOf<Set<String>>()
+    fun hasSavedVarslerWithRequestedRessursIds(planlagteVarsler: List<PPlanlagtVarsel>, ressursIds: Set<String>): Boolean {
+        val savedRessursIds = mutableSetOf<Set<String>>()
         for (v: PPlanlagtVarsel in planlagteVarsler) {
             val sm = databaseAccess.fetchSykmeldingerIdByPlanlagtVarselsUUID(v.uuid)
-            gjeldendeSykmeldinger.add(sm.toSet())
+            savedRessursIds.add(sm.toSet())
         }
-        val gjeldendeSykmeldingerSet = gjeldendeSykmeldinger.flatten().toSet()
-        return (ressursIds intersect gjeldendeSykmeldingerSet).isNotEmpty()
+        val savedRessursIdsSet = savedRessursIds.flatten().toSet()
+        return (ressursIds intersect savedRessursIdsSet).isNotEmpty()
     }
 }
