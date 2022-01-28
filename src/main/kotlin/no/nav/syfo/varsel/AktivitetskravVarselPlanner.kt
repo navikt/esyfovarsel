@@ -58,25 +58,25 @@ class AktivitetskravVarselPlanner(
             val savedVarsler = varselUtil.getPlanlagteVarslerOfType(fnr, VarselType.AKTIVITETSKRAV)
 
             if (varselUtil.isVarselDateBeforeToday(aktivitetskravVarselDate)) {
-                log.info("[$name]: Beregnet dato for varsel er før i dag, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
+                log.info("[$name]: Beregnet dato for varsel er før i dag, sletter tidligere planlagt varsel om det finnes i DB. [FOM, TOM, DATO]: [$fom, $tom, $aktivitetskravVarselDate]")
                 databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
             } else if (varselUtil.isVarselDateAfterTilfelleEnd(aktivitetskravVarselDate, tom)) {
-                log.info("[$name]: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
+                log.info("[$name]: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB. [FOM, TOM, DATO: [$fom, $tom, $aktivitetskravVarselDate]")
                 databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
             } else if (sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDate, fnr) == true) {
-                log.info("[$name]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
+                log.info("[$name]: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, sletter tidligere planlagt varsel om det finnes i DB. [FOM, TOM, DATO]: [$fom, $tom, $aktivitetskravVarselDate]")
                 databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
             } else if (savedVarsler.isNotEmpty() && savedVarsler.filter { it.utsendingsdato == aktivitetskravVarselDate }
                     .isNotEmpty()) {
-                log.info("[$name]: varsel med samme utsendingsdato er allerede planlagt. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
+                log.info("[$name]: varsel med samme utsendingsdato er allerede planlagt. [FOM, TOM, DATO]: [$fom, $tom, $aktivitetskravVarselDate]")
             } else if (savedVarsler.isNotEmpty() && savedVarsler.filter { it.utsendingsdato == aktivitetskravVarselDate }
                     .isEmpty()) {
-                log.info("[$name]: sjekker om det finnes varsler med samme id. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
+                log.info("[$name]: sjekker om det finnes varsler med samme id. [FOM, TOM, DATO]: [$fom, $tom, $aktivitetskravVarselDate]")
                 if (varselUtil.hasSavedVarslerWithRequestedRessursIds(savedVarsler, ressursIds)) {
-                    log.info("[$name]: sletter tidligere varsler for. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
+                    log.info("[$name]: sletter tidligere varsler for. [FOM, TOM, DATO]: [$fom, $tom, $aktivitetskravVarselDate]")
                     databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
 
-                    log.info("[$name]: Lagrer ny varsel etter sletting med dato: -$aktivitetskravVarselDate-. -FOM, TOM: , $fom, $tom-")
+                    log.info("[$name]: Lagrer ny varsel etter sletting. [FOM, TOM, DATO]: [$fom, $tom, $aktivitetskravVarselDate]")
                     val aktivitetskravVarsel = PlanlagtVarsel(
                         fnr,
                         oppfolgingstilfellePerson.aktorId,
@@ -86,7 +86,7 @@ class AktivitetskravVarselPlanner(
                     )
                     databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
                 } else {
-                    log.info("[$name]: Lagrer ny varsel med dato: -$aktivitetskravVarselDate-. -FOM, TOM: , $fom, $tom-")
+                    log.info("[$name]: Lagrer ny varsel. [FOM, TOM, DATO]: [$fom, $tom, $aktivitetskravVarselDate]")
                     val aktivitetskravVarsel = PlanlagtVarsel(
                         fnr,
                         oppfolgingstilfellePerson.aktorId,
@@ -98,7 +98,7 @@ class AktivitetskravVarselPlanner(
                     tellAktivitetskravPlanlagt()
                 }
             } else {
-                log.info("[$name]: Lagrer ny varsel med dato: -$aktivitetskravVarselDate-")
+                log.info("[$name]: Lagrer ny varsel. [FOM, TOM, DATO]: [$fom, $tom, $aktivitetskravVarselDate]")
 
                 val aktivitetskravVarsel = PlanlagtVarsel(
                     fnr,
