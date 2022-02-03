@@ -50,6 +50,10 @@ fun appEnvironment(): AppEnvironment =
             getEnvVar("AZURE_APP_CLIENT_SECRET"),
             getEnvVar("LOGINSERVICE_IDPORTEN_DISCOVERY_URL"),
             getEnvVar("LOGINSERVICE_IDPORTEN_AUDIENCE").split(","),
+            getEnvVar("KAFKA_BROKERS"),
+            getEnvVar("KAFKA_TRUSTSTORE_PATH"),
+            getEnvVar("KAFKA_KEYSTORE_PATH"),
+            getEnvVar("KAFKA_CREDSTORE_PASSWORD"),
             remoteCommonEnvironment()
         )
 
@@ -81,6 +85,10 @@ data class AppEnvironment(
     val clientSecret: String,
     val loginserviceDiscoveryUrl: String,
     val loginserviceAudience: List<String>,
+    val aivenBroker: String,
+    val truststoreLocation: String,
+    val keystoreLocation: String,
+    val credstorePassword: String,
     var commonEnv: CommonEnvironment
 )
 

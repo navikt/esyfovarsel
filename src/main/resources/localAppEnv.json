@@ -11,6 +11,10 @@
   "narmestelederUrl": "http://localhost:9598",
   "loginserviceDiscoveryUrl": "https://loginservice.no/.well-known/openid-configuration",
   "loginserviceAudience": ["aud1", "aud2", "aud3"],
+  "aivenBroker": "http://localhost:9094",
+  "truststoreLocation": "/",
+  "keystoreLocation": "/",
+  "credstorePassword": "pwd",
   "commonEnv": {
     "remote": false,
     "kafkaBootstrapServersUrl": "http://localhost:9092",

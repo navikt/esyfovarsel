@@ -44,10 +44,10 @@ class OppfolgingstilfelleKafkaConsumer(
     }
 
     override suspend fun listen(applicationState: ApplicationState) {
-        log.info("Starting to listen to $topicOppfolgingsTilfelle")
+        log.info("Started listening to topic $topicOppfolgingsTilfelle")
         while (applicationState.running) {
             kafkaListener.poll(Duration.ofMillis(0)).forEach {
-                log.info("Received record from [$topicOppfolgingsTilfelle]")
+                log.info("Received record from topic: [$topicOppfolgingsTilfelle]")
                 try {
                     val peker: KOppfolgingstilfellePeker = objectMapper.readValue(it.value())
                     val aktorId = peker.aktorId
