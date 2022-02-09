@@ -108,6 +108,11 @@ dependencies {
     constraints {
         implementation("org.eclipse.jetty:jetty-io:11.0.2")
         implementation("io.netty:netty-codec:4.1.73.Final")
+        implementation("org.eclipse.jetty:jetty-webapp:11.0.7")
+        implementation("com.google.code.gson:gson:2.8.9")
+        implementation("com.google.protobuf:protobuf-java:3.19.4")
+        implementation("org.glassfish.jersey.media:jersey-media-jaxb:2.31")
+        implementation("org.glassfish:jakarta.el:3.0.4")
     }
 }
 
