@@ -104,6 +104,10 @@ dependencies {
     testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion")
     testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spekVersion")
     testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spekVersion")
+
+    constraints {
+        implementation("org.eclipse.jetty:jetty-io:11.0.2")
+    }
 }
 
 configurations.implementation {
