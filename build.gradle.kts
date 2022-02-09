@@ -13,10 +13,10 @@ val mockkVersion = "1.10.2"
 val slf4jVersion = "1.7.30"
 val logbackVersion = "1.2.3"
 val logstashEncoderVersion = "6.3"
-val postgresVersion = "42.2.13"
+val postgresVersion = "42.3.2"
 val hikariVersion = "4.0.1"
 val flywayVersion = "7.5.2"
-val vaultJdbcVersion = "1.3.7"
+val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.11.3"
 val postgresEmbeddedVersion = "0.13.3"
 val kafkaVersion = "2.7.0"
@@ -104,6 +104,16 @@ dependencies {
     testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion")
     testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spekVersion")
     testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spekVersion")
+
+    constraints {
+        implementation("org.eclipse.jetty:jetty-io:11.0.2")
+        implementation("io.netty:netty-codec:4.1.73.Final")
+        implementation("org.eclipse.jetty:jetty-webapp:11.0.7")
+        implementation("com.google.code.gson:gson:2.8.9")
+        implementation("com.google.protobuf:protobuf-java:3.19.4")
+        implementation("org.glassfish.jersey.media:jersey-media-jaxb:2.31")
+        implementation("org.glassfish:jakarta.el:3.0.4")
+    }
 }
 
 configurations.implementation {
