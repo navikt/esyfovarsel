@@ -44,6 +44,8 @@ spec:
   webproxy: true
   ingresses:
     - "https://esyfovarsel.dev.adeo.no"
+  kafka:
+    pool: nav-dev
   env:
   {{#each env.common}}
     - name: {{@key}}

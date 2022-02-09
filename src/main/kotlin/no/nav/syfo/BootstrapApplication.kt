@@ -27,6 +27,7 @@ import no.nav.syfo.job.SendVarslerJobb
 import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.launchKafkaListener
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
+import no.nav.syfo.kafka.oppfolgingstilfelle.SyketilfelleKafkaConsumer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.metrics.withPrometheus
 import no.nav.syfo.service.*
@@ -200,6 +201,7 @@ fun Application.kafkaModule(
     merVeiledningVarselPlanner: MerVeiledningVarselPlanner
 ) {
     runningRemotely {
+        val syketilfelleKafkaConsumer = SyketilfelleKafkaConsumer(env, database)
         val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, accessControl)
             .addPlanner(aktivitetskravVarselPlanner)
             .addPlanner(merVeiledningVarselPlanner)
@@ -208,6 +210,13 @@ fun Application.kafkaModule(
             launchKafkaListener(
                 state,
                 oppfolgingstilfelleKafkaConsumer
+            )
+        }
+
+        launch(backgroundTasksContext) {
+            launchKafkaListener(
+                state,
+                syketilfelleKafkaConsumer
             )
         }
     }
