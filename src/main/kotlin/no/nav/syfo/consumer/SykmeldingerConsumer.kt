@@ -10,35 +10,19 @@ import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import no.nav.syfo.AppEnvironment
+import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusRequest
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
+import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-class SykmeldingerConsumer(env: AppEnvironment, azureAdTokenConsumer: AzureAdTokenConsumer) {
-
-    private val client: HttpClient
-    private val azureAdTokenConsumer: AzureAdTokenConsumer
-    private val basepath: String
+class SykmeldingerConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
+    private val client = httpClient()
+    private val basepath = urlEnv.syfosmregisterUrl
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.SykmeldingerConsumer")
-    private val scope = env.syfosmregisterScope
-
-    init {
-        client = HttpClient(CIO) {
-            expectSuccess = false
-            install(JsonFeature) {
-                serializer = JacksonSerializer {
-                    registerKotlinModule()
-                    registerModule(JavaTimeModule())
-                    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                }
-            }
-        }
-        this.azureAdTokenConsumer = azureAdTokenConsumer
-        basepath = env.syfosmregisterUrl
-    }
+    private val scope = urlEnv.syfosmregisterScope
 
     suspend fun getSykmeldtStatusPaDato(dato: LocalDate, fnr: String): SykmeldtStatusResponse? {
         val requestURL = "$basepath/api/v2/sykmelding/sykmeldtStatus"

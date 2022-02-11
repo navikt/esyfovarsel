@@ -6,18 +6,16 @@ import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.builders.BeskjedBuilder
 import no.nav.brukernotifikasjon.schemas.builders.NokkelBuilder
 import no.nav.brukernotifikasjon.schemas.builders.domain.PreferertKanal
-import no.nav.syfo.CommonEnvironment
+import no.nav.syfo.*
 import no.nav.syfo.kafka.producerProperties
 import no.nav.syfo.kafka.topicBrukernotifikasjonBeskjed
 import org.apache.kafka.clients.producer.ProducerRecord
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.util.*
 
 class BeskjedKafkaProducer(
-    val env: CommonEnvironment,
-    val baseUrlSykefravaer: String
+    val env: Environment
 ) {
     private val kafkaProducer = KafkaProducer<Nokkel, Beskjed>(producerProperties(env))
     private val UTCPlus1 = ZoneId.of("Europe/Oslo")
@@ -41,7 +39,7 @@ class BeskjedKafkaProducer(
 
     private fun buildNewNokkel(uuid: String): Nokkel {
         return NokkelBuilder()
-            .withSystembruker(env.serviceuserUsername)
+            .withSystembruker(env.authEnv.serviceuserUsername)
             .withEventId(uuid)
             .build()
     }
@@ -52,7 +50,7 @@ class BeskjedKafkaProducer(
             .withEksternVarsling(true)
             .withTidspunkt(LocalDateTime.now(UTCPlus1))
             .withTekst(content)
-            .withLink(URL(baseUrlSykefravaer))
+            .withLink(URL(env.urlEnv.baseUrlDittSykefravaer))
             .withSikkerhetsnivaa(sikkerhetsNiva)
             .withPrefererteKanaler(PreferertKanal.SMS)
             .withGrupperingsId(groupingId)

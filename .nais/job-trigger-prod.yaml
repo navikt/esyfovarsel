@@ -1,0 +1,17 @@
+apiVersion: nais.io/v1
+kind: Naisjob
+metadata:
+  name: esyfovarsel-job
+  namespace: team-esyfo
+  labels:
+    team: team-esyfo
+spec:
+  image: {{ image }}
+  schedule: "5 9 * * *"
+  filesFrom:
+    - secret: esyfovarsel-serviceuser
+  env:
+  {{#each job}}
+    - name: {{@key}}
+      value: {{this}}
+  {{/each}}

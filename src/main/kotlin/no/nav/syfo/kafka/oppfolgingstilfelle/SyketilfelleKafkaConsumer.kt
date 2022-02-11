@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import no.nav.syfo.AppEnvironment
 import no.nav.syfo.ApplicationState
+import no.nav.syfo.Environment
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.storeSyketilfellebit
 import no.nav.syfo.db.toPSyketilfellebit
@@ -24,7 +24,7 @@ import java.time.Duration
 
 
 class SyketilfelleKafkaConsumer(
-    val env: AppEnvironment,
+    val env: Environment,
     val databaseInterface: DatabaseInterface
 ) : KafkaListener {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.SyketilfelleKafkaConsumer")
@@ -39,6 +39,7 @@ class SyketilfelleKafkaConsumer(
 
     init {
         val kafkaConfig = aivenConsumerProperties(env)
+        log.info("[DEBUG]: KAFKA BROKER: ${kafkaConfig.getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG)}")
         kafkaListener = KafkaConsumer(kafkaConfig)
         kafkaListener.subscribe(listOf(topicFlexSyketilfellebiter))
     }

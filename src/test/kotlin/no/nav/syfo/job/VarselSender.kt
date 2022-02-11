@@ -3,7 +3,7 @@ package no.nav.syfo.job
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.syfo.Toggles
+import no.nav.syfo.ToggleEnv
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
@@ -22,7 +22,7 @@ import org.amshove.kluent.should
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
-object SendVarslerJobbSpek: Spek( {
+object VarselSenderSpek: Spek( {
 
     defaultTimeout = 20000L
 
@@ -41,7 +41,7 @@ object SendVarslerJobbSpek: Spek( {
 
 
         it("Sender varsler") {
-            val sendVarselJobb = SendVarslerJobb(embeddedDatabase, sendVarselService, Toggles(true,true,true))
+            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true,true))
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1"), MER_VEILEDNING)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
 
@@ -53,7 +53,7 @@ object SendVarslerJobbSpek: Spek( {
         }
 
         it("Skal ikke sende mer veiledning-varsel hvis toggle er false") {
-            val sendVarselJobb = SendVarslerJobb(embeddedDatabase, sendVarselService, Toggles(true,false,true))
+            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(false,true))
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, emptySet(), MER_VEILEDNING)
             val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1"), AKTIVITETSKRAV)
 
@@ -71,7 +71,7 @@ object SendVarslerJobbSpek: Spek( {
         }
 
         it("Skal ikke sende aktivitetskrav-varsel hvis toggle er false") {
-            val sendVarselJobb = SendVarslerJobb(embeddedDatabase, sendVarselService, Toggles(true,true,false))
+            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true,false))
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1"), MER_VEILEDNING)
             val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1"), AKTIVITETSKRAV)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
@@ -89,7 +89,7 @@ object SendVarslerJobbSpek: Spek( {
         }
 
         it ("Skal ikke markere varsel som sendt dersom utsending feiler"){
-            val sendVarselJobb = SendVarslerJobb(embeddedDatabase, sendVarselService, Toggles(true,true,true))
+            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true,true))
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1"), MER_VEILEDNING)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
 

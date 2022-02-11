@@ -8,17 +8,10 @@ metadata:
 spec:
   image: {{ image }}
   schedule: "*/15 * * * *"
-  vault:
-    enabled: true
-    paths:
-      - kvPath: "/serviceuser/data/dev/srvesyfovarsel"
-        mountPath: "/var/run/secrets/serviceuser"
+  filesFrom:
+    - secret: esyfovarsel-serviceuser
   env:
-  {{#each env.common}}
-    - name: {{@key}}
-      value: {{this}}
-  {{/each}}
-  {{#each env.job}}
+  {{#each job}}
     - name: {{@key}}
       value: {{this}}
   {{/each}}

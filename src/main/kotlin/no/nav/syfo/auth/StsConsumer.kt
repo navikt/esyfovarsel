@@ -1,33 +1,25 @@
 package no.nav.syfo.auth
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.features.json.*
+
 import io.ktor.client.request.*
 import io.ktor.http.*
-import no.nav.syfo.CommonEnvironment
+import no.nav.syfo.AuthEnv
+import no.nav.syfo.UrlEnv
+import no.nav.syfo.utils.httpClient
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.Base64
 
-open class StsConsumer(env: CommonEnvironment) {
-    private val username = env.serviceuserUsername
-    private val password = env.serviceuserPassword
-    private val stsEndpointUrl = "${env.stsUrl}/rest/v1/sts/token?grant_type=client_credentials&scope=openid"
+open class StsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv) {
+    private val username = authEnv.serviceuserUsername
+    private val password = authEnv.serviceuserPassword
+    private val stsEndpointUrl = "${urlEnv.stsUrl}/rest/v1/sts/token?grant_type=client_credentials&scope=openid"
     private var token: Token? = null
-
-    private val client = HttpClient(CIO) {
-        expectSuccess = false
-        install(JsonFeature) {
-            serializer = JacksonSerializer {
-                registerKotlinModule()
-                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            }
-        }
-    }
+    private val client = httpClient()
+    private val log = LoggerFactory.getLogger("no.nav.syfo.auth.StsConsumer")
 
     fun isValidToken(token: Token?) : Boolean {
+        val valid = token?.expiresAt?.isAfter(LocalDateTime.now()) ?: false
         return token?.expiresAt?.isAfter(LocalDateTime.now()) ?: false
     }
 
@@ -46,7 +38,7 @@ open class StsConsumer(env: CommonEnvironment) {
     }
 }
 
-class LocalStsConsumer(env: CommonEnvironment): StsConsumer(env) {
+class LocalStsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv): StsConsumer(urlEnv, authEnv) {
     override suspend fun getToken(): Token = Token(
         "access_token_string",
         "access_token",

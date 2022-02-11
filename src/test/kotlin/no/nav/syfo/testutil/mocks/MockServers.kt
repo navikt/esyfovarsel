@@ -15,19 +15,21 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import no.nav.syfo.AppEnvironment
+import no.nav.syfo.AuthEnv
+import no.nav.syfo.UrlEnv
 import no.nav.syfo.consumer.DkifConsumer
+import no.nav.syfo.consumer.kontaktinfoPathKRR
 import no.nav.syfo.consumer.pdl.IDENTER_QUERY
 import no.nav.syfo.consumer.pdl.PERSON_QUERY
 import no.nav.syfo.testutil.extractPortFromUrl
 import java.io.Serializable
 
 
-class MockServers(val env: AppEnvironment) {
+class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
     private val mapper = ObjectMapper().registerModule(KotlinModule())
 
     fun mockPdlServer(): NettyApplicationEngine {
-        return mockServer(env.commonEnv.pdlUrl) {
+        return mockServer(urlEnv.pdlUrl) {
             post("/") {
                 val content = call.receiveText()
                 val queryType = content.queryType()
@@ -44,10 +46,10 @@ class MockServers(val env: AppEnvironment) {
     }
 
     fun mockDkifServer(): NettyApplicationEngine {
-        return mockServer(env.commonEnv.dkifUrl) {
-            get("/api/v1/personer/kontaktinformasjon") {
-                if (call.request.headers[DkifConsumer.NAV_PERSONIDENTER_HEADER]?.isValidHeader() == true)
-                    call.respond(dkifResponseMap[call.request.headers[DkifConsumer.NAV_PERSONIDENTER_HEADER]] ?: dkifResponseSuccessKanVarsles)
+        return mockServer(urlEnv.dkifUrl) {
+            get(kontaktinfoPathKRR) {
+                if (call.request.headers[DkifConsumer.NAV_PERSONIDENT_HEADER]?.isValidHeader() == true)
+                    call.respond(dkifResponseMap[call.request.headers[DkifConsumer.NAV_PERSONIDENT_HEADER]] ?: dkifResponseSuccessKanVarsles)
                 else
                     call.response.status(HttpStatusCode(500, "Server error"))
             }
@@ -55,15 +57,23 @@ class MockServers(val env: AppEnvironment) {
     }
 
     fun mockStsServer(): NettyApplicationEngine {
-        return mockServer(env.commonEnv.stsUrl) {
+        return mockServer(urlEnv.stsUrl) {
             post("/rest/v1/sts/token") {
                 call.respond(tokenFromStsServer)
             }
         }
     }
 
+    fun mockAADServer(): NettyApplicationEngine {
+        return mockServer(authEnv.aadAccessTokenUrl) {
+            post {
+                call.respond(tokenFromAzureServer)
+            }
+        }
+    }
+
     fun mockSyfosyketilfelleServer(): NettyApplicationEngine {
-        return mockServer(env.syfosyketilfelleUrl) {
+        return mockServer(urlEnv.syfosyketilfelleUrl) {
             get("/kafka/oppfolgingstilfelle/beregn/{aktorId}") {
                 call.respond(
                     oppfolgingstilfelleResponse
@@ -114,4 +124,3 @@ data class PdlRequestSerializable(
 data class VariablesSerializable(
     val ident: String
 ) : Serializable
-

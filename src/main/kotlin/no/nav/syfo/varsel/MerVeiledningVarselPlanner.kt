@@ -25,7 +25,7 @@ class MerVeiledningVarselPlanner(
 
     override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String) = coroutineScope {
         val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle39Uker(aktorId)
-        
+
         if(oppfolgingstilfelle == null) {
             log.info("[$name]: Fant ikke oppfolgingstilfelle for denne brukeren. Planlegger ikke nytt varsel")
             return@coroutineScope

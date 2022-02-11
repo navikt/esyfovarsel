@@ -51,7 +51,7 @@ jobs:
 
   deploy-dev:
     if: github.ref == 'refs/heads/master'
-    name: Deploy to NAIS Dev-fss
+    name: Deploy to dev
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -60,15 +60,15 @@ jobs:
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
+          CLUSTER: dev-gcp
           RESOURCE: .nais/naiserator-dev.yaml
           VARS: .nais/dev.json
       - name: Deploy jobb
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
-          RESOURCE: .nais/send-varsler-job-dev.yaml
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/job-trigger-dev.yaml
           VARS: .nais/dev.json
 
       # Notify Slack
@@ -84,7 +84,7 @@ jobs:
 
   deploy-prod:
     if: github.ref == 'refs/heads/master'
-    name: Deploy to NAIS Prod-fss
+    name: Deploy to prod
     needs: deploy-dev
     runs-on: ubuntu-latest
     steps:
@@ -93,21 +93,21 @@ jobs:
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-fss
+          CLUSTER: prod-gcp
           RESOURCE: .nais/naiserator-prod.yaml
           VARS: .nais/prod.json
       - name: Deploy jobb
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-fss
-          RESOURCE: .nais/send-varsler-job-prod.yaml
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/job-trigger-prod.yaml
           VARS: .nais/prod.json
       - name: Deploy alerts
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-fss
+          CLUSTER: prod-gcp
           RESOURCE: .nais/alerts.yaml
 
       # Notify Slack

@@ -1,0 +1,45 @@
+{
+  "appEnv": {
+    "applicationPort": "8080",
+    "applicationThreads": "1"
+  },
+  "authEnv": {
+    "serviceuserUsername": "srvesyfovarsel",
+    "serviceuserPassword": "password",
+    "clientId": "clientId",
+    "clientSecret": "clientSecret",
+    "aadAccessTokenUrl": "http://localhost:9595",
+    "loginserviceDiscoveryUrl": "https://loginservice.no/.well-known/openid-configuration",
+    "loginserviceAudience": ["aud1", "aud2", "aud3"]
+  },
+  "urlEnv": {
+    "syfosyketilfelleUrl": "http://localhost:9090",
+    "syfosmregisterUrl": "http://localhost:9494",
+    "syfosmregisterScope": "syfosmregisterScope",
+    "baseUrlDittSykefravaer": "http://ditt-sykefravaer:8080",
+    "stsUrl": "http://localhost:9094",
+    "pdlUrl": "http://localhost:9091",
+    "dkifUrl": "http://localhost:9093"
+  },
+  "kafkaEnv": {
+    "kafkaBootstrapServersUrl": "http://localhost:9092",
+    "kafkaSchemaRegistryUrl": "http://localhost:8081",
+    "aivenBroker": "http://localhost:9093",
+    "sslConfig": {
+      "truststoreLocation": "ts.loc",
+      "keystoreLocation": "ks.loc",
+      "credstorePassword": "password"
+    }
+  },
+  "dbEnv": {
+    "dbHost": "127.0.0.1",
+    "dbPort": "5432",
+    "dbName": "esyfovarsel",
+    "dbUsername": "esyfovarsel-admin",
+    "dbPassword": "password"
+  },
+  "toggleEnv": {
+    "sendMerVeiledningVarsler": "true",
+    "sendAktivitetskravVarsler": "true"
+  }
+}
