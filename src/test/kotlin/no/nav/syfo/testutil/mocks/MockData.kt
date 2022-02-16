@@ -5,6 +5,8 @@ import no.nav.syfo.consumer.pdl.*
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
+import no.nav.syfo.syketilfelle.domain.Syketilfellebit
+import no.nav.syfo.syketilfelle.domain.Tag
 import java.time.LocalDate
 
 // Syfosyketilfelle
@@ -18,8 +20,6 @@ const val fnr2 = "23456789012"
 const val fnr3 = "34567890123"
 const val fnr4 = "45678901234"
 const val orgnummer = "999888777"
-const val tagSykmelding = "SYKMELDING"
-const val tagSendt = "SENDT"
 
 val fom = LocalDate.of(2021, 5, 5)
 val tom = LocalDate.of(2021, 6, 5)
@@ -28,14 +28,14 @@ val tomStartOfDay = tom.atStartOfDay()
 
 val syketilfellebit = Syketilfellebit(
     id = "id",
-    aktorId = aktorId,
+    fnr = fnr1,
     orgnummer = orgnummer,
     opprettet = fomStartOfDay,
     inntruffet = fomStartOfDay,
-    tags = listOf(tagSykmelding, tagSendt),
+    tags = listOf(Tag.SYKMELDING, Tag.SENDT),
     ressursId = "ressursId",
-    fom = fomStartOfDay,
-    tom = tomStartOfDay
+    fom = fom,
+    tom = tom
 )
 
 val syketilfelledag = Syketilfelledag(
