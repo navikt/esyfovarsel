@@ -7,6 +7,7 @@ import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.metrics.tellMerVeiledningPlanlagt
 import no.nav.syfo.service.VarselSendtService
+import no.nav.syfo.syketilfelle.SyketilfelleService
 import no.nav.syfo.utils.VarselUtil
 import no.nav.syfo.utils.todayIsBetweenFomAndTom
 import org.slf4j.Logger
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory
 class MerVeiledningVarselPlanner(
     val databaseAccess: DatabaseInterface,
     val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
+    val syketilfelleService: SyketilfelleService,
     val varselSendtService: VarselSendtService
 ) : VarselPlanner {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.Varsel39Uker")
@@ -23,6 +25,9 @@ class MerVeiledningVarselPlanner(
 
     override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String) = coroutineScope {
         val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle39Uker(aktorId)
+        val oppfolgingstilfelleIntern = syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(fnr)
+
+        log.info("SST: ${oppfolgingstilfelle?.fom} <--> ${oppfolgingstilfelle?.tom} (${oppfolgingstilfelle?.antallSykefravaersDagerTotalt})| INT: ${oppfolgingstilfelleIntern?.fom} <--> ${oppfolgingstilfelleIntern?.tom} (${oppfolgingstilfelleIntern?.antallSykefravaersDagerTotalt})")
 
         if(oppfolgingstilfelle == null) {
             log.info("[$name]: Fant ikke oppfolgingstilfelle for denne brukeren. Planlegger ikke nytt varsel")
