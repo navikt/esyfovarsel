@@ -46,8 +46,6 @@ class SyketilfelleKafkaConsumer(
     override suspend fun listen(applicationState: ApplicationState) {
         log.info("Started listening to topic $topicFlexSyketilfellebiter")
         while (applicationState.running) {
-            // TODO: Skru av syketilfellebit-consumer inntil databasen er ryddet opp manuelt
-            /*
             kafkaListener.poll(zeroMillis).forEach {
                 log.info("Received record from topic: [$topicFlexSyketilfellebiter]")
                 try {
@@ -59,9 +57,8 @@ class SyketilfelleKafkaConsumer(
                         e
                     )
                 }
-                kafkaListener.commitSync()      // TODO: Glemte å legge til commit
+                kafkaListener.commitSync()
             }
-             */
         }
     }
 }
