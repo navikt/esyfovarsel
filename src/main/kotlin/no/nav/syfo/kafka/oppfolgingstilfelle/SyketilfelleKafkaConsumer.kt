@@ -57,6 +57,7 @@ class SyketilfelleKafkaConsumer(
                         e
                     )
                 }
+                kafkaListener.commitSync()
             }
         }
     }
