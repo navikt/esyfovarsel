@@ -3,6 +3,7 @@ package no.nav.syfo.syketilfelle
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.syketilfelle.domain.Tag.*
 import no.nav.syfo.db.fetchSyketilfellebiterByFnr
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.syketilfelle.domain.Oppfolgingstilfelle
 import no.nav.syfo.syketilfelle.domain.Syketilfellebiter
 import no.nav.syfo.syketilfelle.domain.Tidslinje
@@ -21,13 +22,22 @@ data class KOppfolgingstilfelle39Uker(
     val tom: LocalDate
 )
 
+fun KOppfolgingstilfelle39Uker.toOppfolgingstilfelle39Uker() = Oppfolgingstilfelle39Uker(
+    this.aktorId,
+    this.arbeidsgiverperiodeTotalt,
+    this.antallSykefravaersDagerTotalt,
+    this.fom,
+    this.tom
+)
+
 class SyketilfelleService(
     val database: DatabaseInterface
 ) {
-    fun beregnKOppfolgingstilfelle39UkersVarsel(fnr: String): KOppfolgingstilfelle39Uker? =
+    fun beregnKOppfolgingstilfelle39UkersVarsel(fnr: String): Oppfolgingstilfelle39Uker? =
         genererOppfolgingstilfelle(fnr)
             ?.filter { oppfolgingstilfelle -> oppfolgingstilfelle.dagerAvArbeidsgiverperiode > AntallDagerIArbeidsgiverPeriode }
             ?.let { slaaSammenTilfeller(fnr, it) }
+            ?.toOppfolgingstilfelle39Uker()
 
 
     private fun genererOppfolgingstilfelle(fnr: String): List<Oppfolgingstilfelle>? {
@@ -100,15 +110,6 @@ class SyketilfelleService(
     }
 
     private fun LocalDate.leggTilArbeidsgiverPeriode() = plusDays(AntallDagerIArbeidsgiverPeriode.toLong())
-
-    /*
-            val oppfolgingstilfelle = syketilfelle.genererOppfolgingstilfelle(aktorId = aktorId)
-            ?.filter { oppfolgingstilfelle -> oppfolgingstilfelle.dagerAvArbeidsgiverperiode > AntallDagerIArbeidsgiverPeriode }
-        return when {
-            !oppfolgingstilfelle.isNullOrEmpty() -> ResponseEntity.ok(syketilfelle.slaaSammenTilfeller(aktorId, oppfolgingstilfelle))
-            else -> ResponseEntity.noContent().build()
-        }
-     */
 
 }
 

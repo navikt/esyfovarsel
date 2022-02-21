@@ -57,7 +57,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
             )
 
             coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns null
+            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             runBlocking {
                 merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
@@ -82,7 +82,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
             )
 
             coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns null
+            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             val dagenForTilfelleStartet = fom.minusDays(1)
             val tidligereUtsendtVarsel = PPlanlagtVarsel(
@@ -121,7 +121,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
             )
 
             coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns null
+            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             val tidligereUtsendtVarsel = PPlanlagtVarsel(
                 UUID.randomUUID().toString(),
@@ -156,7 +156,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
             )
 
             coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns null
+            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             runBlocking {
                 merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
@@ -180,7 +180,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
             )
 
             coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns null
+            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             runBlocking {
                 merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
@@ -222,7 +222,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
             )
 
             coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns null
+            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             runBlocking {
                 merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)

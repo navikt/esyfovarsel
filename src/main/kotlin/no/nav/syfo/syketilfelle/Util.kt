@@ -30,7 +30,6 @@ class ListContainsPredicate<T> private constructor(private val predicate: (List<
     operator fun not() = ListContainsPredicate<T> { it !in this }
 }
 
-infix fun <T> T.or(other: ListContainsPredicate<T>) = ListContainsPredicate.of(this) or other
 
 infix fun <T> T.or(other: T) = ListContainsPredicate.of(this) or other
 
