@@ -2,13 +2,14 @@ package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PSyketilfellebit
-import no.nav.syfo.db.domain.Syketilfellebit
 import no.nav.syfo.db.domain.UtsendtVarsel
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KSyketilfellebit
 import java.sql.ResultSet
 import java.sql.Timestamp
-import java.sql.Date
+import no.nav.syfo.syketilfelle.domain.Syketilfellebit
+import no.nav.syfo.syketilfelle.domain.tagsFromString
 import java.time.LocalDateTime
+import java.sql.Date
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -37,8 +38,12 @@ fun ResultSet.toUtsendtVarsel() = UtsendtVarsel(
 )
 
 fun ResultSet.toSyketilfellebit() = Syketilfellebit(
+    id = getString("id"),
     fnr = getString("fnr"),
     orgnummer = getString("orgnummer"),
+    opprettet = getTimestamp("opprettet").toLocalDateTime(),
+    inntruffet = getTimestamp("inntruffet").toLocalDateTime(),
+    tags = getString("tags").tagsFromString(),
     ressursId = getString("ressurs_id"),
     fom = getDate("fom").toLocalDate(),
     tom = getDate("tom").toLocalDate()

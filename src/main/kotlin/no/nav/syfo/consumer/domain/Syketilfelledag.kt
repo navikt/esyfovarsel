@@ -1,5 +1,6 @@
 package no.nav.syfo.consumer.domain
 
+import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import java.time.LocalDate
 
 data class Syketilfelledag(

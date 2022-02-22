@@ -3,7 +3,7 @@ package no.nav.syfo.varsel
 import kotlinx.coroutines.coroutineScope
 import no.nav.syfo.consumer.NarmesteLederConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
-import no.nav.syfo.consumer.domain.SyketilfellebitTag
+import no.nav.syfo.syketilfelle.domain.Tag.*
 import no.nav.syfo.consumer.domain.Syketilfelledag
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselBySykmeldingerId
@@ -47,8 +47,8 @@ class AktivitetskravVarselPlanner(
             val newestSyketilfelledag = validSyketilfelledager.last()
             val oldestSyketilfelledag = validSyketilfelledager.first()
 
-            val fom = oldestSyketilfelledag.prioritertSyketilfellebit!!.fom.toLocalDate()
-            val tom = newestSyketilfelledag.prioritertSyketilfellebit!!.tom.toLocalDate()
+            val fom = oldestSyketilfelledag.prioritertSyketilfellebit!!.fom
+            val tom = newestSyketilfelledag.prioritertSyketilfellebit!!.tom
 
             val aktivitetskravVarselDate = fom.plusDays(AKTIVITETSKRAV_DAGER)
 
@@ -124,16 +124,16 @@ class AktivitetskravVarselPlanner(
     }
 
     private fun isValidSyketilfelledag(syketilfelledag: Syketilfelledag): Boolean {
-        val hasValidDocumentType = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.SYKMELDING.name) == true ||
-                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.PAPIRSYKMELDING.name) == true ||
-                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.SYKEPENGESOKNAD.name) == true
+        val hasValidDocumentType = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SYKMELDING) == true ||
+                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(PAPIRSYKMELDING) == true ||
+                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SYKEPENGESOKNAD) == true
 
-        val isAcceptedDocument = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.SENDT.name) == true ||
-                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.BEKREFTET.name) == true
+        val isAcceptedDocument = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SENDT) == true ||
+                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(BEKREFTET) == true
 
-        val isBehandlingsdag = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.BEHANDLINGSDAGER.name) == true
+        val isBehandlingsdag = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(BEHANDLINGSDAGER) == true
 
-        val isFravarForSykmelding = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SyketilfellebitTag.FRAVAR_FOR_SYKMELDING.name) == true
+        val isFravarForSykmelding = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(FRAVAR_FOR_SYKMELDING) == true
 
         return hasValidDocumentType && isAcceptedDocument && !isBehandlingsdag && !isFravarForSykmelding
     }
@@ -143,9 +143,9 @@ class AktivitetskravVarselPlanner(
         var actualNumberOfDaysInTimeline =  ChronoUnit.DAYS.between(first!!.fom, first.tom).toInt()
 
         for (i in 1 until validSyketilfelledager.size) {
-            val currentFom = validSyketilfelledager[i].prioritertSyketilfellebit!!.fom.toLocalDate()
-            val currentTom = validSyketilfelledager[i].prioritertSyketilfellebit!!.tom.toLocalDate()
-            val previousTom = validSyketilfelledager[i - 1].prioritertSyketilfellebit!!.tom.toLocalDate()
+            val currentFom = validSyketilfelledager[i].prioritertSyketilfellebit!!.fom
+            val currentTom = validSyketilfelledager[i].prioritertSyketilfellebit!!.tom
+            val previousTom = validSyketilfelledager[i - 1].prioritertSyketilfellebit!!.tom
 
             if (currentFom.isEqualOrAfter(previousTom)) {
                 val currentLength = ChronoUnit.DAYS.between(currentFom, currentTom).toInt()

@@ -31,6 +31,7 @@ import no.nav.syfo.kafka.oppfolgingstilfelle.SyketilfelleKafkaConsumer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.metrics.withPrometheus
 import no.nav.syfo.service.*
+import no.nav.syfo.syketilfelle.SyketilfelleService
 import no.nav.syfo.varsel.AktivitetskravVarselPlanner
 import no.nav.syfo.varsel.MerVeiledningVarselPlanner
 import org.slf4j.LoggerFactory
@@ -89,7 +90,8 @@ fun main() {
             val accessControl = AccessControl(pdlConsumer, dkifConsumer)
             val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
             val varselSendtService = VarselSendtService(pdlConsumer, syfosyketilfelleConsumer, database)
-            val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, syfosyketilfelleConsumer, varselSendtService)
+            val syketilfelleService = SyketilfelleService(database)
+            val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, syfosyketilfelleConsumer, syketilfelleService, varselSendtService)
             val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, syfosyketilfelleConsumer, narmesteLederConsumer, sykmeldingService)
             val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
 

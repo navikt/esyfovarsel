@@ -6,19 +6,19 @@ import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.NarmesteLederConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.consumer.SykmeldingerConsumer
-import no.nav.syfo.consumer.domain.Syketilfellebit
-import no.nav.syfo.consumer.domain.SyketilfellebitTag
 import no.nav.syfo.consumer.domain.Syketilfelledag
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederRelasjon
 import no.nav.syfo.consumer.narmesteLeder.NarmestelederResponse
 import no.nav.syfo.consumer.narmesteLeder.Tilgang
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
+import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
 import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
 import no.nav.syfo.service.SykmeldingService
+import no.nav.syfo.syketilfelle.domain.Tag.*
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import org.amshove.kluent.shouldBeEqualTo
@@ -70,10 +70,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf("ANNET_FRAVAR", "SENDT"),
+                    listOf(ANNET_FRAVAR, SENDT),
                     "3",
-                    LocalDateTime.now(),
-                    LocalDateTime.now().plusDays(7)
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(7)
                 )
             val syketilfellebit2 =
                 Syketilfellebit(
@@ -82,10 +82,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf("ANNET_FRAVAR", "SENDT"),
+                    listOf(ANNET_FRAVAR, SENDT),
                     "3",
-                    LocalDateTime.now().plusDays(8),
-                    LocalDateTime.now().plusDays(16)
+                    LocalDate.now().plusDays(8),
+                    LocalDate.now().plusDays(16)
                 )
             val syketilfellebit3 =
                 Syketilfellebit(
@@ -94,10 +94,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf("ANNET_FRAVAR", "SENDT"),
+                    listOf(ANNET_FRAVAR, SENDT),
                     "3",
-                    LocalDateTime.now().plusDays(17),
-                    LocalDateTime.now().plusDays(50)
+                    LocalDate.now().plusDays(17),
+                    LocalDate.now().plusDays(50)
                 )
 
             val syketilfelledag1 = Syketilfelledag(LocalDate.now(), syketilfellebit1)
@@ -145,10 +145,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     arbeidstakerAktorId1,
                     "2", LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf("SYKMELDING", "SENDT"),
+                    listOf(SYKMELDING, SENDT),
                     "3",
-                    LocalDateTime.now().minusDays(100),
-                    LocalDateTime.now().minusDays(100)
+                    LocalDate.now().minusDays(100),
+                    LocalDate.now().minusDays(100)
                 )
 
             val syketilfelledag1 = Syketilfelledag(LocalDate.now().minusDays(60), syketilfellebit1)
@@ -192,10 +192,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf("SYKMELDING", "SENDT"),
+                    listOf(SYKMELDING, SENDT),
                     "3",
-                    LocalDateTime.now(),
-                    LocalDateTime.now()
+                    LocalDate.now(),
+                    LocalDate.now()
                 )
             val syketilfellebit2 =
                 Syketilfellebit(
@@ -204,10 +204,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf("SYKMELDING", "SENDT"),
+                    listOf(SYKMELDING, SENDT),
                     "3",
-                    LocalDateTime.now(),
-                    LocalDateTime.now()
+                    LocalDate.now(),
+                    LocalDate.now()
                 )
             val syketilfellebit3 =
                 Syketilfellebit(
@@ -216,10 +216,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf("PAPIRSYKMELDING", "SENDT"),
+                    listOf(PAPIRSYKMELDING, SENDT),
                     "3",
-                    LocalDateTime.now(),
-                    LocalDateTime.now()
+                    LocalDate.now(),
+                    LocalDate.now()
                 )
 
             val syketilfelledag1 = Syketilfelledag(LocalDate.now().minusDays(4), syketilfellebit1)
@@ -266,10 +266,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf("SYKMELDING", "SENDT"),
+                    listOf(SYKMELDING, SENDT),
                     "3",
-                    LocalDateTime.now(),
-                    LocalDateTime.now().plusDays(7)
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(7)
                 )
             val syketilfellebit2 =
                 Syketilfellebit(
@@ -278,10 +278,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf("SYKMELDING", "SENDT"),
+                    listOf(SYKMELDING, SENDT),
                     "3",
-                    LocalDateTime.now().plusDays(8),
-                    LocalDateTime.now().plusDays(16)
+                    LocalDate.now().plusDays(8),
+                    LocalDate.now().plusDays(16)
                 )
             val syketilfellebit3 =
                 Syketilfellebit(
@@ -290,10 +290,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf("SYKMELDING", "SENDT"),
+                    listOf(SYKMELDING, SENDT),
                     "3",
-                    LocalDateTime.now().plusDays(17),
-                    LocalDateTime.now().plusDays(50)
+                    LocalDate.now().plusDays(17),
+                    LocalDate.now().plusDays(50)
                 )
 
             val syketilfelledag1 = Syketilfelledag(LocalDate.now(), syketilfellebit1)
@@ -351,10 +351,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf("SYKMELDING", "SENDT"),
+                    listOf(SYKMELDING, SENDT),
                     "1",
-                    utsendingsdato.minusDays(AKTIVITETSKRAV_DAGER).atStartOfDay(),
-                    utsendingsdato.plusDays(30).atStartOfDay()
+                    utsendingsdato.minusDays(AKTIVITETSKRAV_DAGER).atStartOfDay().toLocalDate(),
+                    utsendingsdato.plusDays(30).atStartOfDay().toLocalDate()
                 )
 
             val syketilfelledag1 = Syketilfelledag(utsendingsdato.minusDays(AKTIVITETSKRAV_DAGER), syketilfellebit1)
@@ -451,7 +451,7 @@ fun createValidSyketilfelledag(fom: LocalDateTime, tom: LocalDateTime): Syketilf
     return Syketilfelledag(
         LocalDate.now(),
         Syketilfellebit(
-            "", "", "", LocalDateTime.now(), LocalDateTime.now(), listOf(SyketilfellebitTag.SYKMELDING.name, SyketilfellebitTag.BEKREFTET.name), "", fom, tom
+            "", "", "", LocalDateTime.now(), LocalDateTime.now(), listOf(SYKMELDING, BEKREFTET), "", fom.toLocalDate(), tom.toLocalDate()
         )
     )
 }

@@ -1,7 +1,7 @@
 package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PSyketilfellebit
-import no.nav.syfo.db.domain.Syketilfellebit
+import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 
 
 fun DatabaseInterface.storeSyketilfellebit(pSyketilfellebit: PSyketilfellebit) {
@@ -41,7 +41,7 @@ fun DatabaseInterface.storeSyketilfellebit(pSyketilfellebit: PSyketilfellebit) {
     }
 }
 
-fun DatabaseInterface.fetchSyketilfellebitByFnr(fnr: String): List<Syketilfellebit> {
+fun DatabaseInterface.fetchSyketilfellebiterByFnr(fnr: String): List<Syketilfellebit> {
     val queryStatement = """SELECT *
                             FROM SYKETILFELLEBIT
                             WHERE fnr = ?
