@@ -43,7 +43,7 @@ operator fun <T> T.not() = ListContainsPredicate.not(this)
 fun grupperIOppfolgingstilfeller(tidslinje: List<Syketilfelledag>): List<Oppfolgingstilfelle> {
     val oppfolgingstilfelleListe = ArrayList<Oppfolgingstilfelle>()
     var gjeldendeSyketilfelledagListe = ArrayList<Syketilfelledag>()
-    var ikkeSykedagerSidenForrigeSykedag = 0
+    var friskmeldtdagerSidenForrigeSykedag = 0
     var dagerAvArbeidsgiverperiode = 0
     var behandlingsdager = 0
     var sisteDagIArbeidsgiverperiode: Syketilfelledag? = null
@@ -52,14 +52,14 @@ fun grupperIOppfolgingstilfeller(tidslinje: List<Syketilfelledag>): List<Oppfolg
     tidslinje.forEach {
         when {
             it.erArbeidsdag() -> {
-                ikkeSykedagerSidenForrigeSykedag++
+                friskmeldtdagerSidenForrigeSykedag++
             }
 
             it.erFeriedag() -> {
                 sisteSykedagEllerFeriedagIOppfolgingstilfelle = it.dag
-                if (ikkeSykedagerSidenForrigeSykedag > 0) {
+                if (friskmeldtdagerSidenForrigeSykedag > 0) {
                     // Vi teller kun feriedager her hvis man har vært tilbake på jobb
-                    ikkeSykedagerSidenForrigeSykedag++
+                    friskmeldtdagerSidenForrigeSykedag++
                 }
                 if (dagerAvArbeidsgiverperiode in 1..15) {
                     dagerAvArbeidsgiverperiode++
@@ -69,7 +69,7 @@ fun grupperIOppfolgingstilfeller(tidslinje: List<Syketilfelledag>): List<Oppfolg
             else -> { // Er syk
                 sisteSykedagEllerFeriedagIOppfolgingstilfelle = it.dag
                 gjeldendeSyketilfelledagListe.add(it)
-                ikkeSykedagerSidenForrigeSykedag = 0
+                friskmeldtdagerSidenForrigeSykedag = 0
 
                 if (it.erBehandlingsdag()) {
                     behandlingsdager++
@@ -82,7 +82,7 @@ fun grupperIOppfolgingstilfeller(tidslinje: List<Syketilfelledag>): List<Oppfolg
             }
         }
 
-        if (ikkeSykedagerSidenForrigeSykedag >= 16 && gjeldendeSyketilfelledagListe.isNotEmpty()) {
+        if (friskmeldtdagerSidenForrigeSykedag >= 16 && gjeldendeSyketilfelledagListe.isNotEmpty()) {
             val nyttOppfolgingstilfelle = Oppfolgingstilfelle(
                 tidslinje = gjeldendeSyketilfelledagListe,
                 sisteDagIArbeidsgiverperiode = sisteDagIArbeidsgiverperiode ?: it,
@@ -94,7 +94,7 @@ fun grupperIOppfolgingstilfeller(tidslinje: List<Syketilfelledag>): List<Oppfolg
 
             // Resett variabler
             gjeldendeSyketilfelledagListe = ArrayList()
-            ikkeSykedagerSidenForrigeSykedag = 0
+            friskmeldtdagerSidenForrigeSykedag = 0
             dagerAvArbeidsgiverperiode = 0
             behandlingsdager = 0
             sisteDagIArbeidsgiverperiode = null
