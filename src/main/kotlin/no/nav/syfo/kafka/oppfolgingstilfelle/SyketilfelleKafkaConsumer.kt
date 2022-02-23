@@ -47,13 +47,17 @@ class SyketilfelleKafkaConsumer(
         log.info("Started listening to topic $topicFlexSyketilfellebiter")
         while (applicationState.running) {
             kafkaListener.poll(zeroMillis).forEach {
-                log.info("Received record from topic: [$topicFlexSyketilfellebiter]")
                 try {
                     val kSyketilfellebit: KSyketilfellebit = objectMapper.readValue(it.value())
                     databaseInterface.storeSyketilfellebit(kSyketilfellebit.toPSyketilfellebit())
                 } catch (e: IOException) {
                     log.error(
                         "Error in [$topicFlexSyketilfellebiter]-listener: Could not parse message | ${e.message}",
+                        e
+                    )
+                } catch (e: Exception) {
+                    log.error(
+                        "Exception in [$topicFlexSyketilfellebiter]-listener: ${e.message}",
                         e
                     )
                 }
