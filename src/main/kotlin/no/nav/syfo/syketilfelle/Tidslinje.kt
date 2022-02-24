@@ -20,11 +20,7 @@ class Tidslinje(private val syketilfellebiter: Syketilfellebiter) {
 
     private fun genererTidslinje(): List<Syketilfelledag> {
         // TODO: Fjern try-catch når flex-syketilfellebiter topic er i sync med oppfølgingstilfeller
-        try {
-            require(syketilfellebiter.biter.isNotEmpty())
-        } catch (e: IllegalArgumentException) {
-            log.warn("Spør på fnr som ikke har noen syketilfellebiter i databasen")
-        }
+        require(syketilfellebiter.biter.isNotEmpty())
 
         val tidligsteFom = syketilfellebiter.finnTidligsteFom()
         val sensesteTom = syketilfellebiter.finnSenesteTom()
