@@ -25,10 +25,13 @@ class MerVeiledningVarselPlanner(
 
     override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String) = coroutineScope {
         val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle39Uker(aktorId)
-        val oppfolgingstilfelleIntern = syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(fnr)
-
-        log.info("SST: ${oppfolgingstilfelle?.fom} <--> ${oppfolgingstilfelle?.tom} (${oppfolgingstilfelle?.antallSykefravaersDagerTotalt})| INT: ${oppfolgingstilfelleIntern?.fom} <--> ${oppfolgingstilfelleIntern?.tom} (${oppfolgingstilfelleIntern?.antallSykefravaersDagerTotalt})")
-
+        try {
+            val oppfolgingstilfelleIntern = syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(fnr)
+            log.info("SST: ${oppfolgingstilfelle?.fom} <--> ${oppfolgingstilfelle?.tom} (${oppfolgingstilfelle?.antallSykefravaersDagerTotalt})| INT: ${oppfolgingstilfelleIntern?.fom} <--> ${oppfolgingstilfelleIntern?.tom} (${oppfolgingstilfelleIntern?.antallSykefravaersDagerTotalt})")
+        } catch (e: IllegalArgumentException) {
+            log.warn("Spør på fnr som ikke har noen syketilfellebiter i databasen")
+        }
+        
         if(oppfolgingstilfelle == null) {
             log.info("[$name]: Fant ikke oppfolgingstilfelle for denne brukeren. Planlegger ikke nytt varsel")
             return@coroutineScope
