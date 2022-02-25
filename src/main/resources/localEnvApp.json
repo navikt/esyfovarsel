@@ -1,7 +1,8 @@
 {
   "appEnv": {
     "applicationPort": "8080",
-    "applicationThreads": "1"
+    "applicationThreads": "1",
+    "runningInGCPCluster": "false"
   },
   "authEnv": {
     "serviceuserUsername": "srvesyfovarsel",

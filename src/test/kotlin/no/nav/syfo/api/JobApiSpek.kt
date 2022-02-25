@@ -44,7 +44,7 @@ object JobApiSpek : Spek ({
         coEvery { beskjedKafkaProducer.sendBeskjed(any(), any(), any()) } returns Unit
 
         val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl)
-        val varselSender = VarselSender(embeddedDatabase, sendVarselService, testEnv.toggleEnv)
+        val varselSender = VarselSender(embeddedDatabase, sendVarselService, testEnv.toggleEnv, testEnv.appEnv)
 
         with(TestApplicationEngine()) {
             start()

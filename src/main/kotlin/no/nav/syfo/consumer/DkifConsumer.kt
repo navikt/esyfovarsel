@@ -17,7 +17,7 @@ const val kontaktinfoPathKRR = "/rest/v1/person"
 class DkifConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client = httpClient()
     private val dkifBasepath = urlEnv.dkifUrl
-    private val tokenScope = "api://dev-gcp.team-rocket.digdir-krr-proxy/.default"      // TODO: Env-var
+    private val tokenScope = "api://dev-gcp.team-rocket.digdir-krr-proxy/.default"
 
     fun kontaktinfo(aktorId: String): DigitalKontaktinfo? {
         val requestUrl = "$dkifBasepath$kontaktinfoPathKRR"

@@ -19,14 +19,11 @@ open class PdlConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAd
 
     open fun getFnr(aktorId: String): String? {
         val response = callPdl(IDENTER_QUERY, aktorId)
-        log.info("BEGIN getFnr($aktorId)")
 
         return when (response?.status) {
             HttpStatusCode.OK -> {
                 runBlocking {
-                    log.info("Response OK")
                     val pdlResponse = response.receive<PdlIdentResponse>().data?.hentIdenter?.identer?.first()?.ident
-                    log.info("Response: ${pdlResponse.toString()}")
                     pdlResponse
                 }
             }

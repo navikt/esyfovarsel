@@ -17,8 +17,7 @@ import kotlinx.coroutines.launch
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.*
 import no.nav.syfo.consumer.*
-import no.nav.syfo.db.Database
-import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.*
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.job.sendNotificationsJob
 import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
@@ -48,7 +47,8 @@ fun main() {
         val server = embeddedServer(Netty, applicationEngineEnvironment {
 
             config = HoconApplicationConfig(ConfigFactory.load())
-            database = Database(env.dbEnv)
+
+            database = initDb(env.dbEnv)
 
             val stsConsumer = getStsConsumer(env.urlEnv, env.authEnv)
             val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
@@ -131,7 +131,8 @@ fun Application.serverModule(
     val varselSender = VarselSender(
         database,
         sendVarselService,
-        env.toggleEnv
+        env.toggleEnv,
+        env.appEnv
     )
 
     install(ContentNegotiation) {
@@ -167,13 +168,15 @@ fun Application.kafkaModule(
 ) {
     runningRemotely {
 
-        launch(backgroundTasksContext) {
-            launchKafkaListener(
-                state,
-                OppfolgingstilfelleKafkaConsumer(env, accessControl)
-                    .addPlanner(aktivitetskravVarselPlanner)
-                    .addPlanner(merVeiledningVarselPlanner)
-            )
+        runningInFSSCluster {
+            launch(backgroundTasksContext) {
+                launchKafkaListener(
+                    state,
+                    OppfolgingstilfelleKafkaConsumer(env, accessControl)
+                        .addPlanner(aktivitetskravVarselPlanner)
+                        .addPlanner(merVeiledningVarselPlanner)
+                )
+            }
         }
 
         launch(backgroundTasksContext) {
@@ -188,6 +191,13 @@ fun Application.kafkaModule(
 val Application.envKind
     get() = environment.config.property("ktor.environment").getString()
 
+val Application.cluster
+    get() = environment.config.property("ktor.cluster").getString()
+
+fun Application.runningInFSSCluster(block: () -> Unit) {
+    if (cluster.contains("fss")) block()
+}
+
 fun Application.runningRemotely(block: () -> Unit) {
     if (envKind == "remote") block()
 }
@@ -195,3 +205,14 @@ fun Application.runningRemotely(block: () -> Unit) {
 fun Application.runningLocally(block: () -> Unit) {
     if (envKind == "local") block()
 }
+
+fun initDb(dbEnv: DbEnv): DatabaseInterface =
+    when {
+        isLocal() -> localDatabase(dbEnv)
+        isGCP() -> Database(dbEnv)
+        else -> remoteDatabase(dbEnv)
+    }
+
+private fun localDatabase(dbEnv: DbEnv): DatabaseInterface = LocalDatabase(dbEnv)
+
+private fun remoteDatabase(dbEnv: DbEnv): DatabaseInterface = RemoteDatabase(dbEnv)

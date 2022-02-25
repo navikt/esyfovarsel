@@ -22,15 +22,32 @@ fun getJobEnv() =
             serviceuserPassword = File("$serviceuserMounthPath/password").readText()
         )
 
-fun getEnv() =
-    if (isLocal())
+fun getEnv(): Environment {
+    val dbEnv = if (isGCP())
+        DbEnv(
+            dbHost = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_HOST", "127.0.0.1"),
+            dbPort = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PORT", "5432"),
+            dbName = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_DATABASE"),
+            dbUsername = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_USERNAME"),
+            dbPassword = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PASSWORD")
+        )
+    else
+        DbEnv(
+            dbHost = getEnvVar("DB_HOST", "127.0.0.1"),
+            dbPort = "5432",
+            dbName = "esyfovarsel"
+        )
+
+
+    return if (isLocal())
         getTestEnv()
     else
         Environment(
             AppEnv(
                 applicationPort = getEnvVar("APPLICATION_PORT", "8080").toInt(),
                 applicationThreads = getEnvVar("APPLICATION_THREADS", "4").toInt(),
-                remote = true
+                remote = true,
+                runningInGCPCluster = isGCP()
             ),
             AuthEnv(
                 serviceuserUsername = File("$serviceuserMounthPath/username").readText(),
@@ -60,19 +77,13 @@ fun getEnv() =
                     credstorePassword = getEnvVar("KAFKA_CREDSTORE_PASSWORD")
                 )
             ),
-            DbEnv(
-                dbHost = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_HOST", "127.0.0.1"),
-                dbPort = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PORT", "5432"),
-                dbName = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_DATABASE"),
-                dbUsername = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_USERNAME"),
-                dbPassword = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PASSWORD")
-            ),
+            dbEnv,
             ToggleEnv(
                 sendMerVeiledningVarsler = getEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER").tilBoolean(),
                 sendAktivitetskravVarsler = getEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER").tilBoolean()
             )
-)
-
+    )
+}
 fun getTestEnv() =
     objectMapper.readValue(File(localAppPropertiesPath), Environment::class.java)
 
@@ -91,7 +102,8 @@ data class Environment(
 data class AppEnv(
     val applicationPort: Int,
     val applicationThreads: Int,
-    val remote: Boolean = false
+    val remote: Boolean = false,
+    val runningInGCPCluster: Boolean
 )
 
 data class AuthEnv(
@@ -128,11 +140,12 @@ data class KafkaSslEnv(
 )
 
 data class DbEnv(
-    val dbHost: String,
-    val dbPort: String,
-    val dbName: String,
-    val dbUsername: String,
-    val dbPassword: String
+    var dbHost: String,
+    var dbPort: String,
+    var dbName: String,
+    val dbUsername: String = "",
+    val dbPassword: String = "",
+    val dbCredMounthPath: String = ""
 )
 
 data class ToggleEnv(
@@ -149,6 +162,8 @@ data class JobEnv(
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =
     System.getenv(varName) ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
+
+fun isGCP(): Boolean = getEnvVar("NAIS_CLUSTER_NAME").contains("gcp")
 
 fun isLocal(): Boolean = getEnvVar("KTOR_ENV", "local") == "local"
 

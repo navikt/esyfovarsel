@@ -49,8 +49,10 @@ fun aivenConsumerProperties(env: Environment) : Properties {
 }
 
 fun consumerProperties(env: Environment) : Properties {
+    var kafkaGCPSuffix = if (env.appEnv.runningInGCPCluster) "-gcp" else ""
+
     val properties = HashMap<String,String>().apply {
-        put(GROUP_ID_CONFIG, "esyfovarsel-group-gcp-devtest-b")
+        put(GROUP_ID_CONFIG, "esyfovarsel-group-v04$kafkaGCPSuffix")
         put(AUTO_OFFSET_RESET_CONFIG, "earliest")
         put(MAX_POLL_RECORDS_CONFIG, "1")
         put(ENABLE_AUTO_COMMIT_CONFIG, "false")

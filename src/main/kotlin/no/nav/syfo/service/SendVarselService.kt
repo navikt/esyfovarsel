@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import no.nav.syfo.AppEnv
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType

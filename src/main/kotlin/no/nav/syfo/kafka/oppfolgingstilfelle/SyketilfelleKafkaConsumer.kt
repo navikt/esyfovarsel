@@ -39,7 +39,6 @@ class SyketilfelleKafkaConsumer(
 
     init {
         val kafkaConfig = aivenConsumerProperties(env)
-        log.info("[DEBUG]: KAFKA BROKER: ${kafkaConfig.getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG)}")
         kafkaListener = KafkaConsumer(kafkaConfig)
         kafkaListener.subscribe(listOf(topicFlexSyketilfellebiter))
     }

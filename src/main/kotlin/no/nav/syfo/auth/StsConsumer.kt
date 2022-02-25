@@ -1,12 +1,10 @@
 package no.nav.syfo.auth
 
-
 import io.ktor.client.request.*
 import io.ktor.http.*
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.utils.httpClient
-import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.Base64
 
@@ -16,10 +14,8 @@ open class StsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv) {
     private val stsEndpointUrl = "${urlEnv.stsUrl}/rest/v1/sts/token?grant_type=client_credentials&scope=openid"
     private var token: Token? = null
     private val client = httpClient()
-    private val log = LoggerFactory.getLogger("no.nav.syfo.auth.StsConsumer")
 
     fun isValidToken(token: Token?) : Boolean {
-        val valid = token?.expiresAt?.isAfter(LocalDateTime.now()) ?: false
         return token?.expiresAt?.isAfter(LocalDateTime.now()) ?: false
     }
 

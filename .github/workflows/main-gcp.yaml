@@ -51,7 +51,7 @@ jobs:
 
   deploy-dev:
     if: github.ref == 'refs/heads/master'
-    name: Deploy to NAIS Dev-fss
+    name: Deploy to dev GCP
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -60,16 +60,16 @@ jobs:
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
-          RESOURCE: .nais/naiserator-dev.yaml
-          VARS: .nais/dev.json
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/naiserator-dev-gcp.yaml
+          VARS: .nais/dev-gcp.json
       - name: Deploy jobb
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
-          RESOURCE: .nais/send-varsler-job-dev.yaml
-          VARS: .nais/dev.json
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/job-trigger-dev-gcp.yaml
+          VARS: .nais/dev-gcp.json
 
       # Notify Slack
       - name: Unsuccessful deploy notification dev
@@ -84,7 +84,7 @@ jobs:
 
   deploy-prod:
     if: github.ref == 'refs/heads/master'
-    name: Deploy to NAIS Prod-fss
+    name: Deploy to prod GCP
     needs: deploy-dev
     runs-on: ubuntu-latest
     steps:
@@ -93,21 +93,21 @@ jobs:
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-fss
-          RESOURCE: .nais/naiserator-prod.yaml
-          VARS: .nais/prod.json
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/naiserator-prod-gcp.yaml
+          VARS: .nais/prod-gcp.json
       - name: Deploy jobb
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-fss
-          RESOURCE: .nais/send-varsler-job-prod.yaml
-          VARS: .nais/prod.json
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/job-trigger-prod-gcp.yaml
+          VARS: .nais/prod-gcp.json
       - name: Deploy alerts
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-fss
+          CLUSTER: prod-gcp
           RESOURCE: .nais/alerts.yaml
 
       # Notify Slack

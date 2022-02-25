@@ -1,0 +1,20 @@
+apiVersion: nais.io/v1
+kind: Naisjob
+metadata:
+  name: esyfovarsel-job
+  namespace: team-esyfo
+  labels:
+    team: team-esyfo
+spec:
+  image: {{ image }}
+  schedule: "*/15 * * * *"
+  vault:
+    enabled: true
+    paths:
+      - kvPath: "/serviceuser/data/dev/srvesyfovarsel"
+        mountPath: "/var/run/secrets/serviceuser"
+  env:
+  {{#each job}}
+    - name: {{@key}}
+      value: {{this}}
+  {{/each}}

@@ -1,5 +1,6 @@
 package no.nav.syfo.job
 
+import no.nav.syfo.AppEnv
 import no.nav.syfo.ToggleEnv
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselByVarselId
@@ -17,11 +18,17 @@ import java.time.LocalDate
 class VarselSender(
     private val databaseAccess: DatabaseInterface,
     private val sendVarselService: SendVarselService,
-    private val toggles: ToggleEnv
+    private val toggles: ToggleEnv,
+    private val appEnv: AppEnv
 ) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
 
     fun sendVarsler(): Int {
+        if (appEnv.runningInGCPCluster) {
+            log.info("[GCP] Disabled varselutsending")
+            return 0
+        }
+
         log.info("Starter SendVarslerJobb")
 
         val varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
