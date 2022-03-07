@@ -179,11 +179,13 @@ fun Application.kafkaModule(
             }
         }
 
-        launch(backgroundTasksContext) {
-            launchKafkaListener(
-                state,
-                SyketilfelleKafkaConsumer(env, database)
-            )
+        runningInGCPCluster {
+            launch(backgroundTasksContext) {
+                launchKafkaListener(
+                    state,
+                    SyketilfelleKafkaConsumer(env, database)
+                )
+            }
         }
     }
 }
@@ -196,6 +198,10 @@ val Application.cluster
 
 fun Application.runningInFSSCluster(block: () -> Unit) {
     if (cluster.contains("fss")) block()
+}
+
+fun Application.runningInGCPCluster(block: () -> Unit) {
+    if (cluster.contains("gcp")) block()
 }
 
 fun Application.runningRemotely(block: () -> Unit) {
