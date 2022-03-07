@@ -35,7 +35,8 @@ fun getEnv(): Environment {
         DbEnv(
             dbHost = getEnvVar("DB_HOST", "127.0.0.1"),
             dbPort = "5432",
-            dbName = "esyfovarsel"
+            dbName = "esyfovarsel",
+            dbCredMounthPath = getEnvVar("DB_VAULT_MOUNT_PATH")
         )
 
 
