@@ -70,8 +70,8 @@ class OppfolgingstilfelleKafkaConsumer(
                 kafkaListener.commitSync()
                 delay(10)
             }
-            log.info("Stopped listening to $topicOppfolgingsTilfelle")
         }
+        log.info("Stopped listening to $topicOppfolgingsTilfelle")
     }
 
     fun addPlanner(varselPlanner: VarselPlanner): OppfolgingstilfelleKafkaConsumer {
