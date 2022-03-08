@@ -45,9 +45,7 @@ fun main() {
     } else {
         val env = getEnv()
         val server = embeddedServer(Netty, applicationEngineEnvironment {
-
             config = HoconApplicationConfig(ConfigFactory.load())
-
             database = initDb(env.dbEnv)
 
             val stsConsumer = getStsConsumer(env.urlEnv, env.authEnv)

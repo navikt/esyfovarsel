@@ -12,7 +12,7 @@ spec:
     enabled: true
     paths:
       - kvPath: "/serviceuser/data/dev/srvesyfovarsel"
-        mountPath: "/var/run/secrets/serviceuser"
+        mountPath: "/var/run/secrets"
   env:
   {{#each job}}
     - name: {{@key}}
