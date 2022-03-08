@@ -53,23 +53,33 @@ val oppfolgingstilfelleResponse = OppfolgingstilfellePerson(
 
 // DKIF
 
-val dkifResponseSuccessKanVarsles = DigitalKontaktinfo(
-    personident = aktorId,
-    aktiv = true,
-    kanVarsles = true,
-    reservert = false,
-    epostadresse = "test@nav.no",
-    mobiltelefonnummer = "44556677"
-)
+val dkifResponseSuccessKanVarsles =
+    DigitalKontaktinfo(
+        Kontaktinfo(
+            Ident(
+                personident = aktorId,
+                kanVarsles = true,
+                reservert = false,
+                epostadresse = "test@nav.no",
+                mobiltelefonnummer = "44556677",
+                spraak = "nb"
+            )
+        )
+    )
 
-val dkifResponseSuccessReservert = DigitalKontaktinfo(
-    personident = aktorId,
-    aktiv = true,
-    kanVarsles = false,
-    reservert = true,
-    epostadresse = "test@nav.no",
-    mobiltelefonnummer = "44556677"
-)
+val dkifResponseSuccessReservert  =
+    DigitalKontaktinfo(
+        Kontaktinfo(
+            Ident(
+                personident = aktorId,
+                kanVarsles = false,
+                reservert = true,
+                epostadresse = "test@nav.no",
+                mobiltelefonnummer = "44556677",
+                spraak = "nb"
+            )
+        )
+    )
 
 val dkifResponseMap = mapOf(
     aktorId to dkifResponseSuccessKanVarsles,

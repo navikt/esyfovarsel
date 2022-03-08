@@ -14,20 +14,19 @@ import java.util.UUID.randomUUID
 
 class DkifConsumer(urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
     private val client = httpClient()
-    private val dkifBasepath = urlEnv.dkifUrl
+    private val requestUrl = urlEnv.dkifUrl
     private val tokenScope = "api://dev-gcp.team-rocket.digdir-krr-proxy/.default"
 
     fun kontaktinfo(aktorId: String): DigitalKontaktinfo? {
-        val requestUrl = "$dkifBasepath"
         return runBlocking {
-            val AADToken = "Bearer ${tokenConsumer.getToken(tokenScope)}"
+            val access_token = "Bearer ${tokenConsumer.getToken(tokenScope)}"
             val response: HttpResponse? = try {
                 client.get<HttpResponse>(requestUrl) {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
-                        append(HttpHeaders.Authorization, AADToken)
+                        append(HttpHeaders.Authorization, access_token)
                         append(NAV_CONSUMER_ID_HEADER, ESYFOVARSEL_CONSUMER_ID)
-                        append(NAV_PERSONIDENT_HEADER, aktorId)
+                        append(NAV_PERSONIDENTER_HEADER, aktorId)
                         append(NAV_CALL_ID_HEADER, createCallId())
                     }
                 }
@@ -56,7 +55,7 @@ class DkifConsumer(urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
         private const val NAV_CALL_ID_HEADER = "Nav-Call-Id"
         private const val ESYFOVARSEL_CONSUMER_ID = "srvesyfovarsel"
         private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.DkifConsumer")
-        const val NAV_PERSONIDENT_HEADER = "Nav-Personident"
+        const val NAV_PERSONIDENTER_HEADER = "Nav-Personidenter"
 
         private fun createCallId(): String {
             val randomUUID = randomUUID().toString()
