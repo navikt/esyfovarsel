@@ -6,23 +6,21 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
-import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.auth.TokenConsumer
 import no.nav.syfo.consumer.domain.DigitalKontaktinfo
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 import java.util.UUID.randomUUID
 
-const val kontaktinfoPathKRR = "/rest/v1/person"
-
-class DkifConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
+class DkifConsumer(urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
     private val client = httpClient()
     private val dkifBasepath = urlEnv.dkifUrl
     private val tokenScope = "api://dev-gcp.team-rocket.digdir-krr-proxy/.default"
 
     fun kontaktinfo(aktorId: String): DigitalKontaktinfo? {
-        val requestUrl = "$dkifBasepath$kontaktinfoPathKRR"
+        val requestUrl = "$dkifBasepath"
         return runBlocking {
-            val AADToken = "Bearer ${azureAdTokenConsumer.getAzureAdAccessToken(tokenScope)}"
+            val AADToken = "Bearer ${tokenConsumer.getToken(tokenScope)}"
             val response: HttpResponse? = try {
                 client.get<HttpResponse>(requestUrl) {
                     headers {

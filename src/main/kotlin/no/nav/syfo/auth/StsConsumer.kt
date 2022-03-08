@@ -8,7 +8,7 @@ import no.nav.syfo.utils.httpClient
 import java.time.LocalDateTime
 import java.util.Base64
 
-open class StsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv) {
+open class StsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv): TokenConsumer {
     private val username = authEnv.serviceuserUsername
     private val password = authEnv.serviceuserPassword
     private val stsEndpointUrl = "${urlEnv.stsUrl}/rest/v1/sts/token?grant_type=client_credentials&scope=openid"
@@ -19,9 +19,9 @@ open class StsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv) {
         return token?.expiresAt?.isAfter(LocalDateTime.now()) ?: false
     }
 
-    open suspend fun getToken(): Token {
+    override suspend fun getToken(resource: String?): String {
         if(isValidToken(token)) {
-            return token!!
+            return token!!.access_token
         }
 
         token = client.post<Token>(stsEndpointUrl) {
@@ -30,16 +30,12 @@ open class StsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv) {
             }
         }
 
-        return token!!
+        return token!!.access_token
     }
 }
 
 class LocalStsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv): StsConsumer(urlEnv, authEnv) {
-    override suspend fun getToken(): Token = Token(
-        "access_token_string",
-        "access_token",
-        3600
-    )
+    override suspend fun getToken(resource: String?): String = "access_token_string"
 }
 
 fun encodeCredentials(username: String, password: String): String {

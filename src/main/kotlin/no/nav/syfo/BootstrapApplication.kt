@@ -51,8 +51,8 @@ fun main() {
             val stsConsumer = getStsConsumer(env.urlEnv, env.authEnv)
             val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
 
-            val pdlConsumer = getPdlConsumer(env.urlEnv, azureAdTokenConsumer)
-            val dkifConsumer = DkifConsumer(env.urlEnv, azureAdTokenConsumer)
+            val pdlConsumer = getPdlConsumer(env.urlEnv, azureAdTokenConsumer, stsConsumer)
+            val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer, stsConsumer)
             val oppfolgingstilfelleConsumer = getSyfosyketilfelleConsumer(env.urlEnv, stsConsumer)
             val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
 
@@ -96,25 +96,34 @@ fun main() {
     }
 }
 
-private fun getStsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv): StsConsumer {
+private fun getStsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv): TokenConsumer {
     if (isLocal()) {
         return LocalStsConsumer(urlEnv, authEnv)
     }
     return StsConsumer(urlEnv, authEnv)
 }
 
-private fun getPdlConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer): PdlConsumer {
-    if (isLocal()) {
-        return LocalPdlConsumer(urlEnv, azureAdTokenConsumer)
+private fun getPdlConsumer(urlEnv: UrlEnv, azureADConsumer: TokenConsumer, stsConsumer: TokenConsumer): PdlConsumer {
+    return when {
+        isLocal() -> LocalPdlConsumer(urlEnv, azureADConsumer)
+        isGCP() -> PdlConsumer(urlEnv, azureADConsumer)
+        else -> PdlConsumer(urlEnv, stsConsumer)
     }
-    return PdlConsumer(urlEnv, azureAdTokenConsumer)
 }
 
-private fun getSyfosyketilfelleConsumer(urlEnv: UrlEnv, stsConsumer: StsConsumer): SyfosyketilfelleConsumer {
-    if (isLocal()) {
-        return LocalSyfosyketilfelleConsumer(urlEnv, stsConsumer)
+private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: TokenConsumer, stsConsumer: TokenConsumer): DkifConsumer {
+    return when {
+        isLocal() -> DkifConsumer(urlEnv, azureADConsumer)
+        isGCP() -> DkifConsumer(urlEnv, azureADConsumer)
+        else -> DkifConsumer(urlEnv, stsConsumer)
     }
-    return SyfosyketilfelleConsumer(urlEnv, stsConsumer)
+}
+
+private fun getSyfosyketilfelleConsumer(urlEnv: UrlEnv, tokenConsumer: TokenConsumer): SyfosyketilfelleConsumer {
+    if (isLocal()) {
+        return LocalSyfosyketilfelleConsumer(urlEnv, tokenConsumer)
+    }
+    return SyfosyketilfelleConsumer(urlEnv, tokenConsumer)
 }
 
 fun Application.serverModule(

@@ -27,7 +27,7 @@ class SykmeldingerConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: Azu
     suspend fun getSykmeldtStatusPaDato(dato: LocalDate, fnr: String): SykmeldtStatusResponse? {
         val requestURL = "$basepath/api/v2/sykmelding/sykmeldtStatus"
         val requestBody = SykmeldtStatusRequest(fnr, dato)
-        val token = azureAdTokenConsumer.getAzureAdAccessToken(scope)
+        val token = azureAdTokenConsumer.getToken(scope)
 
         val response = client.post<HttpResponse>(requestURL) {
             headers {

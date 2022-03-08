@@ -20,7 +20,7 @@
     "baseUrlDittSykefravaer": "http://ditt-sykefravaer:8080",
     "stsUrl": "http://localhost:9094",
     "pdlUrl": "http://localhost:9091",
-    "dkifUrl": "http://localhost:9093"
+    "dkifUrl": "http://localhost:9093/api/v1/person"
   },
   "kafkaEnv": {
     "kafkaBootstrapServersUrl": "http://localhost:9092",

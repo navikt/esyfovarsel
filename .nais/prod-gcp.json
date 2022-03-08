@@ -5,7 +5,7 @@
     "KAFKA_SCHEMA_REGISTRY_URL": "http://kafka-schema-registry.tpa:8081",
     "STS_URL": "https://security-token-service.nais.adeo.no",
     "PDL_URL": "https://pdl-api.intern.nav.no/graphql",
-    "DKIF_URL": "https://dkif.intern.nav.no",
+    "DKIF_URL": "https://dkif.intern.nav.no/rest/v1/person",
     "SYFOSYKETILFELLE_URL": "https://syfosyketilfelle.nais.adeo.no",
     "SYFOSMREGISTER_URL": "http://syfosmregister.teamsykmelding",
     "SYFOSMREGISTER_SCOPE": "api://prod-fss.teamsykmelding.syfosmregister/.default",

@@ -7,15 +7,16 @@ import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.auth.TokenConsumer
 import no.nav.syfo.consumer.pdl.*
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 
-open class PdlConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
+open class PdlConsumer(urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
     private val client = httpClient()
     private val pdlBasepath = urlEnv.pdlUrl
-    private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.PdlConsuner")
-    private val tokenScope = "api://dev-fss.pdl.pdl-api/.default"
+    private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.PdlConsumer")
+    private val pdlTokenScope = "api://dev-fss.pdl.pdl-api/.default"
 
     open fun getFnr(aktorId: String): String? {
         val response = callPdl(IDENTER_QUERY, aktorId)
@@ -66,7 +67,7 @@ open class PdlConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAd
 
     fun callPdl(service: String, aktorId: String): HttpResponse? {
         return runBlocking {
-            val ADToken = azureAdTokenConsumer.getAzureAdAccessToken(tokenScope)
+            val ADToken = tokenConsumer.getToken(pdlTokenScope)
             val bearerTokenString = "Bearer ${ADToken}"
             val graphQuery = this::class.java.getResource("$QUERY_PATH_PREFIX/$service").readText().replace("[\n\r]", "")
             val requestBody = PdlRequest(graphQuery, Variables(aktorId))
@@ -89,7 +90,7 @@ open class PdlConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAd
     }
 }
 
-class LocalPdlConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer): PdlConsumer(urlEnv, azureAdTokenConsumer) {
+class LocalPdlConsumer(urlEnv: UrlEnv, tokenConsumer: TokenConsumer): PdlConsumer(urlEnv, tokenConsumer) {
     override fun getFnr(aktorId: String): String {
         return aktorId.substring(0,11)
     }

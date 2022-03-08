@@ -1,5 +1,13 @@
 package no.nav.syfo.testutil
 
 fun String.extractPortFromUrl() : Int {
-    return subSequence(lastIndexOf(':') + 1, length).toString().toInt()
+    val portIndexStart = lastIndexOf(':') + 1
+    val urlLastPortion = subSequence(portIndexStart, length)
+    var portIndexEnd = urlLastPortion.indexOf('/')
+    if (portIndexEnd == -1)
+        portIndexEnd = portIndexStart + urlLastPortion.length
+    else
+        portIndexEnd += portIndexStart
+    return subSequence(portIndexStart, portIndexEnd).toString().toInt()
 }
+
