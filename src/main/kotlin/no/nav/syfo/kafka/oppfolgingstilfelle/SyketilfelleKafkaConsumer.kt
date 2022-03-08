@@ -49,7 +49,7 @@ class SyketilfelleKafkaConsumer(
             kafkaListener.poll(zeroMillis).forEach {
                 try {
                     val kSyketilfellebit: KSyketilfellebit = objectMapper.readValue(it.value())
-                    log.info("DEUBG: ${kSyketilfellebit.fnr}")
+                    log.info("DEUBG: ${kSyketilfellebit.fnr}")  // TODO: Fjern
                     databaseInterface.storeSyketilfellebit(kSyketilfellebit.toPSyketilfellebit())
                 } catch (e: IOException) {
                     log.error(
