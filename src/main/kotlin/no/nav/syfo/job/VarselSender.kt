@@ -24,6 +24,7 @@ class VarselSender(
     private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
 
     fun sendVarsler(): Int {
+        log.info("SendVarslerJobb-API kalt")
         if (appEnv.runningInGCPCluster) {
             log.info("[GCP] Disabled varselutsending")
             return 0
