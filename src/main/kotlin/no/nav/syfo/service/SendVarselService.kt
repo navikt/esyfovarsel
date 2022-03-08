@@ -1,6 +1,5 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.AppEnv
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
@@ -17,19 +16,19 @@ class SendVarselService(
 
     fun sendVarsel(pPlanlagtVarsel: PPlanlagtVarsel): String {
         // Recheck if user can be notified in case of recent 'Addressesperre'
-        try {
+        return try {
             val fodselnummer = accessControl.getFnrIfUserCanBeNotified(pPlanlagtVarsel.aktorId)
             val uuid = pPlanlagtVarsel.uuid
             fodselnummer?.let { fnr ->
                 varselContentFromType(pPlanlagtVarsel.type)?.let { content ->
                     beskjedKafkaProducer.sendBeskjed(fnr, content, uuid)
+                    pPlanlagtVarsel.type
                 } ?: throw RuntimeException("Klarte ikke mappe typestreng til innholdstekst")
-            }
+            } ?: UTSENDING_FEILET
         } catch (e: RuntimeException) {
             log.error("Feil i utsending av varsel med UUID: ${pPlanlagtVarsel.uuid} | ${e.message}", e)
-            return UTSENDING_FEILET
+            UTSENDING_FEILET
         }
-        return pPlanlagtVarsel.type
     }
 
     private fun varselContentFromType(type: String): String? {
