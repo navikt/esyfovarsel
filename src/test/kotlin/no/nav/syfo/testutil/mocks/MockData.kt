@@ -53,37 +53,40 @@ val oppfolgingstilfelleResponse = OppfolgingstilfellePerson(
 
 // DKIF
 
-val dkifResponseSuccessKanVarsles =
-    DigitalKontaktinfo(
-        Kontaktinfo(
-            Ident(
-                personident = aktorId,
-                kanVarsles = true,
-                reservert = false,
-                epostadresse = "test@nav.no",
-                mobiltelefonnummer = "44556677",
-                spraak = "nb"
-            )
-        )
-    )
+val dkifResponseSuccessKanVarslesResponseJSON = """
+    {
+        "kontaktinfo": {
+            "$aktorId": {
+                "personident": $fnr1,
+                "kanVarsles": true,
+                "reservert": false,
+                "epostadresse": "test@nav.no",
+                "mobiltelefonnummer": "44556677",
+                "spraak": "nb"
+            }
+        }
+    }
+""".trim()
 
-val dkifResponseSuccessReservert  =
-    DigitalKontaktinfo(
-        Kontaktinfo(
-            Ident(
-                personident = aktorId,
-                kanVarsles = false,
-                reservert = true,
-                epostadresse = "test@nav.no",
-                mobiltelefonnummer = "44556677",
-                spraak = "nb"
-            )
-        )
-    )
+
+val dkifResponseSuccessReservertResponseJSON = """
+    {
+        "kontaktinfo": {
+            "$aktorId2": {
+                "personident": $fnr2,
+                "kanVarsles": false,
+                "reservert": true,
+                "epostadresse": "test@nav.no",
+                "mobiltelefonnummer": "44556677",
+                "spraak": "nb"
+            }
+        }
+    }
+""".trim()
 
 val dkifResponseMap = mapOf(
-    aktorId to dkifResponseSuccessKanVarsles,
-    aktorId2 to dkifResponseSuccessReservert
+    aktorId to dkifResponseSuccessKanVarslesResponseJSON,
+    aktorId2 to dkifResponseSuccessReservertResponseJSON
 )
 
 // PDL - Persondataløsningen

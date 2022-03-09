@@ -46,11 +46,13 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
 
     fun mockDkifServer(): NettyApplicationEngine {
         return mockServer(urlEnv.dkifUrl) {
-            get("/api/v1/person") {
-                if (call.request.headers[DkifConsumer.NAV_PERSONIDENTER_HEADER]?.isValidHeader() == true)
-                    call.respond(dkifResponseMap[call.request.headers[DkifConsumer.NAV_PERSONIDENTER_HEADER]] ?: dkifResponseSuccessKanVarsles)
-                else
+            get("/api/v1/personer/kontaktinfo") {
+                if (call.request.headers[DkifConsumer.NAV_PERSONIDENTER_HEADER]?.isValidHeader() == true) {
+                    call.respond(dkifResponseMap[call.request.headers[DkifConsumer.NAV_PERSONIDENTER_HEADER]]
+                        ?: dkifResponseSuccessKanVarslesResponseJSON)
+                } else {
                     call.response.status(HttpStatusCode(500, "Server error"))
+                }
             }
         }
     }

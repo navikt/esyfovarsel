@@ -7,7 +7,8 @@ import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.TokenConsumer
-import no.nav.syfo.consumer.domain.DigitalKontaktinfo
+import no.nav.syfo.consumer.domain.Kontaktinfo
+import no.nav.syfo.consumer.domain.KontaktinfoMapper
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 import java.util.UUID.randomUUID
@@ -17,7 +18,7 @@ class DkifConsumer(urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
     private val requestUrl = urlEnv.dkifUrl
     private val tokenScope = "api://dev-gcp.team-rocket.digdir-krr-proxy/.default"
 
-    fun kontaktinfo(aktorId: String): DigitalKontaktinfo? {
+    fun kontaktinfo(aktorId: String): Kontaktinfo? {
         return runBlocking {
             val access_token = "Bearer ${tokenConsumer.getToken(tokenScope)}"
             val response: HttpResponse? = try {
@@ -36,7 +37,8 @@ class DkifConsumer(urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
             }
             when (response?.status) {
                 HttpStatusCode.OK -> {
-                    response.receive<DigitalKontaktinfo>()
+                    val rawJson: String = response.receive()
+                    KontaktinfoMapper.map(rawJson, aktorId)
                 }
                 HttpStatusCode.Unauthorized -> {
                     log.error("Could not get kontaktinfo from DKIF: Unable to authorize")

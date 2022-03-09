@@ -2,7 +2,6 @@ package no.nav.syfo.consumer
 
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.auth.AzureAdTokenConsumer
-import no.nav.syfo.consumer.domain.kanVarsle
 import no.nav.syfo.getTestEnv
 import no.nav.syfo.testutil.mocks.*
 import org.amshove.kluent.shouldBeEqualTo
@@ -38,13 +37,13 @@ object DkifConsumerSpek : Spek({
         it("Call DKIF for non-reserved user") {
             val dkifResponse = runBlocking { dkifConsumer.kontaktinfo(aktorIdNonReservedUser) }
             dkifResponse shouldNotBe null
-            dkifResponse!!.kanVarsle() shouldBeEqualTo true
+            dkifResponse!!.kanVarsles shouldBeEqualTo true
         }
 
         it("Call DKIF for reserved user") {
             val dkifResponse = runBlocking { dkifConsumer.kontaktinfo(aktorIdReservedUser) }
             dkifResponse shouldNotBe null
-            dkifResponse!!.kanVarsle() shouldBeEqualTo false
+            dkifResponse!!.kanVarsles shouldBeEqualTo false
         }
 
         it("DKIF consumer should return null on invalid aktorid") {
