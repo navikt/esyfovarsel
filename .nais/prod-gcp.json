@@ -2,7 +2,7 @@
   "app": {
     "KTOR_ENV": "remote",
     "KAFKA_BOOTSTRAP_SERVERS_URL": "SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443",
-    "KAFKA_SCHEMA_REGISTRY_URL": "http://kafka-schema-registry.tpa:8081",
+    "KAFKA_SCHEMA_REGISTRY_URL": "https://kafka-schema-registry.nais.adeo.no",
     "STS_URL": "https://security-token-service.nais.adeo.no",
     "PDL_URL": "https://pdl-api.intern.nav.no/graphql",
     "DKIF_URL": "https://dkif.intern.nav.no/rest/v1/person",
