@@ -15,7 +15,6 @@ import no.nav.syfo.kafka.KafkaListener
 import no.nav.syfo.kafka.aivenConsumerProperties
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KSyketilfellebit
 import no.nav.syfo.kafka.topicFlexSyketilfellebiter
-import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

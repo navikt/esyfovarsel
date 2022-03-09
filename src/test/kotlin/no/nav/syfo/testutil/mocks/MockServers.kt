@@ -17,7 +17,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.UrlEnv
-import no.nav.syfo.consumer.DkifConsumer
+import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.pdl.IDENTER_QUERY
 import no.nav.syfo.consumer.pdl.PERSON_QUERY
 import no.nav.syfo.testutil.extractPortFromUrl
@@ -53,14 +53,6 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
                 } else {
                     call.response.status(HttpStatusCode(500, "Server error"))
                 }
-            }
-        }
-    }
-
-    fun mockStsServer(): NettyApplicationEngine {
-        return mockServer(urlEnv.stsUrl) {
-            post("/rest/v1/sts/token") {
-                call.respond(tokenFromStsServer)
             }
         }
     }

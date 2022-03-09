@@ -14,7 +14,6 @@ import no.nav.syfo.api.bruker.registerBrukerApi
 import no.nav.syfo.api.bruker.urlPath39UkersVarsel
 import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
-import no.nav.syfo.consumer.domain.KontaktinfoMapper
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storeUtsendtVarselTest

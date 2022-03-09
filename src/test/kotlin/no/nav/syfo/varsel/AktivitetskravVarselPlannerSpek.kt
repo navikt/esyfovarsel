@@ -4,10 +4,8 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
-import no.nav.syfo.consumer.SykmeldingerConsumer
-import no.nav.syfo.consumer.domain.Syketilfelledag
-import no.nav.syfo.consumer.narmesteLeder.NarmesteLederRelasjon
-import no.nav.syfo.consumer.narmesteLeder.Tilgang
+import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import no.nav.syfo.db.domain.PlanlagtVarsel
@@ -446,8 +444,4 @@ fun createValidSyketilfelledag(fom: LocalDateTime, tom: LocalDateTime): Syketilf
             "", "", "", LocalDateTime.now(), LocalDateTime.now(), listOf(SYKMELDING, BEKREFTET), "", fom.toLocalDate(), tom.toLocalDate()
         )
     )
-}
-
-fun createDummyNarmesteLederRelasjon(): NarmesteLederRelasjon {
-    return NarmesteLederRelasjon(null, "123", null, null, null, null, null, null, false, false, Tilgang.SYKMELDING)
 }

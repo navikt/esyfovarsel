@@ -1,6 +1,5 @@
 package no.nav.syfo.varsel
 
-const val SYKEFORLOP_MIN_DIFF_DAGER= 16L
 const val AKTIVITETSKRAV_DAGER = 42L
 const val FULL_AG_PERIODE = 16
 const val arbeidstakerFnr1 = "07088621268"

@@ -1,4 +1,4 @@
-package no.nav.syfo.consumer
+package no.nav.syfo.consumer.dkif
 
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -56,7 +56,7 @@ class DkifConsumer(urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
         private const val NAV_CONSUMER_ID_HEADER = "Nav-Consumer-Id"
         private const val NAV_CALL_ID_HEADER = "Nav-Call-Id"
         private const val ESYFOVARSEL_CONSUMER_ID = "srvesyfovarsel"
-        private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.DkifConsumer")
+        private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.dkif.DkifConsumer")
         const val NAV_PERSONIDENTER_HEADER = "Nav-Personidenter"
 
         private fun createCallId(): String {

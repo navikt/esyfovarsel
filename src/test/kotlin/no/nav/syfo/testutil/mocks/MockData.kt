@@ -1,9 +1,9 @@
 package no.nav.syfo.testutil.mocks
 
-import no.nav.syfo.consumer.domain.*
 import no.nav.syfo.consumer.pdl.*
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import no.nav.syfo.syketilfelle.domain.Tag
 import java.time.LocalDate
@@ -23,7 +23,6 @@ const val orgnummer = "999888777"
 val fom = LocalDate.of(2021, 5, 5)
 val tom = LocalDate.of(2021, 6, 5)
 val fomStartOfDay = fom.atStartOfDay()
-val tomStartOfDay = tom.atStartOfDay()
 
 val syketilfellebit = Syketilfellebit(
     id = "id",

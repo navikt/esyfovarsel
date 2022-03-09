@@ -39,8 +39,7 @@ data class Adressebeskyttelse(
 enum class Gradering : Serializable {
     STRENGT_FORTROLIG_UTLAND,
     STRENGT_FORTROLIG,
-    FORTROLIG,
-    UGRADERT
+    FORTROLIG
 }
 
 data class PdlError(

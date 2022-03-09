@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 class MerVeiledningVarselPlanner(
     val databaseAccess: DatabaseInterface,
     val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
-    val syketilfelleService: SyketilfelleService,
+    val syketilfelleService: SyketilfelleService,               // TODO: Ta i bruk denne (istedet for oppfolgingstilfelle) når syketilfelle er lastet inn i GCP
     val varselSendtService: VarselSendtService
 ) : VarselPlanner {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.Varsel39Uker")

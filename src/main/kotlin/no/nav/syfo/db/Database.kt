@@ -125,7 +125,6 @@ abstract class DatabaseFSS(val daoConfig: DbConfig): DatabaseInterface {
     }
 }
 
-
 fun generateJdbcUrlFromEnv(env: DbEnv): String {
     return "$postgresJdbcPrefix://${env.dbHost}:${env.dbPort}/${env.dbName}"
 }

@@ -1,6 +1,6 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.consumer.DkifConsumer
+import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.PdlConsumer
 import org.slf4j.LoggerFactory
 

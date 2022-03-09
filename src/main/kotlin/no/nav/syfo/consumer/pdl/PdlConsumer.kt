@@ -6,7 +6,6 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
-import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.auth.TokenConsumer
 import no.nav.syfo.consumer.pdl.*
 import no.nav.syfo.utils.httpClient
@@ -67,8 +66,8 @@ open class PdlConsumer(urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer)
 
     fun callPdl(service: String, aktorId: String): HttpResponse? {
         return runBlocking {
-            val ADToken = tokenConsumer.getToken(pdlTokenScope)
-            val bearerTokenString = "Bearer ${ADToken}"
+            val token = tokenConsumer.getToken(pdlTokenScope)
+            val bearerTokenString = "Bearer $token"
             val graphQuery = this::class.java.getResource("$QUERY_PATH_PREFIX/$service").readText().replace("[\n\r]", "")
             val requestBody = PdlRequest(graphQuery, Variables(aktorId))
 

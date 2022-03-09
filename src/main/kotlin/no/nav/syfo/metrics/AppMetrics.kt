@@ -14,7 +14,6 @@ const val METRICS_NS = "esyfovarsel"
 
 const val ERROR_IN_PLANNER = "${METRICS_NS}_error_in_planner"
 const val ERROR_IN_PARSING = "${METRICS_NS}_error_in_parser"
-const val ERROR_IN_PROCESSING = "${METRICS_NS}_error_in_processing"
 const val MER_VEILEDNING_PLANNED = "${METRICS_NS}_mer_veiledning_planned"
 const val AKTIVITETSKRAV_PLANNED = "${METRICS_NS}_aktivitetskrav_planned"
 
@@ -35,11 +34,6 @@ val COUNT_ERROR_IN_PARSING: Counter = Counter
     .description("Counts the number of all errors in parsing")
     .register(METRICS_REGISTRY)
 
-val COUNT_ERROR_IN_PROCESSING: Counter = Counter
-    .builder(ERROR_IN_PROCESSING)
-    .description("Counts the number of all errors in processing")
-    .register(METRICS_REGISTRY)
-
 val COUNT_MER_VEILEDNING_PLANNED: Counter = Counter
     .builder(MER_VEILEDNING_PLANNED)
     .description("Counts the number of planned notice of type Mer veiledning")
@@ -57,10 +51,6 @@ fun tellFeilIPlanner() {
 
 fun tellFeilIParsing() {
     COUNT_ERROR_IN_PARSING.increment()
-}
-
-fun tellFeilIProsessering() {
-    COUNT_ERROR_IN_PROCESSING.increment()
 }
 
 val COUNT_MER_VEILEDNING_NOTICE_SENT: Counter = Counter

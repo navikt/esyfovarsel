@@ -17,6 +17,8 @@ import kotlinx.coroutines.launch
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.*
 import no.nav.syfo.consumer.*
+import no.nav.syfo.consumer.dkif.DkifConsumer
+import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.*
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.job.sendNotificationsJob

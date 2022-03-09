@@ -3,7 +3,7 @@ package no.nav.syfo.varsel
 import kotlinx.coroutines.coroutineScope
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.syketilfelle.domain.Tag.*
-import no.nav.syfo.consumer.domain.Syketilfelledag
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselBySykmeldingerId
 import no.nav.syfo.db.domain.PlanlagtVarsel

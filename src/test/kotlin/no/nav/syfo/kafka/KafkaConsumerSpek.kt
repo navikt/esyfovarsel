@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.common.KafkaEnvironment
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.auth.AzureAdTokenConsumer
-import no.nav.syfo.consumer.DkifConsumer
+import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.getTestEnv
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer

@@ -13,7 +13,6 @@ import io.ktor.client.request.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.AuthEnv
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
-import org.slf4j.LoggerFactory
 import java.net.ProxySelector
 
 val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
