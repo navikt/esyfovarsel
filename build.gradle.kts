@@ -23,7 +23,7 @@ val kafkaVersion = "2.7.0"
 val kafkaEmbeddedVersion = "2.4.0"
 val avroVersion = "1.8.2"
 val confluentVersion = "5.5.0"
-val brukernotifikasjonerSchemaVersion = "1.2022.02.23-10.36-ad966c7d1c14"
+val brukernotifikasjonerSchemaVersion = "2.5.1"
 
 val githubUser: String by project
 val githubPassword: String by project

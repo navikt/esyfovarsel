@@ -25,7 +25,7 @@ class BeskjedKafkaProducer(
 
     fun sendBeskjed(fnr: String, content: String, uuid: String) {
         val nokkel = buildNewNokkel(uuid, fnr)
-        val beskjed = buildNewBeskjed(fnr, content)
+        val beskjed = buildNewBeskjed(content)
 
         val record = ProducerRecord(
             topicBrukernotifikasjonBeskjed,
@@ -49,7 +49,7 @@ class BeskjedKafkaProducer(
             .build()
     }
 
-    private fun buildNewBeskjed(fnr: String, content: String): BeskjedInput {
+    private fun buildNewBeskjed(content: String): BeskjedInput {
         return BeskjedInputBuilder()
             .withTidspunkt(LocalDateTime.now(UTCPlus1))
             .withTekst(content)
