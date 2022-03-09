@@ -17,7 +17,7 @@
   },
   "job": {
     "KTOR_ENV": "remote",
-    "JOB": "NEI",
+    "JOB": "JA",
     "SEND_VARSLER": "NEI",
     "ESYFOVARSEL_JOB_TRIGGER_URL": "https://esyfovarsel.intern.nav.no/job/trigger"
   }
