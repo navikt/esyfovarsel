@@ -16,5 +16,5 @@ spec:
   env:
   {{#each job}}
     - name: {{@key}}
-      value: {{this}}
+      value: "{{this}}"
   {{/each}}
