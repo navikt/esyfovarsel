@@ -13,16 +13,14 @@ import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 import java.util.UUID.randomUUID
 
-class DkifConsumer(urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
+class DkifConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
     private val client = httpClient()
-    private val requestUrl = urlEnv.dkifUrl
-    private val tokenScope = "api://dev-gcp.team-rocket.digdir-krr-proxy/.default"
 
     fun kontaktinfo(aktorId: String): Kontaktinfo? {
         return runBlocking {
-            val access_token = "Bearer ${tokenConsumer.getToken(tokenScope)}"
+            val access_token = "Bearer ${tokenConsumer.getToken(urlEnv.dkifScope)}"
             val response: HttpResponse? = try {
-                client.get<HttpResponse>(requestUrl) {
+                client.get<HttpResponse>(urlEnv.dkifUrl) {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, access_token)

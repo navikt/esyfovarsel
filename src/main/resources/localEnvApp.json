@@ -17,6 +17,8 @@
     "syfosyketilfelleUrl": "http://localhost:9090",
     "syfosmregisterUrl": "http://localhost:9494",
     "syfosmregisterScope": "syfosmregisterScope",
+    "dkifScope": "dkifScope",
+    "pdlScope": "pdlScope",
     "baseUrlDittSykefravaer": "http://ditt-sykefravaer:8080",
     "stsUrl": "http://localhost:9094",
     "pdlUrl": "http://localhost:9091",

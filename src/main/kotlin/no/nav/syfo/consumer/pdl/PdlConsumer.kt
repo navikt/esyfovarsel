@@ -11,11 +11,9 @@ import no.nav.syfo.consumer.pdl.*
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 
-open class PdlConsumer(urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
+open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
     private val client = httpClient()
-    private val pdlBasepath = urlEnv.pdlUrl
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.PdlConsumer")
-    private val pdlTokenScope = "api://dev-fss.pdl.pdl-api/.default"
 
     open fun getFnr(aktorId: String): String? {
         val response = callPdl(IDENTER_QUERY, aktorId)
@@ -66,13 +64,13 @@ open class PdlConsumer(urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer)
 
     fun callPdl(service: String, aktorId: String): HttpResponse? {
         return runBlocking {
-            val token = tokenConsumer.getToken(pdlTokenScope)
+            val token = tokenConsumer.getToken(urlEnv.pdlScope)
             val bearerTokenString = "Bearer $token"
             val graphQuery = this::class.java.getResource("$QUERY_PATH_PREFIX/$service").readText().replace("[\n\r]", "")
             val requestBody = PdlRequest(graphQuery, Variables(aktorId))
 
             try {
-                client.post<HttpResponse>(pdlBasepath) {
+                client.post<HttpResponse>(urlEnv.pdlUrl) {
                     headers {
                         append(TEMA_HEADER, OPPFOLGING_TEMA_HEADERVERDI)
                         append(HttpHeaders.ContentType, ContentType.Application.Json)

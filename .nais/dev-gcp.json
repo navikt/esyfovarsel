@@ -8,17 +8,19 @@
     "DKIF_URL": "https://digdir-krr-proxy.dev.intern.nav.no/rest/v1/person",
     "SYFOSYKETILFELLE_URL": "https://syfosyketilfelle.nais.preprod.local",
     "SYFOSMREGISTER_URL": "http://syfosmregister.teamsykmelding",
-    "SYFOSMREGISTER_SCOPE": "api://dev-fss.teamsykmelding.syfosmregister/.default",
+    "SYFOSMREGISTER_SCOPE": "api://dev-gcp.teamsykmelding.syfosmregister/.default",
+    "DKIF_SCOPE": "api://dev-gcp.team-rocket.digdir-krr-proxy/.default",
+    "PDL_SCOPE": "api://dev-gcp.pdl.pdl-api/.default",
     "LOGINSERVICE_IDPORTEN_DISCOVERY_URL": "https://navtestb2c.b2clogin.com/navtestb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1",
     "LOGINSERVICE_IDPORTEN_AUDIENCE": "0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5",
-    "TOGGLE_SEND_MERVEILEDNING_VARSLER": "NEI",
-    "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "NEI",
+    "TOGGLE_SEND_MERVEILEDNING_VARSLER": "false",
+    "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "false",
     "BASE_URL_DITT_SYKEFRAVAER": "https://www-gcp.dev.nav.no/syk/sykefravaer"
   },
   "job": {
     "KTOR_ENV": "remote",
-    "JOB": "JA",
-    "SEND_VARSLER": "NEI",
+    "JOB": "true",
+    "SEND_VARSLER": "false",
     "ESYFOVARSEL_JOB_TRIGGER_URL": "https://esyfovarsel.dev.intern.nav.no/job/trigger"
   }
 }

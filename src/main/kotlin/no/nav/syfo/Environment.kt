@@ -16,7 +16,7 @@ fun getJobEnv() =
         objectMapper.readValue(File(localJobPropertiesPath), JobEnv::class.java)
     else
         JobEnv(
-            sendVarsler = getEnvVar("SEND_VARSLER").tilBoolean(),
+            sendVarsler = getBooleanEnvVar("SEND_VARSLER"),
             jobTriggerUrl = getEnvVar("ESYFOVARSEL_JOB_TRIGGER_URL"),
             serviceuserUsername = File("$serviceuserMounthPath/username").readText(),
             serviceuserPassword = File("$serviceuserMounthPath/password").readText()
@@ -63,6 +63,8 @@ fun getEnv(): Environment {
                 syfosyketilfelleUrl = getEnvVar("SYFOSYKETILFELLE_URL"),
                 syfosmregisterUrl = getEnvVar("SYFOSMREGISTER_URL"),
                 syfosmregisterScope = getEnvVar("SYFOSMREGISTER_SCOPE"),
+                dkifScope = getEnvVar("DKIF_SCOPE"),
+                pdlScope = getEnvVar("PDL_SCOPE"),
                 baseUrlDittSykefravaer = getEnvVar("BASE_URL_DITT_SYKEFRAVAER"),
                 stsUrl = getEnvVar("STS_URL"),
                 pdlUrl = getEnvVar("PDL_URL"),
@@ -80,8 +82,8 @@ fun getEnv(): Environment {
             ),
             dbEnv,
             ToggleEnv(
-                sendMerVeiledningVarsler = getEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER").tilBoolean(),
-                sendAktivitetskravVarsler = getEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER").tilBoolean()
+                sendMerVeiledningVarsler = getBooleanEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER"),
+                sendAktivitetskravVarsler = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER")
             )
     )
 }
@@ -121,6 +123,8 @@ data class UrlEnv(
     val syfosyketilfelleUrl: String,
     val syfosmregisterUrl: String,
     val syfosmregisterScope: String,
+    val dkifScope: String,
+    val pdlScope: String,
     val baseUrlDittSykefravaer: String,
     val stsUrl: String,
     val pdlUrl: String,
@@ -168,8 +172,6 @@ fun isGCP(): Boolean = getEnvVar("NAIS_CLUSTER_NAME").contains("gcp")
 
 fun isLocal(): Boolean = getEnvVar("KTOR_ENV", "local") == "local"
 
-fun isJob(): Boolean = getEnvVar("JOB", "NEI") == "JA"
+fun isJob(): Boolean = getBooleanEnvVar("JOB")
 
-private fun String.tilBoolean(): Boolean {
-    return this.toUpperCase(Locale.getDefault()) == "JA"
-}
+fun getBooleanEnvVar(varName: String) = System.getenv(varName).toBoolean()
