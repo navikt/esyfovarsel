@@ -71,8 +71,12 @@ fun getEnv(): Environment {
                 dkifUrl = getEnvVar("DKIF_URL")
             ),
             KafkaEnv(
-                kafkaBootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
-                kafkaSchemaRegistryUrl = getEnvVar("KAFKA_SCHEMA_REGISTRY_URL"),
+                bootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
+                schemaRegistry = KafkaSchemaRegistryEnv(
+                    url = getEnvVar("KAFKA_SCHEMA_REGISTRY"),
+                    username = getEnvVar("KAFKA_SCHEMA_REGISTRY_USER"),
+                    password = getEnvVar("KAFKA_SCHEMA_REGISTRY_PASSWORD"),
+                ),
                 aivenBroker = getEnvVar("KAFKA_BROKERS"),
                 KafkaSslEnv(
                     truststoreLocation = getEnvVar("KAFKA_TRUSTSTORE_PATH"),
@@ -91,7 +95,7 @@ fun getTestEnv() =
     objectMapper.readValue(File(localAppPropertiesPath), Environment::class.java)
 
 fun getTestEnv(embeddedKafkaBrokerUrl: String) =
-    getTestEnv().apply { kafkaEnv.kafkaBootstrapServersUrl = embeddedKafkaBrokerUrl }
+    getTestEnv().apply { kafkaEnv.bootstrapServersUrl = embeddedKafkaBrokerUrl }
 
 data class Environment(
     val appEnv: AppEnv,
@@ -132,10 +136,16 @@ data class UrlEnv(
 )
 
 data class KafkaEnv(
-    var kafkaBootstrapServersUrl: String,
-    val kafkaSchemaRegistryUrl: String,
+    var bootstrapServersUrl: String,
+    val schemaRegistry: KafkaSchemaRegistryEnv,
     val aivenBroker: String,
     val sslConfig: KafkaSslEnv
+)
+
+data class KafkaSchemaRegistryEnv(
+    val url: String,
+    val username: String,
+    val password: String
 )
 
 data class KafkaSslEnv(

@@ -25,8 +25,12 @@
     "dkifUrl": "http://localhost:9093/api/v1/personer/kontaktinfo"
   },
   "kafkaEnv": {
-    "kafkaBootstrapServersUrl": "http://localhost:9092",
-    "kafkaSchemaRegistryUrl": "http://localhost:8081",
+    "bootstrapServersUrl": "http://localhost:9092",
+    "schemaRegistry": {
+      "url": "http://localhost:28900",
+      "username": "schema_username",
+      "password": "schema_password"
+    },
     "aivenBroker": "http://localhost:9093",
     "sslConfig": {
       "truststoreLocation": "ts.loc",

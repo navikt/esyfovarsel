@@ -4,7 +4,6 @@
     "DB_HOST": "b27dbvl024.preprod.local",
     "DB_VAULT_MOUNT_PATH": "postgresql/preprod-fss",
     "KAFKA_BOOTSTRAP_SERVERS_URL": "SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443",
-    "KAFKA_SCHEMA_REGISTRY_URL": "https://kafka-schema-registry.nais-q.adeo.no",
     "STS_URL": "https://security-token-service.nais.preprod.local",
     "PDL_URL": "https://pdl-api.nais.preprod.local/graphql",
     "DKIF_URL": "https://dkif.dev.intern.nav.no/api/v1/personer/kontaktinformasjon",

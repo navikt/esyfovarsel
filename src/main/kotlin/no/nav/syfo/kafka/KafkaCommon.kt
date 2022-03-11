@@ -1,5 +1,7 @@
 package no.nav.syfo.kafka
 
+import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE
+import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig.USER_INFO_CONFIG
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.apache.kafka.clients.CommonClientConfigs.GROUP_ID_CONFIG
@@ -22,6 +24,7 @@ const val topicFlexSyketilfellebiter = "flex.syketilfellebiter"
 const val JAVA_KEYSTORE = "JKS"
 const val PKCS12 = "PKCS12"
 const val SSL = "SSL"
+const val USER_INFO = "USER_INFO"
 
 interface KafkaListener {
     suspend fun listen(applicationState: ApplicationState)
@@ -61,7 +64,7 @@ fun consumerProperties(env: Environment) : Properties {
         put(KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer")
         put(VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer")
         put(SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${env.authEnv.serviceuserUsername}\" password=\"${env.authEnv.serviceuserPassword}\";")
-        put(BOOTSTRAP_SERVERS_CONFIG, env.kafkaEnv.kafkaBootstrapServersUrl)
+        put(BOOTSTRAP_SERVERS_CONFIG, env.kafkaEnv.bootstrapServersUrl)
     }.toProperties()
     if (!env.appEnv.remote) {
         properties.remove(SECURITY_PROTOCOL_CONFIG)
@@ -72,6 +75,9 @@ fun consumerProperties(env: Environment) : Properties {
 
 fun producerProperties(env: Environment) : Properties {
     val sslConfig = env.kafkaEnv.sslConfig
+    val schemaRegistryConfig = env.kafkaEnv.schemaRegistry
+    val userinfoConfig = "${schemaRegistryConfig.username}:${schemaRegistryConfig.password}"
+
     val properties = HashMap<String,String>().apply {
         put(ACKS_CONFIG, "all")
         put(SECURITY_PROTOCOL_CONFIG, SSL)
@@ -87,7 +93,9 @@ fun producerProperties(env: Environment) : Properties {
 
         put(KEY_SERIALIZER_CLASS_CONFIG, "io.confluent.kafka.serializers.KafkaAvroSerializer")
         put(VALUE_SERIALIZER_CLASS_CONFIG, "io.confluent.kafka.serializers.KafkaAvroSerializer")
-        put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, env.kafkaEnv.kafkaSchemaRegistryUrl)
+        put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryConfig.url)
+        put(BASIC_AUTH_CREDENTIALS_SOURCE, USER_INFO)
+        put(USER_INFO_CONFIG, userinfoConfig)
         put(BOOTSTRAP_SERVERS_CONFIG, env.kafkaEnv.aivenBroker)
 
         remove(SASL_MECHANISM)

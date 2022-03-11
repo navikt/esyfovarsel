@@ -2,7 +2,6 @@
   "app": {
     "KTOR_ENV": "remote",
     "KAFKA_BOOTSTRAP_SERVERS_URL": "SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443",
-    "KAFKA_SCHEMA_REGISTRY_URL": "https://kafka-schema-registry.nais-q.adeo.no",
     "STS_URL": "https://security-token-service.nais.preprod.local",
     "PDL_URL": "https://pdl-api.dev-fss-pub.nais.io/graphql",
     "DKIF_URL": "https://digdir-krr-proxy.dev.intern.nav.no/rest/v1/person",
