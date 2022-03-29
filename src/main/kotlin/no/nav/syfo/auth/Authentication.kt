@@ -5,9 +5,11 @@ import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
 import io.ktor.routing.*
-import no.nav.syfo.AppEnvironment
+import no.nav.syfo.AuthEnv
 import no.nav.syfo.api.admin.registerAdminApi
 import no.nav.syfo.api.bruker.registerBrukerApi
+import no.nav.syfo.api.job.registerJobTriggerApi
+import no.nav.syfo.job.VarselSender
 import no.nav.syfo.service.ReplanleggingService
 import no.nav.syfo.service.VarselSendtService
 import org.slf4j.Logger
@@ -19,9 +21,9 @@ import java.util.concurrent.TimeUnit
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.JwtValidation")
 
 fun Application.setupAuthentication(
-    env: AppEnvironment
+    authEnv: AuthEnv
 ) {
-    val wellKnown = getWellKnown(env.loginserviceDiscoveryUrl)
+    val wellKnown = getWellKnown(authEnv.loginserviceDiscoveryUrl)
     val jwkProvider = JwkProviderBuilder(URL(wellKnown.jwks_uri))
         .cached(10, 24, TimeUnit.HOURS)
         .rateLimited(10, 1, TimeUnit.MINUTES)
@@ -33,7 +35,7 @@ fun Application.setupAuthentication(
             verifier(jwkProvider, wellKnown.issuer)
             validate { credentials ->
                 when {
-                    hasLoginserviceIdportenClientIdAudience(credentials, env.loginserviceAudience) && erNiva4(credentials) -> JWTPrincipal(credentials.payload)
+                    hasLoginserviceIdportenClientIdAudience(credentials, authEnv.loginserviceAudience) && erNiva4(credentials) -> JWTPrincipal(credentials.payload)
                     else -> null
                 }
             }
@@ -41,28 +43,56 @@ fun Application.setupAuthentication(
         basic("auth-basic") {
             realm = "Access to the '/admin/' path"
             validate { credentials ->
-                if (credentials.name == env.commonEnv.serviceuserUsername && credentials.password == env.commonEnv.serviceuserPassword) {
-                    UserIdPrincipal(credentials.name)
-                } else {
-                    null
+                when {
+                    validBasicAuthCredentials(authEnv, credentials) -> UserIdPrincipal(credentials.name)
+                    else -> null
                 }
             }
         }
     }
 }
 
-fun Application.setupRoutesWithAuthentication(
+fun Application.setupLocalRoutesWithAuthentication(
+    varselSender: VarselSender,
     varselSendtService: VarselSendtService,
     replanleggingService: ReplanleggingService,
-    appEnv: AppEnvironment
+    authEnv: AuthEnv
 ) {
-    setupAuthentication(appEnv)
+    install(Authentication) {
+        basic("auth-basic") {
+            realm = "Access to the '/admin/' path"
+            validate { credentials ->
+                when {
+                    validBasicAuthCredentials(authEnv, credentials) -> UserIdPrincipal(credentials.name)
+                    else -> null
+                }
+            }
+        }
+    }
+
+    routing {
+        registerBrukerApi(varselSendtService)
+        registerAdminApi(replanleggingService)
+        authenticate("auth-basic") {
+            registerJobTriggerApi(varselSender)
+        }
+    }
+}
+
+fun Application.setupRoutesWithAuthentication(
+    varselSender: VarselSender,
+    varselSendtService: VarselSendtService,
+    replanleggingService: ReplanleggingService,
+    authEnv: AuthEnv
+) {
+    setupAuthentication(authEnv)
     routing {
         authenticate("loginservice") {
             registerBrukerApi(varselSendtService)
         }
         authenticate("auth-basic") {
             registerAdminApi(replanleggingService)
+            registerJobTriggerApi(varselSender)
         }
     }
 }

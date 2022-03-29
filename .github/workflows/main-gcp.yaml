@@ -1,6 +1,6 @@
-name: Deploy to preprod
+name: main
 
-on: workflow_dispatch
+on: push
 
 env:
   IMAGE: ghcr.io/${{ github.repository }}:${{ github.sha }}
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ORG_GRADLE_PROJECT_githubUser: x-access-token
-      ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+      ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}    
     steps:
       - name: Setup java
         uses: actions/setup-java@v1
@@ -50,28 +50,8 @@ jobs:
           echo ${IMAGE}
 
   deploy-dev:
-    name: Deploy to NAIS Dev-fss
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Deploy app
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
-          RESOURCE: .nais/naiserator-dev.yaml
-          VARS: .nais/dev.json
-      - name: Deploy jobb
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
-          RESOURCE: .nais/send-varsler-job-dev.yaml
-          VARS: .nais/dev.json
-
-  deploy-dev-gcp:
-    name: Deploy to dev-gcp
+    if: github.ref == 'refs/heads/master'
+    name: Deploy to dev GCP
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -91,7 +71,6 @@ jobs:
           RESOURCE: .nais/job-trigger-dev-gcp.yaml
           VARS: .nais/dev-gcp.json
 
-
       # Notify Slack
       - name: Unsuccessful deploy notification dev
         if: failure()
@@ -99,6 +78,45 @@ jobs:
         env:
           SLACK_TITLE: 'Unsuccesful deployment - `dev` :crying_cat_face:'
           SLACK_MESSAGE: '`${{ github.event.repository.name }}` failed to deploy to dev.'
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          MSG_MINIMAL: commit
+          SLACK_COLOR: ${{ job.status }}
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/master'
+    name: Deploy to prod GCP
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Deploy app
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/naiserator-prod-gcp.yaml
+          VARS: .nais/prod-gcp.json
+      - name: Deploy jobb
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/job-trigger-prod-gcp.yaml
+          VARS: .nais/prod-gcp.json
+      - name: Deploy alerts
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/alerts.yaml
+
+      # Notify Slack
+      - name: Unsuccessful deploy notification prod
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_TITLE: 'Unsuccesful deployment :crying_cat_face:'
+          SLACK_MESSAGE: '`${{ github.event.repository.name }}` failed to deploy to prod.'
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           MSG_MINIMAL: commit
           SLACK_COLOR: ${{ job.status }}

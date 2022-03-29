@@ -7,12 +7,9 @@ metadata:
     team: team-esyfo
 spec:
   image: {{ image }}
-  schedule: "5 9 * * *"
-  vault:
-    enabled: true
-    paths:
-      - kvPath: "/serviceuser/data/prod/srvesyfovarsel"
-        mountPath: "/var/run/secrets"
+  schedule: "*/15 * * * *"
+  filesFrom:
+    - secret: esyfovarsel-serviceuser
   env:
   {{#each job}}
     - name: {{@key}}

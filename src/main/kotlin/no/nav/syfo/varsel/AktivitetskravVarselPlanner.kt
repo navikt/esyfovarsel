@@ -1,10 +1,9 @@
 package no.nav.syfo.varsel
 
 import kotlinx.coroutines.coroutineScope
-import no.nav.syfo.consumer.NarmesteLederConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.syketilfelle.domain.Tag.*
-import no.nav.syfo.consumer.domain.Syketilfelledag
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselBySykmeldingerId
 import no.nav.syfo.db.domain.PlanlagtVarsel
@@ -21,7 +20,6 @@ import java.time.temporal.ChronoUnit
 class AktivitetskravVarselPlanner(
     private val databaseAccess: DatabaseInterface,
     private val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
-    private val narmesteLederConsumer: NarmesteLederConsumer,
     val sykmeldingService: SykmeldingService,
     override val name: String = "AKTIVITETSKRAV_VARSEL"
 ) : VarselPlanner {

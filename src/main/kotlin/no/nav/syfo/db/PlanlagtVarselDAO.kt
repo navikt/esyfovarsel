@@ -3,17 +3,12 @@ package no.nav.syfo.db
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.util.*
-
-private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.db.PlanlagtVarselDAO")
 
 fun DatabaseInterface.storePlanlagtVarsel(planlagtVarsel: PlanlagtVarsel) {
     val insertStatement1 = """INSERT INTO PLANLAGT_VARSEL (
@@ -183,5 +178,18 @@ fun DatabaseInterface.deletePlanlagtVarselBySykmeldingerId(sykmeldingerId: Set<S
         }
 
         connection.commit()
+    }
+}
+
+fun DatabaseInterface.grantAccessToIAMUsers() {
+    val statement = """
+        GRANT ALL ON ALL TABLES IN SCHEMA PUBLIC TO CLOUDSQLIAMUSER
+    """.trimIndent()
+
+    connection.use { conn ->
+        conn.prepareStatement(statement).use {
+            it.executeUpdate()
+        }
+        conn.commit()
     }
 }

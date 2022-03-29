@@ -1,47 +1,26 @@
 package no.nav.syfo.consumer
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import no.nav.syfo.AppEnvironment
-import no.nav.syfo.auth.StsConsumer
+import no.nav.syfo.UrlEnv
+import no.nav.syfo.auth.TokenConsumer
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
+import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-open class SyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsumer) {
-    private val client: HttpClient
-    private val stsConsumer: StsConsumer
-    private val basepath: String
+open class SyfosyketilfelleConsumer(urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
+    private val client = httpClient()
+    private val basepath = urlEnv.syfosyketilfelleUrl
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.SyfosyketilfelleConsumer")
-
-    init {
-        client = HttpClient(CIO) {
-            expectSuccess = false
-            install(JsonFeature) {
-                serializer = JacksonSerializer {
-                    registerKotlinModule()
-                    registerModule(JavaTimeModule())
-                    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                }
-            }
-        }
-        this.stsConsumer = stsConsumer
-        basepath = env.syfosyketilfelleUrl
-    }
 
     suspend fun getOppfolgingstilfelle(aktorId: String): OppfolgingstilfellePerson? {
         val requestURL = "$basepath/kafka/oppfolgingstilfelle/beregn/$aktorId"
-        val stsToken = stsConsumer.getToken()
-        val bearerTokenString = "Bearer ${stsToken.access_token}"
+        val stsAccessToken = tokenConsumer.getToken(null)
+        val bearerTokenString = "Bearer $stsAccessToken"
 
         val response = client.get<HttpResponse>(requestURL) {
             headers {
@@ -71,8 +50,8 @@ open class SyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsume
 
     open suspend fun getOppfolgingstilfelle39Uker(aktorId: String): Oppfolgingstilfelle39Uker? {
         val requestURL = "$basepath/kafka/oppfolgingstilfelle/beregn/$aktorId/39ukersvarsel"
-        val stsToken = stsConsumer.getToken()
-        val bearerTokenString = "Bearer ${stsToken.access_token}"
+        val stsAccessToken = tokenConsumer.getToken(null)
+        val bearerTokenString = "Bearer $stsAccessToken"
 
         val response = client.get<HttpResponse>(requestURL) {
             headers {
@@ -101,7 +80,7 @@ open class SyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsume
     }
 }
 
-class LocalSyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsumer): SyfosyketilfelleConsumer(env, stsConsumer) {
+class LocalSyfosyketilfelleConsumer(urlEnv: UrlEnv, tokenConsumer: TokenConsumer): SyfosyketilfelleConsumer(urlEnv, tokenConsumer) {
     override suspend fun getOppfolgingstilfelle39Uker(aktorId: String): Oppfolgingstilfelle39Uker? {
         return Oppfolgingstilfelle39Uker(
             aktorId,

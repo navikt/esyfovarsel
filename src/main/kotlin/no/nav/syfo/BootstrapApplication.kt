@@ -14,27 +14,23 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
-import no.nav.syfo.api.admin.registerAdminApi
-import no.nav.syfo.api.bruker.registerBrukerApi
 import no.nav.syfo.api.registerNaisApi
-import no.nav.syfo.auth.AzureAdTokenConsumer
-import no.nav.syfo.auth.LocalStsConsumer
-import no.nav.syfo.auth.StsConsumer
-import no.nav.syfo.auth.setupRoutesWithAuthentication
+import no.nav.syfo.auth.*
 import no.nav.syfo.consumer.*
+import no.nav.syfo.consumer.dkif.DkifConsumer
+import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.*
-import no.nav.syfo.job.SendVarslerJobb
+import no.nav.syfo.job.VarselSender
+import no.nav.syfo.job.sendNotificationsJob
 import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.launchKafkaListener
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.kafka.oppfolgingstilfelle.SyketilfelleKafkaConsumer
 import no.nav.syfo.metrics.registerPrometheusApi
-import no.nav.syfo.metrics.withPrometheus
 import no.nav.syfo.service.*
 import no.nav.syfo.syketilfelle.SyketilfelleService
 import no.nav.syfo.varsel.AktivitetskravVarselPlanner
 import no.nav.syfo.varsel.MerVeiledningVarselPlanner
-import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -46,57 +42,33 @@ lateinit var database: DatabaseInterface
 
 fun main() {
     if (isJob()) {
-        val env = jobEnvironment()
-
-        if (env.toggles.startJobb) {
-            val stsConsumer = StsConsumer(env.commonEnv)
-            val pdlConsumer = PdlConsumer(env.commonEnv, stsConsumer)
-            val dkifConsumer = DkifConsumer(env.commonEnv, stsConsumer)
-
-            val accessControl = AccessControl(pdlConsumer, dkifConsumer)
-            val beskjedKafkaProducer = BeskjedKafkaProducer(env.commonEnv, env.baseUrlDittSykefravaer)
-            val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl)
-
-            database = initDb(env.commonEnv.dbEnvironment)
-
-            val jobb = SendVarslerJobb(
-                database,
-                sendVarselService,
-                env.toggles
-            )
-
-            withPrometheus(env.prometheusPushGatewayUrl) {
-                jobb.sendVarsler()
-            }
-        } else {
-            LoggerFactory.getLogger("no.nav.syfo.BootstrapApplication").info("Jobb togglet av")
-        }
-
+        val env = getJobEnv()
+        sendNotificationsJob(env)
     } else {
-        val env: AppEnvironment = appEnvironment()
+        val env = getEnv()
         val server = embeddedServer(Netty, applicationEngineEnvironment {
-            log = LoggerFactory.getLogger("ktor.application")
             config = HoconApplicationConfig(ConfigFactory.load())
-            database = initDb(env.commonEnv.dbEnvironment)
+            database = initDb(env.dbEnv)
 
-            val stsConsumer = getStsConsumer(env.commonEnv)
-            val pdlConsumer = getPdlConsumer(env.commonEnv, stsConsumer)
-            val dkifConsumer = DkifConsumer(env.commonEnv, stsConsumer)
-            val syfosyketilfelleConsumer = getSyfosyketilfelleConsumer(env, stsConsumer)
-            val azureAdTokenConsumer = AzureAdTokenConsumer(env)
-            val sykmeldingerConsumer = SykmeldingerConsumer(env, azureAdTokenConsumer)
-            val narmesteLederConsumer = NarmesteLederConsumer(env, azureAdTokenConsumer)
+            val stsConsumer = getStsConsumer(env.urlEnv, env.authEnv)
+            val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
+
+            val pdlConsumer = getPdlConsumer(env.urlEnv, azureAdTokenConsumer, stsConsumer)
+            val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer, stsConsumer)
+            val oppfolgingstilfelleConsumer = getSyfosyketilfelleConsumer(env.urlEnv, stsConsumer)
+            val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
 
             val accessControl = AccessControl(pdlConsumer, dkifConsumer)
             val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
-            val varselSendtService = VarselSendtService(pdlConsumer, syfosyketilfelleConsumer, database)
+
             val syketilfelleService = SyketilfelleService(database)
-            val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, syfosyketilfelleConsumer, syketilfelleService, varselSendtService)
-            val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, syfosyketilfelleConsumer, narmesteLederConsumer, sykmeldingService)
+            val varselSendtService = VarselSendtService(pdlConsumer, oppfolgingstilfelleConsumer, database)
+            val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, syketilfelleService, varselSendtService)
+            val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
             val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
 
             connector {
-                port = env.applicationPort
+                port = env.appEnv.applicationPort
             }
 
             module {
@@ -104,9 +76,11 @@ fun main() {
 
                 serverModule(
                     env,
+                    accessControl,
                     varselSendtService,
                     replanleggingService
                 )
+
                 kafkaModule(
                     env,
                     accessControl,
@@ -115,6 +89,7 @@ fun main() {
                 )
             }
         })
+
         Runtime.getRuntime().addShutdownHook(Thread {
             server.stop(10, 10, TimeUnit.SECONDS)
         })
@@ -123,52 +98,52 @@ fun main() {
     }
 }
 
-fun initDb(dbEnv: DbEnvironment): Database = if (isLocal()) localDatabase(dbEnv) else remoteDatabase(dbEnv)
-
-private fun localDatabase(env: DbEnvironment): Database = LocalDatabase(
-    DbConfig(
-        jdbcUrl = env.databaseUrl,
-        databaseName = env.databaseName,
-        password = "password",
-        username = "esyfovarsel-admin",
-        remote = false
-    )
-)
-
-private fun remoteDatabase(env: DbEnvironment): Database = RemoteDatabase(
-    DbConfig(
-        jdbcUrl = env.databaseUrl,
-        databaseName = env.databaseName,
-        dbCredMountPath = env.dbVaultMountPath
-    )
-)
-
-private fun getStsConsumer(env: CommonEnvironment): StsConsumer {
+private fun getStsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv): TokenConsumer {
     if (isLocal()) {
-        return LocalStsConsumer(env)
+        return LocalStsConsumer(urlEnv, authEnv)
     }
-    return StsConsumer(env)
+    return StsConsumer(urlEnv, authEnv)
 }
 
-private fun getPdlConsumer(env: CommonEnvironment, stsConsumer: StsConsumer): PdlConsumer {
-    if (isLocal()) {
-        return LocalPdlConsumer(env, stsConsumer)
+private fun getPdlConsumer(urlEnv: UrlEnv, azureADConsumer: TokenConsumer, stsConsumer: TokenConsumer): PdlConsumer {
+    return when {
+        isLocal() -> LocalPdlConsumer(urlEnv, azureADConsumer)
+        isGCP() -> PdlConsumer(urlEnv, azureADConsumer)
+        else -> PdlConsumer(urlEnv, stsConsumer)
     }
-    return PdlConsumer(env, stsConsumer)
 }
 
-private fun getSyfosyketilfelleConsumer(env: AppEnvironment, stsConsumer: StsConsumer): SyfosyketilfelleConsumer {
-    if (isLocal()) {
-        return LocalSyfosyketilfelleConsumer(env, stsConsumer)
+private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: TokenConsumer, stsConsumer: TokenConsumer): DkifConsumer {
+    return when {
+        isLocal() -> DkifConsumer(urlEnv, azureADConsumer)
+        isGCP() -> DkifConsumer(urlEnv, azureADConsumer)
+        else -> DkifConsumer(urlEnv, stsConsumer)
     }
-    return SyfosyketilfelleConsumer(env, stsConsumer)
+}
+
+private fun getSyfosyketilfelleConsumer(urlEnv: UrlEnv, tokenConsumer: TokenConsumer): SyfosyketilfelleConsumer {
+    if (isLocal()) {
+        return LocalSyfosyketilfelleConsumer(urlEnv, tokenConsumer)
+    }
+    return SyfosyketilfelleConsumer(urlEnv, tokenConsumer)
 }
 
 fun Application.serverModule(
-    appEnv: AppEnvironment,
+    env: Environment,
+    accessControl: AccessControl,
     varselSendtService: VarselSendtService,
     replanleggingService: ReplanleggingService
 ) {
+    val beskjedKafkaProducer = BeskjedKafkaProducer(env)
+    val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl)
+
+    val varselSender = VarselSender(
+        database,
+        sendVarselService,
+        env.toggleEnv,
+        env.appEnv
+    )
+
     install(ContentNegotiation) {
         jackson {
             registerKotlinModule()
@@ -178,14 +153,18 @@ fun Application.serverModule(
         }
     }
 
-    runningRemotely {
-        setupRoutesWithAuthentication(varselSendtService, replanleggingService, appEnv)
+    runningInGCPCluster {
+        log.info("GRANTING ACCESS TO IAM ...")
+        database.grantAccessToIAMUsers()
+        log.info("ACCESS GRANTED")
     }
+
+    runningRemotely {
+        setupRoutesWithAuthentication(varselSender, varselSendtService, replanleggingService, env.authEnv)
+    }
+
     runningLocally {
-        routing {
-            registerBrukerApi(varselSendtService)
-            registerAdminApi(replanleggingService)
-        }
+        setupLocalRoutesWithAuthentication(varselSender, varselSendtService, replanleggingService, env.authEnv)
     }
 
     routing {
@@ -197,35 +176,48 @@ fun Application.serverModule(
 }
 
 fun Application.kafkaModule(
-    env: AppEnvironment,
+    env: Environment,
     accessControl: AccessControl,
     aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
     merVeiledningVarselPlanner: MerVeiledningVarselPlanner
 ) {
     runningRemotely {
-        val syketilfelleKafkaConsumer = SyketilfelleKafkaConsumer(env, database)
-        val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(env, accessControl)
-            .addPlanner(aktivitetskravVarselPlanner)
-            .addPlanner(merVeiledningVarselPlanner)
 
-        launch(backgroundTasksContext) {
-            launchKafkaListener(
-                state,
-                oppfolgingstilfelleKafkaConsumer
-            )
+        runningInFSSCluster {
+            launch(backgroundTasksContext) {
+                launchKafkaListener(
+                    state,
+                    OppfolgingstilfelleKafkaConsumer(env, accessControl)
+                        .addPlanner(aktivitetskravVarselPlanner)
+                        .addPlanner(merVeiledningVarselPlanner)
+                )
+            }
         }
 
-        launch(backgroundTasksContext) {
-            launchKafkaListener(
-                state,
-                syketilfelleKafkaConsumer
-            )
+        runningInGCPCluster {
+            launch(backgroundTasksContext) {
+                launchKafkaListener(
+                    state,
+                    SyketilfelleKafkaConsumer(env, database)
+                )
+            }
         }
     }
 }
 
 val Application.envKind
     get() = environment.config.property("ktor.environment").getString()
+
+val Application.cluster
+    get() = environment.config.property("ktor.cluster").getString()
+
+fun Application.runningInFSSCluster(block: () -> Unit) {
+    if (cluster.contains("fss")) block()
+}
+
+fun Application.runningInGCPCluster(block: () -> Unit) {
+    if (cluster.contains("gcp")) block()
+}
 
 fun Application.runningRemotely(block: () -> Unit) {
     if (envKind == "remote") block()
@@ -234,3 +226,14 @@ fun Application.runningRemotely(block: () -> Unit) {
 fun Application.runningLocally(block: () -> Unit) {
     if (envKind == "local") block()
 }
+
+fun initDb(dbEnv: DbEnv): DatabaseInterface =
+    when {
+        isLocal() -> localDatabase(dbEnv)
+        isGCP() -> Database(dbEnv)
+        else -> remoteDatabase(dbEnv)
+    }
+
+private fun localDatabase(dbEnv: DbEnv): DatabaseInterface = LocalDatabase(dbEnv)
+
+private fun remoteDatabase(dbEnv: DbEnv): DatabaseInterface = RemoteDatabase(dbEnv)

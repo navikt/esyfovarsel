@@ -79,21 +79,21 @@ class SyketilfelleService(
         fnr: String,
         oppfolgingstilfeller: List<Oppfolgingstilfelle>
     ): KOppfolgingstilfelle39Uker? {
-            return oppfolgingstilfeller
-                .toMutableList()
-                .map { oppfolgingstilfelle ->
-                    KOppfolgingstilfelle39Uker(
-                        fnr,
-                        oppfolgingstilfelle.antallDagerAGPeriodeBrukt(),
-                        oppfolgingstilfelle.antallSykedager(),
-                        oppfolgingstilfelle.tidslinje.first().dag,
-                        oppfolgingstilfelle.tidslinje.last().dag
-                    )
-                }
-                .sortedBy { it.fom }
-                .reduceRightOrNull { tilfelle: KOppfolgingstilfelle39Uker, acc ->
-                    acc.slaaSammenMedForrige(tilfelle)
-                }
+        return oppfolgingstilfeller
+            .toMutableList()
+            .map { oppfolgingstilfelle ->
+                KOppfolgingstilfelle39Uker(
+                    fnr,
+                    oppfolgingstilfelle.antallDagerAGPeriodeBrukt(),
+                    oppfolgingstilfelle.antallSykedager(),
+                    oppfolgingstilfelle.tidslinje.first().dag,
+                    oppfolgingstilfelle.tidslinje.last().dag
+                )
+            }
+            .sortedBy { it.fom }
+            .reduceRightOrNull { tilfelle: KOppfolgingstilfelle39Uker, acc ->
+                acc.slaaSammenMedForrige(tilfelle)
+            }
     }
 
     private fun KOppfolgingstilfelle39Uker.slaaSammenMedForrige(forrigeTilfelle: KOppfolgingstilfelle39Uker): KOppfolgingstilfelle39Uker {
@@ -112,4 +112,3 @@ class SyketilfelleService(
     private fun LocalDate.leggTilArbeidsgiverPeriode() = plusDays(AntallDagerIArbeidsgiverPeriode.toLong())
 
 }
-

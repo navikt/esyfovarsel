@@ -1,39 +1,27 @@
 package no.nav.syfo.auth
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import no.nav.syfo.CommonEnvironment
+import no.nav.syfo.AuthEnv
+import no.nav.syfo.UrlEnv
+import no.nav.syfo.utils.httpClient
 import java.time.LocalDateTime
 import java.util.Base64
 
-open class StsConsumer(env: CommonEnvironment) {
-    private val username = env.serviceuserUsername
-    private val password = env.serviceuserPassword
-    private val stsEndpointUrl = "${env.stsUrl}/rest/v1/sts/token?grant_type=client_credentials&scope=openid"
+open class StsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv): TokenConsumer {
+    private val username = authEnv.serviceuserUsername
+    private val password = authEnv.serviceuserPassword
+    private val stsEndpointUrl = "${urlEnv.stsUrl}/rest/v1/sts/token?grant_type=client_credentials&scope=openid"
     private var token: Token? = null
-
-    private val client = HttpClient(CIO) {
-        expectSuccess = false
-        install(JsonFeature) {
-            serializer = JacksonSerializer {
-                registerKotlinModule()
-                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            }
-        }
-    }
+    private val client = httpClient()
 
     fun isValidToken(token: Token?) : Boolean {
         return token?.expiresAt?.isAfter(LocalDateTime.now()) ?: false
     }
 
-    open suspend fun getToken(): Token {
+    override suspend fun getToken(resource: String?): String {
         if(isValidToken(token)) {
-            return token!!
+            return token!!.access_token
         }
 
         token = client.post<Token>(stsEndpointUrl) {
@@ -42,16 +30,12 @@ open class StsConsumer(env: CommonEnvironment) {
             }
         }
 
-        return token!!
+        return token!!.access_token
     }
 }
 
-class LocalStsConsumer(env: CommonEnvironment): StsConsumer(env) {
-    override suspend fun getToken(): Token = Token(
-        "access_token_string",
-        "access_token",
-        3600
-    )
+class LocalStsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv): StsConsumer(urlEnv, authEnv) {
+    override suspend fun getToken(resource: String?): String = "access_token_string"
 }
 
 fun encodeCredentials(username: String, password: String): String {

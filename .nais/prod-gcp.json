@@ -1,27 +1,25 @@
 {
   "app": {
     "KTOR_ENV": "remote",
-    "DB_HOST": "A01DBVL022.adeo.no:5432",
-    "DB_VAULT_MOUNT_PATH": "postgresql/prod-fss",
     "KAFKA_BOOTSTRAP_SERVERS_URL": "SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443",
     "STS_URL": "https://security-token-service.nais.adeo.no",
-    "PDL_URL": "https://pdl-api.nais.adeo.no/graphql",
-    "DKIF_URL": "https://dkif.intern.nav.no/api/v1/personer/kontaktinformasjon",
+    "PDL_URL": "https://pdl-api.intern.nav.no/graphql",
+    "DKIF_URL": "https://dkif.intern.nav.no/rest/v1/person",
     "SYFOSYKETILFELLE_URL": "https://syfosyketilfelle.nais.adeo.no",
     "SYFOSMREGISTER_URL": "http://syfosmregister.teamsykmelding",
-    "SYFOSMREGISTER_SCOPE": "api://prod-fss.teamsykmelding.syfosmregister/.default",
-    "DKIF_SCOPE": "api://prod-fss.team-rocket.digdir-krr-proxy/.default",
-    "PDL_SCOPE": "api://prod-fss.pdl.pdl-api/.default",
+    "SYFOSMREGISTER_SCOPE": "api://prod-gcp.teamsykmelding.syfosmregister/.default",
+    "DKIF_SCOPE": "api://prod-gcp.team-rocket.digdir-krr-proxy/.default",
+    "PDL_SCOPE": "api://prod-gcp.pdl.pdl-api/.default",
     "LOGINSERVICE_IDPORTEN_DISCOVERY_URL": "https://navnob2c.b2clogin.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten",
     "LOGINSERVICE_IDPORTEN_AUDIENCE": "45104d6a-f5bc-4e8c-b352-4bbfc9381f25",
-    "TOGGLE_SEND_MERVEILEDNING_VARSLER": "true",
+    "TOGGLE_SEND_MERVEILEDNING_VARSLER": "false",
     "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "false",
     "BASE_URL_DITT_SYKEFRAVAER": "https://www.nav.no/syk/sykefravaer"
   },
   "job": {
     "KTOR_ENV": "remote",
     "JOB": "true",
-    "SEND_VARSLER": "true",
-    "ESYFOVARSEL_JOB_TRIGGER_URL": "https://esyfovarsel.nais.adeo.no/job/trigger"
+    "SEND_VARSLER": "false",
+    "ESYFOVARSEL_JOB_TRIGGER_URL": "https://esyfovarsel.intern.nav.no/job/trigger"
   }
 }

@@ -3,133 +3,185 @@ package no.nav.syfo
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.io.File
+import java.util.*
 
-const val localAppPropertiesPath = "./src/main/resources/localAppEnv.json"
-const val localJobPropertiesPath = "./src/main/resources/localJobEnv.json"
-const val serviceuserMounthPath = "/var/run/secrets/serviceuser"
+
+const val localAppPropertiesPath = "./src/main/resources/localEnvApp.json"
+const val localJobPropertiesPath = "./src/main/resources/localEnvJob.json"
+const val serviceuserMounthPath = "/var/run/secrets"
 val objectMapper = ObjectMapper().registerKotlinModule()
 
-fun testEnvironment(): AppEnvironment =
-    appEnvironment()
-
-fun testEnvironment(embeddedKafkaBrokerUrl: String): AppEnvironment =
-    objectMapper.readValue(File(localAppPropertiesPath), AppEnvironment::class.java).apply { commonEnv.kafkaBootstrapServersUrl = embeddedKafkaBrokerUrl }
-
-private fun remoteCommonEnvironment(): CommonEnvironment {
-    return CommonEnvironment(
-        true,
-        getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
-        getEnvVar("KAFKA_SCHEMA_REGISTRY_URL"),
-        getEnvVar("STS_URL"),
-        getEnvVar("PDL_URL"),
-        getEnvVar("DKIF_URL"),
-        File("$serviceuserMounthPath/username").readText(),
-        File("$serviceuserMounthPath/password").readText(),
-        DbEnvironment (
-            getEnvVar("DATABASE_URL"),
-            getEnvVar("DATABASE_NAME", "esyfovarsel"),
-            getEnvVar("DB_VAULT_MOUNT_PATH")
+fun getJobEnv() =
+    if (isLocal())
+        objectMapper.readValue(File(localJobPropertiesPath), JobEnv::class.java)
+    else
+        JobEnv(
+            sendVarsler = getBooleanEnvVar("SEND_VARSLER"),
+            jobTriggerUrl = getEnvVar("ESYFOVARSEL_JOB_TRIGGER_URL"),
+            serviceuserUsername = File("$serviceuserMounthPath/username").readText(),
+            serviceuserPassword = File("$serviceuserMounthPath/password").readText()
         )
+
+fun getEnv(): Environment {
+    val dbEnv = if (isGCP())
+        DbEnv(
+            dbHost = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_HOST", "127.0.0.1"),
+            dbPort = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PORT", "5432"),
+            dbName = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_DATABASE"),
+            dbUsername = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_USERNAME"),
+            dbPassword = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PASSWORD")
+        )
+    else
+        DbEnv(
+            dbHost = getEnvVar("DB_HOST", "127.0.0.1"),
+            dbPort = "5432",
+            dbName = "esyfovarsel",
+            dbCredMounthPath = getEnvVar("DB_VAULT_MOUNT_PATH")
+        )
+
+
+    return if (isLocal())
+        getTestEnv()
+    else
+        Environment(
+            AppEnv(
+                applicationPort = getEnvVar("APPLICATION_PORT", "8080").toInt(),
+                applicationThreads = getEnvVar("APPLICATION_THREADS", "4").toInt(),
+                remote = true,
+                runningInGCPCluster = isGCP()
+            ),
+            AuthEnv(
+                serviceuserUsername = File("$serviceuserMounthPath/username").readText(),
+                serviceuserPassword = File("$serviceuserMounthPath/password").readText(),
+                clientId = getEnvVar("AZURE_APP_CLIENT_ID"),
+                clientSecret = getEnvVar("AZURE_APP_CLIENT_SECRET"),
+                aadAccessTokenUrl = getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
+                loginserviceDiscoveryUrl = getEnvVar("LOGINSERVICE_IDPORTEN_DISCOVERY_URL"),
+                loginserviceAudience = getEnvVar("LOGINSERVICE_IDPORTEN_AUDIENCE").split(",")
+            ),
+            UrlEnv(
+                syfosyketilfelleUrl = getEnvVar("SYFOSYKETILFELLE_URL"),
+                syfosmregisterUrl = getEnvVar("SYFOSMREGISTER_URL"),
+                syfosmregisterScope = getEnvVar("SYFOSMREGISTER_SCOPE"),
+                dkifScope = getEnvVar("DKIF_SCOPE"),
+                pdlScope = getEnvVar("PDL_SCOPE"),
+                baseUrlDittSykefravaer = getEnvVar("BASE_URL_DITT_SYKEFRAVAER"),
+                stsUrl = getEnvVar("STS_URL"),
+                pdlUrl = getEnvVar("PDL_URL"),
+                dkifUrl = getEnvVar("DKIF_URL")
+            ),
+            KafkaEnv(
+                bootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
+                schemaRegistry = KafkaSchemaRegistryEnv(
+                    url = getEnvVar("KAFKA_SCHEMA_REGISTRY"),
+                    username = getEnvVar("KAFKA_SCHEMA_REGISTRY_USER"),
+                    password = getEnvVar("KAFKA_SCHEMA_REGISTRY_PASSWORD"),
+                ),
+                aivenBroker = getEnvVar("KAFKA_BROKERS"),
+                KafkaSslEnv(
+                    truststoreLocation = getEnvVar("KAFKA_TRUSTSTORE_PATH"),
+                    keystoreLocation = getEnvVar("KAFKA_KEYSTORE_PATH"),
+                    credstorePassword = getEnvVar("KAFKA_CREDSTORE_PASSWORD")
+                )
+            ),
+            dbEnv,
+            ToggleEnv(
+                sendMerVeiledningVarsler = getBooleanEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER"),
+                sendAktivitetskravVarsler = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER")
+            )
     )
 }
+fun getTestEnv() =
+    objectMapper.readValue(File(localAppPropertiesPath), Environment::class.java)
 
-fun appEnvironment(): AppEnvironment =
-    if (isLocal())
-        objectMapper.readValue(File(localAppPropertiesPath), AppEnvironment::class.java)
-    else
-        AppEnvironment(
-            getEnvVar("APPLICATION_PORT", "8080").toInt(),
-            getEnvVar("APPLICATION_THREADS", "4").toInt(),
-            getEnvVar("SYFOSYKETILFELLE_URL"),
-            getEnvVar("SYFOSMREGISTER_URL"),
-            getEnvVar("SYFOSMREGISTER_SCOPE"),
-            getEnvVar("NARMESTELEDER_URL"),
-            getEnvVar("NARMESTELEDER_SCOPE"),
-            getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
-            getEnvVar("AZURE_APP_CLIENT_ID"),
-            getEnvVar("AZURE_APP_CLIENT_SECRET"),
-            getEnvVar("LOGINSERVICE_IDPORTEN_DISCOVERY_URL"),
-            getEnvVar("LOGINSERVICE_IDPORTEN_AUDIENCE").split(","),
-            getEnvVar("KAFKA_BROKERS"),
-            getEnvVar("KAFKA_TRUSTSTORE_PATH"),
-            getEnvVar("KAFKA_KEYSTORE_PATH"),
-            getEnvVar("KAFKA_CREDSTORE_PASSWORD"),
-            remoteCommonEnvironment()
-        )
+fun getTestEnv(embeddedKafkaBrokerUrl: String) =
+    getTestEnv().apply { kafkaEnv.bootstrapServersUrl = embeddedKafkaBrokerUrl }
 
-fun jobEnvironment(): JobEnvironment =
-    if (isLocal())
-        objectMapper.readValue(File(localJobPropertiesPath), JobEnvironment::class.java)
-    else
-        JobEnvironment(
-            Toggles(
-                getEnvVar("TOGGLE_START_JOBB").tilBoolean(),
-                getEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER").tilBoolean(),
-                getEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER").tilBoolean()
-            ),
-            remoteCommonEnvironment(),
-            getEnvVar("BASE_URL_DITT_SYKEFRAVAER"),
-            getEnvVar("PROMETHEUS_PUSH_GATEWAY_URL")
-        )
+data class Environment(
+    val appEnv: AppEnv,
+    val authEnv: AuthEnv,
+    val urlEnv: UrlEnv,
+    val kafkaEnv: KafkaEnv,
+    val dbEnv: DbEnv,
+    val toggleEnv: ToggleEnv
+)
 
-data class AppEnvironment(
+data class AppEnv(
     val applicationPort: Int,
     val applicationThreads: Int,
+    val remote: Boolean = false,
+    val runningInGCPCluster: Boolean
+)
+
+data class AuthEnv(
+    val serviceuserUsername: String,
+    val serviceuserPassword: String,
+    val clientId: String,
+    val clientSecret: String,
+    val aadAccessTokenUrl: String,
+    val loginserviceDiscoveryUrl: String,
+    val loginserviceAudience: List<String>
+)
+
+data class UrlEnv(
     val syfosyketilfelleUrl: String,
     val syfosmregisterUrl: String,
     val syfosmregisterScope: String,
-    val narmestelederUrl: String,
-    val narmestelederScope: String,
-    val aadAccessTokenUrl: String,
-    val clientId: String,
-    val clientSecret: String,
-    val loginserviceDiscoveryUrl: String,
-    val loginserviceAudience: List<String>,
-    val aivenBroker: String,
-    val truststoreLocation: String,
-    val keystoreLocation: String,
-    val credstorePassword: String,
-    var commonEnv: CommonEnvironment
-)
-
-data class JobEnvironment(
-    val toggles: Toggles,
-    var commonEnv: CommonEnvironment,
+    val dkifScope: String,
+    val pdlScope: String,
     val baseUrlDittSykefravaer: String,
-    val prometheusPushGatewayUrl: String
-)
-
-data class CommonEnvironment(
-    val remote: Boolean,
-    var kafkaBootstrapServersUrl: String,
-    val kafkaSchemaRegistryUrl: String,
     val stsUrl: String,
     val pdlUrl: String,
-    val dkifUrl: String,
-    val serviceuserUsername: String,
-    val serviceuserPassword: String,
-    val dbEnvironment: DbEnvironment
+    val dkifUrl: String
 )
 
-data class DbEnvironment(
-    val databaseUrl: String,
-    val databaseName: String,
-    val dbVaultMountPath: String
+data class KafkaEnv(
+    var bootstrapServersUrl: String,
+    val schemaRegistry: KafkaSchemaRegistryEnv,
+    val aivenBroker: String,
+    val sslConfig: KafkaSslEnv
 )
 
-data class Toggles(
-    val startJobb: Boolean,
+data class KafkaSchemaRegistryEnv(
+    val url: String,
+    val username: String,
+    val password: String
+)
+
+data class KafkaSslEnv(
+    val truststoreLocation: String,
+    val keystoreLocation: String,
+    val credstorePassword: String
+)
+
+data class DbEnv(
+    var dbHost: String,
+    var dbPort: String,
+    var dbName: String,
+    val dbUsername: String = "",
+    val dbPassword: String = "",
+    val dbCredMounthPath: String = ""
+)
+
+data class ToggleEnv(
     val sendMerVeiledningVarsler: Boolean,
     val sendAktivitetskravVarsler: Boolean
+)
+
+data class JobEnv(
+    val sendVarsler: Boolean,
+    val jobTriggerUrl: String,
+    val serviceuserUsername: String,
+    val serviceuserPassword: String
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =
     System.getenv(varName) ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
 
+fun isGCP(): Boolean = getEnvVar("NAIS_CLUSTER_NAME").contains("gcp")
+
 fun isLocal(): Boolean = getEnvVar("KTOR_ENV", "local") == "local"
 
-fun isJob(): Boolean = getEnvVar("SEND_VARSLER", "NEI") == "JA"
+fun isJob(): Boolean = getBooleanEnvVar("JOB")
 
-private fun String.tilBoolean(): Boolean {
-    return this.toUpperCase() == "JA"
-}
+fun getBooleanEnvVar(varName: String) = System.getenv(varName).toBoolean()

@@ -20,5 +20,6 @@ Run `./gradlew build`
 ### Running job locally
 
 - Run `docker-compose up` in a terminal at the project root
-- Start BootstrapApplication with environment variable `SEND_VARSLER=JA`
+- Start one instance of BootstrapApplication
+- Start another instance of BootStrapApplication with environment variable `JOB=true`
 - This will run the job once

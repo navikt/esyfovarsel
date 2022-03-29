@@ -1,4 +1,4 @@
-package no.nav.syfo.consumer.domain
+package no.nav.syfo.kafka.oppfolgingstilfelle.domain
 
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import java.time.LocalDate

@@ -13,17 +13,18 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import no.nav.syfo.AppEnvironment
+import no.nav.syfo.AuthEnv
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.ProxySelector
 import java.time.Instant
 
-class AzureAdTokenConsumer(env: AppEnvironment) {
-    private val aadAccessTokenUrl = env.aadAccessTokenUrl
-    private val clientId = env.clientId
-    private val clientSecret = env.clientSecret
+
+class AzureAdTokenConsumer(authEnv: AuthEnv): TokenConsumer {
+    private val aadAccessTokenUrl = authEnv.aadAccessTokenUrl
+    private val clientId = authEnv.clientId
+    private val clientSecret = authEnv.clientSecret
     private val log: Logger = LoggerFactory.getLogger("AzureAdTokenConsumer")
 
     val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
@@ -52,7 +53,7 @@ class AzureAdTokenConsumer(env: AppEnvironment) {
     @Volatile
     private var tokenMap = HashMap<String, AzureAdAccessToken>()
 
-    suspend fun getAzureAdAccessToken(resource: String): String {
+    override suspend fun getToken(resource: String?): String {
         val omToMinutter = Instant.now().plusSeconds(120L)
 
         val token: AzureAdAccessToken? = tokenMap.get(resource)
@@ -65,13 +66,13 @@ class AzureAdTokenConsumer(env: AppEnvironment) {
 
                 body = FormDataContent(Parameters.build {
                     append("client_id", clientId)
-                    append("scope", resource)
+                    append("scope", resource!!)
                     append("grant_type", "client_credentials")
                     append("client_secret", clientSecret)
                 })
             }
             if (response.status == HttpStatusCode.OK) {
-                tokenMap[resource] = response.receive()
+                tokenMap[resource!!] = response.receive()
             } else {
                 log.error("Could not get token from Azure AD: $response")
             }

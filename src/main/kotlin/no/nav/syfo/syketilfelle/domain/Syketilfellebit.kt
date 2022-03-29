@@ -97,7 +97,7 @@ class Syketilfellebiter(
     }
 
     fun finnTidligsteFom(): LocalDate {
-        return this.finnBit(Comparator.comparing<Syketilfellebit, LocalDate> { it.fom }).fom
+        return this.finnBit(Comparator.comparing { it.fom }).fom
     }
 
     fun finnSenesteTom(): LocalDate {

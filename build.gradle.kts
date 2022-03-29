@@ -12,6 +12,7 @@ val spekVersion = "2.0.9"
 val mockkVersion = "1.10.2"
 val slf4jVersion = "1.7.30"
 val logbackVersion = "1.2.3"
+val javaxVersion = "2.1.1"
 val logstashEncoderVersion = "6.3"
 val postgresVersion = "42.2.13"
 val hikariVersion = "4.0.1"
@@ -20,10 +21,10 @@ val vaultJdbcVersion = "1.3.7"
 val jacksonVersion = "2.11.3"
 val postgresEmbeddedVersion = "0.13.3"
 val kafkaVersion = "2.7.0"
-val kafkaEmbeddedVersion = "2.4.0"
-val avroVersion = "1.8.2"
-val confluentVersion = "5.5.0"
-val brukernotifikasjonerSchemaVersion = "1.2021.06.21-08.21-7998a39f216a"
+val kafkaEmbeddedVersion = "2.8.1"
+val avroVersion = "1.11.0"
+val confluentVersion = "6.2.1"
+val brukernotifikasjonerSchemaVersion = "2.5.1"
 
 val githubUser: String by project
 val githubPassword: String by project
@@ -59,6 +60,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization:$ktorVersion")
     implementation("io.ktor:ktor-auth:$ktorVersion")
     implementation("io.ktor:ktor-auth-jwt:$ktorVersion")
+    implementation("javax.ws.rs:javax.ws.rs-api:$javaxVersion")
 
     // Logging
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
@@ -85,11 +87,8 @@ dependencies {
 
     //Kafka
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
-    implementation("org.apache.kafka:kafka_2.12:$kafkaVersion")
-    implementation("io.confluent:kafka-streams-avro-serde:$confluentVersion")
-    implementation("io.confluent:kafka-schema-registry:$confluentVersion") {
-          exclude(group = "org.slf4j", module = "slf4j-log4j12")
-    }
+    implementation("org.apache.kafka:kafka_2.13:$kafkaVersion")
+    implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
     implementation("org.apache.avro:avro:$avroVersion")
     implementation("com.github.navikt:brukernotifikasjon-schemas:$brukernotifikasjonerSchemaVersion")
 
@@ -107,7 +106,7 @@ dependencies {
 }
 
 configurations.implementation {
-    exclude(group = "com.fasterxml.jackson.module", module = "jackson-module-scala_2.12")
+    exclude(group = "com.fasterxml.jackson.module", module = "jackson-module-scala_2.13")
 }
 
 tasks {

@@ -1,6 +1,7 @@
 package no.nav.syfo.job
 
-import no.nav.syfo.Toggles
+import no.nav.syfo.AppEnv
+import no.nav.syfo.ToggleEnv
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselByVarselId
 import no.nav.syfo.db.domain.PPlanlagtVarsel
@@ -14,14 +15,21 @@ import no.nav.syfo.service.SendVarselService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-class SendVarslerJobb(
+class VarselSender(
     private val databaseAccess: DatabaseInterface,
     private val sendVarselService: SendVarselService,
-    private val toggles: Toggles
+    private val toggles: ToggleEnv,
+    private val appEnv: AppEnv
 ) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
 
-    fun sendVarsler() {
+    fun sendVarsler(): Int {
+        log.info("SendVarslerJobb-API kalt")
+        if (appEnv.runningInGCPCluster) {
+            log.info("[GCP] Disabled varselutsending")
+            return 0
+        }
+
         log.info("Starter SendVarslerJobb")
 
         val varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
@@ -48,10 +56,15 @@ class SendVarslerJobb(
             log.info("Sendte $value varsler av type $key")
         }
 
-        varslerSendt[VarselType.MER_VEILEDNING.name]?.let(::tellMerVeiledningVarselSendt)
-        varslerSendt[VarselType.AKTIVITETSKRAV.name]?.let(::tellAktivitetskravVarselSendt)
+        val antallMerVeiledningSendt = varslerSendt[VarselType.MER_VEILEDNING.name] ?: 0
+        val antallAktivitetskravSendt = varslerSendt[VarselType.AKTIVITETSKRAV.name] ?: 0
+
+        tellMerVeiledningVarselSendt(antallMerVeiledningSendt)
+        tellAktivitetskravVarselSendt(antallAktivitetskravSendt)
 
         log.info("Avslutter SendVarslerJobb")
+
+        return antallMerVeiledningSendt + antallAktivitetskravSendt
     }
 
     private fun incrementVarselCountMap(map: HashMap<String, Int>, type: String) {

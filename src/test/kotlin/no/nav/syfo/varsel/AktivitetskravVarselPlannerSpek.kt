@@ -3,13 +3,9 @@ package no.nav.syfo.varsel
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.consumer.NarmesteLederConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
-import no.nav.syfo.consumer.SykmeldingerConsumer
-import no.nav.syfo.consumer.domain.Syketilfelledag
-import no.nav.syfo.consumer.narmesteLeder.NarmesteLederRelasjon
-import no.nav.syfo.consumer.narmesteLeder.NarmestelederResponse
-import no.nav.syfo.consumer.narmesteLeder.Tilgang
+import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import no.nav.syfo.db.domain.PlanlagtVarsel
@@ -37,10 +33,9 @@ object AktivitetskravVarselPlannerSpek : Spek({
     val embeddedDatabase by lazy { EmbeddedDatabase() }
     val sykmeldingerConsumer = mockk<SykmeldingerConsumer>()
     val syfosyketilfelleConsumer = mockk<SyfosyketilfelleConsumer>()
-    val narmesteLederConsumer = mockk<NarmesteLederConsumer>()
 
     val aktivitetskravVarselPlanner =
-        AktivitetskravVarselPlanner(embeddedDatabase, syfosyketilfelleConsumer, narmesteLederConsumer, SykmeldingService(sykmeldingerConsumer))
+        AktivitetskravVarselPlanner(embeddedDatabase, syfosyketilfelleConsumer, SykmeldingService(sykmeldingerConsumer))
 
     describe("AktivitetskravVarselPlannerSpek") {
         val planlagtVarselToStore2 =
@@ -122,7 +117,6 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
             coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
-            coEvery { narmesteLederConsumer.getNarmesteLeder(any(), any()) } returns NarmestelederResponse(createDummyNarmesteLederRelasjon())
 
             runBlocking {
                 aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
@@ -167,7 +161,6 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
             coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
-            coEvery { narmesteLederConsumer.getNarmesteLeder(any(), any()) } returns NarmestelederResponse(createDummyNarmesteLederRelasjon())
 
             runBlocking {
                 aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
@@ -240,7 +233,6 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
             coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
-            coEvery { narmesteLederConsumer.getNarmesteLeder(any(), any()) } returns NarmestelederResponse(createDummyNarmesteLederRelasjon())
 
             runBlocking {
 
@@ -318,7 +310,6 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
             coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
-            coEvery { narmesteLederConsumer.getNarmesteLeder(any(), any()) } returns NarmestelederResponse(createDummyNarmesteLederRelasjon())
 
             runBlocking {
                 aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
@@ -373,7 +364,6 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
             coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
-            coEvery { narmesteLederConsumer.getNarmesteLeder(any(), any()) } returns NarmestelederResponse(createDummyNarmesteLederRelasjon())
 
             val lagreteVarsler1 = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
             val nrOfRowsFetchedTotal1 = lagreteVarsler1.size
@@ -454,8 +444,4 @@ fun createValidSyketilfelledag(fom: LocalDateTime, tom: LocalDateTime): Syketilf
             "", "", "", LocalDateTime.now(), LocalDateTime.now(), listOf(SYKMELDING, BEKREFTET), "", fom.toLocalDate(), tom.toLocalDate()
         )
     )
-}
-
-fun createDummyNarmesteLederRelasjon(): NarmesteLederRelasjon {
-    return NarmesteLederRelasjon(null, "123", null, null, null, null, null, null, false, false, Tilgang.SYKMELDING)
 }
