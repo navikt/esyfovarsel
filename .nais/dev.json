@@ -12,8 +12,6 @@
     "SYFOSMREGISTER_SCOPE": "api://dev-fss.teamsykmelding.syfosmregister/.default",
     "DKIF_SCOPE": "api://dev-fss.team-rocket.digdir-krr-proxy/.default",
     "PDL_SCOPE": "api://dev-fss.pdl.pdl-api/.default",
-    "LOGINSERVICE_IDPORTEN_DISCOVERY_URL": "https://navtestb2c.b2clogin.com/navtestb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1",
-    "LOGINSERVICE_IDPORTEN_AUDIENCE": "0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5",
     "TOGGLE_SEND_MERVEILEDNING_VARSLER": "true",
     "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "true",
     "BASE_URL_DITT_SYKEFRAVAER": "https://www-gcp.dev.nav.no/syk/sykefravaer"

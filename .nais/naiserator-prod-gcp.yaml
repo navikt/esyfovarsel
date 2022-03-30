@@ -72,6 +72,8 @@ spec:
     pool: nav-prod
   filesFrom:
     - secret: esyfovarsel-serviceuser
+  envFrom:
+    - configmap: loginservice-idporten
   env:
   {{#each app}}
     - name: {{@key}}

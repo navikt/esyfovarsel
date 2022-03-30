@@ -46,6 +46,8 @@ spec:
     - "https://esyfovarsel.dev.adeo.no"
   kafka:
     pool: nav-dev
+  envFrom:
+    - configmap: loginservice-idporten
   env:
   {{#each app}}
     - name: {{@key}}
