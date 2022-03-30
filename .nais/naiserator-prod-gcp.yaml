@@ -36,6 +36,13 @@ spec:
   azure:
     application:
       enabled: true
+  accessPolicy:
+    outbound:
+      external:
+        - host: pdl-api.prod-fss-pub.nais.io
+      rules:
+        - application: digdir-krr-proxy
+        - application: security-token-service
   gcp:
     sqlInstances:
       - autoBackupHour: 1
