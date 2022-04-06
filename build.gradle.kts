@@ -87,7 +87,9 @@ dependencies {
 
     //Kafka
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
-    implementation("org.apache.kafka:kafka_2.13:$kafkaVersion")
+    implementation("org.apache.kafka:kafka_2.13:$kafkaVersion") {
+        exclude(group = "log4j")
+    }
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
     implementation("org.apache.avro:avro:$avroVersion")
     implementation("com.github.navikt:brukernotifikasjon-schemas:$brukernotifikasjonerSchemaVersion")
@@ -100,7 +102,9 @@ dependencies {
     }
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
-    testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion")
+    testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion"){
+        exclude(group = "log4j")
+    }
     testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spekVersion")
     testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spekVersion")
 }
