@@ -5,7 +5,7 @@ group = "no.nav.syfo"
 version = "1.0"
 
 val kluentVersion = "1.59"
-val ktorVersion = "1.6.0"
+val ktorVersion = "1.6.8"
 val prometheusVersion = "0.8.1"
 val micrometerVersion = "1.7.3"
 val spekVersion = "2.0.9"
@@ -95,6 +95,7 @@ dependencies {
     implementation("com.github.navikt:brukernotifikasjon-schemas:$brukernotifikasjonerSchemaVersion")
 
     // Test
+    testImplementation(kotlin("test"))
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion") {
