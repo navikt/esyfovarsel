@@ -19,6 +19,7 @@ val hikariVersion = "5.0.1"
 val flywayVersion = "7.5.2"
 val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.13.2"
+val jacksonDatabindVersion = "2.13.2.2"
 val postgresEmbeddedVersion = "0.13.3"
 val kafkaVersion = "2.7.0"
 val kafkaEmbeddedVersion = "2.8.1"
@@ -80,10 +81,9 @@ dependencies {
     implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
 
     // JSON parsing
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 
     //Kafka
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
