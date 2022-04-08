@@ -2,20 +2,21 @@ package no.nav.syfo.kafka
 
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig.USER_INFO_CONFIG
+import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import no.nav.syfo.ApplicationState
+import no.nav.syfo.Environment
 import org.apache.kafka.clients.CommonClientConfigs.GROUP_ID_CONFIG
 import org.apache.kafka.clients.CommonClientConfigs.SECURITY_PROTOCOL_CONFIG
-import org.apache.kafka.common.config.SaslConfigs.SASL_JAAS_CONFIG
-import org.apache.kafka.common.config.SaslConfigs.SASL_MECHANISM
-import org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.consumer.ConsumerConfig.*
+import org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG
 import org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG
 import org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG
+import org.apache.kafka.common.config.SaslConfigs.SASL_JAAS_CONFIG
+import org.apache.kafka.common.config.SaslConfigs.SASL_MECHANISM
 import org.apache.kafka.common.config.SslConfigs.*
-import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig
-import no.nav.syfo.*
 import java.util.*
 
 const val topicOppfolgingsTilfelle = "aapen-syfo-oppfolgingstilfelle-v1"
@@ -52,7 +53,7 @@ fun aivenConsumerProperties(env: Environment) : Properties {
 }
 
 fun consumerProperties(env: Environment) : Properties {
-    var kafkaGCPSuffix = if (env.appEnv.runningInGCPCluster) "-gcp" else ""
+    val kafkaGCPSuffix = if (env.appEnv.runningInGCPCluster) "-gcp" else ""
 
     val properties = HashMap<String,String>().apply {
         put(GROUP_ID_CONFIG, "esyfovarsel-group-v04$kafkaGCPSuffix")
@@ -93,7 +94,7 @@ fun producerProperties(env: Environment) : Properties {
 
         put(KEY_SERIALIZER_CLASS_CONFIG, "io.confluent.kafka.serializers.KafkaAvroSerializer")
         put(VALUE_SERIALIZER_CLASS_CONFIG, "io.confluent.kafka.serializers.KafkaAvroSerializer")
-        put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryConfig.url)
+        put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryConfig.url)
         put(BASIC_AUTH_CREDENTIALS_SOURCE, USER_INFO)
         put(USER_INFO_CONFIG, userinfoConfig)
         put(BOOTSTRAP_SERVERS_CONFIG, env.kafkaEnv.aivenBroker)

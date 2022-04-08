@@ -21,7 +21,7 @@ import no.nav.syfo.service.SendVarselService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.*
 import no.nav.syfo.util.contentNegotationFeature
-import org.amshove.kluent.shouldEqual
+import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
@@ -62,7 +62,7 @@ object JobApiSpek : Spek ({
                 ).forEach { embeddedDatabase.storePlanlagtVarsel(it)}
 
                 with(handleRequest(HttpMethod.Post, urlPathJobTrigger)) {
-                    response.status()?.isSuccess() shouldEqual true
+                    response.status()?.isSuccess() shouldBeEqualTo true
                     verify(exactly = 2) { beskjedKafkaProducer.sendBeskjed(any(), any(), any()) }
                 }
             }

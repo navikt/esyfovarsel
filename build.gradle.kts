@@ -4,21 +4,22 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.syfo"
 version = "1.0"
 
-val kluentVersion = "1.59"
-val ktorVersion = "1.6.0"
-val prometheusVersion = "0.8.1"
-val micrometerVersion = "1.7.3"
-val spekVersion = "2.0.9"
-val mockkVersion = "1.10.2"
-val slf4jVersion = "1.7.30"
-val logbackVersion = "1.2.3"
+val kluentVersion = "1.68"
+val ktorVersion = "1.6.8"
+val prometheusVersion = "0.15.0"
+val micrometerVersion = "1.8.4"
+val spekVersion = "2.0.18"
+val mockkVersion = "1.12.3"
+val slf4jVersion = "1.7.36"
+val logbackVersion = "1.2.11"
 val javaxVersion = "2.1.1"
-val logstashEncoderVersion = "6.3"
-val postgresVersion = "42.2.13"
-val hikariVersion = "4.0.1"
+val logstashEncoderVersion = "7.0.1"
+val postgresVersion = "42.3.3"
+val hikariVersion = "5.0.1"
 val flywayVersion = "7.5.2"
-val vaultJdbcVersion = "1.3.7"
-val jacksonVersion = "2.11.3"
+val vaultJdbcVersion = "1.3.9"
+val jacksonVersion = "2.13.2"
+val jacksonDatabindVersion = "2.13.2.2"
 val postgresEmbeddedVersion = "0.13.3"
 val kafkaVersion = "2.7.0"
 val kafkaEmbeddedVersion = "2.8.1"
@@ -80,19 +81,21 @@ dependencies {
     implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
 
     // JSON parsing
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 
     //Kafka
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
-    implementation("org.apache.kafka:kafka_2.13:$kafkaVersion")
+    implementation("org.apache.kafka:kafka_2.13:$kafkaVersion") {
+        exclude(group = "log4j")
+    }
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
     implementation("org.apache.avro:avro:$avroVersion")
     implementation("com.github.navikt:brukernotifikasjon-schemas:$brukernotifikasjonerSchemaVersion")
 
     // Test
+    testImplementation(kotlin("test"))
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion") {
@@ -100,7 +103,9 @@ dependencies {
     }
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
-    testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion")
+    testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion"){
+        exclude(group = "log4j")
+    }
     testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spekVersion")
     testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spekVersion")
 }

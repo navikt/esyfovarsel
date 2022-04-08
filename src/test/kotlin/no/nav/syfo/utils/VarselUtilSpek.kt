@@ -4,7 +4,8 @@ import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.varsel.arbeidstakerAktorId1
-import org.amshove.kluent.shouldEqual
+import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
@@ -69,7 +70,7 @@ object VarselUtilSpek: Spek( {
 
             val utsendingsdato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
 
-            utsendingsdato shouldEqual forventetUtsendingsdato
+            utsendingsdato shouldBeEqualTo forventetUtsendingsdato
         }
 
 
@@ -89,7 +90,7 @@ object VarselUtilSpek: Spek( {
 
             val utsendingsdato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
 
-            utsendingsdato shouldEqual null
+            utsendingsdato shouldBeEqualTo null
         }
 
 
@@ -109,7 +110,7 @@ object VarselUtilSpek: Spek( {
             val utsendingsdato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
 
             val forventetUtsendingsdato = LocalDate.now()
-            utsendingsdato shouldEqual forventetUtsendingsdato
+            utsendingsdato shouldBeEqualTo forventetUtsendingsdato
         }
 
         it("Dersom sykefraværet er akkurat 39 uker (273 dager) skal utsendingsdato bli null, fordi varselet sendes dagen etter (på dag 274)") {
@@ -126,7 +127,7 @@ object VarselUtilSpek: Spek( {
                 tom
             )
             val utsendingsdato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
-            utsendingsdato shouldEqual null
+            utsendingsdato shouldBeEqualTo null
         }
 
         it("Dersom sykefraværet er under 39 uker skal utsendingsdato bli null") {
@@ -143,7 +144,7 @@ object VarselUtilSpek: Spek( {
                 tom
             )
             val utsendingsdato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
-            utsendingsdato shouldEqual null
+            utsendingsdato shouldBeEqualTo null
         }
 
     }

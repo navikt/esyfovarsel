@@ -23,7 +23,7 @@ import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.*
 import no.nav.syfo.util.contentNegotationFeature
 import no.nav.syfo.varsel.FULL_AG_PERIODE
-import org.amshove.kluent.shouldEqual
+import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
@@ -77,8 +77,8 @@ class BrukerApiSpek : Spek({
                     call.authentication.principal = JWTPrincipal(mockPayload)
                     addHeader("Content-Type", ContentType.Application.Json.toString())
                 }) {
-                    response.status()?.isSuccess() shouldEqual true
-                    response.content shouldEqual "false"
+                    response.status()?.isSuccess() shouldBeEqualTo true
+                    response.content shouldBeEqualTo "false"
 
                 }
             }
@@ -113,8 +113,8 @@ class BrukerApiSpek : Spek({
                     call.authentication.principal = JWTPrincipal(mockPayload)
                     addHeader("Content-Type", ContentType.Application.Json.toString())
                 }) {
-                    response.status()?.isSuccess() shouldEqual true
-                    response.content shouldEqual "true"
+                    response.status()?.isSuccess() shouldBeEqualTo true
+                    response.content shouldBeEqualTo "true"
 
                 }
             }
@@ -149,8 +149,8 @@ class BrukerApiSpek : Spek({
                     call.authentication.principal = JWTPrincipal(mockPayload)
                     addHeader("Content-Type", ContentType.Application.Json.toString())
                 }) {
-                    response.status()?.isSuccess() shouldEqual true
-                    response.content shouldEqual "false"
+                    response.status()?.isSuccess() shouldBeEqualTo true
+                    response.content shouldBeEqualTo "false"
                 }
             }
             it("Bruker skal ikke kunne slå opp andre aktørId'er enn sin egen") {
@@ -184,7 +184,7 @@ class BrukerApiSpek : Spek({
                     call.authentication.principal = JWTPrincipal(mockPayload)
                     addHeader("Content-Type", ContentType.Application.Json.toString())
                 }) {
-                    response.status()?.value shouldEqual HttpStatusCode.Forbidden.value
+                    response.status()?.value shouldBeEqualTo HttpStatusCode.Forbidden.value
                 }
             }
 
@@ -221,7 +221,7 @@ class BrukerApiSpek : Spek({
                     call.authentication.principal = JWTPrincipal(mockPayload)
                     addHeader("Content-Type", ContentType.Application.Json.toString())
                 }) {
-                    response.status()?.value shouldEqual HttpStatusCode.InternalServerError.value
+                    response.status()?.value shouldBeEqualTo HttpStatusCode.InternalServerError.value
                 }
             }
 
@@ -244,7 +244,7 @@ class BrukerApiSpek : Spek({
                     call.authentication.principal = JWTPrincipal(mockPayload)
                     addHeader("Content-Type", ContentType.Application.Json.toString())
                 }) {
-                    response.status()?.value shouldEqual HttpStatusCode.BadRequest.value
+                    response.status()?.value shouldBeEqualTo HttpStatusCode.BadRequest.value
                 }
             }
 

@@ -73,7 +73,7 @@ class RemoteDatabase(dbEnv: DbEnv): DatabaseFSS(
 abstract class DatabaseFSS(val daoConfig: DbConfig): DatabaseInterface {
     enum class Role {
         ADMIN, USER;
-        override fun toString() = name.toLowerCase()
+        override fun toString() = name.lowercase()
     }
 
     var hikariDataSource: HikariDataSource
