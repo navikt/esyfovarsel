@@ -53,7 +53,7 @@ fun aivenConsumerProperties(env: Environment) : Properties {
 }
 
 fun consumerProperties(env: Environment) : Properties {
-    val kafkaGCPSuffix = if (env.appEnv.runningInGCPCluster) "-gcp" else ""
+    val kafkaGCPSuffix = if (env.appEnv.runningInGCPCluster) "-gcp-v03" else ""
 
     val properties = HashMap<String,String>().apply {
         put(GROUP_ID_CONFIG, "esyfovarsel-group-v04$kafkaGCPSuffix")

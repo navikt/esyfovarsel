@@ -46,10 +46,11 @@ spec:
   gcp:
     sqlInstances:
       - autoBackupHour: 1
-        cascadingDelete: true
+        cascadingDelete: false
         collation: nb_NO.UTF8
         databases:
-          - name: db
+          - envVarPrefix: GCP_DB
+            name: esyfovarsel-db
         diskAutoresize: true
         diskSize: 30
         diskType: SSD
@@ -62,6 +63,7 @@ spec:
         maintenance:
           day: 1
           hour: 4
+        name: esyfovarsel-db-instance
         pointInTimeRecovery: true
         tier: db-f1-micro
         type: POSTGRES_12
