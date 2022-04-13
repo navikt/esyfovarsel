@@ -37,7 +37,7 @@ class MerVeiledningVarselPlanner(
         if (todayIsBetweenFomAndTom(tilfelleFom, tilfelleTom)) {
             val varselDato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
 
-            if(varselDato == null) {
+            if(varselDato == null){
                 val tidligerePlanlagteVarslerPaFnr = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.MER_VEILEDNING)
 
                 if (tidligerePlanlagteVarslerPaFnr.isNotEmpty()) {
