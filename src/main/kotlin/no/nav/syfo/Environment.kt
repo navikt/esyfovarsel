@@ -25,11 +25,11 @@ fun getJobEnv() =
 fun getEnv(): Environment {
     val dbEnv = if (isGCP())
         DbEnv(
-            dbHost = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_HOST", "127.0.0.1"),
-            dbPort = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PORT", "5432"),
-            dbName = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_DATABASE"),
-            dbUsername = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_USERNAME"),
-            dbPassword = getEnvVar("NAIS_DATABASE_ESYFOVARSEL_DB_PASSWORD")
+            dbHost = getEnvVar("GCP_DB_HOST", "127.0.0.1"),
+            dbPort = getEnvVar("GCP_DB_PORT", "5432"),
+            dbName = getEnvVar("GCP_DB_DATABASE"),
+            dbUsername = getEnvVar("GCP_DB_USERNAME"),
+            dbPassword = getEnvVar("GCP_DB_PASSWORD")
         )
     else
         DbEnv(
