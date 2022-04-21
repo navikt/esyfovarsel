@@ -1,5 +1,7 @@
 # esyfovarsel
-Varsler for eSYFO
+Varsler for eSYFO. Lytter på topic'en `team-esyfo.varselbus` og videresender varsler til
+relevante kanaler ( DineSykmeldte, Brukernotifikasjoner og Arbeidsgivernotifikasjoner ).
+Bruker også til å planlegge 39-ukers varsel for sykmeldt.
 
 ## Technologies used
 * Kotlin
