@@ -1,0 +1,29 @@
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: varselbus
+  namespace: team-esyfo
+  labels:
+    team: team-esyfo
+spec:
+  pool: {{kafkaPool}}
+  config:
+    cleanupPolicy: delete
+    minimumInSyncReplicas: 1
+    partitions: 20
+    replication: 3
+    retentionBytes: -1  # Messages will never be deleted because of disk space
+    retentionHours: -1  # Messages will never be timed out
+  acl:
+    - team: team-esyfo
+      application: esyfovarsel
+      access: read
+    - team: team-esyfo
+      application: syfooppfolgingsplanservice
+      access: write
+    - team: team-esyfo
+      application: syfomotebehov
+      access: write
+    - team: team-esyfo
+      application: isdialogmote
+      access: write
