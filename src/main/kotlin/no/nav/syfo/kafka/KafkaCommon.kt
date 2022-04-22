@@ -23,6 +23,7 @@ const val topicOppfolgingsTilfelle = "aapen-syfo-oppfolgingstilfelle-v1"
 const val topicBrukernotifikasjonBeskjed = "min-side.aapen-brukernotifikasjon-beskjed-v1"
 const val topicFlexSyketilfellebiter = "flex.syketilfellebiter"
 const val topicDineSykmeldteHendelse = "teamsykmelding.dinesykmeldte-hendelser-v2"
+const val topicVarselBus = "team-esyfo.varselbus"
 
 const val JAVA_KEYSTORE = "JKS"
 const val PKCS12 = "PKCS12"
@@ -32,7 +33,6 @@ const val USER_INFO = "USER_INFO"
 interface KafkaListener {
     suspend fun listen(applicationState: ApplicationState)
 }
-
 
 fun aivenConsumerProperties(env: Environment) : Properties {
     val sslConfig = env.kafkaEnv.sslConfig
@@ -109,13 +109,6 @@ fun producerProperties(env: Environment) : Properties {
         properties.remove(SECURITY_PROTOCOL_CONFIG)
     }
     return properties
-}
-
-fun producerPropertiesDineSykmeldte(env: Environment) : Properties {
-    return producerProperties(env) + mapOf(
-        KEY_SERIALIZER_CLASS_CONFIG to "org.apache.kafka.common.serialization.StringSerializer",
-        VALUE_SERIALIZER_CLASS_CONFIG to JacksonKafkaSerializer::class.java
-    )
 }
 
 suspend fun CoroutineScope.launchKafkaListener(applicationState: ApplicationState, kafkaListener: KafkaListener) {

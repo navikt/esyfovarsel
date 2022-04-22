@@ -26,6 +26,7 @@ import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.launchKafkaListener
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.kafka.oppfolgingstilfelle.SyketilfelleKafkaConsumer
+import no.nav.syfo.kafka.varselbus.VarselBusConsumer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.service.*
 import no.nav.syfo.syketilfelle.SyketilfelleService
@@ -199,6 +200,12 @@ fun Application.kafkaModule(
                 launchKafkaListener(
                     state,
                     SyketilfelleKafkaConsumer(env, database)
+                )
+            }
+            launch(backgroundTasksContext) {
+                launchKafkaListener(
+                    state,
+                    VarselBusConsumer(env)
                 )
             }
         }

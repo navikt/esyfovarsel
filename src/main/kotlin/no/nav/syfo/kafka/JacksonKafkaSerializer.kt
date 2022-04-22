@@ -1,7 +1,6 @@
 package no.nav.syfo.kafka
 
 import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -14,6 +13,6 @@ fun jacksonMapper() = jacksonObjectMapper().apply {
 }
 
 class JacksonKafkaSerializer : Serializer<Any> {
-    override fun serialize(topic: String?, data: Any?): ByteArray = jacksonMapper.writeValueAsBytes(data)
+    override fun serialize(topic: String?, data: Any?): ByteArray = jacksonMapper().writeValueAsBytes(data)
     override fun close() {}
 }
