@@ -10,15 +10,17 @@ import no.nav.syfo.Environment
 import no.nav.syfo.kafka.KafkaListener
 import no.nav.syfo.kafka.aivenConsumerProperties
 import no.nav.syfo.kafka.topicVarselBus
-import no.nav.syfo.kafka.varselbus.domain.AsyncVarsel
+import no.nav.syfo.kafka.varselbus.domain.EsyfovarselHendelse
+import no.nav.syfo.service.VarselBusService
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.time.Duration
 
-class VarselBusConsumer(
-    env: Environment
+class VarselBusKafkaConsumer(
+    env: Environment,
+    val varselBusService: VarselBusService
 ) : KafkaListener {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.VarselBusConsumer")
     private val kafkaListener: KafkaConsumer<String, String>
@@ -42,8 +44,9 @@ class VarselBusConsumer(
             kafkaListener.poll(zeroMillis).forEach {
                 log.info("VARSEL BUS: Mottatt melding ${it.key()} fra topic")
                 try {
-                    val varsel: AsyncVarsel = objectMapper.readValue(it.value())
-                    log.info("VARSEL BUS: Innhold | fnr: ${varsel.mottakerFnr} | kontekst: ${varsel.extraContext}")
+                    val varsel: EsyfovarselHendelse = objectMapper.readValue(it.value())
+                    log.info("VARSEL BUS: Innhold | fnr: ${varsel.mottakerFnr} | kontekst: ${varsel.type}")
+                    varselBusService.processVarselHendelse(varsel)
                 } catch (e: IOException) {
                     log.error(
                         "Error in [$topicVarselBus]-listener: Could not parse message | ${e.message}",
