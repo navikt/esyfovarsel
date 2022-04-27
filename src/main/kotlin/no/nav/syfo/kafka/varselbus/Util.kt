@@ -19,7 +19,7 @@ fun EsyfovarselHendelse.dataToOppfolgingsplanNLVarselData(): OppfolgingsplanNLVa
         }
         throw IllegalArgumentException("EsyfovarselHendelse har feil format i 'data'-felt")
     }
-    throw IllegalArgumentException("EsyfovarselHendelse har feil datatype i 'data'-felt")
+    throw IllegalArgumentException("EsyfovarselHendelse har feil datatype i 'data'-felt: ${data.toString()}")
 }
 
 
