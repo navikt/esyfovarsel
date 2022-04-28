@@ -44,7 +44,7 @@ class BrukerApiSpek : Spek({
 
         val mockPayload = mockk<Payload>()
 
-        coEvery { mockPayload.subject } returns fnr1
+        coEvery { mockPayload.getClaim("pid").asString() } returns fnr1
 
         coEvery { pdlConsumer.getFnr(aktorId) } returns fnr1
         coEvery { pdlConsumer.getFnr(aktorId2) } returns fnr2

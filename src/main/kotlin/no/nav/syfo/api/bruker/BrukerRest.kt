@@ -16,7 +16,7 @@ fun Route.registerBrukerApi(varselSendtService: VarselSendtService) {
     accept(ContentType.Application.Json) {
         get(urlPath39UkersVarsel) {
             val principal: JWTPrincipal = call.authentication.principal()!!
-            val innloggetFnr = principal.payload.subject
+            val innloggetFnr = principal.payload.getClaim("pid").asString()
             val aktorId = call.parameters["aktorid"]
 
             if (!isAktorIDGyldig(aktorId)) {
