@@ -45,6 +45,7 @@ class VarselBusKafkaConsumer(
                 log.info("VARSEL BUS: Mottatt melding ${it.key()} fra topic")
                 try {
                     val varsel: EsyfovarselHendelse = objectMapper.readValue(it.value())
+                    varsel.data = objectMapper.readTree(it.value())["data"]
                     // TODO: FJERN FØR PRODSETTING
                     log.info("VARSEL BUS: Innhold | fnr: ${varsel.mottakerFnr} | kontekst: ${varsel.type} | data: ${varsel.data.toString()} | value: ${it.value()}")
                     varselBusService.processVarselHendelse(varsel)

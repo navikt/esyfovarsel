@@ -10,8 +10,7 @@ import no.nav.syfo.kafka.varselbus.domain.EsyfovarselHendelse
 import org.apache.commons.cli.MissingArgumentException
 import java.io.IOException
 
-//Placeholdere
-
+// TODO: HUSK Å SETTE RIKTIG URL OG TEKST!!
 const val NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST = "SM har sendt plan til godkjenning"
 const val NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_LENKE = "https://dine-sykmeldte.no"
 const val NL_OPPFOLGINGSPLAN_OPPRETTET_TEKST = "SM har opprettet plan"

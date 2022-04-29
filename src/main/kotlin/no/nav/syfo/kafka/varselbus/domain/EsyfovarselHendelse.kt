@@ -1,12 +1,11 @@
 package no.nav.syfo.kafka.varselbus.domain
 
 import java.io.Serializable
-import java.util.*
 
 data class EsyfovarselHendelse(
     val mottakerFnr: String,
     val type: HendelseType,
-    val data: Any?
+    var data: Any?
 ) : Serializable
 
 enum class HendelseType {
