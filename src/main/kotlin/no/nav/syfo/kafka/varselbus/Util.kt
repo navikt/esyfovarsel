@@ -14,8 +14,8 @@ import no.nav.syfo.kafka.varselbus.domain.DineSykmeldteHendelse.*
 import org.apache.commons.cli.MissingArgumentException
 import java.io.IOException
 
-const val NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST = "En oppfølgingsplan venter på godkjenning fra deg"
-const val NL_OPPFOLGINGSPLAN_OPPRETTET_TEKST = "En ny oppfølgingsplan er blitt opprettet"
+const val NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST = "1 oppfølgingsplan til godkjenning"
+const val NL_OPPFOLGINGSPLAN_OPPRETTET_TEKST = "1 oppfølgingsplan er påbegynt"
 
 private val objectMapper: ObjectMapper = ObjectMapper().apply {
     registerKotlinModule()
