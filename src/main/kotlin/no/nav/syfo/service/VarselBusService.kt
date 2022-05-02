@@ -29,11 +29,10 @@ class VarselBusService(
             varseldata.ansattFnr,
             varseldata.orgnummer,
             varselHendelse.type.toDineSykmeldteHendelse().toString(),
-            NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_LENKE,
-            NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST,
-            OffsetDateTime.now().plusMonths(4L)
+            null,
+            NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST
         )
-        log.info("Sender varsel av type ${varselHendelse.type} til mottaker $varseldata")
+        log.info("Sender varsel av type ${varselHendelse.type}")
         dineSykmeldteHendelseKafkaProducer.sendHendelse(dineSykmeldteVarsel)
 
     }
@@ -44,11 +43,10 @@ class VarselBusService(
             varseldata.ansattFnr,
             varseldata.orgnummer,
             varselHendelse.type.toDineSykmeldteHendelse().toString(),
-            NL_OPPFOLGINGSPLAN_OPPRETTET_LENKE,
-            NL_OPPFOLGINGSPLAN_OPPRETTET_TEKST,
-            OffsetDateTime.now().plusMonths(4L)
+            null,
+            NL_OPPFOLGINGSPLAN_OPPRETTET_TEKST
         )
-        log.info("Sender varsel av type ${varselHendelse.type} til mottaker $varseldata")
+        log.info("Sender varsel av type ${varselHendelse.type}")
         dineSykmeldteHendelseKafkaProducer.sendHendelse(dineSykmeldteVarsel)
     }
 

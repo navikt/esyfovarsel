@@ -46,8 +46,7 @@ class VarselBusKafkaConsumer(
                 try {
                     val varsel: EsyfovarselHendelse = objectMapper.readValue(it.value())
                     varsel.data = objectMapper.readTree(it.value())["data"]
-                    // TODO: FJERN FØR PRODSETTING
-                    log.info("VARSEL BUS: Innhold | fnr: ${varsel.mottakerFnr} | kontekst: ${varsel.type} | data: ${varsel.data.toString()} | value: ${it.value()}")
+                    log.info("VARSEL BUS: Melding med UUID ${it.key()} er av type: ${varsel.type}")
                     varselBusService.processVarselHendelse(varsel)
                 } catch (e: IOException) {
                     log.error(

@@ -14,11 +14,8 @@ import no.nav.syfo.kafka.varselbus.domain.DineSykmeldteHendelse.*
 import org.apache.commons.cli.MissingArgumentException
 import java.io.IOException
 
-// TODO: HUSK Å SETTE RIKTIG URL OG TEKST!!
-const val NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST = "SM har sendt plan til godkjenning"
-const val NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_LENKE = "https://dine-sykmeldte.no"
-const val NL_OPPFOLGINGSPLAN_OPPRETTET_TEKST = "SM har opprettet plan"
-const val NL_OPPFOLGINGSPLAN_OPPRETTET_LENKE  = "https://dine-sykmeldte.no"
+const val NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST = "En oppfølgingsplan venter på godkjenning fra deg"
+const val NL_OPPFOLGINGSPLAN_OPPRETTET_TEKST = "En ny oppfølgingsplan er blitt opprettet"
 
 private val objectMapper: ObjectMapper = ObjectMapper().apply {
     registerKotlinModule()

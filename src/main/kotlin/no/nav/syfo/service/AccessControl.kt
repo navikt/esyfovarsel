@@ -14,5 +14,4 @@ class AccessControl(val pdlConsumer: PdlConsumer, val dkifConsumer: DkifConsumer
         else
             null
     }
-
 }

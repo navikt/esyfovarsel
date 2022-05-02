@@ -8,5 +8,5 @@ data class DineSykmeldteVarsel(
     val oppgavetype: String,
     val lenke: String?,
     val tekst: String,
-    val utlopstidspunkt: OffsetDateTime? = OffsetDateTime.now().plusMinutes(15)
+    val utlopstidspunkt: OffsetDateTime? = null
 )
