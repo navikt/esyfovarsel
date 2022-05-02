@@ -5,8 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import no.nav.syfo.kafka.varselbus.domain.DineSykmeldteHendelse
 import no.nav.syfo.kafka.varselbus.domain.OppfolgingsplanNLVarselData
 import no.nav.syfo.kafka.varselbus.domain.EsyfovarselHendelse
+import no.nav.syfo.kafka.varselbus.domain.HendelseType
+import no.nav.syfo.kafka.varselbus.domain.HendelseType.*
+import no.nav.syfo.kafka.varselbus.domain.DineSykmeldteHendelse.*
 import org.apache.commons.cli.MissingArgumentException
 import java.io.IOException
 
@@ -20,6 +24,13 @@ private val objectMapper: ObjectMapper = ObjectMapper().apply {
     registerKotlinModule()
     registerModule(JavaTimeModule())
     configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+}
+
+fun HendelseType.toDineSykmeldteHendelse(): DineSykmeldteHendelse {
+    return when (this) {
+        NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> OPPFOLGINGSPLAN_TIL_GODKJENNING
+        NL_OPPFOLGINGSPLAN_OPPRETTET -> OPPFOLGINGSPLAN_OPPRETTET
+    }
 }
 
 fun EsyfovarselHendelse.dataToOppfolgingsplanNLVarselData(): OppfolgingsplanNLVarselData {

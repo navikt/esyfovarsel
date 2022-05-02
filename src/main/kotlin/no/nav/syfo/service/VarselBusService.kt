@@ -20,7 +20,6 @@ class VarselBusService(
         when (varselHendelse.type) {
             HendelseType.NL_OPPFOLGINGSPLAN_OPPRETTET -> opprettetOppfolgingsplanNL(varselHendelse)
             else -> sendtOppfolgingsplanNL(varselHendelse)
-
         }
     }
 
@@ -29,7 +28,7 @@ class VarselBusService(
         val dineSykmeldteVarsel = DineSykmeldteVarsel(
             varseldata.ansattFnr,
             varseldata.orgnummer,
-            varselHendelse.type.name,
+            varselHendelse.type.toDineSykmeldteHendelse().toString(),
             NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_LENKE,
             NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST,
             OffsetDateTime.now().plusMonths(4L)
@@ -44,7 +43,7 @@ class VarselBusService(
         val dineSykmeldteVarsel = DineSykmeldteVarsel(
             varseldata.ansattFnr,
             varseldata.orgnummer,
-            varselHendelse.type.name,
+            varselHendelse.type.toDineSykmeldteHendelse().toString(),
             NL_OPPFOLGINGSPLAN_OPPRETTET_LENKE,
             NL_OPPFOLGINGSPLAN_OPPRETTET_TEKST,
             OffsetDateTime.now().plusMonths(4L)
