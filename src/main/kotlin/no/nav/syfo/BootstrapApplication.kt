@@ -70,7 +70,7 @@ fun main() {
             val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
 
             val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
-            val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer, accessControl)
+            val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer)
 
             connector {
                 port = env.appEnv.applicationPort
