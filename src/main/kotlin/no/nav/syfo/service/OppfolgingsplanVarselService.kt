@@ -1,38 +1,38 @@
-package no.nav.syfo.kafka.varselbus
+package no.nav.syfo.service
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.syfo.DINE_SYKMELDTE_OPPFOLGINGSPLAN_OPPRETTET_TEKST
+import no.nav.syfo.DINE_SYKMELDTE_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST
+import no.nav.syfo.kafka.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.varselbus.domain.EsyfovarselHendelse
+import no.nav.syfo.kafka.varselbus.domain.HendelseType.*
 import no.nav.syfo.kafka.varselbus.domain.OppfolgingsplanNLVarselData
-import no.nav.syfo.kafka.varselbus.domain.toDineSykmeldteHendelse
+import no.nav.syfo.kafka.varselbus.domain.toDineSykmeldteHendelseType
+import no.nav.syfo.kafka.varselbus.isOrgFnrNrValidFormat
+import no.nav.syfo.kafka.varselbus.objectMapper
 import org.apache.commons.cli.MissingArgumentException
 import java.io.IOException
 import java.time.OffsetDateTime
 
-class OppfolgingsplanVarsler {
-
-    fun varselSendtOppfolgingsplanNL(varselHendelse: EsyfovarselHendelse): DineSykmeldteVarsel {
+class OppfolgingsplanVarselService(
+    val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer
+) {
+    fun sendVarselTilDineSykmeldte(varselHendelse: EsyfovarselHendelse) {
+        val varseltekst = when (varselHendelse.type) {
+            NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> DINE_SYKMELDTE_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST
+            NL_OPPFOLGINGSPLAN_OPPRETTET -> DINE_SYKMELDTE_OPPFOLGINGSPLAN_OPPRETTET_TEKST
+        }
         val varseldata = varselHendelse.dataToOppfolgingsplanNLVarselData()
-        return DineSykmeldteVarsel(
+        val dineSykmeldteVarsel = DineSykmeldteVarsel(
             varseldata.ansattFnr,
             varseldata.orgnummer,
-            varselHendelse.type.toDineSykmeldteHendelse().toString(),
+            varselHendelse.type.toDineSykmeldteHendelseType().toString(),
             null,
-            NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST,
+            varseltekst,
             OffsetDateTime.now().plusWeeks(4L)
         )
-    }
-
-    fun varselOpprettetOppfolgingsplanNL(varselHendelse: EsyfovarselHendelse): DineSykmeldteVarsel {
-        val varseldata = varselHendelse.dataToOppfolgingsplanNLVarselData()
-        return DineSykmeldteVarsel(
-            varseldata.ansattFnr,
-            varseldata.orgnummer,
-            varselHendelse.type.toDineSykmeldteHendelse().toString(),
-            null,
-            NL_OPPFOLGINGSPLAN_OPPRETTET_TEKST,
-            OffsetDateTime.now().plusWeeks(4L)
-        )
+        dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
     }
 }
 

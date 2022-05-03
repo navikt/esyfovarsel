@@ -22,7 +22,7 @@ class DineSykmeldteHendelseKafkaProducer(
     }
     private val kafkaProducer = KafkaProducer<String, DineSykmeldteHendelse>(kafkaConfig)
 
-    fun sendHendelse(varsel: DineSykmeldteVarsel) {
+    fun sendVarsel(varsel: DineSykmeldteVarsel) {
         val dineSykmeldteHendelse = DineSykmeldteHendelse(
             "${UUID.randomUUID()}",
             OpprettHendelse(

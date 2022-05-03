@@ -13,9 +13,9 @@ enum class HendelseType {
     NL_OPPFOLGINGSPLAN_OPPRETTET
 }
 
-fun HendelseType.toDineSykmeldteHendelse(): DineSykmeldteHendelse {
+fun HendelseType.toDineSykmeldteHendelseType(): DineSykmeldteHendelseType {
     return when (this) {
-        HendelseType.NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> DineSykmeldteHendelse.OPPFOLGINGSPLAN_TIL_GODKJENNING
-        HendelseType.NL_OPPFOLGINGSPLAN_OPPRETTET -> DineSykmeldteHendelse.OPPFOLGINGSPLAN_OPPRETTET
+        HendelseType.NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> DineSykmeldteHendelseType.OPPFOLGINGSPLAN_TIL_GODKJENNING
+        HendelseType.NL_OPPFOLGINGSPLAN_OPPRETTET -> DineSykmeldteHendelseType.OPPFOLGINGSPLAN_OPPRETTET
     }
 }
