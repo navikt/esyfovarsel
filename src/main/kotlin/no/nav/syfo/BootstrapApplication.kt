@@ -23,9 +23,11 @@ import no.nav.syfo.db.*
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.job.sendNotificationsJob
 import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
+import no.nav.syfo.kafka.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.launchKafkaListener
 import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.kafka.oppfolgingstilfelle.SyketilfelleKafkaConsumer
+import no.nav.syfo.kafka.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.service.*
 import no.nav.syfo.syketilfelle.SyketilfelleService
@@ -67,6 +69,9 @@ fun main() {
             val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
             val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
 
+            val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
+            val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer)
+
             connector {
                 port = env.appEnv.applicationPort
             }
@@ -84,6 +89,7 @@ fun main() {
                 kafkaModule(
                     env,
                     accessControl,
+                    varselBusService,
                     aktivitetskravVarselPlanner,
                     merVeiledningVarselPlanner
                 )
@@ -178,6 +184,7 @@ fun Application.serverModule(
 fun Application.kafkaModule(
     env: Environment,
     accessControl: AccessControl,
+    varselBusService: VarselBusService,
     aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
     merVeiledningVarselPlanner: MerVeiledningVarselPlanner
 ) {
@@ -199,6 +206,12 @@ fun Application.kafkaModule(
                 launchKafkaListener(
                     state,
                     SyketilfelleKafkaConsumer(env, database)
+                )
+            }
+            launch(backgroundTasksContext) {
+                launchKafkaListener(
+                    state,
+                    VarselBusKafkaConsumer(env, varselBusService)
                 )
             }
         }
