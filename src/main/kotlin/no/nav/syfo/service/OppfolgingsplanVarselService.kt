@@ -22,6 +22,7 @@ class OppfolgingsplanVarselService(
         val varseltekst = when (varselHendelse.type) {
             NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> DINE_SYKMELDTE_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST
             NL_OPPFOLGINGSPLAN_OPPRETTET -> DINE_SYKMELDTE_OPPFOLGINGSPLAN_OPPRETTET_TEKST
+            else -> {throw IllegalArgumentException("Type må være Oppfølgingsplan-type")}
         }
         val varseldata = varselHendelse.dataToOppfolgingsplanNLVarselData()
         val dineSykmeldteVarsel = DineSykmeldteVarsel(
