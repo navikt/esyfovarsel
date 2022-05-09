@@ -18,6 +18,9 @@ class VarselBusService(
             NL_OPPFOLGINGSPLAN_OPPRETTET,
             NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilDineSykmeldte(varselHendelse)
             NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilDineSykmeldte(varselHendelse)
+            else -> {
+                log.info("Vi har ikke lagt til støtte på varselbussen for varsel av type ${varselHendelse.type}")
+            }
         }
     }
 }
