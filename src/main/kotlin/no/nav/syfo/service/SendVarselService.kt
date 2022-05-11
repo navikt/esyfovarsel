@@ -21,6 +21,7 @@ class SendVarselService(
         return try {
             val fodselnummer = accessControl.getFnrIfUserCanBeNotified(pPlanlagtVarsel.aktorId)
             val uuid = pPlanlagtVarsel.uuid
+            log.info("fodselnummer: $fodselnummer") // TODO Delete
             fodselnummer?.let { fnr ->
                 val varselUrl = varselUrlFromType(pPlanlagtVarsel.type)
                 val varselContent = varselContentFromType(pPlanlagtVarsel.type)
