@@ -26,7 +26,7 @@ import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 
-object JobApiSpek : Spek ({
+object JobApiSpek : Spek({
 
     defaultTimeout = 20000L
 
@@ -41,9 +41,9 @@ object JobApiSpek : Spek ({
         coEvery { accessControl.getFnrIfUserCanBeNotified(aktorId2) } returns fnr2
         coEvery { accessControl.getFnrIfUserCanBeNotified(aktorId3) } returns null
 
-        coEvery { beskjedKafkaProducer.sendBeskjed(any(), any(), any()) } returns Unit
+        coEvery { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
 
-        val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl)
+        val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl, testEnv.urlEnv)
         val varselSender = VarselSender(embeddedDatabase, sendVarselService, testEnv.toggleEnv, testEnv.appEnv)
 
         with(TestApplicationEngine()) {
@@ -59,15 +59,13 @@ object JobApiSpek : Spek ({
                     PlanlagtVarsel(fnr2, aktorId2, setOf("2"), VarselType.AKTIVITETSKRAV),
                     PlanlagtVarsel(fnr2, aktorId2, setOf("3"), VarselType.MER_VEILEDNING, LocalDate.now().plusDays(1)),
                     PlanlagtVarsel(fnr3, aktorId3, setOf("4"), VarselType.AKTIVITETSKRAV)
-                ).forEach { embeddedDatabase.storePlanlagtVarsel(it)}
+                ).forEach { embeddedDatabase.storePlanlagtVarsel(it) }
 
                 with(handleRequest(HttpMethod.Post, urlPathJobTrigger)) {
                     response.status()?.isSuccess() shouldBeEqualTo true
-                    verify(exactly = 2) { beskjedKafkaProducer.sendBeskjed(any(), any(), any()) }
+                    verify(exactly = 2) { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) }
                 }
             }
-
         }
-
     }
 })

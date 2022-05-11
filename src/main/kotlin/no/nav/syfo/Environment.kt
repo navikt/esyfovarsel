@@ -3,8 +3,6 @@ package no.nav.syfo
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.io.File
-import java.util.*
-
 
 const val localAppPropertiesPath = "./src/main/resources/localEnvApp.json"
 const val localJobPropertiesPath = "./src/main/resources/localEnvJob.json"
@@ -39,7 +37,6 @@ fun getEnv(): Environment {
             dbCredMounthPath = getEnvVar("DB_VAULT_MOUNT_PATH")
         )
 
-
     return if (isLocal())
         getTestEnv()
     else
@@ -65,7 +62,7 @@ fun getEnv(): Environment {
                 syfosmregisterScope = getEnvVar("SYFOSMREGISTER_SCOPE"),
                 dkifScope = getEnvVar("DKIF_SCOPE"),
                 pdlScope = getEnvVar("PDL_SCOPE"),
-                baseUrlDittSykefravaer = getEnvVar("BASE_URL_DITT_SYKEFRAVAER"),
+                baseUrlSykInfo = getEnvVar("BASE_URL_SYK_INFO"),
                 stsUrl = getEnvVar("STS_URL"),
                 pdlUrl = getEnvVar("PDL_URL"),
                 dkifUrl = getEnvVar("DKIF_URL")
@@ -89,8 +86,9 @@ fun getEnv(): Environment {
                 sendMerVeiledningVarsler = getBooleanEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER"),
                 sendAktivitetskravVarsler = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER")
             )
-    )
+        )
 }
+
 fun getTestEnv() =
     objectMapper.readValue(File(localAppPropertiesPath), Environment::class.java)
 
@@ -129,7 +127,7 @@ data class UrlEnv(
     val syfosmregisterScope: String,
     val dkifScope: String,
     val pdlScope: String,
-    val baseUrlDittSykefravaer: String,
+    val baseUrlSykInfo: String,
     val stsUrl: String,
     val pdlUrl: String,
     val dkifUrl: String
