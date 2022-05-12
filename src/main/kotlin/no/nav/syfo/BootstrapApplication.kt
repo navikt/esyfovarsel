@@ -65,6 +65,8 @@ fun main() {
                 val oppfolgingstilfelleConsumer = getSyfosyketilfelleConsumer(env.urlEnv, stsConsumer)
                 val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
 
+                val beskjedKafkaProducer = BeskjedKafkaProducer(env)
+
                 val accessControl = AccessControl(pdlConsumer, dkifConsumer)
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
 
@@ -75,7 +77,8 @@ fun main() {
                 val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
 
                 val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
-                val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer)
+                val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl)
+                val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService)
 
                 connector {
                     port = env.appEnv.applicationPort
@@ -88,7 +91,8 @@ fun main() {
                         env,
                         accessControl,
                         varselSendtService,
-                        replanleggingService
+                        replanleggingService,
+                        beskjedKafkaProducer
                     )
 
                     kafkaModule(
@@ -146,9 +150,9 @@ fun Application.serverModule(
     env: Environment,
     accessControl: AccessControl,
     varselSendtService: VarselSendtService,
-    replanleggingService: ReplanleggingService
+    replanleggingService: ReplanleggingService,
+    beskjedKafkaProducer: BeskjedKafkaProducer
 ) {
-    val beskjedKafkaProducer = BeskjedKafkaProducer(env)
     val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl, env.urlEnv)
 
     val varselSender = VarselSender(
