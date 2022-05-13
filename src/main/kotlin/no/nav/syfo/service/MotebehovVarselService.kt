@@ -34,7 +34,7 @@ class MotebehovVarselService(
     }
 
     fun sendVarselTilSykmeldt(varselHendelse: EsyfovarselHendelse) {
-        brukernotifikasjonerService.sendVarsel(UUID.randomUUID().toString(), varselHendelse.mottakerFnr, varselHendelse.type.name, BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST)
+        brukernotifikasjonerService.sendVarsel(UUID.randomUUID().toString(), varselHendelse.mottakerFnr, BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST)
     }
 }
 
