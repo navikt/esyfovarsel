@@ -1,7 +1,7 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.PdlConsumer
+import no.nav.syfo.consumer.dkif.DkifConsumer
 import org.slf4j.LoggerFactory
 
 class AccessControl(val pdlConsumer: PdlConsumer, val dkifConsumer: DkifConsumer) {

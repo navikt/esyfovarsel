@@ -16,7 +16,10 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.*
-import no.nav.syfo.consumer.*
+import no.nav.syfo.consumer.LocalPdlConsumer
+import no.nav.syfo.consumer.LocalSyfosyketilfelleConsumer
+import no.nav.syfo.consumer.PdlConsumer
+import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.*
@@ -48,57 +51,62 @@ fun main() {
         sendNotificationsJob(env)
     } else {
         val env = getEnv()
-        val server = embeddedServer(Netty, applicationEngineEnvironment {
-            config = HoconApplicationConfig(ConfigFactory.load())
-            database = initDb(env.dbEnv)
+        val server = embeddedServer(
+            Netty,
+            applicationEngineEnvironment {
+                config = HoconApplicationConfig(ConfigFactory.load())
+                database = initDb(env.dbEnv)
 
-            val stsConsumer = getStsConsumer(env.urlEnv, env.authEnv)
-            val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
+                val stsConsumer = getStsConsumer(env.urlEnv, env.authEnv)
+                val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
 
-            val pdlConsumer = getPdlConsumer(env.urlEnv, azureAdTokenConsumer, stsConsumer)
-            val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer, stsConsumer)
-            val oppfolgingstilfelleConsumer = getSyfosyketilfelleConsumer(env.urlEnv, stsConsumer)
-            val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
+                val pdlConsumer = getPdlConsumer(env.urlEnv, azureAdTokenConsumer, stsConsumer)
+                val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer, stsConsumer)
+                val oppfolgingstilfelleConsumer = getSyfosyketilfelleConsumer(env.urlEnv, stsConsumer)
+                val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
 
-            val accessControl = AccessControl(pdlConsumer, dkifConsumer)
-            val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
+                val accessControl = AccessControl(pdlConsumer, dkifConsumer)
+                val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
 
-            val syketilfelleService = SyketilfelleService(database)
-            val varselSendtService = VarselSendtService(pdlConsumer, oppfolgingstilfelleConsumer, database)
-            val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, syketilfelleService, varselSendtService)
-            val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
-            val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
+                val syketilfelleService = SyketilfelleService(database)
+                val varselSendtService = VarselSendtService(pdlConsumer, oppfolgingstilfelleConsumer, database)
+                val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, syketilfelleService, varselSendtService)
+                val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
+                val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
 
-            val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
-            val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer)
+                val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
+                val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer)
 
-            connector {
-                port = env.appEnv.applicationPort
+                connector {
+                    port = env.appEnv.applicationPort
+                }
+
+                module {
+                    state.running = true
+
+                    serverModule(
+                        env,
+                        accessControl,
+                        varselSendtService,
+                        replanleggingService
+                    )
+
+                    kafkaModule(
+                        env,
+                        accessControl,
+                        varselBusService,
+                        aktivitetskravVarselPlanner,
+                        merVeiledningVarselPlanner
+                    )
+                }
             }
+        )
 
-            module {
-                state.running = true
-
-                serverModule(
-                    env,
-                    accessControl,
-                    varselSendtService,
-                    replanleggingService
-                )
-
-                kafkaModule(
-                    env,
-                    accessControl,
-                    varselBusService,
-                    aktivitetskravVarselPlanner,
-                    merVeiledningVarselPlanner
-                )
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                server.stop(10, 10, TimeUnit.SECONDS)
             }
-        })
-
-        Runtime.getRuntime().addShutdownHook(Thread {
-            server.stop(10, 10, TimeUnit.SECONDS)
-        })
+        )
 
         server.start(wait = false)
     }
@@ -141,7 +149,7 @@ fun Application.serverModule(
     replanleggingService: ReplanleggingService
 ) {
     val beskjedKafkaProducer = BeskjedKafkaProducer(env)
-    val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl)
+    val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl, env.urlEnv)
 
     val varselSender = VarselSender(
         database,
