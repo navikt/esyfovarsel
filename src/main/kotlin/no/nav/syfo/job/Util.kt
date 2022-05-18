@@ -1,6 +1,5 @@
 package no.nav.syfo.job
 
-import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -16,18 +15,19 @@ fun sendNotificationsJob(env: JobEnv) {
         runBlocking {
             val credentials = "${env.serviceuserUsername}:${env.serviceuserPassword}"
             val encodededCredentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
-            val response: HttpResponse = httpClient().post(env.jobTriggerUrl) {
+            val httpClient = httpClient()
+            val response: HttpResponse = httpClient.post(env.jobTriggerUrl) {
                 headers {
                     append("Authorization", "Basic $encodededCredentials")
                 }
             }
             val status = response.status
             if (status == HttpStatusCode.OK) {
-                val varslerSendt = response.receive<Int>()
-                logg.info("Varsler sendt: $varslerSendt")
+                logg.info("Har trigget varselutsending")
             } else {
                 logg.error("Feil i esyfovarsel-job: Klarte ikke kalle trigger-API i esyfovarsel. Fikk svar med status: $status")
             }
+            httpClient.close()
         }
     } else {
         logg.info("Jobb togglet av")
