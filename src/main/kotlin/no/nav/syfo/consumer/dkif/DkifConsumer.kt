@@ -70,7 +70,9 @@ class DkifConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: TokenC
                 HttpStatusCode.OK -> {
                     val rawJson: String = response.receive()
                     log.info("Person: " + rawJson)
-                    KontaktinfoMapper.mapPerson(rawJson)
+                    val mapPerson = KontaktinfoMapper.mapPerson(rawJson)
+                    log.info("Mapped person: " + mapPerson)
+                    mapPerson
                 }
                 HttpStatusCode.Unauthorized -> {
                     log.error("Could not get kontaktinfo from DKIF: Unable to authorize")
