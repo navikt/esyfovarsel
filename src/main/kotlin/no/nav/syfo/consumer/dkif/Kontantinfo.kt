@@ -35,4 +35,19 @@ object KontaktinfoMapper {
             )
         }
     }
+
+    fun mapPerson(json: String): Kontaktinfo? {
+        val jsonNode = objectMapper.readTree(json)
+
+        if(jsonNode.has("feil")) {
+            return null
+        }
+
+        jsonNode.let {
+            return Kontaktinfo(
+                it["kanVarsles"]?.asBoolean(),
+                it["reservert"]?.asBoolean()
+            )
+        }
+    }
 }
