@@ -7,12 +7,17 @@ metadata:
     team: team-esyfo
 spec:
   image: {{ image }}
-  schedule: "*/15 * * * *"
+  schedule: "*/5 * * * *"
+  azure:
+    application:
+      enabled: true
   vault:
     enabled: true
     paths:
       - kvPath: "/serviceuser/data/dev/srvesyfovarsel"
         mountPath: "/var/run/secrets"
+    webproxy: true
+
   env:
   {{#each job}}
     - name: {{@key}}

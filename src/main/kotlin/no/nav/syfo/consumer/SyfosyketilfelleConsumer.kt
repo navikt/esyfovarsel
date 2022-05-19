@@ -80,7 +80,7 @@ open class SyfosyketilfelleConsumer(urlEnv: UrlEnv, private val tokenConsumer: T
     }
 }
 
-class LocalSyfosyketilfelleConsumer(urlEnv: UrlEnv, tokenConsumer: TokenConsumer): SyfosyketilfelleConsumer(urlEnv, tokenConsumer) {
+class LocalSyfosyketilfelleConsumer(urlEnv: UrlEnv, tokenConsumer: TokenConsumer) : SyfosyketilfelleConsumer(urlEnv, tokenConsumer) {
     override suspend fun getOppfolgingstilfelle39Uker(aktorId: String): Oppfolgingstilfelle39Uker? {
         return Oppfolgingstilfelle39Uker(
             aktorId,

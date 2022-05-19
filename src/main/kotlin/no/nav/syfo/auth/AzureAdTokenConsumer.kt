@@ -20,8 +20,7 @@ import org.slf4j.LoggerFactory
 import java.net.ProxySelector
 import java.time.Instant
 
-
-class AzureAdTokenConsumer(authEnv: AuthEnv): TokenConsumer {
+class AzureAdTokenConsumer(authEnv: AuthEnv) : TokenConsumer {
     private val aadAccessTokenUrl = authEnv.aadAccessTokenUrl
     private val clientId = authEnv.clientId
     private val clientSecret = authEnv.clientSecret
@@ -64,12 +63,14 @@ class AzureAdTokenConsumer(authEnv: AuthEnv): TokenConsumer {
             val response = httpClientWithProxy.post<HttpResponse>(aadAccessTokenUrl) {
                 accept(ContentType.Application.Json)
 
-                body = FormDataContent(Parameters.build {
-                    append("client_id", clientId)
-                    append("scope", resource!!)
-                    append("grant_type", "client_credentials")
-                    append("client_secret", clientSecret)
-                })
+                body = FormDataContent(
+                    Parameters.build {
+                        append("client_id", clientId)
+                        append("scope", resource!!)
+                        append("grant_type", "client_credentials")
+                        append("client_secret", clientSecret)
+                    }
+                )
             }
             if (response.status == HttpStatusCode.OK) {
                 tokenMap[resource!!] = response.receive()

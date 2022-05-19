@@ -6,6 +6,7 @@ import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
+import no.nav.syfo.testutil.mocks.orgnummer
 import org.amshove.kluent.should
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBe
@@ -36,9 +37,9 @@ object PlanlagtVarselDAOSpek : Spek({
         }
 
         it("Store and fetch PlanlagtVarsel") {
-            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1", "2" ), VarselType.AKTIVITETSKRAV)
-            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("3"), VarselType.MER_VEILEDNING)
-            val planlagtVarselToStore3 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, setOf("4"), VarselType.AKTIVITETSKRAV)
+            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1", "2"), VarselType.AKTIVITETSKRAV)
+            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("3"), VarselType.MER_VEILEDNING)
+            val planlagtVarselToStore3 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, orgnummer, setOf("4"), VarselType.AKTIVITETSKRAV)
 
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
@@ -69,9 +70,9 @@ object PlanlagtVarselDAOSpek : Spek({
         }
 
         it("Delete PlanlagtVarsel by varsel uuid") {
-            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1", "2"), VarselType.AKTIVITETSKRAV)
-            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("3"), VarselType.MER_VEILEDNING)
-            val planlagtVarselToStore3 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, setOf("4"), VarselType.AKTIVITETSKRAV)
+            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1", "2"), VarselType.AKTIVITETSKRAV)
+            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("3"), VarselType.MER_VEILEDNING)
+            val planlagtVarselToStore3 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, orgnummer, setOf("4"), VarselType.AKTIVITETSKRAV)
 
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
@@ -105,9 +106,9 @@ object PlanlagtVarselDAOSpek : Spek({
         }
 
         it("Delete PlanlagtVarsel by sykmelding ids") {
-            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1", "2"), VarselType.AKTIVITETSKRAV)
-            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("3"), VarselType.MER_VEILEDNING)
-            val planlagtVarselToStore3 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, setOf("4"), VarselType.AKTIVITETSKRAV)
+            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1", "2"), VarselType.AKTIVITETSKRAV)
+            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("3"), VarselType.MER_VEILEDNING)
+            val planlagtVarselToStore3 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, orgnummer, setOf("4"), VarselType.AKTIVITETSKRAV)
 
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
@@ -141,10 +142,10 @@ object PlanlagtVarselDAOSpek : Spek({
         }
 
         it("Finn PlanlagtVarsel som skal sendes") {
-            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1", "2"), VarselType.AKTIVITETSKRAV, LocalDate.now())
-            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("3"), VarselType.MER_VEILEDNING, LocalDate.now().minusDays(1))
-            val planlagtVarselToStore3 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, setOf("4"), VarselType.AKTIVITETSKRAV, LocalDate.now().plusDays(1))
-            val planlagtVarselToStore4 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, setOf("5"), VarselType.MER_VEILEDNING, LocalDate.now().plusWeeks(1))
+            val planlagtVarselToStore1 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1", "2"), VarselType.AKTIVITETSKRAV, LocalDate.now())
+            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("3"), VarselType.MER_VEILEDNING, LocalDate.now().minusDays(1))
+            val planlagtVarselToStore3 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, orgnummer, setOf("4"), VarselType.AKTIVITETSKRAV, LocalDate.now().plusDays(1))
+            val planlagtVarselToStore4 = PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, orgnummer, setOf("5"), VarselType.MER_VEILEDNING, LocalDate.now().plusWeeks(1))
 
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
@@ -166,16 +167,22 @@ private fun Collection<PPlanlagtVarsel>.skalBareHaVarslerMedUtsendingsdatoPa(dat
     all { it.utsendingsdato.isEqual(dato) }
 }
 
-private fun Collection<PPlanlagtVarsel>.skalInneholdeVarsel(expectedVarsel: PlanlagtVarsel) = this.should("$this skal inneholde varsel med fnr[${expectedVarsel.fnr}], aktorId[${expectedVarsel.aktorId}], utsendingsdato[${expectedVarsel.utsendingsdato}], type[${expectedVarsel.type}]") {
-    any { it.fnr == expectedVarsel.fnr &&
-            it.aktorId == expectedVarsel.aktorId &&
-            it.utsendingsdato == expectedVarsel.utsendingsdato &&
-            it.type == expectedVarsel.type.name }
-}
+private fun Collection<PPlanlagtVarsel>.skalInneholdeVarsel(expectedVarsel: PlanlagtVarsel) =
+    this.should("$this skal inneholde varsel med fnr[${expectedVarsel.fnr}], aktorId[${expectedVarsel.aktorId}], utsendingsdato[${expectedVarsel.utsendingsdato}], type[${expectedVarsel.type}]") {
+        any {
+            it.fnr == expectedVarsel.fnr &&
+                    it.aktorId == expectedVarsel.aktorId &&
+                    it.utsendingsdato == expectedVarsel.utsendingsdato &&
+                    it.type == expectedVarsel.type.name
+        }
+    }
 
-private fun Collection<PPlanlagtVarsel>.skalIkkeInneholdeVarsel(expectedVarsel: PlanlagtVarsel) = this.should("$this skal ikke inneholde varsel med fnr[${expectedVarsel.fnr}], aktorId[${expectedVarsel.aktorId}], utsendingsdato[${expectedVarsel.utsendingsdato}], type[${expectedVarsel.type}]") {
-    ! any { it.fnr == expectedVarsel.fnr &&
-            it.aktorId == expectedVarsel.aktorId &&
-            it.utsendingsdato == expectedVarsel.utsendingsdato &&
-            it.type == expectedVarsel.type.name }
-}
+private fun Collection<PPlanlagtVarsel>.skalIkkeInneholdeVarsel(expectedVarsel: PlanlagtVarsel) =
+    this.should("$this skal ikke inneholde varsel med fnr[${expectedVarsel.fnr}], aktorId[${expectedVarsel.aktorId}], utsendingsdato[${expectedVarsel.utsendingsdato}], type[${expectedVarsel.type}]") {
+        !any {
+            it.fnr == expectedVarsel.fnr &&
+                    it.aktorId == expectedVarsel.aktorId &&
+                    it.utsendingsdato == expectedVarsel.utsendingsdato &&
+                    it.type == expectedVarsel.type.name
+        }
+    }

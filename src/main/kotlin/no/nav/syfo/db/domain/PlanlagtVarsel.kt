@@ -8,9 +8,10 @@ enum class VarselType {
 
 val UTSENDING_FEILET = "UTSENDING_FEILET"
 
-data class PlanlagtVarsel (
+data class PlanlagtVarsel(
     val fnr: String,
     val aktorId: String,
+    val orgnummer: String?,
     val sykmeldingerId: Set<String>,
     val type: VarselType,
     val utsendingsdato: LocalDate = LocalDate.now()

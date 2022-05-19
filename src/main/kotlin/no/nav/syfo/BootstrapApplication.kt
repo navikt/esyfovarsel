@@ -20,7 +20,9 @@ import no.nav.syfo.consumer.LocalPdlConsumer
 import no.nav.syfo.consumer.LocalSyfosyketilfelleConsumer
 import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
+import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusentConsumer
 import no.nav.syfo.consumer.dkif.DkifConsumer
+import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.*
 import no.nav.syfo.job.VarselSender
@@ -64,6 +66,8 @@ fun main() {
                 val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer, stsConsumer)
                 val oppfolgingstilfelleConsumer = getSyfosyketilfelleConsumer(env.urlEnv, stsConsumer)
                 val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
+                val narmesteLederConsumer = NarmesteLederConsumer(env.urlEnv, azureAdTokenConsumer)
+                val arbeidsgiverNotifikasjonProdusentConsumer = ArbeidsgiverNotifikasjonProdusentConsumer(env.urlEnv, azureAdTokenConsumer, narmesteLederConsumer)
 
                 val accessControl = AccessControl(pdlConsumer, dkifConsumer)
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
@@ -88,7 +92,8 @@ fun main() {
                         env,
                         accessControl,
                         varselSendtService,
-                        replanleggingService
+                        replanleggingService,
+                        arbeidsgiverNotifikasjonProdusentConsumer
                     )
 
                     kafkaModule(
@@ -146,10 +151,11 @@ fun Application.serverModule(
     env: Environment,
     accessControl: AccessControl,
     varselSendtService: VarselSendtService,
-    replanleggingService: ReplanleggingService
+    replanleggingService: ReplanleggingService,
+    arbeidsgiverNotifikasjonProdusentConsumer: ArbeidsgiverNotifikasjonProdusentConsumer
 ) {
     val beskjedKafkaProducer = BeskjedKafkaProducer(env)
-    val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl, env.urlEnv)
+    val sendVarselService = SendVarselService(beskjedKafkaProducer, arbeidsgiverNotifikasjonProdusentConsumer, accessControl, env.urlEnv)
 
     val varselSender = VarselSender(
         database,

@@ -10,6 +10,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.api.job.registerJobTriggerApi
 import no.nav.syfo.api.job.urlPathJobTrigger
+import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusentConsumer
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
@@ -36,6 +37,7 @@ object JobApiSpek : Spek({
         val embeddedDatabase by lazy { EmbeddedDatabase() }
         val accessControl = mockk<AccessControl>()
         val beskjedKafkaProducer = mockk<BeskjedKafkaProducer>()
+        val arbeidsgiverNotifikasjonProdusentConsumer = mockk<ArbeidsgiverNotifikasjonProdusentConsumer>()
 
         coEvery { accessControl.getFnrIfUserCanBeNotified(aktorId) } returns fnr1
         coEvery { accessControl.getFnrIfUserCanBeNotified(aktorId2) } returns fnr2
@@ -43,7 +45,7 @@ object JobApiSpek : Spek({
 
         coEvery { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
 
-        val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl, testEnv.urlEnv)
+        val sendVarselService = SendVarselService(beskjedKafkaProducer, arbeidsgiverNotifikasjonProdusentConsumer, accessControl, testEnv.urlEnv)
         val varselSender = VarselSender(embeddedDatabase, sendVarselService, testEnv.toggleEnv, testEnv.appEnv)
 
         with(TestApplicationEngine()) {
@@ -55,10 +57,10 @@ object JobApiSpek : Spek({
 
             it("esyfovarsel-job trigger utsending av 2 varsler") {
                 listOf(
-                    PlanlagtVarsel(fnr1, aktorId, setOf("1"), VarselType.MER_VEILEDNING),
-                    PlanlagtVarsel(fnr2, aktorId2, setOf("2"), VarselType.AKTIVITETSKRAV),
-                    PlanlagtVarsel(fnr2, aktorId2, setOf("3"), VarselType.MER_VEILEDNING, LocalDate.now().plusDays(1)),
-                    PlanlagtVarsel(fnr3, aktorId3, setOf("4"), VarselType.AKTIVITETSKRAV)
+                    PlanlagtVarsel(fnr1, aktorId, orgnummer, setOf("1"), VarselType.MER_VEILEDNING),
+                    PlanlagtVarsel(fnr2, aktorId2, orgnummer, setOf("2"), VarselType.AKTIVITETSKRAV),
+                    PlanlagtVarsel(fnr2, aktorId2, orgnummer, setOf("3"), VarselType.MER_VEILEDNING, LocalDate.now().plusDays(1)),
+                    PlanlagtVarsel(fnr3, aktorId3, orgnummer, setOf("4"), VarselType.AKTIVITETSKRAV)
                 ).forEach { embeddedDatabase.storePlanlagtVarsel(it) }
 
                 with(handleRequest(HttpMethod.Post, urlPathJobTrigger)) {

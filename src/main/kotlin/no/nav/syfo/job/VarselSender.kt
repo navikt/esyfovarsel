@@ -23,7 +23,7 @@ class VarselSender(
 ) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
 
-    fun sendVarsler(): Int {
+    suspend fun sendVarsler(): Int {
         log.info("SendVarslerJobb-API kalt")
         if (appEnv.runningInGCPCluster) {
             log.info("[GCP] Disabled varselutsending")
@@ -43,8 +43,8 @@ class VarselSender(
             if (skalSendeVarsel(it)) {
                 log.info("Sender varsel med UUID ${it.uuid}")
                 val type = sendVarselService.sendVarsel(it)
-                incrementVarselCountMap(varslerSendt, type)
                 if (type.sendtUtenFeil()) {
+                    incrementVarselCountMap(varslerSendt, type)
                     log.info("Markerer varsel med UUID ${it.uuid} som sendt")
                     databaseAccess.storeUtsendtVarsel(it)
                     databaseAccess.deletePlanlagtVarselByVarselId(it.uuid)

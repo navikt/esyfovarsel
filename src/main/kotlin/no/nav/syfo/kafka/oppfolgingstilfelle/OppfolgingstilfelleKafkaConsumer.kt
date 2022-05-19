@@ -49,16 +49,18 @@ class OppfolgingstilfelleKafkaConsumer(
                 try {
                     val peker: KOppfolgingstilfellePeker = objectMapper.readValue(it.value())
                     val aktorId = peker.aktorId
+                    val orgnummer = peker.orgnummer
                     val fnr = accessControl.getFnrIfUserCanBeNotified(aktorId)
                     fnr?.let {
                         varselPlanners.forEach { planner ->
                             try {
-                                runBlocking { planner.processOppfolgingstilfelle(aktorId, fnr) }
+                                runBlocking { planner.processOppfolgingstilfelle(aktorId, fnr, orgnummer) }
                             } catch (e: Exception) {
                                 log.error("Error in [${planner.name}] planner: | ${e.message}", e)
                                 tellFeilIPlanner()
                             }
                         }
+                        log.info("Bruker med forespurt fnr kan ikke varsles")
                     }
                 } catch (e: IOException) {
                     log.error(

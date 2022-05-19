@@ -1,6 +1,7 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.UrlEnv
+import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusentConsumer
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
@@ -11,6 +12,7 @@ import java.net.URL
 
 class SendVarselService(
     val beskjedKafkaProducer: BeskjedKafkaProducer,
+    val arbeidsgiverNotifikasjonProdusentConsumer: ArbeidsgiverNotifikasjonProdusentConsumer,
     val accessControl: AccessControl,
     val urlEnv: UrlEnv
 ) {
@@ -26,8 +28,21 @@ class SendVarselService(
                 val varselContent = varselContentFromType(pPlanlagtVarsel.type)
 
                 if (varselUrl !== null && varselContent !== null) {
-                    beskjedKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl)
-                    return pPlanlagtVarsel.type
+                    when {
+                        VarselType.AKTIVITETSKRAV.toString().equals(pPlanlagtVarsel.type) -> {
+                            beskjedKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl)
+                            arbeidsgiverNotifikasjonProdusentConsumer.createNewNotificationForArbeidsgiver(uuid, pPlanlagtVarsel.orgnummer, fnr)
+                            pPlanlagtVarsel.type
+                        }
+
+                        VarselType.MER_VEILEDNING.toString().equals(pPlanlagtVarsel.type) -> {
+                            beskjedKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl)
+                            pPlanlagtVarsel.type
+                        }
+                        else -> {
+                            throw RuntimeException("Ukjent typestreng")
+                        }
+                    }
                 } else {
                     throw RuntimeException("Klarte ikke mappe typestreng til innholdstekst og URL")
                 }

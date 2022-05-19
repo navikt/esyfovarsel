@@ -18,12 +18,15 @@ fun DatabaseInterface.storePlanlagtVarsel(planlagtVarsel: PlanlagtVarsel) {
         type,
         utsendingsdato,
         opprettet,
-        sist_endret) VALUES (?, ?, ?, ?, ?, ?, ?)""".trimIndent()
+        sist_endret,
+        orgnummer) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """.trimIndent()
 
     val insertStatement2 = """INSERT INTO SYKMELDING_IDS (
         uuid,
         sykmelding_id,
-        varsling_id) VALUES (?, ?, ?)""".trimIndent()
+        varsling_id) VALUES (?, ?, ?)
+    """.trimIndent()
 
     val now = Timestamp.valueOf(LocalDateTime.now())
     val varselUUID = UUID.randomUUID()
@@ -37,6 +40,7 @@ fun DatabaseInterface.storePlanlagtVarsel(planlagtVarsel: PlanlagtVarsel) {
             it.setDate(5, Date.valueOf(planlagtVarsel.utsendingsdato))
             it.setTimestamp(6, now)
             it.setTimestamp(7, now)
+            it.setString(8, planlagtVarsel.orgnummer)
             it.executeUpdate()
         }
 

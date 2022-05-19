@@ -28,7 +28,7 @@ class AktivitetskravVarselPlanner(
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.AktivitetskravVarselPlanner")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
 
-    override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String) = coroutineScope {
+    override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String, orgnummer: String?) = coroutineScope {
         val oppfolgingstilfellePerson = syfosyketilfelleConsumer.getOppfolgingstilfelle(aktorId)
         log.info("-$name-: oppfolgingstilfellePerson er -$oppfolgingstilfellePerson-")
 
@@ -87,6 +87,7 @@ class AktivitetskravVarselPlanner(
                     val aktivitetskravVarsel = PlanlagtVarsel(
                         fnr,
                         oppfolgingstilfellePerson.aktorId,
+                        orgnummer,
                         ressursIds,
                         VarselType.AKTIVITETSKRAV,
                         aktivitetskravVarselDate
@@ -97,6 +98,7 @@ class AktivitetskravVarselPlanner(
                     val aktivitetskravVarsel = PlanlagtVarsel(
                         fnr,
                         oppfolgingstilfellePerson.aktorId,
+                        orgnummer,
                         ressursIds,
                         VarselType.AKTIVITETSKRAV,
                         aktivitetskravVarselDate
@@ -110,6 +112,7 @@ class AktivitetskravVarselPlanner(
                 val aktivitetskravVarsel = PlanlagtVarsel(
                     fnr,
                     oppfolgingstilfellePerson.aktorId,
+                    orgnummer,
                     ressursIds,
                     VarselType.AKTIVITETSKRAV,
                     aktivitetskravVarselDate

@@ -11,7 +11,11 @@
     "clientSecret": "clientSecret",
     "aadAccessTokenUrl": "http://localhost:9595",
     "loginserviceDiscoveryUrl": "https://loginservice.no/.well-known/openid-configuration",
-    "loginserviceAudience": ["aud1", "aud2", "aud3"]
+    "loginserviceAudience": [
+      "aud1",
+      "aud2",
+      "aud3"
+    ]
   },
   "urlEnv": {
     "syfosyketilfelleUrl": "http://localhost:9090",
@@ -22,7 +26,12 @@
     "baseUrlSykInfo": "http://ditt-sykefravaer:8080",
     "stsUrl": "http://localhost:9094",
     "pdlUrl": "http://localhost:9091",
-    "dkifUrl": "http://localhost:9093/api/v1/personer/kontaktinfo"
+    "dkifUrl": "http://localhost:9093/api/v1/personer/kontaktinfo",
+    "arbeidsgiverNotifikasjonProdusentApiUrl": "http://localhost:9095",
+    "arbeidsgiverNotifikasjonProdusentApiScope": "agNotifikasjonProdusentScope",
+    "narmestelederUrl": "http://localhost:9097",
+    "narmestelederScope": "narmestelederScope",
+    "baseUrlDineSykmeldte": "http://dine-sykmeldte:9099"
   },
   "kafkaEnv": {
     "bootstrapServersUrl": "http://localhost:9092",

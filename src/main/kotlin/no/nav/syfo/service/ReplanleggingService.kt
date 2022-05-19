@@ -31,7 +31,7 @@ class ReplanleggingService(
         val planlagteVarsler = databaseAccess.fetchPlanlagtVarselByTypeAndUtsendingsdato(varselType, fromDate, toDate)
         val size = planlagteVarsler.size
         log.info("[ReplanleggingService]: Replanlegger $size varsler av type $varselType")
-        planlagteVarsler.forEach { planlegger.processOppfolgingstilfelle(it.aktorId, it.fnr) }
+        planlagteVarsler.forEach { planlegger.processOppfolgingstilfelle(it.aktorId, it.fnr, it.orgnummer) }
         log.info("[ReplanleggingService]: Planla $size varsler av type $varselType")
         return size
     }

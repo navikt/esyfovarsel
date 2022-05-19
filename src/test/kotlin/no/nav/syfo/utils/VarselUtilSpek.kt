@@ -5,7 +5,6 @@ import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.varsel.arbeidstakerAktorId1
 import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate

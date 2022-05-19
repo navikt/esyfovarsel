@@ -48,8 +48,8 @@ class BrukerApiSpek : Spek({
 
         coEvery { pdlConsumer.getFnr(aktorId) } returns fnr1
         coEvery { pdlConsumer.getFnr(aktorId2) } returns fnr2
-        coEvery { pdlConsumer.getFnr(aktorId3)} returns null
-        coEvery { pdlConsumer.getFnr("ugyldig")} returns "ugyldig"
+        coEvery { pdlConsumer.getFnr(aktorId3) } returns null
+        coEvery { pdlConsumer.getFnr("ugyldig") } returns "ugyldig"
 
 
         with(TestApplicationEngine()) {
@@ -99,6 +99,7 @@ class BrukerApiSpek : Spek({
                     UUID.randomUUID().toString(),
                     fnr1,
                     aktorId,
+                    orgnummer,
                     VarselType.MER_VEILEDNING.toString(),
                     varselUtsendtDato,
                     varselUtsendtDato.atStartOfDay(),
@@ -135,6 +136,7 @@ class BrukerApiSpek : Spek({
                     UUID.randomUUID().toString(),
                     fnr1,
                     aktorId,
+                    orgnummer,
                     VarselType.MER_VEILEDNING.toString(),
                     varselUtsendtDato,
                     varselUtsendtDato.atStartOfDay(),
@@ -170,6 +172,7 @@ class BrukerApiSpek : Spek({
                     UUID.randomUUID().toString(),
                     fnr1,
                     aktorId,
+                    orgnummer,
                     VarselType.MER_VEILEDNING.toString(),
                     varselUtsendtDato,
                     varselUtsendtDato.atStartOfDay(),
@@ -205,6 +208,7 @@ class BrukerApiSpek : Spek({
                     UUID.randomUUID().toString(),
                     fnr3,
                     aktorId3,
+                    orgnummer,
                     VarselType.MER_VEILEDNING.toString(),
                     varselUtsendtDato,
                     varselUtsendtDato.atStartOfDay(),
