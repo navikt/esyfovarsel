@@ -14,7 +14,7 @@ class BrukernotifikasjonerService(
 
     fun sendVarsel(uuid: String, mottakerFnr: String, content: String) {
         // Recheck if user can be notified in case of recent 'Addressesperre'
-        val fodselnummer = accessControl.getFnrIfUserCanBeNotified(mottakerFnr)
+        val fodselnummer = accessControl.getFnrIfUserCanBeNotifiedFromFnr(mottakerFnr)
         fodselnummer?.let { fnr ->
             beskjedKafkaProducer.sendBeskjed(fnr, content, uuid, url)
         } ?: log.info("Kan ikke sende melding til bruker for melding med uuid ${uuid}, dette kan skyldes adressesperre")
