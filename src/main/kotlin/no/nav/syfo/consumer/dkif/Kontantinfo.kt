@@ -43,7 +43,7 @@ object KontaktinfoMapper {
             return null
         }
 
-        jsonNode.get(0).let {
+        jsonNode.let {
             return Kontaktinfo(
                 it["kanVarsles"]?.asBoolean(),
                 it["reservert"]?.asBoolean()
