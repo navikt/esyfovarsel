@@ -36,6 +36,7 @@ import no.nav.syfo.service.*
 import no.nav.syfo.syketilfelle.SyketilfelleService
 import no.nav.syfo.varsel.AktivitetskravVarselPlanner
 import no.nav.syfo.varsel.MerVeiledningVarselPlanner
+import java.net.URL
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -77,7 +78,7 @@ fun main() {
                 val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
 
                 val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
-                val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl)
+                val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl, URL(env.urlEnv.baseUrlSykInfo))
                 val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService)
 
                 connector {
