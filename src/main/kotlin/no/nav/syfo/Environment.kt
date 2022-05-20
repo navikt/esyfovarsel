@@ -67,6 +67,9 @@ fun getEnv(): Environment {
                 pdlUrl = getEnvVar("PDL_URL"),
                 dkifUrl = getEnvVar("DKIF_URL")
             ),
+            VarselUrlEnv(
+                dialogmoterUrl = getEnvVar("BASE_URL_DIALOGMOTER")
+            ),
             KafkaEnv(
                 bootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
                 schemaRegistry = KafkaSchemaRegistryEnv(
@@ -99,6 +102,7 @@ data class Environment(
     val appEnv: AppEnv,
     val authEnv: AuthEnv,
     val urlEnv: UrlEnv,
+    val varselUrlEnv: VarselUrlEnv,
     val kafkaEnv: KafkaEnv,
     val dbEnv: DbEnv,
     val toggleEnv: ToggleEnv
@@ -131,6 +135,10 @@ data class UrlEnv(
     val stsUrl: String,
     val pdlUrl: String,
     val dkifUrl: String
+)
+
+data class VarselUrlEnv(
+    val dialogmoterUrl: String
 )
 
 data class KafkaEnv(
