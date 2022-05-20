@@ -21,7 +21,9 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: To
         return when (response?.status) {
             HttpStatusCode.OK -> {
                 runBlocking {
-                    val pdlResponse = response.receive<PdlIdentResponse>().data?.hentIdenter?.identer?.first()?.ident
+                    val data = response.receive<PdlIdentResponse>().data
+                    log.info("Data: " + data)
+                    val pdlResponse = data?.hentIdenter?.identer?.first()?.ident
                     pdlResponse
                 }
             }

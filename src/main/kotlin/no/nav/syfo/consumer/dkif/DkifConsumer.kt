@@ -69,7 +69,6 @@ class DkifConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: TokenC
             when (response?.status) {
                 HttpStatusCode.OK -> {
                     val rawJson: String = response.receive()
-                    log.info("Person: " + rawJson)
                     val mapPerson = KontaktinfoMapper.mapPerson(rawJson)
                     log.info("Mapped person: " + mapPerson)
                     mapPerson
