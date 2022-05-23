@@ -22,7 +22,8 @@
     "baseUrlSykInfo": "http://ditt-sykefravaer:8080",
     "stsUrl": "http://localhost:9094",
     "pdlUrl": "http://localhost:9091",
-    "dkifUrl": "http://localhost:9093/api/v1/personer/kontaktinfo"
+    "dkifUrl": "http://localhost:9093/api/v1/personer/kontaktinfo",
+    "dialogmoterUrl": "http://dialogmoter:8080"
   },
   "kafkaEnv": {
     "bootstrapServersUrl": "http://localhost:9092",

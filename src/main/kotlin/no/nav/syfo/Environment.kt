@@ -65,9 +65,7 @@ fun getEnv(): Environment {
                 baseUrlSykInfo = getEnvVar("BASE_URL_SYK_INFO"),
                 stsUrl = getEnvVar("STS_URL"),
                 pdlUrl = getEnvVar("PDL_URL"),
-                dkifUrl = getEnvVar("DKIF_URL")
-            ),
-            VarselUrlEnv(
+                dkifUrl = getEnvVar("DKIF_URL"),
                 dialogmoterUrl = getEnvVar("BASE_URL_DIALOGMOTER")
             ),
             KafkaEnv(
@@ -102,7 +100,6 @@ data class Environment(
     val appEnv: AppEnv,
     val authEnv: AuthEnv,
     val urlEnv: UrlEnv,
-    val varselUrlEnv: VarselUrlEnv,
     val kafkaEnv: KafkaEnv,
     val dbEnv: DbEnv,
     val toggleEnv: ToggleEnv
@@ -134,10 +131,7 @@ data class UrlEnv(
     val baseUrlSykInfo: String,
     val stsUrl: String,
     val pdlUrl: String,
-    val dkifUrl: String
-)
-
-data class VarselUrlEnv(
+    val dkifUrl: String,
     val dialogmoterUrl: String
 )
 
