@@ -1,18 +1,24 @@
 package no.nav.syfo.service
 
+import no.nav.syfo.DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusentConsumer
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
+import no.nav.syfo.kafka.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
+import no.nav.syfo.kafka.dinesykmeldte.domain.DineSykmeldteVarsel
+import no.nav.syfo.kafka.varselbus.domain.DineSykmeldteHendelseType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
+import java.time.OffsetDateTime
 
 class SendVarselService(
     val beskjedKafkaProducer: BeskjedKafkaProducer,
     val arbeidsgiverNotifikasjonProdusentConsumer: ArbeidsgiverNotifikasjonProdusentConsumer,
+    val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
     val accessControl: AccessControl,
     val urlEnv: UrlEnv
 ) {
@@ -31,6 +37,17 @@ class SendVarselService(
                     when {
                         VarselType.AKTIVITETSKRAV.toString().equals(pPlanlagtVarsel.type) -> {
                             beskjedKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl)
+
+                            val dineSykmeldteVarsel = DineSykmeldteVarsel(
+                                fnr,
+                                pPlanlagtVarsel.orgnummer,
+                                DineSykmeldteHendelseType.AKTIVITETSKRAV.toString(),
+                                null,
+                                DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST,
+                                OffsetDateTime.now().plusWeeks(4L)
+                            )
+
+                            dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
                             arbeidsgiverNotifikasjonProdusentConsumer.createNewNotificationForArbeidsgiver(uuid, pPlanlagtVarsel.orgnummer, fnr)
                             pPlanlagtVarsel.type
                         }
