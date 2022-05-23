@@ -233,7 +233,7 @@ fun Application.varselBusModule(
         runningInGCPCluster {
             val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
             val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl)
-            val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService, env.varselUrlEnv)
+            val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService, env.urlEnv)
 
             launch(backgroundTasksContext) {
                 launchKafkaListener(
