@@ -155,7 +155,8 @@ fun Application.serverModule(
     arbeidsgiverNotifikasjonProdusentConsumer: ArbeidsgiverNotifikasjonProdusentConsumer
 ) {
     val beskjedKafkaProducer = BeskjedKafkaProducer(env)
-    val sendVarselService = SendVarselService(beskjedKafkaProducer, arbeidsgiverNotifikasjonProdusentConsumer, accessControl, env.urlEnv)
+    val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
+    val sendVarselService = SendVarselService(beskjedKafkaProducer, arbeidsgiverNotifikasjonProdusentConsumer, dineSykmeldteHendelseKafkaProducer, accessControl, env.urlEnv)
 
     val varselSender = VarselSender(
         database,
