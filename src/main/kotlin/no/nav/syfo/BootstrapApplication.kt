@@ -230,12 +230,11 @@ fun Application.varselBusModule(
     accessControl: AccessControl,
 ) {
     runningRemotely {
-
-        val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
-        val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl)
-        val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService, env.varselUrlEnv)
-
         runningInGCPCluster {
+            val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
+            val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl)
+            val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService, env.varselUrlEnv)
+
             launch(backgroundTasksContext) {
                 launchKafkaListener(
                     state,
