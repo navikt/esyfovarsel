@@ -69,6 +69,8 @@ fun main() {
                 val narmesteLederConsumer = NarmesteLederConsumer(env.urlEnv, azureAdTokenConsumer)
                 val arbeidsgiverNotifikasjonProdusentConsumer = ArbeidsgiverNotifikasjonProdusentConsumer(env.urlEnv, azureAdTokenConsumer, narmesteLederConsumer)
 
+                val beskjedKafkaProducer = BeskjedKafkaProducer(env)
+
                 val accessControl = AccessControl(pdlConsumer, dkifConsumer)
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
 
@@ -77,9 +79,6 @@ fun main() {
                 val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, syketilfelleService, varselSendtService)
                 val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
                 val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
-
-                val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
-                val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer)
 
                 connector {
                     port = env.appEnv.applicationPort
@@ -93,15 +92,21 @@ fun main() {
                         accessControl,
                         varselSendtService,
                         replanleggingService,
+                        beskjedKafkaProducer,
                         arbeidsgiverNotifikasjonProdusentConsumer
                     )
 
                     kafkaModule(
                         env,
                         accessControl,
-                        varselBusService,
                         aktivitetskravVarselPlanner,
                         merVeiledningVarselPlanner
+                    )
+
+                    varselBusModule(
+                        env,
+                        beskjedKafkaProducer,
+                        accessControl
                     )
                 }
             }
@@ -152,10 +157,10 @@ fun Application.serverModule(
     accessControl: AccessControl,
     varselSendtService: VarselSendtService,
     replanleggingService: ReplanleggingService,
+    beskjedKafkaProducer: BeskjedKafkaProducer,
     arbeidsgiverNotifikasjonProdusentConsumer: ArbeidsgiverNotifikasjonProdusentConsumer
 ) {
-    val beskjedKafkaProducer = BeskjedKafkaProducer(env)
-    val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
+    val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env) // TODO: move to constructor
     val sendVarselService = SendVarselService(beskjedKafkaProducer, arbeidsgiverNotifikasjonProdusentConsumer, dineSykmeldteHendelseKafkaProducer, accessControl, env.urlEnv)
 
     val varselSender = VarselSender(
@@ -199,7 +204,6 @@ fun Application.serverModule(
 fun Application.kafkaModule(
     env: Environment,
     accessControl: AccessControl,
-    varselBusService: VarselBusService,
     aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
     merVeiledningVarselPlanner: MerVeiledningVarselPlanner
 ) {
@@ -223,6 +227,21 @@ fun Application.kafkaModule(
                     SyketilfelleKafkaConsumer(env, database)
                 )
             }
+        }
+    }
+}
+
+fun Application.varselBusModule(
+    env: Environment,
+    beskjedKafkaProducer: BeskjedKafkaProducer,
+    accessControl: AccessControl,
+) {
+    runningRemotely {
+        runningInGCPCluster {
+            val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
+            val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl)
+            val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService, env.urlEnv)
+
             launch(backgroundTasksContext) {
                 launchKafkaListener(
                     state,

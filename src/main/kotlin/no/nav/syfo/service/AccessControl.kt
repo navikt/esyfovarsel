@@ -14,4 +14,8 @@ class AccessControl(val pdlConsumer: PdlConsumer, val dkifConsumer: DkifConsumer
         else
             null
     }
+
+    fun canUserBeNotified(fnr: String): Boolean {
+        return (pdlConsumer.isBrukerGradertForInformasjon(fnr) == false && dkifConsumer.person(fnr)?.kanVarsles == true)
+    }
 }
