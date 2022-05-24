@@ -76,10 +76,6 @@ fun main() {
                 val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
                 val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
 
-                val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
-                val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl)
-                val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer)
-
                 connector {
                     port = env.appEnv.applicationPort
                 }
@@ -98,9 +94,14 @@ fun main() {
                     kafkaModule(
                         env,
                         accessControl,
-                        varselBusService,
                         aktivitetskravVarselPlanner,
                         merVeiledningVarselPlanner
+                    )
+
+                    varselBusModule(
+                        env,
+                        beskjedKafkaProducer,
+                        accessControl
                     )
                 }
             }
@@ -196,7 +197,6 @@ fun Application.serverModule(
 fun Application.kafkaModule(
     env: Environment,
     accessControl: AccessControl,
-    varselBusService: VarselBusService,
     aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
     merVeiledningVarselPlanner: MerVeiledningVarselPlanner
 ) {
@@ -220,6 +220,21 @@ fun Application.kafkaModule(
                     SyketilfelleKafkaConsumer(env, database)
                 )
             }
+        }
+    }
+}
+
+fun Application.varselBusModule(
+    env: Environment,
+    beskjedKafkaProducer: BeskjedKafkaProducer,
+    accessControl: AccessControl,
+) {
+    runningRemotely {
+        runningInGCPCluster {
+            val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
+            val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl)
+            val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService, env.urlEnv)
+
             launch(backgroundTasksContext) {
                 launchKafkaListener(
                     state,
