@@ -20,7 +20,7 @@ import no.nav.syfo.consumer.LocalPdlConsumer
 import no.nav.syfo.consumer.LocalSyfosyketilfelleConsumer
 import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
-import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusentConsumer
+import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
@@ -67,7 +67,7 @@ fun main() {
                 val oppfolgingstilfelleConsumer = getSyfosyketilfelleConsumer(env.urlEnv, stsConsumer)
                 val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
                 val narmesteLederConsumer = NarmesteLederConsumer(env.urlEnv, azureAdTokenConsumer)
-                val arbeidsgiverNotifikasjonProdusentConsumer = ArbeidsgiverNotifikasjonProdusentConsumer(env.urlEnv, azureAdTokenConsumer, narmesteLederConsumer)
+                val arbeidsgiverNotifikasjonProdusent = ArbeidsgiverNotifikasjonProdusent(env.urlEnv, azureAdTokenConsumer, narmesteLederConsumer)
 
                 val beskjedKafkaProducer = BeskjedKafkaProducer(env)
                 val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
@@ -94,7 +94,7 @@ fun main() {
                         varselSendtService,
                         replanleggingService,
                         beskjedKafkaProducer,
-                        arbeidsgiverNotifikasjonProdusentConsumer,
+                        arbeidsgiverNotifikasjonProdusent,
                         dineSykmeldteHendelseKafkaProducer
                     )
 
@@ -108,7 +108,8 @@ fun main() {
                     varselBusModule(
                         env,
                         beskjedKafkaProducer,
-                        accessControl
+                        accessControl,
+                        dineSykmeldteHendelseKafkaProducer
                     )
                 }
             }
@@ -160,10 +161,10 @@ fun Application.serverModule(
     varselSendtService: VarselSendtService,
     replanleggingService: ReplanleggingService,
     beskjedKafkaProducer: BeskjedKafkaProducer,
-    arbeidsgiverNotifikasjonProdusentConsumer: ArbeidsgiverNotifikasjonProdusentConsumer,
+    arbeidsgiverNotifikasjonProdusent: ArbeidsgiverNotifikasjonProdusent,
     dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer
 ) {
-    val sendVarselService = SendVarselService(beskjedKafkaProducer, arbeidsgiverNotifikasjonProdusentConsumer, dineSykmeldteHendelseKafkaProducer, accessControl, env.urlEnv)
+    val sendVarselService = SendVarselService(beskjedKafkaProducer, arbeidsgiverNotifikasjonProdusent, dineSykmeldteHendelseKafkaProducer, accessControl, env.urlEnv)
 
     val varselSender = VarselSender(
         database,
@@ -237,10 +238,10 @@ fun Application.varselBusModule(
     env: Environment,
     beskjedKafkaProducer: BeskjedKafkaProducer,
     accessControl: AccessControl,
+    dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer
 ) {
     runningRemotely {
         runningInGCPCluster {
-            val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
             val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl)
             val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService, env.urlEnv)
 

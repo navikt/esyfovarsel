@@ -8,4 +8,3 @@ const val MESSAGE_TEXT = "En av dine medarbeidere har snart vært sykmeldt i åt
 const val EMAIL_TITLE = "Varsel om nytt aktivitetskrav"
 const val EMAIL_BODY_START = "<body>En av dine medarbeidere har snart vært sykmeldt i åtte uker. Gå inn på "
 const val EMAIL_BODY_END = " for å se hvem det gjelder.</body>"
-val EMAIL_SENDING_WINDOW = EpostSendevinduTypes.LOEPENDE

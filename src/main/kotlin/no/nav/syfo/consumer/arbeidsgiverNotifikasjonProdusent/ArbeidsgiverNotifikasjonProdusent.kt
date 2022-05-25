@@ -16,7 +16,7 @@ import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import org.slf4j.LoggerFactory
 
-open class ArbeidsgiverNotifikasjonProdusentConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer, narmesteLederConsumer: NarmesteLederConsumer) {
+open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer, narmesteLederConsumer: NarmesteLederConsumer) {
     private val client: HttpClient
     private val azureAdTokenConsumer: AzureAdTokenConsumer
     private val narmesteLederConsumer: NarmesteLederConsumer
@@ -100,7 +100,7 @@ open class ArbeidsgiverNotifikasjonProdusentConsumer(urlEnv: UrlEnv, azureAdToke
                 narmesteLederEpostadresse,
                 EMAIL_TITLE,
                 EMAIL_BODY,
-                EMAIL_SENDING_WINDOW
+                EpostSendevinduTypes.LOEPENDE
             )
             val requestBody = CreateNewNotificationAgRequest(graphQuery, variables)
 

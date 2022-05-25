@@ -2,7 +2,7 @@ package no.nav.syfo.service
 
 import no.nav.syfo.DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST
 import no.nav.syfo.UrlEnv
-import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusentConsumer
+import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
@@ -17,7 +17,7 @@ import java.time.OffsetDateTime
 
 class SendVarselService(
     val beskjedKafkaProducer: BeskjedKafkaProducer,
-    val arbeidsgiverNotifikasjonProdusentConsumer: ArbeidsgiverNotifikasjonProdusentConsumer,
+    val arbeidsgiverNotifikasjonProdusent: ArbeidsgiverNotifikasjonProdusent,
     val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
     val accessControl: AccessControl,
     val urlEnv: UrlEnv
@@ -32,28 +32,20 @@ class SendVarselService(
             fodselnummer?.let { fnr ->
                 val varselUrl = varselUrlFromType(pPlanlagtVarsel.type)
                 val varselContent = varselContentFromType(pPlanlagtVarsel.type)
+                val orgnummer = pPlanlagtVarsel.orgnummer
 
                 if (varselUrl !== null && varselContent !== null) {
                     when {
                         VarselType.AKTIVITETSKRAV.toString().equals(pPlanlagtVarsel.type) -> {
-                            beskjedKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl)
-
-                            val dineSykmeldteVarsel = DineSykmeldteVarsel(
-                                fnr,
-                                pPlanlagtVarsel.orgnummer,
-                                DineSykmeldteHendelseType.AKTIVITETSKRAV.toString(),
-                                null,
-                                DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST,
-                                OffsetDateTime.now().plusWeeks(4L)
-                            )
-
-                            dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
-                            arbeidsgiverNotifikasjonProdusentConsumer.createNewNotificationForArbeidsgiver(uuid, pPlanlagtVarsel.orgnummer, fnr)
+                            sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
+                            if (orgnummer !== null) {
+                                sendVarselTilArbeidsgiver(fnr, orgnummer, uuid)
+                            }
                             pPlanlagtVarsel.type
                         }
 
                         VarselType.MER_VEILEDNING.toString().equals(pPlanlagtVarsel.type) -> {
-                            beskjedKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl)
+                            sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
                             pPlanlagtVarsel.type
                         }
                         else -> {
@@ -68,6 +60,24 @@ class SendVarselService(
             log.error("Feil i utsending av varsel med UUID: ${pPlanlagtVarsel.uuid} | ${e.message}", e)
             UTSENDING_FEILET
         }
+    }
+
+    private fun sendVarselTilArbeidsgiver(fnr: String, orgnummer: String, uuid: String) {
+        val dineSykmeldteVarsel = DineSykmeldteVarsel(
+            fnr,
+            orgnummer,
+            DineSykmeldteHendelseType.AKTIVITETSKRAV.toString(),
+            null,
+            DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST,
+            OffsetDateTime.now().plusWeeks(4L)
+        )
+
+        dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
+        arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(uuid, orgnummer, fnr)
+    }
+
+    private fun sendVarselTilSykmeldt(fnr: String, varselContent: String, uuid: String, varselUrl: URL) {
+        beskjedKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl)
     }
 
     private fun varselContentFromType(type: String): String? {
