@@ -70,6 +70,7 @@ fun main() {
                 val arbeidsgiverNotifikasjonProdusentConsumer = ArbeidsgiverNotifikasjonProdusentConsumer(env.urlEnv, azureAdTokenConsumer, narmesteLederConsumer)
 
                 val beskjedKafkaProducer = BeskjedKafkaProducer(env)
+                val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
 
                 val accessControl = AccessControl(pdlConsumer, dkifConsumer)
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
@@ -93,7 +94,8 @@ fun main() {
                         varselSendtService,
                         replanleggingService,
                         beskjedKafkaProducer,
-                        arbeidsgiverNotifikasjonProdusentConsumer
+                        arbeidsgiverNotifikasjonProdusentConsumer,
+                        dineSykmeldteHendelseKafkaProducer
                     )
 
                     kafkaModule(
@@ -158,9 +160,9 @@ fun Application.serverModule(
     varselSendtService: VarselSendtService,
     replanleggingService: ReplanleggingService,
     beskjedKafkaProducer: BeskjedKafkaProducer,
-    arbeidsgiverNotifikasjonProdusentConsumer: ArbeidsgiverNotifikasjonProdusentConsumer
+    arbeidsgiverNotifikasjonProdusentConsumer: ArbeidsgiverNotifikasjonProdusentConsumer,
+    dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer
 ) {
-    val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env) // TODO: move to constructor
     val sendVarselService = SendVarselService(beskjedKafkaProducer, arbeidsgiverNotifikasjonProdusentConsumer, dineSykmeldteHendelseKafkaProducer, accessControl, env.urlEnv)
 
     val varselSender = VarselSender(
