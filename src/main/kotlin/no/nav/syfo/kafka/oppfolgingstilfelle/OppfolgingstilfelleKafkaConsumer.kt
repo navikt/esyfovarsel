@@ -60,8 +60,7 @@ class OppfolgingstilfelleKafkaConsumer(
                                 tellFeilIPlanner()
                             }
                         }
-                        log.info("Bruker med forespurt fnr kan ikke varsles")
-                    }
+                    } ?: log.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles ")
                 } catch (e: IOException) {
                     log.error(
                         "Error in [$topicOppfolgingsTilfelle] listener: Could not parse message | ${e.message}",
