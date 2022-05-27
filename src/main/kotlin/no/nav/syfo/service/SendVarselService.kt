@@ -3,6 +3,7 @@ package no.nav.syfo.service
 import no.nav.syfo.DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusent
+import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
@@ -19,6 +20,7 @@ class SendVarselService(
     val beskjedKafkaProducer: BeskjedKafkaProducer,
     val arbeidsgiverNotifikasjonProdusent: ArbeidsgiverNotifikasjonProdusent,
     val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
+    val narmesteLederService: NarmesteLederService,
     val accessControl: AccessControl,
     val urlEnv: UrlEnv
 ) {
@@ -39,7 +41,10 @@ class SendVarselService(
                         VarselType.AKTIVITETSKRAV.toString().equals(pPlanlagtVarsel.type) -> {
                             sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
                             if (orgnummer !== null) {
-                                sendVarselTilArbeidsgiver(fnr, orgnummer, uuid)
+                                val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer)
+                                if (narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
+                                    sendVarselTilArbeidsgiver(fnr, orgnummer, uuid, narmesteLederRelasjon!!.narmesteLederFnr!!, narmesteLederRelasjon.narmesteLederEpost!!)
+                                }
                             }
                             pPlanlagtVarsel.type
                         }
@@ -62,7 +67,7 @@ class SendVarselService(
         }
     }
 
-    private fun sendVarselTilArbeidsgiver(fnr: String, orgnummer: String, uuid: String) {
+    private fun sendVarselTilArbeidsgiver(fnr: String, orgnummer: String, uuid: String, narmesteLederFnr: String, narmesteLederEpostadresse: String) {
         val dineSykmeldteVarsel = DineSykmeldteVarsel(
             fnr,
             orgnummer,
@@ -73,7 +78,7 @@ class SendVarselService(
         )
 
         dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
-        arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(uuid, orgnummer, fnr)
+        arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(uuid, orgnummer, fnr, narmesteLederFnr, narmesteLederEpostadresse)
     }
 
     private fun sendVarselTilSykmeldt(fnr: String, varselContent: String, uuid: String, varselUrl: URL) {

@@ -11,6 +11,7 @@ import io.mockk.verify
 import no.nav.syfo.api.job.registerJobTriggerApi
 import no.nav.syfo.api.job.urlPathJobTrigger
 import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusent
+import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
@@ -40,6 +41,7 @@ object JobApiSpek : Spek({
         val beskjedKafkaProducer = mockk<BeskjedKafkaProducer>()
         val arbeidsgiverNotifikasjonProdusent = mockk<ArbeidsgiverNotifikasjonProdusent>()
         val dineSykmeldteHendelseKafkaProducer = mockk<DineSykmeldteHendelseKafkaProducer>()
+        val narmesteLederService = mockk<NarmesteLederService>()
 
         coEvery { accessControl.getFnrIfUserCanBeNotified(aktorId) } returns fnr1
         coEvery { accessControl.getFnrIfUserCanBeNotified(aktorId2) } returns fnr2
@@ -47,7 +49,8 @@ object JobApiSpek : Spek({
 
         coEvery { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
 
-        val sendVarselService = SendVarselService(beskjedKafkaProducer, arbeidsgiverNotifikasjonProdusent, dineSykmeldteHendelseKafkaProducer, accessControl, testEnv.urlEnv)
+        val sendVarselService =
+            SendVarselService(beskjedKafkaProducer, arbeidsgiverNotifikasjonProdusent, dineSykmeldteHendelseKafkaProducer, narmesteLederService, accessControl, testEnv.urlEnv)
         val varselSender = VarselSender(embeddedDatabase, sendVarselService, testEnv.toggleEnv, testEnv.appEnv)
 
         with(TestApplicationEngine()) {

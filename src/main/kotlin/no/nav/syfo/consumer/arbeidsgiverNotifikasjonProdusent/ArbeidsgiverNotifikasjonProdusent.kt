@@ -42,41 +42,33 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsume
         arbeidsgiverNotifikasjonProdusentBasepath = urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl
     }
 
-    open fun createNewNotificationForArbeidsgiver(varselId: String, virksomhetsnummer: String, ansattFnr: String): String? {
-        val narmesteLederRelasjon = runBlocking { narmesteLederConsumer.getNarmesteLeder(ansattFnr, virksomhetsnummer)?.narmesteLederRelasjon }
-        val narmesteLederFnr = narmesteLederRelasjon?.narmesteLederFnr
-        val narmesteLederEpostadresse = narmesteLederRelasjon?.narmesteLederEpost
-
-        if (narmesteLederFnr != null && narmesteLederEpostadresse !== null) {
-            val response: HttpResponse? = callArbeidsgiverNotifikasjonProdusent(varselId, virksomhetsnummer, narmesteLederFnr, ansattFnr, narmesteLederEpostadresse)
-            return when (response?.status) {
-                HttpStatusCode.OK -> {
-                    val beskjed = runBlocking { response.receive<OpprettNyBeskjedArbeidsgiverNotifikasjonResponse>() }
-                    return if (beskjed.data !== null) {
-                        beskjed.data.nyBeskjed.id
-                    } else {
-                        log.error("Could not post notification, data is null: $beskjed")
-                        val errors = runBlocking { response.receive<OpprettNyBeskjedArbeidsgiverNotifikasjonErrorResponse>().errors }
-                        log.error("Could not post notification because of errors: $errors")
-                        null
-                    }
-                }
-                HttpStatusCode.NoContent -> {
-                    log.error("Could not post notification: No content found in the response body")
+    open fun createNewNotificationForArbeidsgiver(varselId: String, virksomhetsnummer: String, ansattFnr: String, narmesteLederFnr: String, narmesteLederEpostadresse: String): String? {
+        val response: HttpResponse? = callArbeidsgiverNotifikasjonProdusent(varselId, virksomhetsnummer, narmesteLederFnr, ansattFnr, narmesteLederEpostadresse)
+        return when (response?.status) {
+            HttpStatusCode.OK -> {
+                val beskjed = runBlocking { response.receive<OpprettNyBeskjedArbeidsgiverNotifikasjonResponse>() }
+                return if (beskjed.data !== null) {
+                    beskjed.data.nyBeskjed.id
+                } else {
+                    log.error("Could not post notification, data is null: $beskjed")
+                    val errors = runBlocking { response.receive<OpprettNyBeskjedArbeidsgiverNotifikasjonErrorResponse>().errors }
+                    log.error("Could not post notification because of errors: $errors")
                     null
                 }
-                HttpStatusCode.Unauthorized -> {
-                    log.error("Could not post notification: Unable to authorize")
-                    return null
-                }
-                else -> {
-                    log.error("Could get nærmeste leder data")
-                    return null
-                }
+            }
+            HttpStatusCode.NoContent -> {
+                log.error("Could not post notification: No content found in the response body")
+                null
+            }
+            HttpStatusCode.Unauthorized -> {
+                log.error("Could not post notification: Unable to authorize")
+                return null
+            }
+            else -> {
+                log.error("Could get nærmeste leder data")
+                return null
             }
         }
-        log.error("Could not post notification: Unable to authorize")
-        return null
     }
 
     private fun callArbeidsgiverNotifikasjonProdusent(
