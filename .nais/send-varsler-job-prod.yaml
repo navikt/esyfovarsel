@@ -13,7 +13,6 @@ spec:
     paths:
       - kvPath: "/serviceuser/data/prod/srvesyfovarsel"
         mountPath: "/var/run/secrets"
-  webproxy: true
   env:
   {{#each job}}
     - name: {{@key}}
