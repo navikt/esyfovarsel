@@ -33,6 +33,36 @@ fun DatabaseInterface.storeUtsendtVarsel(planlagtVarsel: PPlanlagtVarsel) {
     }
 }
 
+fun DatabaseInterface.storeUtsendtVarsel(utsendtVarsel: UtsendtVarsel) {
+    val insertStatement1 = """INSERT INTO UTSENDT_VARSEL (
+        uuid,
+        fnr,
+        aktor_id,
+        ansatt_fnr,
+        orgnummer,
+        type,
+        utsendt_tidspunkt) VALUES (?, ?, ?, ?, ?, ?, ?)""".trimIndent()
+
+    val now = Timestamp.valueOf(LocalDateTime.now())
+    val varselUUID = UUID.randomUUID()
+
+    connection.use { connection ->
+        connection.prepareStatement(insertStatement1).use {
+            it.setObject(1, varselUUID)
+            it.setString(2, utsendtVarsel.fnr)
+            it.setString(3, utsendtVarsel.aktorId)
+            it.setString(4, utsendtVarsel.ansattFnr)
+            it.setString(5, utsendtVarsel.orgnummer)
+            it.setString(6, utsendtVarsel.type)
+            it.setTimestamp(7, now)
+            it.executeUpdate()
+        }
+
+        connection.commit()
+    }
+}
+
+
 fun DatabaseInterface.fetchUtsendtVarselByFnr(fnr: String): List<UtsendtVarsel> {
     val queryStatement = """SELECT *
                             FROM UTSENDT_VARSEL

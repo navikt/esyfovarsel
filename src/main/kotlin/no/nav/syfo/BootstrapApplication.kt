@@ -101,7 +101,8 @@ fun main() {
                     varselBusModule(
                         env,
                         beskjedKafkaProducer,
-                        accessControl
+                        accessControl,
+                        database
                     )
                 }
             }
@@ -228,12 +229,13 @@ fun Application.varselBusModule(
     env: Environment,
     beskjedKafkaProducer: BeskjedKafkaProducer,
     accessControl: AccessControl,
+    database: DatabaseInterface,
 ) {
     runningRemotely {
         runningInGCPCluster {
             val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
             val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl)
-            val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService, env.urlEnv)
+            val varselBusService = VarselBusService(database, dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService, env.urlEnv)
 
             launch(backgroundTasksContext) {
                 launchKafkaListener(
