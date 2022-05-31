@@ -1,16 +1,26 @@
 package no.nav.syfo.service
 
+import no.nav.syfo.DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST
 import no.nav.syfo.UrlEnv
+import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusent
+import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
+import no.nav.syfo.kafka.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
+import no.nav.syfo.kafka.dinesykmeldte.domain.DineSykmeldteVarsel
+import no.nav.syfo.kafka.varselbus.domain.DineSykmeldteHendelseType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
+import java.time.OffsetDateTime
 
 class SendVarselService(
     val beskjedKafkaProducer: BeskjedKafkaProducer,
+    val arbeidsgiverNotifikasjonProdusent: ArbeidsgiverNotifikasjonProdusent,
+    val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
+    val narmesteLederService: NarmesteLederService,
     val accessControl: AccessControl,
     val urlEnv: UrlEnv
 ) {
@@ -24,10 +34,29 @@ class SendVarselService(
             fodselnummer?.let { fnr ->
                 val varselUrl = varselUrlFromType(pPlanlagtVarsel.type)
                 val varselContent = varselContentFromType(pPlanlagtVarsel.type)
+                val orgnummer = pPlanlagtVarsel.orgnummer
 
                 if (varselUrl !== null && varselContent !== null) {
-                    beskjedKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl)
-                    return pPlanlagtVarsel.type
+                    when {
+                        VarselType.AKTIVITETSKRAV.toString().equals(pPlanlagtVarsel.type) -> {
+                            sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
+                            if (orgnummer !== null) {
+                                val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer)
+                                if (narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
+                                    sendVarselTilArbeidsgiver(fnr, orgnummer, uuid, narmesteLederRelasjon!!.narmesteLederFnr!!, narmesteLederRelasjon.narmesteLederEpost!!)
+                                }
+                            }
+                            pPlanlagtVarsel.type
+                        }
+
+                        VarselType.MER_VEILEDNING.toString().equals(pPlanlagtVarsel.type) -> {
+                            sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
+                            pPlanlagtVarsel.type
+                        }
+                        else -> {
+                            throw RuntimeException("Ukjent typestreng")
+                        }
+                    }
                 } else {
                     throw RuntimeException("Klarte ikke mappe typestreng til innholdstekst og URL")
                 }
@@ -36,6 +65,24 @@ class SendVarselService(
             log.error("Feil i utsending av varsel med UUID: ${pPlanlagtVarsel.uuid} | ${e.message}", e)
             UTSENDING_FEILET
         }
+    }
+
+    private fun sendVarselTilArbeidsgiver(fnr: String, orgnummer: String, uuid: String, narmesteLederFnr: String, narmesteLederEpostadresse: String) {
+        val dineSykmeldteVarsel = DineSykmeldteVarsel(
+            fnr,
+            orgnummer,
+            DineSykmeldteHendelseType.AKTIVITETSKRAV.toString(),
+            null,
+            DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST,
+            OffsetDateTime.now().plusWeeks(4L)
+        )
+
+        dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
+        arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(uuid, orgnummer, fnr, narmesteLederFnr, narmesteLederEpostadresse)
+    }
+
+    private fun sendVarselTilSykmeldt(fnr: String, varselContent: String, uuid: String, varselUrl: URL) {
+        beskjedKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl)
     }
 
     private fun varselContentFromType(type: String): String? {

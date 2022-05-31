@@ -25,7 +25,7 @@ fun Route.registerBrukerApi(varselSendtService: VarselSendtService) {
                 try {
                     val erSendtOgGyldig = varselSendtService.varselErSendtOgGyldig(innloggetFnr, aktorId!!, VarselType.MER_VEILEDNING)
                     call.respond(erSendtOgGyldig)
-                } catch (e: ForbiddenException){
+                } catch (e: ForbiddenException) {
                     call.respond(HttpStatusCode.Forbidden, "Ikke autorisert")
                 } catch (e: RuntimeException) {
                     call.respond(HttpStatusCode.InternalServerError, "Feil ved henting av aktorid")

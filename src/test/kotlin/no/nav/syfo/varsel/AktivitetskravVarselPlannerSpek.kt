@@ -39,9 +39,9 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
     describe("AktivitetskravVarselPlannerSpek") {
         val planlagtVarselToStore2 =
-            PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, setOf("1"), VarselType.MER_VEILEDNING)
+            PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), VarselType.MER_VEILEDNING)
         val planlagtVarselToStore3 =
-            PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, setOf("2"), VarselType.AKTIVITETSKRAV)
+            PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, orgnummer, setOf("2"), VarselType.AKTIVITETSKRAV)
 
         beforeGroup {
         }
@@ -119,7 +119,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
-                aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
+                aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
                 val nrOfRowsFetchedTotal = lagreteVarsler.size
@@ -163,7 +163,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
-                aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
+                aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
                 val nrOfRowsFetchedTotal = lagreteVarsler.size
@@ -236,7 +236,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             runBlocking {
 
-                aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
+                aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
                 val nrOfRowsFetchedTotal = lagreteVarsler.size
@@ -312,7 +312,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
-                aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
+                aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
                 val nrOfRowsFetchedTotal = lagreteVarsler.size
@@ -328,6 +328,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val initPlanlagtVarselToStore = PlanlagtVarsel(
                 arbeidstakerFnr1,
                 arbeidstakerAktorId1,
+                orgnummer,
                 setOf("1", "2"),
                 VarselType.AKTIVITETSKRAV,
                 utsendingsdato
@@ -374,7 +375,8 @@ object AktivitetskravVarselPlannerSpek : Spek({
             runBlocking {
                 aktivitetskravVarselPlanner.processOppfolgingstilfelle(
                     arbeidstakerAktorId1,
-                    arbeidstakerFnr1
+                    arbeidstakerFnr1,
+                    orgnummer
                 )
             }
 
@@ -390,7 +392,8 @@ object AktivitetskravVarselPlannerSpek : Spek({
                 runBlocking {
                     aktivitetskravVarselPlanner.processOppfolgingstilfelle(
                         arbeidstakerAktorId1,
-                        arbeidstakerFnr1
+                        arbeidstakerFnr1,
+                        orgnummer
                     )
                 }
             }
@@ -401,7 +404,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns null
 
             runBlocking {
-                aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1)
+                aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
 
                 lagreteVarsler.size shouldBeEqualTo 0

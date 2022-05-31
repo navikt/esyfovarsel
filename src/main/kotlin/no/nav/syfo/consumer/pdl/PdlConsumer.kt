@@ -87,8 +87,8 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: To
     }
 }
 
-class LocalPdlConsumer(urlEnv: UrlEnv, tokenConsumer: TokenConsumer): PdlConsumer(urlEnv, tokenConsumer) {
+class LocalPdlConsumer(urlEnv: UrlEnv, tokenConsumer: TokenConsumer) : PdlConsumer(urlEnv, tokenConsumer) {
     override fun getFnr(aktorId: String): String {
-        return aktorId.substring(0,11)
+        return aktorId.substring(0, 11)
     }
 }

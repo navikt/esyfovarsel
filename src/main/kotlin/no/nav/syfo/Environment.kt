@@ -66,7 +66,12 @@ fun getEnv(): Environment {
                 stsUrl = getEnvVar("STS_URL"),
                 pdlUrl = getEnvVar("PDL_URL"),
                 dkifUrl = getEnvVar("DKIF_URL"),
-                dialogmoterUrl = getEnvVar("BASE_URL_DIALOGMOTER")
+                dialogmoterUrl = getEnvVar("BASE_URL_DIALOGMOTER"),
+                arbeidsgiverNotifikasjonProdusentApiUrl = getEnvVar("AG_NOTIFIKASJON_PRODUSENT_API_URL"),
+                arbeidsgiverNotifikasjonProdusentApiScope = getEnvVar("AG_NOTIFIKASJON_PRODUSENT_API_SCOPE"),
+                narmestelederUrl = getEnvVar("NARMESTELEDER_URL"),
+                narmestelederScope = getEnvVar("NARMESTELEDER_SCOPE"),
+                baseUrlDineSykmeldte = getEnvVar("BASE_URL_DINE_SYKMELDTE"),
             ),
             KafkaEnv(
                 bootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
@@ -132,7 +137,12 @@ data class UrlEnv(
     val stsUrl: String,
     val pdlUrl: String,
     val dkifUrl: String,
-    val dialogmoterUrl: String
+    val dialogmoterUrl: String,
+    val arbeidsgiverNotifikasjonProdusentApiUrl: String,
+    val arbeidsgiverNotifikasjonProdusentApiScope: String,
+    val narmestelederUrl: String,
+    val narmestelederScope: String,
+    val baseUrlDineSykmeldte: String,
 )
 
 data class KafkaEnv(

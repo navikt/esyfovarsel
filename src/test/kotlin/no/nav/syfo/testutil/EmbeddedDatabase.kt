@@ -22,7 +22,6 @@ class EmbeddedDatabase : DatabaseInterface {
     fun stop() {
         pg.close()
     }
-
 }
 
 fun Connection.dropData() {

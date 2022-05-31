@@ -4,14 +4,13 @@ import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PSyketilfellebit
 import no.nav.syfo.db.domain.UtsendtVarsel
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KSyketilfellebit
-import java.sql.ResultSet
-import java.sql.Timestamp
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import no.nav.syfo.syketilfelle.domain.tagsFromString
-import java.time.LocalDateTime
 import java.sql.Date
+import java.sql.ResultSet
+import java.sql.Timestamp
+import java.time.LocalDateTime
 import java.util.*
-import kotlin.collections.ArrayList
 
 fun <T> ResultSet.toList(mapper: ResultSet.() -> T) = mutableListOf<T>().apply {
     while (next()) {
@@ -23,6 +22,7 @@ fun ResultSet.toPPlanlagtVarsel() = PPlanlagtVarsel(
     uuid = getString("uuid"),
     fnr = getString("fnr"),
     aktorId = getString("aktor_id"),
+    orgnummer = getString("orgnummer"),
     type = getString("type"),
     utsendingsdato = getDate("utsendingsdato").toLocalDate(),
     opprettet = getTimestamp("opprettet").toLocalDateTime(),
@@ -63,7 +63,7 @@ fun ResultSet.toVarslingIdsListeCount(): Int {
 }
 
 fun KSyketilfellebit.toPSyketilfellebit(): PSyketilfellebit {
-    return PSyketilfellebit (
+    return PSyketilfellebit(
         UUID.randomUUID(),
         this.id,
         this.fnr,
@@ -71,7 +71,7 @@ fun KSyketilfellebit.toPSyketilfellebit(): PSyketilfellebit {
         Timestamp.valueOf(LocalDateTime.now()),
         Timestamp.valueOf(this.opprettet.toLocalDateTime()),
         Timestamp.valueOf(this.inntruffet.toLocalDateTime()),
-        this.tags.reduce{acc, tag -> "$acc,$tag" },
+        this.tags.reduce { acc, tag -> "$acc,$tag" },
         this.ressursId,
         Date.valueOf(this.fom),
         Date.valueOf(this.tom),

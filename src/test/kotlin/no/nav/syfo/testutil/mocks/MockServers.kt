@@ -23,7 +23,6 @@ import no.nav.syfo.consumer.pdl.PERSON_QUERY
 import no.nav.syfo.testutil.extractPortFromUrl
 import java.io.Serializable
 
-
 class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
     private val mapper = ObjectMapper().registerModule(KotlinModule())
 
@@ -48,8 +47,10 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
         return mockServer(urlEnv.dkifUrl) {
             get("/api/v1/personer/kontaktinfo") {
                 if (call.request.headers[DkifConsumer.NAV_PERSONIDENTER_HEADER]?.isValidHeader() == true) {
-                    call.respond(dkifResponseMap[call.request.headers[DkifConsumer.NAV_PERSONIDENTER_HEADER]]
-                        ?: dkifResponseSuccessKanVarslesResponseJSON)
+                    call.respond(
+                        dkifResponseMap[call.request.headers[DkifConsumer.NAV_PERSONIDENTER_HEADER]]
+                            ?: dkifResponseSuccessKanVarslesResponseJSON
+                    )
                 } else {
                     call.response.status(HttpStatusCode(500, "Server error"))
                 }

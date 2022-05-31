@@ -2,9 +2,12 @@ package no.nav.syfo.varsel
 
 import kotlinx.coroutines.coroutineScope
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
-import no.nav.syfo.db.*
+import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.deletePlanlagtVarselByVarselId
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
+import no.nav.syfo.db.storePlanlagtVarsel
+import no.nav.syfo.db.updateUtsendingsdatoByVarselId
 import no.nav.syfo.metrics.tellMerVeiledningPlanlagt
 import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.syketilfelle.SyketilfelleService
@@ -16,17 +19,17 @@ import org.slf4j.LoggerFactory
 class MerVeiledningVarselPlanner(
     val databaseAccess: DatabaseInterface,
     val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
-    val syketilfelleService: SyketilfelleService,               // TODO: Ta i bruk denne (istedet for oppfolgingstilfelle) når syketilfelle er lastet inn i GCP
+    val syketilfelleService: SyketilfelleService, // TODO: Ta i bruk denne (istedet for oppfolgingstilfelle) når syketilfelle er lastet inn i GCP
     val varselSendtService: VarselSendtService
 ) : VarselPlanner {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.Varsel39Uker")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
     override val name: String = "MER_VEILEDNING_VARSEL"
 
-    override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String) = coroutineScope {
+    override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String, orgnummer: String?) = coroutineScope {
         val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle39Uker(aktorId)
 
-        if(oppfolgingstilfelle == null) {
+        if (oppfolgingstilfelle == null) {
             log.info("[$name]: Fant ikke oppfolgingstilfelle for denne brukeren. Planlegger ikke nytt varsel")
             return@coroutineScope
         }
@@ -37,7 +40,7 @@ class MerVeiledningVarselPlanner(
         if (todayIsBetweenFomAndTom(tilfelleFom, tilfelleTom)) {
             val varselDato = varselUtil.varselDate39Uker(oppfolgingstilfelle)
 
-            if(varselDato == null){
+            if (varselDato == null) {
                 val tidligerePlanlagteVarslerPaFnr = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.MER_VEILEDNING)
 
                 if (tidligerePlanlagteVarslerPaFnr.isNotEmpty()) {
@@ -55,6 +58,7 @@ class MerVeiledningVarselPlanner(
                 val varsel = PlanlagtVarsel(
                     fnr,
                     arbeidstakerAktorId,
+                    orgnummer,
                     emptySet(),
                     VarselType.MER_VEILEDNING,
                     varselDato
@@ -80,5 +84,4 @@ class MerVeiledningVarselPlanner(
             log.info("[$name]: Dagens dato er utenfor [fom,tom] intervall til oppfølgingstilfelle. Planlegger ikke varsel")
         }
     }
-
 }

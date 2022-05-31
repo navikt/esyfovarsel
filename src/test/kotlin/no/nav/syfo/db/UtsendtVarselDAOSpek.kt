@@ -6,6 +6,7 @@ import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
+import no.nav.syfo.testutil.mocks.orgnummer
 import org.amshove.kluent.should
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
@@ -31,7 +32,7 @@ object UtsendtVarselDAOSpek : Spek({
         }
 
         it("Store utsendt varsel") {
-            val planlagtVarselToStore1 = PPlanlagtVarsel(UUID.randomUUID().toString(), arbeidstakerFnr1, arbeidstakerAktorId1, AKTIVITETSKRAV.name, LocalDate.now(), LocalDateTime.now(), LocalDateTime.now())
+            val planlagtVarselToStore1 = PPlanlagtVarsel(UUID.randomUUID().toString(), arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, AKTIVITETSKRAV.name, LocalDate.now(), LocalDateTime.now(), LocalDateTime.now())
 
             embeddedDatabase.storeUtsendtVarsel(planlagtVarselToStore1)
             embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV, planlagtVarselToStore1.uuid)

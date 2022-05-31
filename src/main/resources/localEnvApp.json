@@ -23,7 +23,12 @@
     "stsUrl": "http://localhost:9094",
     "pdlUrl": "http://localhost:9091",
     "dkifUrl": "http://localhost:9093/api/v1/personer/kontaktinfo",
-    "dialogmoterUrl": "http://dialogmoter:8080"
+    "dialogmoterUrl": "http://dialogmoter:8080",
+    "arbeidsgiverNotifikasjonProdusentApiUrl": "http://localhost:9095",
+    "arbeidsgiverNotifikasjonProdusentApiScope": "agNotifikasjonProdusentScope",
+    "narmestelederUrl": "http://localhost:9097",
+    "narmestelederScope": "narmestelederScope",
+    "baseUrlDineSykmeldte": "http://dine-sykmeldte:9099"
   },
   "kafkaEnv": {
     "bootstrapServersUrl": "http://localhost:9092",

@@ -20,7 +20,10 @@ import no.nav.syfo.consumer.LocalPdlConsumer
 import no.nav.syfo.consumer.LocalSyfosyketilfelleConsumer
 import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
+import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.consumer.dkif.DkifConsumer
+import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
+import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.*
 import no.nav.syfo.job.VarselSender
@@ -64,8 +67,11 @@ fun main() {
                 val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer, stsConsumer)
                 val oppfolgingstilfelleConsumer = getSyfosyketilfelleConsumer(env.urlEnv, stsConsumer)
                 val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
+                val narmesteLederConsumer = NarmesteLederConsumer(env.urlEnv, azureAdTokenConsumer)
+                val arbeidsgiverNotifikasjonProdusent = ArbeidsgiverNotifikasjonProdusent(env.urlEnv, azureAdTokenConsumer)
 
                 val beskjedKafkaProducer = BeskjedKafkaProducer(env)
+                val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
 
                 val accessControl = AccessControl(pdlConsumer, dkifConsumer)
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
@@ -75,6 +81,7 @@ fun main() {
                 val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, syketilfelleService, varselSendtService)
                 val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
                 val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
+                val narmesteLederService = NarmesteLederService(narmesteLederConsumer)
 
                 connector {
                     port = env.appEnv.applicationPort
@@ -88,7 +95,10 @@ fun main() {
                         accessControl,
                         varselSendtService,
                         replanleggingService,
-                        beskjedKafkaProducer
+                        beskjedKafkaProducer,
+                        arbeidsgiverNotifikasjonProdusent,
+                        dineSykmeldteHendelseKafkaProducer,
+                        narmesteLederService,
                     )
 
                     kafkaModule(
@@ -101,7 +111,8 @@ fun main() {
                     varselBusModule(
                         env,
                         beskjedKafkaProducer,
-                        accessControl
+                        accessControl,
+                        dineSykmeldteHendelseKafkaProducer
                     )
                 }
             }
@@ -152,9 +163,13 @@ fun Application.serverModule(
     accessControl: AccessControl,
     varselSendtService: VarselSendtService,
     replanleggingService: ReplanleggingService,
-    beskjedKafkaProducer: BeskjedKafkaProducer
+    beskjedKafkaProducer: BeskjedKafkaProducer,
+    arbeidsgiverNotifikasjonProdusent: ArbeidsgiverNotifikasjonProdusent,
+    dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
+    narmesteLederService: NarmesteLederService
 ) {
-    val sendVarselService = SendVarselService(beskjedKafkaProducer, accessControl, env.urlEnv)
+    val sendVarselService =
+        SendVarselService(beskjedKafkaProducer, arbeidsgiverNotifikasjonProdusent, dineSykmeldteHendelseKafkaProducer, narmesteLederService, accessControl, env.urlEnv)
 
     val varselSender = VarselSender(
         database,
@@ -228,10 +243,10 @@ fun Application.varselBusModule(
     env: Environment,
     beskjedKafkaProducer: BeskjedKafkaProducer,
     accessControl: AccessControl,
+    dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer
 ) {
     runningRemotely {
         runningInGCPCluster {
-            val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
             val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl)
             val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService, env.urlEnv)
 

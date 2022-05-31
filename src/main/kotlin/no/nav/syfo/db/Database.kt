@@ -13,19 +13,20 @@ interface DatabaseInterface {
     val connection: Connection
 }
 
-
 class Database(val env: DbEnv) : DatabaseInterface {
 
-    val hikariDataSource = HikariDataSource(HikariConfig().apply {
-        jdbcUrl = generateJdbcUrlFromEnv(env)
-        username = env.dbUsername
-        password = env.dbPassword
-        maximumPoolSize = 2
-        minimumIdle = 1
-        isAutoCommit = false
-        transactionIsolation = "TRANSACTION_REPEATABLE_READ"
-        validate()
-    })
+    val hikariDataSource = HikariDataSource(
+        HikariConfig().apply {
+            jdbcUrl = generateJdbcUrlFromEnv(env)
+            username = env.dbUsername
+            password = env.dbPassword
+            maximumPoolSize = 2
+            minimumIdle = 1
+            isAutoCommit = false
+            transactionIsolation = "TRANSACTION_REPEATABLE_READ"
+            validate()
+        }
+    )
 
     init {
         runFlywayMigrations(hikariDataSource)
@@ -34,13 +35,11 @@ class Database(val env: DbEnv) : DatabaseInterface {
     override val connection: Connection
         get() = hikariDataSource.connection
 
-
     private fun runFlywayMigrations(hikariDataSource: HikariDataSource) = Flyway.configure().run {
         dataSource(hikariDataSource)
         load().migrate().migrationsExecuted
     }
 }
-
 
 data class DbConfig(
     val jdbcUrl: String,
@@ -52,7 +51,7 @@ data class DbConfig(
     val remote: Boolean = true
 )
 
-class LocalDatabase(dbEnv: DbEnv): DatabaseFSS(
+class LocalDatabase(dbEnv: DbEnv) : DatabaseFSS(
     DbConfig(
         jdbcUrl = generateJdbcUrlFromEnv(dbEnv),
         databaseName = dbEnv.dbName,
@@ -62,7 +61,7 @@ class LocalDatabase(dbEnv: DbEnv): DatabaseFSS(
     )
 )
 
-class RemoteDatabase(dbEnv: DbEnv): DatabaseFSS(
+class RemoteDatabase(dbEnv: DbEnv) : DatabaseFSS(
     DbConfig(
         jdbcUrl = generateJdbcUrlFromEnv(dbEnv),
         databaseName = dbEnv.dbName,
@@ -70,9 +69,10 @@ class RemoteDatabase(dbEnv: DbEnv): DatabaseFSS(
     )
 )
 
-abstract class DatabaseFSS(val daoConfig: DbConfig): DatabaseInterface {
+abstract class DatabaseFSS(val daoConfig: DbConfig) : DatabaseInterface {
     enum class Role {
         ADMIN, USER;
+
         override fun toString() = name.lowercase()
     }
 
@@ -92,20 +92,21 @@ abstract class DatabaseFSS(val daoConfig: DbConfig): DatabaseInterface {
         hikariDataSource = if (daoConfig.remote)
             createDataSource(hikariConfig, Role.ADMIN)
         else
-            HikariDataSource(hikariConfig.apply {
-                username = daoConfig.username
-                password = daoConfig.password
-            })
+            HikariDataSource(
+                hikariConfig.apply {
+                    username = daoConfig.username
+                    password = daoConfig.password
+                }
+            )
         runFlywayMigrations(hikariDataSource)
         if (daoConfig.remote)
             changeRoleToUser()
     }
 
     override val connection: Connection
-    get() = hikariDataSource.connection
+        get() = hikariDataSource.connection
 
-
-    private fun createDataSource(hikariConfig: HikariConfig, role: Role) : HikariDataSource {
+    private fun createDataSource(hikariConfig: HikariConfig, role: Role): HikariDataSource {
         return HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration(
             hikariConfig,
             daoConfig.dbCredMountPath,

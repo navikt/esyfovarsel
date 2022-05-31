@@ -13,7 +13,12 @@
     "TOGGLE_SEND_MERVEILEDNING_VARSLER": "false",
     "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "false",
     "BASE_URL_SYK_INFO": "https://www-gcp.dev.nav.no/syk/info",
-    "BASE_URL_DIALOGMOTER": "https://www-gcp.dev.nav.no/syk/dialogmoter"
+    "BASE_URL_DIALOGMOTER": "https://www-gcp.dev.nav.no/syk/dialogmoter",
+    "AG_NOTIFIKASJON_PRODUSENT_API_URL": "https://ag-notifikasjon-produsent-api.dev.intern.nav.no/api/graphql",
+    "AG_NOTIFIKASJON_PRODUSENT_API_SCOPE": "api://dev-gcp.fager.notifikasjon-produsent-api/.default",
+    "NARMESTELEDER_URL": "https://narmesteleder.dev.intern.nav.no",
+    "NARMESTELEDER_SCOPE": "api://dev-gcp.teamsykmelding.narmesteleder/.default",
+    "BASE_URL_DINE_SYKMELDTE": "https://www-gcp.dev.nav.no/arbeidsgiver/sykmeldte"
   },
   "job": {
     "KTOR_ENV": "remote",
