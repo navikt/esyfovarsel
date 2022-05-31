@@ -28,7 +28,8 @@
     "arbeidsgiverNotifikasjonProdusentApiScope": "agNotifikasjonProdusentScope",
     "narmestelederUrl": "http://localhost:9097",
     "narmestelederScope": "narmestelederScope",
-    "baseUrlDineSykmeldte": "http://dine-sykmeldte:9099"
+    "baseUrlDineSykmeldte": "http://dine-sykmeldte:9099",
+    "syfomotebehovUrl": "http://localhost:9595"
   },
   "kafkaEnv": {
     "bootstrapServersUrl": "http://localhost:9092",

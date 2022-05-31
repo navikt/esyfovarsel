@@ -24,6 +24,7 @@ import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifi
 import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
+import no.nav.syfo.consumer.syfomotebehov.SyfoMotebehovConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.*
 import no.nav.syfo.job.VarselSender
@@ -39,6 +40,7 @@ import no.nav.syfo.service.*
 import no.nav.syfo.syketilfelle.SyketilfelleService
 import no.nav.syfo.varsel.AktivitetskravVarselPlanner
 import no.nav.syfo.varsel.MerVeiledningVarselPlanner
+import no.nav.syfo.varsel.SvarMotebehovVarselPlanner
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -80,8 +82,10 @@ fun main() {
                 val varselSendtService = VarselSendtService(pdlConsumer, oppfolgingstilfelleConsumer, database)
                 val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, syketilfelleService, varselSendtService)
                 val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
+                val svarMotebehovVarselPlanner = SvarMotebehovVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService)
                 val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
                 val narmesteLederService = NarmesteLederService(narmesteLederConsumer)
+                val syfoMotebehovConsumer = SyfoMotebehovConsumer(env.urlEnv, stsConsumer)
 
                 connector {
                     port = env.appEnv.applicationPort
@@ -99,13 +103,15 @@ fun main() {
                         arbeidsgiverNotifikasjonProdusent,
                         dineSykmeldteHendelseKafkaProducer,
                         narmesteLederService,
+                        syfoMotebehovConsumer,
                     )
 
                     kafkaModule(
                         env,
                         accessControl,
                         aktivitetskravVarselPlanner,
-                        merVeiledningVarselPlanner
+                        merVeiledningVarselPlanner,
+                        svarMotebehovVarselPlanner
                     )
 
                     varselBusModule(
@@ -166,10 +172,12 @@ fun Application.serverModule(
     beskjedKafkaProducer: BeskjedKafkaProducer,
     arbeidsgiverNotifikasjonProdusent: ArbeidsgiverNotifikasjonProdusent,
     dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
-    narmesteLederService: NarmesteLederService
+    narmesteLederService: NarmesteLederService,
+    syfoMotebehovConsumer: SyfoMotebehovConsumer
 ) {
+
     val sendVarselService =
-        SendVarselService(beskjedKafkaProducer, arbeidsgiverNotifikasjonProdusent, dineSykmeldteHendelseKafkaProducer, narmesteLederService, accessControl, env.urlEnv)
+        SendVarselService(beskjedKafkaProducer, arbeidsgiverNotifikasjonProdusent, dineSykmeldteHendelseKafkaProducer, narmesteLederService, accessControl, env.urlEnv, syfoMotebehovConsumer)
 
     val varselSender = VarselSender(
         database,
@@ -213,7 +221,8 @@ fun Application.kafkaModule(
     env: Environment,
     accessControl: AccessControl,
     aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
-    merVeiledningVarselPlanner: MerVeiledningVarselPlanner
+    merVeiledningVarselPlanner: MerVeiledningVarselPlanner,
+    svarMotebehovVarselPlanner: SvarMotebehovVarselPlanner
 ) {
     runningRemotely {
 
@@ -224,6 +233,7 @@ fun Application.kafkaModule(
                     OppfolgingstilfelleKafkaConsumer(env, accessControl)
                         .addPlanner(aktivitetskravVarselPlanner)
                         .addPlanner(merVeiledningVarselPlanner)
+                        .addPlanner(svarMotebehovVarselPlanner)
                 )
             }
         }

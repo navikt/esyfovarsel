@@ -72,6 +72,7 @@ fun getEnv(): Environment {
                 narmestelederUrl = getEnvVar("NARMESTELEDER_URL"),
                 narmestelederScope = getEnvVar("NARMESTELEDER_SCOPE"),
                 baseUrlDineSykmeldte = getEnvVar("BASE_URL_DINE_SYKMELDTE"),
+                syfomotebehovUrl = getEnvVar("SYFOMOTEBEHOV_URL"),
             ),
             KafkaEnv(
                 bootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
@@ -143,6 +144,7 @@ data class UrlEnv(
     val narmestelederUrl: String,
     val narmestelederScope: String,
     val baseUrlDineSykmeldte: String,
+    val syfomotebehovUrl: String,
 )
 
 data class KafkaEnv(
