@@ -68,7 +68,7 @@ fun main() {
                 val oppfolgingstilfelleConsumer = getSyfosyketilfelleConsumer(env.urlEnv, stsConsumer)
                 val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
                 val narmesteLederConsumer = NarmesteLederConsumer(env.urlEnv, azureAdTokenConsumer)
-                val arbeidsgiverNotifikasjonProdusent = ArbeidsgiverNotifikasjonProdusent(env.urlEnv, azureAdTokenConsumer, narmesteLederConsumer)
+                val arbeidsgiverNotifikasjonProdusent = ArbeidsgiverNotifikasjonProdusent(env.urlEnv, azureAdTokenConsumer)
 
                 val beskjedKafkaProducer = BeskjedKafkaProducer(env)
                 val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)

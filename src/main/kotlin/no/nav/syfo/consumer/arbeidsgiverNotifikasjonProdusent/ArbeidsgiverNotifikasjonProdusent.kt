@@ -13,13 +13,11 @@ import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
-import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import org.slf4j.LoggerFactory
 
-open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer, narmesteLederConsumer: NarmesteLederConsumer) {
+open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client: HttpClient
     private val azureAdTokenConsumer: AzureAdTokenConsumer
-    private val narmesteLederConsumer: NarmesteLederConsumer
     private val arbeidsgiverNotifikasjonProdusentBasepath: String
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.AgNotifikasjonProdusentConsumer")
     private val scope = urlEnv.arbeidsgiverNotifikasjonProdusentApiScope
@@ -38,7 +36,6 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsume
             }
         }
         this.azureAdTokenConsumer = azureAdTokenConsumer
-        this.narmesteLederConsumer = narmesteLederConsumer
         arbeidsgiverNotifikasjonProdusentBasepath = urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl
     }
 
