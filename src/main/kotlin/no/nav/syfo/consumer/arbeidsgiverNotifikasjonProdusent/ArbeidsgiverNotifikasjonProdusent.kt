@@ -39,7 +39,13 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsume
         arbeidsgiverNotifikasjonProdusentBasepath = urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl
     }
 
-    open fun createNewNotificationForArbeidsgiver(varselId: String, virksomhetsnummer: String, ansattFnr: String, narmesteLederFnr: String, narmesteLederEpostadresse: String): String? {
+    open fun createNewNotificationForArbeidsgiver(
+        varselId: String,
+        virksomhetsnummer: String,
+        ansattFnr: String,
+        narmesteLederFnr: String,
+        narmesteLederEpostadresse: String
+    ): String? {
         val response: HttpResponse? = callArbeidsgiverNotifikasjonProdusent(varselId, virksomhetsnummer, narmesteLederFnr, ansattFnr, narmesteLederEpostadresse)
         return when (response?.status) {
             HttpStatusCode.OK -> {
@@ -62,7 +68,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsume
                 return null
             }
             else -> {
-                log.error("Could get nærmeste leder data")
+                log.error("Could not send send notification to arbeidsgiver")
                 return null
             }
         }
