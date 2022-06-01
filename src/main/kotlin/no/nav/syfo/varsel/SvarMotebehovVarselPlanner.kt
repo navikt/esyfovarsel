@@ -40,9 +40,6 @@ class SvarMotebehovVarselPlanner(
         val validSyketilfelledager = oppfolgingstilfellePerson.tidslinje.filter { isValidSyketilfelledag(it) }.sortedBy { it.dag }
 
         log.info("-$name-: gyldigeSyketilfelledager i tidslinjen er -${validSyketilfelledager.size}-")
-        validSyketilfelledager.forEach {
-            log.info("-$name-: Dag ${it.dag}, fom ${it.prioritertSyketilfellebit?.fom}, tom ${it.prioritertSyketilfellebit?.tom} ")
-        }
 
         if (validSyketilfelledager.isNotEmpty() && calculateActualNumberOfDaysInTimeline(validSyketilfelledager) >= SVAR_MOTEBEHOV_DAGER) {
             val newestSyketilfelledag = validSyketilfelledager.last()
