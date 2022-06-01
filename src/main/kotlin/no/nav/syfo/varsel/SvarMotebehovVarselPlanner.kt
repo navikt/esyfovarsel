@@ -124,7 +124,7 @@ class SvarMotebehovVarselPlanner(
                 tellAktivitetskravPlanlagt()
             }
         } else {
-            log.info("-$name-: Ingen gyldigeSykmeldingTilfelledager. Planlegger ikke nytt varsel")
+            log.info("-$name-: Ingen gyldigeSykmeldingTilfelledager eller har ikke vært sykmeldt $SVAR_MOTEBEHOV_DAGER dager. Planlegger ikke nytt varsel")
         }
     }
 
