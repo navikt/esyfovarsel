@@ -2,15 +2,15 @@ package no.nav.syfo.varsel
 
 import kotlinx.coroutines.coroutineScope
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
-import no.nav.syfo.syketilfelle.domain.Tag.*
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselBySykmeldingerId
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.metrics.tellAktivitetskravPlanlagt
 import no.nav.syfo.service.SykmeldingService
+import no.nav.syfo.syketilfelle.domain.Tag.*
 import no.nav.syfo.utils.VarselUtil
 import no.nav.syfo.utils.isEqualOrAfter
 import org.slf4j.Logger
@@ -30,7 +30,6 @@ class AktivitetskravVarselPlanner(
 
     override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String, orgnummer: String?) = coroutineScope {
         val oppfolgingstilfellePerson = syfosyketilfelleConsumer.getOppfolgingstilfelle(aktorId)
-        log.info("-$name-: oppfolgingstilfellePerson er -$oppfolgingstilfellePerson-")
 
         if (oppfolgingstilfellePerson == null) {
             log.info("-$name-: Fant ikke oppfolgingstilfelle. Planlegger ikke nytt varsel")
@@ -38,8 +37,6 @@ class AktivitetskravVarselPlanner(
         }
 
         val validSyketilfelledager = oppfolgingstilfellePerson.tidslinje.filter { isValidSyketilfelledag(it) }.sortedBy { it.dag }
-
-        log.info("-$name-: gyldigeSyketilfelledager i tidslinjen er -$validSyketilfelledager-")
 
         if (validSyketilfelledager.isNotEmpty() && calculateActualNumberOfDaysInTimeline(validSyketilfelledager) >= AKTIVITETSKRAV_DAGER) {
             val newestSyketilfelledag = validSyketilfelledager.last()
@@ -59,7 +56,6 @@ class AktivitetskravVarselPlanner(
                 ressursIds.add(it.prioritertSyketilfellebit!!.ressursId)
             }
 
-            log.info("-$name-: nyestOppT: $newestSyketilfelledag")
             log.info("-$name-: relevante -FOM, TOM, DATO, RESSURS_IDS: $fom, $tom, $aktivitetskravVarselDate, $ressursIds-")
 
             val lagreteVarsler = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.AKTIVITETSKRAV)
@@ -74,10 +70,12 @@ class AktivitetskravVarselPlanner(
                 log.info("-$name-: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
                 databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
             } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDate }
-                    .isNotEmpty()) {
+                .isNotEmpty()
+            ) {
                 log.info("-$name-: varsel med samme utsendingsdato er allerede planlagt. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
             } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDate }
-                    .isEmpty()) {
+                .isEmpty()
+            ) {
                 log.info("-$name-: sjekker om det finnes varsler med samme id. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
                 if (varselUtil.hasLagreteVarslerForForespurteSykmeldinger(lagreteVarsler, ressursIds)) {
                     log.info("-$name-: sletter tidligere varsler for. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
@@ -126,11 +124,11 @@ class AktivitetskravVarselPlanner(
 
     private fun isValidSyketilfelledag(syketilfelledag: Syketilfelledag): Boolean {
         val hasValidDocumentType = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SYKMELDING) == true ||
-                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(PAPIRSYKMELDING) == true ||
-                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SYKEPENGESOKNAD) == true
+            syketilfelledag.prioritertSyketilfellebit?.tags?.contains(PAPIRSYKMELDING) == true ||
+            syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SYKEPENGESOKNAD) == true
 
         val isAcceptedDocument = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SENDT) == true ||
-                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(BEKREFTET) == true
+            syketilfelledag.prioritertSyketilfellebit?.tags?.contains(BEKREFTET) == true
 
         val isBehandlingsdag = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(BEHANDLINGSDAGER) == true
 
@@ -141,7 +139,7 @@ class AktivitetskravVarselPlanner(
 
     fun calculateActualNumberOfDaysInTimeline(validSyketilfelledager: List<Syketilfelledag>): Int {
         val first = validSyketilfelledager[0].prioritertSyketilfellebit
-        var actualNumberOfDaysInTimeline =  ChronoUnit.DAYS.between(first!!.fom, first.tom).toInt()
+        var actualNumberOfDaysInTimeline = ChronoUnit.DAYS.between(first!!.fom, first.tom).toInt()
 
         for (i in 1 until validSyketilfelledager.size) {
             val currentFom = validSyketilfelledager[i].prioritertSyketilfellebit!!.fom
