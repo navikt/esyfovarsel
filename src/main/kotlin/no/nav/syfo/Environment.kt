@@ -91,7 +91,8 @@ fun getEnv(): Environment {
             dbEnv,
             ToggleEnv(
                 sendMerVeiledningVarsler = getBooleanEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER"),
-                sendAktivitetskravVarsler = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER")
+                sendAktivitetskravVarsler = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER"),
+                sendSvarMotebehovVarsler = getBooleanEnvVar("TOGGLE_SEND_SVAR_MOTEBEHOV_VARSLER")
             )
         )
 }
@@ -177,7 +178,8 @@ data class DbEnv(
 
 data class ToggleEnv(
     val sendMerVeiledningVarsler: Boolean,
-    val sendAktivitetskravVarsler: Boolean
+    val sendAktivitetskravVarsler: Boolean,
+    val sendSvarMotebehovVarsler: Boolean
 )
 
 data class JobEnv(
