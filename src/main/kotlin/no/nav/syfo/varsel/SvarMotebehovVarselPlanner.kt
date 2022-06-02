@@ -29,7 +29,6 @@ class SvarMotebehovVarselPlanner(
 
     override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String, orgnummer: String?) = coroutineScope {
         val oppfolgingstilfellePerson = syfosyketilfelleConsumer.getOppfolgingstilfelle(aktorId)
-        log.info("-$name-: oppfolgingstilfellePerson er -$oppfolgingstilfellePerson-")
 
         if (oppfolgingstilfellePerson == null) {
             log.info("-$name-: Fant ikke oppfolgingstilfelle. Planlegger ikke nytt varsel")
@@ -58,7 +57,6 @@ class SvarMotebehovVarselPlanner(
                 ressursIds.add(it.prioritertSyketilfellebit!!.ressursId)
             }
 
-            log.info("-$name-: nyestOppT: $newestSyketilfelledag")
             log.info("-$name-: relevante -FOM, TOM, DATO, RESSURS_IDS: $fom, $tom, $svarMotebehovVarselDate, $ressursIds-")
 
             val lagreteVarsler = varselUtil.getPlanlagteVarslerAvType(fnr, VarselType.SVAR_MOTEBEHOV)
