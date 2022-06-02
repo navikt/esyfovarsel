@@ -8,7 +8,6 @@ import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
-import no.nav.syfo.metrics.tellAktivitetskravPlanlagt
 import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.syketilfelle.domain.Tag.*
 import no.nav.syfo.utils.VarselUtil
@@ -104,7 +103,6 @@ class SvarMotebehovVarselPlanner(
                         svarMotebehovVarselDate
                     )
                     databaseAccess.storePlanlagtVarsel(svarMotebehovVarsel)
-                    tellAktivitetskravPlanlagt()
                 }
             } else {
                 log.info("-$name-: Lagrer ny varsel med dato: -$svarMotebehovVarselDate-")
@@ -118,7 +116,6 @@ class SvarMotebehovVarselPlanner(
                     svarMotebehovVarselDate
                 )
                 databaseAccess.storePlanlagtVarsel(svarMotebehovVarsel)
-                tellAktivitetskravPlanlagt()
             }
         } else {
             log.info("-$name-: Ingen gyldigeSykmeldingTilfelledager eller har ikke vært sykmeldt $SVAR_MOTEBEHOV_DAGER dager. Planlegger ikke nytt varsel")
