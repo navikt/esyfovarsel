@@ -3,7 +3,7 @@ package no.nav.syfo.db.domain
 import java.time.LocalDate
 
 enum class VarselType {
-    AKTIVITETSKRAV, MER_VEILEDNING
+    AKTIVITETSKRAV, MER_VEILEDNING, SVAR_MOTEBEHOV
 }
 
 val UTSENDING_FEILET = "UTSENDING_FEILET"

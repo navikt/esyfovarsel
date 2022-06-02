@@ -4,6 +4,7 @@ import no.nav.syfo.DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
+import no.nav.syfo.consumer.syfomotebehov.SyfoMotebehovConsumer
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
@@ -22,7 +23,8 @@ class SendVarselService(
     val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
     val narmesteLederService: NarmesteLederService,
     val accessControl: AccessControl,
-    val urlEnv: UrlEnv
+    val urlEnv: UrlEnv,
+    val syfoMotebehovConsumer: SyfoMotebehovConsumer
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.db.SendVarselService")
 
@@ -51,6 +53,14 @@ class SendVarselService(
 
                         VarselType.MER_VEILEDNING.toString().equals(pPlanlagtVarsel.type) -> {
                             sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
+                            pPlanlagtVarsel.type
+                        }
+
+                        VarselType.SVAR_MOTEBEHOV.toString().equals(pPlanlagtVarsel.type) -> {
+                            if (orgnummer !== null) {
+                                syfoMotebehovConsumer.sendVarselTilNaermesteLeder(pPlanlagtVarsel.aktorId, orgnummer)
+
+                            }
                             pPlanlagtVarsel.type
                         }
                         else -> {
@@ -89,6 +99,7 @@ class SendVarselService(
         return when (type) {
             VarselType.AKTIVITETSKRAV.toString() -> "NAV skal nå vurdere aktivitetsplikten din"
             VarselType.MER_VEILEDNING.toString() -> "Det nærmer seg datoen da du ikke lenger kan få sykepenger."
+            VarselType.SVAR_MOTEBEHOV.toString() -> "Ikke i bruk"
             else -> null
         }
     }
@@ -97,10 +108,12 @@ class SendVarselService(
         val baseUrlSykInfo = urlEnv.baseUrlSykInfo
         val aktivitetskravUrl = URL(baseUrlSykInfo + "/aktivitetsplikt")
         val merVeiledningUrl = URL(baseUrlSykInfo + "/snart-slutt-pa-sykepengene")
+        val svarMotebehovUrl = URL(baseUrlSykInfo + "/ikke-i-bruk")
 
         return when (type) {
             VarselType.AKTIVITETSKRAV.toString() -> aktivitetskravUrl
             VarselType.MER_VEILEDNING.toString() -> merVeiledningUrl
+            VarselType.SVAR_MOTEBEHOV.toString() -> svarMotebehovUrl
             else -> null
         }
     }

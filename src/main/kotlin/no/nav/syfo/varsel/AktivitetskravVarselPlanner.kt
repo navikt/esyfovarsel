@@ -62,13 +62,13 @@ class AktivitetskravVarselPlanner(
 
             if (varselUtil.isVarselDatoForIDag(aktivitetskravVarselDate)) {
                 log.info("-$name-: Beregnet dato for varsel er før i dag, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
-                databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
+                databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds, VarselType.AKTIVITETSKRAV)
             } else if (varselUtil.isVarselDatoEtterTilfelleSlutt(aktivitetskravVarselDate, tom)) {
                 log.info("-$name-: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
-                databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
+                databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds, VarselType.AKTIVITETSKRAV)
             } else if (sykmeldingService.isNot100SykmeldtPaVarlingsdato(aktivitetskravVarselDate, fnr) == true) {
                 log.info("-$name-: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
-                databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
+                databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds, VarselType.AKTIVITETSKRAV)
             } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDate }
                 .isNotEmpty()
             ) {
@@ -79,7 +79,7 @@ class AktivitetskravVarselPlanner(
                 log.info("-$name-: sjekker om det finnes varsler med samme id. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
                 if (varselUtil.hasLagreteVarslerForForespurteSykmeldinger(lagreteVarsler, ressursIds)) {
                     log.info("-$name-: sletter tidligere varsler for. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
-                    databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
+                    databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds, VarselType.AKTIVITETSKRAV)
 
                     log.info("-$name-: Lagrer ny varsel etter sletting med dato: -$aktivitetskravVarselDate-. -FOM, TOM: , $fom, $tom-")
                     val aktivitetskravVarsel = PlanlagtVarsel(

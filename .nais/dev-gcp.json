@@ -18,7 +18,8 @@
     "AG_NOTIFIKASJON_PRODUSENT_API_SCOPE": "api://dev-gcp.fager.notifikasjon-produsent-api/.default",
     "NARMESTELEDER_URL": "https://narmesteleder.dev.intern.nav.no",
     "NARMESTELEDER_SCOPE": "api://dev-gcp.teamsykmelding.narmesteleder/.default",
-    "BASE_URL_DINE_SYKMELDTE": "https://www-gcp.dev.nav.no/arbeidsgiver/sykmeldte"
+    "BASE_URL_DINE_SYKMELDTE": "https://www-gcp.dev.nav.no/arbeidsgiver/sykmeldte",
+    "SYFOMOTEBEHOV_URL": "NOT IN USE"
   },
   "job": {
     "KTOR_ENV": "remote",

@@ -73,7 +73,7 @@ class VarselSender(
     }
 
     private fun skalSendeVarsel(it: PPlanlagtVarsel) = (it.type.equals(VarselType.MER_VEILEDNING.name) && toggles.sendMerVeiledningVarsler) ||
-        (it.type.equals(VarselType.AKTIVITETSKRAV.name) && toggles.sendAktivitetskravVarsler)
+        (it.type.equals(VarselType.AKTIVITETSKRAV.name) && toggles.sendAktivitetskravVarsler) || it.type.equals(VarselType.SVAR_MOTEBEHOV.name)
 
     private fun String.sendtUtenFeil(): Boolean {
         return this != UTSENDING_FEILET
