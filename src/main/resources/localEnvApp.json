@@ -54,6 +54,7 @@
   },
   "toggleEnv": {
     "sendMerVeiledningVarsler": "true",
-    "sendAktivitetskravVarsler": "true"
+    "sendAktivitetskravVarsler": "true",
+    "sendSvarMotebehovVarsler": "true"
   }
 }

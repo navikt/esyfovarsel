@@ -37,6 +37,7 @@ class VarselSender(
 
         if (!toggles.sendAktivitetskravVarsler) log.info("Utsending av Aktivitetskrav er ikke aktivert, og varsler av denne typen blir ikke sendt")
         if (!toggles.sendMerVeiledningVarsler) log.info("Utsending av Mer veiledning er ikke aktivert, og varsler av denne typen blir ikke sendt")
+        if (!toggles.sendSvarMotebehovVarsler) log.info("Utsending av Svar møtebehov er ikke aktivert, og varsler av denne typen blir ikke sendt")
 
         val varslerSendt = HashMap<String, Int>()
         varslerToSendToday.forEach {
@@ -73,7 +74,8 @@ class VarselSender(
     }
 
     private fun skalSendeVarsel(it: PPlanlagtVarsel) = (it.type.equals(VarselType.MER_VEILEDNING.name) && toggles.sendMerVeiledningVarsler) ||
-        (it.type.equals(VarselType.AKTIVITETSKRAV.name) && toggles.sendAktivitetskravVarsler) || it.type.equals(VarselType.SVAR_MOTEBEHOV.name)
+        (it.type.equals(VarselType.AKTIVITETSKRAV.name) && toggles.sendAktivitetskravVarsler) ||
+            (it.type.equals(VarselType.SVAR_MOTEBEHOV.name)  && toggles.sendSvarMotebehovVarsler)
 
     private fun String.sendtUtenFeil(): Boolean {
         return this != UTSENDING_FEILET
