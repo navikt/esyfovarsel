@@ -65,10 +65,10 @@ class SvarMotebehovVarselPlanner(
 
             if (varselUtil.isVarselDatoForIDag(svarMotebehovVarselDate)) {
                 log.info("-$name-: Beregnet dato for varsel er før i dag, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $svarMotebehovVarselDate-")
-                databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
+                databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds, VarselType.SVAR_MOTEBEHOV)
             } else if (varselUtil.isVarselDatoEtterTilfelleSlutt(svarMotebehovVarselDate, tom)) {
                 log.info("-$name-: Tilfelle er kortere enn 112 dager, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $svarMotebehovVarselDate-")
-                databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
+                databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds, VarselType.SVAR_MOTEBEHOV)
             } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == svarMotebehovVarselDate }
                     .isNotEmpty()) {
                 log.info("-$name-: varsel med samme utsendingsdato er allerede planlagt. -FOM, TOM, DATO: , $fom, $tom, $svarMotebehovVarselDate-")
@@ -80,7 +80,7 @@ class SvarMotebehovVarselPlanner(
                 log.info("-$name-: sjekker om det finnes varsler med samme id. -FOM, TOM, DATO: , $fom, $tom, $svarMotebehovVarselDate-")
                 if (varselUtil.hasLagreteVarslerForForespurteSykmeldinger(lagreteVarsler, ressursIds)) {
                     log.info("-$name-: sletter tidligere varsler for. -FOM, TOM, DATO: , $fom, $tom, $svarMotebehovVarselDate-")
-                    databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds)
+                    databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds, VarselType.SVAR_MOTEBEHOV)
 
                     log.info("-$name-: Lagrer ny varsel etter sletting med dato: -$svarMotebehovVarselDate-. -FOM, TOM: , $fom, $tom-")
                     val svarMotebehovVarsel = PlanlagtVarsel(

@@ -166,16 +166,18 @@ fun DatabaseInterface.deletePlanlagtVarselByVarselId(uuid: String) {
     }
 }
 
-fun DatabaseInterface.deletePlanlagtVarselBySykmeldingerId(sykmeldingerId: Set<String>) {
+fun DatabaseInterface.deletePlanlagtVarselBySykmeldingerId(sykmeldingerId: Set<String>, varselType: VarselType) {
     val st1 = """DELETE
         FROM PLANLAGT_VARSEL
-        WHERE uuid IN (SELECT varsling_id FROM SYKMELDING_IDS WHERE sykmelding_id = ? )
+        WHERE uuid IN (SELECT varsling_id FROM SYKMELDING_IDS WHERE sykmelding_id = ? ) 
+        AND type = ?
     """.trimMargin()
 
     connection.use { connection ->
         connection.prepareStatement(st1).use {
             for (sykmeldingId: String in sykmeldingerId) {
                 it.setString(1, sykmeldingId)
+                it.setString(2, varselType.name)
                 it.addBatch()
             }
             it.executeBatch()

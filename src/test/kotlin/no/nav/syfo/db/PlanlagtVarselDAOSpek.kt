@@ -129,7 +129,7 @@ object PlanlagtVarselDAOSpek : Spek({
             embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(merveiledningPlanlagtVarselUuid).size shouldNotBe 0
 
             //Delete
-            embeddedDatabase.deletePlanlagtVarselBySykmeldingerId(setOf("1", "2"))
+            embeddedDatabase.deletePlanlagtVarselBySykmeldingerId(setOf("1", "2"), VarselType.AKTIVITETSKRAV)
 
             //Etter delete
             val planlagtVarselFetchedList1EtterDelete = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
