@@ -16,9 +16,11 @@ const val ERROR_IN_PLANNER = "${METRICS_NS}_error_in_planner"
 const val ERROR_IN_PARSING = "${METRICS_NS}_error_in_parser"
 const val MER_VEILEDNING_PLANNED = "${METRICS_NS}_mer_veiledning_planned"
 const val AKTIVITETSKRAV_PLANNED = "${METRICS_NS}_aktivitetskrav_planned"
+const val SVAR_MOTEBEHOV_PLANNED = "${METRICS_NS}_svar_motebehov_planned"
 
 const val MER_VEILEDNING_NOTICE_SENT = "${METRICS_NS}_mer_veiledning_notice_sent"
 const val AKTIVITETSKRAV_NOTICE_SENT = "${METRICS_NS}_aktivitetskrav_notice_sent"
+const val SVAR_MOTEBEHOV_NOTICE_SENT = "${METRICS_NS}_svar_motebehov_notice_sent"
 const val NOTICE_SENT = "${METRICS_NS}_notice_sent"
 
 
@@ -44,6 +46,10 @@ val COUNT_AKTIVITETSKRAV_PLANNED: Counter = Counter
     .description("Counts the number of planned notice of type Aktivitetskrav")
     .register(METRICS_REGISTRY)
 
+val COUNT_SVAR_MOTEBEHOV_PLANNED: Counter = Counter
+    .builder(SVAR_MOTEBEHOV_PLANNED)
+    .description("Counts the number of planned notice of type Svar møtebehov")
+    .register(METRICS_REGISTRY)
 
 fun tellFeilIPlanner() {
     COUNT_ERROR_IN_PLANNER.increment()
@@ -63,6 +69,11 @@ val COUNT_AKTIVITETSKRAV_NOTICE_SENT: Counter = Counter
     .description("Counts the number of Aktivitetskrav notice sent")
     .register(METRICS_REGISTRY)
 
+val COUNT_SVAR_MOTEBEHOV_NOTICE_SENT: Counter = Counter
+    .builder(SVAR_MOTEBEHOV_NOTICE_SENT)
+    .description("Counts the number of Svar møtebehov notice sent")
+    .register(METRICS_REGISTRY)
+
 val COUNT_ALL_NOTICE_SENT: Counter = Counter
     .builder(NOTICE_SENT)
     .description("Counts the number of all types of notice sent")
@@ -78,12 +89,21 @@ fun tellAktivitetskravVarselSendt(varslerSendt: Int) {
     COUNT_AKTIVITETSKRAV_NOTICE_SENT.increment(varslerSendt.toDouble())
 }
 
+fun tellSvarMotebehovVarselSendt(varslerSendt: Int) {
+    COUNT_ALL_NOTICE_SENT.increment(varslerSendt.toDouble())
+    COUNT_SVAR_MOTEBEHOV_NOTICE_SENT.increment(varslerSendt.toDouble())
+}
+
 fun tellMerVeiledningPlanlagt() {
     COUNT_MER_VEILEDNING_PLANNED.increment()
 }
 
 fun tellAktivitetskravPlanlagt() {
     COUNT_AKTIVITETSKRAV_PLANNED.increment()
+}
+
+fun tellSvarMotebehovPlanlagt() {
+    COUNT_SVAR_MOTEBEHOV_PLANNED.increment()
 }
 
 fun Routing.registerPrometheusApi() {

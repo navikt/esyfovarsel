@@ -11,6 +11,7 @@ import no.nav.syfo.db.fetchPlanlagtVarselByUtsendingsdato
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.metrics.tellAktivitetskravVarselSendt
 import no.nav.syfo.metrics.tellMerVeiledningVarselSendt
+import no.nav.syfo.metrics.tellSvarMotebehovVarselSendt
 import no.nav.syfo.service.SendVarselService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -59,9 +60,11 @@ class VarselSender(
 
         val antallMerVeiledningSendt = varslerSendt[VarselType.MER_VEILEDNING.name] ?: 0
         val antallAktivitetskravSendt = varslerSendt[VarselType.AKTIVITETSKRAV.name] ?: 0
+        val antallSvarMotebehovSendt = varslerSendt[VarselType.SVAR_MOTEBEHOV.name] ?: 0
 
         tellMerVeiledningVarselSendt(antallMerVeiledningSendt)
         tellAktivitetskravVarselSendt(antallAktivitetskravSendt)
+        tellSvarMotebehovVarselSendt(antallSvarMotebehovSendt)
 
         log.info("Avslutter SendVarslerJobb")
 
