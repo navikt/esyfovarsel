@@ -7,7 +7,7 @@ metadata:
     team: team-esyfo
 spec:
   image: {{ image }}
-  schedule: "50 10 * * *"
+  schedule: "05 12 * * *"
   vault:
     enabled: true
     paths:
