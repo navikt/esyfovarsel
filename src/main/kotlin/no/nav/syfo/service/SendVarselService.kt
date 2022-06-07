@@ -44,6 +44,7 @@ class SendVarselService(
                             sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
                             if (orgnummer !== null) {
                                 val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer)
+                                log.info("Har kalt nærmesteleder for uuid $uuid")
                                 if (narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
                                     sendVarselTilArbeidsgiver(fnr, orgnummer, uuid, narmesteLederRelasjon!!.narmesteLederFnr!!, narmesteLederRelasjon.narmesteLederEpost!!)
                                 }
@@ -94,7 +95,9 @@ class SendVarselService(
     }
 
     private fun sendVarselTilSykmeldt(fnr: String, varselContent: String, uuid: String, varselUrl: URL) {
+        log.info("Sender varsel til Brukernotifikasjoner for uuid $uuid")
         beskjedKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl)
+        log.info("Har sendt varsel til Brukernotifikasjoner for uuid $uuid")
     }
 
     private fun varselContentFromType(type: String): String? {
