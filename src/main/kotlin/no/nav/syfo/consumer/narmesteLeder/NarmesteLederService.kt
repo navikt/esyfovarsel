@@ -12,19 +12,17 @@ class NarmesteLederService(val narmesteLederConsumer: NarmesteLederConsumer) {
             log.info("NarmesteLederService: Nærmeste leder relasjon er null for uuid: $uuid")
             return null
         }
-        if (uuid == "66705dc4-e3b6-4afd-ab1a-ccd08bbcbc78") {
-            val nlf = nlRelasjon.narmesteLederFnr
-            val epost = nlRelasjon.narmesteLederEpost
-            if (nlf == null) {
-                log.info("NarmesteLederService: NL-fnr er null!")
-            } else {
-                log.info("NarmesteLederService: ${nlf.substring(0, 6)} lengde = ${nlf.length}")
-            }
-            if (epost == null) {
-                log.info("NarmesteLederService: NL-epost er null!")
-            } else {
-                log.info("NarmesteLederService: epost lengde = ${epost.length}")
-            }
+        val nlf = nlRelasjon.narmesteLederFnr
+        val epost = nlRelasjon.narmesteLederEpost
+        if (nlf == null) {
+            log.info("NarmesteLederService: NL-fnr er null!")
+        } else {
+            log.info("NarmesteLederService: ${nlf.substring(0, 6)} lengde = ${nlf.length}")
+        }
+        if (epost == null) {
+            log.info("NarmesteLederService: NL-epost er null!")
+        } else {
+            log.info("NarmesteLederService: epost lengde = ${epost.length}")
         }
         return nlRelasjon
     }
