@@ -87,7 +87,9 @@ class SendVarselService(
             OffsetDateTime.now().plusWeeks(4L)
         )
 
+        log.info("Sender varsel til Dine sykmeldte for uuid $uuid")
         dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
+        log.info("Sender varsel til Arbeidsgivernotifikasjoner for uuid $uuid")
         arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(uuid, orgnummer, fnr, narmesteLederFnr, narmesteLederEpostadresse)
     }
 
