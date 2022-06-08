@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory
 
 private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.db.NarmesteLederService")
 class NarmesteLederService(val narmesteLederConsumer: NarmesteLederConsumer) {
-    fun getNarmesteLederRelasjon(fnr: String, orgnummer: String, uuid: String): NarmesteLederRelasjon? {
-        val nlRelasjon = runBlocking { narmesteLederConsumer.getNarmesteLeder(fnr, orgnummer)?.narmesteLederRelasjon }
+    suspend fun getNarmesteLederRelasjon(fnr: String, orgnummer: String, uuid: String): NarmesteLederRelasjon? {
+        val nlRelasjon = narmesteLederConsumer.getNarmesteLeder(fnr, orgnummer)?.narmesteLederRelasjon
         if (nlRelasjon == null) {
             log.info("NarmesteLederService: Nærmeste leder relasjon er null for uuid: $uuid")
             return null

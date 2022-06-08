@@ -28,7 +28,7 @@ class SendVarselService(
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.db.SendVarselService")
 
-    fun sendVarsel(pPlanlagtVarsel: PPlanlagtVarsel): String {
+    suspend fun sendVarsel(pPlanlagtVarsel: PPlanlagtVarsel): String {
         // Recheck if user can be notified in case of recent 'Addressesperre'
         return try {
             val fodselnummer = accessControl.getFnrIfUserCanBeNotified(pPlanlagtVarsel.aktorId)
