@@ -3,6 +3,7 @@ package no.nav.syfo.job
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import no.nav.syfo.AppEnv
 import no.nav.syfo.ToggleEnv
 import no.nav.syfo.db.DatabaseInterface
@@ -53,8 +54,8 @@ object VarselSenderSpek : Spek({
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
 
-            sendVarselJobb.sendVarsler()
-            verify { sendVarselService.sendVarsel(any()) }
+            sendVarselJobb.testSendVarsler()
+            sendVarselService.testSendVarsel()
 
             embeddedDatabase.skalIkkeHaPlanlagtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
             embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
@@ -68,8 +69,8 @@ object VarselSenderSpek : Spek({
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
 
-            sendVarselJobb.sendVarsler()
-            verify { sendVarselService.sendVarsel(any()) }
+            sendVarselJobb.testSendVarsler()
+            sendVarselService.testSendVarsel()
 
             embeddedDatabase.skalHaPlanlagtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
             embeddedDatabase.skalIkkeHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
@@ -85,15 +86,16 @@ object VarselSenderSpek : Spek({
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
 
-            sendVarselJobb.sendVarsler()
-            verify { sendVarselService.sendVarsel(any()) }
+            sendVarselJobb.testSendVarsler()
+            sendVarselService.testSendVarsel()
 
             embeddedDatabase.skalIkkeHaPlanlagtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
             embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
 
             embeddedDatabase.skalHaPlanlagtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
             embeddedDatabase.skalIkkeHaUtsendtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
-            verify { sendVarselService.sendVarsel(any()) }
+
+            sendVarselService.testSendVarsel()
         }
 
         it("Skal ikke markere varsel som sendt dersom utsending feiler") {
@@ -103,14 +105,28 @@ object VarselSenderSpek : Spek({
 
             coEvery { sendVarselService.sendVarsel(any()) } returns UTSENDING_FEILET
 
-            sendVarselJobb.sendVarsler()
-            verify { sendVarselService.sendVarsel(any()) }
+            sendVarselJobb.testSendVarsler()
+            sendVarselService.testSendVarsel()
 
             embeddedDatabase.skalHaPlanlagtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
             embeddedDatabase.skalIkkeHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
         }
     }
 })
+
+private fun VarselSender.testSendVarsler() {
+    runBlocking {
+        sendVarsler()
+    }
+}
+
+private fun SendVarselService.testSendVarsel() {
+    verify {
+        runBlocking {
+            sendVarsel(any())
+        }
+    }
+}
 
 private fun DatabaseInterface.skalHaPlanlagtVarsel(fnr: String, type: VarselType) = this.should("Skal ha planlagt varsel av type $type") {
     this.fetchPlanlagtVarselByFnr(fnr).filter { it.type.equals(type.name) }.isNotEmpty()
