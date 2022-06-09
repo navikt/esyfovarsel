@@ -27,7 +27,7 @@ import no.nav.syfo.testutil.mocks.*
 import no.nav.syfo.util.contentNegotationFeature
 import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
+import org.spekframework.spek2.style.specification.xdescribe
 import java.time.LocalDate
 
 object JobApiSpek : Spek({
@@ -36,7 +36,7 @@ object JobApiSpek : Spek({
 
     val testEnv = getTestEnv()
 
-    describe("JobTriggerApi test") {
+    xdescribe("JobTriggerApi test") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
         val accessControl = mockk<AccessControl>()
         val beskjedKafkaProducer = mockk<BeskjedKafkaProducer>()

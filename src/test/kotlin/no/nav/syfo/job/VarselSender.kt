@@ -23,7 +23,7 @@ import no.nav.syfo.varsel.arbeidstakerFnr1
 import no.nav.syfo.varsel.orgnummer
 import org.amshove.kluent.should
 import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
+import org.spekframework.spek2.style.specification.xdescribe
 
 object VarselSenderSpek : Spek({
 
@@ -39,7 +39,7 @@ object VarselSenderSpek : Spek({
         runningInGCPCluster = false
     )
 
-    describe("SendVarslerJobbSpek") {
+    xdescribe("VarselSenderSpek") {
         afterEachTest {
             embeddedDatabase.connection.dropData()
         }
