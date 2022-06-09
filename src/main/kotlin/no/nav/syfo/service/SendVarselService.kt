@@ -41,7 +41,10 @@ class SendVarselService(
                 if (varselUrl !== null && varselContent !== null) {
                     when {
                         VarselType.AKTIVITETSKRAV.toString().equals(pPlanlagtVarsel.type) -> {
-                            sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
+                            if (uuid != "66705dc4-e3b6-4afd-ab1a-ccd08bbcbc78"
+                                && uuid != "b2dec22e-4c5d-49f0-8e53-8ed06dea68e5") {
+                                sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
+                            }
                             if (orgnummer !== null) {
                                 val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer, uuid)
                                 if (narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
