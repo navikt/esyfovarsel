@@ -41,19 +41,15 @@ class SendVarselService(
                 if (varselUrl !== null && varselContent !== null) {
                     when {
                         VarselType.AKTIVITETSKRAV.toString().equals(pPlanlagtVarsel.type) -> {
-                            if (uuid != "66705dc4-e3b6-4afd-ab1a-ccd08bbcbc78") {
+                            if (uuid != "66705dc4-e3b6-4afd-ab1a-ccd08bbcbc78"
+                                && uuid != "b2dec22e-4c5d-49f0-8e53-8ed06dea68e5") {
                                 sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
                             }
                             if (orgnummer !== null) {
                                 val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer, uuid)
-                                log.info("SendVarselService: Har kalt nærmesteleder for uuid $uuid")
                                 if (narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
-                                    log.info("SendVarselService: Har hentet nærmeste leder relasjon for uuid $uuid")
                                     sendVarselTilArbeidsgiver(fnr, orgnummer, uuid, narmesteLederRelasjon!!.narmesteLederFnr!!, narmesteLederRelasjon.narmesteLederEpost!!)
-                                    log.info("SendVarselService: Har sendt varsel til arbeidsgiver for uuid $uuid")
                                 }
-                            } else {
-                                log.info("SendVarselService: orgnummer er null for uuid $uuid")
                             }
                             pPlanlagtVarsel.type
                         }
