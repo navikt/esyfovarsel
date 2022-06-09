@@ -46,7 +46,9 @@ class SendVarselService(
                                 sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
                             }
                             if (orgnummer !== null) {
+                                log.info("Henter NL-relasjon for UUID: $uuid")
                                 val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer, uuid)
+                                log.info("NL-relasjon hentet for UUID: $uuid")
                                 if (narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
                                     sendVarselTilArbeidsgiver(fnr, orgnummer, uuid, narmesteLederRelasjon!!.narmesteLederFnr!!, narmesteLederRelasjon.narmesteLederEpost!!)
                                 }
