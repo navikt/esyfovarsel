@@ -33,7 +33,7 @@ class VarselSender(
 
         log.info("Starter SendVarslerJobb")
 
-        val varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.parse("2022-06-08"))
+        val varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
         log.info("Planlegger å sende ${varslerToSendToday.size} varsler")
 
         if (!toggles.sendAktivitetskravVarsler) log.info("Utsending av Aktivitetskrav er ikke aktivert, og varsler av denne typen blir ikke sendt")
