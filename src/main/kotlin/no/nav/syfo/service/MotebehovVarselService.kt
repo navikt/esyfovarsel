@@ -33,12 +33,11 @@ class MotebehovVarselService(
 
         val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(varseldata.ansattFnr, varseldata.orgnummer)
         if (narmesteLederRelasjon !== null && narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
-            val ansattId = ""
             arbeidsgiverNotifikasjonService.sendNotifikasjon(
                 VarselType.SVAR_MOTEBEHOV,
                 null,
                 varseldata.orgnummer,
-                dialogmoterUrl + "/arbeidsgiver/$ansattId", // TODO: add  landingssiden til dialogmøte-appen: PER ANSATT! "/syk/dialogmoter/arbeidsgiver/218aa801-ecac-4cb1-8e4f-4569e3b56930"
+                dialogmoterUrl + "/arbeidsgiver/${narmesteLederRelasjon.narmesteLederId}",
                 narmesteLederRelasjon.narmesteLederFnr!!,
                 varseldata.ansattFnr,
                 narmesteLederRelasjon.narmesteLederEpost!!
