@@ -18,6 +18,8 @@ fun <T> ResultSet.toList(mapper: ResultSet.() -> T) = mutableListOf<T>().apply {
     }
 }
 
+fun ResultSet.toCount() = getLong("nr_rows")
+
 fun ResultSet.toPPlanlagtVarsel() = PPlanlagtVarsel(
     uuid = getString("uuid"),
     fnr = getString("fnr"),

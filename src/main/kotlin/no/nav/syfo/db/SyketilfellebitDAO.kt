@@ -54,3 +54,15 @@ fun DatabaseInterface.fetchSyketilfellebiterByFnr(fnr: String): List<Syketilfell
         }
     }
 }
+
+fun DatabaseInterface.countEntries(): Long {
+    val queryStatement = """SELECT count(*) AS nr_rows
+                            FROM SYKETILFELLEBIT
+    """.trimIndent()
+
+    return connection.use { conn ->
+        conn.prepareStatement(queryStatement).use {
+            it.executeQuery().toCount()
+        }
+    }
+}
