@@ -2,7 +2,6 @@ package no.nav.syfo.service
 
 import no.nav.syfo.DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST
 import no.nav.syfo.UrlEnv
-import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.syfomotebehov.SyfoMotebehovConsumer
 import no.nav.syfo.db.domain.PPlanlagtVarsel
@@ -19,12 +18,12 @@ import java.time.OffsetDateTime
 
 class SendVarselService(
     val beskjedKafkaProducer: BeskjedKafkaProducer,
-    val arbeidsgiverNotifikasjonProdusent: ArbeidsgiverNotifikasjonProdusent,
     val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
     val narmesteLederService: NarmesteLederService,
     val accessControl: AccessControl,
     val urlEnv: UrlEnv,
-    val syfoMotebehovConsumer: SyfoMotebehovConsumer
+    val syfoMotebehovConsumer: SyfoMotebehovConsumer,
+    val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.db.SendVarselService")
 
@@ -41,14 +40,21 @@ class SendVarselService(
                 if (varselUrl !== null && varselContent !== null) {
                     when {
                         VarselType.AKTIVITETSKRAV.toString().equals(pPlanlagtVarsel.type) -> {
-                            if (uuid != "66705dc4-e3b6-4afd-ab1a-ccd08bbcbc78"
-                                && uuid != "b2dec22e-4c5d-49f0-8e53-8ed06dea68e5") {
+                            if (uuid != "66705dc4-e3b6-4afd-ab1a-ccd08bbcbc78" &&
+                                uuid != "b2dec22e-4c5d-49f0-8e53-8ed06dea68e5"
+                            ) {
                                 sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
                             }
                             if (orgnummer !== null) {
-                                val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer, uuid)
+                                val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer)
                                 if (narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
-                                    sendVarselTilArbeidsgiver(fnr, orgnummer, uuid, narmesteLederRelasjon!!.narmesteLederFnr!!, narmesteLederRelasjon.narmesteLederEpost!!)
+                                    sendAktivitetskravVarselTilArbeidsgiver(
+                                        fnr,
+                                        orgnummer,
+                                        uuid,
+                                        narmesteLederRelasjon!!.narmesteLederFnr!!,
+                                        narmesteLederRelasjon.narmesteLederEpost!!
+                                    )
                                 }
                             }
                             pPlanlagtVarsel.type
@@ -62,7 +68,6 @@ class SendVarselService(
                         VarselType.SVAR_MOTEBEHOV.toString().equals(pPlanlagtVarsel.type) -> {
                             if (orgnummer !== null) {
                                 syfoMotebehovConsumer.sendVarselTilNaermesteLeder(pPlanlagtVarsel.aktorId, orgnummer)
-
                             }
                             pPlanlagtVarsel.type
                         }
@@ -80,7 +85,7 @@ class SendVarselService(
         }
     }
 
-    private fun sendVarselTilArbeidsgiver(fnr: String, orgnummer: String, uuid: String, narmesteLederFnr: String, narmesteLederEpostadresse: String) {
+    private fun sendAktivitetskravVarselTilArbeidsgiver(fnr: String, orgnummer: String, uuid: String, narmesteLederFnr: String, narmesteLederEpostadresse: String) {
         val dineSykmeldteVarsel = DineSykmeldteVarsel(
             fnr,
             orgnummer,
@@ -92,8 +97,9 @@ class SendVarselService(
 
         log.info("Sender varsel til Dine sykmeldte for uuid $uuid")
         dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
+
         log.info("Sender varsel til Arbeidsgivernotifikasjoner for uuid $uuid")
-        arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(uuid, orgnummer, fnr, narmesteLederFnr, narmesteLederEpostadresse)
+        arbeidsgiverNotifikasjonService.sendNotifikasjon(VarselType.AKTIVITETSKRAV, uuid, orgnummer, urlEnv.baseUrlDineSykmeldte, narmesteLederFnr, fnr, narmesteLederEpostadresse)
     }
 
     private fun sendVarselTilSykmeldt(fnr: String, varselContent: String, uuid: String, varselUrl: URL) {

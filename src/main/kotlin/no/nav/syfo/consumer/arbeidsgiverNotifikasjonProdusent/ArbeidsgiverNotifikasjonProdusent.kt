@@ -13,6 +13,7 @@ import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.kafka.dinesykmeldte.domain.ArbeidsgiverNotifikasjon
 import org.slf4j.LoggerFactory
 
 open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer) {
@@ -21,8 +22,6 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsume
     private val arbeidsgiverNotifikasjonProdusentBasepath: String
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.AgNotifikasjonProdusentConsumer")
     private val scope = urlEnv.arbeidsgiverNotifikasjonProdusentApiScope
-    private val dineSykmeldteUrl = urlEnv.baseUrlDineSykmeldte
-    private val EMAIL_BODY = EMAIL_BODY_START + dineSykmeldteUrl + EMAIL_BODY_END
 
     init {
         client = HttpClient(CIO) {
@@ -39,18 +38,14 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsume
         arbeidsgiverNotifikasjonProdusentBasepath = urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl
     }
 
-    open fun createNewNotificationForArbeidsgiver(
-        varselId: String,
-        virksomhetsnummer: String,
-        ansattFnr: String,
-        narmesteLederFnr: String,
-        narmesteLederEpostadresse: String
-    ): String? {
-        val response: HttpResponse? = callArbeidsgiverNotifikasjonProdusent(varselId, virksomhetsnummer, narmesteLederFnr, ansattFnr, narmesteLederEpostadresse)
+    open fun createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? {
+        val response: HttpResponse? = callArbeidsgiverNotifikasjonProdusent(arbeidsgiverNotifikasjon)
+
         return when (response?.status) {
             HttpStatusCode.OK -> {
                 val beskjed = runBlocking { response.receive<OpprettNyBeskjedArbeidsgiverNotifikasjonResponse>() }
                 return if (beskjed.data !== null) {
+                    log.info("Have send new notificationt with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api")
                     beskjed.data.nyBeskjed.id
                 } else {
                     log.error("Could not post notification, data is null: $beskjed")
@@ -75,27 +70,24 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsume
     }
 
     private fun callArbeidsgiverNotifikasjonProdusent(
-        varselId: String,
-        virksomhetsnummer: String,
-        naermesteLederFnr: String,
-        ansattFnr: String,
-        narmesteLederEpostadresse: String
+        arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon,
     ): HttpResponse? {
         return runBlocking {
             val token = azureAdTokenConsumer.getToken(scope)
             val graphQuery = this::class.java.getResource("$MUTATION_PATH_PREFIX/$CREATE_NOTIFICATION_AG_MUTATION").readText().replace("[\n\r]", "")
+
             val variables = Variables(
-                varselId,
-                virksomhetsnummer,
-                dineSykmeldteUrl,
-                naermesteLederFnr,
-                ansattFnr,
+                arbeidsgiverNotifikasjon.varselId,
+                arbeidsgiverNotifikasjon.virksomhetsnummer,
+                arbeidsgiverNotifikasjon.url,
+                arbeidsgiverNotifikasjon.naermesteLederFnr,
+                arbeidsgiverNotifikasjon.ansattFnr,
                 MERKELAPP,
-                MESSAGE_TEXT,
-                narmesteLederEpostadresse,
-                EMAIL_TITLE,
-                EMAIL_BODY,
-                EpostSendevinduTypes.LOEPENDE
+                arbeidsgiverNotifikasjon.messageText,
+                arbeidsgiverNotifikasjon.narmesteLederEpostadresse,
+                arbeidsgiverNotifikasjon.emailTitle,
+                arbeidsgiverNotifikasjon.emailBody,
+                EpostSendevinduTypes.LOEPENDE,
             )
             val requestBody = CreateNewNotificationAgRequest(graphQuery, variables)
 
