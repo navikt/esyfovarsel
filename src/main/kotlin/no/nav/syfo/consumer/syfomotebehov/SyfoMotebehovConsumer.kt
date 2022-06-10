@@ -12,12 +12,12 @@ open class SyfoMotebehovConsumer(urlEnv: UrlEnv, private val tokenConsumer: Toke
     private val client = httpClient()
     private val basepath = urlEnv.syfomotebehovUrl
 
-    fun sendVarselTilNaermesteLeder(aktorId: String, orgnummer: String) {
+    fun sendVarselTilNaermesteLeder(aktorId: String, orgnummer: String, narmesteLederFnr: String, arbeidstakerFnr: String) {
         runBlocking {
             val requestURL = "$basepath/syfomotebehov/api/varsel/naermesteleder/esyfovarsel"
             val stsAccessToken = tokenConsumer.getToken(null)
             val bearerTokenString = "Bearer $stsAccessToken"
-            val requestBody = MotebehovsvarVarselInfo(aktorId, orgnummer)
+            val requestBody = MotebehovsvarVarselInfo(aktorId, orgnummer, narmesteLederFnr, arbeidstakerFnr)
 
             val response = client.post<HttpResponse>(requestURL) {
                 headers {
@@ -37,4 +37,6 @@ open class SyfoMotebehovConsumer(urlEnv: UrlEnv, private val tokenConsumer: Toke
 data class MotebehovsvarVarselInfo(
     val sykmeldtAktorId: String,
     val orgnummer: String,
+    val naermesteLederFnr: String,
+    val arbeidstakerFnr: String,
 )
