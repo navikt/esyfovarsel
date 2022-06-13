@@ -39,8 +39,8 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsume
     }
 
     open fun createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? {
+        log.info("About to send new notificationt with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api")
         val response: HttpResponse? = callArbeidsgiverNotifikasjonProdusent(arbeidsgiverNotifikasjon)
-
         return when (response?.status) {
             HttpStatusCode.OK -> {
                 val beskjed = runBlocking { response.receive<OpprettNyBeskjedArbeidsgiverNotifikasjonResponse>() }
