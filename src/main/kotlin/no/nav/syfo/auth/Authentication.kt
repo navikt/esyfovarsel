@@ -8,9 +8,7 @@ import io.ktor.routing.*
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.api.admin.registerAdminApi
 import no.nav.syfo.api.bruker.registerBrukerApi
-import no.nav.syfo.api.job.registerCountApi
 import no.nav.syfo.api.job.registerJobTriggerApi
-import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.service.ReplanleggingService
 import no.nav.syfo.service.VarselSendtService
@@ -58,7 +56,7 @@ fun Application.setupLocalRoutesWithAuthentication(
     varselSender: VarselSender,
     varselSendtService: VarselSendtService,
     replanleggingService: ReplanleggingService,
-    authEnv: AuthEnv,
+    authEnv: AuthEnv
 ) {
     install(Authentication) {
         basic("auth-basic") {
@@ -85,8 +83,7 @@ fun Application.setupRoutesWithAuthentication(
     varselSender: VarselSender,
     varselSendtService: VarselSendtService,
     replanleggingService: ReplanleggingService,
-    authEnv: AuthEnv,
-    databaseInterface: DatabaseInterface
+    authEnv: AuthEnv
 ) {
     setupAuthentication(authEnv)
     routing {
@@ -96,7 +93,6 @@ fun Application.setupRoutesWithAuthentication(
         authenticate("auth-basic") {
             registerAdminApi(replanleggingService)
             registerJobTriggerApi(varselSender)
-            registerCountApi(databaseInterface)
         }
     }
 }
