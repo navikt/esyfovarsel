@@ -47,7 +47,7 @@ class SendVarselService(
                             }
                             if (orgnummer !== null) {
                                 log.info("Henter NL-relasjon for UUID: $uuid")
-                                val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer)
+                                val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer, uuid)
                                 log.info("NL-relasjon hentet for UUID: $uuid")
                                 if (narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
                                     sendVarselTilArbeidsgiver(fnr, orgnummer, uuid, narmesteLederRelasjon!!.narmesteLederFnr!!, narmesteLederRelasjon.narmesteLederEpost!!)
@@ -63,10 +63,8 @@ class SendVarselService(
 
                         VarselType.SVAR_MOTEBEHOV.toString().equals(pPlanlagtVarsel.type) -> {
                             if (orgnummer !== null) {
-                                val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer)
-                                if (narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
-                                    syfoMotebehovConsumer.sendVarselTilNaermesteLeder(pPlanlagtVarsel.aktorId, orgnummer, narmesteLederRelasjon!!.narmesteLederFnr!!, pPlanlagtVarsel.fnr)
-                                }
+                                syfoMotebehovConsumer.sendVarselTilNaermesteLeder(pPlanlagtVarsel.aktorId, orgnummer)
+
                             }
                             pPlanlagtVarsel.type
                         }
