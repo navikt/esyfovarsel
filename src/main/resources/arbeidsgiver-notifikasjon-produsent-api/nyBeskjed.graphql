@@ -10,11 +10,15 @@ mutation OpprettNyBeskjed(
     $epostTittel: String!
     $epostHtmlBody: String!
     $sendevindu: Sendevindu = LOEPENDE
+    $hardDeleteDate: ISO8601LocalDateTime
 ) {
     nyBeskjed(nyBeskjed: {
         metadata: {
             eksternId: $eksternId
             virksomhetsnummer: $virksomhetsnummer
+            hardDelete: {
+                den: $hardDeleteDate
+            }
         }
         mottakere: [
             {
