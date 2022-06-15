@@ -16,6 +16,7 @@ import no.nav.syfo.kafka.varselbus.objectMapper
 import org.apache.commons.cli.MissingArgumentException
 import java.io.IOException
 import java.net.URL
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -26,6 +27,8 @@ class MotebehovVarselService(
     val narmesteLederService: NarmesteLederService,
     val dialogmoterUrl: String
 ) {
+    val WEEKS_BEFORE_DELETE = 4L
+
     suspend fun sendVarselTilNarmesteLeder(varselHendelse: EsyfovarselHendelse) {
         val varseldata = varselHendelse.dataToMotebehovNLVarselData()
 
@@ -40,7 +43,8 @@ class MotebehovVarselService(
                 dialogmoterUrl + "/arbeidsgiver/${narmesteLederRelasjon.narmesteLederId}",
                 narmesteLederRelasjon.narmesteLederFnr!!,
                 varseldata.ansattFnr,
-                narmesteLederRelasjon.narmesteLederEpost!!
+                narmesteLederRelasjon.narmesteLederEpost!!,
+                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
             )
         }
     }
@@ -58,7 +62,7 @@ class MotebehovVarselService(
             varselHendelse.type.toDineSykmeldteHendelseType().toString(),
             null,
             varseltekst,
-            OffsetDateTime.now().plusWeeks(4L)
+            OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
         )
         dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
     }

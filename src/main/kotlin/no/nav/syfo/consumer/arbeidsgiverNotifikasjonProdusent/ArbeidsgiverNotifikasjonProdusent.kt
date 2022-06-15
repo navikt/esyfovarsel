@@ -45,10 +45,6 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsume
             HttpStatusCode.OK -> {
                 val beskjed = runBlocking { response.receive<OpprettNyBeskjedArbeidsgiverNotifikasjonResponse>() }
                 return if (beskjed.data !== null) {
-                    log.info("beskjed.data.nyBeskjed.id ${beskjed.data.nyBeskjed.id} to ag-notifikasjon-produsent-api")
-                    log.info("beskjed.data.nyBeskjed.feilmelding ${beskjed.data.nyBeskjed.feilmelding} to ag-notifikasjon-produsent-api")
-                    log.info("beskjed.data.nyBeskjed.typename ${beskjed.data.nyBeskjed.__typename} to ag-notifikasjon-produsent-api")
-
                     if (beskjed.data.nyBeskjed.__typename?.let { OpprettNyBeskjedArbeidsgiverNotifikasjonMutationStatus.NY_BESKJED_VELLYKKET.status.equals(it) } == true) {
                         log.info("Have send new notification with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api")
                         return beskjed.data.nyBeskjed.id
@@ -57,9 +53,8 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsume
                         null
                     }
                 } else {
-                    log.error("Could not send notification, data is null: $beskjed")
                     val errors = runBlocking { response.receive<OpprettNyBeskjedArbeidsgiverNotifikasjonErrorResponse>().errors }
-                    log.error("Could not send notification because of error: ${errors[0].message}")
+                    log.error("Could not send notification because of error: ${errors[0].message}, data was null: $beskjed")
                     null
                 }
             }
@@ -97,6 +92,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsume
                 arbeidsgiverNotifikasjon.emailTitle,
                 arbeidsgiverNotifikasjon.emailBody,
                 EpostSendevinduTypes.LOEPENDE,
+                arbeidsgiverNotifikasjon.hardDeleteDate.toString()
             )
             val requestBody = CreateNewNotificationAgRequest(graphQuery, variables)
 

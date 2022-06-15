@@ -14,6 +14,7 @@ import no.nav.syfo.kafka.varselbus.domain.DineSykmeldteHendelseType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 
 class SendVarselService(
@@ -26,6 +27,7 @@ class SendVarselService(
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.db.SendVarselService")
+    val WEEKS_BEFORE_DELETE_AKTIVITETSKRAV = 2L
 
     suspend fun sendVarsel(pPlanlagtVarsel: PPlanlagtVarsel): String {
         // Recheck if user can be notified in case of recent 'Addressesperre'
@@ -71,7 +73,12 @@ class SendVarselService(
                             if (orgnummer !== null) {
                                 val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer)
                                 if (narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
-                                    syfoMotebehovConsumer.sendVarselTilNaermesteLeder(pPlanlagtVarsel.aktorId, orgnummer, narmesteLederRelasjon!!.narmesteLederFnr!!, pPlanlagtVarsel.fnr)
+                                    syfoMotebehovConsumer.sendVarselTilNaermesteLeder(
+                                        pPlanlagtVarsel.aktorId,
+                                        orgnummer,
+                                        narmesteLederRelasjon!!.narmesteLederFnr!!,
+                                        pPlanlagtVarsel.fnr
+                                    )
                                 }
                             }
                             pPlanlagtVarsel.type
@@ -97,14 +104,23 @@ class SendVarselService(
             DineSykmeldteHendelseType.AKTIVITETSKRAV.toString(),
             null,
             DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST,
-            OffsetDateTime.now().plusWeeks(4L)
+            OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE_AKTIVITETSKRAV)
         )
 
         log.info("Sender varsel til Dine sykmeldte for uuid $uuid")
         dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
 
         log.info("Sender varsel til Arbeidsgivernotifikasjoner for uuid $uuid")
-        arbeidsgiverNotifikasjonService.sendNotifikasjon(VarselType.AKTIVITETSKRAV, uuid, orgnummer, urlEnv.baseUrlDineSykmeldte, narmesteLederFnr, fnr, narmesteLederEpostadresse)
+        arbeidsgiverNotifikasjonService.sendNotifikasjon(
+            VarselType.AKTIVITETSKRAV,
+            uuid,
+            orgnummer,
+            urlEnv.baseUrlDineSykmeldte,
+            narmesteLederFnr,
+            fnr,
+            narmesteLederEpostadresse,
+            LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE_AKTIVITETSKRAV),
+        )
     }
 
     private fun sendVarselTilSykmeldt(fnr: String, varselContent: String, uuid: String, varselUrl: URL) {

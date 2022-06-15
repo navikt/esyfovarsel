@@ -1,5 +1,7 @@
 package no.nav.syfo.kafka.dinesykmeldte.domain
 
+import java.time.LocalDateTime
+
 data class ArbeidsgiverNotifikasjon(
     val varselId: String,
     val virksomhetsnummer: String,
@@ -10,4 +12,5 @@ data class ArbeidsgiverNotifikasjon(
     val narmesteLederEpostadresse: String,
     val emailTitle: String,
     val emailBody: String,
+    val hardDeleteDate: LocalDateTime,
 )
