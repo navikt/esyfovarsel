@@ -202,7 +202,7 @@ fun Application.serverModule(
     }
 
     runningRemotely {
-        setupRoutesWithAuthentication(varselSender, varselSendtService, replanleggingService, env.authEnv, database)
+        setupRoutesWithAuthentication(varselSender, varselSendtService, replanleggingService, env.authEnv)
     }
 
     runningLocally {
