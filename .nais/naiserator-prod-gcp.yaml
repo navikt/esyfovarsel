@@ -46,27 +46,29 @@ spec:
   gcp:
     sqlInstances:
       - autoBackupHour: 1
-        cascadingDelete: false
+        cascadingDelete: true
         collation: nb_NO.UTF8
         databases:
           - envVarPrefix: GCP_DB
-            name: esyfovarsel-db
+            name: esyfovarsel
         diskAutoresize: true
-        diskSize: 30
+        diskSize: 80
         diskType: SSD
+        flags:
+          - name: max_connections
+            value: "50"
         highAvailability: true
         insights:
           enabled: true
-          queryStringLength: 4500
           recordApplicationTags: true
           recordClientAddress: true
         maintenance:
           day: 1
           hour: 4
-        name: esyfovarsel-db-instance
+        name: esyfovarsel-instance
         pointInTimeRecovery: true
-        tier: db-f1-micro
-        type: POSTGRES_12
+        tier: db-custom-4-15360
+        type: POSTGRES_13
   webproxy: true
   ingresses:
     - "https://esyfovarsel.intern.nav.no"

@@ -14,6 +14,7 @@ import no.nav.syfo.db.toPSyketilfellebit
 import no.nav.syfo.kafka.KafkaListener
 import no.nav.syfo.kafka.aivenConsumerProperties
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KSyketilfellebit
+import no.nav.syfo.kafka.syketilfelleConsumerProperties
 import no.nav.syfo.kafka.topicFlexSyketilfellebiter
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
@@ -37,7 +38,7 @@ class SyketilfelleKafkaConsumer(
     }
 
     init {
-        val kafkaConfig = aivenConsumerProperties(env)
+        val kafkaConfig = syketilfelleConsumerProperties(env)
         kafkaListener = KafkaConsumer(kafkaConfig)
         kafkaListener.subscribe(listOf(topicFlexSyketilfellebiter))
     }
