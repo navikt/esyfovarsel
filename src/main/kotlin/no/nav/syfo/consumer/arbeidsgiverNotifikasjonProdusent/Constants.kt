@@ -3,7 +3,7 @@ package no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent
 const val MUTATION_PATH_PREFIX = "/arbeidsgiver-notifikasjon-produsent-api"
 const val CREATE_NOTIFICATION_AG_MUTATION = "nyBeskjed.graphql"
 
-const val MERKELAPP = "Oppfølging"
+const val MERKELAPP = "OppfølgingTull"
 const val AKTIVITETSKRAV_MESSAGE_TEXT = "En av dine medarbeidere har snart vært sykmeldt i åtte uker"
 const val AKTIVITETSKRAV_EMAIL_TITLE = "Varsel om nytt aktivitetskrav"
 const val AKTIVITETSKRAV_EMAIL_BODY_START = "<body>En av dine medarbeidere har snart vært sykmeldt i åtte uker. Gå inn på "
