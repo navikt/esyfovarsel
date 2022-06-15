@@ -45,24 +45,30 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsume
             HttpStatusCode.OK -> {
                 val beskjed = runBlocking { response.receive<OpprettNyBeskjedArbeidsgiverNotifikasjonResponse>() }
                 return if (beskjed.data !== null) {
-                    log.info("Have send new notification, beskjed.data.nyBeskjed.id ${beskjed.data.nyBeskjed.id} to ag-notifikasjon-produsent-api")
-                    log.info("Have send new notification, beskjed.data.nyBeskjed.feilmelding ${beskjed.data.nyBeskjed.feilmelding} to ag-notifikasjon-produsent-api")
-                    log.info("Have send new notification, beskjed.data.nyBeskjed.typename ${beskjed.data.nyBeskjed.__typename} to ag-notifikasjon-produsent-api")
-                    log.info("Have send new notification with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api")
-                    beskjed.data.nyBeskjed.id
+                    log.info("beskjed.data.nyBeskjed.id ${beskjed.data.nyBeskjed.id} to ag-notifikasjon-produsent-api")
+                    log.info("beskjed.data.nyBeskjed.feilmelding ${beskjed.data.nyBeskjed.feilmelding} to ag-notifikasjon-produsent-api")
+                    log.info("beskjed.data.nyBeskjed.typename ${beskjed.data.nyBeskjed.__typename} to ag-notifikasjon-produsent-api")
+
+                    if (beskjed.data.nyBeskjed.__typename?.let { OpprettNyBeskjedArbeidsgiverNotifikasjonMutationStatus.NY_BESKJED_VELLYKKET.status.equals(it) } == true) {
+                        log.info("Have send new notification with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api")
+                        return beskjed.data.nyBeskjed.id
+                    } else {
+                        log.error("Could not send notification because of error: ${beskjed.data.nyBeskjed.feilmelding}")
+                        null
+                    }
                 } else {
-                    log.error("Could not post notification, data is null: $beskjed")
+                    log.error("Could not send notification, data is null: $beskjed")
                     val errors = runBlocking { response.receive<OpprettNyBeskjedArbeidsgiverNotifikasjonErrorResponse>().errors }
-                    log.error("Could not post notification because of errors: $errors")
+                    log.error("Could not send notification because of error: ${errors[0].message}")
                     null
                 }
             }
             HttpStatusCode.NoContent -> {
-                log.error("Could not post notification: No content found in the response body")
+                log.error("Could not send notification: No content found in the response body")
                 null
             }
             HttpStatusCode.Unauthorized -> {
-                log.error("Could not post notification: Unable to authorize")
+                log.error("Could not send notification: Unable to authorize")
                 return null
             }
             else -> {
