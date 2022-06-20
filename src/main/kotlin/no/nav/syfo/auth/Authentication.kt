@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory
 import java.net.URL
 import java.util.concurrent.TimeUnit
 
-
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.JwtValidation")
 
 fun Application.setupAuthentication(
@@ -28,7 +27,6 @@ fun Application.setupAuthentication(
         .cached(10, 24, TimeUnit.HOURS)
         .rateLimited(10, 1, TimeUnit.MINUTES)
         .build()
-
 
     install(Authentication) {
         jwt(name = "loginservice") {
