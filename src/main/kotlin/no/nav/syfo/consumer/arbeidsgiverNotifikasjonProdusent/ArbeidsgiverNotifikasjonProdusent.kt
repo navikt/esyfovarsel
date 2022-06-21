@@ -11,6 +11,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MERKELAPP
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.kafka.dinesykmeldte.domain.ArbeidsgiverNotifikasjon
@@ -39,7 +40,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsume
     }
 
     open fun createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? {
-        log.info("About to send new notificationt with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api")
+        log.info("About to send new notification with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api")
         val response: HttpResponse? = callArbeidsgiverNotifikasjonProdusent(arbeidsgiverNotifikasjon)
         return when (response?.status) {
             HttpStatusCode.OK -> {
@@ -84,9 +85,9 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsume
                 arbeidsgiverNotifikasjon.varselId,
                 arbeidsgiverNotifikasjon.virksomhetsnummer,
                 arbeidsgiverNotifikasjon.url,
-                arbeidsgiverNotifikasjon.naermesteLederFnr,
+                arbeidsgiverNotifikasjon.narmesteLederFnr,
                 arbeidsgiverNotifikasjon.ansattFnr,
-                MERKELAPP,
+                ARBEIDSGIVERNOTIFIKASJON_MERKELAPP,
                 arbeidsgiverNotifikasjon.messageText,
                 arbeidsgiverNotifikasjon.narmesteLederEpostadresse,
                 arbeidsgiverNotifikasjon.emailTitle,

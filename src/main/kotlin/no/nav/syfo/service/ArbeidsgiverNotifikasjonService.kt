@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import no.nav.syfo.*
 import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.*
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.kafka.dinesykmeldte.domain.ArbeidsgiverNotifikasjon
@@ -41,10 +42,10 @@ class ArbeidsgiverNotifikasjonService(val arbeidsgiverNotifikasjonProdusent: Arb
                 url,
                 narmesteLederFnr,
                 ansattFnr,
-                AKTIVITETSKRAV_MESSAGE_TEXT,
+                ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT,
                 narmesteLederEpostadresse,
-                AKTIVITETSKRAV_EMAIL_TITLE,
-                AKTIVITETSKRAV_EMAIL_BODY_START + url + AKTIVITETSKRAV_EMAIL_BODY_END,
+                ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE,
+                ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY_START + url + ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY_END,
                 hardDeleteDate,
             )
             VarselType.SVAR_MOTEBEHOV -> ArbeidsgiverNotifikasjon(
@@ -53,10 +54,10 @@ class ArbeidsgiverNotifikasjonService(val arbeidsgiverNotifikasjonProdusent: Arb
                 url,
                 narmesteLederFnr,
                 ansattFnr,
-                SVAR_MOTEBEHOV_MESSAGE_TEXT,
+                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
                 narmesteLederEpostadresse,
-                SVAR_MOTEBEHOV_EMAIL_TITLE,
-                SVAR_MOTEBEHOV_EMAIL_BODY,
+                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
+                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
                 hardDeleteDate
             )
             else -> null

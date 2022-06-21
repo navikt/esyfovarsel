@@ -6,7 +6,7 @@ data class ArbeidsgiverNotifikasjon(
     val varselId: String,
     val virksomhetsnummer: String,
     val url: String,
-    val naermesteLederFnr: String,
+    val narmesteLederFnr: String,
     val ansattFnr: String,
     val messageText: String,
     val narmesteLederEpostadresse: String,
