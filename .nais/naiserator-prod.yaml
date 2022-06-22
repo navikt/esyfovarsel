@@ -8,14 +8,12 @@ metadata:
 spec:
   image: {{ image }}
   port: 8080
-  strategy:
-    type: Recreate
   liveness:
     path: /isAlive
     initialDelay: 300
-    timeout: 20
+    timeout: 60
     periodSeconds: 10
-    failureThreshold: 50
+    failureThreshold: 100
   readiness:
     path: /isReady
     initialDelay: 10
@@ -23,11 +21,11 @@ spec:
     timeout: 5
   resources:
     limits:
-      cpu: 4000m
-      memory: 2048Mi
+      cpu: 6000m
+      memory: 3096Mi
     requests:
-      cpu: 3000m
-      memory: 1536Mi
+      cpu: 4000m
+      memory: 3072Mi
   replicas:
     min: 1
     max: 1
