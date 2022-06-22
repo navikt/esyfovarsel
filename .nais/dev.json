@@ -22,8 +22,7 @@
     "NARMESTELEDER_URL": "https://narmesteleder.dev.intern.nav.no",
     "NARMESTELEDER_SCOPE": "api://dev-gcp.teamsykmelding.narmesteleder/.default",
     "BASE_URL_DINE_SYKMELDTE": "https://www-gcp.dev.nav.no/arbeidsgiver/sykmeldte",
-    "SYFOMOTEBEHOV_URL": "https://syfomotebehov.dev.intern.nav.no",
-    "FLYWAY_LOCK_RETRY_COUNT": "-1"
+    "SYFOMOTEBEHOV_URL": "https://syfomotebehov.dev.intern.nav.no"
   },
   "job": {
     "KTOR_ENV": "remote",
