@@ -22,4 +22,5 @@ data class Variables(
     val epostTittel: String,
     val epostHtmlBody: String,
     val sendevindu: EpostSendevinduTypes,
+    val hardDeleteDate: String,
 )

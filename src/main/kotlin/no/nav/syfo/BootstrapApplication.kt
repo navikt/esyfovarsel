@@ -71,6 +71,7 @@ fun main() {
                 val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
                 val narmesteLederConsumer = NarmesteLederConsumer(env.urlEnv, azureAdTokenConsumer)
                 val arbeidsgiverNotifikasjonProdusent = ArbeidsgiverNotifikasjonProdusent(env.urlEnv, azureAdTokenConsumer)
+                val arbeidsgiverNotifikasjonService = ArbeidsgiverNotifikasjonService(arbeidsgiverNotifikasjonProdusent)
 
                 val beskjedKafkaProducer = BeskjedKafkaProducer(env)
                 val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
@@ -100,10 +101,10 @@ fun main() {
                         varselSendtService,
                         replanleggingService,
                         beskjedKafkaProducer,
-                        arbeidsgiverNotifikasjonProdusent,
                         dineSykmeldteHendelseKafkaProducer,
                         narmesteLederService,
                         syfoMotebehovConsumer,
+                        arbeidsgiverNotifikasjonService,
                     )
 
                     kafkaModule(
@@ -170,14 +171,22 @@ fun Application.serverModule(
     varselSendtService: VarselSendtService,
     replanleggingService: ReplanleggingService,
     beskjedKafkaProducer: BeskjedKafkaProducer,
-    arbeidsgiverNotifikasjonProdusent: ArbeidsgiverNotifikasjonProdusent,
     dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
     narmesteLederService: NarmesteLederService,
-    syfoMotebehovConsumer: SyfoMotebehovConsumer
+    syfoMotebehovConsumer: SyfoMotebehovConsumer,
+    arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
 ) {
 
     val sendVarselService =
-        SendVarselService(beskjedKafkaProducer, arbeidsgiverNotifikasjonProdusent, dineSykmeldteHendelseKafkaProducer, narmesteLederService, accessControl, env.urlEnv, syfoMotebehovConsumer)
+        SendVarselService(
+            beskjedKafkaProducer,
+            dineSykmeldteHendelseKafkaProducer,
+            narmesteLederService,
+            accessControl,
+            env.urlEnv,
+            syfoMotebehovConsumer,
+            arbeidsgiverNotifikasjonService,
+        )
 
     val varselSender = VarselSender(
         database,
@@ -257,8 +266,16 @@ fun Application.varselBusModule(
 ) {
     runningRemotely {
         runningInGCPCluster {
+            val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
+            val arbeidsgiverNotifikasjonProdusent = ArbeidsgiverNotifikasjonProdusent(env.urlEnv, azureAdTokenConsumer)
+            val narmesteLederConsumer = NarmesteLederConsumer(env.urlEnv, azureAdTokenConsumer)
+
             val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl)
-            val varselBusService = VarselBusService(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService, env.urlEnv)
+            val arbeidsgiverNotifikasjonService = ArbeidsgiverNotifikasjonService(arbeidsgiverNotifikasjonProdusent)
+            val narmesteLederService = NarmesteLederService(narmesteLederConsumer)
+
+            val varselBusService =
+                VarselBusService(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService, arbeidsgiverNotifikasjonService, narmesteLederService, env.urlEnv)
 
             launch(backgroundTasksContext) {
                 launchKafkaListener(

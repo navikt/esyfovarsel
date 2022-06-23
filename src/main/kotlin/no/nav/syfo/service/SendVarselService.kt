@@ -2,7 +2,6 @@ package no.nav.syfo.service
 
 import no.nav.syfo.DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST
 import no.nav.syfo.UrlEnv
-import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.syfomotebehov.SyfoMotebehovConsumer
 import no.nav.syfo.db.domain.PPlanlagtVarsel
@@ -15,18 +14,20 @@ import no.nav.syfo.kafka.varselbus.domain.DineSykmeldteHendelseType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 
 class SendVarselService(
     val beskjedKafkaProducer: BeskjedKafkaProducer,
-    val arbeidsgiverNotifikasjonProdusent: ArbeidsgiverNotifikasjonProdusent,
     val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
     val narmesteLederService: NarmesteLederService,
     val accessControl: AccessControl,
     val urlEnv: UrlEnv,
-    val syfoMotebehovConsumer: SyfoMotebehovConsumer
+    val syfoMotebehovConsumer: SyfoMotebehovConsumer,
+    val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.db.SendVarselService")
+    val WEEKS_BEFORE_DELETE_AKTIVITETSKRAV = 2L
 
     suspend fun sendVarsel(pPlanlagtVarsel: PPlanlagtVarsel): String {
         // Recheck if user can be notified in case of recent 'Addressesperre'
@@ -41,8 +42,9 @@ class SendVarselService(
                 if (varselUrl !== null && varselContent !== null) {
                     when {
                         VarselType.AKTIVITETSKRAV.toString().equals(pPlanlagtVarsel.type) -> {
-                            if (uuid != "66705dc4-e3b6-4afd-ab1a-ccd08bbcbc78"
-                                && uuid != "b2dec22e-4c5d-49f0-8e53-8ed06dea68e5") {
+                            if (uuid != "66705dc4-e3b6-4afd-ab1a-ccd08bbcbc78" &&
+                                uuid != "b2dec22e-4c5d-49f0-8e53-8ed06dea68e5"
+                            ) {
                                 sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
                             }
                             if (orgnummer !== null) {
@@ -50,7 +52,13 @@ class SendVarselService(
                                 val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer)
                                 log.info("NL-relasjon hentet for UUID: $uuid")
                                 if (narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
-                                    sendVarselTilArbeidsgiver(fnr, orgnummer, uuid, narmesteLederRelasjon!!.narmesteLederFnr!!, narmesteLederRelasjon.narmesteLederEpost!!)
+                                    sendAktivitetskravVarselTilArbeidsgiver(
+                                        fnr,
+                                        orgnummer,
+                                        uuid,
+                                        narmesteLederRelasjon!!.narmesteLederFnr!!,
+                                        narmesteLederRelasjon.narmesteLederEpost!!
+                                    )
                                 }
                             }
                             pPlanlagtVarsel.type
@@ -66,7 +74,12 @@ class SendVarselService(
                             if (orgnummer !== null) {
                                 val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer)
                                 if (narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
-                                    syfoMotebehovConsumer.sendVarselTilNaermesteLeder(pPlanlagtVarsel.aktorId, orgnummer, narmesteLederRelasjon!!.narmesteLederFnr!!, pPlanlagtVarsel.fnr)
+                                    syfoMotebehovConsumer.sendVarselTilNaermesteLeder(
+                                        pPlanlagtVarsel.aktorId,
+                                        orgnummer,
+                                        narmesteLederRelasjon!!.narmesteLederFnr!!,
+                                        pPlanlagtVarsel.fnr
+                                    )
                                 }
                             }
                             pPlanlagtVarsel.type
@@ -85,20 +98,30 @@ class SendVarselService(
         }
     }
 
-    private fun sendVarselTilArbeidsgiver(fnr: String, orgnummer: String, uuid: String, narmesteLederFnr: String, narmesteLederEpostadresse: String) {
+    private fun sendAktivitetskravVarselTilArbeidsgiver(fnr: String, orgnummer: String, uuid: String, narmesteLederFnr: String, narmesteLederEpostadresse: String) {
         val dineSykmeldteVarsel = DineSykmeldteVarsel(
             fnr,
             orgnummer,
             DineSykmeldteHendelseType.AKTIVITETSKRAV.toString(),
             null,
             DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST,
-            OffsetDateTime.now().plusWeeks(4L)
+            OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE_AKTIVITETSKRAV)
         )
 
         log.info("Sender varsel til Dine sykmeldte for uuid $uuid")
         dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
+
         log.info("Sender varsel til Arbeidsgivernotifikasjoner for uuid $uuid")
-        arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(uuid, orgnummer, fnr, narmesteLederFnr, narmesteLederEpostadresse)
+        arbeidsgiverNotifikasjonService.sendNotifikasjon(
+            VarselType.AKTIVITETSKRAV,
+            uuid,
+            orgnummer,
+            urlEnv.baseUrlDineSykmeldte,
+            narmesteLederFnr,
+            fnr,
+            narmesteLederEpostadresse,
+            LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE_AKTIVITETSKRAV),
+        )
     }
 
     private fun sendVarselTilSykmeldt(fnr: String, varselContent: String, uuid: String, varselUrl: URL) {

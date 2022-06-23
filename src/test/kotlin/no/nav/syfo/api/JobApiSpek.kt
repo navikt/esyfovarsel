@@ -10,7 +10,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.api.job.registerJobTriggerApi
 import no.nav.syfo.api.job.urlPathJobTrigger
-import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.syfomotebehov.SyfoMotebehovConsumer
 import no.nav.syfo.db.domain.PlanlagtVarsel
@@ -21,6 +20,7 @@ import no.nav.syfo.job.VarselSender
 import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.service.AccessControl
+import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
 import no.nav.syfo.service.SendVarselService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.*
@@ -40,7 +40,7 @@ object JobApiSpek : Spek({
         val embeddedDatabase by lazy { EmbeddedDatabase() }
         val accessControl = mockk<AccessControl>()
         val beskjedKafkaProducer = mockk<BeskjedKafkaProducer>()
-        val arbeidsgiverNotifikasjonProdusent = mockk<ArbeidsgiverNotifikasjonProdusent>()
+        val arbeidsgiverNotifikasjonService = mockk<ArbeidsgiverNotifikasjonService>()
         val dineSykmeldteHendelseKafkaProducer = mockk<DineSykmeldteHendelseKafkaProducer>()
         val narmesteLederService = mockk<NarmesteLederService>()
         val syfoMotebeovConsumer = mockk<SyfoMotebehovConsumer>()
@@ -52,7 +52,15 @@ object JobApiSpek : Spek({
         coEvery { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
 
         val sendVarselService =
-            SendVarselService(beskjedKafkaProducer, arbeidsgiverNotifikasjonProdusent, dineSykmeldteHendelseKafkaProducer, narmesteLederService, accessControl, testEnv.urlEnv, syfoMotebeovConsumer)
+            SendVarselService(
+                beskjedKafkaProducer,
+                dineSykmeldteHendelseKafkaProducer,
+                narmesteLederService,
+                accessControl,
+                testEnv.urlEnv,
+                syfoMotebeovConsumer,
+                arbeidsgiverNotifikasjonService,
+            )
         val varselSender = VarselSender(embeddedDatabase, sendVarselService, testEnv.toggleEnv, testEnv.appEnv)
 
         with(TestApplicationEngine()) {
