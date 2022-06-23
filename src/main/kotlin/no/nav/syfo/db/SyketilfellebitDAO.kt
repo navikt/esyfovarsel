@@ -3,7 +3,6 @@ package no.nav.syfo.db
 import no.nav.syfo.db.domain.PSyketilfellebit
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 
-
 fun DatabaseInterface.storeSyketilfellebit(pSyketilfellebit: PSyketilfellebit) {
     val insertStatement = """INSERT INTO SYKETILFELLEBIT (
         uuid,
@@ -17,8 +16,8 @@ fun DatabaseInterface.storeSyketilfellebit(pSyketilfellebit: PSyketilfellebit) {
         ressurs_id,
         fom,
         tom,
-        korrigert_soknad) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""".trimIndent()
-
+        korrigert_soknad) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+    """.trimIndent()
 
     connection.use { conn ->
         conn.prepareStatement(insertStatement).use {

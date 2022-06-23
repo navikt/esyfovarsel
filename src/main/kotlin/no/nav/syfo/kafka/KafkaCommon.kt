@@ -34,12 +34,17 @@ interface KafkaListener {
     suspend fun listen(applicationState: ApplicationState)
 }
 
-fun aivenConsumerProperties(env: Environment) : Properties {
+fun syketilfelleConsumerProperties(env: Environment): Properties {
+    return aivenConsumerProperties(env).apply {
+        put(GROUP_ID_CONFIG, "esyfovarsel-syketilfelle-group")
+    }
+}
+fun aivenConsumerProperties(env: Environment): Properties {
     val sslConfig = env.kafkaEnv.sslConfig
 
     return consumerProperties(env).apply {
         put(SECURITY_PROTOCOL_CONFIG, SSL)
-        put(SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "")    // Disable server host name verification
+        put(SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "") // Disable server host name verification
         put(SSL_TRUSTSTORE_TYPE_CONFIG, JAVA_KEYSTORE)
         put(SSL_KEYSTORE_TYPE_CONFIG, PKCS12)
         put(SSL_TRUSTSTORE_LOCATION_CONFIG, sslConfig.truststoreLocation)
@@ -54,10 +59,10 @@ fun aivenConsumerProperties(env: Environment) : Properties {
     }
 }
 
-fun consumerProperties(env: Environment) : Properties {
+fun consumerProperties(env: Environment): Properties {
     val kafkaGCPSuffix = if (env.appEnv.runningInGCPCluster) "-gcp-v03" else ""
 
-    val properties = HashMap<String,String>().apply {
+    val properties = HashMap<String, String>().apply {
         put(GROUP_ID_CONFIG, "esyfovarsel-group-v04$kafkaGCPSuffix")
         put(AUTO_OFFSET_RESET_CONFIG, "earliest")
         put(MAX_POLL_RECORDS_CONFIG, "1")
@@ -81,10 +86,10 @@ fun producerProperties(env: Environment) : Properties {
     val schemaRegistryConfig = env.kafkaEnv.schemaRegistry
     val userinfoConfig = "${schemaRegistryConfig.username}:${schemaRegistryConfig.password}"
 
-    val properties = HashMap<String,String>().apply {
+    val properties = HashMap<String, String>().apply {
         put(ACKS_CONFIG, "all")
         put(SECURITY_PROTOCOL_CONFIG, SSL)
-        put(SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "")    // Disable server host name verification
+        put(SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "") // Disable server host name verification
         put(SSL_TRUSTSTORE_TYPE_CONFIG, JAVA_KEYSTORE)
         put(SSL_KEYSTORE_TYPE_CONFIG, PKCS12)
         put(SSL_TRUSTSTORE_LOCATION_CONFIG, sslConfig.truststoreLocation)

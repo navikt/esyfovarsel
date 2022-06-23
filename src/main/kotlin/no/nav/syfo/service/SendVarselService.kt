@@ -70,6 +70,7 @@ class SendVarselService(
                         }
 
                         VarselType.SVAR_MOTEBEHOV.toString().equals(pPlanlagtVarsel.type) -> {
+                            syfoMotebehovConsumer.sendVarselTilArbeidstaker(pPlanlagtVarsel.aktorId, pPlanlagtVarsel.fnr)
                             if (orgnummer !== null) {
                                 val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer)
                                 if (narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
