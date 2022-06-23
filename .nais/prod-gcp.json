@@ -9,7 +9,7 @@
     "SYFOSMREGISTER_URL": "http://syfosmregister.teamsykmelding",
     "SYFOSMREGISTER_SCOPE": "api://prod-gcp.teamsykmelding.syfosmregister/.default",
     "DKIF_SCOPE": "api://prod-gcp.team-rocket.digdir-krr-proxy/.default",
-    "PDL_SCOPE": "api://prod-gcp.pdl.pdl-api/.default",
+    "PDL_SCOPE": "api://prod-fss.pdl.pdl-api/.default",
     "TOGGLE_SEND_MERVEILEDNING_VARSLER": "false",
     "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "false",
     "TOGGLE_SEND_SVAR_MOTEBEHOV_VARSLER": "false",
