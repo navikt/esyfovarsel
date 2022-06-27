@@ -1,7 +1,7 @@
 package no.nav.syfo.syketilfelle
 
 import no.nav.syfo.syketilfelle.domain.Tag
-import no.nav.syfo.syketilfelle.domain.Oppfolgingstilfelle
+import no.nav.syfo.syketilfelle.domain.Syketilfelle
 import no.nav.syfo.syketilfelle.domain.Syketilfelledag
 import java.time.LocalDate
 
@@ -39,8 +39,8 @@ infix fun <T> T.and(other: T) = ListContainsPredicate.of(this) and other
 operator fun <T> T.not() = ListContainsPredicate.not(this)
 
 
-fun grupperIOppfolgingstilfeller(tidslinje: List<Syketilfelledag>): List<Oppfolgingstilfelle> {
-    val oppfolgingstilfelleListe = ArrayList<Oppfolgingstilfelle>()
+fun grupperIOppfolgingstilfeller(tidslinje: List<Syketilfelledag>): List<Syketilfelle> {
+    val syketilfelleListe = ArrayList<Syketilfelle>()
     var gjeldendeSyketilfelledagListe = ArrayList<Syketilfelledag>()
     var friskmeldtdagerSidenForrigeSykedag = 0
     var dagerAvArbeidsgiverperiode = 0
@@ -82,14 +82,14 @@ fun grupperIOppfolgingstilfeller(tidslinje: List<Syketilfelledag>): List<Oppfolg
         }
 
         if (friskmeldtdagerSidenForrigeSykedag >= 16 && gjeldendeSyketilfelledagListe.isNotEmpty()) {
-            val nyttOppfolgingstilfelle = Oppfolgingstilfelle(
+            val nyttSyketilfelle = Syketilfelle(
                 tidslinje = gjeldendeSyketilfelledagListe,
                 sisteDagIArbeidsgiverperiode = sisteDagIArbeidsgiverperiode ?: it,
                 dagerAvArbeidsgiverperiode = dagerAvArbeidsgiverperiode,
                 behandlingsdager = behandlingsdager,
                 sisteSykedagEllerFeriedag = sisteSykedagEllerFeriedagIOppfolgingstilfelle
             )
-            oppfolgingstilfelleListe.add(nyttOppfolgingstilfelle)
+            syketilfelleListe.add(nyttSyketilfelle)
 
             // Resett variabler
             gjeldendeSyketilfelledagListe = ArrayList()
@@ -102,17 +102,17 @@ fun grupperIOppfolgingstilfeller(tidslinje: List<Syketilfelledag>): List<Oppfolg
     }
 
     if (gjeldendeSyketilfelledagListe.isNotEmpty()) {
-        val sisteOppfolgingstilfelle = Oppfolgingstilfelle(
+        val sisteSyketilfelle = Syketilfelle(
             tidslinje = gjeldendeSyketilfelledagListe,
             sisteDagIArbeidsgiverperiode = sisteDagIArbeidsgiverperiode ?: tidslinje.last(),
             dagerAvArbeidsgiverperiode = dagerAvArbeidsgiverperiode,
             behandlingsdager = behandlingsdager,
             sisteSykedagEllerFeriedag = sisteSykedagEllerFeriedagIOppfolgingstilfelle
         )
-        oppfolgingstilfelleListe.add(sisteOppfolgingstilfelle)
+        syketilfelleListe.add(sisteSyketilfelle)
     }
 
-    return oppfolgingstilfelleListe
+    return syketilfelleListe
 }
 
 private fun Syketilfelledag.erBehandlingsdag() =

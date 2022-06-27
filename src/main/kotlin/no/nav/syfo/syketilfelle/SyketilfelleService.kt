@@ -4,7 +4,7 @@ import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.syketilfelle.domain.Tag.*
 import no.nav.syfo.db.fetchSyketilfellebiterByFnr
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
-import no.nav.syfo.syketilfelle.domain.Oppfolgingstilfelle
+import no.nav.syfo.syketilfelle.domain.Syketilfelle
 import no.nav.syfo.syketilfelle.domain.Syketilfellebiter
 import no.nav.syfo.syketilfelle.domain.Tidslinje
 import java.time.LocalDate
@@ -39,8 +39,7 @@ class SyketilfelleService(
             ?.let { slaaSammenTilfeller(fnr, it) }
             ?.toOppfolgingstilfelle39Uker()
 
-
-    private fun genererOppfolgingstilfelle(fnr: String): List<Oppfolgingstilfelle>? {
+    private fun genererOppfolgingstilfelle(fnr: String): List<Syketilfelle>? {
         val biter = database.fetchSyketilfellebiterByFnr(fnr)
 
         val tidslinje = Tidslinje(
@@ -77,7 +76,7 @@ class SyketilfelleService(
 
     private fun slaaSammenTilfeller(
         fnr: String,
-        oppfolgingstilfeller: List<Oppfolgingstilfelle>
+        oppfolgingstilfeller: List<Syketilfelle>
     ): KOppfolgingstilfelle39Uker? {
         return oppfolgingstilfeller
             .toMutableList()
@@ -110,5 +109,4 @@ class SyketilfelleService(
     }
 
     private fun LocalDate.leggTilArbeidsgiverPeriode() = plusDays(AntallDagerIArbeidsgiverPeriode.toLong())
-
 }

@@ -8,7 +8,7 @@ import no.nav.syfo.syketilfelle.erFeriedag
 import no.nav.syfo.syketilfelle.erSendt
 import java.time.LocalDate
 
-class Oppfolgingstilfelle(
+class Syketilfelle(
     val tidslinje: List<Syketilfelledag>,
     val sisteDagIArbeidsgiverperiode: Syketilfelledag,
     val dagerAvArbeidsgiverperiode: Int,
