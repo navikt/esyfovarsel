@@ -16,6 +16,7 @@ import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KSyketilfellebit
 import no.nav.syfo.kafka.syketilfelleConsumerProperties
 import no.nav.syfo.kafka.topicFlexSyketilfellebiter
 import no.nav.syfo.service.AccessControl
+import no.nav.syfo.syketilfelle.or
 import no.nav.syfo.varsel.VarselPlanner
 import no.nav.syfo.varsel.VarselPlannerSyketilfelle
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -55,7 +56,7 @@ class SyketilfelleKafkaConsumer(
                     val kSyketilfellebit: KSyketilfellebit = objectMapper.readValue(it.value())
                     databaseInterface.storeSyketilfellebit(kSyketilfellebit.toPSyketilfellebit())
                     val sykmeldtFnr = kSyketilfellebit.fnr
-                    if (accessControl.canUserBeNotified(sykmeldtFnr)) {
+                    if (accessControl.canUserBeNotified(sykmeldtFnr) && kSyketilfellebit.orgnummer != null) {
                         varselPlanners.forEach {
                             it.processSyketilfelle(sykmeldtFnr, kSyketilfellebit.orgnummer)
                         }

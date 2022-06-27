@@ -30,11 +30,10 @@ object MerVeiledningVarselPlannerSpek : Spek({
     describe("Varsel39UkerSpek") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
         val syketilfelleConsumer = mockk<SyfosyketilfelleConsumer>()
-        val syketilfelleService = mockk<SyketilfelleService>()
         val pdlConsumer = mockk<PdlConsumer>()
         val varselSendtService = VarselSendtService(pdlConsumer, syketilfelleConsumer, embeddedDatabase)
 
-        val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(embeddedDatabase, syketilfelleConsumer, syketilfelleService, varselSendtService)
+        val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(embeddedDatabase, syketilfelleConsumer, varselSendtService)
 
         afterEachTest {
             embeddedDatabase.connection.dropData()
@@ -57,7 +56,6 @@ object MerVeiledningVarselPlannerSpek : Spek({
             )
 
             coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             runBlocking {
                 merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
@@ -82,7 +80,6 @@ object MerVeiledningVarselPlannerSpek : Spek({
             )
 
             coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             val dagenForTilfelleStartet = fom.minusDays(1)
             val tidligereUtsendtVarsel = PPlanlagtVarsel(
@@ -122,7 +119,6 @@ object MerVeiledningVarselPlannerSpek : Spek({
             )
 
             coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             val tidligereUtsendtVarsel = PPlanlagtVarsel(
                 UUID.randomUUID().toString(),
@@ -158,7 +154,6 @@ object MerVeiledningVarselPlannerSpek : Spek({
             )
 
             coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             runBlocking {
                 merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
@@ -182,7 +177,6 @@ object MerVeiledningVarselPlannerSpek : Spek({
             )
 
             coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             runBlocking {
                 merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
@@ -225,7 +219,6 @@ object MerVeiledningVarselPlannerSpek : Spek({
             )
 
             coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             runBlocking {
                 merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
@@ -250,7 +243,6 @@ object MerVeiledningVarselPlannerSpek : Spek({
         it("MerVeiledningVarselPlanner dropper planlegging når syfosyketilfelle returnerer null") {
 
             coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns null
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns null
 
             runBlocking {
                 merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
