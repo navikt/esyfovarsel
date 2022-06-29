@@ -47,7 +47,7 @@ class MotebehovVarselService(
     private suspend fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: EsyfovarselHendelse, varseldata: MotebehovNLVarselData) {
         val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(varseldata.ansattFnr, varseldata.orgnummer)
         if (narmesteLederRelasjon !== null && narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
-            if (varselHendelse.mottakerFnr.equals(narmesteLederRelasjon)) {
+            if (varselHendelse.mottakerFnr.equals(narmesteLederRelasjon.narmesteLederFnr)) {
                 arbeidsgiverNotifikasjonService.sendNotifikasjon(
                     VarselType.SVAR_MOTEBEHOV,
                     null,
@@ -61,8 +61,9 @@ class MotebehovVarselService(
             } else {
                 log.warn("Sender ikke varsel til ag-notifikasjon: den ansatte har nærmeste leder med annet fnr enn mottaker i varselHendelse")
             }
+        } else {
+            log.warn("Sender ikke varsel til ag-notifikasjon: narmesteLederRelasjon er null eller har ikke kontaktinfo")
         }
-        log.warn("Sender ikke varsel til ag-notifikasjon: narmesteLederRelasjon er null eller har ikke kontaktinfo")
     }
 
     private fun sendVarselTilDineSykmeldte(varselHendelse: EsyfovarselHendelse, varseldata: MotebehovNLVarselData) {

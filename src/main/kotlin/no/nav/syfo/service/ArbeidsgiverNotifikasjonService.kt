@@ -1,7 +1,7 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.*
-import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.*
+import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.kafka.dinesykmeldte.domain.ArbeidsgiverNotifikasjon
 import java.time.LocalDateTime
