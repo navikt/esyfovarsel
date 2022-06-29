@@ -26,7 +26,7 @@ class SendVarselService(
     val syfoMotebehovConsumer: SyfoMotebehovConsumer,
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
 ) {
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.db.SendVarselService")
+    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.SendVarselService")
     val WEEKS_BEFORE_DELETE_AKTIVITETSKRAV = 2L
 
     suspend fun sendVarsel(pPlanlagtVarsel: PPlanlagtVarsel): String {
@@ -91,7 +91,10 @@ class SendVarselService(
                 } else {
                     throw RuntimeException("Klarte ikke mappe typestreng til innholdstekst og URL")
                 }
-            } ?: UTSENDING_FEILET
+            } ?: run {
+                log.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles ")
+                return UTSENDING_FEILET
+            }
         } catch (e: RuntimeException) {
             log.error("Feil i utsending av varsel med UUID: ${pPlanlagtVarsel.uuid} | ${e.message}", e)
             UTSENDING_FEILET
@@ -108,10 +111,10 @@ class SendVarselService(
             OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE_AKTIVITETSKRAV)
         )
 
-        log.info("Sender varsel til Dine sykmeldte for uuid $uuid")
+        log.info("Sender AKTIVITETSKRAV varsel til Dine sykmeldte for uuid $uuid")
         dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
 
-        log.info("Sender varsel til Arbeidsgivernotifikasjoner for uuid $uuid")
+        log.info("Sender AKTIVITETSKRAV varsel til Arbeidsgivernotifikasjoner for uuid $uuid")
         arbeidsgiverNotifikasjonService.sendNotifikasjon(
             VarselType.AKTIVITETSKRAV,
             uuid,
