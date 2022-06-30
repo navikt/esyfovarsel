@@ -40,6 +40,7 @@ import no.nav.syfo.service.*
 import no.nav.syfo.syketilfelle.SyketilfelleService
 import no.nav.syfo.varsel.AktivitetskravVarselPlanner
 import no.nav.syfo.varsel.MerVeiledningVarselPlanner
+import no.nav.syfo.varsel.MerVeiledningVarselPlannerSyketilfelle
 import no.nav.syfo.varsel.SvarMotebehovVarselPlanner
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -81,7 +82,8 @@ fun main() {
 
                 val syketilfelleService = SyketilfelleService(database)
                 val varselSendtService = VarselSendtService(pdlConsumer, oppfolgingstilfelleConsumer, database)
-                val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, syketilfelleService, varselSendtService)
+                val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService)
+                val merVeiledningVarselPlannerSyketilfelle = MerVeiledningVarselPlannerSyketilfelle(database, syketilfelleService, varselSendtService)
                 val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
                 val svarMotebehovVarselPlanner = SvarMotebehovVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService)
                 val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
@@ -112,6 +114,7 @@ fun main() {
                         accessControl,
                         aktivitetskravVarselPlanner,
                         merVeiledningVarselPlanner,
+                        merVeiledningVarselPlannerSyketilfelle,
                         svarMotebehovVarselPlanner
                     )
 
@@ -231,6 +234,7 @@ fun Application.kafkaModule(
     accessControl: AccessControl,
     aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
     merVeiledningVarselPlanner: MerVeiledningVarselPlanner,
+    merVeiledningVarselPlannerSyketilfelle: MerVeiledningVarselPlannerSyketilfelle,
     svarMotebehovVarselPlanner: SvarMotebehovVarselPlanner
 ) {
     runningRemotely {
@@ -251,7 +255,8 @@ fun Application.kafkaModule(
             launch(backgroundTasksContext) {
                 launchKafkaListener(
                     state,
-                    SyketilfelleKafkaConsumer(env, database)
+                    SyketilfelleKafkaConsumer(env, accessControl, database)
+                        .addPlanner(merVeiledningVarselPlannerSyketilfelle)
                 )
             }
         }

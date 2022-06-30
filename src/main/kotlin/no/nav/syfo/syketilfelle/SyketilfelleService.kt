@@ -39,7 +39,6 @@ class SyketilfelleService(
             ?.let { slaaSammenTilfeller(fnr, it) }
             ?.toOppfolgingstilfelle39Uker()
 
-
     private fun genererOppfolgingstilfelle(fnr: String): List<Oppfolgingstilfelle>? {
         val biter = database.fetchSyketilfellebiterByFnr(fnr)
 
@@ -110,5 +109,4 @@ class SyketilfelleService(
     }
 
     private fun LocalDate.leggTilArbeidsgiverPeriode() = plusDays(AntallDagerIArbeidsgiverPeriode.toLong())
-
 }

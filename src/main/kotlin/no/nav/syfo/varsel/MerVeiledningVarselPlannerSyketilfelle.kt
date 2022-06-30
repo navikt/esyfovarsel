@@ -1,7 +1,6 @@
 package no.nav.syfo.varsel
 
 import kotlinx.coroutines.coroutineScope
-import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselByVarselId
 import no.nav.syfo.db.domain.PlanlagtVarsel
@@ -10,27 +9,23 @@ import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.db.updateUtsendingsdatoByVarselId
 import no.nav.syfo.metrics.tellMerVeiledningPlanlagt
 import no.nav.syfo.service.VarselSendtService
+import no.nav.syfo.syketilfelle.SyketilfelleService
 import no.nav.syfo.utils.VarselUtil
 import no.nav.syfo.utils.todayIsBetweenFomAndTom
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class MerVeiledningVarselPlanner(
+class MerVeiledningVarselPlannerSyketilfelle(
     val databaseAccess: DatabaseInterface,
-    val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
+    val syketilfelleService: SyketilfelleService,
     val varselSendtService: VarselSendtService
-) : VarselPlanner {
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.Varsel39Uker")
+) : VarselPlannerSyketilfelle {
+    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.MerVeiledningVarselPlannerSyketilfelle")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
-    override val name: String = "MER_VEILEDNING_VARSEL"
+    override val name: String = "MER_VEILEDNING_VARSEL_GCP"
 
-    override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String, orgnummer: String?) = coroutineScope {
-        val oppfolgingstilfelle = syfosyketilfelleConsumer.getOppfolgingstilfelle39Uker(aktorId)
-
-        if (oppfolgingstilfelle == null) {
-            log.info("[$name]: Fant ikke oppfolgingstilfelle for denne brukeren. Planlegger ikke nytt varsel")
-            return@coroutineScope
-        }
+    override suspend fun processSyketilfelle(fnr: String, orgnummer: String) = coroutineScope {
+        val oppfolgingstilfelle = syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(fnr) ?: return@coroutineScope
 
         val tilfelleFom = oppfolgingstilfelle.fom
         val tilfelleTom = oppfolgingstilfelle.tom

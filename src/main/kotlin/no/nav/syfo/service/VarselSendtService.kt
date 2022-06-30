@@ -37,7 +37,6 @@ class VarselSendtService(
             return idag.isEqualOrBefore(tom) && erVarselSendt(fnr, varselType, fom, tom)
         } ?: false
     }
-
     fun erVarselSendt(fnr: String, varselType: VarselType, tilfelleFom: LocalDate, tilfelleTom: LocalDate): Boolean {
         val utsendtVarsel = databaseAccess.fetchUtsendtVarselByFnr(fnr)
             .filter { it.type == varselType.name }
