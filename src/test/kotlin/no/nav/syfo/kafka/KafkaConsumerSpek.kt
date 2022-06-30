@@ -53,7 +53,6 @@ object KafkaConsumerSpek : Spek({
     val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(testEnv, accessControl)
         .addPlanner(MockVarselPlaner(fakeApplicationState))
 
-
     beforeGroup {
         embeddedKafkaEnv.start()
         azureADServer.start()

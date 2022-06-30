@@ -192,8 +192,9 @@ data class JobEnv(
 fun getEnvVar(varName: String, defaultValue: String? = null) =
     System.getenv(varName) ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
 
-fun isGCP(): Boolean = getEnvVar("NAIS_CLUSTER_NAME").contains("gcp")
+fun isGCP(): Boolean = getEnvVar("NAIS_CLUSTER_NAME", "none").contains("gcp")
 
+fun isNotGCP(): Boolean = !isGCP()
 fun isLocal(): Boolean = getEnvVar("KTOR_ENV", "local") == "local"
 
 fun isJob(): Boolean = getBooleanEnvVar("JOB")
