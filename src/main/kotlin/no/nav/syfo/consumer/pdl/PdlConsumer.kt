@@ -8,6 +8,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.TokenConsumer
 import no.nav.syfo.consumer.pdl.*
+import no.nav.syfo.isNotGCP
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 
@@ -68,14 +69,17 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: To
             val bearerTokenString = "Bearer $token"
             val graphQuery = this::class.java.getResource("$QUERY_PATH_PREFIX/$service").readText().replace("[\n\r]", "")
             val requestBody = PdlRequest(graphQuery, Variables(aktorId))
-
             try {
                 client.post<HttpResponse>(urlEnv.pdlUrl) {
                     headers {
                         append(TEMA_HEADER, OPPFOLGING_TEMA_HEADERVERDI)
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, bearerTokenString)
-                        append(NAV_CONSUMER_TOKEN_HEADER, bearerTokenString)
+                    }
+                    if (isNotGCP()) {
+                        headers {
+                            append(NAV_CONSUMER_TOKEN_HEADER, bearerTokenString)
+                        }
                     }
                     body = requestBody
                 }
