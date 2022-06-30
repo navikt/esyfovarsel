@@ -3,7 +3,7 @@
     "KTOR_ENV": "remote",
     "KAFKA_BOOTSTRAP_SERVERS_URL": "SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443",
     "STS_URL": "https://security-token-service.nais.adeo.no",
-    "PDL_URL": "https://pdl-api.intern.nav.no/graphql",
+    "PDL_URL": "https://pdl-api.prod-fss-pub.nais.io/graphql",
     "DKIF_URL": "https://dkif.intern.nav.no/rest/v1/person",
     "SYFOSYKETILFELLE_URL": "https://syfosyketilfelle.nais.adeo.no",
     "SYFOSMREGISTER_URL": "http://syfosmregister.teamsykmelding",
