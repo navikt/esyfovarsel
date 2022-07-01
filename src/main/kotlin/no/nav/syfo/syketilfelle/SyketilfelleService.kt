@@ -4,15 +4,14 @@ import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.syketilfelle.domain.Tag.*
 import no.nav.syfo.db.fetchSyketilfellebiterByFnr
 import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
-import no.nav.syfo.syketilfelle.domain.Oppfolgingstilfelle
-import no.nav.syfo.syketilfelle.domain.Syketilfellebiter
-import no.nav.syfo.syketilfelle.domain.Tidslinje
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
+import no.nav.syfo.syketilfelle.domain.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 const val AntallDagerIArbeidsgiverPeriode = 16
 private const val TjueseksUkerIAntallDager = 26 * 7
-
 
 data class KOppfolgingstilfelle39Uker(
     val aktorId: String,
@@ -21,7 +20,14 @@ data class KOppfolgingstilfelle39Uker(
     val fom: LocalDate,
     val tom: LocalDate
 )
-
+data class KOppfolgingstilfellePerson(
+    val aktorId: String,
+    val tidslinje: List<Syketilfelledag>,
+    val sisteDagIArbeidsgiverperiode: Syketilfelledag,
+    val antallBrukteDager: Int,
+    val oppbruktArbeidsgiverperiode: Boolean,
+    val utsendelsestidspunkt: LocalDateTime
+)
 fun KOppfolgingstilfelle39Uker.toOppfolgingstilfelle39Uker() = Oppfolgingstilfelle39Uker(
     this.aktorId,
     this.arbeidsgiverperiodeTotalt,
@@ -39,7 +45,21 @@ class SyketilfelleService(
             ?.let { slaaSammenTilfeller(fnr, it) }
             ?.toOppfolgingstilfelle39Uker()
 
-    private fun genererOppfolgingstilfelle(fnr: String): List<Oppfolgingstilfelle>? {
+    fun beregnKOppfolgingstilfelle(fnr: String): KOppfolgingstilfellePerson? =
+        genererOppfolgingstilfelle(fnr)
+            ?.last()
+            ?.let { oppfolgingstilfelle ->
+                KOppfolgingstilfellePerson(
+                    fnr,
+                    oppfolgingstilfelle.tidslinje,
+                    oppfolgingstilfelle.sisteDagIArbeidsgiverperiode,
+                    oppfolgingstilfelle.dagerAvArbeidsgiverperiode,
+                    oppfolgingstilfelle.oppbruktArbeidsgiverperiode(),
+                    LocalDateTime.now()
+                )
+            }
+
+    fun genererOppfolgingstilfelle(fnr: String): List<Oppfolgingstilfelle>? {
         val biter = database.fetchSyketilfellebiterByFnr(fnr)
 
         val tidslinje = Tidslinje(

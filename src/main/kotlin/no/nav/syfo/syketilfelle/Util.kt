@@ -1,8 +1,8 @@
 package no.nav.syfo.syketilfelle
 
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.syketilfelle.domain.Tag
 import no.nav.syfo.syketilfelle.domain.Oppfolgingstilfelle
-import no.nav.syfo.syketilfelle.domain.Syketilfelledag
 import java.time.LocalDate
 
 class ListContainsPredicate<T> private constructor(private val predicate: (List<T>) -> Boolean) {
@@ -128,9 +128,9 @@ fun Syketilfelledag.erArbeidsdag() =
             it in (
                 (Tag.SYKMELDING and Tag.PERIODE and Tag.FULL_AKTIVITET)
                     or
-                    (Tag.SYKEPENGESOKNAD and Tag.ARBEID_GJENNOPPTATT)
+                        (Tag.SYKEPENGESOKNAD and Tag.ARBEID_GJENNOPPTATT)
                     or
-                    (Tag.SYKEPENGESOKNAD and Tag.BEHANDLINGSDAGER)
+                        (Tag.SYKEPENGESOKNAD and Tag.BEHANDLINGSDAGER)
                 )
         }
         ?: true
