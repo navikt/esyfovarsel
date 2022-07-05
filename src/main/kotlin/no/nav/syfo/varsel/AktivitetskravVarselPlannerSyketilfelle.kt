@@ -108,7 +108,8 @@ class AktivitetskravVarselPlannerSyketilfelle(
                 databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
                 tellAktivitetskravPlanlagt()
             }
+        } else {
+            log.info("-$name-: Ingen gyldigeSykmeldingTilfelledager. Planlegger ikke nytt varsel")
         }
-        log.info("-$name-: Ingen gyldigeSykmeldingTilfelledager. Planlegger ikke nytt varsel")
     }
 }
