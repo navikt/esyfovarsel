@@ -40,6 +40,7 @@ spec:
     outbound:
       external:
         - host: pdl-api.prod-fss-pub.nais.io
+        - host: syfosmregister.prod-fss-pub.nais.io
       rules:
         - application: digdir-krr-proxy
         - application: security-token-service
