@@ -1,40 +1,30 @@
 package no.nav.syfo.varsel
 
 import kotlinx.coroutines.coroutineScope
-import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselBySykmeldingerId
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.metrics.tellAktivitetskravPlanlagt
 import no.nav.syfo.service.SykmeldingService
-import no.nav.syfo.syketilfelle.domain.Tag.*
+import no.nav.syfo.syketilfelle.SyketilfelleService
 import no.nav.syfo.utils.VarselUtil
-import no.nav.syfo.utils.isEqualOrAfter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.temporal.ChronoUnit
 
-class AktivitetskravVarselPlanner(
-    private val databaseAccess: DatabaseInterface,
-    private val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
-    val sykmeldingService: SykmeldingService,
-    override val name: String = "AKTIVITETSKRAV_VARSEL"
-) : VarselPlanner {
-    private val AKTIVITETSKRAV_DAGER: Long = 42
-
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.AktivitetskravVarselPlanner")
+class AktivitetskravVarselPlannerSyketilfelle(
+    val databaseAccess: DatabaseInterface,
+    val syketilfelleService: SyketilfelleService,
+    val sykmeldingService: SykmeldingService
+) : VarselPlannerSyketilfelle {
+    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.AktivitetskravVarselPlannerSyketilfelle")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
+    private val AKTIVITETSKRAV_DAGER: Long = 42L
+    override val name: String = "AKTIVITETSKRAV_VARSEL_GCP"
 
-    override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String, orgnummer: String?) = coroutineScope {
-        val oppfolgingstilfellePerson = syfosyketilfelleConsumer.getOppfolgingstilfelle(aktorId)
-
-        if (oppfolgingstilfellePerson == null) {
-            log.info("-$name-: Fant ikke oppfolgingstilfelle. Planlegger ikke nytt varsel")
-            return@coroutineScope
-        }
+    override suspend fun processSyketilfelle(fnr: String, orgnummer: String) = coroutineScope {
+        val oppfolgingstilfellePerson = syketilfelleService.beregnKOppfolgingstilfelle(fnr) ?: return@coroutineScope
 
         val validSyketilfelledager = oppfolgingstilfellePerson.tidslinje.filter { varselUtil.isValidSyketilfelledag(it) }.sortedBy { it.dag }
 
@@ -118,7 +108,8 @@ class AktivitetskravVarselPlanner(
                 databaseAccess.storePlanlagtVarsel(aktivitetskravVarsel)
                 tellAktivitetskravPlanlagt()
             }
+        } else {
+            log.info("-$name-: Ingen gyldigeSykmeldingTilfelledager. Planlegger ikke nytt varsel")
         }
-        log.info("-$name-: Ingen gyldigeSykmeldingTilfelledager. Planlegger ikke nytt varsel")
     }
 }

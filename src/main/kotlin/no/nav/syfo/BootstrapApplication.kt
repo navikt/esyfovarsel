@@ -38,10 +38,7 @@ import no.nav.syfo.kafka.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.service.*
 import no.nav.syfo.syketilfelle.SyketilfelleService
-import no.nav.syfo.varsel.AktivitetskravVarselPlanner
-import no.nav.syfo.varsel.MerVeiledningVarselPlanner
-import no.nav.syfo.varsel.MerVeiledningVarselPlannerSyketilfelle
-import no.nav.syfo.varsel.SvarMotebehovVarselPlanner
+import no.nav.syfo.varsel.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -85,6 +82,7 @@ fun main() {
                 val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService)
                 val merVeiledningVarselPlannerSyketilfelle = MerVeiledningVarselPlannerSyketilfelle(database, syketilfelleService, varselSendtService)
                 val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
+                val aktivitetskravVarselPlannerSyketilfelle = AktivitetskravVarselPlannerSyketilfelle(database, syketilfelleService, sykmeldingService)
                 val svarMotebehovVarselPlanner = SvarMotebehovVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService)
                 val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
                 val narmesteLederService = NarmesteLederService(narmesteLederConsumer)
@@ -113,6 +111,7 @@ fun main() {
                         env,
                         accessControl,
                         aktivitetskravVarselPlanner,
+                        aktivitetskravVarselPlannerSyketilfelle,
                         merVeiledningVarselPlanner,
                         merVeiledningVarselPlannerSyketilfelle,
                         svarMotebehovVarselPlanner
@@ -233,6 +232,7 @@ fun Application.kafkaModule(
     env: Environment,
     accessControl: AccessControl,
     aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
+    aktivitetskravVarselPlannerSyketilfelle: AktivitetskravVarselPlannerSyketilfelle,
     merVeiledningVarselPlanner: MerVeiledningVarselPlanner,
     merVeiledningVarselPlannerSyketilfelle: MerVeiledningVarselPlannerSyketilfelle,
     svarMotebehovVarselPlanner: SvarMotebehovVarselPlanner
@@ -257,6 +257,7 @@ fun Application.kafkaModule(
                     state,
                     SyketilfelleKafkaConsumer(env, accessControl, database)
                         .addPlanner(merVeiledningVarselPlannerSyketilfelle)
+                        .addPlanner(aktivitetskravVarselPlannerSyketilfelle)
                 )
             }
         }

@@ -46,7 +46,7 @@ val oppfolgingstilfelleResponse = OppfolgingstilfellePerson(
     tidslinje = listOf(syketilfelledag),
     sisteDagIArbeidsgiverperiode = syketilfelledag,
     antallBrukteDager = 2,
-    oppbruktArbeidsgvierperiode = false,
+    oppbruktArbeidsgiverperiode = false,
     utsendelsestidspunkt = fomStartOfDay
 )
 

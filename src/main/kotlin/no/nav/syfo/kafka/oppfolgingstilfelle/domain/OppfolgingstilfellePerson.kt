@@ -7,6 +7,6 @@ data class OppfolgingstilfellePerson(
     val tidslinje: List<Syketilfelledag>,
     val sisteDagIArbeidsgiverperiode: Syketilfelledag,
     val antallBrukteDager: Int,
-    val oppbruktArbeidsgvierperiode: Boolean,
+    val oppbruktArbeidsgiverperiode: Boolean,
     val utsendelsestidspunkt: LocalDateTime
 )

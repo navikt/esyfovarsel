@@ -1,5 +1,6 @@
 package no.nav.syfo.syketilfelle.domain
 
+import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
 import java.time.LocalDateTime
 import no.nav.syfo.syketilfelle.ListContainsPredicate
 import java.time.LocalDate
@@ -66,7 +67,7 @@ class SyketilfelleIntradag(
             .mapValues(this::finnPresedens)
             .mapNotNull(Map.Entry<LocalDate, Syketilfellebit?>::value)
             .map { it.toSyketilfelledag() }
-            .lastOrNull() ?: Syketilfelledag(dag, null, biter)
+            .lastOrNull() ?: Syketilfelledag(dag, null)
     }
 
     private fun finnPresedens(entry: Map.Entry<LocalDate, List<Syketilfellebit>>): Syketilfellebit? {
@@ -82,8 +83,7 @@ class SyketilfelleIntradag(
     private fun Syketilfellebit.toSyketilfelledag(): Syketilfelledag =
         Syketilfelledag(
             dag = this@SyketilfelleIntradag.dag,
-            prioritertSyketilfellebit = this,
-            syketilfellebiter = this@SyketilfelleIntradag.biter
+            prioritertSyketilfellebit = this
         )
 }
 
@@ -93,7 +93,7 @@ class Syketilfellebiter(
     private val prioriteringsliste: List<ListContainsPredicate<Tag>>
 ) {
     fun tilSyketilfelleIntradag(dag: LocalDate): SyketilfelleIntradag {
-        return SyketilfelleIntradag(dag, biter.filter { dag in (it.fom ..(it.tom)) }, prioriteringsliste)
+        return SyketilfelleIntradag(dag, biter.filter { dag in (it.fom..(it.tom)) }, prioriteringsliste)
     }
 
     fun finnTidligsteFom(): LocalDate {
