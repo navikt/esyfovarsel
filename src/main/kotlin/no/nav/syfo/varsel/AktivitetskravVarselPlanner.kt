@@ -7,15 +7,11 @@ import no.nav.syfo.db.deletePlanlagtVarselBySykmeldingerId
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.metrics.tellAktivitetskravPlanlagt
 import no.nav.syfo.service.SykmeldingService
-import no.nav.syfo.syketilfelle.domain.Tag.*
 import no.nav.syfo.utils.VarselUtil
-import no.nav.syfo.utils.isEqualOrAfter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.temporal.ChronoUnit
 
 class AktivitetskravVarselPlanner(
     private val databaseAccess: DatabaseInterface,

@@ -1,4 +1,4 @@
-package no.nav.syfo.kafka
+package no.nav.syfo.kafka.common
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature

@@ -1,4 +1,4 @@
-package no.nav.syfo.kafka.varselbus
+package no.nav.syfo.kafka.consumers.varselbus
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -11,8 +11,8 @@ val objectMapper: ObjectMapper = ObjectMapper().apply {
     configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 }
 fun isOrgFnrNrValidFormat(fnr: String?, orgnr: String?): Boolean {
-    return orgnr?.length == 9
-        && orgnr.all { char -> char.isDigit()}
-        && fnr?.length == 11
-        && fnr.all { char -> char.isDigit()}
+    return orgnr?.length == 9 &&
+        orgnr.all { char -> char.isDigit() } &&
+        fnr?.length == 11 &&
+        fnr.all { char -> char.isDigit() }
 }

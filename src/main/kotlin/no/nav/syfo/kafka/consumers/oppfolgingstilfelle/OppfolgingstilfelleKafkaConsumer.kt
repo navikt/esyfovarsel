@@ -1,4 +1,4 @@
-package no.nav.syfo.kafka.oppfolgingstilfelle
+package no.nav.syfo.kafka.consumers.oppfolgingstilfelle
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -8,10 +8,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
-import no.nav.syfo.kafka.KafkaListener
-import no.nav.syfo.kafka.consumerProperties
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
-import no.nav.syfo.kafka.topicOppfolgingsTilfelle
+import no.nav.syfo.kafka.common.KafkaListener
+import no.nav.syfo.kafka.common.consumerProperties
+import no.nav.syfo.kafka.common.createObjectMapper
+import no.nav.syfo.kafka.common.topicOppfolgingsTilfelle
+import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import no.nav.syfo.metrics.tellFeilIParsing
 import no.nav.syfo.metrics.tellFeilIPlanner
 import no.nav.syfo.service.AccessControl
@@ -30,10 +31,7 @@ class OppfolgingstilfelleKafkaConsumer(
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.OppfolgingstilfelleConsumer")
     private val kafkaListener: KafkaConsumer<String, String>
     private val varselPlanners: ArrayList<VarselPlanner> = arrayListOf()
-    private val objectMapper: ObjectMapper = ObjectMapper().apply {
-        registerKotlinModule()
-        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-    }
+    private val objectMapper = createObjectMapper()
 
     init {
         val kafkaConfig = consumerProperties(env)

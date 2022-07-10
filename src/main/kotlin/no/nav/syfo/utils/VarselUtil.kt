@@ -5,8 +5,8 @@ import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
 import no.nav.syfo.db.fetchSykmeldingerIdByPlanlagtVarselsUUID
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
+import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
+import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.syketilfelle.domain.Tag
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit

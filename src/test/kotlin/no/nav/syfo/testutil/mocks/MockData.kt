@@ -1,9 +1,9 @@
 package no.nav.syfo.testutil.mocks
 
 import no.nav.syfo.consumer.pdl.*
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
+import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
+import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
+import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import no.nav.syfo.syketilfelle.domain.Tag
 import java.time.LocalDate

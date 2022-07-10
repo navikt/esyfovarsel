@@ -5,14 +5,14 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
+import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
 import no.nav.syfo.db.storePlanlagtVarsel
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
+import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
 import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.syketilfelle.domain.Tag.*
 import no.nav.syfo.testutil.EmbeddedDatabase

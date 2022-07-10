@@ -6,13 +6,13 @@ import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_URL
 import no.nav.syfo.DINE_SYKMELDTE_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.db.domain.VarselType
-import no.nav.syfo.kafka.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
-import no.nav.syfo.kafka.dinesykmeldte.domain.DineSykmeldteVarsel
-import no.nav.syfo.kafka.varselbus.domain.EsyfovarselHendelse
-import no.nav.syfo.kafka.varselbus.domain.MotebehovNLVarselData
-import no.nav.syfo.kafka.varselbus.domain.toDineSykmeldteHendelseType
-import no.nav.syfo.kafka.varselbus.isOrgFnrNrValidFormat
-import no.nav.syfo.kafka.varselbus.objectMapper
+import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
+import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
+import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.MotebehovNLVarselData
+import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
+import no.nav.syfo.kafka.consumers.varselbus.isOrgFnrNrValidFormat
+import no.nav.syfo.kafka.consumers.varselbus.objectMapper
 import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -40,10 +40,17 @@ class MotebehovVarselService(
     }
 
     fun sendVarselTilSykmeldt(varselHendelse: EsyfovarselHendelse) {
-        val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_URL)
-        brukernotifikasjonerService.sendVarsel(UUID.randomUUID().toString(), varselHendelse.mottakerFnr, BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST, url)
+        sendVarselTilArbeidstaker(varselHendelse.mottakerFnr)
     }
 
+    fun sendVarselTilDialogmoteKandidat(fnrKandidat: String) {
+        sendVarselTilArbeidstaker(fnrKandidat)
+    }
+
+    private fun sendVarselTilArbeidstaker(fnr: String) {
+        val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_URL)
+        brukernotifikasjonerService.sendVarsel(UUID.randomUUID().toString(), fnr, BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST, url)
+    }
     private suspend fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: EsyfovarselHendelse, varseldata: MotebehovNLVarselData) {
         val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(varseldata.ansattFnr, varseldata.orgnummer)
         if (narmesteLederRelasjon !== null && narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {

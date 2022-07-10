@@ -7,7 +7,7 @@ import no.nav.syfo.db.deletePlanlagtVarselBySykmeldingerId
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
+import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.metrics.tellSvarMotebehovPlanlagt
 import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.syketilfelle.domain.Tag.*
@@ -125,11 +125,11 @@ class SvarMotebehovVarselPlanner(
 
     private fun isValidSyketilfelledag(syketilfelledag: Syketilfelledag): Boolean {
         val hasValidDocumentType = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SYKMELDING) == true ||
-                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(PAPIRSYKMELDING) == true ||
-                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SYKEPENGESOKNAD) == true
+            syketilfelledag.prioritertSyketilfellebit?.tags?.contains(PAPIRSYKMELDING) == true ||
+            syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SYKEPENGESOKNAD) == true
 
         val isAcceptedDocument = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(SENDT) == true ||
-                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(BEKREFTET) == true
+            syketilfelledag.prioritertSyketilfellebit?.tags?.contains(BEKREFTET) == true
 
         val isBehandlingsdag = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(BEHANDLINGSDAGER) == true
 

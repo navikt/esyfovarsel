@@ -1,6 +1,6 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
+import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
