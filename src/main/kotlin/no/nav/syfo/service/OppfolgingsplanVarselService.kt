@@ -40,7 +40,7 @@ class OppfolgingsplanVarselService(
 fun EsyfovarselHendelse.dataToOppfolgingsplanNLVarselData(): OppfolgingsplanNLVarselData {
     return data?.let {
         try {
-            val varseldata: OppfolgingsplanNLVarselData = no.nav.syfo.kafka.consumers.varselbus.objectMapper.readValue(data.toString())
+            val varseldata: OppfolgingsplanNLVarselData = objectMapper.readValue(data.toString())
             if (isOrgFnrNrValidFormat(varseldata.ansattFnr, varseldata.orgnummer)) {
                 return@let varseldata
             }

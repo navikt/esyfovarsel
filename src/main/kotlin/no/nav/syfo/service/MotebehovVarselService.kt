@@ -38,16 +38,7 @@ class MotebehovVarselService(
 
         sendVarselTilArbeidsgiverNotifikasjon(varselHendelse, varseldata)
     }
-
-    fun sendVarselTilSykmeldt(varselHendelse: EsyfovarselHendelse) {
-        sendVarselTilArbeidstaker(varselHendelse.mottakerFnr)
-    }
-
-    fun sendVarselTilDialogmoteKandidat(fnrKandidat: String) {
-        sendVarselTilArbeidstaker(fnrKandidat)
-    }
-
-    private fun sendVarselTilArbeidstaker(fnr: String) {
+    fun sendVarselTilArbeidstaker(fnr: String) {
         val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_URL)
         brukernotifikasjonerService.sendVarsel(UUID.randomUUID().toString(), fnr, BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST, url)
     }

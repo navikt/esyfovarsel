@@ -40,7 +40,7 @@ class KandidatlisteDialogmoteKafkaConsumer(
                     val kandidat: KafkaDialogmotekandidatEndring = objectMapper.readValue(it.value())
                     val kandidatFnr = kandidat.personIdentNumber
                     if (accessControl.canUserBeNotified(kandidatFnr)) {
-                        motebehovVarselService.sendVarselTilDialogmoteKandidat(kandidatFnr)
+                        motebehovVarselService.sendVarselTilArbeidstaker(kandidatFnr)
                     }
                 } catch (e: IOException) {
                     log.error(
