@@ -101,7 +101,7 @@ class SendVarselService(
         }
     }
 
-    private fun sendAktivitetskravVarselTilArbeidsgiver(fnr: String, orgnummer: String, uuid: String, narmesteLederFnr: String, narmesteLederEpostadresse: String) {
+    private suspend fun sendAktivitetskravVarselTilArbeidsgiver(fnr: String, orgnummer: String, uuid: String, narmesteLederFnr: String, narmesteLederEpostadresse: String) {
         val dineSykmeldteVarsel = DineSykmeldteVarsel(
             fnr,
             orgnummer,
@@ -111,6 +111,15 @@ class SendVarselService(
             OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE_AKTIVITETSKRAV)
         )
 
+        val nlRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer)
+        val dineSykmeldteUrlSuffix = when {
+            nlRelasjon !== null && narmesteLederService.hasNarmesteLederInfo(nlRelasjon) -> "/sykmeldt/${nlRelasjon.narmesteLederId}"
+            else -> {
+                log.warn("Lenker til Dine sykmeldte landingsside: narmesteLederRelasjon er null eller har ikke kontaktinfo")
+                ""
+            }
+        }
+
         log.info("Sender AKTIVITETSKRAV varsel til Dine sykmeldte for uuid $uuid")
         dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
 
@@ -119,7 +128,7 @@ class SendVarselService(
             VarselType.AKTIVITETSKRAV,
             uuid,
             orgnummer,
-            urlEnv.baseUrlDineSykmeldte,
+            "${urlEnv.baseUrlDineSykmeldte}$dineSykmeldteUrlSuffix",
             narmesteLederFnr,
             fnr,
             narmesteLederEpostadresse,
