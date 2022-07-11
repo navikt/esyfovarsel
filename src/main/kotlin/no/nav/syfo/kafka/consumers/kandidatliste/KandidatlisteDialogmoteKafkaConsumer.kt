@@ -24,7 +24,9 @@ class KandidatlisteDialogmoteKafkaConsumer(
     init {
         val kafkaConfig = aivenConsumerProperties(env)
         kafkaListener = KafkaConsumer(kafkaConfig)
-        kafkaListener.subscribe(listOf(topicKandidatliste))
+        if (env.toggleEnv.useKandidatlisteTopic) {
+            kafkaListener.subscribe(listOf(topicKandidatliste))
+        }
     }
 
     override suspend fun listen(applicationState: ApplicationState) {
