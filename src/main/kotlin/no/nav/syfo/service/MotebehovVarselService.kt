@@ -26,7 +26,8 @@ class MotebehovVarselService(
     val brukernotifikasjonerService: BrukernotifikasjonerService,
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
     val narmesteLederService: NarmesteLederService,
-    val dialogmoterUrl: String
+    val dialogmoterUrl: String,
+    val dineSykmeldteUrl: String,
 ) {
     val WEEKS_BEFORE_DELETE = 4L
     private val log = LoggerFactory.getLogger("no.nav.syfo.service.MotebehovVarselService")
@@ -50,7 +51,7 @@ class MotebehovVarselService(
                     VarselType.SVAR_MOTEBEHOV,
                     null,
                     varseldata.orgnummer,
-                    dialogmoterUrl + "/arbeidsgiver/${narmesteLederRelasjon.narmesteLederId}",
+                    dineSykmeldteUrl + "/sykmeldt/${narmesteLederRelasjon.narmesteLederId}",
                     narmesteLederRelasjon.narmesteLederFnr!!,
                     varseldata.ansattFnr,
                     narmesteLederRelasjon.narmesteLederEpost!!,
