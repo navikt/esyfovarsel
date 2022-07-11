@@ -1,4 +1,4 @@
-package no.nav.syfo.kafka.brukernotifikasjoner
+package no.nav.syfo.kafka.producers.brukernotifikasjoner
 
 import no.nav.brukernotifikasjon.schemas.builders.BeskjedInputBuilder
 import no.nav.brukernotifikasjon.schemas.builders.NokkelInputBuilder
@@ -6,8 +6,8 @@ import no.nav.brukernotifikasjon.schemas.builders.domain.PreferertKanal
 import no.nav.brukernotifikasjon.schemas.input.BeskjedInput
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput
 import no.nav.syfo.Environment
-import no.nav.syfo.kafka.producerProperties
-import no.nav.syfo.kafka.topicBrukernotifikasjonBeskjed
+import no.nav.syfo.kafka.common.producerProperties
+import no.nav.syfo.kafka.common.topicBrukernotifikasjonBeskjed
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import java.net.URL

@@ -1,6 +1,6 @@
 package no.nav.syfo.syketilfelle.domain
 
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
+import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.syketilfelle.AntallDagerIArbeidsgiverPeriode
 import no.nav.syfo.syketilfelle.domain.Tag.FERIE
 import no.nav.syfo.syketilfelle.domain.Tag.SYKEPENGESOKNAD

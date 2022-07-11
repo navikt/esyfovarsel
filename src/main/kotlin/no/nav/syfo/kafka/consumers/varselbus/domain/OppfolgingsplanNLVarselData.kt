@@ -1,4 +1,4 @@
-package no.nav.syfo.kafka.varselbus.domain
+package no.nav.syfo.kafka.consumers.varselbus.domain
 
 import java.io.Serializable
 

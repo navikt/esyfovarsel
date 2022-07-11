@@ -1,22 +1,15 @@
-package no.nav.syfo.kafka.varselbus
+package no.nav.syfo.kafka.consumers.varselbus
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
-import no.nav.syfo.kafka.KafkaListener
-import no.nav.syfo.kafka.aivenConsumerProperties
-import no.nav.syfo.kafka.topicVarselBus
-import no.nav.syfo.kafka.varselbus.domain.EsyfovarselHendelse
+import no.nav.syfo.kafka.common.*
+import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
 import no.nav.syfo.service.VarselBusService
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
-import java.time.Duration
 
 class VarselBusKafkaConsumer(
     env: Environment,
@@ -24,13 +17,7 @@ class VarselBusKafkaConsumer(
 ) : KafkaListener {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.VarselBusConsumer")
     private val kafkaListener: KafkaConsumer<String, String>
-    private val zeroMillis = Duration.ofMillis(0L)
-    private val objectMapper: ObjectMapper = ObjectMapper().apply {
-        registerKotlinModule()
-        registerModule(JavaTimeModule())
-        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true)
-    }
+    private val objectMapper = createObjectMapper()
 
     init {
         val kafkaConfig = aivenConsumerProperties(env)

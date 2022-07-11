@@ -51,7 +51,7 @@ repositories {
 
 dependencies {
 
-    // Kotlin / Server
+    // Ktor server
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-jackson:$ktorVersion")
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
@@ -62,6 +62,8 @@ dependencies {
     implementation("io.ktor:ktor-serialization:$ktorVersion")
     implementation("io.ktor:ktor-auth:$ktorVersion")
     implementation("io.ktor:ktor-auth-jwt:$ktorVersion")
+
+    // API
     implementation("javax.ws.rs:javax.ws.rs-api:$javaxVersion")
 
     // Logging
@@ -86,7 +88,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
-    //Kafka
+    // Kafka
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
     implementation("org.apache.kafka:kafka_2.13:$kafkaVersion") {
         exclude(group = "log4j")
@@ -104,7 +106,7 @@ dependencies {
     }
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
-    testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion"){
+    testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion") {
         exclude(group = "log4j")
     }
     testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spekVersion")

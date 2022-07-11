@@ -1,5 +1,10 @@
-package no.nav.syfo.kafka
+package no.nav.syfo.kafka.common
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig.USER_INFO_CONFIG
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
@@ -17,6 +22,7 @@ import org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_C
 import org.apache.kafka.common.config.SaslConfigs.SASL_JAAS_CONFIG
 import org.apache.kafka.common.config.SaslConfigs.SASL_MECHANISM
 import org.apache.kafka.common.config.SslConfigs.*
+import java.time.Duration
 import java.util.*
 
 const val topicOppfolgingsTilfelle = "aapen-syfo-oppfolgingstilfelle-v1"
@@ -24,11 +30,14 @@ const val topicBrukernotifikasjonBeskjed = "min-side.aapen-brukernotifikasjon-be
 const val topicFlexSyketilfellebiter = "flex.syketilfellebiter"
 const val topicDineSykmeldteHendelse = "teamsykmelding.dinesykmeldte-hendelser-v2"
 const val topicVarselBus = "team-esyfo.varselbus"
+const val topicKandidatliste = "teamsykefravr.isdialogmotekandidat-dialogmotekandidat-midlertidig-syfomotebehov"
 
 const val JAVA_KEYSTORE = "JKS"
 const val PKCS12 = "PKCS12"
 const val SSL = "SSL"
 const val USER_INFO = "USER_INFO"
+
+val zeroMillis = Duration.ofMillis(0L)
 
 interface KafkaListener {
     suspend fun listen(applicationState: ApplicationState)
@@ -114,6 +123,13 @@ fun producerProperties(env: Environment) : Properties {
         properties.remove(SECURITY_PROTOCOL_CONFIG)
     }
     return properties
+}
+
+fun createObjectMapper() = ObjectMapper().apply {
+    registerKotlinModule()
+    registerModule(JavaTimeModule())
+    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 }
 
 suspend fun CoroutineScope.launchKafkaListener(applicationState: ApplicationState, kafkaListener: KafkaListener) {

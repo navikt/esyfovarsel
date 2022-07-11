@@ -55,6 +55,7 @@
   "toggleEnv": {
     "sendMerVeiledningVarsler": "true",
     "sendAktivitetskravVarsler": "true",
-    "sendSvarMotebehovVarsler": "true"
+    "sendSvarMotebehovVarsler": "true",
+    "useKandidatlisteTopic": "false"
   }
 }

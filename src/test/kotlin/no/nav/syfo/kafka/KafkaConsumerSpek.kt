@@ -7,8 +7,9 @@ import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.getTestEnv
-import no.nav.syfo.kafka.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
+import no.nav.syfo.kafka.common.*
+import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
+import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import no.nav.syfo.service.AccessControl
 import no.nav.syfo.testutil.kafka.JacksonKafkaSerializer
 import no.nav.syfo.testutil.mocks.MockServers

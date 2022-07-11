@@ -17,8 +17,8 @@ import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.getTestEnv
 import no.nav.syfo.job.VarselSender
-import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
-import no.nav.syfo.kafka.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
+import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
+import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.service.AccessControl
 import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
 import no.nav.syfo.service.SendVarselService

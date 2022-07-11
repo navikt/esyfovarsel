@@ -6,8 +6,8 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.TokenConsumer
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
+import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
+import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate

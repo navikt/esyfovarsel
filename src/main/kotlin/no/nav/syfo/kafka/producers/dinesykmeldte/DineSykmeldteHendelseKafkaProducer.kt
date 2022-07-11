@@ -1,12 +1,12 @@
-package no.nav.syfo.kafka.dinesykmeldte
+package no.nav.syfo.kafka.producers.dinesykmeldte
 
 import no.nav.syfo.Environment
-import no.nav.syfo.kafka.JacksonKafkaSerializer
-import no.nav.syfo.kafka.dinesykmeldte.domain.DineSykmeldteHendelse
-import no.nav.syfo.kafka.dinesykmeldte.domain.DineSykmeldteVarsel
-import no.nav.syfo.kafka.dinesykmeldte.domain.OpprettHendelse
-import no.nav.syfo.kafka.producerProperties
-import no.nav.syfo.kafka.topicDineSykmeldteHendelse
+import no.nav.syfo.kafka.common.JacksonKafkaSerializer
+import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteHendelse
+import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
+import no.nav.syfo.kafka.producers.dinesykmeldte.domain.OpprettHendelse
+import no.nav.syfo.kafka.common.producerProperties
+import no.nav.syfo.kafka.common.topicDineSykmeldteHendelse
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord

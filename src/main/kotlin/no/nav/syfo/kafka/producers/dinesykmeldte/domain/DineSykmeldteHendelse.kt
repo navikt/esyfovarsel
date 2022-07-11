@@ -1,4 +1,4 @@
-package no.nav.syfo.kafka.dinesykmeldte.domain
+package no.nav.syfo.kafka.producers.dinesykmeldte.domain
 
 import java.time.OffsetDateTime
 

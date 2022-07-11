@@ -9,7 +9,7 @@ import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
 import no.nav.syfo.db.storePlanlagtVarsel
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.Syketilfelledag
+import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.syketilfelle.KOppfolgingstilfellePerson
 import no.nav.syfo.syketilfelle.SyketilfelleService

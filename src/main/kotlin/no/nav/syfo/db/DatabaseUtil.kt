@@ -3,7 +3,7 @@ package no.nav.syfo.db
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PSyketilfellebit
 import no.nav.syfo.db.domain.UtsendtVarsel
-import no.nav.syfo.kafka.oppfolgingstilfelle.domain.KSyketilfellebit
+import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.KSyketilfellebit
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import no.nav.syfo.syketilfelle.domain.tagsFromString
 import java.sql.Date

@@ -7,10 +7,10 @@ import no.nav.syfo.consumer.syfomotebehov.SyfoMotebehovConsumer
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
-import no.nav.syfo.kafka.brukernotifikasjoner.BeskjedKafkaProducer
-import no.nav.syfo.kafka.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
-import no.nav.syfo.kafka.dinesykmeldte.domain.DineSykmeldteVarsel
-import no.nav.syfo.kafka.varselbus.domain.DineSykmeldteHendelseType
+import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
+import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
+import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
+import no.nav.syfo.kafka.consumers.varselbus.domain.DineSykmeldteHendelseType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
