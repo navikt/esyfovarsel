@@ -6,13 +6,13 @@ import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_URL
 import no.nav.syfo.DINE_SYKMELDTE_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.db.domain.VarselType
-import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
-import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.MotebehovNLVarselData
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.consumers.varselbus.isOrgFnrNrValidFormat
 import no.nav.syfo.kafka.consumers.varselbus.objectMapper
+import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
+import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.LoggerFactory
 import java.io.IOException
