@@ -111,8 +111,6 @@ class SendVarselService(
             OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE_AKTIVITETSKRAV)
         )
 
-        log.info("DEBUG: sendAktivitetskravVarselTilArbeidsgiver: fnr: $fnr, orgnr: $orgnummer")
-
         val nlRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer)
         val dineSykmeldteUrlSuffix = when {
             nlRelasjon !== null && narmesteLederService.hasNarmesteLederInfo(nlRelasjon) -> "/sykmeldt/${nlRelasjon.narmesteLederId}"
@@ -121,8 +119,6 @@ class SendVarselService(
                 ""
             }
         }
-
-        log.info("DEBUG: sendAktivitetskravVarselTilArbeidsgiver: urlSuffix: $dineSykmeldteUrlSuffix")
 
         log.info("Sender AKTIVITETSKRAV varsel til Dine sykmeldte for uuid $uuid")
         dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
