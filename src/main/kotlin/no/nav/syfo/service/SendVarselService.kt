@@ -113,7 +113,7 @@ class SendVarselService(
 
         val nlRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer)
         val dineSykmeldteUrlSuffix = when {
-            nlRelasjon !== null && narmesteLederService.hasNarmesteLederInfo(nlRelasjon) -> "/sykmeldt/${nlRelasjon.narmesteLederId}"
+            nlRelasjon !== null && narmesteLederService.hasNarmesteLederInfo(nlRelasjon) -> "/${nlRelasjon.narmesteLederId}"
             else -> {
                 log.warn("Lenker til Dine sykmeldte landingsside: narmesteLederRelasjon er null eller har ikke kontaktinfo")
                 ""
