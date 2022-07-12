@@ -271,11 +271,13 @@ fun Application.kafkaModule(
                 )
             }
 
-            launch(backgroundTasksContext) {
-                launchKafkaListener(
-                    state,
-                    KandidatlisteDialogmoteKafkaConsumer(env, accessControl, motebehovVarselService)
-                )
+            if (env.toggleEnv.useKandidatlisteTopic) {
+                launch(backgroundTasksContext) {
+                    launchKafkaListener(
+                        state,
+                        KandidatlisteDialogmoteKafkaConsumer(env, accessControl, motebehovVarselService)
+                    )
+                }
             }
         }
     }

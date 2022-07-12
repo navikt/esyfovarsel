@@ -24,16 +24,10 @@ class KandidatlisteDialogmoteKafkaConsumer(
     init {
         val kafkaConfig = aivenConsumerProperties(env)
         kafkaListener = KafkaConsumer(kafkaConfig)
-        if (env.toggleEnv.useKandidatlisteTopic) {
-            kafkaListener.subscribe(listOf(topicKandidatliste))
-        }
+        kafkaListener.subscribe(listOf(topicKandidatliste))
     }
 
     override suspend fun listen(applicationState: ApplicationState) {
-        if (!env.toggleEnv.useKandidatlisteTopic) {
-            log.info("KANDIDATLISTE-CONSUMER: Kandidatliste-toggle is disabled")
-            return
-        }
         log.info("Started listening to topic: $topicKandidatliste")
         while (applicationState.running) {
             kafkaListener.poll(zeroMillis).forEach {
