@@ -51,7 +51,7 @@ class MotebehovVarselService(
                     VarselType.SVAR_MOTEBEHOV,
                     null,
                     varseldata.orgnummer,
-                    dineSykmeldteUrl + "/sykmeldt/${narmesteLederRelasjon.narmesteLederId}",
+                    dineSykmeldteUrl + "/${narmesteLederRelasjon.narmesteLederId}",
                     narmesteLederRelasjon.narmesteLederFnr!!,
                     varseldata.ansattFnr,
                     narmesteLederRelasjon.narmesteLederEpost!!,
