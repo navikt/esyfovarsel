@@ -92,7 +92,8 @@ fun main() {
                     brukernotifikasjonerService,
                     arbeidsgiverNotifikasjonService,
                     narmesteLederService,
-                    env.urlEnv.dialogmoterUrl
+                    env.urlEnv.dialogmoterUrl,
+                    env.urlEnv.baseUrlDineSykmeldte
                 )
 
                 val syfoMotebehovConsumer = SyfoMotebehovConsumer(env.urlEnv, stsConsumer)
