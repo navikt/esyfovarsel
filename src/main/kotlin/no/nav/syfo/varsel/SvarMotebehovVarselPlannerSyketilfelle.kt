@@ -1,7 +1,6 @@
 package no.nav.syfo.varsel
 
 import kotlinx.coroutines.coroutineScope
-import no.nav.syfo.consumer.SyfosyketilfelleConsumer
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselBySykmeldingerId
 import no.nav.syfo.db.domain.PlanlagtVarsel
@@ -10,6 +9,7 @@ import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.metrics.tellSvarMotebehovPlanlagt
 import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.syketilfelle.SyketilfelleService
+import no.nav.syfo.utils.SVAR_MOTEBEHOV_DAGER
 import no.nav.syfo.utils.VarselUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -20,8 +20,6 @@ class SvarMotebehovVarselPlannerSyketilfelle(
     private val varselSendtService: VarselSendtService,
     override val name: String = "SVAR_MOTEBEHOV_VARSEL_GCP"
 ) : VarselPlannerSyketilfelle {
-    private val SVAR_MOTEBEHOV_DAGER: Long = 112
-
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.SvarMotebehovVarselPlannerSyketilfelle")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
 

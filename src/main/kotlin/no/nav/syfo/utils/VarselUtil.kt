@@ -13,6 +13,7 @@ import java.time.temporal.ChronoUnit
 
 val antallUker39UkersVarsel = 39L
 val antallDager39UkersVarsel = antallUker39UkersVarsel * 7L + 1
+val SVAR_MOTEBEHOV_DAGER: Long = 112
 
 class VarselUtil(private val databaseAccess: DatabaseInterface) {
     fun isVarselDatoForIDag(varselDato: LocalDate): Boolean {

@@ -28,7 +28,7 @@ import java.time.temporal.ChronoUnit
 import kotlin.test.assertFailsWith
 
 object AktivitetskravVarselPlannerSyketilfelleSpek : Spek({
-    //The default timeout of 10 seconds is not sufficient to initialise the embedded database
+    // The default timeout of 10 seconds is not sufficient to initialise the embedded database
     defaultTimeout = 20000L
 
     val embeddedDatabase by lazy { EmbeddedDatabase() }
