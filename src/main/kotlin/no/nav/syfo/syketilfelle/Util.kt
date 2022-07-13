@@ -1,8 +1,8 @@
 package no.nav.syfo.syketilfelle
 
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
-import no.nav.syfo.syketilfelle.domain.Tag
 import no.nav.syfo.syketilfelle.domain.Oppfolgingstilfelle
+import no.nav.syfo.syketilfelle.domain.Tag
 import java.time.LocalDate
 
 class ListContainsPredicate<T> private constructor(private val predicate: (List<T>) -> Boolean) {
@@ -39,7 +39,7 @@ infix fun <T> T.and(other: T) = ListContainsPredicate.of(this) and other
 operator fun <T> T.not() = ListContainsPredicate.not(this)
 
 
-fun grupperIOppfolgingstilfeller(tidslinje: List<Syketilfelledag>): List<Oppfolgingstilfelle> {
+fun grupperIOppfolgingstilfeller(tidslinje: List<Syketilfelledag>): List<Oppfolgingstilfelle>? {
     val oppfolgingstilfelleListe = ArrayList<Oppfolgingstilfelle>()
     var gjeldendeSyketilfelledagListe = ArrayList<Syketilfelledag>()
     var friskmeldtdagerSidenForrigeSykedag = 0
@@ -111,8 +111,10 @@ fun grupperIOppfolgingstilfeller(tidslinje: List<Syketilfelledag>): List<Oppfolg
         )
         oppfolgingstilfelleListe.add(sisteOppfolgingstilfelle)
     }
-
-    return oppfolgingstilfelleListe
+    if (oppfolgingstilfelleListe.isNotEmpty()) {
+        return oppfolgingstilfelleListe
+    }
+    return null
 }
 
 private fun Syketilfelledag.erBehandlingsdag() =
@@ -126,12 +128,12 @@ fun Syketilfelledag.erArbeidsdag() =
         ?.tags
         ?.let {
             it in (
-                (Tag.SYKMELDING and Tag.PERIODE and Tag.FULL_AKTIVITET)
-                    or
-                        (Tag.SYKEPENGESOKNAD and Tag.ARBEID_GJENNOPPTATT)
-                    or
-                        (Tag.SYKEPENGESOKNAD and Tag.BEHANDLINGSDAGER)
-                )
+                    (Tag.SYKMELDING and Tag.PERIODE and Tag.FULL_AKTIVITET)
+                            or
+                            (Tag.SYKEPENGESOKNAD and Tag.ARBEID_GJENNOPPTATT)
+                            or
+                            (Tag.SYKEPENGESOKNAD and Tag.BEHANDLINGSDAGER)
+                    )
         }
         ?: true
 
