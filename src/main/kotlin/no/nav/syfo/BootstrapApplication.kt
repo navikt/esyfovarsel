@@ -84,6 +84,7 @@ fun main() {
                 val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
                 val aktivitetskravVarselPlannerSyketilfelle = AktivitetskravVarselPlannerSyketilfelle(database, syketilfelleService, sykmeldingService)
                 val svarMotebehovVarselPlanner = SvarMotebehovVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService)
+                val svarMotebehovVarselPlannerSyketilfelle = SvarMotebehovVarselPlannerSyketilfelle(database, syketilfelleService, varselSendtService)
                 val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
                 val narmesteLederService = NarmesteLederService(narmesteLederConsumer)
                 val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl)
@@ -124,6 +125,7 @@ fun main() {
                         merVeiledningVarselPlanner,
                         merVeiledningVarselPlannerSyketilfelle,
                         svarMotebehovVarselPlanner,
+                        svarMotebehovVarselPlannerSyketilfelle,
                         motebehovVarselService
                     )
 
@@ -245,6 +247,7 @@ fun Application.kafkaModule(
     merVeiledningVarselPlanner: MerVeiledningVarselPlanner,
     merVeiledningVarselPlannerSyketilfelle: MerVeiledningVarselPlannerSyketilfelle,
     svarMotebehovVarselPlanner: SvarMotebehovVarselPlanner,
+    svarMotebehovVarselPlannerSyketilfelle: SvarMotebehovVarselPlannerSyketilfelle,
     motebehovVarselService: MotebehovVarselService
 ) {
     runningRemotely {
@@ -268,6 +271,7 @@ fun Application.kafkaModule(
                     SyketilfelleKafkaConsumer(env, accessControl, database)
                         .addPlanner(merVeiledningVarselPlannerSyketilfelle)
                         .addPlanner(aktivitetskravVarselPlannerSyketilfelle)
+                        .addPlanner(svarMotebehovVarselPlannerSyketilfelle)
                 )
             }
 
