@@ -10,7 +10,7 @@ import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.syketilfelle.KOppfolgingstilfellePerson
-import no.nav.syfo.syketilfelle.SyketilfelleService
+import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import no.nav.syfo.syketilfelle.domain.Tag
 import no.nav.syfo.testutil.EmbeddedDatabase
@@ -31,12 +31,12 @@ object SvarMotebehovVarselPlannerSyketilfellebitSpek : Spek({
     defaultTimeout = 20000L
 
     val embeddedDatabase by lazy { EmbeddedDatabase() }
-    val syketilfelleService = mockk<SyketilfelleService>()
+    val syketilfellebitService = mockk<SyketilfellebitService>()
     val varselSendtService = mockk<VarselSendtService>()
     val varselUtil = VarselUtil(embeddedDatabase)
 
     val svarMotebehovVarselPlannerSyketilfellebit =
-        SvarMotebehovVarselPlannerSyketilfellebit(embeddedDatabase, syketilfelleService, varselSendtService)
+        SvarMotebehovVarselPlannerSyketilfellebit(embeddedDatabase, syketilfellebitService, varselSendtService)
 
     describe("SyfoMotebehovVarselPlannerSyketilfellebitSpek") {
         val planlagtVarselToStore1 =
@@ -110,7 +110,7 @@ object SvarMotebehovVarselPlannerSyketilfellebitSpek : Spek({
                 LocalDateTime.now()
             )
 
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
                 svarMotebehovVarselPlannerSyketilfellebit.processSyketilfelle(arbeidstakerFnr1, orgnummer)
@@ -148,7 +148,7 @@ object SvarMotebehovVarselPlannerSyketilfellebitSpek : Spek({
                 LocalDateTime.now()
             )
 
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
                 svarMotebehovVarselPlannerSyketilfellebit.processSyketilfelle(arbeidstakerFnr1, orgnummer)
@@ -213,7 +213,7 @@ object SvarMotebehovVarselPlannerSyketilfellebitSpek : Spek({
                 LocalDateTime.now()
             )
 
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
                 svarMotebehovVarselPlannerSyketilfellebit.processSyketilfelle(arbeidstakerFnr1, orgnummer)
@@ -264,7 +264,7 @@ object SvarMotebehovVarselPlannerSyketilfellebitSpek : Spek({
                 LocalDateTime.now()
             )
 
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             val lagreteVarsler1 = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
             val nrOfRowsFetchedTotal1 = lagreteVarsler1.size
@@ -287,7 +287,7 @@ object SvarMotebehovVarselPlannerSyketilfellebitSpek : Spek({
 
         it("SvarMotebehovVarselPlannerSyketilfellebit kaster RuntimeException dersom syfosyketilfelleConsumer kaster exception") {
             assertFailsWith(RuntimeException::class) {
-                coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } throws RuntimeException()
+                coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } throws RuntimeException()
                 runBlocking {
                     svarMotebehovVarselPlannerSyketilfellebit.processSyketilfelle(
                         arbeidstakerFnr1,
@@ -299,7 +299,7 @@ object SvarMotebehovVarselPlannerSyketilfellebitSpek : Spek({
 
         it("SvarMotebehovVarselPlannerSyketilfellebit dropper planlegging når syfosyketilfelle returnerer null") {
 
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } returns null
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns null
 
             runBlocking {
                 svarMotebehovVarselPlannerSyketilfellebit.processSyketilfelle(arbeidstakerFnr1, orgnummer)

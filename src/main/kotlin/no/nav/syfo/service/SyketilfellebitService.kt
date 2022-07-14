@@ -36,7 +36,7 @@ fun KOppfolgingstilfelle39Uker.toOppfolgingstilfelle39Uker() = Oppfolgingstilfel
     this.tom
 )
 
-class SyketilfelleService(
+class SyketilfellebitService(
     val database: DatabaseInterface
 ) {
     fun beregnKOppfolgingstilfelle39UkersVarsel(fnr: String): Oppfolgingstilfelle39Uker? =

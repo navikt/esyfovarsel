@@ -12,7 +12,7 @@ import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.syketilfelle.KOppfolgingstilfellePerson
-import no.nav.syfo.syketilfelle.SyketilfelleService
+import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import no.nav.syfo.syketilfelle.domain.Tag
 import no.nav.syfo.testutil.EmbeddedDatabase
@@ -33,11 +33,11 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
 
     val embeddedDatabase by lazy { EmbeddedDatabase() }
     val sykmeldingerConsumer = mockk<SykmeldingerConsumer>()
-    val syketilfelleService = mockk<SyketilfelleService>()
+    val syketilfellebitService = mockk<SyketilfellebitService>()
     val varselUtil = VarselUtil(embeddedDatabase)
 
     val aktivitetskravVarselPlanner =
-        AktivitetskravVarselPlannerSyketilfellebit(embeddedDatabase, syketilfelleService, SykmeldingService(sykmeldingerConsumer))
+        AktivitetskravVarselPlannerSyketilfellebit(embeddedDatabase, syketilfellebitService, SykmeldingService(sykmeldingerConsumer))
 
     describe("AktivitetskravVarselPlannerSyketilfellebitSpek") {
         val planlagtVarselToStore2 =
@@ -118,7 +118,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                 )
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
                 aktivitetskravVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
@@ -162,7 +162,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                 SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
                 aktivitetskravVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
@@ -234,7 +234,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                 )
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
                 aktivitetskravVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
@@ -310,7 +310,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                 )
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
                 aktivitetskravVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
@@ -365,7 +365,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
             )
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             val lagreteVarsler1 = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
             val nrOfRowsFetchedTotal1 = lagreteVarsler1.size
@@ -388,7 +388,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
 
         it("AkvitietskravVarselPlanner kaster RuntimeException dersom syfosyketilfelleConsumer kaster exception") {
             assertFailsWith(RuntimeException::class) {
-                coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } throws RuntimeException()
+                coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } throws RuntimeException()
                 runBlocking {
                     aktivitetskravVarselPlanner.processSyketilfelle(
                         arbeidstakerFnr1,
@@ -400,7 +400,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
 
         it("AkvitietskravVarselPlanner dropper planlegging når syfosyketilfelle returnerer null") {
 
-            coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } returns null
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns null
 
             runBlocking {
                 aktivitetskravVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
