@@ -14,13 +14,13 @@ import no.nav.syfo.utils.VarselUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class SvarMotebehovVarselPlannerSyketilfelle(
+class SvarMotebehovVarselPlannerSyketilfellebit(
     private val databaseAccess: DatabaseInterface,
     private val syketilfelleService: SyketilfelleService,
     private val varselSendtService: VarselSendtService,
     override val name: String = "SVAR_MOTEBEHOV_VARSEL_GCP"
-) : VarselPlannerSyketilfelle {
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.SvarMotebehovVarselPlannerSyketilfelle")
+) : VarselPlannerSyketilfellebit {
+    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.SvarMotebehovVarselPlannerSyketilfellebit")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
 
     override suspend fun processSyketilfelle(fnr: String, orgnummer: String) = coroutineScope {

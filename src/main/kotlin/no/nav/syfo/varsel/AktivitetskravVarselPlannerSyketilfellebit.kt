@@ -13,12 +13,12 @@ import no.nav.syfo.utils.VarselUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class AktivitetskravVarselPlannerSyketilfelle(
+class AktivitetskravVarselPlannerSyketilfellebit(
     val databaseAccess: DatabaseInterface,
     val syketilfelleService: SyketilfelleService,
     val sykmeldingService: SykmeldingService
-) : VarselPlannerSyketilfelle {
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.AktivitetskravVarselPlannerSyketilfelle")
+) : VarselPlannerSyketilfellebit {
+    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.AktivitetskravVarselPlannerSyketilfellebit")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
     private val AKTIVITETSKRAV_DAGER: Long = 42L
     override val name: String = "AKTIVITETSKRAV_VARSEL_GCP"

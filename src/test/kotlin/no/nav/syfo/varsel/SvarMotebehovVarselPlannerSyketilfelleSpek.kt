@@ -26,7 +26,7 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.test.assertFailsWith
 
-object SvarMotebehovVarselPlannerSyketilfelleSpek : Spek({
+object SvarMotebehovVarselPlannerSyketilfellebitSpek : Spek({
     // The default timeout of 10 seconds is not sufficient to initialise the embedded database
     defaultTimeout = 20000L
 
@@ -35,10 +35,10 @@ object SvarMotebehovVarselPlannerSyketilfelleSpek : Spek({
     val varselSendtService = mockk<VarselSendtService>()
     val varselUtil = VarselUtil(embeddedDatabase)
 
-    val svarMotebehovVarselPlannerSyketilfelle =
-        SvarMotebehovVarselPlannerSyketilfelle(embeddedDatabase, syketilfelleService, varselSendtService)
+    val svarMotebehovVarselPlannerSyketilfellebit =
+        SvarMotebehovVarselPlannerSyketilfellebit(embeddedDatabase, syketilfelleService, varselSendtService)
 
-    describe("SyfoMotebehovVarselPlannerSyketilfelleSpek") {
+    describe("SyfoMotebehovVarselPlannerSyketilfellebitSpek") {
         val planlagtVarselToStore1 =
             PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), VarselType.MER_VEILEDNING)
         val planlagtVarselToStore2 =
@@ -113,7 +113,7 @@ object SvarMotebehovVarselPlannerSyketilfelleSpek : Spek({
             coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
-                svarMotebehovVarselPlannerSyketilfelle.processSyketilfelle(arbeidstakerFnr1, orgnummer)
+                svarMotebehovVarselPlannerSyketilfellebit.processSyketilfelle(arbeidstakerFnr1, orgnummer)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
                 val nrOfRowsFetchedTotal = lagreteVarsler.size
@@ -151,7 +151,7 @@ object SvarMotebehovVarselPlannerSyketilfelleSpek : Spek({
             coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
-                svarMotebehovVarselPlannerSyketilfelle.processSyketilfelle(arbeidstakerFnr1, orgnummer)
+                svarMotebehovVarselPlannerSyketilfellebit.processSyketilfelle(arbeidstakerFnr1, orgnummer)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
                 val nrOfRowsFetchedTotal = lagreteVarsler.size
@@ -216,7 +216,7 @@ object SvarMotebehovVarselPlannerSyketilfelleSpek : Spek({
             coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
-                svarMotebehovVarselPlannerSyketilfelle.processSyketilfelle(arbeidstakerFnr1, orgnummer)
+                svarMotebehovVarselPlannerSyketilfellebit.processSyketilfelle(arbeidstakerFnr1, orgnummer)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
                 val nrOfRowsFetchedTotal = lagreteVarsler.size
@@ -273,7 +273,7 @@ object SvarMotebehovVarselPlannerSyketilfelleSpek : Spek({
 
             // Skal lagre varsel
             runBlocking {
-                svarMotebehovVarselPlannerSyketilfelle.processSyketilfelle(
+                svarMotebehovVarselPlannerSyketilfellebit.processSyketilfelle(
                     arbeidstakerFnr1,
                     orgnummer
                 )
@@ -285,11 +285,11 @@ object SvarMotebehovVarselPlannerSyketilfelleSpek : Spek({
             nrOfRowsFetchedTotal shouldBeEqualTo 1
         }
 
-        it("SvarMotebehovVarselPlannerSyketilfelle kaster RuntimeException dersom syfosyketilfelleConsumer kaster exception") {
+        it("SvarMotebehovVarselPlannerSyketilfellebit kaster RuntimeException dersom syfosyketilfelleConsumer kaster exception") {
             assertFailsWith(RuntimeException::class) {
                 coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } throws RuntimeException()
                 runBlocking {
-                    svarMotebehovVarselPlannerSyketilfelle.processSyketilfelle(
+                    svarMotebehovVarselPlannerSyketilfellebit.processSyketilfelle(
                         arbeidstakerFnr1,
                         orgnummer
                     )
@@ -297,19 +297,19 @@ object SvarMotebehovVarselPlannerSyketilfelleSpek : Spek({
             }
         }
 
-        it("SvarMotebehovVarselPlannerSyketilfelle dropper planlegging når syfosyketilfelle returnerer null") {
+        it("SvarMotebehovVarselPlannerSyketilfellebit dropper planlegging når syfosyketilfelle returnerer null") {
 
             coEvery { syketilfelleService.beregnKOppfolgingstilfelle(any()) } returns null
 
             runBlocking {
-                svarMotebehovVarselPlannerSyketilfelle.processSyketilfelle(arbeidstakerFnr1, orgnummer)
+                svarMotebehovVarselPlannerSyketilfellebit.processSyketilfelle(arbeidstakerFnr1, orgnummer)
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
 
                 lagreteVarsler.size shouldBeEqualTo 0
             }
         }
 
-        it("SvarMotebehovVarselPlannerSyketilfelle fjerner perioder uten sykmelding når den faktiske fraværlengde blir beregnet") {
+        it("SvarMotebehovVarselPlannerSyketilfellebit fjerner perioder uten sykmelding når den faktiske fraværlengde blir beregnet") {
 
             val validSyketilfelledager: List<Syketilfelledag> = listOf(
                 createValidSyketilfelledag(LocalDate.of(2021, 12, 8).atStartOfDay(), LocalDate.of(2021, 12, 10).atStartOfDay()),

@@ -80,11 +80,11 @@ fun main() {
                 val syketilfelleService = SyketilfelleService(database)
                 val varselSendtService = VarselSendtService(pdlConsumer, oppfolgingstilfelleConsumer, database)
                 val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService)
-                val merVeiledningVarselPlannerSyketilfelle = MerVeiledningVarselPlannerSyketilfelle(database, syketilfelleService, varselSendtService)
+                val merVeiledningVarselPlannerSyketilfellebit = MerVeiledningVarselPlannerSyketilfellebit(database, syketilfelleService, varselSendtService)
                 val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, oppfolgingstilfelleConsumer, sykmeldingService)
-                val aktivitetskravVarselPlannerSyketilfelle = AktivitetskravVarselPlannerSyketilfelle(database, syketilfelleService, sykmeldingService)
+                val aktivitetskravVarselPlannerSyketilfellebit = AktivitetskravVarselPlannerSyketilfellebit(database, syketilfelleService, sykmeldingService)
                 val svarMotebehovVarselPlanner = SvarMotebehovVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService)
-                val svarMotebehovVarselPlannerSyketilfelle = SvarMotebehovVarselPlannerSyketilfelle(database, syketilfelleService, varselSendtService)
+                val svarMotebehovVarselPlannerSyketilfellebit = SvarMotebehovVarselPlannerSyketilfellebit(database, syketilfelleService, varselSendtService)
                 val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
                 val narmesteLederService = NarmesteLederService(narmesteLederConsumer)
                 val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl)
@@ -121,11 +121,11 @@ fun main() {
                         env,
                         accessControl,
                         aktivitetskravVarselPlanner,
-                        aktivitetskravVarselPlannerSyketilfelle,
+                        aktivitetskravVarselPlannerSyketilfellebit,
                         merVeiledningVarselPlanner,
-                        merVeiledningVarselPlannerSyketilfelle,
+                        merVeiledningVarselPlannerSyketilfellebit,
                         svarMotebehovVarselPlanner,
-                        svarMotebehovVarselPlannerSyketilfelle,
+                        svarMotebehovVarselPlannerSyketilfellebit,
                         motebehovVarselService
                     )
 
@@ -243,11 +243,11 @@ fun Application.kafkaModule(
     env: Environment,
     accessControl: AccessControl,
     aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
-    aktivitetskravVarselPlannerSyketilfelle: AktivitetskravVarselPlannerSyketilfelle,
+    aktivitetskravVarselPlannerSyketilfellebit: AktivitetskravVarselPlannerSyketilfellebit,
     merVeiledningVarselPlanner: MerVeiledningVarselPlanner,
-    merVeiledningVarselPlannerSyketilfelle: MerVeiledningVarselPlannerSyketilfelle,
+    merVeiledningVarselPlannerSyketilfellebit: MerVeiledningVarselPlannerSyketilfellebit,
     svarMotebehovVarselPlanner: SvarMotebehovVarselPlanner,
-    svarMotebehovVarselPlannerSyketilfelle: SvarMotebehovVarselPlannerSyketilfelle,
+    svarMotebehovVarselPlannerSyketilfellebit: SvarMotebehovVarselPlannerSyketilfellebit,
     motebehovVarselService: MotebehovVarselService
 ) {
     runningRemotely {
@@ -269,9 +269,9 @@ fun Application.kafkaModule(
                 launchKafkaListener(
                     state,
                     SyketilfelleKafkaConsumer(env, accessControl, database)
-                        .addPlanner(merVeiledningVarselPlannerSyketilfelle)
-                        .addPlanner(aktivitetskravVarselPlannerSyketilfelle)
-                        .addPlanner(svarMotebehovVarselPlannerSyketilfelle)
+                        .addPlanner(merVeiledningVarselPlannerSyketilfellebit)
+                        .addPlanner(aktivitetskravVarselPlannerSyketilfellebit)
+                        .addPlanner(svarMotebehovVarselPlannerSyketilfellebit)
                 )
             }
 

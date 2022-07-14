@@ -9,7 +9,7 @@ import no.nav.syfo.db.toPSyketilfellebit
 import no.nav.syfo.kafka.common.*
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.KSyketilfellebit
 import no.nav.syfo.service.AccessControl
-import no.nav.syfo.varsel.VarselPlannerSyketilfelle
+import no.nav.syfo.varsel.VarselPlannerSyketilfellebit
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -22,7 +22,7 @@ class SyketilfelleKafkaConsumer(
 ) : KafkaListener {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.SyketilfelleKafkaConsumer")
     private val kafkaListener: KafkaConsumer<String, String>
-    private val varselPlanners: ArrayList<VarselPlannerSyketilfelle> = arrayListOf()
+    private val varselPlanners: ArrayList<VarselPlannerSyketilfellebit> = arrayListOf()
     private val objectMapper = createObjectMapper()
 
     init {
@@ -60,7 +60,7 @@ class SyketilfelleKafkaConsumer(
         }
     }
 
-    fun addPlanner(varselPlanner: VarselPlannerSyketilfelle): SyketilfelleKafkaConsumer {
+    fun addPlanner(varselPlanner: VarselPlannerSyketilfellebit): SyketilfelleKafkaConsumer {
         varselPlanners.add(varselPlanner)
         return this
     }

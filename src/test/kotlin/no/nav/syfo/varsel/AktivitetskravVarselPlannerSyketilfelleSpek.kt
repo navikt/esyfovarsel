@@ -27,7 +27,7 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.test.assertFailsWith
 
-object AktivitetskravVarselPlannerSyketilfelleSpek : Spek({
+object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
     // The default timeout of 10 seconds is not sufficient to initialise the embedded database
     defaultTimeout = 20000L
 
@@ -37,9 +37,9 @@ object AktivitetskravVarselPlannerSyketilfelleSpek : Spek({
     val varselUtil = VarselUtil(embeddedDatabase)
 
     val aktivitetskravVarselPlanner =
-        AktivitetskravVarselPlannerSyketilfelle(embeddedDatabase, syketilfelleService, SykmeldingService(sykmeldingerConsumer))
+        AktivitetskravVarselPlannerSyketilfellebit(embeddedDatabase, syketilfelleService, SykmeldingService(sykmeldingerConsumer))
 
-    describe("AktivitetskravVarselPlannerSyketilfelleSpek") {
+    describe("AktivitetskravVarselPlannerSyketilfellebitSpek") {
         val planlagtVarselToStore2 =
             PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), VarselType.MER_VEILEDNING)
         val planlagtVarselToStore3 =
