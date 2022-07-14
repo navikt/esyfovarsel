@@ -15,12 +15,12 @@ import no.nav.syfo.utils.todayIsBetweenFomAndTom
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class MerVeiledningVarselPlannerSyketilfelle(
+class MerVeiledningVarselPlannerSyketilfellebit(
     val databaseAccess: DatabaseInterface,
     val syketilfelleService: SyketilfelleService,
     val varselSendtService: VarselSendtService
-) : VarselPlannerSyketilfelle {
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.MerVeiledningVarselPlannerSyketilfelle")
+) : VarselPlannerSyketilfellebit {
+    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.MerVeiledningVarselPlannerSyketilfellebit")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
     override val name: String = "MER_VEILEDNING_VARSEL_GCP"
 

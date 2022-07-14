@@ -22,16 +22,16 @@ import java.time.temporal.ChronoUnit
 import java.util.*
 import kotlin.test.assertFailsWith
 
-object MerVeiledningVarselPlannerSyketilfelleSpek : Spek({
+object MerVeiledningVarselPlannerSyketilfellebitSpek : Spek({
 
-    describe("MerVeiledningVarselPlannerSyketilfelleSpek") {
+    describe("MerVeiledningVarselPlannerSyketilfellebitSpek") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
         val syketilfelleConsumer = mockk<SyfosyketilfelleConsumer>()
         val syketilfelleService = mockk<SyketilfelleService>()
         val pdlConsumer = mockk<PdlConsumer>()
         val varselSendtService = VarselSendtService(pdlConsumer, syketilfelleConsumer, embeddedDatabase)
 
-        val merVeiledningVarselPlanner = MerVeiledningVarselPlannerSyketilfelle(embeddedDatabase, syketilfelleService, varselSendtService)
+        val merVeiledningVarselPlanner = MerVeiledningVarselPlannerSyketilfellebit(embeddedDatabase, syketilfelleService, varselSendtService)
 
         afterEachTest {
             embeddedDatabase.connection.dropData()

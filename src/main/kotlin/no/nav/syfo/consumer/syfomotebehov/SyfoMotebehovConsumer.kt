@@ -13,7 +13,6 @@ open class SyfoMotebehovConsumer(urlEnv: UrlEnv, private val tokenConsumer: Toke
     private val client = httpClient()
     private val basepath = urlEnv.syfomotebehovUrl
     private val varselPath = "/syfomotebehov/api/varsel"
-
     fun sendVarselTilNaermesteLeder(aktorId: String, orgnummer: String, narmesteLederFnr: String, arbeidstakerFnr: String) {
         runBlocking {
             val requestURL = "$basepath$varselPath/naermesteleder/esyfovarsel"
