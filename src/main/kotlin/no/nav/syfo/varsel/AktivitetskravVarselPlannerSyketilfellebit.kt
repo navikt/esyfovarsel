@@ -8,14 +8,14 @@ import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.metrics.tellAktivitetskravPlanlagt
 import no.nav.syfo.service.SykmeldingService
-import no.nav.syfo.syketilfelle.SyketilfelleService
+import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.utils.VarselUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class AktivitetskravVarselPlannerSyketilfellebit(
     val databaseAccess: DatabaseInterface,
-    val syketilfelleService: SyketilfelleService,
+    val syketilfellebitService: SyketilfellebitService,
     val sykmeldingService: SykmeldingService
 ) : VarselPlannerSyketilfellebit {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.AktivitetskravVarselPlannerSyketilfellebit")
@@ -24,7 +24,7 @@ class AktivitetskravVarselPlannerSyketilfellebit(
     override val name: String = "AKTIVITETSKRAV_VARSEL_GCP"
 
     override suspend fun processSyketilfelle(fnr: String, orgnummer: String) = coroutineScope {
-        val oppfolgingstilfellePerson = syketilfelleService.beregnKOppfolgingstilfelle(fnr) ?: return@coroutineScope
+        val oppfolgingstilfellePerson = syketilfellebitService.beregnKOppfolgingstilfelle(fnr) ?: return@coroutineScope
 
         val validSyketilfelledager = oppfolgingstilfellePerson.tidslinje.filter { varselUtil.isValidSyketilfelledag(it) }.sortedBy { it.dag }
 

@@ -8,7 +8,7 @@ import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.metrics.tellSvarMotebehovPlanlagt
 import no.nav.syfo.service.VarselSendtService
-import no.nav.syfo.syketilfelle.SyketilfelleService
+import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.utils.SVAR_MOTEBEHOV_DAGER
 import no.nav.syfo.utils.VarselUtil
 import org.slf4j.Logger
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 
 class SvarMotebehovVarselPlannerSyketilfellebit(
     private val databaseAccess: DatabaseInterface,
-    private val syketilfelleService: SyketilfelleService,
+    private val syketilfellebitService: SyketilfellebitService,
     private val varselSendtService: VarselSendtService,
     override val name: String = "SVAR_MOTEBEHOV_VARSEL_GCP"
 ) : VarselPlannerSyketilfellebit {
@@ -24,7 +24,7 @@ class SvarMotebehovVarselPlannerSyketilfellebit(
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
 
     override suspend fun processSyketilfelle(fnr: String, orgnummer: String) = coroutineScope {
-        val oppfolgingstilfellePerson = syketilfelleService.beregnKOppfolgingstilfelle(fnr) ?: run {
+        val oppfolgingstilfellePerson = syketilfellebitService.beregnKOppfolgingstilfelle(fnr) ?: run {
             log.info("-$name-: Fant ikke oppfolgingstilfelle. Planlegger ikke nytt varsel")
             return@coroutineScope
         }

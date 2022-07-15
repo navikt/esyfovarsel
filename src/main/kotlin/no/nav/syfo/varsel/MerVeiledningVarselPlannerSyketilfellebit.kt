@@ -9,7 +9,7 @@ import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.db.updateUtsendingsdatoByVarselId
 import no.nav.syfo.metrics.tellMerVeiledningPlanlagt
 import no.nav.syfo.service.VarselSendtService
-import no.nav.syfo.syketilfelle.SyketilfelleService
+import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.utils.VarselUtil
 import no.nav.syfo.utils.todayIsBetweenFomAndTom
 import org.slf4j.Logger
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 
 class MerVeiledningVarselPlannerSyketilfellebit(
     val databaseAccess: DatabaseInterface,
-    val syketilfelleService: SyketilfelleService,
+    val syketilfellebitService: SyketilfellebitService,
     val varselSendtService: VarselSendtService
 ) : VarselPlannerSyketilfellebit {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.MerVeiledningVarselPlannerSyketilfellebit")
@@ -25,7 +25,7 @@ class MerVeiledningVarselPlannerSyketilfellebit(
     override val name: String = "MER_VEILEDNING_VARSEL_GCP"
 
     override suspend fun processSyketilfelle(fnr: String, orgnummer: String) = coroutineScope {
-        val oppfolgingstilfelle = syketilfelleService.beregnKOppfolgingstilfelle39UkersVarsel(fnr) ?: return@coroutineScope
+        val oppfolgingstilfelle = syketilfellebitService.beregnKOppfolgingstilfelle39UkersVarsel(fnr) ?: return@coroutineScope
 
         val tilfelleFom = oppfolgingstilfelle.fom
         val tilfelleTom = oppfolgingstilfelle.tom
