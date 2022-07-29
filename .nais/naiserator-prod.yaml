@@ -46,6 +46,7 @@ spec:
     - "https://esyfovarsel.nais.adeo.no"
   kafka:
     pool: nav-prod
+  leaderElection: true
   envFrom:
     - configmap: loginservice-idporten
   env:

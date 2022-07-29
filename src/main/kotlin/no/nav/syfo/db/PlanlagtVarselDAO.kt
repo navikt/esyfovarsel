@@ -3,6 +3,7 @@ package no.nav.syfo.db
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
+import no.nav.syfo.kafka.producers.migration.domain.FSSVarsel
 import java.sql.Date
 import java.sql.ResultSet
 import java.sql.Timestamp
@@ -59,6 +60,37 @@ fun DatabaseInterface.storePlanlagtVarsel(planlagtVarsel: PlanlagtVarsel) {
     }
 }
 
+fun DatabaseInterface.storeMigratredPlanlagtVarsel(fssVarsel: FSSVarsel) {
+    val insertStatement1 = """INSERT INTO PLANLAGT_VARSEL (
+        uuid,
+        fnr,
+        aktor_id,
+        type,
+        utsendingsdato,
+        opprettet,
+        sist_endret,
+        orgnummer) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """.trimIndent()
+
+    val now = Timestamp.valueOf(LocalDateTime.now())
+    val varselUUID = UUID.randomUUID()
+
+    connection.use { connection ->
+        connection.prepareStatement(insertStatement1).use {
+            it.setObject(1, varselUUID)
+            it.setString(2, fssVarsel.fnr)
+            it.setString(3, fssVarsel.aktorId)
+            it.setString(4, fssVarsel.type)
+            it.setDate(5, Date.valueOf(fssVarsel.utsendingsdato))
+            it.setTimestamp(6, now)
+            it.setTimestamp(7, now)
+            it.setString(8, fssVarsel.orgnummer)
+            it.executeUpdate()
+        }
+        connection.commit()
+    }
+}
+
 fun DatabaseInterface.fetchPlanlagtVarselByFnr(fnr: String): List<PPlanlagtVarsel> {
     val queryStatement = """SELECT *
                             FROM PLANLAGT_VARSEL
@@ -100,6 +132,20 @@ fun DatabaseInterface.fetchPlanlagtVarselByTypeAndUtsendingsdato(type: VarselTyp
             it.setString(1, type.name)
             it.setDate(2, Date.valueOf(fromDate))
             it.setDate(3, Date.valueOf(toDate))
+            it.executeQuery().toList { toPPlanlagtVarsel() }
+        }
+    }
+}
+
+fun DatabaseInterface.fetchPlanlagtVarselWithUtsendingAfterDate(afterDate: LocalDate): List<PPlanlagtVarsel> {
+    val queryStatement = """SELECT *
+                            FROM PLANLAGT_VARSEL
+                            WHERE utsendingsdato > ?
+    """.trimIndent()
+
+    return connection.use { conn ->
+        conn.prepareStatement(queryStatement).use {
+            it.setDate(1, Date.valueOf(afterDate))
             it.executeQuery().toList { toPPlanlagtVarsel() }
         }
     }
@@ -185,6 +231,30 @@ fun DatabaseInterface.deletePlanlagtVarselBySykmeldingerId(sykmeldingerId: Set<S
 
         connection.commit()
     }
+}
+
+fun DatabaseInterface.isVarselAlreadyPlanned(fssVarsel: FSSVarsel): Boolean {
+    var queryStatement = """SELECT *
+                            FROM PLANLAGT_VARSEL
+                            WHERE fnr =  ?
+                            AND type = ?
+                            AND utsendingsdato >= ?
+                            AND orgnummer
+    """.trimIndent()
+
+    fssVarsel.orgnummer?.let {
+        queryStatement = "$queryStatement = ?"
+    } ?: run { queryStatement = "$queryStatement is null" }
+
+    return connection.use { conn ->
+        conn.prepareStatement(queryStatement).use { statement ->
+            statement.setString(1, fssVarsel.fnr)
+            statement.setString(2, fssVarsel.type)
+            statement.setDate(3, Date.valueOf(fssVarsel.utsendingsdato))
+            fssVarsel.orgnummer?.let { statement.setString(4, it) }
+            statement.executeQuery().toList { toPPlanlagtVarsel() }
+        }
+    }.isNotEmpty()
 }
 
 fun DatabaseInterface.grantAccessToIAMUsers() {
