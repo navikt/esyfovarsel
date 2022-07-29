@@ -5,19 +5,18 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
 import no.nav.syfo.kafka.consumers.varselbus.isOrgFnrNrValidFormat
 import no.nav.syfo.kafka.consumers.varselbus.objectMapper
-import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.Serializable
 
 class VarselBusService(
-    dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
-    val motebehovVarselService: MotebehovVarselService
+    val motebehovVarselService: MotebehovVarselService,
+    val oppfolgingsplanVarselService: OppfolgingsplanVarselService
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.VarselBusService")
-    private val oppfolgingsplanVarselService = OppfolgingsplanVarselService(dineSykmeldteHendelseKafkaProducer)
-    suspend fun processVarselHendelse(varselHendelse: EsyfovarselHendelse) {
+
+    fun processVarselHendelse(varselHendelse: EsyfovarselHendelse) {
         log.info("Behandler varsel av type ${varselHendelse.type}")
         varselHendelse.berikMedAnsattfnrOgOrgnummer()
         when (varselHendelse.type) {

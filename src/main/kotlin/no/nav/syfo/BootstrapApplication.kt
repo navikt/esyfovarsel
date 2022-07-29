@@ -90,12 +90,14 @@ fun main() {
                 val svarMotebehovVarselPlannerSyketilfellebit = SvarMotebehovVarselPlannerSyketilfellebit(database, syketilfellebitService, varselSendtService)
                 val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
                 val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl)
-                val motebehovVarselService = MotebehovVarselService(
-                    dineSykmeldteHendelseKafkaProducer,
+                val senderFacade = SenderFacade(dineSykmeldteHendelseKafkaProducer,
                     brukernotifikasjonerService,
-                    arbeidsgiverNotifikasjonService,
+                    arbeidsgiverNotifikasjonService)
+                val motebehovVarselService = MotebehovVarselService(
+                    senderFacade,
                     env.urlEnv.dialogmoterUrl,
                 )
+                val oppfolgingsplanVarselService = OppfolgingsplanVarselService(senderFacade)
 
                 val syfoMotebehovConsumer = SyfoMotebehovConsumer(env.urlEnv, stsConsumer)
 
@@ -131,8 +133,8 @@ fun main() {
 
                     varselBusModule(
                         env,
-                        dineSykmeldteHendelseKafkaProducer,
-                        motebehovVarselService
+                        motebehovVarselService,
+                        oppfolgingsplanVarselService
                     )
                 }
             }
@@ -283,13 +285,13 @@ fun Application.kafkaModule(
 
 fun Application.varselBusModule(
     env: Environment,
-    dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
-    motebehovVarselService: MotebehovVarselService
+    motebehovVarselService: MotebehovVarselService,
+    oppfolgingsplanVarselService: OppfolgingsplanVarselService
 ) {
     runningRemotely {
         runningInGCPCluster {
             val varselBusService =
-                VarselBusService(dineSykmeldteHendelseKafkaProducer, motebehovVarselService)
+                VarselBusService(motebehovVarselService, oppfolgingsplanVarselService)
 
             launch(backgroundTasksContext) {
                 launchKafkaListener(

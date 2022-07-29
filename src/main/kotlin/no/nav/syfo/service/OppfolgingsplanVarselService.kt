@@ -6,12 +6,11 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_OPPFOLGINGSPLAN_OPPRETTET
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
-import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import java.time.OffsetDateTime
 
 class OppfolgingsplanVarselService(
-    val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer
+    val senderFacade: SenderFacade
 ) {
     fun sendVarselTilDineSykmeldte(varselHendelse: EsyfovarselHendelse) {
         if (varselHendelse.ansattFnr == null || varselHendelse.orgnummer == null)
@@ -32,6 +31,6 @@ class OppfolgingsplanVarselService(
             varseltekst,
             OffsetDateTime.now().plusWeeks(4L)
         )
-        dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
+        senderFacade.sendTilDineSykmeldte(dineSykmeldteVarsel)
     }
 }
