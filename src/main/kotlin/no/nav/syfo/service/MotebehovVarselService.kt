@@ -39,9 +39,9 @@ class MotebehovVarselService(
 
         sendVarselTilArbeidsgiverNotifikasjon(varselHendelse, varseldata)
     }
-    fun sendVarselTilArbeidstaker(fnr: String) {
+    fun sendVarselTilSykmeldt(varselHendelse: EsyfovarselHendelse) {
         val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_URL)
-        brukernotifikasjonerService.sendVarsel(UUID.randomUUID().toString(), fnr, BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST, url)
+        brukernotifikasjonerService.sendVarsel(UUID.randomUUID().toString(), varselHendelse.mottakerFnr, BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST, url)
     }
     private suspend fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: EsyfovarselHendelse, varseldata: MotebehovNLVarselData) {
         val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(varseldata.ansattFnr, varseldata.orgnummer)
