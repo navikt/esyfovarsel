@@ -1,7 +1,7 @@
 package no.nav.syfo.varsel
 
 import kotlinx.coroutines.coroutineScope
-import no.nav.syfo.consumer.SyfosyketilfelleConsumer
+import no.nav.syfo.consumer.syfosyketilfelle.SyfosyketilfelleConsumer
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselByVarselId
 import no.nav.syfo.db.domain.PlanlagtVarsel

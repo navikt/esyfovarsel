@@ -1,21 +1,17 @@
 package no.nav.syfo.varsel
 
 import kotlinx.coroutines.coroutineScope
-import no.nav.syfo.consumer.SyfosyketilfelleConsumer
+import no.nav.syfo.consumer.syfosyketilfelle.SyfosyketilfelleConsumer
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselBySykmeldingerId
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
-import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.metrics.tellSvarMotebehovPlanlagt
 import no.nav.syfo.service.VarselSendtService
-import no.nav.syfo.syketilfelle.domain.Tag.*
 import no.nav.syfo.utils.VarselUtil
-import no.nav.syfo.utils.isEqualOrAfter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.temporal.ChronoUnit
 
 class SvarMotebehovVarselPlanner(
     private val databaseAccess: DatabaseInterface,

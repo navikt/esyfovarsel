@@ -17,9 +17,9 @@ import kotlinx.coroutines.launch
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.*
 import no.nav.syfo.consumer.LocalPdlConsumer
-import no.nav.syfo.consumer.LocalSyfosyketilfelleConsumer
+import no.nav.syfo.consumer.syfosyketilfelle.LocalSyfosyketilfelleConsumer
 import no.nav.syfo.consumer.PdlConsumer
-import no.nav.syfo.consumer.SyfosyketilfelleConsumer
+import no.nav.syfo.consumer.syfosyketilfelle.SyfosyketilfelleConsumer
 import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
