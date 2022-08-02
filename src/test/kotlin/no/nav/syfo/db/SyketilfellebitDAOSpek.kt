@@ -1,6 +1,6 @@
 package no.nav.syfo.db
 
-import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.KSyketilfellebit
+import no.nav.syfo.kafka.consumers.syketilfelle.domain.KSyketilfellebit
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.mocks.fnr1

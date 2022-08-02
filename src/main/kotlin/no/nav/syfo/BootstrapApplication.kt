@@ -33,7 +33,7 @@ import no.nav.syfo.kafka.common.launchKafkaListener
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
-import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.SyketilfelleKafkaConsumer
+import no.nav.syfo.kafka.consumers.syketilfelle.SyketilfelleKafkaConsumer
 import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.service.*
