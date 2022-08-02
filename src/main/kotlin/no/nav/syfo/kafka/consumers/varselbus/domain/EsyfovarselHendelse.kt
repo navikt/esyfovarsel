@@ -4,6 +4,8 @@ import java.io.Serializable
 
 data class EsyfovarselHendelse(
     val mottakerFnr: String,
+    var ansattFnr: String?,
+    var orgnummer: String?,
     val type: HendelseType,
     var data: Any?
 ) : Serializable
