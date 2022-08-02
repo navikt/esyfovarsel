@@ -9,7 +9,7 @@ import no.nav.syfo.db.toPSyketilfellebit
 import no.nav.syfo.kafka.common.*
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.KSyketilfellebit
 import no.nav.syfo.service.AccessControl
-import no.nav.syfo.varsel.VarselPlannerSyketilfellebit
+import no.nav.syfo.planner.VarselPlannerSyketilfellebit
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

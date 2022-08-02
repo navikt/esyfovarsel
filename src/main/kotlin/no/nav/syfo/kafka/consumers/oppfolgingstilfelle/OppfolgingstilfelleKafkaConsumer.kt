@@ -1,9 +1,6 @@
 package no.nav.syfo.kafka.consumers.oppfolgingstilfelle
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.ApplicationState
@@ -16,7 +13,7 @@ import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.KOppfolgingstilfel
 import no.nav.syfo.metrics.tellFeilIParsing
 import no.nav.syfo.metrics.tellFeilIPlanner
 import no.nav.syfo.service.AccessControl
-import no.nav.syfo.varsel.VarselPlanner
+import no.nav.syfo.planner.VarselPlanner
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

@@ -18,9 +18,9 @@ import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.service.SendVarselService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
-import no.nav.syfo.varsel.arbeidstakerAktorId1
-import no.nav.syfo.varsel.arbeidstakerFnr1
-import no.nav.syfo.varsel.orgnummer
+import no.nav.syfo.planner.arbeidstakerAktorId1
+import no.nav.syfo.planner.arbeidstakerFnr1
+import no.nav.syfo.planner.orgnummer
 import org.amshove.kluent.should
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe

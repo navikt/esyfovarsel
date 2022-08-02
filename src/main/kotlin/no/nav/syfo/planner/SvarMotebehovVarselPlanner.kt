@@ -1,4 +1,4 @@
-package no.nav.syfo.varsel
+package no.nav.syfo.planner
 
 import kotlinx.coroutines.coroutineScope
 import no.nav.syfo.consumer.syfosyketilfelle.SyfosyketilfelleConsumer

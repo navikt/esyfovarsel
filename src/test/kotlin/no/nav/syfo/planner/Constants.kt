@@ -1,4 +1,4 @@
-package no.nav.syfo.varsel
+package no.nav.syfo.planner
 
 const val AKTIVITETSKRAV_DAGER = 42L
 const val FULL_AG_PERIODE = 16

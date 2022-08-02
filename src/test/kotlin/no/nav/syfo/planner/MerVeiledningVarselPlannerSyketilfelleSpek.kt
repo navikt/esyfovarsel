@@ -1,4 +1,4 @@
-package no.nav.syfo.varsel
+package no.nav.syfo.planner
 
 import io.mockk.coEvery
 import io.mockk.mockk

@@ -38,7 +38,7 @@ import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.service.*
 import no.nav.syfo.syketilfelle.SyketilfellebitService
-import no.nav.syfo.varsel.*
+import no.nav.syfo.planner.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 

@@ -1,4 +1,4 @@
-package no.nav.syfo.varsel
+package no.nav.syfo.planner
 
 interface VarselPlannerSyketilfellebit {
     val name: String
