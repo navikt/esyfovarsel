@@ -30,7 +30,6 @@ import no.nav.syfo.db.*
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.job.sendNotificationsJob
 import no.nav.syfo.kafka.common.launchKafkaListener
-import no.nav.syfo.kafka.consumers.kandidatliste.KandidatlisteDialogmoteKafkaConsumer
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
@@ -127,7 +126,6 @@ fun main() {
                         merVeiledningVarselPlannerSyketilfellebit,
                         svarMotebehovVarselPlanner,
                         svarMotebehovVarselPlannerSyketilfellebit,
-                        motebehovVarselService
                     )
 
                     varselBusModule(
@@ -249,7 +247,6 @@ fun Application.kafkaModule(
     merVeiledningVarselPlannerSyketilfellebit: MerVeiledningVarselPlannerSyketilfellebit,
     svarMotebehovVarselPlanner: SvarMotebehovVarselPlanner,
     svarMotebehovVarselPlannerSyketilfellebit: SvarMotebehovVarselPlannerSyketilfellebit,
-    motebehovVarselService: MotebehovVarselService
 ) {
     runningRemotely {
 
@@ -274,15 +271,6 @@ fun Application.kafkaModule(
                         .addPlanner(aktivitetskravVarselPlannerSyketilfellebit)
                         .addPlanner(svarMotebehovVarselPlannerSyketilfellebit)
                 )
-            }
-
-            if (env.toggleEnv.useKandidatlisteTopic) {
-                launch(backgroundTasksContext) {
-                    launchKafkaListener(
-                        state,
-                        KandidatlisteDialogmoteKafkaConsumer(env, accessControl, motebehovVarselService)
-                    )
-                }
             }
         }
     }

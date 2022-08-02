@@ -30,7 +30,6 @@ const val topicBrukernotifikasjonBeskjed = "min-side.aapen-brukernotifikasjon-be
 const val topicFlexSyketilfellebiter = "flex.syketilfellebiter"
 const val topicDineSykmeldteHendelse = "teamsykmelding.dinesykmeldte-hendelser-v2"
 const val topicVarselBus = "team-esyfo.varselbus"
-const val topicKandidatliste = "teamsykefravr.isdialogmotekandidat-dialogmotekandidat-midlertidig-syfomotebehov"
 
 const val JAVA_KEYSTORE = "JKS"
 const val PKCS12 = "PKCS12"
