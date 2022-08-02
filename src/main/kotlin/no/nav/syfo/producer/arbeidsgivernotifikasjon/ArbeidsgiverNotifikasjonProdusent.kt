@@ -1,4 +1,4 @@
-package no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent
+package no.nav.syfo.producer.arbeidsgivernotifikasjon
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule

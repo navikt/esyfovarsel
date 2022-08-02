@@ -1,4 +1,4 @@
-package no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent
+package no.nav.syfo.producer.arbeidsgivernotifikasjon
 
 data class CreateNewNotificationAgRequest(
     val query: String,
