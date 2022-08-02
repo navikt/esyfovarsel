@@ -1,4 +1,4 @@
-package no.nav.syfo.kafka.producers.dinesykmeldte.domain
+package no.nav.syfo.producer.arbeidsgivernotifikasjon.domain
 
 import java.time.LocalDateTime
 
