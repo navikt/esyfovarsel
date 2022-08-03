@@ -8,7 +8,7 @@
     "PDL_URL": "https://pdl-api.dev.intern.nav.no/graphql",
     "DKIF_URL": "https://dkif.dev.intern.nav.no/api/v1/personer/kontaktinformasjon",
     "SYFOSYKETILFELLE_URL": "https://syfosyketilfelle.nais.preprod.local",
-    "SYFOSMREGISTER_URL": "https://smregister.dev.nav.no",
+    "SYFOSMREGISTER_URL": "https://smregister.dev.intern.nav.no",
     "SYFOSMREGISTER_SCOPE": "api://dev-gcp.teamsykmelding.syfosmregister/.default",
     "DKIF_SCOPE": "api://dev-fss.team-rocket.digdir-krr-proxy/.default",
     "PDL_SCOPE": "api://dev-fss.pdl.pdl-api/.default",
