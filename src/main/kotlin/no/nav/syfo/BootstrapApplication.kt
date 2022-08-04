@@ -17,10 +17,10 @@ import kotlinx.coroutines.launch
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.*
 import no.nav.syfo.consumer.LocalPdlConsumer
-import no.nav.syfo.consumer.LocalSyfosyketilfelleConsumer
+import no.nav.syfo.consumer.syfosyketilfelle.LocalSyfosyketilfelleConsumer
 import no.nav.syfo.consumer.PdlConsumer
-import no.nav.syfo.consumer.SyfosyketilfelleConsumer
-import no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent.ArbeidsgiverNotifikasjonProdusent
+import no.nav.syfo.consumer.syfosyketilfelle.SyfosyketilfelleConsumer
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
@@ -33,12 +33,12 @@ import no.nav.syfo.kafka.common.launchKafkaListener
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
-import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.SyketilfelleKafkaConsumer
+import no.nav.syfo.kafka.consumers.syketilfelle.SyketilfelleKafkaConsumer
 import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.service.*
 import no.nav.syfo.syketilfelle.SyketilfellebitService
-import no.nav.syfo.varsel.*
+import no.nav.syfo.planner.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 

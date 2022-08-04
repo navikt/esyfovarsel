@@ -3,7 +3,7 @@ package no.nav.syfo.utils
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
-import no.nav.syfo.varsel.arbeidstakerAktorId1
+import no.nav.syfo.planner.arbeidstakerAktorId1
 import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe

@@ -3,9 +3,9 @@ package no.nav.syfo.service
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByTypeAndUtsendingsdato
-import no.nav.syfo.varsel.AktivitetskravVarselPlanner
-import no.nav.syfo.varsel.MerVeiledningVarselPlanner
-import no.nav.syfo.varsel.VarselPlanner
+import no.nav.syfo.planner.AktivitetskravVarselPlanner
+import no.nav.syfo.planner.MerVeiledningVarselPlanner
+import no.nav.syfo.planner.VarselPlanner
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate

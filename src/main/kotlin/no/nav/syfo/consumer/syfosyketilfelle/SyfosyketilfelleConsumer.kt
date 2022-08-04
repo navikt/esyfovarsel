@@ -1,4 +1,4 @@
-package no.nav.syfo.consumer
+package no.nav.syfo.consumer.syfosyketilfelle
 
 import io.ktor.client.call.*
 import io.ktor.client.request.*

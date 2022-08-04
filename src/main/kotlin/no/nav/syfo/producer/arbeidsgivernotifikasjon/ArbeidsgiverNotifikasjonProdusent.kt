@@ -1,4 +1,4 @@
-package no.nav.syfo.consumer.arbeidsgiverNotifikasjonProdusent
+package no.nav.syfo.producer.arbeidsgivernotifikasjon
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -14,7 +14,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MERKELAPP
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
-import no.nav.syfo.kafka.producers.dinesykmeldte.domain.ArbeidsgiverNotifikasjon
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
 import org.slf4j.LoggerFactory
 
 open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer) {

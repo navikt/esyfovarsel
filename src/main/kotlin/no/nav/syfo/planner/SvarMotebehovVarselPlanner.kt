@@ -1,6 +1,7 @@
-package no.nav.syfo.varsel
+package no.nav.syfo.planner
 
 import kotlinx.coroutines.coroutineScope
+import no.nav.syfo.consumer.syfosyketilfelle.SyfosyketilfelleConsumer
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselBySykmeldingerId
 import no.nav.syfo.db.domain.PlanlagtVarsel
@@ -8,23 +9,25 @@ import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.metrics.tellSvarMotebehovPlanlagt
 import no.nav.syfo.service.VarselSendtService
-import no.nav.syfo.syketilfelle.SyketilfellebitService
-import no.nav.syfo.utils.SVAR_MOTEBEHOV_DAGER
 import no.nav.syfo.utils.VarselUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class SvarMotebehovVarselPlannerSyketilfellebit(
+class SvarMotebehovVarselPlanner(
     private val databaseAccess: DatabaseInterface,
-    private val syketilfellebitService: SyketilfellebitService,
+    private val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
     private val varselSendtService: VarselSendtService,
-    override val name: String = "SVAR_MOTEBEHOV_VARSEL_GCP"
-) : VarselPlannerSyketilfellebit {
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.SvarMotebehovVarselPlannerSyketilfellebit")
+    override val name: String = "SVAR_MOTEBEHOV_VARSEL"
+) : VarselPlanner {
+    private val SVAR_MOTEBEHOV_DAGER: Long = 112
+
+    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.SvarMotebehovVarselPlanner")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
 
-    override suspend fun processSyketilfelle(fnr: String, orgnummer: String) = coroutineScope {
-        val oppfolgingstilfellePerson = syketilfellebitService.beregnKOppfolgingstilfelle(fnr) ?: run {
+    override suspend fun processOppfolgingstilfelle(aktorId: String, fnr: String, orgnummer: String?) = coroutineScope {
+        val oppfolgingstilfellePerson = syfosyketilfelleConsumer.getOppfolgingstilfelle(aktorId)
+
+        if (oppfolgingstilfellePerson == null) {
             log.info("-$name-: Fant ikke oppfolgingstilfelle. Planlegger ikke nytt varsel")
             return@coroutineScope
         }
@@ -62,8 +65,7 @@ class SvarMotebehovVarselPlannerSyketilfellebit(
                 log.info("-$name-: Tilfelle er kortere enn 112 dager, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $svarMotebehovVarselDate-")
                 databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds, VarselType.SVAR_MOTEBEHOV)
             } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == svarMotebehovVarselDate }
-                .isNotEmpty()
-            ) {
+                .isNotEmpty()) {
                 log.info("-$name-: varsel med samme utsendingsdato er allerede planlagt. -FOM, TOM, DATO: , $fom, $tom, $svarMotebehovVarselDate-")
             } else if (varselSendtService.erVarselSendt(fnr, VarselType.SVAR_MOTEBEHOV, fom, tom)) {
                 log.info("[$name]: Varsel har allerede blitt sendt ut til bruker i dette sykeforløpet. Planlegger ikke nytt varsel")

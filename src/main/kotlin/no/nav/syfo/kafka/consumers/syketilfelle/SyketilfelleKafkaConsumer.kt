@@ -1,4 +1,4 @@
-package no.nav.syfo.kafka.consumers.oppfolgingstilfelle
+package no.nav.syfo.kafka.consumers.syketilfelle
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.ApplicationState
@@ -7,9 +7,9 @@ import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.storeSyketilfellebit
 import no.nav.syfo.db.toPSyketilfellebit
 import no.nav.syfo.kafka.common.*
-import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.KSyketilfellebit
+import no.nav.syfo.kafka.consumers.syketilfelle.domain.KSyketilfellebit
+import no.nav.syfo.planner.VarselPlannerSyketilfellebit
 import no.nav.syfo.service.AccessControl
-import no.nav.syfo.varsel.VarselPlannerSyketilfellebit
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

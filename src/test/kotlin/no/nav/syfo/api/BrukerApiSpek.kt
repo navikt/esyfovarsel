@@ -13,7 +13,7 @@ import io.mockk.mockk
 import no.nav.syfo.api.bruker.registerBrukerApi
 import no.nav.syfo.api.bruker.urlPath39UkersVarsel
 import no.nav.syfo.consumer.PdlConsumer
-import no.nav.syfo.consumer.SyfosyketilfelleConsumer
+import no.nav.syfo.consumer.syfosyketilfelle.SyfosyketilfelleConsumer
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storeUtsendtVarselTest
@@ -22,7 +22,7 @@ import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.*
 import no.nav.syfo.util.contentNegotationFeature
-import no.nav.syfo.varsel.FULL_AG_PERIODE
+import no.nav.syfo.planner.FULL_AG_PERIODE
 import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe

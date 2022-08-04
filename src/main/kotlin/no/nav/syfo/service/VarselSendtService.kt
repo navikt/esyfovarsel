@@ -2,7 +2,7 @@ package no.nav.syfo.service
 
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.PdlConsumer
-import no.nav.syfo.consumer.SyfosyketilfelleConsumer
+import no.nav.syfo.consumer.syfosyketilfelle.SyfosyketilfelleConsumer
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchUtsendtVarselByFnr
