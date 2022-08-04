@@ -40,10 +40,12 @@ spec:
     outbound:
       external:
         - host: pdl-api.dev-fss-pub.nais.io
-        - host: syfosmregister.dev-fss-pub.nais.io
       rules:
         - application: digdir-krr-proxy
         - application: security-token-service
+        - application: syfosmregister
+          namespace: teamsykmelding
+          cluster: dev-gcp
   gcp:
     sqlInstances:
       - autoBackupHour: 1
