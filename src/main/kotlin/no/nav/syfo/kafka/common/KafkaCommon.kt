@@ -30,7 +30,6 @@ const val topicBrukernotifikasjonBeskjed = "min-side.aapen-brukernotifikasjon-be
 const val topicFlexSyketilfellebiter = "flex.syketilfellebiter"
 const val topicDineSykmeldteHendelse = "teamsykmelding.dinesykmeldte-hendelser-v2"
 const val topicVarselBus = "team-esyfo.varselbus"
-const val topicVarselMigration = "team-esyfo.varsel-migration"
 
 const val JAVA_KEYSTORE = "JKS"
 const val PKCS12 = "PKCS12"
@@ -49,11 +48,6 @@ fun syketilfelleConsumerProperties(env: Environment): Properties {
     }
 }
 
-fun varselMigrationConsumerProperties(env: Environment): Properties {
-    return aivenConsumerProperties(env).apply {
-        put(GROUP_ID_CONFIG, "esyfovarsel-migration-group")
-    }
-}
 fun aivenConsumerProperties(env: Environment): Properties {
     val sslConfig = env.kafkaEnv.sslConfig
 
