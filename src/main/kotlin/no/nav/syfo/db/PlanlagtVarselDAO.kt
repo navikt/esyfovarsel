@@ -186,16 +186,3 @@ fun DatabaseInterface.deletePlanlagtVarselBySykmeldingerId(sykmeldingerId: Set<S
         connection.commit()
     }
 }
-
-fun DatabaseInterface.grantAccessToIAMUsers() {
-    val statement = """
-        GRANT ALL ON ALL TABLES IN SCHEMA PUBLIC TO CLOUDSQLIAMUSER
-    """.trimIndent()
-
-    connection.use { conn ->
-        conn.prepareStatement(statement).use {
-            it.executeUpdate()
-        }
-        conn.commit()
-    }
-}

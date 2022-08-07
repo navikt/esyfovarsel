@@ -229,12 +229,6 @@ fun Application.serverModule(
         }
     }
 
-    runningInGCPCluster {
-        log.info("GRANTING ACCESS TO IAM ...")
-        database.grantAccessToIAMUsers()
-        log.info("ACCESS GRANTED")
-    }
-
     runningRemotely {
         setupRoutesWithAuthentication(varselSender, varselSendtService, replanleggingService, env.authEnv)
     }
