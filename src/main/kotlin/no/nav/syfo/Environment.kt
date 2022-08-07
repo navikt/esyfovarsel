@@ -8,7 +8,6 @@ const val localAppPropertiesPath = "./src/main/resources/localEnvApp.json"
 const val localJobPropertiesPath = "./src/main/resources/localEnvJob.json"
 const val serviceuserMounthPath = "/var/run/secrets"
 val objectMapper = ObjectMapper().registerKotlinModule()
-
 fun getJobEnv() =
     if (isLocal())
         objectMapper.readValue(File(localJobPropertiesPath), JobEnv::class.java)

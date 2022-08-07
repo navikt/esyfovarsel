@@ -77,6 +77,7 @@ spec:
     - "https://esyfovarsel.intern.nav.no"
   kafka:
     pool: nav-prod
+  leaderElection: true
   filesFrom:
     - secret: esyfovarsel-serviceuser
   envFrom:
