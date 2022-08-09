@@ -1,66 +1,62 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.*
+import kotlinx.coroutines.runBlocking
+import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
-import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 
-class ArbeidsgiverNotifikasjonService(val arbeidsgiverNotifikasjonProdusent: ArbeidsgiverNotifikasjonProdusent) {
+class ArbeidsgiverNotifikasjonService(
+    val arbeidsgiverNotifikasjonProdusent: ArbeidsgiverNotifikasjonProdusent,
+    val narmesteLederService: NarmesteLederService,
+    val dineSykmeldteUrl: String,
+) {
+
+    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.ArbeidsgiverNotifikasjonService")
 
     fun sendNotifikasjon(
-        varselType: VarselType,
-        varselId: String?,
-        orgnummer: String,
-        url: String,
-        narmesteLederFnr: String,
-        ansattFnr: String,
-        narmesteLederEpostadresse: String,
-        hardDeletDate: LocalDateTime,
+        arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonInput
     ) {
-        val arbeidsgiverNotifikasjon = getNotifikasjonFromType(varselType, varselId, orgnummer, url, narmesteLederFnr, ansattFnr, narmesteLederEpostadresse, hardDeletDate)
-        arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjon!!)
-    }
+        runBlocking {
+            val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(arbeidsgiverNotifikasjon.ansattFnr, arbeidsgiverNotifikasjon.virksomhetsnummer)
+            if (narmesteLederRelasjon !== null && narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
+                if (arbeidsgiverNotifikasjon.narmesteLederFnr == null || arbeidsgiverNotifikasjon.narmesteLederFnr.equals(narmesteLederRelasjon.narmesteLederFnr)) {
+                    val url = dineSykmeldteUrl + "/${narmesteLederRelasjon.narmesteLederId}"
+                    val arbeidsgiverNotifikasjonen = ArbeidsgiverNotifikasjon(
+                        arbeidsgiverNotifikasjon.uuid.toString(),
+                        arbeidsgiverNotifikasjon.virksomhetsnummer,
+                        url,
+                        narmesteLederRelasjon.narmesteLederFnr!!,
+                        arbeidsgiverNotifikasjon.ansattFnr,
+                        arbeidsgiverNotifikasjon.messageText,
+                        narmesteLederRelasjon.narmesteLederEpost!!,
+                        arbeidsgiverNotifikasjon.emailTitle,
+                        arbeidsgiverNotifikasjon.emailBody(url),
+                        arbeidsgiverNotifikasjon.hardDeleteDate,
+                    )
 
-    private fun getNotifikasjonFromType(
-        varselType: VarselType,
-        varselId: String?,
-        orgnummer: String,
-        url: String,
-        narmesteLederFnr: String,
-        ansattFnr: String,
-        narmesteLederEpostadresse: String,
-        hardDeleteDate: LocalDateTime
-    ): ArbeidsgiverNotifikasjon? {
-        val uuid = varselId ?: UUID.randomUUID().toString()
-
-        return when (varselType) {
-            VarselType.AKTIVITETSKRAV -> ArbeidsgiverNotifikasjon(
-                uuid,
-                orgnummer,
-                url,
-                narmesteLederFnr,
-                ansattFnr,
-                ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT,
-                narmesteLederEpostadresse,
-                ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE,
-                ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY_START + url + ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY_END,
-                hardDeleteDate,
-            )
-            VarselType.SVAR_MOTEBEHOV -> ArbeidsgiverNotifikasjon(
-                uuid,
-                orgnummer,
-                url,
-                narmesteLederFnr,
-                ansattFnr,
-                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
-                narmesteLederEpostadresse,
-                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
-                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
-                hardDeleteDate
-            )
-            else -> null
+                    arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjonen)
+                } else {
+                    log.warn("Sender ikke varsel til ag-notifikasjon: den ansatte har nærmeste leder med annet fnr enn mottaker i varselHendelse")
+                }
+            } else {
+                log.warn("Sender ikke varsel til ag-notifikasjon: narmesteLederRelasjon er null eller har ikke kontaktinfo")
+            }
         }
     }
 }
+
+data class ArbeidsgiverNotifikasjonInput(
+    val uuid: UUID,
+    val virksomhetsnummer: String,
+    val narmesteLederFnr: String?,
+    val ansattFnr: String,
+    val messageText: String,
+    val emailTitle: String,
+    val emailBody: (url: String) -> String,
+    val hardDeleteDate: LocalDateTime,
+)
+

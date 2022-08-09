@@ -1,11 +1,7 @@
 package no.nav.syfo.service
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
-import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_URL
-import no.nav.syfo.DINE_SYKMELDTE_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
-import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
-import no.nav.syfo.db.domain.VarselType
+import no.nav.syfo.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.MotebehovNLVarselData
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
@@ -14,7 +10,6 @@ import no.nav.syfo.kafka.consumers.varselbus.objectMapper
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import org.apache.commons.cli.MissingArgumentException
-import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.URL
 import java.time.LocalDateTime
@@ -25,14 +20,11 @@ class MotebehovVarselService(
     val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
     val brukernotifikasjonerService: BrukernotifikasjonerService,
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
-    val narmesteLederService: NarmesteLederService,
     val dialogmoterUrl: String,
-    val dineSykmeldteUrl: String,
 ) {
     val WEEKS_BEFORE_DELETE = 4L
-    private val log = LoggerFactory.getLogger("no.nav.syfo.service.MotebehovVarselService")
 
-    suspend fun sendVarselTilNarmesteLeder(varselHendelse: EsyfovarselHendelse) {
+    fun sendVarselTilNarmesteLeder(varselHendelse: EsyfovarselHendelse) {
         val varseldata = varselHendelse.dataToMotebehovNLVarselData()
 
         sendVarselTilDineSykmeldte(varselHendelse, varseldata)
@@ -43,26 +35,17 @@ class MotebehovVarselService(
         val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_URL)
         brukernotifikasjonerService.sendVarsel(UUID.randomUUID().toString(), varselHendelse.mottakerFnr, BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST, url)
     }
-    private suspend fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: EsyfovarselHendelse, varseldata: MotebehovNLVarselData) {
-        val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(varseldata.ansattFnr, varseldata.orgnummer)
-        if (narmesteLederRelasjon !== null && narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
-            if (varselHendelse.mottakerFnr.equals(narmesteLederRelasjon.narmesteLederFnr)) {
+    private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: EsyfovarselHendelse, varseldata: MotebehovNLVarselData) {
                 arbeidsgiverNotifikasjonService.sendNotifikasjon(
-                    VarselType.SVAR_MOTEBEHOV,
-                    null,
-                    varseldata.orgnummer,
-                    dineSykmeldteUrl + "/${narmesteLederRelasjon.narmesteLederId}",
-                    narmesteLederRelasjon.narmesteLederFnr!!,
-                    varseldata.ansattFnr,
-                    narmesteLederRelasjon.narmesteLederEpost!!,
-                    LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
-                )
-            } else {
-                log.warn("Sender ikke varsel til ag-notifikasjon: den ansatte har nærmeste leder med annet fnr enn mottaker i varselHendelse")
-            }
-        } else {
-            log.warn("Sender ikke varsel til ag-notifikasjon: narmesteLederRelasjon er null eller har ikke kontaktinfo")
-        }
+                    ArbeidsgiverNotifikasjonInput(
+                        UUID.randomUUID(),
+                        varseldata.orgnummer,
+                        varselHendelse.mottakerFnr,
+                        varseldata.ansattFnr,
+                        ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
+                        ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
+                        { url: String -> ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY},
+                        LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)))
     }
 
     private fun sendVarselTilDineSykmeldte(varselHendelse: EsyfovarselHendelse, varseldata: MotebehovNLVarselData) {
