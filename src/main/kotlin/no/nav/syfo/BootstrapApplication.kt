@@ -31,16 +31,13 @@ import no.nav.syfo.db.*
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.job.sendNotificationsJob
 import no.nav.syfo.kafka.common.launchKafkaListener
-import no.nav.syfo.kafka.consumers.migration.VarselMigrationKafkaConsumer
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.kafka.consumers.syketilfelle.SyketilfelleKafkaConsumer
 import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
-import no.nav.syfo.kafka.producers.migration.VarselMigrationKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.service.*
-import no.nav.syfo.service.migration.MigrationService
 import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.planner.*
 import no.nav.syfo.utils.LeaderElection
@@ -90,9 +87,6 @@ fun main() {
                 val aktivitetskravVarselPlannerSyketilfellebit = AktivitetskravVarselPlannerSyketilfellebit(database, syketilfellebitService, sykmeldingService)
                 val svarMotebehovVarselPlanner = SvarMotebehovVarselPlanner(database, oppfolgingstilfelleConsumer, varselSendtService)
                 val svarMotebehovVarselPlannerSyketilfellebit = SvarMotebehovVarselPlannerSyketilfellebit(database, syketilfellebitService, varselSendtService)
-                val varselMigrationKafkaProducer = VarselMigrationKafkaProducer(env)
-                val migrationService = MigrationService(env, database, varselMigrationKafkaProducer)
-                val varselMigrationKafkaConsumer = VarselMigrationKafkaConsumer(env, migrationService)
                 val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
                 val narmesteLederService = NarmesteLederService(narmesteLederConsumer)
                 val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControl)
@@ -123,8 +117,7 @@ fun main() {
                         dineSykmeldteHendelseKafkaProducer,
                         narmesteLederService,
                         syfoMotebehovConsumer,
-                        arbeidsgiverNotifikasjonService,
-                        migrationService
+                        arbeidsgiverNotifikasjonService
                     )
 
                     kafkaModule(
@@ -135,8 +128,7 @@ fun main() {
                         merVeiledningVarselPlanner,
                         merVeiledningVarselPlannerSyketilfellebit,
                         svarMotebehovVarselPlanner,
-                        svarMotebehovVarselPlannerSyketilfellebit,
-                        varselMigrationKafkaConsumer
+                        svarMotebehovVarselPlannerSyketilfellebit
                     )
 
                     varselBusModule(
@@ -197,8 +189,7 @@ fun Application.serverModule(
     dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
     narmesteLederService: NarmesteLederService,
     syfoMotebehovConsumer: SyfoMotebehovConsumer,
-    arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
-    migrationService: MigrationService
+    arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService
 ) {
 
     val sendVarselService =
@@ -228,20 +219,7 @@ fun Application.serverModule(
         }
     }
 
-    val electionJobList = if (isNotGCP())
-        listOf(
-            RunOnElection(
-                name = "VarselMigration",
-                runOnElection = {
-                    log.info("Migrating notifications")
-                    val migrationStatus = migrationService.migrateUnsentVarsler()
-                    log.info("Migration attempt done: ${migrationStatus.first}/${migrationStatus.second} notifications migrated")
-                }
-            )
-        )
-    else
-        listOf()
-
+    val electionJobList = emptyList<RunOnElection>()
     val leaderElection = LeaderElection(electionJobList)
 
     launch(backgroundTasksContext) {
@@ -249,12 +227,6 @@ fun Application.serverModule(
             delay(300000)
             leaderElection.checkIfPodIsLeader()
         }
-    }
-
-    runningInGCPCluster {
-        log.info("GRANTING ACCESS TO IAM ...")
-        database.grantAccessToIAMUsers()
-        log.info("ACCESS GRANTED")
     }
 
     runningRemotely {
@@ -281,8 +253,7 @@ fun Application.kafkaModule(
     merVeiledningVarselPlanner: MerVeiledningVarselPlanner,
     merVeiledningVarselPlannerSyketilfellebit: MerVeiledningVarselPlannerSyketilfellebit,
     svarMotebehovVarselPlanner: SvarMotebehovVarselPlanner,
-    svarMotebehovVarselPlannerSyketilfellebit: SvarMotebehovVarselPlannerSyketilfellebit,
-    varselMigrationKafkaConsumer: VarselMigrationKafkaConsumer
+    svarMotebehovVarselPlannerSyketilfellebit: SvarMotebehovVarselPlannerSyketilfellebit
 ) {
     runningRemotely {
 
@@ -306,13 +277,6 @@ fun Application.kafkaModule(
                         .addPlanner(merVeiledningVarselPlannerSyketilfellebit)
                         .addPlanner(aktivitetskravVarselPlannerSyketilfellebit)
                         .addPlanner(svarMotebehovVarselPlannerSyketilfellebit)
-                )
-            }
-
-            launch(backgroundTasksContext) {
-                launchKafkaListener(
-                    state,
-                    varselMigrationKafkaConsumer
                 )
             }
         }
