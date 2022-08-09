@@ -22,29 +22,31 @@ class ArbeidsgiverNotifikasjonService(
     ) {
         runBlocking {
             val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(arbeidsgiverNotifikasjon.ansattFnr, arbeidsgiverNotifikasjon.virksomhetsnummer)
-            if (narmesteLederRelasjon !== null && narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
-                if (arbeidsgiverNotifikasjon.narmesteLederFnr == null || arbeidsgiverNotifikasjon.narmesteLederFnr.equals(narmesteLederRelasjon.narmesteLederFnr)) {
-                    val url = dineSykmeldteUrl + "/${narmesteLederRelasjon.narmesteLederId}"
-                    val arbeidsgiverNotifikasjonen = ArbeidsgiverNotifikasjon(
-                        arbeidsgiverNotifikasjon.uuid.toString(),
-                        arbeidsgiverNotifikasjon.virksomhetsnummer,
-                        url,
-                        narmesteLederRelasjon.narmesteLederFnr!!,
-                        arbeidsgiverNotifikasjon.ansattFnr,
-                        arbeidsgiverNotifikasjon.messageText,
-                        narmesteLederRelasjon.narmesteLederEpost!!,
-                        arbeidsgiverNotifikasjon.emailTitle,
-                        arbeidsgiverNotifikasjon.emailBody(url),
-                        arbeidsgiverNotifikasjon.hardDeleteDate,
-                    )
 
-                    arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjonen)
-                } else {
-                    log.warn("Sender ikke varsel til ag-notifikasjon: den ansatte har nærmeste leder med annet fnr enn mottaker i varselHendelse")
-                }
-            } else {
+            if (narmesteLederRelasjon == null || !narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
                 log.warn("Sender ikke varsel til ag-notifikasjon: narmesteLederRelasjon er null eller har ikke kontaktinfo")
+                return@runBlocking
             }
+
+            if (arbeidsgiverNotifikasjon.narmesteLederFnr !== null && !arbeidsgiverNotifikasjon.narmesteLederFnr.equals(narmesteLederRelasjon.narmesteLederFnr)) {
+                log.warn("Sender ikke varsel til ag-notifikasjon: den ansatte har nærmeste leder med annet fnr enn mottaker i varselHendelse")
+                return@runBlocking
+            }
+
+            val url = dineSykmeldteUrl + "/${narmesteLederRelasjon.narmesteLederId}"
+            val arbeidsgiverNotifikasjonen = ArbeidsgiverNotifikasjon(
+                arbeidsgiverNotifikasjon.uuid.toString(),
+                arbeidsgiverNotifikasjon.virksomhetsnummer,
+                url,
+                narmesteLederRelasjon.narmesteLederFnr!!,
+                arbeidsgiverNotifikasjon.ansattFnr,
+                arbeidsgiverNotifikasjon.messageText,
+                narmesteLederRelasjon.narmesteLederEpost!!,
+                arbeidsgiverNotifikasjon.emailTitle,
+                arbeidsgiverNotifikasjon.emailBody(url),
+                arbeidsgiverNotifikasjon.hardDeleteDate,
+            )
+            arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjonen)
         }
     }
 }
