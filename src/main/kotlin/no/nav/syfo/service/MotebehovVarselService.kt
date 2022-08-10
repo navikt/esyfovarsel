@@ -19,26 +19,30 @@ class MotebehovVarselService(
     val WEEKS_BEFORE_DELETE = 4L
 
     fun sendVarselTilNarmesteLeder(varselHendelse: EsyfovarselHendelse) {
-        if(varselHendelse.ansattFnr == null || varselHendelse.orgnummer == null)
+        if (varselHendelse.ansattFnr == null || varselHendelse.orgnummer == null)
             throw IllegalArgumentException("varselHendelse mangler ansattFnr eller orgnummer")
         sendVarselTilDineSykmeldte(varselHendelse)
         sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
     }
+
     fun sendVarselTilSykmeldt(varselHendelse: EsyfovarselHendelse) {
         val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_URL)
         brukernotifikasjonerService.sendVarsel(UUID.randomUUID().toString(), varselHendelse.mottakerFnr, BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST, url)
     }
+
     private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: EsyfovarselHendelse) {
-                arbeidsgiverNotifikasjonService.sendNotifikasjon(
-                    ArbeidsgiverNotifikasjonInput(
-                        UUID.randomUUID(),
-                        varselHendelse.orgnummer!!,
-                        varselHendelse.mottakerFnr,
-                        varselHendelse.ansattFnr!!,
-                        ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
-                        ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
-                        { url: String -> ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY},
-                        LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)))
+        arbeidsgiverNotifikasjonService.sendNotifikasjon(
+            ArbeidsgiverNotifikasjonInput(
+                UUID.randomUUID(),
+                varselHendelse.orgnummer!!,
+                varselHendelse.mottakerFnr,
+                varselHendelse.ansattFnr!!,
+                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
+                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
+                { url: String -> ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY },
+                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
+            )
+        )
     }
 
     private fun sendVarselTilDineSykmeldte(varselHendelse: EsyfovarselHendelse) {
