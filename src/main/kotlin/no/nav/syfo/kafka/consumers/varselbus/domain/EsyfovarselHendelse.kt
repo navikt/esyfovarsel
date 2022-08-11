@@ -1,24 +1,27 @@
 package no.nav.syfo.kafka.consumers.varselbus.domain
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.io.Serializable
 
-interface EsyfovarselHendelse : Serializable {
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+sealed interface EsyfovarselHendelse : Serializable {
     val mottaker: Mottaker
     val type: HendelseType
     var data: Any?
 }
 
-interface Mottaker : Serializable
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+sealed interface Mottaker : Serializable
 
 data class SykmeldtMottaker(
     val mottakerFnr: String
-) : Mottaker, Serializable
+) : Mottaker
 
 data class NarmesteLederMottaker(
     val mottakerFnr: String,
     val orgnummer: String,
     val ansattFnr: String,
-) : Mottaker, Serializable
+) : Mottaker
 
 data class NarmesteLederHendelse(
     override val mottaker: NarmesteLederMottaker,
