@@ -2,11 +2,35 @@ package no.nav.syfo.kafka.consumers.varselbus.domain
 
 import java.io.Serializable
 
-data class EsyfovarselHendelse(
-    val mottakerFnr: String,
-    val type: HendelseType,
+interface EsyfovarselHendelse : Serializable {
+    val mottaker: Mottaker
+    val type: HendelseType
     var data: Any?
-) : Serializable
+}
+
+interface Mottaker : Serializable
+
+data class SykmeldtMottaker(
+    val mottakerFnr: String
+) : Mottaker, Serializable
+
+data class NarmesteLederMottaker(
+    val mottakerFnr: String,
+    val orgnummer: String,
+    val ansattFnr: String,
+) : Mottaker, Serializable
+
+data class NarmesteLederHendelse(
+    override val mottaker: NarmesteLederMottaker,
+    override val type: HendelseType,
+    override var data: Any?
+) : EsyfovarselHendelse
+
+data class SykmeldtHendelse(
+    override val mottaker: SykmeldtMottaker,
+    override val type: HendelseType,
+    override var data: Any?
+) : EsyfovarselHendelse
 
 enum class HendelseType {
     NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
