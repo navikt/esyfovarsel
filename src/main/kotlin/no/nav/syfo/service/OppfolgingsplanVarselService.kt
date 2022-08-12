@@ -1,33 +1,30 @@
 package no.nav.syfo.service
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.DINE_SYKMELDTE_OPPFOLGINGSPLAN_OPPRETTET_TEKST
 import no.nav.syfo.DINE_SYKMELDTE_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST
+import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_OPPFOLGINGSPLAN_OPPRETTET
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
+import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederMottaker
+import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
-import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
-import no.nav.syfo.kafka.consumers.varselbus.domain.OppfolgingsplanNLVarselData
-import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
-import no.nav.syfo.kafka.consumers.varselbus.isOrgFnrNrValidFormat
-import no.nav.syfo.kafka.consumers.varselbus.objectMapper
-import org.apache.commons.cli.MissingArgumentException
-import java.io.IOException
 import java.time.OffsetDateTime
 
 class OppfolgingsplanVarselService(
     val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer
 ) {
-    fun sendVarselTilDineSykmeldte(varselHendelse: EsyfovarselHendelse) {
+    fun sendVarselTilDineSykmeldte(varselHendelse: EsyfovarselHendelse<NarmesteLederMottaker>) {
         val varseltekst = when (varselHendelse.type) {
             NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> DINE_SYKMELDTE_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST
             NL_OPPFOLGINGSPLAN_OPPRETTET -> DINE_SYKMELDTE_OPPFOLGINGSPLAN_OPPRETTET_TEKST
-            else -> {throw IllegalArgumentException("Type må være Oppfølgingsplan-type")}
+            else -> {
+                throw IllegalArgumentException("Type må være Oppfølgingsplan-type")
+            }
         }
-        val varseldata = varselHendelse.dataToOppfolgingsplanNLVarselData()
         val dineSykmeldteVarsel = DineSykmeldteVarsel(
-            varseldata.ansattFnr,
-            varseldata.orgnummer,
+            varselHendelse.mottaker.ansattFnr,
+            varselHendelse.mottaker.orgnummer,
             varselHendelse.type.toDineSykmeldteHendelseType().toString(),
             null,
             varseltekst,
@@ -35,18 +32,4 @@ class OppfolgingsplanVarselService(
         )
         dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
     }
-}
-
-fun EsyfovarselHendelse.dataToOppfolgingsplanNLVarselData(): OppfolgingsplanNLVarselData {
-    return data?.let {
-        try {
-            val varseldata: OppfolgingsplanNLVarselData = objectMapper.readValue(data.toString())
-            if (isOrgFnrNrValidFormat(varseldata.ansattFnr, varseldata.orgnummer)) {
-                return@let varseldata
-            }
-            throw IllegalArgumentException("OppfolgingsplanNLVarselData har ugyldig fnr eller orgnummer")
-        } catch (e: IOException) {
-            throw IOException("EsyfovarselHendelse har feil format i 'data'-felt")
-        }
-    } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
 }

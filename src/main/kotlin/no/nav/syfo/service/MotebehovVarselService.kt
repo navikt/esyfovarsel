@@ -1,9 +1,7 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.*
-import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.SykmeldtHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
+import no.nav.syfo.kafka.consumers.varselbus.domain.*
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import java.net.URL
@@ -19,12 +17,12 @@ class MotebehovVarselService(
 ) {
     val WEEKS_BEFORE_DELETE = 4L
 
-    fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
+    fun sendVarselTilNarmesteLeder(varselHendelse: EsyfovarselHendelse<NarmesteLederMottaker>) {
         sendVarselTilDineSykmeldte(varselHendelse)
         sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
     }
 
-    fun sendVarselTilSykmeldt(varselHendelse: SykmeldtHendelse) {
+    fun sendVarselTilSykmeldt(varselHendelse: EsyfovarselHendelse<SykmeldtMottaker>) {
         val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_URL)
         brukernotifikasjonerService.sendVarsel(
             UUID.randomUUID().toString(),
@@ -34,7 +32,7 @@ class MotebehovVarselService(
         )
     }
 
-    private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
+    private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: EsyfovarselHendelse<NarmesteLederMottaker>) {
         arbeidsgiverNotifikasjonService.sendNotifikasjon(
             ArbeidsgiverNotifikasjonInput(
                 UUID.randomUUID(),
@@ -49,7 +47,7 @@ class MotebehovVarselService(
         )
     }
 
-    private fun sendVarselTilDineSykmeldte(varselHendelse: NarmesteLederHendelse) {
+    private fun sendVarselTilDineSykmeldte(varselHendelse: EsyfovarselHendelse<NarmesteLederMottaker>) {
         val varseltekst = DINE_SYKMELDTE_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
         val dineSykmeldteVarsel = DineSykmeldteVarsel(
             varselHendelse.mottaker.ansattFnr,

@@ -12,27 +12,27 @@ class VarselBusService(
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.VarselBusService")
     private val oppfolgingsplanVarselService = OppfolgingsplanVarselService(dineSykmeldteHendelseKafkaProducer)
-    fun processVarselHendelse(varselHendelse: EsyfovarselHendelse) {
+    fun processVarselHendelse(varselHendelse: EsyfovarselHendelse<Any>) {
         log.info("Behandler varsel av type ${varselHendelse.type}")
         when (varselHendelse.type) {
             NL_OPPFOLGINGSPLAN_OPPRETTET,
-            NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilDineSykmeldte(varselHendelse)
+            NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilDineSykmeldte(varselHendelse.toNarmestelederHendelse())
             NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
             SM_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilSykmeldt(varselHendelse.toSykmeldtHendelse())
         }
     }
 
-    private fun EsyfovarselHendelse.toNarmestelederHendelse(): NarmesteLederHendelse {
+    private fun EsyfovarselHendelse<out Any>.toNarmestelederHendelse(): EsyfovarselHendelse<NarmesteLederMottaker> {
         return if (mottaker is NarmesteLederMottaker) {
-            NarmesteLederHendelse(mottaker, type, data)
+            this as EsyfovarselHendelse<NarmesteLederMottaker>
         } else {
             throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type NarmesteLederHendelse")
         }
     }
 
-    private fun EsyfovarselHendelse.toSykmeldtHendelse(): SykmeldtHendelse {
+    private fun EsyfovarselHendelse<out Any>.toSykmeldtHendelse(): EsyfovarselHendelse<SykmeldtMottaker> {
         return if (mottaker is SykmeldtMottaker) {
-            SykmeldtHendelse(mottaker, type, data)
+            this as EsyfovarselHendelse<SykmeldtMottaker>
         } else {
             throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type NarmesteLederHendelse")
         }
