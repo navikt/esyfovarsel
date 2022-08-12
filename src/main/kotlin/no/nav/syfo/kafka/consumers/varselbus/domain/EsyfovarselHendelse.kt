@@ -3,12 +3,11 @@ package no.nav.syfo.kafka.consumers.varselbus.domain
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.io.Serializable
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
-sealed interface EsyfovarselHendelse : Serializable {
-    val mottaker: Mottaker
-    val type: HendelseType
-    var data: Any?
-}
+data class EsyfovarselHendelse(
+    val mottaker: Mottaker,
+    val type: HendelseType,
+    var data: Any?,
+) : Serializable
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
 sealed interface Mottaker : Serializable
@@ -24,16 +23,16 @@ data class NarmesteLederMottaker(
 ) : Mottaker
 
 data class NarmesteLederHendelse(
-    override val mottaker: NarmesteLederMottaker,
-    override val type: HendelseType,
-    override var data: Any?
-) : EsyfovarselHendelse
+    val mottaker: NarmesteLederMottaker,
+    val type: HendelseType,
+    var data: Any?
+)
 
 data class SykmeldtHendelse(
-    override val mottaker: SykmeldtMottaker,
-    override val type: HendelseType,
-    override var data: Any?
-) : EsyfovarselHendelse
+    val mottaker: SykmeldtMottaker,
+    val type: HendelseType,
+    var data: Any?
+)
 
 enum class HendelseType {
     NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
