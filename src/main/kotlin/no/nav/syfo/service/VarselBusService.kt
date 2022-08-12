@@ -1,9 +1,7 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
-import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.SykmeldtHendelse
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -25,11 +23,19 @@ class VarselBusService(
     }
 
     private fun EsyfovarselHendelse.toNarmestelederHendelse(): NarmesteLederHendelse {
-        throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type NarmesteLederHendelse")
+        return if (mottaker is NarmesteLederMottaker) {
+            NarmesteLederHendelse(mottaker, type, data)
+        } else {
+            throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type NarmesteLederHendelse")
+        }
     }
 
     private fun EsyfovarselHendelse.toSykmeldtHendelse(): SykmeldtHendelse {
-        throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type SykmeldtHendelse")
+        return if (mottaker is SykmeldtMottaker) {
+            SykmeldtHendelse(mottaker, type, data)
+        } else {
+            throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type NarmesteLederHendelse")
+        }
     }
 
 
