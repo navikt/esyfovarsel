@@ -26,7 +26,7 @@ class VarselBusService(
         return if (mottaker is NarmesteLederMottaker) {
             this as EsyfovarselHendelse<NarmesteLederMottaker>
         } else {
-            throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type NarmesteLederHendelse")
+            throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, mottaker should be of type NarmesteLederMottaker")
         }
     }
 
@@ -34,7 +34,7 @@ class VarselBusService(
         return if (mottaker is SykmeldtMottaker) {
             this as EsyfovarselHendelse<SykmeldtMottaker>
         } else {
-            throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type NarmesteLederHendelse")
+            throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, mottaker should be of type SykmeldtMottaker")
         }
     }
 
