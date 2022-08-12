@@ -12,7 +12,7 @@ class VarselBusService(
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.VarselBusService")
     private val oppfolgingsplanVarselService = OppfolgingsplanVarselService(dineSykmeldteHendelseKafkaProducer)
-    fun processVarselHendelse(varselHendelse: EsyfovarselHendelse<Any>) {
+    fun processVarselHendelse(varselHendelse: EsyfovarselHendelse<out Mottaker>) {
         log.info("Behandler varsel av type ${varselHendelse.type}")
         when (varselHendelse.type) {
             NL_OPPFOLGINGSPLAN_OPPRETTET,

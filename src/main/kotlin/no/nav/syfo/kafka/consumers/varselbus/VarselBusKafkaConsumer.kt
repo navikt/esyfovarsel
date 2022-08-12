@@ -5,6 +5,7 @@ import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.Mottaker
 import no.nav.syfo.service.VarselBusService
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
@@ -31,7 +32,7 @@ class VarselBusKafkaConsumer(
             kafkaListener.poll(zeroMillis).forEach {
                 log.info("VARSEL BUS: Mottatt melding ${it.key()} fra topic")
                 try {
-                    val varsel: EsyfovarselHendelse = objectMapper.readValue(it.value())
+                    val varsel: EsyfovarselHendelse<out Mottaker> = objectMapper.readValue(it.value())
                     varsel.data = objectMapper.readTree(it.value())["data"]
                     log.info("VARSEL BUS: Melding med UUID ${it.key()} er av type: ${varsel.type}")
                     varselBusService.processVarselHendelse(varsel)
