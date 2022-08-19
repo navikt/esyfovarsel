@@ -36,7 +36,7 @@ fun Route.registerBrukerApi(varselSendtService: VarselSendtService) {
 }
 
 private fun isAktorIDGyldig(aktorId: String?): Boolean {
-    return aktorId?.let {
-        it.length == 13
+    return aktorId?.let { id ->
+        id.length == 13 && id.all { it.isDigit() }
     } ?: true
 }

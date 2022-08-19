@@ -33,7 +33,6 @@ val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
 
 fun getWellKnown(wellKnownUrl: String) = runBlocking { HttpClient(Apache, proxyConfig).get<WellKnown>(wellKnownUrl) }
 
-
 fun hasLoginserviceIdportenClientIdAudience(credentials: JWTCredential, loginserviceIdportenClientId: List<String>): Boolean {
     val isValid = loginserviceIdportenClientId.any { credentials.payload.audience.contains(it) }
     if (!isValid) {
