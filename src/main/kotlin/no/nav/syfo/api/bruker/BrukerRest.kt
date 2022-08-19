@@ -8,10 +8,12 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.service.VarselSendtService
+import org.slf4j.LoggerFactory
 import javax.ws.rs.ForbiddenException
 
 val urlPath39UkersVarsel = "/api/bruker/39ukersvarsel/{aktorid}"
 
+val log = LoggerFactory.getLogger("no.nav.syfo.api.bruker.registerBrukerApi")
 fun Route.registerBrukerApi(varselSendtService: VarselSendtService) {
     accept(ContentType.Application.Json) {
         get(urlPath39UkersVarsel) {
@@ -28,7 +30,8 @@ fun Route.registerBrukerApi(varselSendtService: VarselSendtService) {
                 } catch (e: ForbiddenException) {
                     call.respond(HttpStatusCode.Forbidden, "Ikke autorisert")
                 } catch (e: RuntimeException) {
-                    call.respond(HttpStatusCode.InternalServerError, "Feil ved henting av aktorid")
+                    log.error("Uventet feil oppstå under kall til 39-ukersvarsel endepunkt: ${e.message}", e)
+                    call.respond(HttpStatusCode.InternalServerError, "Uventet feil oppsto")
                 }
             }
         }

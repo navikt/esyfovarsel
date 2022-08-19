@@ -50,6 +50,11 @@ object JobApiSpek : Spek({
         val journalpostdistribusjonConsumer = mockk<JournalpostdistribusjonConsumer>()
         val dokarkivService = mockk<DokarkivService>()
 
+        coEvery { accessControlService.getUserAccessStatusByFnr(fnr1) } returns userAccessStatus1
+        coEvery { accessControlService.getUserAccessStatusByFnr(fnr2) } returns userAccessStatus2
+        coEvery { accessControlService.getUserAccessStatusByFnr(fnr3) } returns userAccessStatus3
+        coEvery { accessControlService.getUserAccessStatusByFnr(fnr4) } returns userAccessStatus4
+        coEvery { accessControlService.getUserAccessStatusByFnr(fnr5) } returns userAccessStatus5
         coEvery { accessControlService.getUserAccessStatusByAktorId(aktorId) } returns userAccessStatus1
         coEvery { accessControlService.getUserAccessStatusByAktorId(aktorId2) } returns userAccessStatus2
         coEvery { accessControlService.getUserAccessStatusByAktorId(aktorId3) } returns userAccessStatus3
@@ -66,12 +71,13 @@ object JobApiSpek : Spek({
                 narmesteLederService,
                 accessControlService,
                 testEnv.urlEnv,
+                testEnv.appEnv,
                 syfoMotebeovConsumer,
                 arbeidsgiverNotifikasjonService,
                 journalpostdistribusjonConsumer,
                 dokarkivService,
             )
-        val varselSender = VarselSender(embeddedDatabase, sendVarselService, testEnv.toggleEnv, testEnv.appEnv)
+        val varselSender = VarselSender(embeddedDatabase, sendVarselService, testEnv.toggleEnv)
 
         with(TestApplicationEngine()) {
             start()

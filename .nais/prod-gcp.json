@@ -10,8 +10,8 @@
     "SYFOSMREGISTER_SCOPE": "api://prod-gcp.teamsykmelding.syfosmregister/.default",
     "DKIF_SCOPE": "api://prod-gcp.team-rocket.digdir-krr-proxy/.default",
     "PDL_SCOPE": "api://prod-fss.pdl.pdl-api/.default",
-    "TOGGLE_SEND_MERVEILEDNING_VARSLER": "false",
-    "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "false",
+    "TOGGLE_SEND_MERVEILEDNING_VARSLER": "true",
+    "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "true",
     "TOGGLE_SEND_SVAR_MOTEBEHOV_VARSLER": "false",
     "BASE_URL_SYK_INFO": "https://www.nav.no/syk/info",
     "BASE_URL_DIALOGMOTER": "https://www.nav.no/syk/dialogmoter",
@@ -30,7 +30,7 @@
   "job": {
     "KTOR_ENV": "remote",
     "JOB": "true",
-    "SEND_VARSLER": "false",
+    "SEND_VARSLER": "true",
     "ESYFOVARSEL_JOB_TRIGGER_URL": "https://esyfovarsel.intern.nav.no/job/trigger"
   }
 }
