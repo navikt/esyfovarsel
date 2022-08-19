@@ -11,6 +11,7 @@ import no.nav.syfo.consumer.pdl.*
 import no.nav.syfo.isNotGCP
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
+import java.io.FileNotFoundException
 
 open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
     private val client = httpClient()
@@ -41,8 +42,8 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: To
         }
     }
 
-    fun isBrukerGradertForInformasjon(aktorId: String): Boolean? {
-        val response = callPdl(PERSON_QUERY, aktorId)
+    fun isBrukerGradertForInformasjon(ident: String): Boolean? {
+        val response = callPdl(PERSON_QUERY, ident)
 
         return when (response?.status) {
             HttpStatusCode.OK -> {
@@ -63,12 +64,15 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: To
         }
     }
 
-    fun callPdl(service: String, aktorId: String): HttpResponse? {
+    private fun callPdl(service: String, ident: String): HttpResponse? {
         return runBlocking {
             val token = tokenConsumer.getToken(urlEnv.pdlScope)
             val bearerTokenString = "Bearer $token"
-            val graphQuery = this::class.java.getResource("$QUERY_PATH_PREFIX/$service").readText().replace("[\n\r]", "")
-            val requestBody = PdlRequest(graphQuery, Variables(aktorId))
+            val graphQueryResourcePath = "$QUERY_PATH_PREFIX/$service"
+            val graphQuery =
+                this::class.java.getResource(graphQueryResourcePath)?.readText()?.replace("[\n\r]", "")
+                    ?: throw FileNotFoundException("Could not found resource: $graphQueryResourcePath")
+            val requestBody = PdlRequest(graphQuery, Variables(ident))
             try {
                 client.post<HttpResponse>(urlEnv.pdlUrl) {
                     headers {

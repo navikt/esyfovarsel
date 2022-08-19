@@ -1,6 +1,7 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.*
+import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.syfomotebehov.SyfoMotebehovConsumer
 import no.nav.syfo.db.domain.PPlanlagtVarsel
@@ -32,9 +33,9 @@ class SendVarselService(
     suspend fun sendVarsel(pPlanlagtVarsel: PPlanlagtVarsel): String {
         // Recheck if user can be notified in case of recent 'Addressesperre'
         return try {
-            val fodselnummer = accessControl.getFnrIfUserCanBeNotified(pPlanlagtVarsel.aktorId)
+            val fnr = pPlanlagtVarsel.fnr
             val uuid = pPlanlagtVarsel.uuid
-            fodselnummer?.let { fnr ->
+            if (accessControl.canUserBeNotified(fnr)) {
                 val varselUrl = varselUrlFromType(pPlanlagtVarsel.type)
                 val varselContent = varselContentFromType(pPlanlagtVarsel.type)
                 val orgnummer = pPlanlagtVarsel.orgnummer
@@ -80,7 +81,7 @@ class SendVarselService(
                 } else {
                     throw RuntimeException("Klarte ikke mappe typestreng til innholdstekst og URL")
                 }
-            } ?: run {
+            } else {
                 log.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles ")
                 return UTSENDING_FEILET
             }

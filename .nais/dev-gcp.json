@@ -10,9 +10,9 @@
     "SYFOSMREGISTER_SCOPE": "api://dev-gcp.teamsykmelding.syfosmregister/.default",
     "DKIF_SCOPE": "api://dev-gcp.team-rocket.digdir-krr-proxy/.default",
     "PDL_SCOPE": "api://dev-fss.pdl.pdl-api/.default",
-    "TOGGLE_SEND_MERVEILEDNING_VARSLER": "false",
-    "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "false",
-    "TOGGLE_SEND_SVAR_MOTEBEHOV_VARSLER": "false",
+    "TOGGLE_SEND_MERVEILEDNING_VARSLER": "true",
+    "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "true",
+    "TOGGLE_SEND_SVAR_MOTEBEHOV_VARSLER": "true",
     "BASE_URL_SYK_INFO": "https://www-gcp.dev.nav.no/syk/info",
     "BASE_URL_DIALOGMOTER": "https://www-gcp.dev.nav.no/syk/dialogmoter",
     "AG_NOTIFIKASJON_PRODUSENT_API_URL": "https://ag-notifikasjon-produsent-api.dev.intern.nav.no/api/graphql",
@@ -25,7 +25,7 @@
   "job": {
     "KTOR_ENV": "remote",
     "JOB": "true",
-    "SEND_VARSLER": "false",
+    "SEND_VARSLER": "true",
     "ESYFOVARSEL_JOB_TRIGGER_URL": "https://esyfovarsel.dev.intern.nav.no/job/trigger"
   }
 }

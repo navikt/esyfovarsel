@@ -26,8 +26,8 @@
   },
   "job": {
     "KTOR_ENV": "remote",
-    "JOB": "true",
-    "SEND_VARSLER": "true",
+    "JOB": "false",
+    "SEND_VARSLER": "false",
     "ESYFOVARSEL_JOB_TRIGGER_URL": "https://esyfovarsel.dev.adeo.no/job/trigger"
   }
 }

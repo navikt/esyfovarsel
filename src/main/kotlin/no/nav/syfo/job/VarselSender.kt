@@ -19,18 +19,11 @@ import java.time.LocalDate
 class VarselSender(
     private val databaseAccess: DatabaseInterface,
     private val sendVarselService: SendVarselService,
-    private val toggles: ToggleEnv,
-    private val appEnv: AppEnv
+    private val toggles: ToggleEnv
 ) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
 
     suspend fun sendVarsler(): Int {
-        log.info("SendVarslerJobb-API kalt")
-        if (appEnv.runningInGCPCluster) {
-            log.info("[GCP] Disabled varselutsending")
-            return 0
-        }
-
         log.info("Starter SendVarslerJobb")
 
         val varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())

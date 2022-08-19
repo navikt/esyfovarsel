@@ -50,6 +50,9 @@ spec:
         - application: syfosmregister
           namespace: teamsykmelding
           cluster: prod-gcp
+        - application: narmesteleder
+          namespace: teamsykmelding
+          cluster: prod-gcp
   gcp:
     sqlInstances:
       - autoBackupHour: 1

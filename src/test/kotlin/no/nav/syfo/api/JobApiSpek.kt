@@ -10,6 +10,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.api.job.registerJobTriggerApi
 import no.nav.syfo.api.job.urlPathJobTrigger
+import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.syfomotebehov.SyfoMotebehovConsumer
 import no.nav.syfo.db.domain.PlanlagtVarsel
@@ -45,9 +46,9 @@ object JobApiSpek : Spek({
         val narmesteLederService = mockk<NarmesteLederService>()
         val syfoMotebeovConsumer = mockk<SyfoMotebehovConsumer>()
 
-        coEvery { accessControl.getFnrIfUserCanBeNotified(aktorId) } returns fnr1
-        coEvery { accessControl.getFnrIfUserCanBeNotified(aktorId2) } returns fnr2
-        coEvery { accessControl.getFnrIfUserCanBeNotified(aktorId3) } returns null
+        coEvery { accessControl.canUserBeNotified(fnr1) } returns true
+        coEvery { accessControl.canUserBeNotified(fnr2) } returns true
+        coEvery { accessControl.canUserBeNotified(fnr3) } returns false
 
         coEvery { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
 
@@ -61,7 +62,7 @@ object JobApiSpek : Spek({
                 syfoMotebeovConsumer,
                 arbeidsgiverNotifikasjonService,
             )
-        val varselSender = VarselSender(embeddedDatabase, sendVarselService, testEnv.toggleEnv, testEnv.appEnv)
+        val varselSender = VarselSender(embeddedDatabase, sendVarselService, testEnv.toggleEnv)
 
         with(TestApplicationEngine()) {
             start()
