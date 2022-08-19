@@ -15,9 +15,9 @@ class BrukernotifikasjonerService(
         // Recheck if user can be notified in case of recent 'Addressesperre'
         if (accessControlService.getUserAccessStatusByFnr(mottakerFnr).canUserBeDigitallyNotified) {
             beskjedKafkaProducer.sendBeskjed(mottakerFnr, content, uuid, url)
-            log.info("Har sendt melding med uuid ${uuid} til brukernotifikasjoner: ${content}")
+            log.info("Har sendt melding med uuid $uuid til brukernotifikasjoner: $content")
         } else {
-            log.info("Kan ikke sende melding til bruker for melding med uuid ${uuid}, dette kan skyldes adressesperre")
+            log.info("Kan ikke sende melding til bruker for melding med uuid $uuid, dette kan skyldes adressesperre")
         }
     }
 

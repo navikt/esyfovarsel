@@ -27,6 +27,7 @@ class SendVarselService(
     val narmesteLederService: NarmesteLederService,
     val accessControlService: AccessControlService,
     val urlEnv: UrlEnv,
+    val appEnv: AppEnv,
     val syfoMotebehovConsumer: SyfoMotebehovConsumer,
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
     val journalpostdistribusjonConsumer: JournalpostdistribusjonConsumer,
@@ -39,7 +40,12 @@ class SendVarselService(
     suspend fun sendVarsel(pPlanlagtVarsel: PPlanlagtVarsel): String {
         // Recheck if user can be notified in case of recent 'Addressesperre'
         return try {
-            val userAccessStatus = accessControlService.getUserAccessStatusByAktorId(pPlanlagtVarsel.aktorId)
+            val userAccessStatus =
+                if (appEnv.runningInGCPCluster)
+                    accessControlService.getUserAccessStatusByFnr(pPlanlagtVarsel.fnr)
+                else
+                    accessControlService.getUserAccessStatusByAktorId(pPlanlagtVarsel.aktorId)
+            val fnr = userAccessStatus.fnr!!
             val uuid = pPlanlagtVarsel.uuid
 
             val varselUrl = varselUrlFromType(pPlanlagtVarsel.type)
@@ -50,11 +56,11 @@ class SendVarselService(
                 if (userSkalVarsles(pPlanlagtVarsel.type, userAccessStatus)) {
                     when (pPlanlagtVarsel.type) {
                         AKTIVITETSKRAV.name -> {
-                            sendVarselTilSykmeldt(userAccessStatus.fnr!!, varselContent, uuid, varselUrl)
+                            sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
                             if (orgnummer !== null) {
                                 sendAktivitetskravVarselTilArbeidsgiver(
                                     uuid,
-                                    userAccessStatus.fnr!!,
+                                    fnr,
                                     orgnummer
                                 )
                             }
@@ -62,11 +68,11 @@ class SendVarselService(
                         }
                         MER_VEILEDNING.name -> {
                             if (userAccessStatus.canUserBeDigitallyNotified) {
-                                sendVarselTilSykmeldt(userAccessStatus.fnr!!, varselContent, uuid, varselUrl)
+                                sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
                                 pPlanlagtVarsel.type
                             } else if (userAccessStatus.canUserBePhysicallyNotified) {
                                 log.info("Skal sende fysisk brev for varsel med uuid: $uuid")
-                                sendFysiskBrevTilReservertBruker(userAccessStatus.fnr!!, pPlanlagtVarsel.uuid)
+                                sendFysiskBrevTilReservertBruker(fnr, pPlanlagtVarsel.uuid)
                                 pPlanlagtVarsel.type
                             } else {
                                 log.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles")
@@ -74,9 +80,9 @@ class SendVarselService(
                             }
                         }
                         SVAR_MOTEBEHOV.name -> {
-                            syfoMotebehovConsumer.sendVarselTilArbeidstaker(pPlanlagtVarsel.aktorId, pPlanlagtVarsel.fnr)
+                            syfoMotebehovConsumer.sendVarselTilArbeidstaker(pPlanlagtVarsel.aktorId, fnr)
                             if (orgnummer !== null) {
-                                val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(userAccessStatus.fnr!!, orgnummer)
+                                val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer)
                                 if (narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
                                     syfoMotebehovConsumer.sendVarselTilNaermesteLeder(
                                         pPlanlagtVarsel.aktorId,

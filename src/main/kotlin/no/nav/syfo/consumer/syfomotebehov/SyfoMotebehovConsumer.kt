@@ -28,6 +28,7 @@ open class SyfoMotebehovConsumer(urlEnv: UrlEnv, private val tokenConsumer: Toke
                 }
                 body = requestBody
             }
+
             if (response.status != HttpStatusCode.OK) {
                 throw RuntimeException("Klarte ikke å opprette varsel til naermeste leder om møtebehov - ${response.status} $requestURL")
             }
@@ -49,6 +50,7 @@ open class SyfoMotebehovConsumer(urlEnv: UrlEnv, private val tokenConsumer: Toke
                 }
                 body = requestBody
             }
+
             if (response.status != HttpStatusCode.OK) {
                 throw RuntimeException("Klarte ikke å opprette varsel til sykmeldt om møtebehov - ${response.status} $requestURL")
             }

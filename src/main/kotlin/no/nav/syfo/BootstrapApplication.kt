@@ -88,8 +88,10 @@ fun main() {
                 val accessControlService = AccessControlService(pdlConsumer, dkifConsumer)
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
                 val syketilfellebitService = SyketilfellebitService(database)
-                val varselSendtService = VarselSendtService(pdlConsumer, oppfolgingstilfelleConsumer, database)
+                val syketilfelleConsumer: SyketilfelleInterface = getSyketilfelleConsumer(env.urlEnv, stsConsumer) ?: syketilfellebitService
+                val varselSendtService = VarselSendtService(pdlConsumer, syketilfelleConsumer, database)
                 val merVeiledningVarselPlanner = MerVeiledningVarselPlannerOppfolgingstilfelle(database, oppfolgingstilfelleConsumer, varselSendtService)
+
                 val merVeiledningVarselPlannerSyketilfellebit = MerVeiledningVarselPlannerSyketilfellebit(database, syketilfellebitService, varselSendtService)
                 val aktivitetskravVarselPlanner = AktivitetskravVarselPlannerOppfolgingstilfelle(database, oppfolgingstilfelleConsumer, sykmeldingService)
                 val aktivitetskravVarselPlannerSyketilfellebit = AktivitetskravVarselPlannerSyketilfellebit(database, syketilfellebitService, sykmeldingService)
@@ -180,6 +182,14 @@ private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: TokenConsumer, stsC
     }
 }
 
+private fun getSyketilfelleConsumer(urlEnv: UrlEnv, tokenConsumer: TokenConsumer): SyketilfelleInterface? {
+    if (isLocal()) {
+        return LocalSyfosyketilfelleConsumer(urlEnv, tokenConsumer)
+    }
+    if (isNotGCP())
+        return SyfosyketilfelleConsumer(urlEnv, tokenConsumer)
+    return null
+}
 private fun getSyfosyketilfelleConsumer(urlEnv: UrlEnv, tokenConsumer: TokenConsumer): SyfosyketilfelleConsumer {
     if (isLocal()) {
         return LocalSyfosyketilfelleConsumer(urlEnv, tokenConsumer)
@@ -208,6 +218,7 @@ fun Application.serverModule(
             narmesteLederService,
             accessControlService,
             env.urlEnv,
+            env.appEnv,
             syfoMotebehovConsumer,
             arbeidsgiverNotifikasjonService,
             journalpostdistribusjonConsumer,
@@ -217,8 +228,7 @@ fun Application.serverModule(
     val varselSender = VarselSender(
         database,
         sendVarselService,
-        env.toggleEnv,
-        env.appEnv,
+        env.toggleEnv
     )
 
     install(ContentNegotiation) {

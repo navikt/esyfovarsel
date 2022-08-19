@@ -8,11 +8,12 @@ import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.TokenConsumer
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
+import no.nav.syfo.service.SyketilfelleInterface
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-open class SyfosyketilfelleConsumer(urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
+open class SyfosyketilfelleConsumer(urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) : SyketilfelleInterface {
     private val client = httpClient()
     private val basepath = urlEnv.syfosyketilfelleUrl
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.SyfosyketilfelleConsumer")
@@ -78,10 +79,14 @@ open class SyfosyketilfelleConsumer(urlEnv: UrlEnv, private val tokenConsumer: T
             }
         }
     }
+
+    override suspend fun getOppfolgingstilfelle39UkerCommon(fnr: String, aktorId: String): Oppfolgingstilfelle39Uker? {
+        return getOppfolgingstilfelle39Uker(aktorId)
+    }
 }
 
 class LocalSyfosyketilfelleConsumer(urlEnv: UrlEnv, tokenConsumer: TokenConsumer) : SyfosyketilfelleConsumer(urlEnv, tokenConsumer) {
-    override suspend fun getOppfolgingstilfelle39Uker(aktorId: String): Oppfolgingstilfelle39Uker? {
+    override suspend fun getOppfolgingstilfelle39Uker(aktorId: String): Oppfolgingstilfelle39Uker {
         return Oppfolgingstilfelle39Uker(
             aktorId,
             16,

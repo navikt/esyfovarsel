@@ -1,6 +1,5 @@
 package no.nav.syfo.job
 
-import no.nav.syfo.AppEnv
 import no.nav.syfo.ToggleEnv
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselByVarselId
@@ -19,18 +18,11 @@ import java.time.LocalDate
 class VarselSender(
     private val databaseAccess: DatabaseInterface,
     private val sendVarselService: SendVarselService,
-    private val toggles: ToggleEnv,
-    private val appEnv: AppEnv,
+    private val toggles: ToggleEnv
 ) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
 
     suspend fun sendVarsler(): Int {
-        log.info("SendVarslerJobb-API kalt")
-        if (appEnv.runningInGCPCluster) {
-            log.info("[GCP] Disabled varselutsending")
-            return 0
-        }
-
         log.info("Starter SendVarslerJobb")
 
         val varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
@@ -78,8 +70,8 @@ class VarselSender(
     }
 
     private fun skalSendeVarsel(it: PPlanlagtVarsel) = (it.type.equals(VarselType.MER_VEILEDNING.name) && toggles.sendMerVeiledningVarsler) ||
-            (it.type.equals(VarselType.AKTIVITETSKRAV.name) && toggles.sendAktivitetskravVarsler) ||
-            (it.type.equals(VarselType.SVAR_MOTEBEHOV.name) && toggles.sendSvarMotebehovVarsler)
+        (it.type.equals(VarselType.AKTIVITETSKRAV.name) && toggles.sendAktivitetskravVarsler) ||
+        (it.type.equals(VarselType.SVAR_MOTEBEHOV.name) && toggles.sendSvarMotebehovVarsler)
 
     private fun String.sendtUtenFeil(): Boolean {
         return this != UTSENDING_FEILET

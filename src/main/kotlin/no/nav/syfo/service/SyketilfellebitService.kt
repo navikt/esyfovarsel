@@ -5,6 +5,7 @@ import no.nav.syfo.syketilfelle.domain.Tag.*
 import no.nav.syfo.db.fetchSyketilfellebiterByFnr
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
+import no.nav.syfo.service.SyketilfelleInterface
 import no.nav.syfo.syketilfelle.domain.*
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -38,7 +39,7 @@ fun KOppfolgingstilfelle39Uker.toOppfolgingstilfelle39Uker() = Oppfolgingstilfel
 
 class SyketilfellebitService(
     val database: DatabaseInterface
-) {
+) : SyketilfelleInterface {
     fun beregnKOppfolgingstilfelle39UkersVarsel(fnr: String): Oppfolgingstilfelle39Uker? =
         genererOppfolgingstilfelle(fnr)
             ?.filter { oppfolgingstilfelle -> oppfolgingstilfelle.dagerAvArbeidsgiverperiode > AntallDagerIArbeidsgiverPeriode }
@@ -61,37 +62,40 @@ class SyketilfellebitService(
 
     fun genererOppfolgingstilfelle(fnr: String): List<Oppfolgingstilfelle>? {
         val biter = database.fetchSyketilfellebiterByFnr(fnr)
-
-        val tidslinje = Tidslinje(
-            Syketilfellebiter(
-                prioriteringsliste = listOf(
-                    SYKEPENGESOKNAD and SENDT and ARBEID_GJENNOPPTATT,
-                    SYKEPENGESOKNAD and SENDT and KORRIGERT_ARBEIDSTID and BEHANDLINGSDAGER,
-                    SYKEPENGESOKNAD and SENDT and KORRIGERT_ARBEIDSTID and FULL_AKTIVITET,
-                    SYKEPENGESOKNAD and SENDT and KORRIGERT_ARBEIDSTID and (GRADERT_AKTIVITET or INGEN_AKTIVITET),
-                    SYKEPENGESOKNAD and SENDT and (PERMISJON or FERIE),
-                    SYKEPENGESOKNAD and SENDT and (EGENMELDING or PAPIRSYKMELDING or FRAVAR_FOR_SYKMELDING),
-                    SYKEPENGESOKNAD and SENDT and ListContainsPredicate.tagsSize(2),
-                    SYKEPENGESOKNAD and SENDT and BEHANDLINGSDAG,
-                    SYKEPENGESOKNAD and SENDT and BEHANDLINGSDAGER,
-                    SYKMELDING and (SENDT or BEKREFTET) and PERIODE and BEHANDLINGSDAGER,
-                    SYKMELDING and (SENDT or BEKREFTET) and PERIODE and FULL_AKTIVITET,
-                    SYKMELDING and (SENDT or BEKREFTET) and PERIODE and (GRADERT_AKTIVITET or INGEN_AKTIVITET),
-                    SYKMELDING and BEKREFTET and ANNET_FRAVAR,
-                    SYKMELDING and SENDT and PERIODE and REISETILSKUDD and UKJENT_AKTIVITET,
-                    SYKMELDING and NY and PERIODE and BEHANDLINGSDAGER,
-                    SYKMELDING and NY and PERIODE and FULL_AKTIVITET,
-                    SYKMELDING and NY and PERIODE and (GRADERT_AKTIVITET or INGEN_AKTIVITET),
-                    SYKMELDING and NY and PERIODE and REISETILSKUDD and UKJENT_AKTIVITET,
-                ),
-                biter = biter
+        return try {
+            val tidslinje = Tidslinje(
+                Syketilfellebiter(
+                    prioriteringsliste = listOf(
+                        SYKEPENGESOKNAD and SENDT and ARBEID_GJENNOPPTATT,
+                        SYKEPENGESOKNAD and SENDT and KORRIGERT_ARBEIDSTID and BEHANDLINGSDAGER,
+                        SYKEPENGESOKNAD and SENDT and KORRIGERT_ARBEIDSTID and FULL_AKTIVITET,
+                        SYKEPENGESOKNAD and SENDT and KORRIGERT_ARBEIDSTID and (GRADERT_AKTIVITET or INGEN_AKTIVITET),
+                        SYKEPENGESOKNAD and SENDT and (PERMISJON or FERIE),
+                        SYKEPENGESOKNAD and SENDT and (EGENMELDING or PAPIRSYKMELDING or FRAVAR_FOR_SYKMELDING),
+                        SYKEPENGESOKNAD and SENDT and ListContainsPredicate.tagsSize(2),
+                        SYKEPENGESOKNAD and SENDT and BEHANDLINGSDAG,
+                        SYKEPENGESOKNAD and SENDT and BEHANDLINGSDAGER,
+                        SYKMELDING and (SENDT or BEKREFTET) and PERIODE and BEHANDLINGSDAGER,
+                        SYKMELDING and (SENDT or BEKREFTET) and PERIODE and FULL_AKTIVITET,
+                        SYKMELDING and (SENDT or BEKREFTET) and PERIODE and (GRADERT_AKTIVITET or INGEN_AKTIVITET),
+                        SYKMELDING and BEKREFTET and ANNET_FRAVAR,
+                        SYKMELDING and SENDT and PERIODE and REISETILSKUDD and UKJENT_AKTIVITET,
+                        SYKMELDING and NY and PERIODE and BEHANDLINGSDAGER,
+                        SYKMELDING and NY and PERIODE and FULL_AKTIVITET,
+                        SYKMELDING and NY and PERIODE and (GRADERT_AKTIVITET or INGEN_AKTIVITET),
+                        SYKMELDING and NY and PERIODE and REISETILSKUDD and UKJENT_AKTIVITET,
+                    ),
+                    biter = biter
+                )
             )
-        )
 
-        return grupperIOppfolgingstilfeller(
-            tidslinje
-                .tidslinjeSomListe()
-        )
+            grupperIOppfolgingstilfeller(
+                tidslinje
+                    .tidslinjeSomListe()
+            )
+        } catch (e: IllegalArgumentException) {
+            null
+        }
     }
 
     private fun slaaSammenTilfeller(
@@ -129,4 +133,7 @@ class SyketilfellebitService(
     }
 
     private fun LocalDate.leggTilArbeidsgiverPeriode() = plusDays(AntallDagerIArbeidsgiverPeriode.toLong())
+    override suspend fun getOppfolgingstilfelle39UkerCommon(fnr: String, aktorId: String): Oppfolgingstilfelle39Uker? {
+        return beregnKOppfolgingstilfelle39UkersVarsel(fnr)
+    }
 }
