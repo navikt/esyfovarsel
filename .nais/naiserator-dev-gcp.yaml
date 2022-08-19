@@ -37,6 +37,10 @@ spec:
     application:
       enabled: true
   accessPolicy:
+    inbound:
+      rules:
+        - application: syfomotebehov
+          namespace: team-esyfo
     outbound:
       external:
         - host: pdl-api.dev-fss-pub.nais.io
