@@ -45,7 +45,7 @@ fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
 
     connection.use { connection ->
         connection.prepareStatement(insertStatement1).use {
-            it.setString(1, PUtsendtVarsel.uuid)
+            it.setObject(1, UUID.fromString(PUtsendtVarsel.uuid))
             it.setString(2, PUtsendtVarsel.narmesteLederFnr)
             it.setString(3, PUtsendtVarsel.fnr)
             it.setString(4, PUtsendtVarsel.orgnummer)

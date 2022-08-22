@@ -9,7 +9,7 @@ data class PUtsendtVarsel(
     val narmesteLederFnr: String?,
     val orgnummer: String?,
     val type: String,
-    val kanal: String,
+    val kanal: String?,
     val utsendtTidspunkt: LocalDateTime,
     val planlagtVarselId: String?
 )
