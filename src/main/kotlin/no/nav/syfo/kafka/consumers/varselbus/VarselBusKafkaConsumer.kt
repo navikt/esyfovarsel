@@ -30,8 +30,6 @@ class VarselBusKafkaConsumer(
         while (applicationState.running) {
             kafkaListener.poll(zeroMillis).forEach {
                 log.info("VARSEL BUS: Mottatt melding ${it.key()} fra topic")
-                // TODO: remove
-                log.info("VARSEL BUS: Mottatt melding ${it.value()} fra topic")
                 try {
                     val varsel: EsyfovarselHendelse = objectMapper.readValue(it.value())
                     varsel.data = objectMapper.readTree(it.value())["data"]
