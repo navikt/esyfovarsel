@@ -2,15 +2,15 @@ package no.nav.syfo.service
 
 import no.nav.syfo.DINE_SYKMELDTE_OPPFOLGINGSPLAN_OPPRETTET_TEKST
 import no.nav.syfo.DINE_SYKMELDTE_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST
-import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
-import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_OPPFOLGINGSPLAN_OPPRETTET
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
+import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import java.time.OffsetDateTime
 
 class OppfolgingsplanVarselService(
-    val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer
+    val senderFacade: SenderFacade
 ) {
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         val varseltekst = when (varselHendelse.type) {
@@ -28,6 +28,6 @@ class OppfolgingsplanVarselService(
             varseltekst,
             OffsetDateTime.now().plusWeeks(4L)
         )
-        dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
+        senderFacade.sendTilDineSykmeldte(varselHendelse, dineSykmeldteVarsel)
     }
 }

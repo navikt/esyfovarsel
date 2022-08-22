@@ -4,16 +4,14 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
-import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class VarselBusService(
-    dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
-    val motebehovVarselService: MotebehovVarselService
+    val motebehovVarselService: MotebehovVarselService,
+    val oppfolgingsplanVarselService: OppfolgingsplanVarselService
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.VarselBusService")
-    private val oppfolgingsplanVarselService = OppfolgingsplanVarselService(dineSykmeldteHendelseKafkaProducer)
     fun processVarselHendelse(varselHendelse: EsyfovarselHendelse) {
         log.info("Behandler varsel av type ${varselHendelse.type}")
         when (varselHendelse.type) {

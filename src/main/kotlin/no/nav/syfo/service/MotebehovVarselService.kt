@@ -4,7 +4,6 @@ import no.nav.syfo.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
-import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import java.net.URL
 import java.time.LocalDateTime
@@ -12,9 +11,7 @@ import java.time.OffsetDateTime
 import java.util.*
 
 class MotebehovVarselService(
-    val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
-    val brukernotifikasjonerService: BrukernotifikasjonerService,
-    val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
+    val senderFacade: SenderFacade,
     val dialogmoterUrl: String,
 ) {
     val WEEKS_BEFORE_DELETE = 4L
@@ -26,11 +23,18 @@ class MotebehovVarselService(
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_URL)
-        brukernotifikasjonerService.sendVarsel(UUID.randomUUID().toString(), varselHendelse.arbeidstakerFnr, BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST, url)
+        senderFacade.sendTilBrukernotifikasjoner(
+            varselHendelse,
+            UUID.randomUUID().toString(),
+            varselHendelse.arbeidstakerFnr,
+            BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
+            url
+        )
     }
 
     private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
-        arbeidsgiverNotifikasjonService.sendNotifikasjon(
+        senderFacade.sendTilArbeidsgiverNotifikasjon(
+            varselHendelse,
             ArbeidsgiverNotifikasjonInput(
                 UUID.randomUUID(),
                 varselHendelse.orgnummer,
@@ -54,6 +58,6 @@ class MotebehovVarselService(
             varseltekst,
             OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
         )
-        dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
+        senderFacade.sendTilDineSykmeldte(varselHendelse, dineSykmeldteVarsel)
     }
 }
