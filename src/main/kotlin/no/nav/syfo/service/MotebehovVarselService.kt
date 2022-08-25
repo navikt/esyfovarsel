@@ -51,12 +51,12 @@ class MotebehovVarselService(
     private fun sendVarselTilDineSykmeldte(varselHendelse: NarmesteLederHendelse) {
         val varseltekst = DINE_SYKMELDTE_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
         val dineSykmeldteVarsel = DineSykmeldteVarsel(
-            varselHendelse.arbeidstakerFnr,
-            varselHendelse.orgnummer,
-            varselHendelse.type.toDineSykmeldteHendelseType().toString(),
-            null,
-            varseltekst,
-            OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
+            ansattFnr = varselHendelse.arbeidstakerFnr,
+            orgnr = varselHendelse.orgnummer,
+            oppgavetype = varselHendelse.type.toDineSykmeldteHendelseType().toString(),
+            lenke = null,
+            tekst = varseltekst,
+            utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
         )
         senderFacade.sendTilDineSykmeldte(varselHendelse, dineSykmeldteVarsel)
     }

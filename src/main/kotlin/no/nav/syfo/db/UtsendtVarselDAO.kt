@@ -41,7 +41,8 @@ fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
         orgnummer,
         type,
         kanal,
-        utsendt_tidspunkt) VALUES (?, ?, ?, ?, ?, ?, ?)""".trimIndent()
+        utsendt_tidspunkt,
+        ekstern_ref) VALUES (?, ?, ?, ?, ?, ?, ?,?)""".trimIndent()
 
     connection.use { connection ->
         connection.prepareStatement(insertStatement1).use {
@@ -52,6 +53,7 @@ fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
             it.setString(5, PUtsendtVarsel.type)
             it.setString(6, PUtsendtVarsel.kanal)
             it.setTimestamp(7, Timestamp.valueOf(PUtsendtVarsel.utsendtTidspunkt))
+            it.setString(8, PUtsendtVarsel.eksternReferanse)
             it.executeUpdate()
         }
 

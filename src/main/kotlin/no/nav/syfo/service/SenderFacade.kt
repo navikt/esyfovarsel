@@ -23,12 +23,12 @@ class SenderFacade(
 
     fun sendTilDineSykmeldte(varselHendelse: NarmesteLederHendelse, varsel: DineSykmeldteVarsel) {
         dineSykmeldteHendelseKafkaProducer.sendVarsel(varsel)
-        lagreUtsendtNarmesteLederVarsel(DINE_SYKMELDTE, varselHendelse)
+        lagreUtsendtNarmesteLederVarsel(DINE_SYKMELDTE, varselHendelse, varsel.id.toString())
     }
 
     fun sendTilBrukernotifikasjoner(varselHendelse: ArbeidstakerHendelse, uuid: String, mottakerFnr: String, content: String, url: URL) {
         brukernotifikasjonerService.sendVarsel(uuid, mottakerFnr, content, url)
-        lagreUtsendtArbeidstakerVarsel(Kanal.BRUKERNOTIFIKASJON, varselHendelse)
+        lagreUtsendtArbeidstakerVarsel(Kanal.BRUKERNOTIFIKASJON, varselHendelse, uuid)
     }
 
     fun sendTilArbeidsgiverNotifikasjon(
@@ -36,10 +36,10 @@ class SenderFacade(
         varsel: ArbeidsgiverNotifikasjonInput
     ) {
         arbeidsgiverNotifikasjonService.sendNotifikasjon(varsel)
-        lagreUtsendtNarmesteLederVarsel(ARBEIDSGIVERNOTIFIKASJON, varselHendelse)
+        lagreUtsendtNarmesteLederVarsel(ARBEIDSGIVERNOTIFIKASJON, varselHendelse, varsel.uuid.toString())
     }
 
-    fun lagreUtsendtNarmesteLederVarsel(kanal: Kanal, varselHendelse: NarmesteLederHendelse) {
+    fun lagreUtsendtNarmesteLederVarsel(kanal: Kanal, varselHendelse: NarmesteLederHendelse, eksternReferanse: String) {
         databaseInterface.storeUtsendtVarsel(
             PUtsendtVarsel(
                 UUID.randomUUID().toString(),
@@ -50,12 +50,13 @@ class SenderFacade(
                 varselHendelse.type.name,
                 kanal.name,
                 LocalDateTime.now(),
-                null
+                null,
+                eksternReferanse,
             )
         )
     }
 
-    fun lagreUtsendtArbeidstakerVarsel(kanal: Kanal, varselHendelse: ArbeidstakerHendelse) {
+    fun lagreUtsendtArbeidstakerVarsel(kanal: Kanal, varselHendelse: ArbeidstakerHendelse, eksternReferanse: String) {
         databaseInterface.storeUtsendtVarsel(
             PUtsendtVarsel(
                 UUID.randomUUID().toString(),
@@ -66,7 +67,8 @@ class SenderFacade(
                 varselHendelse.type.name,
                 kanal.name,
                 LocalDateTime.now(),
-                null
+                null,
+                eksternReferanse,
             )
         )
     }

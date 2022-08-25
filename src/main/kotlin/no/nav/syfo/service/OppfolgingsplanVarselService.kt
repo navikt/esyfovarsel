@@ -21,12 +21,12 @@ class OppfolgingsplanVarselService(
             }
         }
         val dineSykmeldteVarsel = DineSykmeldteVarsel(
-            varselHendelse.arbeidstakerFnr,
-            varselHendelse.orgnummer,
-            varselHendelse.type.toDineSykmeldteHendelseType().toString(),
-            null,
-            varseltekst,
-            OffsetDateTime.now().plusWeeks(4L)
+            ansattFnr = varselHendelse.arbeidstakerFnr,
+            orgnr = varselHendelse.orgnummer,
+            oppgavetype = varselHendelse.type.toDineSykmeldteHendelseType().toString(),
+            lenke = null,
+            tekst = varseltekst,
+            utlopstidspunkt = OffsetDateTime.now().plusWeeks(4L)
         )
         senderFacade.sendTilDineSykmeldte(varselHendelse, dineSykmeldteVarsel)
     }

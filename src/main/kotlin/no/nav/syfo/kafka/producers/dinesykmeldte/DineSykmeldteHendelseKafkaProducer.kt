@@ -2,15 +2,14 @@ package no.nav.syfo.kafka.producers.dinesykmeldte
 
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.JacksonKafkaSerializer
+import no.nav.syfo.kafka.common.producerProperties
+import no.nav.syfo.kafka.common.topicDineSykmeldteHendelse
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteHendelse
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.OpprettHendelse
-import no.nav.syfo.kafka.common.producerProperties
-import no.nav.syfo.kafka.common.topicDineSykmeldteHendelse
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
-import java.util.*
 import java.time.OffsetDateTime
 
 class DineSykmeldteHendelseKafkaProducer(
@@ -24,7 +23,7 @@ class DineSykmeldteHendelseKafkaProducer(
 
     fun sendVarsel(varsel: DineSykmeldteVarsel) {
         val dineSykmeldteHendelse = DineSykmeldteHendelse(
-            "${UUID.randomUUID()}",
+            varsel.id.toString(),
             OpprettHendelse(
                 varsel.ansattFnr,
                 varsel.orgnr,
