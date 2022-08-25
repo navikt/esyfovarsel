@@ -92,12 +92,12 @@ class SendVarselService(
 
     private fun sendAktivitetskravVarselTilArbeidsgiver(uuid: String, arbeidstakerFnr: String, orgnummer: String) {
         val dineSykmeldteVarsel = DineSykmeldteVarsel(
-            arbeidstakerFnr,
-            orgnummer,
-            DineSykmeldteHendelseType.AKTIVITETSKRAV.toString(),
-            null,
-            DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST,
-            OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE_AKTIVITETSKRAV)
+            ansattFnr = arbeidstakerFnr,
+            orgnr = orgnummer,
+            oppgavetype = DineSykmeldteHendelseType.AKTIVITETSKRAV.toString(),
+            lenke = null,
+            tekst = DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST,
+            utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE_AKTIVITETSKRAV)
         )
 
         log.info("Sender AKTIVITETSKRAV varsel til Dine sykmeldte for uuid $uuid")
