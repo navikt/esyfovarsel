@@ -6,11 +6,15 @@ import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.kafka.consumers.syketilfelle.domain.KSyketilfellebit
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import no.nav.syfo.syketilfelle.domain.tagsFromString
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.*
+
+val log: Logger = LoggerFactory.getLogger("no.nav.syfo.db")
 
 fun <T> ResultSet.toList(mapper: ResultSet.() -> T) = mutableListOf<T>().apply {
     while (next()) {

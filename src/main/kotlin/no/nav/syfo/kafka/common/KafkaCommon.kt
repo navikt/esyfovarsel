@@ -44,7 +44,7 @@ interface KafkaListener {
 
 fun syketilfelleConsumerProperties(env: Environment): Properties {
     return aivenConsumerProperties(env).apply {
-        put(GROUP_ID_CONFIG, "esyfovarsel-syketilfelle-group")
+        put(GROUP_ID_CONFIG, "esyfovarsel-gcp-syketilfelle-group")
     }
 }
 

@@ -56,6 +56,7 @@ object SyketilfellebitDAOSpek : Spek({
 
             embeddedDatabase.storeSyketilfellebit(syketilfellebitToStore1.toPSyketilfellebit())
             embeddedDatabase.storeSyketilfellebit(syketilfellebitToStore2.toPSyketilfellebit())
+            embeddedDatabase.storeSyketilfellebit(syketilfellebitToStore2.toPSyketilfellebit())
 
             val syketilfellebitListe = embeddedDatabase.fetchSyketilfellebiterByFnr(fnr1)
 
