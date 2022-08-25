@@ -1,2 +1,0 @@
-ALTER TABLE SYKETILFELLEBIT
-    ADD CONSTRAINT unique_syketilfellebit_id UNIQUE (id);
