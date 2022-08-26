@@ -1,0 +1,2 @@
+ALTER TABLE UTSENDT_VARSEL
+    ADD COLUMN ekstern_ref varchar(50);

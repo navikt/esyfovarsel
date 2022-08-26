@@ -1,12 +1,28 @@
 package no.nav.syfo.kafka.consumers.varselbus.domain
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.io.Serializable
 
-data class EsyfovarselHendelse(
-    val mottakerFnr: String,
-    val type: HendelseType,
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+sealed interface EsyfovarselHendelse : Serializable {
+    val type: HendelseType
     var data: Any?
-) : Serializable
+}
+
+data class NarmesteLederHendelse(
+    override val type: HendelseType,
+    override var data: Any?,
+    val narmesteLederFnr: String,
+    val arbeidstakerFnr: String,
+    val orgnummer: String
+) : EsyfovarselHendelse
+
+data class ArbeidstakerHendelse(
+    override val type: HendelseType,
+    override var data: Any?,
+    val arbeidstakerFnr: String,
+    val orgnummer: String?
+) : EsyfovarselHendelse
 
 enum class HendelseType {
     NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,

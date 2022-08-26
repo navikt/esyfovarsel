@@ -2,7 +2,7 @@ package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PSyketilfellebit
-import no.nav.syfo.db.domain.UtsendtVarsel
+import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.kafka.consumers.syketilfelle.domain.KSyketilfellebit
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import no.nav.syfo.syketilfelle.domain.tagsFromString
@@ -29,12 +29,17 @@ fun ResultSet.toPPlanlagtVarsel() = PPlanlagtVarsel(
     sistEndret = getTimestamp("sist_endret").toLocalDateTime()
 )
 
-fun ResultSet.toUtsendtVarsel() = UtsendtVarsel(
+fun ResultSet.toPUtsendtVarsel() = PUtsendtVarsel(
+    uuid = getString("uuid"),
     fnr = getString("fnr"),
     aktorId = getString("aktor_id"),
+    narmesteLederFnr = getString("narmesteleder_fnr"),
+    orgnummer = getString("orgnummer"),
     type = getString("type"),
+    kanal = getString("kanal"),
     utsendtTidspunkt = getTimestamp("utsendt_tidspunkt").toLocalDateTime(),
-    planlagtVarselId = getString("planlagt_varsel_id")
+    planlagtVarselId = getString("planlagt_varsel_id"),
+    eksternReferanse = getString("ekstern_ref")
 )
 
 fun ResultSet.toSyketilfellebit() = Syketilfellebit(
