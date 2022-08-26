@@ -2,8 +2,11 @@ package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PSyketilfellebit
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.sql.SQLException
 
+val log: Logger = LoggerFactory.getLogger("no.nav.syfo.db.SyketilfelleDAO")
 fun DatabaseInterface.storeSyketilfellebit(pSyketilfellebit: PSyketilfellebit) {
     val insertStatement = """INSERT INTO SYKETILFELLEBIT (
         uuid,
