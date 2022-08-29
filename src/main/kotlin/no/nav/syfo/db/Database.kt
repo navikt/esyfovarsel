@@ -8,6 +8,7 @@ import org.flywaydb.core.Flyway
 import java.sql.Connection
 
 const val postgresJdbcPrefix = "jdbc:postgresql"
+const val errorCodeUniqueViolation = "23505"
 
 interface DatabaseInterface {
     val connection: Connection
