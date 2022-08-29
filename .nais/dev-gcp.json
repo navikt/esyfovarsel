@@ -20,7 +20,12 @@
     "NARMESTELEDER_URL": "https://narmesteleder.dev.intern.nav.no",
     "NARMESTELEDER_SCOPE": "api://dev-gcp.teamsykmelding.narmesteleder/.default",
     "BASE_URL_DINE_SYKMELDTE": "https://www-gcp.dev.nav.no/arbeidsgiver/sykmeldte",
-    "SYFOMOTEBEHOV_URL": "NOT IN USE"
+    "SYFOMOTEBEHOV_URL": "NOT IN USE",
+    "DOKDIST_FORDELING_URL": "https://dokdistfordeling.dev-fss-pub.nais.io",
+    "DOKDIST_FORDELING_SCOPE": "api://dev-fss.teamdokumenthandtering.saf/.default",
+    "DOKARKIV_SCOPE": "api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default",
+    "DOKARKIV_URL": "https://dokarkiv.dev-fss-pub.nais.io",
+    "SYFOOPDFGEN_URL": "http://syfooppdfgen"
   },
   "job": {
     "KTOR_ENV": "remote",

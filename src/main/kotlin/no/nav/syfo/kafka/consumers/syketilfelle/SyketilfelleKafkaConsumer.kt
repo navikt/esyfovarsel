@@ -9,7 +9,7 @@ import no.nav.syfo.db.toPSyketilfellebit
 import no.nav.syfo.kafka.common.*
 import no.nav.syfo.kafka.consumers.syketilfelle.domain.KSyketilfellebit
 import no.nav.syfo.planner.VarselPlannerSyketilfellebit
-import no.nav.syfo.service.AccessControl
+import no.nav.syfo.service.AccessControlService
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,10 +17,10 @@ import java.io.IOException
 
 class SyketilfelleKafkaConsumer(
     val env: Environment,
-    val accessControl: AccessControl,
+    val accessControlService: AccessControlService,
     val databaseInterface: DatabaseInterface
 ) : KafkaListener {
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.SyketilfelleKafkaConsumer")
+    private val LOG: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.SyketilfelleKafkaConsumer")
     private val kafkaListener: KafkaConsumer<String, String>
     private val varselPlanners: ArrayList<VarselPlannerSyketilfellebit> = arrayListOf()
     private val objectMapper = createObjectMapper()
@@ -32,25 +32,33 @@ class SyketilfelleKafkaConsumer(
     }
 
     override suspend fun listen(applicationState: ApplicationState) {
-        log.info("Started listening to topic $topicFlexSyketilfellebiter")
+        LOG.info("Started listening to topic $topicFlexSyketilfellebiter")
         while (applicationState.running) {
             kafkaListener.poll(zeroMillis).forEach {
                 try {
                     val kSyketilfellebit: KSyketilfellebit = objectMapper.readValue(it.value())
                     databaseInterface.storeSyketilfellebit(kSyketilfellebit.toPSyketilfellebit())
                     val sykmeldtFnr = kSyketilfellebit.fnr
-                    if (accessControl.canUserBeNotified(sykmeldtFnr) && kSyketilfellebit.orgnummer != null) {
+                    val userAccessStatus = accessControlService.getUserAccessStatusByFnr(sykmeldtFnr)
+
+                    if (kSyketilfellebit.orgnummer != null) {
                         varselPlanners.forEach {
-                            it.processSyketilfelle(sykmeldtFnr, kSyketilfellebit.orgnummer)
+                            varselPlanners.forEach { planner ->
+                                if (planner.varselSkalLagres(userAccessStatus)) {
+                                    it.processSyketilfelle(sykmeldtFnr, kSyketilfellebit.orgnummer)
+                                } else {
+                                    LOG.info("Prosesserer ikke varsel pga bruker med forespurt fnr er reservert og/eller gradert")
+                                }
+                            }
                         }
                     }
                 } catch (e: IOException) {
-                    log.error(
+                    LOG.error(
                         "Error in [$topicFlexSyketilfellebiter]-listener: Could not parse message | ${e.message}",
                         e
                     )
                 } catch (e: Exception) {
-                    log.error(
+                    LOG.error(
                         "Exception in [$topicFlexSyketilfellebiter]-listener: ${e.message}",
                         e
                     )
@@ -59,6 +67,14 @@ class SyketilfelleKafkaConsumer(
             }
         }
     }
+
+//    fun varselSkalLagres(planner: VarselPlanner, userAccessStatus: UserAccessStatus): Boolean {
+//        return if (planner is MerVeiledningVarselPlannerSyketilfellebit) {
+//            userAccessStatus.canUserBePhysicallyNotified || userAccessStatus.canUserBeDigitallyNotified
+//        } else {
+//            return userAccessStatus.canUserBeDigitallyNotified
+//        }
+//    }
 
     fun addPlanner(varselPlanner: VarselPlannerSyketilfellebit): SyketilfelleKafkaConsumer {
         varselPlanners.add(varselPlanner)

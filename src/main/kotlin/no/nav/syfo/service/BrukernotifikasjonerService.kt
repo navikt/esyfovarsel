@@ -7,17 +7,16 @@ import java.net.URL
 
 class BrukernotifikasjonerService(
     val beskjedKafkaProducer: BeskjedKafkaProducer,
-    val accessControl: AccessControl,
+    val accessControlService: AccessControlService,
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.BrukernotifikasjonerService")
 
-    fun sendVarsel(uuid: String, mottakerFnr: String, content: String, url:URL) {
+    fun sendVarsel(uuid: String, mottakerFnr: String, content: String, url: URL) {
         // Recheck if user can be notified in case of recent 'Addressesperre'
-        if(accessControl.canUserBeNotified(mottakerFnr)){
+        if (accessControlService.getUserAccessStatusByFnr(mottakerFnr).canUserBeDigitallyNotified) {
             beskjedKafkaProducer.sendBeskjed(mottakerFnr, content, uuid, url)
             log.info("Har sendt melding med uuid ${uuid} til brukernotifikasjoner: ${content}")
-        }
-        else {
+        } else {
             log.info("Kan ikke sende melding til bruker for melding med uuid ${uuid}, dette kan skyldes adressesperre")
         }
     }

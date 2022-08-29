@@ -29,7 +29,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
         val pdlConsumer = mockk<PdlConsumer>()
         val varselSendtService = VarselSendtService(pdlConsumer, syketilfelleConsumer, embeddedDatabase)
 
-        val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(embeddedDatabase, syketilfelleConsumer, varselSendtService)
+        val merVeiledningVarselPlanner = MerVeiledningVarselPlannerOppfolgingstilfelle(embeddedDatabase, syketilfelleConsumer, varselSendtService)
 
         afterEachTest {
             embeddedDatabase.connection.dropData()

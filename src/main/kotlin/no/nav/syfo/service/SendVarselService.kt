@@ -1,11 +1,15 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.*
+import no.nav.syfo.access.domain.UserAccessStatus
+import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.syfomotebehov.SyfoMotebehovConsumer
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
-import no.nav.syfo.db.domain.VarselType.*
+import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
+import no.nav.syfo.db.domain.VarselType.MER_VEILEDNING
+import no.nav.syfo.db.domain.VarselType.SVAR_MOTEBEHOV
 import no.nav.syfo.kafka.consumers.varselbus.domain.DineSykmeldteHendelseType
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
@@ -21,47 +25,58 @@ class SendVarselService(
     val beskjedKafkaProducer: BeskjedKafkaProducer,
     val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
     val narmesteLederService: NarmesteLederService,
-    val accessControl: AccessControl,
+    val accessControlService: AccessControlService,
     val urlEnv: UrlEnv,
     val syfoMotebehovConsumer: SyfoMotebehovConsumer,
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
+    val journalpostdistribusjonConsumer: JournalpostdistribusjonConsumer,
+    val dokarkivService: DokarkivService,
 ) {
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.SendVarselService")
+    private val LOG: Logger = LoggerFactory.getLogger("no.nav.syfo.service.SendVarselService")
+
     val WEEKS_BEFORE_DELETE_AKTIVITETSKRAV = 2L
 
     suspend fun sendVarsel(pPlanlagtVarsel: PPlanlagtVarsel): String {
         // Recheck if user can be notified in case of recent 'Addressesperre'
         return try {
-            val fodselnummer = accessControl.getFnrIfUserCanBeNotified(pPlanlagtVarsel.aktorId)
+            val userAccessStatus = accessControlService.getUserAccessStatusByFnr(pPlanlagtVarsel.fnr)
             val uuid = pPlanlagtVarsel.uuid
-            fodselnummer?.let { fnr ->
-                val varselUrl = varselUrlFromType(pPlanlagtVarsel.type)
-                val varselContent = varselContentFromType(pPlanlagtVarsel.type)
-                val orgnummer = pPlanlagtVarsel.orgnummer
 
-                if (varselUrl !== null && varselContent !== null) {
-                    when {
-                        AKTIVITETSKRAV.toString().equals(pPlanlagtVarsel.type) -> {
-                            sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
+            val varselUrl = varselUrlFromType(pPlanlagtVarsel.type)
+            val varselContent = varselContentFromType(pPlanlagtVarsel.type)
+            val orgnummer = pPlanlagtVarsel.orgnummer
+
+            if (varselUrl !== null && varselContent !== null) {
+                if (userSkalVarsles(pPlanlagtVarsel.type, userAccessStatus)) {
+                    when (pPlanlagtVarsel.type) {
+                        AKTIVITETSKRAV.toString() -> {
+                            sendVarselTilSykmeldt(userAccessStatus.fnr!!, varselContent, uuid, varselUrl)
                             if (orgnummer !== null) {
                                 sendAktivitetskravVarselTilArbeidsgiver(
                                     uuid,
-                                    fnr,
+                                    userAccessStatus.fnr!!,
                                     orgnummer
                                 )
                             }
                             pPlanlagtVarsel.type
                         }
-
-                        MER_VEILEDNING.toString().equals(pPlanlagtVarsel.type) -> {
-                            sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
-                            pPlanlagtVarsel.type
+                        MER_VEILEDNING.toString() -> {
+                            if (userAccessStatus.canUserBeDigitallyNotified) {
+                                sendVarselTilSykmeldt(userAccessStatus.fnr!!, varselContent, uuid, varselUrl)
+                                pPlanlagtVarsel.type
+                            } else if(userAccessStatus.canUserBePhysicallyNotified) {
+                                LOG.info("Skal sende fysisk brev for varsel med uuid: $uuid")
+                                sendFysiskBrevTilReservertBruker(userAccessStatus.fnr!!, pPlanlagtVarsel.uuid)
+                                pPlanlagtVarsel.type
+                            } else {
+                                LOG.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles ")
+                                UTSENDING_FEILET
+                            }
                         }
-
-                        SVAR_MOTEBEHOV.toString().equals(pPlanlagtVarsel.type) -> {
+                        SVAR_MOTEBEHOV.toString() -> {
                             syfoMotebehovConsumer.sendVarselTilArbeidstaker(pPlanlagtVarsel.aktorId, pPlanlagtVarsel.fnr)
                             if (orgnummer !== null) {
-                                val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer)
+                                val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(userAccessStatus.fnr!!, orgnummer)
                                 if (narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
                                     syfoMotebehovConsumer.sendVarselTilNaermesteLeder(
                                         pPlanlagtVarsel.aktorId,
@@ -78,15 +93,45 @@ class SendVarselService(
                         }
                     }
                 } else {
-                    throw RuntimeException("Klarte ikke mappe typestreng til innholdstekst og URL")
+                    LOG.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles ")
+                    UTSENDING_FEILET
                 }
-            } ?: run {
-                log.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles ")
-                return UTSENDING_FEILET
+            } else {
+                throw RuntimeException("Klarte ikke mappe typestreng til innholdstekst og URL")
             }
         } catch (e: RuntimeException) {
-            log.error("Feil i utsending av varsel med UUID: ${pPlanlagtVarsel.uuid} | ${e.message}", e)
+            LOG.error("Feil i utsending av varsel med UUID: ${pPlanlagtVarsel.uuid} | ${e.message}", e)
             UTSENDING_FEILET
+        }
+    }
+
+    private fun userSkalVarsles(varselType: String, userAccessStatus: UserAccessStatus): Boolean {
+        when (varselType) {
+            AKTIVITETSKRAV.toString() -> {
+                return userAccessStatus.canUserBeDigitallyNotified
+            }
+            MER_VEILEDNING.toString() -> {
+                return userAccessStatus.canUserBeDigitallyNotified || userAccessStatus.canUserBePhysicallyNotified
+            }
+            SVAR_MOTEBEHOV.toString() -> {
+                return userAccessStatus.canUserBeDigitallyNotified
+            }
+            else -> {
+                return false
+            }
+        }
+    }
+
+    private suspend fun sendFysiskBrevTilReservertBruker(fnr: String, uuid: String) {
+        val journalpostId = dokarkivService.getJournalpostId(fnr, uuid)
+        LOG.info("Forsøkte å sende data til dokarkiv, journalpostId er $journalpostId, MER_VEILEDNING varsel med UUID: ${uuid}")
+
+        val bestillingsId = journalpostId?.let { journalpostdistribusjonConsumer.distribuerJournalpost(it)?.bestillingsId }
+
+        if (bestillingsId == null) {
+            LOG.info("Forsøkte å sende PDF til print, men noe gikk galt, bestillingsId er null, MER_VEILEDNING varsel med UUID: ${uuid}")
+        } else {
+            LOG.info("Sendte PDF til print, bestillingsId er $bestillingsId, MER_VEILEDNING varsel med UUID: ${uuid}")
         }
     }
 
@@ -100,10 +145,9 @@ class SendVarselService(
             utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE_AKTIVITETSKRAV)
         )
 
-        log.info("Sender AKTIVITETSKRAV varsel til Dine sykmeldte for uuid $uuid")
         dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
 
-        log.info("Sender AKTIVITETSKRAV varsel til Arbeidsgivernotifikasjoner for uuid $uuid")
+        LOG.info("Sender AKTIVITETSKRAV varsel til Arbeidsgivernotifikasjoner for uuid $uuid")
         arbeidsgiverNotifikasjonService.sendNotifikasjon(
             ArbeidsgiverNotifikasjonInput(
                 UUID.fromString(uuid),
@@ -112,16 +156,16 @@ class SendVarselService(
                 arbeidstakerFnr,
                 ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT,
                 ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE,
-                {url: String -> ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY_START + url + ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY_END},
+                { url: String -> ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY_START + url + ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY_END },
                 LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE_AKTIVITETSKRAV)
             )
         )
     }
 
     private fun sendVarselTilSykmeldt(fnr: String, varselContent: String, uuid: String, varselUrl: URL) {
-        log.info("Sender varsel til Brukernotifikasjoner for uuid $uuid")
+        LOG.info("Sender varsel til Brukernotifikasjoner for uuid $uuid")
         beskjedKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl)
-        log.info("Har sendt varsel til Brukernotifikasjoner for uuid $uuid")
+        LOG.info("Har sendt varsel til Brukernotifikasjoner for uuid $uuid")
     }
 
     private fun varselContentFromType(type: String): String? {

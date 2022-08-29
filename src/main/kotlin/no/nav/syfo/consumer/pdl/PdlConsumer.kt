@@ -63,6 +63,32 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: To
         }
     }
 
+    open fun hentPerson(fnr: String): PdlHentPerson? {
+        val response = callPdl(PERSON_QUERY, fnr)
+
+        return when (response?.status) {
+            HttpStatusCode.OK -> {
+                runBlocking {
+                    val pdlResponse = response.receive<PdlPersonResponse>().data
+                    pdlResponse
+                }
+            }
+            HttpStatusCode.NoContent -> {
+                log.error("Could not get navn from PDL: No content found in the response body")
+                null
+            }
+            HttpStatusCode.Unauthorized -> {
+                log.error("Could not get navn from PDL: Unable to authorize")
+                null
+            }
+            else -> {
+                log.error("Could not get fnr from PDL: $response")
+                null
+            }
+        }
+    }
+
+
     fun callPdl(service: String, aktorId: String): HttpResponse? {
         return runBlocking {
             val token = tokenConsumer.getToken(urlEnv.pdlScope)

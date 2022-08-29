@@ -1,5 +1,6 @@
 package no.nav.syfo.testutil.mocks
 
+import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.consumer.pdl.*
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
@@ -14,11 +15,19 @@ const val aktorId = "1234567890123"
 const val aktorId2 = "2345678901234"
 const val aktorId3 = "3456789012345"
 const val aktorId4 = "4567890123456"
+const val aktorId5 = "4567890123450"
 const val fnr1 = "12345678901"
 const val fnr2 = "23456789012"
 const val fnr3 = "34567890123"
 const val fnr4 = "45678901234"
+const val fnr5 = "45678901230"
 const val orgnummer = "999888777"
+
+val userAccessStatus1 = UserAccessStatus(fnr1, true, false, false, true) // Kan varsles digitalt
+val userAccessStatus2 = UserAccessStatus(fnr2, true, false, false, true)  // Kan varsles digitalt
+val userAccessStatus3 = UserAccessStatus(fnr3, false, true, false, false) // Kan varsles fysisk
+val userAccessStatus4 = UserAccessStatus(fnr4, false, true, false, false) // Kan varsles fysisk
+val userAccessStatus5 = UserAccessStatus(fnr5, false, false, true, false) // Kan ikke varsles
 
 val fom = LocalDate.of(2021, 5, 5)
 val tom = LocalDate.of(2021, 6, 5)
@@ -95,7 +104,7 @@ val pdlGetBrukerReservert = mapOf(
         null,
         PdlHentPerson(
             PdlPerson(
-                emptyList()
+                emptyList(), emptyList(),
             )
         )
     ),
@@ -103,7 +112,7 @@ val pdlGetBrukerReservert = mapOf(
         null,
         PdlHentPerson(
             PdlPerson(
-                emptyList()
+                emptyList(), emptyList(),
             )
         )
     ),
@@ -111,9 +120,8 @@ val pdlGetBrukerReservert = mapOf(
         null,
         PdlHentPerson(
             PdlPerson(
-                listOf(
-                    Adressebeskyttelse(Gradering.STRENGT_FORTROLIG)
-                )
+                listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG)),
+                listOf(PersonNavn("Fornavn", "Mellomnavn", "Etternavn"))
             )
         )
     ),
@@ -186,14 +194,6 @@ val pdlGetFnrResponseMap = mapOf(
 val kafkaOppfolgingstilfellePeker = KOppfolgingstilfellePeker(
     aktorId = aktorId,
     orgnummer = orgnummer
-)
-
-// STS
-
-val tokenFromStsServer = Token(
-    access_token = "default access token",
-    token_type = "Bearer",
-    expires_in = 3600
 )
 
 val tokenFromAzureServer = Token(

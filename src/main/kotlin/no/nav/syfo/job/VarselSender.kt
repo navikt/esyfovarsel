@@ -20,34 +20,35 @@ class VarselSender(
     private val databaseAccess: DatabaseInterface,
     private val sendVarselService: SendVarselService,
     private val toggles: ToggleEnv,
-    private val appEnv: AppEnv
+    private val appEnv: AppEnv,
 ) {
-    private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
+    private val LOG = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
 
     suspend fun sendVarsler(): Int {
-        log.info("SendVarslerJobb-API kalt")
+        LOG.info("SendVarslerJobb-API kalt")
         if (appEnv.runningInGCPCluster) {
-            log.info("[GCP] Disabled varselutsending")
+            LOG.info("[GCP] Disabled varselutsending")
             return 0
         }
 
-        log.info("Starter SendVarslerJobb")
+        LOG.info("Starter SendVarslerJobb")
 
         val varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
-        log.info("Planlegger å sende ${varslerToSendToday.size} varsler")
+        LOG.info("Planlegger å sende ${varslerToSendToday.size} varsler")
 
-        if (!toggles.sendAktivitetskravVarsler) log.info("Utsending av Aktivitetskrav er ikke aktivert, og varsler av denne typen blir ikke sendt")
-        if (!toggles.sendMerVeiledningVarsler) log.info("Utsending av Mer veiledning er ikke aktivert, og varsler av denne typen blir ikke sendt")
-        if (!toggles.sendSvarMotebehovVarsler) log.info("Utsending av Svar møtebehov er ikke aktivert, og varsler av denne typen blir ikke sendt")
+        if (!toggles.sendAktivitetskravVarsler) LOG.info("Utsending av Aktivitetskrav er ikke aktivert, og varsler av denne typen blir ikke sendt")
+        if (!toggles.sendMerVeiledningVarsler) LOG.info("Utsending av Mer veiledning er ikke aktivert, og varsler av denne typen blir ikke sendt")
+        if (!toggles.sendSvarMotebehovVarsler) LOG.info("Utsending av Svar møtebehov er ikke aktivert, og varsler av denne typen blir ikke sendt")
 
         val varslerSendt = HashMap<String, Int>()
+
         varslerToSendToday.forEach {
             if (skalSendeVarsel(it)) {
-                log.info("Sender varsel med UUID ${it.uuid}")
+                LOG.info("Sender varsel med UUID ${it.uuid}")
                 val type = sendVarselService.sendVarsel(it)
                 if (type.sendtUtenFeil()) {
                     incrementVarselCountMap(varslerSendt, type)
-                    log.info("Markerer varsel med UUID ${it.uuid} som sendt")
+                    LOG.info("Markerer varsel med UUID ${it.uuid} som sendt")
                     databaseAccess.storeUtsendtVarsel(it)
                     databaseAccess.deletePlanlagtVarselByVarselId(it.uuid)
                 }
@@ -55,7 +56,7 @@ class VarselSender(
         }
 
         varslerSendt.forEach { (key, value) ->
-            log.info("Sendte $value varsler av type $key")
+            LOG.info("Sendte $value varsler av type $key")
         }
 
         val antallMerVeiledningSendt = varslerSendt[VarselType.MER_VEILEDNING.name] ?: 0
@@ -66,7 +67,7 @@ class VarselSender(
         tellAktivitetskravVarselSendt(antallAktivitetskravSendt)
         tellSvarMotebehovVarselSendt(antallSvarMotebehovSendt)
 
-        log.info("Avslutter SendVarslerJobb")
+        LOG.info("Avslutter SendVarslerJobb")
 
         return antallMerVeiledningSendt + antallAktivitetskravSendt
     }
@@ -77,8 +78,8 @@ class VarselSender(
     }
 
     private fun skalSendeVarsel(it: PPlanlagtVarsel) = (it.type.equals(VarselType.MER_VEILEDNING.name) && toggles.sendMerVeiledningVarsler) ||
-        (it.type.equals(VarselType.AKTIVITETSKRAV.name) && toggles.sendAktivitetskravVarsler) ||
-            (it.type.equals(VarselType.SVAR_MOTEBEHOV.name)  && toggles.sendSvarMotebehovVarsler)
+            (it.type.equals(VarselType.AKTIVITETSKRAV.name) && toggles.sendAktivitetskravVarsler) ||
+            (it.type.equals(VarselType.SVAR_MOTEBEHOV.name) && toggles.sendSvarMotebehovVarsler)
 
     private fun String.sendtUtenFeil(): Boolean {
         return this != UTSENDING_FEILET

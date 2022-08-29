@@ -6,7 +6,7 @@ metadata:
   labels:
     team: team-esyfo
 spec:
-  image: {{ image }}
+  image: { { image } }
   port: 8080
   liveness:
     path: /isAlive
@@ -44,6 +44,8 @@ spec:
     outbound:
       external:
         - host: pdl-api.dev-fss-pub.nais.io
+        - host: dokdistfordeling.dev-fss-pub.nais.io
+        - host: dokarkiv.dev-fss-pub.nais.io
       rules:
         - application: digdir-krr-proxy
         - application: security-token-service
@@ -85,6 +87,6 @@ spec:
     - configmap: loginservice-idporten
   env:
   {{#each app}}
-    - name: {{@key}}
-      value: "{{this}}"
+     - name: {{@key}}
+  value: "{{this}}"
   {{/each}}

@@ -19,7 +19,7 @@ class NarmesteLederConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenCo
     private val client: HttpClient
     private val azureAdTokenConsumer: AzureAdTokenConsumer
     private val basepath: String
-    private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.SykmeldingerConsumer")
+    private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.NarmesteLederConsumer")
     private val scope = urlEnv.narmestelederScope
 
     init {

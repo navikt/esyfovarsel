@@ -8,8 +8,10 @@ import io.ktor.server.testing.*
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import no.nav.syfo.api.job.registerJobTriggerApi
 import no.nav.syfo.api.job.urlPathJobTrigger
+import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.syfomotebehov.SyfoMotebehovConsumer
 import no.nav.syfo.db.domain.PlanlagtVarsel
@@ -19,8 +21,9 @@ import no.nav.syfo.getTestEnv
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
-import no.nav.syfo.service.AccessControl
+import no.nav.syfo.service.AccessControlService
 import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
+import no.nav.syfo.service.DokarkivService
 import no.nav.syfo.service.SendVarselService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.*
@@ -38,28 +41,35 @@ object JobApiSpek : Spek({
 
     describe("JobTriggerApi test") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
-        val accessControl = mockk<AccessControl>()
+        val accessControlService = mockk<AccessControlService>()
         val beskjedKafkaProducer = mockk<BeskjedKafkaProducer>()
         val arbeidsgiverNotifikasjonService = mockk<ArbeidsgiverNotifikasjonService>()
         val dineSykmeldteHendelseKafkaProducer = mockk<DineSykmeldteHendelseKafkaProducer>()
         val narmesteLederService = mockk<NarmesteLederService>()
         val syfoMotebeovConsumer = mockk<SyfoMotebehovConsumer>()
+        val journalpostdistribusjonConsumer = mockk<JournalpostdistribusjonConsumer>()
+        val dokarkivService = mockk<DokarkivService>()
 
-        coEvery { accessControl.getFnrIfUserCanBeNotified(aktorId) } returns fnr1
-        coEvery { accessControl.getFnrIfUserCanBeNotified(aktorId2) } returns fnr2
-        coEvery { accessControl.getFnrIfUserCanBeNotified(aktorId3) } returns null
+        coEvery { accessControlService.getUserAccessStatusByFnr(fnr1) } returns userAccessStatus1
+        coEvery { accessControlService.getUserAccessStatusByFnr(fnr2) } returns userAccessStatus2
+        coEvery { accessControlService.getUserAccessStatusByFnr(fnr3) } returns userAccessStatus3
+        coEvery { accessControlService.getUserAccessStatusByFnr(fnr4) } returns userAccessStatus4
+        coEvery { accessControlService.getUserAccessStatusByFnr(fnr5) } returns userAccessStatus5
 
         coEvery { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
+        coEvery { dokarkivService.getJournalpostId(any(), any()) } returns "1"
 
         val sendVarselService =
             SendVarselService(
                 beskjedKafkaProducer,
                 dineSykmeldteHendelseKafkaProducer,
                 narmesteLederService,
-                accessControl,
+                accessControlService,
                 testEnv.urlEnv,
                 syfoMotebeovConsumer,
                 arbeidsgiverNotifikasjonService,
+                journalpostdistribusjonConsumer,
+                dokarkivService,
             )
         val varselSender = VarselSender(embeddedDatabase, sendVarselService, testEnv.toggleEnv, testEnv.appEnv)
 
@@ -70,17 +80,20 @@ object JobApiSpek : Spek({
                 registerJobTriggerApi(varselSender)
             }
 
-            it("esyfovarsel-job trigger utsending av 2 varsler") {
+            it("esyfovarsel-job trigger utsending av 2 varsler digitalt og 1 varsel som brev") {
                 listOf(
-                    PlanlagtVarsel(fnr1, aktorId, orgnummer, setOf("1"), VarselType.MER_VEILEDNING),
-                    PlanlagtVarsel(fnr2, aktorId2, orgnummer, setOf("2"), VarselType.AKTIVITETSKRAV),
-                    PlanlagtVarsel(fnr2, aktorId2, orgnummer, setOf("3"), VarselType.MER_VEILEDNING, LocalDate.now().plusDays(1)),
-                    PlanlagtVarsel(fnr3, aktorId3, orgnummer, setOf("4"), VarselType.AKTIVITETSKRAV)
+                    PlanlagtVarsel(fnr1, aktorId, orgnummer, setOf("1"), VarselType.MER_VEILEDNING), // Blir sendt digitalt
+                    PlanlagtVarsel(fnr2, aktorId2, orgnummer, setOf("2"), VarselType.AKTIVITETSKRAV), // Blir sendt digitalt
+                    PlanlagtVarsel(fnr2, aktorId2, orgnummer, setOf("3"), VarselType.MER_VEILEDNING, LocalDate.now().plusDays(1)), // Blir ikke sendt pga dato
+                    PlanlagtVarsel(fnr3, aktorId3, orgnummer, setOf("4"), VarselType.AKTIVITETSKRAV), // Blir ikke sendt, mottaker er reservert mot digital kommunikasjon
+                    PlanlagtVarsel(fnr4, aktorId4, orgnummer, setOf("5"), VarselType.MER_VEILEDNING), // Blir sendt som brev
+                    PlanlagtVarsel(fnr5, aktorId5, orgnummer, setOf("6"), VarselType.MER_VEILEDNING), // Blir ikke sendt, mottaker er reservert mot digital kommunikasjon og har kode 6 eller 7
                 ).forEach { embeddedDatabase.storePlanlagtVarsel(it) }
 
                 with(handleRequest(HttpMethod.Post, urlPathJobTrigger)) {
                     response.status()?.isSuccess() shouldBeEqualTo true
                     verify(exactly = 2) { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) }
+                    verify(exactly = 1) { runBlocking { dokarkivService.getJournalpostId(any(), any()) } }
                 }
             }
         }

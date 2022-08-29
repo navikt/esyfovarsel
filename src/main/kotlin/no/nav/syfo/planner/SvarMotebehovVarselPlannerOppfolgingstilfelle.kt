@@ -13,12 +13,12 @@ import no.nav.syfo.utils.VarselUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class SvarMotebehovVarselPlanner(
+class SvarMotebehovVarselPlannerOppfolgingstilfelle(
     private val databaseAccess: DatabaseInterface,
     private val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
     private val varselSendtService: VarselSendtService,
     override val name: String = "SVAR_MOTEBEHOV_VARSEL"
-) : VarselPlanner {
+) : VarselPlannerOppfolgingstilfelle {
     private val SVAR_MOTEBEHOV_DAGER: Long = 112
 
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.SvarMotebehovVarselPlanner")
