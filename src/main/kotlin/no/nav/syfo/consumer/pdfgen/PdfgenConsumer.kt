@@ -70,9 +70,9 @@ class PdfgenConsumer(urlEnv: UrlEnv) {
         }
     }
 
-    private fun getPdfgenRequest(navn: String?, maxdate: LocalDate?): PdfgenRequest {
+    private fun getPdfgenRequest(navn: String?, maxDate: LocalDate?): PdfgenRequest {
         val sendtDateFormatted = LocalDate.now().format(DateTimeFormatter.ofPattern(BREV_DATE_FORMAT_PATTERN))
-        val maxDateFormatted = maxdate?.format(DateTimeFormatter.ofPattern(BREV_DATE_FORMAT_PATTERN))
+        val maxDateFormatted = maxDate?.format(DateTimeFormatter.ofPattern(BREV_DATE_FORMAT_PATTERN))
 
         return PdfgenRequest(Brevdata(navn = navn, sendtdato = sendtDateFormatted, maxdato = maxDateFormatted))
     }

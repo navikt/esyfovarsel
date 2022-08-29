@@ -6,7 +6,7 @@ metadata:
   labels:
     team: team-esyfo
 spec:
-  image: { { image } }
+  image: {{ image }}
   port: 8080
   liveness:
     path: /isAlive
@@ -87,6 +87,6 @@ spec:
     - configmap: loginservice-idporten
   env:
   {{#each app}}
-     - name: {{@key}}
-  value: "{{this}}"
+    - name: {{@key}}
+      value: "{{this}}"
   {{/each}}
