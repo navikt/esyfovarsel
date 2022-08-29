@@ -76,14 +76,6 @@ class OppfolgingstilfelleKafkaConsumer(
         LOG.info("Stopped listening to $topicOppfolgingsTilfelle")
     }
 
-//    fun varselSkalLagres(planner: VarselPlanner, userAccessStatus: UserAccessStatus): Boolean {
-//        return if (planner is MerVeiledningVarselPlannerOppfolgingstilfelle) {
-//            userAccessStatus.canUserBePhysicallyNotified || userAccessStatus.canUserBeDigitallyNotified
-//        } else {
-//            return userAccessStatus.canUserBeDigitallyNotified
-//        }
-//    }
-
     fun addPlanner(varselPlannerOppfolgingstilfelle: VarselPlannerOppfolgingstilfelle): OppfolgingstilfelleKafkaConsumer {
         varselPlannerOppfolgingstilfelles.add(varselPlannerOppfolgingstilfelle)
         return this

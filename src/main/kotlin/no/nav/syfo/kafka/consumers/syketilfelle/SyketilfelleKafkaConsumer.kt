@@ -68,14 +68,6 @@ class SyketilfelleKafkaConsumer(
         }
     }
 
-//    fun varselSkalLagres(planner: VarselPlanner, userAccessStatus: UserAccessStatus): Boolean {
-//        return if (planner is MerVeiledningVarselPlannerSyketilfellebit) {
-//            userAccessStatus.canUserBePhysicallyNotified || userAccessStatus.canUserBeDigitallyNotified
-//        } else {
-//            return userAccessStatus.canUserBeDigitallyNotified
-//        }
-//    }
-
     fun addPlanner(varselPlanner: VarselPlannerSyketilfellebit): SyketilfelleKafkaConsumer {
         varselPlanners.add(varselPlanner)
         return this
