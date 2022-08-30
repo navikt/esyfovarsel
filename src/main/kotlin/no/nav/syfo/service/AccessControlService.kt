@@ -7,28 +7,24 @@ import no.nav.syfo.consumer.dkif.DkifConsumer
 class AccessControlService(val pdlConsumer: PdlConsumer, val dkifConsumer: DkifConsumer) {
 
     fun getUserAccessStatusByAktorId(aktorId: String): UserAccessStatus {
-        val isKode6Eller7 = pdlConsumer.isBrukerGradertForInformasjon(aktorId)
-        val isKanVarsles = dkifConsumer.kontaktinfo(aktorId)?.kanVarsles
+        val isKode6Eller7 = pdlConsumer.isBrukerGradertForInformasjon(aktorId) // har adressebeskyttelse
+        val isKanVarsles = dkifConsumer.kontaktinfo(aktorId)?.kanVarsles // status i KRR: [reservert/ikke reservert + kontakt info nyere enn 18mnd]
 
         return UserAccessStatus(
             pdlConsumer.getFnr(aktorId),
             canUserBeDigitallyNotified(isKode6Eller7, isKanVarsles),
             canUserBePhysicallyNotified(isKode6Eller7, isKanVarsles),
-            isKode6Eller7,
-            isKanVarsles
         )
     }
 
     fun getUserAccessStatusByFnr(fnr: String): UserAccessStatus {
-        val isKode6Eller7 = pdlConsumer.isBrukerGradertForInformasjon(fnr)
-        val isKanVarsles = dkifConsumer.person(fnr)?.kanVarsles
+        val isKode6Eller7 = pdlConsumer.isBrukerGradertForInformasjon(fnr) // har adressebeskyttelse
+        val isKanVarsles = dkifConsumer.person(fnr)?.kanVarsles // status i KRR: [reservert/ikke reservert + kontakt info nyere enn 18mnd]
 
         return UserAccessStatus(
             fnr,
             canUserBeDigitallyNotified(isKode6Eller7, isKanVarsles),
             canUserBePhysicallyNotified(isKode6Eller7, isKanVarsles),
-            isKode6Eller7,
-            isKanVarsles
         )
     }
 

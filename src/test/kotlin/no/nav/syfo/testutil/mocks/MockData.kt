@@ -23,11 +23,11 @@ const val fnr4 = "45678901234"
 const val fnr5 = "45678901230"
 const val orgnummer = "999888777"
 
-val userAccessStatus1 = UserAccessStatus(fnr1, true, false, false, true) // Kan varsles digitalt
-val userAccessStatus2 = UserAccessStatus(fnr2, true, false, false, true)  // Kan varsles digitalt
-val userAccessStatus3 = UserAccessStatus(fnr3, false, true, false, false) // Kan varsles fysisk
-val userAccessStatus4 = UserAccessStatus(fnr4, false, true, false, false) // Kan varsles fysisk
-val userAccessStatus5 = UserAccessStatus(fnr5, false, false, true, false) // Kan ikke varsles
+val userAccessStatus1 = UserAccessStatus(fnr1, true, false) // Kan varsles digitalt
+val userAccessStatus2 = UserAccessStatus(fnr2, true, false)  // Kan varsles digitalt
+val userAccessStatus3 = UserAccessStatus(fnr3, false, true) // Kan varsles fysisk
+val userAccessStatus4 = UserAccessStatus(fnr4, false, true) // Kan varsles fysisk
+val userAccessStatus5 = UserAccessStatus(fnr5, false, false) // Kan ikke varsles
 
 val fom = LocalDate.of(2021, 5, 5)
 val tom = LocalDate.of(2021, 6, 5)
