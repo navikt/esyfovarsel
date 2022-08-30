@@ -1,43 +1,21 @@
 package no.nav.syfo.consumer.distribuerjournalpost
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 
-class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer) {
-    private val client: HttpClient
-    private val dokdistfordelingUrl: String
-    private val dokdistfordelingScope: String
-    private val azureAdTokenConsumer: AzureAdTokenConsumer
+class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
+    private val client = httpClient()
+    private val dokdistfordelingUrl = urlEnv.dokdistfordelingUrl
+    private val dokdistfordelingScope = urlEnv.dokdistfordelingScope
 
     private val LOG = LoggerFactory.getLogger("no.nav.syfo.consumer.JournalpostdistribusjonConsumer")
-
-    init {
-        client = HttpClient(CIO) {
-            expectSuccess = false
-            install(JsonFeature) {
-                serializer = JacksonSerializer {
-                    registerKotlinModule()
-                    registerModule(JavaTimeModule())
-                    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                }
-            }
-        }
-        this.azureAdTokenConsumer = azureAdTokenConsumer
-        dokdistfordelingUrl = urlEnv.dokdistfordelingUrl
-        dokdistfordelingScope = urlEnv.dokdistfordelingScope
-    }
 
     suspend fun distribuerJournalpost(journalpostId: String): JournalpostdistribusjonResponse? {
         val requestURL = "${dokdistfordelingUrl}/rest/v1/distribuerjournalpost"

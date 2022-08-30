@@ -1,13 +1,6 @@
 package no.nav.syfo.consumer.dokarkiv
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.features.json.*
-import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -15,11 +8,11 @@ import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.consumer.dokarkiv.domain.DokarkivRequest
 import no.nav.syfo.consumer.dokarkiv.domain.DokarkivResponse
+import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 
-class DokarkivConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer) {
-    private val client: HttpClient
-    private val azureAdTokenConsumer: AzureAdTokenConsumer
+class DokarkivConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
+    private val client = httpClient()
     private val dokarkivUrl = urlEnv.dokarkivUrl
     private val dokarkivScope = urlEnv.dokarkivScope
 
@@ -29,24 +22,6 @@ class DokarkivConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsume
     private val requestURL: String = "$dokarkivUrl$JOURNALPOST_PATH"
 
     private val LOG = LoggerFactory.getLogger("no.nav.syfo.consumer.DokarkivClient")
-
-    init {
-        client = HttpClient(CIO) {
-            expectSuccess = false
-            install(JsonFeature) {
-                serializer = JacksonSerializer {
-                    registerKotlinModule()
-                    registerModule(JavaTimeModule())
-                    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                }
-            }
-            install(Logging) {
-                logger = Logger.DEFAULT
-                level = LogLevel.INFO
-            }
-        }
-        this.azureAdTokenConsumer = azureAdTokenConsumer
-    }
 
     suspend fun postDocumentToDokarkiv(request: DokarkivRequest): DokarkivResponse? {
         try {
