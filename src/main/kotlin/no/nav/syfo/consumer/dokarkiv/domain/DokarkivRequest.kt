@@ -20,7 +20,7 @@ data class DokarkivRequest(
         ) = DokarkivRequest(
             avsenderMottaker = avsenderMottaker,
             tittel = "Brev om snart slutt på sykepenger",
-            bruker = Bruker(id = avsenderMottaker.id, idType = avsenderMottaker.idType),
+            bruker = Bruker.create(id = avsenderMottaker.id, idType = avsenderMottaker.idType),
             dokumenter = dokumenter,
             journalfoerendeEnhet = JOURNALFORENDE_ENHET,
             journalpostType = "UTGAAENDE",
@@ -31,7 +31,7 @@ data class DokarkivRequest(
     }
 }
 
-data class AvsenderMottaker private constructor(
+data class AvsenderMottaker(
     val id: String,
     val idType: String,
 ) {
@@ -60,7 +60,7 @@ data class Bruker(
     }
 }
 
-data class Dokument private constructor(
+data class Dokument(
     val brevkode: String,
     val dokumentvarianter: List<Dokumentvariant>,
     val tittel: String,
