@@ -41,17 +41,17 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
                         response.receive<JournalpostdistribusjonResponse>()
                     }
                     HttpStatusCode.Unauthorized -> {
-                        log.error("Failed to send document to print: Unable to authorize")
+                        log.error("Failed to send document to print: Unable to authorize, journalpostId: $journalpostId")
                         null
                     }
                     else -> {
-                        log.error("Error while calling distribuerjournalpost: $response")
+                        log.error("Error while calling distribuerjournalpost, journalpostId: $journalpostId; response: $response")
                         null
                     }
                 }
 
             } catch (e: Exception) {
-                log.error("Exception while calling distribuerjournalpost: ${e.message}", e)
+                log.error("Exception while calling distribuerjournalpost, journalpostId: $journalpostId; error message: ${e.message}", e)
                 null
             }
         }
