@@ -49,7 +49,7 @@ class SendVarselService(
             if (varselUrl !== null && varselContent !== null) {
                 if (userSkalVarsles(pPlanlagtVarsel.type, userAccessStatus)) {
                     when (pPlanlagtVarsel.type) {
-                        AKTIVITETSKRAV.toString() -> {
+                        AKTIVITETSKRAV.name -> {
                             sendVarselTilSykmeldt(userAccessStatus.fnr!!, varselContent, uuid, varselUrl)
                             if (orgnummer !== null) {
                                 sendAktivitetskravVarselTilArbeidsgiver(
@@ -60,7 +60,7 @@ class SendVarselService(
                             }
                             pPlanlagtVarsel.type
                         }
-                        MER_VEILEDNING.toString() -> {
+                        MER_VEILEDNING.name -> {
                             if (userAccessStatus.canUserBeDigitallyNotified) {
                                 sendVarselTilSykmeldt(userAccessStatus.fnr!!, varselContent, uuid, varselUrl)
                                 pPlanlagtVarsel.type
@@ -73,7 +73,7 @@ class SendVarselService(
                                 UTSENDING_FEILET
                             }
                         }
-                        SVAR_MOTEBEHOV.toString() -> {
+                        SVAR_MOTEBEHOV.name -> {
                             syfoMotebehovConsumer.sendVarselTilArbeidstaker(pPlanlagtVarsel.aktorId, pPlanlagtVarsel.fnr)
                             if (orgnummer !== null) {
                                 val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(userAccessStatus.fnr!!, orgnummer)
@@ -106,18 +106,18 @@ class SendVarselService(
     }
 
     private fun userSkalVarsles(varselType: String, userAccessStatus: UserAccessStatus): Boolean {
-        when (varselType) {
-            AKTIVITETSKRAV.toString() -> {
-                return userAccessStatus.canUserBeDigitallyNotified
+        return when (varselType) {
+            AKTIVITETSKRAV.name -> {
+                userAccessStatus.canUserBeDigitallyNotified
             }
-            MER_VEILEDNING.toString() -> {
-                return userAccessStatus.canUserBeDigitallyNotified || userAccessStatus.canUserBePhysicallyNotified
+            MER_VEILEDNING.name -> {
+                userAccessStatus.canUserBeDigitallyNotified || userAccessStatus.canUserBePhysicallyNotified
             }
-            SVAR_MOTEBEHOV.toString() -> {
-                return userAccessStatus.canUserBeDigitallyNotified
+            SVAR_MOTEBEHOV.name -> {
+                userAccessStatus.canUserBeDigitallyNotified
             }
             else -> {
-                return false
+                false
             }
         }
     }
@@ -170,9 +170,9 @@ class SendVarselService(
 
     private fun varselContentFromType(type: String): String? {
         return when (type) {
-            AKTIVITETSKRAV.toString() -> "NAV skal vurdere aktivitetsplikten din"
-            MER_VEILEDNING.toString() -> "Det nærmer seg datoen da du ikke lenger kan få sykepenger."
-            SVAR_MOTEBEHOV.toString() -> "Ikke i bruk"
+            AKTIVITETSKRAV.name -> "NAV skal vurdere aktivitetsplikten din"
+            MER_VEILEDNING.name -> "Det nærmer seg datoen da du ikke lenger kan få sykepenger."
+            SVAR_MOTEBEHOV.name -> "Ikke i bruk"
             else -> null
         }
     }
@@ -184,9 +184,9 @@ class SendVarselService(
         val svarMotebehovUrl = URL(baseUrlSykInfo + "/ikke-i-bruk")
 
         return when (type) {
-            AKTIVITETSKRAV.toString() -> aktivitetskravUrl
-            MER_VEILEDNING.toString() -> merVeiledningUrl
-            SVAR_MOTEBEHOV.toString() -> svarMotebehovUrl
+            AKTIVITETSKRAV.name -> aktivitetskravUrl
+            MER_VEILEDNING.name -> merVeiledningUrl
+            SVAR_MOTEBEHOV.name -> svarMotebehovUrl
             else -> null
         }
     }

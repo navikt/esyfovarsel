@@ -70,7 +70,7 @@ data class Dokument private constructor(
             dokumentvarianter: List<Dokumentvariant>,
         ) = Dokument(
             tittel = "Brev om snart slutt på sykepenger",
-            brevkode = "SNARTT_SLUTT_PA_SYKEPENGER",
+            brevkode = "SNART_SLUTT_PA_SYKEPENGER",
             dokumentvarianter = dokumentvarianter,
         )
     }

@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory
 class DokarkivConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client: HttpClient
     private val azureAdTokenConsumer: AzureAdTokenConsumer
-    private val basepath: String
     private val dokarkivUrl = urlEnv.dokarkivUrl
     private val dokarkivScope = urlEnv.dokarkivScope
 
@@ -47,7 +46,6 @@ class DokarkivConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsume
             }
         }
         this.azureAdTokenConsumer = azureAdTokenConsumer
-        basepath = urlEnv.narmestelederUrl
     }
 
     suspend fun postDocumentToDokarkiv(request: DokarkivRequest): DokarkivResponse? {
