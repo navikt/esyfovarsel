@@ -25,7 +25,7 @@ class OppfolgingstilfelleKafkaConsumer(
     val accessControlService: AccessControlService
 ) : KafkaListener {
 
-    private val LOG: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.OppfolgingstilfelleConsumer")
+    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.OppfolgingstilfelleConsumer")
     private val kafkaListener: KafkaConsumer<String, String>
     private val varselPlannerOppfolgingstilfelles: ArrayList<VarselPlannerOppfolgingstilfelle> = arrayListOf()
     private val objectMapper = createObjectMapper()
@@ -37,10 +37,10 @@ class OppfolgingstilfelleKafkaConsumer(
     }
 
     override suspend fun listen(applicationState: ApplicationState) {
-        LOG.info("Started listening to topic $topicOppfolgingsTilfelle")
+        log.info("Started listening to topic $topicOppfolgingsTilfelle")
         while (applicationState.running) {
             kafkaListener.poll(Duration.ofMillis(0)).forEach {
-                LOG.info("Received record from topic: [$topicOppfolgingsTilfelle]")
+                log.info("Received record from topic: [$topicOppfolgingsTilfelle]")
                 try {
                     val peker: KOppfolgingstilfellePeker = objectMapper.readValue(it.value())
                     val aktorId = peker.aktorId
@@ -52,18 +52,18 @@ class OppfolgingstilfelleKafkaConsumer(
                             try {
                                 runBlocking {
                                     userAccessStatus.fnr?.let { fnr -> planner.processOppfolgingstilfelle(aktorId, fnr, orgnummer) }
-                                        ?: LOG.info("Klarte ikke hente fnr fra PDL")
+                                        ?: log.info("Klarte ikke hente fnr fra PDL")
                                 }
                             } catch (e: Exception) {
-                                LOG.error("Error in [${planner.name}] planner: | ${e.message}", e)
+                                log.error("Error in [${planner.name}] planner: | ${e.message}", e)
                                 tellFeilIPlanner()
                             }
                         } else {
-                            LOG.info("Prosesserer ikke varsel pga bruker med forespurt fnr er reservert og/eller gradert")
+                            log.info("Prosesserer ikke varsel pga bruker med forespurt fnr er reservert og/eller gradert")
                         }
                     }
                 } catch (e: IOException) {
-                    LOG.error(
+                    log.error(
                         "Error in [$topicOppfolgingsTilfelle] listener: Could not parse message | ${e.message}",
                         e
                     )
@@ -73,7 +73,7 @@ class OppfolgingstilfelleKafkaConsumer(
                 delay(10)
             }
         }
-        LOG.info("Stopped listening to $topicOppfolgingsTilfelle")
+        log.info("Stopped listening to $topicOppfolgingsTilfelle")
     }
 
     fun addPlanner(varselPlannerOppfolgingstilfelle: VarselPlannerOppfolgingstilfelle): OppfolgingstilfelleKafkaConsumer {

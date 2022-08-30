@@ -20,7 +20,7 @@ class SyketilfelleKafkaConsumer(
     val accessControlService: AccessControlService,
     val databaseInterface: DatabaseInterface
 ) : KafkaListener {
-    private val LOG: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.SyketilfelleKafkaConsumer")
+    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.SyketilfelleKafkaConsumer")
     private val kafkaListener: KafkaConsumer<String, String>
     private val varselPlanners: ArrayList<VarselPlannerSyketilfellebit> = arrayListOf()
     private val objectMapper = createObjectMapper()
@@ -32,7 +32,7 @@ class SyketilfelleKafkaConsumer(
     }
 
     override suspend fun listen(applicationState: ApplicationState) {
-        LOG.info("Started listening to topic $topicFlexSyketilfellebiter")
+        log.info("Started listening to topic $topicFlexSyketilfellebiter")
         while (applicationState.running) {
             kafkaListener.poll(zeroMillis).forEach {
                 try {
@@ -47,18 +47,18 @@ class SyketilfelleKafkaConsumer(
                                 if (planner.varselSkalLagres(userAccessStatus)) {
                                     it.processSyketilfelle(sykmeldtFnr, kSyketilfellebit.orgnummer)
                                 } else {
-                                    LOG.info("Prosesserer ikke varsel pga bruker med forespurt fnr er reservert og/eller gradert")
+                                    log.info("Prosesserer ikke varsel pga bruker med forespurt fnr er reservert og/eller gradert")
                                 }
                             }
                         }
                     }
                 } catch (e: IOException) {
-                    LOG.error(
+                    log.error(
                         "Error in [$topicFlexSyketilfellebiter]-listener: Could not parse message | ${e.message}",
                         e
                     )
                 } catch (e: Exception) {
-                    LOG.error(
+                    log.error(
                         "Exception in [$topicFlexSyketilfellebiter]-listener: ${e.message}",
                         e
                     )

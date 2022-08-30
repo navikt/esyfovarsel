@@ -32,7 +32,7 @@ class SendVarselService(
     val journalpostdistribusjonConsumer: JournalpostdistribusjonConsumer,
     val dokarkivService: DokarkivService,
 ) {
-    private val LOG: Logger = LoggerFactory.getLogger("no.nav.syfo.service.SendVarselService")
+    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.SendVarselService")
 
     val WEEKS_BEFORE_DELETE_AKTIVITETSKRAV = 2L
 
@@ -65,11 +65,11 @@ class SendVarselService(
                                 sendVarselTilSykmeldt(userAccessStatus.fnr!!, varselContent, uuid, varselUrl)
                                 pPlanlagtVarsel.type
                             } else if(userAccessStatus.canUserBePhysicallyNotified) {
-                                LOG.info("Skal sende fysisk brev for varsel med uuid: $uuid")
+                                log.info("Skal sende fysisk brev for varsel med uuid: $uuid")
                                 sendFysiskBrevTilReservertBruker(userAccessStatus.fnr!!, pPlanlagtVarsel.uuid)
                                 pPlanlagtVarsel.type
                             } else {
-                                LOG.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles ")
+                                log.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles ")
                                 UTSENDING_FEILET
                             }
                         }
@@ -93,14 +93,14 @@ class SendVarselService(
                         }
                     }
                 } else {
-                    LOG.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles ")
+                    log.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles ")
                     UTSENDING_FEILET
                 }
             } else {
                 throw RuntimeException("Klarte ikke mappe typestreng til innholdstekst og URL")
             }
         } catch (e: RuntimeException) {
-            LOG.error("Feil i utsending av varsel med UUID: ${pPlanlagtVarsel.uuid} | ${e.message}", e)
+            log.error("Feil i utsending av varsel med UUID: ${pPlanlagtVarsel.uuid} | ${e.message}", e)
             UTSENDING_FEILET
         }
     }
@@ -124,14 +124,14 @@ class SendVarselService(
 
     private suspend fun sendFysiskBrevTilReservertBruker(fnr: String, uuid: String) {
         val journalpostId = dokarkivService.getJournalpostId(fnr, uuid)
-        LOG.info("Forsøkte å sende data til dokarkiv, journalpostId er $journalpostId, MER_VEILEDNING varsel med UUID: ${uuid}")
+        log.info("Forsøkte å sende data til dokarkiv, journalpostId er $journalpostId, MER_VEILEDNING varsel med UUID: ${uuid}")
 
         val bestillingsId = journalpostId?.let { journalpostdistribusjonConsumer.distribuerJournalpost(it)?.bestillingsId }
 
         if (bestillingsId == null) {
-            LOG.info("Forsøkte å sende PDF til print, men noe gikk galt, bestillingsId er null, MER_VEILEDNING varsel med UUID: ${uuid}")
+            log.info("Forsøkte å sende PDF til print, men noe gikk galt, bestillingsId er null, MER_VEILEDNING varsel med UUID: ${uuid}")
         } else {
-            LOG.info("Sendte PDF til print, bestillingsId er $bestillingsId, MER_VEILEDNING varsel med UUID: ${uuid}")
+            log.info("Sendte PDF til print, bestillingsId er $bestillingsId, MER_VEILEDNING varsel med UUID: ${uuid}")
         }
     }
 
@@ -147,7 +147,7 @@ class SendVarselService(
 
         dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
 
-        LOG.info("Sender AKTIVITETSKRAV varsel til Arbeidsgivernotifikasjoner for uuid $uuid")
+        log.info("Sender AKTIVITETSKRAV varsel til Arbeidsgivernotifikasjoner for uuid $uuid")
         arbeidsgiverNotifikasjonService.sendNotifikasjon(
             ArbeidsgiverNotifikasjonInput(
                 UUID.fromString(uuid),
@@ -163,9 +163,9 @@ class SendVarselService(
     }
 
     private fun sendVarselTilSykmeldt(fnr: String, varselContent: String, uuid: String, varselUrl: URL) {
-        LOG.info("Sender varsel til Brukernotifikasjoner for uuid $uuid")
+        log.info("Sender varsel til Brukernotifikasjoner for uuid $uuid")
         beskjedKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl)
-        LOG.info("Har sendt varsel til Brukernotifikasjoner for uuid $uuid")
+        log.info("Har sendt varsel til Brukernotifikasjoner for uuid $uuid")
     }
 
     private fun varselContentFromType(type: String): String? {

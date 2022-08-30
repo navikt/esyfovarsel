@@ -21,7 +21,7 @@ class DokarkivConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAd
     private val JOURNALPOST_PARAM_VALUE = true
     private val requestURL: String = "$dokarkivUrl$JOURNALPOST_PATH"
 
-    private val LOG = LoggerFactory.getLogger("no.nav.syfo.consumer.DokarkivClient")
+    private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.DokarkivClient")
 
     suspend fun postDocumentToDokarkiv(request: DokarkivRequest): DokarkivResponse? {
         try {
@@ -35,23 +35,23 @@ class DokarkivConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAd
             }
             return when (response.status) {
                 HttpStatusCode.Created -> {
-                    LOG.info("Sending to dokarkiv successful, journalpost created")
+                    log.info("Sending to dokarkiv successful, journalpost created")
                     response.receive<DokarkivResponse>()
                 }
                 HttpStatusCode.Unauthorized -> {
-                    LOG.error("Failed to post document to Dokarkiv: Unable to authorize")
+                    log.error("Failed to post document to Dokarkiv: Unable to authorize")
                     null
                 }
                 else -> {
-                    LOG.error("Failed to post document to Dokarkiv: $response")
+                    log.error("Failed to post document to Dokarkiv: $response")
                     null
                 }
             }
         } catch (e: Exception) {
-            LOG.error("Exception while posting document to Dokarkiv, message: ${e.message}")
+            log.error("Exception while posting document to Dokarkiv, message: ${e.message}")
             return null
         } catch (e: Error) {
-            LOG.error("Error while post documenting to Dokarkiv, message: ${e.message}")
+            log.error("Error while post documenting to Dokarkiv, message: ${e.message}")
             throw e
         }
     }

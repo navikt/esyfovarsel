@@ -15,7 +15,7 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
     private val dokdistfordelingUrl = urlEnv.dokdistfordelingUrl
     private val dokdistfordelingScope = urlEnv.dokdistfordelingScope
 
-    private val LOG = LoggerFactory.getLogger("no.nav.syfo.consumer.JournalpostdistribusjonConsumer")
+    private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.JournalpostdistribusjonConsumer")
 
     suspend fun distribuerJournalpost(journalpostId: String): JournalpostdistribusjonResponse? {
         val requestURL = "${dokdistfordelingUrl}/rest/v1/distribuerjournalpost"
@@ -37,21 +37,21 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
 
                 when (response.status) {
                     HttpStatusCode.OK -> {
-                        LOG.info("Sent document to print")
+                        log.info("Sent document to print")
                         response.receive<JournalpostdistribusjonResponse>()
                     }
                     HttpStatusCode.Unauthorized -> {
-                        LOG.error("Failed to send document to print: Unable to authorize")
+                        log.error("Failed to send document to print: Unable to authorize")
                         null
                     }
                     else -> {
-                        LOG.error("Error while calling distribuerjournalpost: $response")
+                        log.error("Error while calling distribuerjournalpost: $response")
                         null
                     }
                 }
 
             } catch (e: Exception) {
-                LOG.error("Exception while calling distribuerjournalpost: ${e.message}", e)
+                log.error("Exception while calling distribuerjournalpost: ${e.message}", e)
                 null
             }
         }
