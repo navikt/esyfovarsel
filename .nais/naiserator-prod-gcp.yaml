@@ -44,7 +44,7 @@ spec:
     outbound:
       external:
         - host: pdl-api.prod-fss-pub.nais.io
-        - host: dokdistfordeling-q1.prod-fss-pub.nais.io
+        - host: dokdistfordeling.prod-fss-pub.nais.io
         - host: dokarkiv.prod-fss-pub.nais.io
       rules:
         - application: digdir-krr-proxy
