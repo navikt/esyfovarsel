@@ -1,7 +1,6 @@
 package no.nav.syfo.consumer
 
 import io.ktor.client.call.*
-import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
@@ -9,11 +8,10 @@ import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.TokenConsumer
 import no.nav.syfo.consumer.pdl.*
 import no.nav.syfo.isNotGCP
-import no.nav.syfo.utils.httpClient
+import no.nav.syfo.utils.post
 import org.slf4j.LoggerFactory
 
 open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
-    private val client = httpClient()
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.PdlConsumer")
 
     open fun getFnr(aktorId: String): String? {
@@ -66,28 +64,26 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: To
     fun callPdl(service: String, aktorId: String): HttpResponse? {
         return runBlocking {
             val token = tokenConsumer.getToken(urlEnv.pdlScope)
-            val bearerTokenString = "Bearer $token"
             val graphQuery = this::class.java.getResource("$QUERY_PATH_PREFIX/$service").readText().replace("[\n\r]", "")
             val requestBody = PdlRequest(graphQuery, Variables(aktorId))
             try {
-                client.post<HttpResponse>(urlEnv.pdlUrl) {
-                    headers {
-                        append(TEMA_HEADER, OPPFOLGING_TEMA_HEADERVERDI)
-                        append(HttpHeaders.ContentType, ContentType.Application.Json)
-                        append(HttpHeaders.Authorization, bearerTokenString)
-                    }
-                    if (isNotGCP()) {
-                        headers {
-                            append(NAV_CONSUMER_TOKEN_HEADER, bearerTokenString)
-                        }
-                    }
-                    body = requestBody
-                }
+                post(urlEnv.pdlUrl, requestBody, urlEnv.pdlScope, getRequestHeaders(token))
             } catch (e: Exception) {
                 log.error("Error while calling PDL ($service): ${e.message}", e)
                 null
             }
         }
+    }
+
+    private fun getRequestHeaders(token: String): HashMap<String, String> {
+        val requestHeaders = hashMapOf<String, String>()
+        requestHeaders[TEMA_HEADER] = OPPFOLGING_TEMA_HEADERVERDI
+        requestHeaders[HttpHeaders.ContentType] = ContentType.Application.Json.toString()
+
+        if (isNotGCP()) {
+            requestHeaders[NAV_CONSUMER_TOKEN_HEADER] = "Bearer $token"
+        }
+        return requestHeaders
     }
 }
 

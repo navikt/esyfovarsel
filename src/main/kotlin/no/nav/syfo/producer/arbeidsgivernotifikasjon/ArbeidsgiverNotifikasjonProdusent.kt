@@ -7,7 +7,6 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
-import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
@@ -15,6 +14,7 @@ import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MERKELAPP
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
+import no.nav.syfo.utils.post
 import org.slf4j.LoggerFactory
 
 open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer) {
@@ -98,14 +98,13 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsume
             val requestBody = CreateNewNotificationAgRequest(graphQuery, variables)
 
             try {
-                client.post<HttpResponse>(arbeidsgiverNotifikasjonProdusentBasepath) {
-                    headers {
-                        append(HttpHeaders.Accept, ContentType.Application.Json)
-                        append(HttpHeaders.ContentType, ContentType.Application.Json)
-                        append(HttpHeaders.Authorization, "Bearer $token")
-                    }
-                    body = requestBody
-                }
+                post(
+                    arbeidsgiverNotifikasjonProdusentBasepath, requestBody, token,
+                    hashMapOf(
+                        HttpHeaders.Accept to ContentType.Application.Json.toString(),
+                        HttpHeaders.ContentType to ContentType.Application.Json.toString(),
+                    )
+                )
             } catch (e: Exception) {
                 log.error("Error while calling ag-notifikasjon-produsent-api ($CREATE_NOTIFICATION_AG_MUTATION): ${e.message}", e)
                 null
