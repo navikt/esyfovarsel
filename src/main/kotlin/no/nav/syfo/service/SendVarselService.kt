@@ -107,6 +107,7 @@ class SendVarselService(
     }
 
     private fun userSkalVarsles(varselType: String, userAccessStatus: UserAccessStatus): Boolean {
+        log.info("[${varselType}] - userAccessStatus.canUserBeDigitallyNotified: ${userAccessStatus.canUserBeDigitallyNotified} | userAccessStatus.canUserBePhysicallyNotified: ${userAccessStatus.canUserBePhysicallyNotified}")
         return when (varselType) {
             AKTIVITETSKRAV.name -> {
                 userAccessStatus.canUserBeDigitallyNotified
