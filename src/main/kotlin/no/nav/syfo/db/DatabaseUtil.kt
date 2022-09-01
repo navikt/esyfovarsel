@@ -12,6 +12,7 @@ import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.*
 
+
 fun <T> ResultSet.toList(mapper: ResultSet.() -> T) = mutableListOf<T>().apply {
     while (next()) {
         add(mapper())

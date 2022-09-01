@@ -12,7 +12,7 @@ import java.time.OffsetDateTime
 
 object SyketilfellebitDAOSpek : Spek({
 
-    //The default timeout of 10 seconds is not sufficient to initialise the embedded database
+    // The default timeout of 10 seconds is not sufficient to initialise the embedded database
     defaultTimeout = 20000L
 
     describe("SyketilfellebitDAOSpek") {
@@ -56,6 +56,44 @@ object SyketilfellebitDAOSpek : Spek({
 
             embeddedDatabase.storeSyketilfellebit(syketilfellebitToStore1.toPSyketilfellebit())
             embeddedDatabase.storeSyketilfellebit(syketilfellebitToStore2.toPSyketilfellebit())
+
+            val syketilfellebitListe = embeddedDatabase.fetchSyketilfellebiterByFnr(fnr1)
+
+            syketilfellebitListe.size shouldBeEqualTo 2
+        }
+
+        it("Store syketilfellebit should ignore duplicates") {
+            val syketilfellebitToStore1 = KSyketilfellebit(
+                fnr = fnr1,
+                id = "1",
+                orgnummer = "123456789",
+                opprettet = OffsetDateTime.now(),
+                inntruffet = OffsetDateTime.now(),
+                tags = setOf("SYKMELDING", "SENDT"),
+                ressursId = "ressursId_1",
+                fom = LocalDate.now(),
+                tom = LocalDate.now().plusDays(14),
+                korrigererSendtSoknad = null
+            )
+
+            val syketilfellebitToStore2 = KSyketilfellebit(
+                fnr = fnr1,
+                id = "2",
+                orgnummer = "123456789",
+                opprettet = OffsetDateTime.now(),
+                inntruffet = OffsetDateTime.now(),
+                tags = setOf("SYKMELDING", "SENDT"),
+                ressursId = "ressursId_2",
+                fom = LocalDate.now().plusDays(15),
+                tom = LocalDate.now().plusDays(30),
+                korrigererSendtSoknad = null
+            )
+
+            val duplicateOfSyketilfellebit2 = syketilfellebitToStore2.copy()
+
+            embeddedDatabase.storeSyketilfellebit(syketilfellebitToStore1.toPSyketilfellebit())
+            embeddedDatabase.storeSyketilfellebit(syketilfellebitToStore2.toPSyketilfellebit())
+            embeddedDatabase.storeSyketilfellebit(duplicateOfSyketilfellebit2.toPSyketilfellebit())
 
             val syketilfellebitListe = embeddedDatabase.fetchSyketilfellebiterByFnr(fnr1)
 
