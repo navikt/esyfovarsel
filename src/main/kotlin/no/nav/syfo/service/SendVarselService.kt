@@ -48,6 +48,7 @@ class SendVarselService(
 
             if (varselUrl !== null && varselContent !== null) {
                 if (userSkalVarsles(pPlanlagtVarsel.type, userAccessStatus)) {
+                    log.info("Bruker skal varsles, skal varsles digitalt: ${userAccessStatus.canUserBeDigitallyNotified} | skal varsles på brev: canUserBePhysicallyNotified: ${userAccessStatus.canUserBePhysicallyNotified} | uuid: ${pPlanlagtVarsel.uuid},  varseltype: [${pPlanlagtVarsel.type}]")
                     when (pPlanlagtVarsel.type) {
                         AKTIVITETSKRAV.name -> {
                             sendVarselTilSykmeldt(userAccessStatus.fnr!!, varselContent, uuid, varselUrl)
@@ -64,12 +65,12 @@ class SendVarselService(
                             if (userAccessStatus.canUserBeDigitallyNotified) {
                                 sendVarselTilSykmeldt(userAccessStatus.fnr!!, varselContent, uuid, varselUrl)
                                 pPlanlagtVarsel.type
-                            } else if(userAccessStatus.canUserBePhysicallyNotified) {
+                            } else if (userAccessStatus.canUserBePhysicallyNotified) {
                                 log.info("Skal sende fysisk brev for varsel med uuid: $uuid")
                                 sendFysiskBrevTilReservertBruker(userAccessStatus.fnr!!, pPlanlagtVarsel.uuid)
                                 pPlanlagtVarsel.type
                             } else {
-                                log.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles ")
+                                log.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles")
                                 UTSENDING_FEILET
                             }
                         }
@@ -93,7 +94,7 @@ class SendVarselService(
                         }
                     }
                 } else {
-                    log.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles ")
+                    log.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles")
                     UTSENDING_FEILET
                 }
             } else {
