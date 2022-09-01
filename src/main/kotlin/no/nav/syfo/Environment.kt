@@ -76,7 +76,7 @@ fun getEnv(): Environment {
                 dokdistfordelingScope = getEnvVar("DOKDIST_FORDELING_SCOPE"),
                 dokarkivUrl = getEnvVar("DOKARKIV_URL"),
                 dokarkivScope = getEnvVar("DOKARKIV_SCOPE"),
-                syfooppdfgenUrl = getEnvVar("SYFOOPDFGEN_URL"),
+                syfooppdfgenUrl = getEnvVar("SYFOOPPDFGEN_URL"),
             ),
             KafkaEnv(
                 bootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
