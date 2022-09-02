@@ -1,12 +1,6 @@
 package no.nav.syfo.producer.arbeidsgivernotifikasjon
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -15,29 +9,14 @@ import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MERKELAPP
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
+import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 
-open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer) {
-    private val client: HttpClient
-    private val azureAdTokenConsumer: AzureAdTokenConsumer
-    private val arbeidsgiverNotifikasjonProdusentBasepath: String
+open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
+    private val client = httpClient()
+    private val arbeidsgiverNotifikasjonProdusentBasepath = urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.AgNotifikasjonProdusentConsumer")
     private val scope = urlEnv.arbeidsgiverNotifikasjonProdusentApiScope
-
-    init {
-        client = HttpClient(CIO) {
-            expectSuccess = false
-            install(JsonFeature) {
-                serializer = JacksonSerializer {
-                    registerKotlinModule()
-                    registerModule(JavaTimeModule())
-                    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                }
-            }
-        }
-        this.azureAdTokenConsumer = azureAdTokenConsumer
-        arbeidsgiverNotifikasjonProdusentBasepath = urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl
-    }
 
     open fun createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? {
         log.info("About to send new notification with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api")

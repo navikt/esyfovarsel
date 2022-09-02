@@ -100,7 +100,7 @@ class BrukerApiSpek : Spek({
                     fnr1,
                     aktorId,
                     orgnummer,
-                    VarselType.MER_VEILEDNING.toString(),
+                    VarselType.MER_VEILEDNING.name,
                     varselUtsendtDato,
                     varselUtsendtDato.atStartOfDay(),
                     varselUtsendtDato.atStartOfDay()
@@ -137,7 +137,7 @@ class BrukerApiSpek : Spek({
                     fnr1,
                     aktorId,
                     orgnummer,
-                    VarselType.MER_VEILEDNING.toString(),
+                    VarselType.MER_VEILEDNING.name,
                     varselUtsendtDato,
                     varselUtsendtDato.atStartOfDay(),
                     varselUtsendtDato.atStartOfDay()
@@ -173,7 +173,7 @@ class BrukerApiSpek : Spek({
                     fnr1,
                     aktorId,
                     orgnummer,
-                    VarselType.MER_VEILEDNING.toString(),
+                    VarselType.MER_VEILEDNING.name,
                     varselUtsendtDato,
                     varselUtsendtDato.atStartOfDay(),
                     varselUtsendtDato.atStartOfDay()
@@ -209,7 +209,7 @@ class BrukerApiSpek : Spek({
                     fnr3,
                     aktorId3,
                     orgnummer,
-                    VarselType.MER_VEILEDNING.toString(),
+                    VarselType.MER_VEILEDNING.name,
                     varselUtsendtDato,
                     varselUtsendtDato.atStartOfDay(),
                     varselUtsendtDato.atStartOfDay()

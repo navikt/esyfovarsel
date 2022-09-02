@@ -29,7 +29,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
         val pdlConsumer = mockk<PdlConsumer>()
         val varselSendtService = VarselSendtService(pdlConsumer, syketilfelleConsumer, embeddedDatabase)
 
-        val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(embeddedDatabase, syketilfelleConsumer, varselSendtService)
+        val merVeiledningVarselPlanner = MerVeiledningVarselPlannerOppfolgingstilfelle(embeddedDatabase, syketilfelleConsumer, varselSendtService)
 
         afterEachTest {
             embeddedDatabase.connection.dropData()
@@ -82,7 +82,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
                 arbeidstakerFnr1,
                 orgnummer,
                 arbeidstakerAktorId1,
-                VarselType.MER_VEILEDNING.toString(),
+                VarselType.MER_VEILEDNING.name,
                 dagenForTilfelleStartet,
                 dagenForTilfelleStartet.atStartOfDay(),
                 dagenForTilfelleStartet.atStartOfDay()
@@ -118,7 +118,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
                 arbeidstakerFnr1,
                 arbeidstakerAktorId1,
                 orgnummer,
-                VarselType.MER_VEILEDNING.toString(),
+                VarselType.MER_VEILEDNING.name,
                 fom,
                 fom.atStartOfDay(),
                 fom.atStartOfDay()

@@ -29,8 +29,15 @@ data class PdlHentPerson(
 ) : Serializable
 
 data class PdlPerson(
-    val adressebeskyttelse: List<Adressebeskyttelse>?
+    val adressebeskyttelse: List<Adressebeskyttelse>?,
+    val navn: List<PersonNavn>?
 ) : Serializable
+
+data class PersonNavn(
+    val fornavn: String?,
+    val mellomnavn: String?,
+    val etternavn: String?,
+)
 
 data class Adressebeskyttelse(
     val gradering: Gradering
@@ -59,7 +66,7 @@ data class PdlErrorExtension(
     val classification: String
 )
 
-fun PdlHentPerson.isKode6Eller7() : Boolean {
+fun PdlHentPerson.isKode6Eller7(): Boolean {
     val adressebeskyttelse = this.hentPerson?.adressebeskyttelse
     return if (adressebeskyttelse.isNullOrEmpty()) {
         false
@@ -76,4 +83,18 @@ fun Adressebeskyttelse.isKode6(): Boolean {
 
 fun Adressebeskyttelse.isKode7(): Boolean {
     return this.gradering == Gradering.FORTROLIG
+}
+
+fun PdlHentPerson.getFullNameAsString(): String? {
+    val navn = this.hentPerson?.navn?.first()
+
+    return if (navn == null) {
+        null
+    } else {
+        "${navn.fornavn}${getMellomnavn(navn.mellomnavn)} ${navn.etternavn}"
+    }
+}
+
+private fun getMellomnavn(mellomnavn: String?): String {
+    return if (mellomnavn !== null) " $mellomnavn" else ""
 }

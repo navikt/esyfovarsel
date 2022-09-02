@@ -20,7 +20,7 @@ class VarselSender(
     private val databaseAccess: DatabaseInterface,
     private val sendVarselService: SendVarselService,
     private val toggles: ToggleEnv,
-    private val appEnv: AppEnv
+    private val appEnv: AppEnv,
 ) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
 
@@ -41,6 +41,7 @@ class VarselSender(
         if (!toggles.sendSvarMotebehovVarsler) log.info("Utsending av Svar møtebehov er ikke aktivert, og varsler av denne typen blir ikke sendt")
 
         val varslerSendt = HashMap<String, Int>()
+
         varslerToSendToday.forEach {
             if (skalSendeVarsel(it)) {
                 log.info("Sender varsel med UUID ${it.uuid}")
@@ -77,8 +78,8 @@ class VarselSender(
     }
 
     private fun skalSendeVarsel(it: PPlanlagtVarsel) = (it.type.equals(VarselType.MER_VEILEDNING.name) && toggles.sendMerVeiledningVarsler) ||
-        (it.type.equals(VarselType.AKTIVITETSKRAV.name) && toggles.sendAktivitetskravVarsler) ||
-            (it.type.equals(VarselType.SVAR_MOTEBEHOV.name)  && toggles.sendSvarMotebehovVarsler)
+            (it.type.equals(VarselType.AKTIVITETSKRAV.name) && toggles.sendAktivitetskravVarsler) ||
+            (it.type.equals(VarselType.SVAR_MOTEBEHOV.name) && toggles.sendSvarMotebehovVarsler)
 
     private fun String.sendtUtenFeil(): Boolean {
         return this != UTSENDING_FEILET
