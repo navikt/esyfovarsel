@@ -48,7 +48,6 @@ class SendVarselService(
 
             if (varselUrl !== null && varselContent !== null) {
                 if (userSkalVarsles(pPlanlagtVarsel.type, userAccessStatus)) {
-                    log.info("Bruker skal varsles, skal varsles digitalt: ${userAccessStatus.canUserBeDigitallyNotified} | skal varsles på brev: ${userAccessStatus.canUserBePhysicallyNotified} | uuid: ${pPlanlagtVarsel.uuid},  varseltype: [${pPlanlagtVarsel.type}]")
                     when (pPlanlagtVarsel.type) {
                         AKTIVITETSKRAV.name -> {
                             sendVarselTilSykmeldt(userAccessStatus.fnr!!, varselContent, uuid, varselUrl)
