@@ -9,7 +9,7 @@ import no.nav.syfo.db.toPSyketilfellebit
 import no.nav.syfo.kafka.common.*
 import no.nav.syfo.kafka.consumers.syketilfelle.domain.KSyketilfellebit
 import no.nav.syfo.planner.VarselPlannerSyketilfellebit
-import no.nav.syfo.service.AccessControl
+import no.nav.syfo.service.AccessControlService
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,7 +17,7 @@ import java.io.IOException
 
 class SyketilfelleKafkaConsumer(
     val env: Environment,
-    val accessControl: AccessControl,
+    val accessControlService: AccessControlService,
     val databaseInterface: DatabaseInterface
 ) : KafkaListener {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.SyketilfelleKafkaConsumer")
@@ -39,9 +39,17 @@ class SyketilfelleKafkaConsumer(
                     val kSyketilfellebit: KSyketilfellebit = objectMapper.readValue(it.value())
                     databaseInterface.storeSyketilfellebit(kSyketilfellebit.toPSyketilfellebit())
                     val sykmeldtFnr = kSyketilfellebit.fnr
-                    if (accessControl.canUserBeNotified(sykmeldtFnr) && kSyketilfellebit.orgnummer != null) {
+                    val userAccessStatus = accessControlService.getUserAccessStatusByFnr(sykmeldtFnr)
+
+                    if (kSyketilfellebit.orgnummer != null) {
                         varselPlanners.forEach {
-                            it.processSyketilfelle(sykmeldtFnr, kSyketilfellebit.orgnummer)
+                            varselPlanners.forEach { planner ->
+                                if (planner.varselSkalLagres(userAccessStatus)) {
+                                    it.processSyketilfelle(sykmeldtFnr, kSyketilfellebit.orgnummer)
+                                } else {
+                                    log.info("Prosesserer ikke varsel pga bruker med forespurt fnr er reservert og/eller gradert")
+                                }
+                            }
                         }
                     }
                 } catch (e: IOException) {

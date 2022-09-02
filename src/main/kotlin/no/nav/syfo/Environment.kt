@@ -72,6 +72,11 @@ fun getEnv(): Environment {
                 narmestelederScope = getEnvVar("NARMESTELEDER_SCOPE"),
                 baseUrlDineSykmeldte = getEnvVar("BASE_URL_DINE_SYKMELDTE"),
                 syfomotebehovUrl = getEnvVar("SYFOMOTEBEHOV_URL"),
+                dokdistfordelingUrl = getEnvVar("DOKDIST_FORDELING_URL"),
+                dokdistfordelingScope = getEnvVar("DOKDIST_FORDELING_SCOPE"),
+                dokarkivUrl = getEnvVar("DOKARKIV_URL"),
+                dokarkivScope = getEnvVar("DOKARKIV_SCOPE"),
+                syfooppdfgenUrl = getEnvVar("SYFOOPPDFGEN_URL"),
             ),
             KafkaEnv(
                 bootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
@@ -145,6 +150,11 @@ data class UrlEnv(
     val narmestelederScope: String,
     val baseUrlDineSykmeldte: String,
     val syfomotebehovUrl: String,
+    val dokdistfordelingUrl: String,
+    val dokdistfordelingScope: String,
+    val dokarkivUrl: String,
+    val dokarkivScope: String,
+    val syfooppdfgenUrl: String,
 )
 
 data class KafkaEnv(

@@ -37,7 +37,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
     val varselUtil = VarselUtil(embeddedDatabase)
 
     val aktivitetskravVarselPlanner =
-        AktivitetskravVarselPlanner(embeddedDatabase, syfosyketilfelleConsumer, SykmeldingService(sykmeldingerConsumer))
+        AktivitetskravVarselPlannerOppfolgingstilfelle(embeddedDatabase, syfosyketilfelleConsumer, SykmeldingService(sykmeldingerConsumer))
 
     describe("AktivitetskravVarselPlannerSpek") {
         val planlagtVarselToStore2 =

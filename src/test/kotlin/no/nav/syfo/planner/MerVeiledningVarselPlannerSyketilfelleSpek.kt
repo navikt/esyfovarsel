@@ -84,7 +84,7 @@ object MerVeiledningVarselPlannerSyketilfellebitSpek : Spek({
                 arbeidstakerFnr1,
                 orgnummer,
                 arbeidstakerAktorId1,
-                VarselType.MER_VEILEDNING.toString(),
+                VarselType.MER_VEILEDNING.name,
                 dagenForTilfelleStartet,
                 dagenForTilfelleStartet.atStartOfDay(),
                 dagenForTilfelleStartet.atStartOfDay()
@@ -120,7 +120,7 @@ object MerVeiledningVarselPlannerSyketilfellebitSpek : Spek({
                 arbeidstakerFnr1,
                 arbeidstakerAktorId1,
                 orgnummer,
-                VarselType.MER_VEILEDNING.toString(),
+                VarselType.MER_VEILEDNING.name,
                 fom,
                 fom.atStartOfDay(),
                 fom.atStartOfDay()

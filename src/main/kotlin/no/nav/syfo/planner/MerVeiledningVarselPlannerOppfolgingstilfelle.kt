@@ -15,11 +15,11 @@ import no.nav.syfo.utils.todayIsBetweenFomAndTom
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class MerVeiledningVarselPlanner(
+class MerVeiledningVarselPlannerOppfolgingstilfelle(
     val databaseAccess: DatabaseInterface,
     val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
     val varselSendtService: VarselSendtService
-) : VarselPlanner {
+) : VarselPlannerOppfolgingstilfelle {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.Varsel39Uker")
     private val varselUtil: VarselUtil = VarselUtil(databaseAccess)
     override val name: String = "MER_VEILEDNING_VARSEL"

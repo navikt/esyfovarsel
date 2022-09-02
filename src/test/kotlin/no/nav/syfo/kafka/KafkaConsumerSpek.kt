@@ -10,10 +10,10 @@ import no.nav.syfo.getTestEnv
 import no.nav.syfo.kafka.common.*
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
-import no.nav.syfo.service.AccessControl
+import no.nav.syfo.service.AccessControlService
 import no.nav.syfo.testutil.kafka.JacksonKafkaSerializer
 import no.nav.syfo.testutil.mocks.MockServers
-import no.nav.syfo.testutil.mocks.MockVarselPlaner
+import no.nav.syfo.testutil.mocks.MockOppfolgingstilfelleVarselPlaner
 import no.nav.syfo.testutil.mocks.kafkaOppfolgingstilfellePeker
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -50,9 +50,9 @@ object KafkaConsumerSpek : Spek({
     val azureAdTokenConsumer = AzureAdTokenConsumer(testEnv.authEnv)
     val pdlConsumer = PdlConsumer(testEnv.urlEnv, azureAdTokenConsumer)
     val dkifConsumer = DkifConsumer(testEnv.urlEnv, azureAdTokenConsumer)
-    val accessControl = AccessControl(pdlConsumer, dkifConsumer)
-    val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(testEnv, accessControl)
-        .addPlanner(MockVarselPlaner(fakeApplicationState))
+    val accessControlService = AccessControlService(pdlConsumer, dkifConsumer)
+    val oppfolgingstilfelleKafkaConsumer = OppfolgingstilfelleKafkaConsumer(testEnv, accessControlService)
+        .addPlanner(MockOppfolgingstilfelleVarselPlaner(fakeApplicationState))
 
     beforeGroup {
         embeddedKafkaEnv.start()

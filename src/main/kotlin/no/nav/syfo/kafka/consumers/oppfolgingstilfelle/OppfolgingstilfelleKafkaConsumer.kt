@@ -12,8 +12,8 @@ import no.nav.syfo.kafka.common.topicOppfolgingsTilfelle
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
 import no.nav.syfo.metrics.tellFeilIParsing
 import no.nav.syfo.metrics.tellFeilIPlanner
-import no.nav.syfo.service.AccessControl
-import no.nav.syfo.planner.VarselPlanner
+import no.nav.syfo.planner.VarselPlannerOppfolgingstilfelle
+import no.nav.syfo.service.AccessControlService
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -22,12 +22,12 @@ import java.time.Duration
 
 class OppfolgingstilfelleKafkaConsumer(
     val env: Environment,
-    val accessControl: AccessControl
+    val accessControlService: AccessControlService
 ) : KafkaListener {
 
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.OppfolgingstilfelleConsumer")
     private val kafkaListener: KafkaConsumer<String, String>
-    private val varselPlanners: ArrayList<VarselPlanner> = arrayListOf()
+    private val varselPlannerOppfolgingstilfelles: ArrayList<VarselPlannerOppfolgingstilfelle> = arrayListOf()
     private val objectMapper = createObjectMapper()
 
     init {
@@ -45,17 +45,23 @@ class OppfolgingstilfelleKafkaConsumer(
                     val peker: KOppfolgingstilfellePeker = objectMapper.readValue(it.value())
                     val aktorId = peker.aktorId
                     val orgnummer = peker.orgnummer
-                    val fnr = accessControl.getFnrIfUserCanBeNotified(aktorId)
-                    fnr?.let {
-                        varselPlanners.forEach { planner ->
+                    val userAccessStatus = accessControlService.getUserAccessStatusByAktorId(aktorId)
+
+                    varselPlannerOppfolgingstilfelles.forEach { planner ->
+                        if (planner.varselSkalLagres(userAccessStatus)) {
                             try {
-                                runBlocking { planner.processOppfolgingstilfelle(aktorId, fnr, orgnummer) }
+                                runBlocking {
+                                    userAccessStatus.fnr?.let { fnr -> planner.processOppfolgingstilfelle(aktorId, fnr, orgnummer) }
+                                        ?: log.info("Klarte ikke hente fnr fra PDL")
+                                }
                             } catch (e: Exception) {
                                 log.error("Error in [${planner.name}] planner: | ${e.message}", e)
                                 tellFeilIPlanner()
                             }
+                        } else {
+                            log.info("Prosesserer ikke varsel pga bruker med forespurt fnr er reservert og/eller gradert")
                         }
-                    } ?: log.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles ")
+                    }
                 } catch (e: IOException) {
                     log.error(
                         "Error in [$topicOppfolgingsTilfelle] listener: Could not parse message | ${e.message}",
@@ -70,8 +76,8 @@ class OppfolgingstilfelleKafkaConsumer(
         log.info("Stopped listening to $topicOppfolgingsTilfelle")
     }
 
-    fun addPlanner(varselPlanner: VarselPlanner): OppfolgingstilfelleKafkaConsumer {
-        varselPlanners.add(varselPlanner)
+    fun addPlanner(varselPlannerOppfolgingstilfelle: VarselPlannerOppfolgingstilfelle): OppfolgingstilfelleKafkaConsumer {
+        varselPlannerOppfolgingstilfelles.add(varselPlannerOppfolgingstilfelle)
         return this
     }
 }
