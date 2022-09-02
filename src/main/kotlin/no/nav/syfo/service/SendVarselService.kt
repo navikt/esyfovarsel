@@ -39,7 +39,7 @@ class SendVarselService(
     suspend fun sendVarsel(pPlanlagtVarsel: PPlanlagtVarsel): String {
         // Recheck if user can be notified in case of recent 'Addressesperre'
         return try {
-            val userAccessStatus = accessControlService.getUserAccessStatusByFnr(pPlanlagtVarsel.fnr)
+            val userAccessStatus = accessControlService.getUserAccessStatusByAktorId(pPlanlagtVarsel.aktorId)
             val uuid = pPlanlagtVarsel.uuid
 
             val varselUrl = varselUrlFromType(pPlanlagtVarsel.type)

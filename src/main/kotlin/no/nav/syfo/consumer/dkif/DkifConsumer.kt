@@ -58,8 +58,7 @@ class DkifConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: TokenC
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, access_token)
-                        append(NAV_PERSONIDENTER_HEADER, fnr)
-                        append(NAV_CONSUMER_ID_HEADER, ESYFOVARSEL_CONSUMER_ID)
+                        append(NAV_PERSONIDENT_HEADER, fnr)
                         append(NAV_CALL_ID_HEADER, createCallId())
                     }
                 }
