@@ -1,8 +1,6 @@
 package no.nav.syfo.utils
 
 import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -49,15 +47,13 @@ class LeaderElection(private val blocksToRun: List<RunOnElection>) {
         val leaderJsonString = callElectorPath(path)
         return parseLeaderJson(leaderJsonString)
     }
+
     private suspend fun callElectorPath(path: String): String {
-        val client = httpClient()
-        val leaderResponse = client.get<HttpResponse>(path) {
-            headers {
-                append(HttpHeaders.Accept, ContentType.Application.Json)
-            }
-        }
+        val leaderResponse = get(path, null, hashMapOf(HttpHeaders.Accept to ContentType.Application.Json.toString()))
+
         return leaderResponse.receive()
     }
+
     private fun parseLeaderJson(leaderJsonString: String): String {
         val leaderJson = objectMapper.readTree(leaderJsonString)
         return leaderJson["name"].toString().replace("\"", "")
