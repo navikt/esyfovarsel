@@ -1,6 +1,7 @@
 package no.nav.syfo.consumer.dkif
 
 import io.ktor.client.call.*
+import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
@@ -8,25 +9,26 @@ import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.TokenConsumer
 import no.nav.syfo.consumer.domain.Kontaktinfo
 import no.nav.syfo.consumer.domain.KontaktinfoMapper
-import no.nav.syfo.utils.get
+import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 import java.util.UUID.randomUUID
 
 class DkifConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
+    private val client = httpClient()
 
     fun kontaktinfo(aktorId: String): Kontaktinfo? {
         return runBlocking {
-            val token = tokenConsumer.getToken(urlEnv.dkifScope)
+            val access_token = "Bearer ${tokenConsumer.getToken(urlEnv.dkifScope)}"
             val response: HttpResponse? = try {
-                get(
-                    urlEnv.dkifUrl, token,
-                    hashMapOf(
-                        HttpHeaders.ContentType to ContentType.Application.Json.toString(),
-                        NAV_CONSUMER_ID_HEADER to ESYFOVARSEL_CONSUMER_ID,
-                        NAV_PERSONIDENTER_HEADER to aktorId,
-                        NAV_CALL_ID_HEADER to createCallId(),
-                    )
-                )
+                client.get<HttpResponse>(urlEnv.dkifUrl) {
+                    headers {
+                        append(HttpHeaders.ContentType, ContentType.Application.Json)
+                        append(HttpHeaders.Authorization, access_token)
+                        append(NAV_CONSUMER_ID_HEADER, ESYFOVARSEL_CONSUMER_ID)
+                        append(NAV_PERSONIDENTER_HEADER, aktorId)
+                        append(NAV_CALL_ID_HEADER, createCallId())
+                    }
+                }
             } catch (e: Exception) {
                 log.error("Error while calling DKIF: ${e.message}", e)
                 null
@@ -50,16 +52,16 @@ class DkifConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: TokenC
 
     fun person(fnr: String): Kontaktinfo? {
         return runBlocking {
-            val token = tokenConsumer.getToken(urlEnv.dkifScope)
+            val access_token = "Bearer ${tokenConsumer.getToken(urlEnv.dkifScope)}"
             val response: HttpResponse? = try {
-                get(
-                    urlEnv.dkifUrl, token,
-                    hashMapOf(
-                        NAV_PERSONIDENT_HEADER to fnr,
-                        NAV_CALL_ID_HEADER to createCallId(),
-                        HttpHeaders.ContentType to ContentType.Application.Json.toString(),
-                    )
-                )
+                client.get<HttpResponse>(urlEnv.dkifUrl) {
+                    headers {
+                        append(HttpHeaders.ContentType, ContentType.Application.Json)
+                        append(HttpHeaders.Authorization, access_token)
+                        append(NAV_PERSONIDENT_HEADER, fnr)
+                        append(NAV_CALL_ID_HEADER, createCallId())
+                    }
+                }
             } catch (e: Exception) {
                 log.error("Error while calling DKIF: ${e.message}", e)
                 null
