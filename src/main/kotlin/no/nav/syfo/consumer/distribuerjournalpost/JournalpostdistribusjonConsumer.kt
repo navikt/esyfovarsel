@@ -1,14 +1,17 @@
 package no.nav.syfo.consumer.distribuerjournalpost
 
 import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
-import no.nav.syfo.utils.post
+import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 
 class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
+    private val client = httpClient()
     private val dokdistfordelingUrl = urlEnv.dokdistfordelingUrl
     private val dokdistfordelingScope = urlEnv.dokdistfordelingScope
 
@@ -23,13 +26,14 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
 
         return runBlocking {
             try {
-                val response = post(
-                    requestURL, request, token,
-                    hashMapOf(
-                        HttpHeaders.Accept to ContentType.Application.Json.toString(),
-                        HttpHeaders.ContentType to ContentType.Application.Json.toString(),
-                    )
-                )
+                val response = client.post<HttpResponse>(requestURL) {
+                    headers {
+                        append(HttpHeaders.Accept, ContentType.Application.Json)
+                        append(HttpHeaders.ContentType, ContentType.Application.Json)
+                        append(HttpHeaders.Authorization, "Bearer $token")
+                    }
+                    body = request
+                }
 
                 when (response.status) {
                     HttpStatusCode.OK -> {
