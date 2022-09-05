@@ -43,7 +43,7 @@ class ArbeidsgiverNotifikasjonService(
                 arbeidsgiverNotifikasjon.messageText,
                 narmesteLederRelasjon.narmesteLederEpost!!,
                 arbeidsgiverNotifikasjon.emailTitle,
-                arbeidsgiverNotifikasjon.emailBody(url),
+                arbeidsgiverNotifikasjon.emailBody,
                 arbeidsgiverNotifikasjon.hardDeleteDate,
             )
             arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjonen)
@@ -58,7 +58,7 @@ data class ArbeidsgiverNotifikasjonInput(
     val ansattFnr: String,
     val messageText: String,
     val emailTitle: String,
-    val emailBody: (url: String) -> String,
+    val emailBody: String,
     val hardDeleteDate: LocalDateTime,
 )
 

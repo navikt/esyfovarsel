@@ -42,7 +42,7 @@ class MotebehovVarselService(
                 varselHendelse.arbeidstakerFnr,
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
-                { url: String -> ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY },
+                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
                 LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
             )
         )
