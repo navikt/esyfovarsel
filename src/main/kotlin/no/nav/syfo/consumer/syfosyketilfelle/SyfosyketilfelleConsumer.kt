@@ -1,33 +1,24 @@
 package no.nav.syfo.consumer.syfosyketilfelle
 
 import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.TokenConsumer
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
-import no.nav.syfo.utils.httpClient
+import no.nav.syfo.utils.get
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 open class SyfosyketilfelleConsumer(urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
-    private val client = httpClient()
     private val basepath = urlEnv.syfosyketilfelleUrl
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.SyfosyketilfelleConsumer")
 
     suspend fun getOppfolgingstilfelle(aktorId: String): OppfolgingstilfellePerson? {
         val requestURL = "$basepath/kafka/oppfolgingstilfelle/beregn/$aktorId"
         val stsAccessToken = tokenConsumer.getToken(null)
-        val bearerTokenString = "Bearer $stsAccessToken"
 
-        val response = client.get<HttpResponse>(requestURL) {
-            headers {
-                append(HttpHeaders.Authorization, bearerTokenString)
-                append(HttpHeaders.Accept, ContentType.Application.Json)
-            }
-        }
+        val response = get(requestURL, stsAccessToken, hashMapOf(HttpHeaders.Accept to ContentType.Application.Json.toString()))
 
         return when (response.status) {
             HttpStatusCode.OK -> {
@@ -51,14 +42,7 @@ open class SyfosyketilfelleConsumer(urlEnv: UrlEnv, private val tokenConsumer: T
     open suspend fun getOppfolgingstilfelle39Uker(aktorId: String): Oppfolgingstilfelle39Uker? {
         val requestURL = "$basepath/kafka/oppfolgingstilfelle/beregn/$aktorId/39ukersvarsel"
         val stsAccessToken = tokenConsumer.getToken(null)
-        val bearerTokenString = "Bearer $stsAccessToken"
-
-        val response = client.get<HttpResponse>(requestURL) {
-            headers {
-                append(HttpHeaders.Authorization, bearerTokenString)
-                append(HttpHeaders.Accept, ContentType.Application.Json)
-            }
-        }
+        val response = get(requestURL, stsAccessToken,  hashMapOf(HttpHeaders.Accept to ContentType.Application.Json.toString()))
 
         return when (response.status) {
             HttpStatusCode.OK -> {
@@ -81,7 +65,7 @@ open class SyfosyketilfelleConsumer(urlEnv: UrlEnv, private val tokenConsumer: T
 }
 
 class LocalSyfosyketilfelleConsumer(urlEnv: UrlEnv, tokenConsumer: TokenConsumer) : SyfosyketilfelleConsumer(urlEnv, tokenConsumer) {
-    override suspend fun getOppfolgingstilfelle39Uker(aktorId: String): Oppfolgingstilfelle39Uker? {
+    override suspend fun getOppfolgingstilfelle39Uker(aktorId: String): Oppfolgingstilfelle39Uker {
         return Oppfolgingstilfelle39Uker(
             aktorId,
             16,
