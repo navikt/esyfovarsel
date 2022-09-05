@@ -26,7 +26,7 @@ fun httpClient(): HttpClient {
 suspend fun post(requestURL: String, requestBody: Any, bearerToken: String?, requestHeaders: HashMap<String, String>): HttpResponse {
     return httpClient().post(requestURL) {
         headers {
-            bearerToken ?: append(HttpHeaders.Authorization, "Bearer $bearerToken")
+            if (bearerToken != null) append(HttpHeaders.Authorization, "Bearer $bearerToken")
             for (header in requestHeaders) {
                 append(header.key, header.value)
             }
@@ -38,7 +38,7 @@ suspend fun post(requestURL: String, requestBody: Any, bearerToken: String?, req
 suspend fun postWithParameter(requestURL: String, requestBody: Any?, bearerToken: String?, requestHeaders: HashMap<String, String>, parameter: Pair<String, Any>): HttpResponse {
     return httpClient().post(requestURL) {
         headers {
-            bearerToken ?: append(HttpHeaders.Authorization, "Bearer $bearerToken")
+            if (bearerToken != null) append(HttpHeaders.Authorization, "Bearer $bearerToken")
             for (header in requestHeaders) {
                 append(header.key, header.value)
             }
@@ -51,7 +51,7 @@ suspend fun postWithParameter(requestURL: String, requestBody: Any?, bearerToken
 suspend fun get(requestURL: String, bearerToken: String?, requestHeaders: HashMap<String, String>): HttpResponse {
     return httpClient().get(requestURL) {
         headers {
-            bearerToken ?: append(HttpHeaders.Authorization, "Bearer $bearerToken")
+            if (bearerToken != null) append(HttpHeaders.Authorization, "Bearer $bearerToken")
             for (requestHeader in requestHeaders) {
                 append(requestHeader.key, requestHeader.value)
             }
