@@ -1,6 +1,7 @@
 package no.nav.syfo.producer.arbeidsgivernotifikasjon
 
 import io.ktor.client.call.*
+import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
@@ -8,10 +9,11 @@ import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MERKELAPP
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
-import no.nav.syfo.utils.post
+import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 
 open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
+    private val client = httpClient()
     private val arbeidsgiverNotifikasjonProdusentBasepath = urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.AgNotifikasjonProdusentConsumer")
     private val scope = urlEnv.arbeidsgiverNotifikasjonProdusentApiScope
@@ -75,13 +77,14 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
             val requestBody = CreateNewNotificationAgRequest(graphQuery, variables)
 
             try {
-                post(
-                    arbeidsgiverNotifikasjonProdusentBasepath, requestBody, token,
-                    hashMapOf(
-                        HttpHeaders.Accept to ContentType.Application.Json.toString(),
-                        HttpHeaders.ContentType to ContentType.Application.Json.toString(),
-                    )
-                )
+                client.post<HttpResponse>(arbeidsgiverNotifikasjonProdusentBasepath) {
+                    headers {
+                        append(HttpHeaders.Accept, ContentType.Application.Json)
+                        append(HttpHeaders.ContentType, ContentType.Application.Json)
+                        append(HttpHeaders.Authorization, "Bearer $token")
+                    }
+                    body = requestBody
+                }
             } catch (e: Exception) {
                 log.error("Error while calling ag-notifikasjon-produsent-api ($CREATE_NOTIFICATION_AG_MUTATION): ${e.message}", e)
                 null
