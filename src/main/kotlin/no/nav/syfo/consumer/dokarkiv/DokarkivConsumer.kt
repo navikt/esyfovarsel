@@ -1,18 +1,15 @@
 package no.nav.syfo.consumer.dokarkiv
 
 import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.consumer.dokarkiv.domain.DokarkivRequest
 import no.nav.syfo.consumer.dokarkiv.domain.DokarkivResponse
-import no.nav.syfo.utils.httpClient
+import no.nav.syfo.utils.postWithParameter
 import org.slf4j.LoggerFactory
 
 class DokarkivConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
-    private val client = httpClient()
     private val dokarkivUrl = urlEnv.dokarkivUrl
     private val dokarkivScope = urlEnv.dokarkivScope
 
@@ -26,13 +23,15 @@ class DokarkivConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAd
     suspend fun postDocumentToDokarkiv(request: DokarkivRequest): DokarkivResponse? {
         try {
             val token = azureAdTokenConsumer.getToken(dokarkivScope)
-            val response = client.post<HttpResponse>(requestURL) {
-                parameter(JOURNALPOST_PARAM_STRING, JOURNALPOST_PARAM_VALUE)
-                header(HttpHeaders.Authorization, "Bearer $token")
-                accept(ContentType.Application.Json)
-                contentType(ContentType.Application.Json)
-                body = request
-            }
+            val response = postWithParameter(
+                requestURL, request, token,
+                hashMapOf(
+                    HttpHeaders.Accept to ContentType.Application.Json.toString(),
+                    HttpHeaders.ContentType to ContentType.Application.Json.toString(),
+                ),
+                Pair(JOURNALPOST_PARAM_STRING, JOURNALPOST_PARAM_VALUE)
+            )
+
             return when (response.status) {
                 HttpStatusCode.Created -> {
                     log.info("Sending to dokarkiv successful, journalpost created")
