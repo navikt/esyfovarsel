@@ -6,6 +6,7 @@ import no.nav.syfo.consumer.syfosyketilfelle.SyfosyketilfelleConsumer
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchUtsendtVarselByFnr
+import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.utils.dateIsInInterval
 import no.nav.syfo.utils.isEqualOrBefore
 import org.slf4j.Logger
@@ -16,7 +17,7 @@ import javax.ws.rs.ForbiddenException
 
 class VarselSendtService(
     val pdlConsumer: PdlConsumer,
-    val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
+    val syketilfellebitService: SyketilfellebitService,
     val databaseAccess: DatabaseInterface
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.db.VarselSendtService")
@@ -28,7 +29,7 @@ class VarselSendtService(
             throw ForbiddenException("Uautorisert forespørsel")
         }
         val syketilfelle = runBlocking {
-            syfosyketilfelleConsumer.getOppfolgingstilfelle39Uker(aktorId)
+            syketilfellebitService.beregnKOppfolgingstilfelle39UkersVarsel(fnr)
         }
         return syketilfelle?.let {
             val idag = LocalDate.now()

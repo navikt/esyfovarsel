@@ -88,7 +88,7 @@ fun main() {
                 val accessControlService = AccessControlService(pdlConsumer, dkifConsumer)
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
                 val syketilfellebitService = SyketilfellebitService(database)
-                val varselSendtService = VarselSendtService(pdlConsumer, oppfolgingstilfelleConsumer, database)
+                val varselSendtService = VarselSendtService(pdlConsumer, syketilfellebitService, database)
                 val merVeiledningVarselPlanner = MerVeiledningVarselPlannerOppfolgingstilfelle(database, oppfolgingstilfelleConsumer, varselSendtService)
                 val merVeiledningVarselPlannerSyketilfellebit = MerVeiledningVarselPlannerSyketilfellebit(database, syketilfellebitService, varselSendtService)
                 val aktivitetskravVarselPlanner = AktivitetskravVarselPlannerOppfolgingstilfelle(database, oppfolgingstilfelleConsumer, sykmeldingService)
