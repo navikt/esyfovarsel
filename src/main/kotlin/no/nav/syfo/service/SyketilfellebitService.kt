@@ -5,7 +5,6 @@ import no.nav.syfo.syketilfelle.domain.Tag.*
 import no.nav.syfo.db.fetchSyketilfellebiterByFnr
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
-import no.nav.syfo.service.SyketilfelleInterface
 import no.nav.syfo.syketilfelle.domain.*
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -39,7 +38,7 @@ fun KOppfolgingstilfelle39Uker.toOppfolgingstilfelle39Uker() = Oppfolgingstilfel
 
 class SyketilfellebitService(
     val database: DatabaseInterface
-) : SyketilfelleInterface {
+) {
     fun beregnKOppfolgingstilfelle39UkersVarsel(fnr: String): Oppfolgingstilfelle39Uker? =
         genererOppfolgingstilfelle(fnr)
             ?.filter { oppfolgingstilfelle -> oppfolgingstilfelle.dagerAvArbeidsgiverperiode > AntallDagerIArbeidsgiverPeriode }
@@ -133,7 +132,4 @@ class SyketilfellebitService(
     }
 
     private fun LocalDate.leggTilArbeidsgiverPeriode() = plusDays(AntallDagerIArbeidsgiverPeriode.toLong())
-    override suspend fun getOppfolgingstilfelle39UkerCommon(fnr: String, aktorId: String): Oppfolgingstilfelle39Uker? {
-        return beregnKOppfolgingstilfelle39UkersVarsel(fnr)
-    }
 }

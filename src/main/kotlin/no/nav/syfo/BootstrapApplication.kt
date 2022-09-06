@@ -88,8 +88,7 @@ fun main() {
                 val accessControlService = AccessControlService(pdlConsumer, dkifConsumer)
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
                 val syketilfellebitService = SyketilfellebitService(database)
-                val syketilfelleConsumer: SyketilfelleInterface = getSyketilfelleConsumer(env.urlEnv, stsConsumer) ?: syketilfellebitService
-                val varselSendtService = VarselSendtService(pdlConsumer, syketilfelleConsumer, database)
+                val varselSendtService = VarselSendtService(pdlConsumer, oppfolgingstilfelleConsumer, database)
                 val merVeiledningVarselPlanner = MerVeiledningVarselPlannerOppfolgingstilfelle(database, oppfolgingstilfelleConsumer, varselSendtService)
 
                 val merVeiledningVarselPlannerSyketilfellebit = MerVeiledningVarselPlannerSyketilfellebit(database, syketilfellebitService, varselSendtService)
@@ -182,14 +181,6 @@ private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: TokenConsumer, stsC
     }
 }
 
-private fun getSyketilfelleConsumer(urlEnv: UrlEnv, tokenConsumer: TokenConsumer): SyketilfelleInterface? {
-    if (isLocal()) {
-        return LocalSyfosyketilfelleConsumer(urlEnv, tokenConsumer)
-    }
-    if (isNotGCP())
-        return SyfosyketilfelleConsumer(urlEnv, tokenConsumer)
-    return null
-}
 private fun getSyfosyketilfelleConsumer(urlEnv: UrlEnv, tokenConsumer: TokenConsumer): SyfosyketilfelleConsumer {
     if (isLocal()) {
         return LocalSyfosyketilfelleConsumer(urlEnv, tokenConsumer)

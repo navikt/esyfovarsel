@@ -16,7 +16,7 @@ import javax.ws.rs.ForbiddenException
 
 class VarselSendtService(
     val pdlConsumer: PdlConsumer,
-    val syketilfelleConsumer: SyketilfelleInterface,
+    val syfosyketilfelleConsumer: SyfosyketilfelleConsumer,
     val databaseAccess: DatabaseInterface
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.db.VarselSendtService")
@@ -28,7 +28,7 @@ class VarselSendtService(
             throw ForbiddenException("Uautorisert forespørsel")
         }
         val syketilfelle = runBlocking {
-            syketilfelleConsumer.getOppfolgingstilfelle39UkerCommon(fnr, aktorId)
+            syfosyketilfelleConsumer.getOppfolgingstilfelle39Uker(aktorId)
         }
         return syketilfelle?.let {
             val idag = LocalDate.now()

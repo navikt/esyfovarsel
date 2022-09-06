@@ -68,7 +68,7 @@ class BrukerApiSpek : Spek({
                     tom
                 )
 
-                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39UkerCommon(any(), any()) } returns oppfolgingstilfelle39Uker
+                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
 
                 with(
                     handleRequest(HttpMethod.Get, requestUrl39UkersVarsel) {
@@ -106,7 +106,7 @@ class BrukerApiSpek : Spek({
 
                 embeddedDatabase.storeUtsendtVarselTest(tidligereUtsendtVarsel)
 
-                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39UkerCommon(any(), any()) } returns oppfolgingstilfelle39Uker
+                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
 
                 with(
                     handleRequest(HttpMethod.Get, requestUrl39UkersVarsel) {
@@ -144,7 +144,7 @@ class BrukerApiSpek : Spek({
 
                 embeddedDatabase.storeUtsendtVarselTest(tidligereUtsendtVarsel)
 
-                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39UkerCommon(any(), any()) } returns oppfolgingstilfelle39Uker
+                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
 
                 with(
                     handleRequest(HttpMethod.Get, requestUrl39UkersVarsel) {
@@ -182,7 +182,7 @@ class BrukerApiSpek : Spek({
 
                 embeddedDatabase.storeUtsendtVarselTest(tidligereUtsendtVarsel)
 
-                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39UkerCommon(any(), any()) } returns oppfolgingstilfelle39Uker
+                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
 
                 with(
                     handleRequest(HttpMethod.Get, requestUrl39UkersVarselUautorisert) {
@@ -220,7 +220,7 @@ class BrukerApiSpek : Spek({
 
                 embeddedDatabase.storeUtsendtVarselTest(tidligereUtsendtVarsel)
 
-                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39UkerCommon(any(), any()) } returns oppfolgingstilfelle39Uker
+                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
 
                 coEvery { mockPayload.subject } returns fnr3
 
@@ -246,7 +246,7 @@ class BrukerApiSpek : Spek({
                     tom
                 )
 
-                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39UkerCommon(any(), any()) } returns oppfolgingstilfelle39Uker
+                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
 
                 with(
                     handleRequest(HttpMethod.Get, requestUrl39UkersVarselUgyldigAktorId) {
