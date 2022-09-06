@@ -26,10 +26,9 @@ object MerVeiledningVarselPlannerSyketilfellebitSpek : Spek({
 
     describe("MerVeiledningVarselPlannerSyketilfellebitSpek") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
-        val syketilfelleConsumer = mockk<SyfosyketilfelleConsumer>()
         val syketilfellebitService = mockk<SyketilfellebitService>()
         val pdlConsumer = mockk<PdlConsumer>()
-        val varselSendtService = VarselSendtService(pdlConsumer, syketilfelleConsumer, embeddedDatabase)
+        val varselSendtService = VarselSendtService(pdlConsumer, syketilfellebitService, embeddedDatabase)
 
         val merVeiledningVarselPlanner = MerVeiledningVarselPlannerSyketilfellebit(embeddedDatabase, syketilfellebitService, varselSendtService)
 

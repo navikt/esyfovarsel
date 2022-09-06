@@ -13,6 +13,7 @@ import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.db.storeUtsendtVarselTest
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.service.VarselSendtService
+import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.testutil.*
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
@@ -26,8 +27,9 @@ object MerVeiledningVarselPlannerSpek : Spek({
     describe("MerVeiledningVarselPlannerSpek") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
         val syketilfelleConsumer = mockk<SyfosyketilfelleConsumer>()
+        val syketilfellebitService = mockk<SyketilfellebitService>()
         val pdlConsumer = mockk<PdlConsumer>()
-        val varselSendtService = VarselSendtService(pdlConsumer, syketilfelleConsumer, embeddedDatabase)
+        val varselSendtService = VarselSendtService(pdlConsumer, syketilfellebitService, embeddedDatabase)
 
         val merVeiledningVarselPlanner = MerVeiledningVarselPlannerOppfolgingstilfelle(embeddedDatabase, syketilfelleConsumer, varselSendtService)
 
