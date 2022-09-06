@@ -10,8 +10,7 @@ const val BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST = "NAV ønsker sv
 const val ARBEIDSGIVERNOTIFIKASJON_MERKELAPP = "Oppfølging"
 const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT = "En av dine medarbeidere har snart vært sykmeldt i åtte uker"
 const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE = "Varsel om nytt aktivitetskrav"
-const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY_START = "<body>En av dine medarbeidere har snart vært sykmeldt i åtte uker. Gå inn på "
-const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY_END = " for å se hvem det gjelder.</body>"
+const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY = "<body>En av dine medarbeidere har snart vært sykmeldt i åtte uker. Logg inn på Din side arbeidsgiver på nav.no for å se hvem det gjelder.</body>"
 
 const val ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT = "Vi trenger din vurdering av behovet for dialogmøte."
 const val ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE = "Behov for dialogmøte?"
