@@ -41,6 +41,7 @@ spec:
       rules:
         - application: syfomotebehov
           namespace: team-esyfo
+          cluster: prod-fss
     outbound:
       external:
         - host: pdl-api.prod-fss-pub.nais.io

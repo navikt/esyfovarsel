@@ -13,13 +13,13 @@ import io.mockk.mockk
 import no.nav.syfo.api.bruker.registerBrukerApi
 import no.nav.syfo.api.bruker.urlPath39UkersVarsel
 import no.nav.syfo.consumer.PdlConsumer
-import no.nav.syfo.consumer.syfosyketilfelle.SyfosyketilfelleConsumer
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storeUtsendtVarselTest
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.planner.FULL_AG_PERIODE
 import no.nav.syfo.service.VarselSendtService
+import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.*
 import no.nav.syfo.util.contentNegotationFeature
@@ -33,13 +33,14 @@ import java.util.*
 class BrukerApiSpek : Spek({
     describe("Bruker kaller sjekk på om varsel er sendt") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
-        val syketilfelleConsumer = mockk<SyfosyketilfelleConsumer>()
+        val syketilfellebitService = mockk<SyketilfellebitService>()
         val pdlConsumer = mockk<PdlConsumer>()
-        val varselSendtService = VarselSendtService(pdlConsumer, syketilfelleConsumer, embeddedDatabase)
+        val varselSendtService = VarselSendtService(pdlConsumer, syketilfellebitService, embeddedDatabase)
         val requestUrl39UkersVarsel = urlPath39UkersVarsel.replace("{aktorid}", aktorId)
         val requestUrl39UkersVarselUautorisert = urlPath39UkersVarsel.replace("{aktorid}", aktorId2)
         val requestUrl39UkersVarselManglerAktorId = urlPath39UkersVarsel.replace("{aktorid}", aktorId3)
         val requestUrl39UkersVarselUgyldigAktorId = urlPath39UkersVarsel.replace("{aktorid}", "ugyldig")
+
         val mockPayload = mockk<Payload>()
 
         coEvery { mockPayload.getClaim("pid").asString() } returns fnr1
@@ -68,7 +69,7 @@ class BrukerApiSpek : Spek({
                     tom
                 )
 
-                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
+                coEvery { syketilfellebitService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
                 with(
                     handleRequest(HttpMethod.Get, requestUrl39UkersVarsel) {
@@ -106,7 +107,7 @@ class BrukerApiSpek : Spek({
 
                 embeddedDatabase.storeUtsendtVarselTest(tidligereUtsendtVarsel)
 
-                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
+                coEvery { syketilfellebitService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
                 with(
                     handleRequest(HttpMethod.Get, requestUrl39UkersVarsel) {
@@ -144,7 +145,7 @@ class BrukerApiSpek : Spek({
 
                 embeddedDatabase.storeUtsendtVarselTest(tidligereUtsendtVarsel)
 
-                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
+                coEvery { syketilfellebitService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
                 with(
                     handleRequest(HttpMethod.Get, requestUrl39UkersVarsel) {
@@ -182,7 +183,7 @@ class BrukerApiSpek : Spek({
 
                 embeddedDatabase.storeUtsendtVarselTest(tidligereUtsendtVarsel)
 
-                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
+                coEvery { syketilfellebitService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
                 with(
                     handleRequest(HttpMethod.Get, requestUrl39UkersVarselUautorisert) {
@@ -220,7 +221,7 @@ class BrukerApiSpek : Spek({
 
                 embeddedDatabase.storeUtsendtVarselTest(tidligereUtsendtVarsel)
 
-                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
+                coEvery { syketilfellebitService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
                 coEvery { mockPayload.subject } returns fnr3
 
@@ -246,7 +247,7 @@ class BrukerApiSpek : Spek({
                     tom
                 )
 
-                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
+                coEvery { syketilfellebitService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
                 with(
                     handleRequest(HttpMethod.Get, requestUrl39UkersVarselUgyldigAktorId) {
