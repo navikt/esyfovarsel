@@ -90,6 +90,7 @@ fun main() {
                 val syketilfellebitService = SyketilfellebitService(database)
                 val varselSendtService = VarselSendtService(pdlConsumer, oppfolgingstilfelleConsumer, database)
                 val merVeiledningVarselPlanner = MerVeiledningVarselPlannerOppfolgingstilfelle(database, oppfolgingstilfelleConsumer, varselSendtService)
+
                 val merVeiledningVarselPlannerSyketilfellebit = MerVeiledningVarselPlannerSyketilfellebit(database, syketilfellebitService, varselSendtService)
                 val aktivitetskravVarselPlanner = AktivitetskravVarselPlannerOppfolgingstilfelle(database, oppfolgingstilfelleConsumer, sykmeldingService)
                 val aktivitetskravVarselPlannerSyketilfellebit = AktivitetskravVarselPlannerSyketilfellebit(database, syketilfellebitService, sykmeldingService)
@@ -208,6 +209,7 @@ fun Application.serverModule(
             narmesteLederService,
             accessControlService,
             env.urlEnv,
+            env.appEnv,
             syfoMotebehovConsumer,
             arbeidsgiverNotifikasjonService,
             journalpostdistribusjonConsumer,
@@ -217,8 +219,7 @@ fun Application.serverModule(
     val varselSender = VarselSender(
         database,
         sendVarselService,
-        env.toggleEnv,
-        env.appEnv,
+        env.toggleEnv
     )
 
     install(ContentNegotiation) {

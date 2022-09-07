@@ -43,7 +43,7 @@ class DkifConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: TokenC
                     null
                 }
                 else -> {
-                    log.error("Could not get kontaktinfo from DKIF: $response")
+                    log.error("Could not get kontaktinfo from DKIF (error code: ${response?.status?.value}): $response")
                     null
                 }
             }

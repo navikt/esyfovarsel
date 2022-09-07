@@ -18,11 +18,11 @@ import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storeUtsendtVarselTest
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
+import no.nav.syfo.planner.FULL_AG_PERIODE
 import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.*
 import no.nav.syfo.util.contentNegotationFeature
-import no.nav.syfo.planner.FULL_AG_PERIODE
 import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
@@ -40,8 +40,6 @@ class BrukerApiSpek : Spek({
         val requestUrl39UkersVarselUautorisert = urlPath39UkersVarsel.replace("{aktorid}", aktorId2)
         val requestUrl39UkersVarselManglerAktorId = urlPath39UkersVarsel.replace("{aktorid}", aktorId3)
         val requestUrl39UkersVarselUgyldigAktorId = urlPath39UkersVarsel.replace("{aktorid}", "ugyldig")
-
-
         val mockPayload = mockk<Payload>()
 
         coEvery { mockPayload.getClaim("pid").asString() } returns fnr1
@@ -50,7 +48,6 @@ class BrukerApiSpek : Spek({
         coEvery { pdlConsumer.getFnr(aktorId2) } returns fnr2
         coEvery { pdlConsumer.getFnr(aktorId3) } returns null
         coEvery { pdlConsumer.getFnr("ugyldig") } returns "ugyldig"
-
 
         with(TestApplicationEngine()) {
             start()
@@ -73,13 +70,14 @@ class BrukerApiSpek : Spek({
 
                 coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
 
-                with(handleRequest(HttpMethod.Get, requestUrl39UkersVarsel) {
-                    call.authentication.principal = JWTPrincipal(mockPayload)
-                    addHeader("Content-Type", ContentType.Application.Json.toString())
-                }) {
+                with(
+                    handleRequest(HttpMethod.Get, requestUrl39UkersVarsel) {
+                        call.authentication.principal = JWTPrincipal(mockPayload)
+                        addHeader("Content-Type", ContentType.Application.Json.toString())
+                    }
+                ) {
                     response.status()?.isSuccess() shouldBeEqualTo true
                     response.content shouldBeEqualTo "false"
-
                 }
             }
             it("Bruker skal få 'true' dersom varsel har blitt sendt i inneværende sykeforløp") {
@@ -110,13 +108,14 @@ class BrukerApiSpek : Spek({
 
                 coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
 
-                with(handleRequest(HttpMethod.Get, requestUrl39UkersVarsel) {
-                    call.authentication.principal = JWTPrincipal(mockPayload)
-                    addHeader("Content-Type", ContentType.Application.Json.toString())
-                }) {
+                with(
+                    handleRequest(HttpMethod.Get, requestUrl39UkersVarsel) {
+                        call.authentication.principal = JWTPrincipal(mockPayload)
+                        addHeader("Content-Type", ContentType.Application.Json.toString())
+                    }
+                ) {
                     response.status()?.isSuccess() shouldBeEqualTo true
                     response.content shouldBeEqualTo "true"
-
                 }
             }
             it("Bruker skal få 'false' dersom varsel har blitt sendt i et annet sykeforløp") {
@@ -147,10 +146,12 @@ class BrukerApiSpek : Spek({
 
                 coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
 
-                with(handleRequest(HttpMethod.Get, requestUrl39UkersVarsel) {
-                    call.authentication.principal = JWTPrincipal(mockPayload)
-                    addHeader("Content-Type", ContentType.Application.Json.toString())
-                }) {
+                with(
+                    handleRequest(HttpMethod.Get, requestUrl39UkersVarsel) {
+                        call.authentication.principal = JWTPrincipal(mockPayload)
+                        addHeader("Content-Type", ContentType.Application.Json.toString())
+                    }
+                ) {
                     response.status()?.isSuccess() shouldBeEqualTo true
                     response.content shouldBeEqualTo "false"
                 }
@@ -183,10 +184,12 @@ class BrukerApiSpek : Spek({
 
                 coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
 
-                with(handleRequest(HttpMethod.Get, requestUrl39UkersVarselUautorisert) {
-                    call.authentication.principal = JWTPrincipal(mockPayload)
-                    addHeader("Content-Type", ContentType.Application.Json.toString())
-                }) {
+                with(
+                    handleRequest(HttpMethod.Get, requestUrl39UkersVarselUautorisert) {
+                        call.authentication.principal = JWTPrincipal(mockPayload)
+                        addHeader("Content-Type", ContentType.Application.Json.toString())
+                    }
+                ) {
                     response.status()?.value shouldBeEqualTo HttpStatusCode.Forbidden.value
                 }
             }
@@ -221,14 +224,15 @@ class BrukerApiSpek : Spek({
 
                 coEvery { mockPayload.subject } returns fnr3
 
-                with(handleRequest(HttpMethod.Get, requestUrl39UkersVarselManglerAktorId) {
-                    call.authentication.principal = JWTPrincipal(mockPayload)
-                    addHeader("Content-Type", ContentType.Application.Json.toString())
-                }) {
+                with(
+                    handleRequest(HttpMethod.Get, requestUrl39UkersVarselManglerAktorId) {
+                        call.authentication.principal = JWTPrincipal(mockPayload)
+                        addHeader("Content-Type", ContentType.Application.Json.toString())
+                    }
+                ) {
                     response.status()?.value shouldBeEqualTo HttpStatusCode.InternalServerError.value
                 }
             }
-
 
             it("Ugyldig aktorId skal returnere 400") {
                 val fom = LocalDate.now()
@@ -244,15 +248,15 @@ class BrukerApiSpek : Spek({
 
                 coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
 
-                with(handleRequest(HttpMethod.Get, requestUrl39UkersVarselUgyldigAktorId) {
-                    call.authentication.principal = JWTPrincipal(mockPayload)
-                    addHeader("Content-Type", ContentType.Application.Json.toString())
-                }) {
+                with(
+                    handleRequest(HttpMethod.Get, requestUrl39UkersVarselUgyldigAktorId) {
+                        call.authentication.principal = JWTPrincipal(mockPayload)
+                        addHeader("Content-Type", ContentType.Application.Json.toString())
+                    }
+                ) {
                     response.status()?.value shouldBeEqualTo HttpStatusCode.BadRequest.value
                 }
             }
-
-
         }
     }
 })
