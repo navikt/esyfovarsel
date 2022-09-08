@@ -50,6 +50,9 @@ spec:
       rules:
         - application: digdir-krr-proxy
         - application: security-token-service
+        - application: syfooppdfgen
+          namespace: team-esyfo
+          cluster: prod-gcp
         - application: syfosmregister
           namespace: teamsykmelding
           cluster: prod-gcp
