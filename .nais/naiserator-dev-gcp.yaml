@@ -82,7 +82,6 @@ spec:
         pointInTimeRecovery: true
         tier: db-f1-micro
         type: POSTGRES_13
-  webproxy: true
   ingresses:
     - "https://esyfovarsel.dev.intern.nav.no"
   kafka:
