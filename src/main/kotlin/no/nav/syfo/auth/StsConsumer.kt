@@ -1,5 +1,6 @@
 package no.nav.syfo.auth
 
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import no.nav.syfo.AuthEnv
@@ -24,11 +25,11 @@ open class StsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv): TokenConsumer {
             return token!!.access_token
         }
 
-        token = client.post<Token>(stsEndpointUrl) {
-            headers{
+        token = client.post(stsEndpointUrl) {
+            headers {
                 append(HttpHeaders.Authorization, encodeCredentials(username, password))
             }
-        }
+        }.body<Token>()
 
         return token!!.access_token
     }

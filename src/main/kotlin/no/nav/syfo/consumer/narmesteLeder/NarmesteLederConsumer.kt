@@ -20,7 +20,7 @@ class NarmesteLederConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: Az
         val requestURL = "$basepath/sykmeldt/narmesteleder?orgnummer=$orgnummer"
         try {
             val token = azureAdTokenConsumer.getToken(scope)
-            val response = client.get<HttpResponse>(requestURL) {
+            val response = client.get(requestURL) {
                 headers {
                     append(HttpHeaders.Accept, ContentType.Application.Json)
                     append(HttpHeaders.ContentType, ContentType.Application.Json)
@@ -31,7 +31,7 @@ class NarmesteLederConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: Az
 
             return when (response.status) {
                 HttpStatusCode.OK -> {
-                    response.receive<NarmestelederResponse>()
+                    response.body<NarmestelederResponse>()
                 }
                 HttpStatusCode.Unauthorized -> {
                     log.error("Could not get nærmeste leder: Unable to authorize")

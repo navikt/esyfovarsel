@@ -21,18 +21,18 @@ class SykmeldingerConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: Azu
         val requestBody = SykmeldtStatusRequest(fnr, dato)
         val token = azureAdTokenConsumer.getToken(scope)
 
-        val response = client.post<HttpResponse>(requestURL) {
+        val response = client.post(requestURL) {
             headers {
                 append(HttpHeaders.Accept, ContentType.Application.Json)
                 append(HttpHeaders.ContentType, ContentType.Application.Json)
                 append(HttpHeaders.Authorization, "Bearer $token")
             }
-            body = requestBody
+            setBody(requestBody)
         }
 
         return when (response.status) {
             HttpStatusCode.OK -> {
-                response.receive<SykmeldtStatusResponse>()
+                response.body<SykmeldtStatusResponse>()
             }
             HttpStatusCode.Unauthorized -> {
                 log.error("Could not get sykmeldinger from syfosmregister: Unable to authorize")

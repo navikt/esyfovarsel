@@ -4,20 +4,22 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.apache.*
-import io.ktor.client.features.json.*
-import io.ktor.client.request.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.get
+import io.ktor.serialization.jackson.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.AuthEnv
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import java.net.ProxySelector
 
 val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
-    install(JsonFeature) {
-        serializer = JacksonSerializer {
+    install(ContentNegotiation) {
+        jackson {
             registerKotlinModule()
             registerModule(JavaTimeModule())
             configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
@@ -31,7 +33,7 @@ val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
     }
 }
 
-fun getWellKnown(wellKnownUrl: String) = runBlocking { HttpClient(Apache, proxyConfig).get<WellKnown>(wellKnownUrl) }
+fun getWellKnown(wellKnownUrl: String) = runBlocking { HttpClient(Apache, proxyConfig).get(wellKnownUrl).body<WellKnown>() }
 
 fun hasLoginserviceIdportenClientIdAudience(credentials: JWTCredential, loginserviceIdportenClientId: List<String>): Boolean {
     val isValid = loginserviceIdportenClientId.any { credentials.payload.audience.contains(it) }

@@ -1,7 +1,7 @@
 package no.nav.syfo.api
 
 import io.ktor.http.*
-import io.ktor.routing.*
+import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import no.nav.syfo.ApplicationState
 import org.amshove.kluent.shouldBeEqualTo

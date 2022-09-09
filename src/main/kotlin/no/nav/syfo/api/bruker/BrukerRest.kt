@@ -1,11 +1,11 @@
 package no.nav.syfo.api.bruker
 
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.http.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.service.VarselSendtService
 import org.slf4j.LoggerFactory

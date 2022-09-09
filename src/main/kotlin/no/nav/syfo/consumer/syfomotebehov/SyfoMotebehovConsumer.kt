@@ -20,13 +20,13 @@ open class SyfoMotebehovConsumer(urlEnv: UrlEnv, private val tokenConsumer: Toke
             val bearerTokenString = "Bearer $stsAccessToken"
             val requestBody = MotebehovsvarVarselInfo(aktorId, orgnummer, narmesteLederFnr, arbeidstakerFnr)
 
-            val response = client.post<HttpResponse>(requestURL) {
+            val response = client.post(requestURL) {
                 headers {
                     append(HttpHeaders.Authorization, bearerTokenString)
                     append(HttpHeaders.Accept, ContentType.Application.Json)
                     append(HttpHeaders.ContentType, ContentType.Application.Json)
                 }
-                body = requestBody
+                setBody(requestBody)
             }
 
             if (response.status != HttpStatusCode.OK) {
@@ -42,13 +42,13 @@ open class SyfoMotebehovConsumer(urlEnv: UrlEnv, private val tokenConsumer: Toke
             val bearerTokenString = "Bearer $stsAccessToken"
             val requestBody = MotebehovsvarSykmeldtVarselInfo(aktorId, arbeidstakerFnr)
 
-            val response = client.post<HttpResponse>(requestURL) {
+            val response = client.post(requestURL) {
                 headers {
                     append(HttpHeaders.Authorization, bearerTokenString)
                     append(HttpHeaders.Accept, ContentType.Application.Json)
                     append(HttpHeaders.ContentType, ContentType.Application.Json)
                 }
-                body = requestBody
+                setBody(requestBody)
             }
 
             if (response.status != HttpStatusCode.OK) {

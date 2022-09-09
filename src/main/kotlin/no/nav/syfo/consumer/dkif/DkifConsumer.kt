@@ -20,7 +20,7 @@ class DkifConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: TokenC
         return runBlocking {
             val access_token = "Bearer ${tokenConsumer.getToken(urlEnv.dkifScope)}"
             val response: HttpResponse? = try {
-                client.get<HttpResponse>(urlEnv.dkifUrl) {
+                client.get(urlEnv.dkifUrl) {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, access_token)
@@ -35,7 +35,7 @@ class DkifConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: TokenC
             }
             when (response?.status) {
                 HttpStatusCode.OK -> {
-                    val rawJson: String = response.receive()
+                    val rawJson: String = response.body()
                     KontaktinfoMapper.map(rawJson, aktorId)
                 }
                 HttpStatusCode.Unauthorized -> {
@@ -54,7 +54,7 @@ class DkifConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: TokenC
         return runBlocking {
             val access_token = "Bearer ${tokenConsumer.getToken(urlEnv.dkifScope)}"
             val response: HttpResponse? = try {
-                client.get<HttpResponse>(urlEnv.dkifUrl) {
+                client.get(urlEnv.dkifUrl) {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, access_token)
@@ -68,7 +68,7 @@ class DkifConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: TokenC
             }
             when (response?.status) {
                 HttpStatusCode.OK -> {
-                    val rawJson: String = response.receive()
+                    val rawJson: String = response.body()
                     KontaktinfoMapper.mapPerson(rawJson)
                 }
                 HttpStatusCode.Unauthorized -> {

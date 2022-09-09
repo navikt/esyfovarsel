@@ -25,17 +25,17 @@ class PdfgenConsumer(urlEnv: UrlEnv) {
 
         return runBlocking {
             try {
-                val response = client.post<HttpResponse>(merVeiledningPdfUrl) {
+                val response = client.post(merVeiledningPdfUrl) {
                     headers {
                         append(HttpHeaders.Accept, ContentType.Application.Json)
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                     }
-                    body = request
+                    setBody(request)
                 }
 
                 when (response.status) {
                     HttpStatusCode.OK -> {
-                        response.receive<ByteArray>()
+                        response.body<ByteArray>()
                     }
                     else -> {
                         log.error("Could not get PDF byte array from syfooppdfgen: $response")

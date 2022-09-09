@@ -1,9 +1,9 @@
 package no.nav.syfo.api
 
-import io.ktor.application.*
-import io.ktor.features.*
 import io.ktor.http.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.mockk.coEvery
 import io.mockk.mockk

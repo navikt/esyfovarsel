@@ -1,10 +1,10 @@
 package no.nav.syfo.auth
 
 import com.auth0.jwk.JwkProviderBuilder
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
+import io.ktor.server.routing.*
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.api.admin.registerAdminApi
 import no.nav.syfo.api.bruker.registerBrukerApi

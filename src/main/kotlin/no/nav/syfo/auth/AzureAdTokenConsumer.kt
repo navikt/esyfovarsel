@@ -8,11 +8,12 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.apache.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import no.nav.syfo.AuthEnv
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.Logger
@@ -27,9 +28,9 @@ class AzureAdTokenConsumer(authEnv: AuthEnv) : TokenConsumer {
     private val log: Logger = LoggerFactory.getLogger("AzureAdTokenConsumer")
 
     val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
-        install(JsonFeature) {
+        install(ContentNegotiation) {
             expectSuccess = false
-            serializer = JacksonSerializer {
+            jackson {
                 registerKotlinModule()
                 registerModule(JavaTimeModule())
                 configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
@@ -60,20 +61,20 @@ class AzureAdTokenConsumer(authEnv: AuthEnv) : TokenConsumer {
         if (token == null || token.issuedOn!!.plusSeconds(token.expires_in).isBefore(omToMinutter)) {
             log.info("Henter nytt token fra Azure AD for scope : $resource")
 
-            val response = httpClientWithProxy.post<HttpResponse>(aadAccessTokenUrl) {
+            val response = httpClientWithProxy.post(aadAccessTokenUrl) {
                 accept(ContentType.Application.Json)
 
-                body = FormDataContent(
+                setBody(FormDataContent(
                     Parameters.build {
                         append("client_id", clientId)
                         append("scope", resource!!)
                         append("grant_type", "client_credentials")
                         append("client_secret", clientSecret)
                     }
-                )
+                ))
             }
             if (response.status == HttpStatusCode.OK) {
-                tokenMap[resource!!] = response.receive()
+                tokenMap[resource!!] = response.body()
             } else {
                 log.error("Could not get token from Azure AD: $response")
             }

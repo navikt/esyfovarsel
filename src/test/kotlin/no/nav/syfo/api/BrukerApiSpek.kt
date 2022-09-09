@@ -1,12 +1,13 @@
 package no.nav.syfo.api
 
 import com.auth0.jwt.interfaces.Payload
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
-import io.ktor.features.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
+import io.ktor.serialization.jackson.*
+import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.http.*
-import io.ktor.routing.*
+import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.mockk.coEvery
 import io.mockk.mockk

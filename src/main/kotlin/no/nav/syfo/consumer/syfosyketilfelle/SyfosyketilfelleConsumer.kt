@@ -22,7 +22,7 @@ open class SyfosyketilfelleConsumer(urlEnv: UrlEnv, private val tokenConsumer: T
         val stsAccessToken = tokenConsumer.getToken(null)
         val bearerTokenString = "Bearer $stsAccessToken"
 
-        val response = client.get<HttpResponse>(requestURL) {
+        val response: HttpResponse = client.get(requestURL) {
             headers {
                 append(HttpHeaders.Authorization, bearerTokenString)
                 append(HttpHeaders.Accept, ContentType.Application.Json)
@@ -31,7 +31,7 @@ open class SyfosyketilfelleConsumer(urlEnv: UrlEnv, private val tokenConsumer: T
 
         return when (response.status) {
             HttpStatusCode.OK -> {
-                response.receive<OppfolgingstilfellePerson>()
+                response.body<OppfolgingstilfellePerson>()
             }
             HttpStatusCode.NoContent -> {
                 log.info("Could not get oppfolgingstilfelle: No content found in the response body")
@@ -53,7 +53,7 @@ open class SyfosyketilfelleConsumer(urlEnv: UrlEnv, private val tokenConsumer: T
         val stsAccessToken = tokenConsumer.getToken(null)
         val bearerTokenString = "Bearer $stsAccessToken"
 
-        val response = client.get<HttpResponse>(requestURL) {
+        val response = client.get(requestURL) {
             headers {
                 append(HttpHeaders.Authorization, bearerTokenString)
                 append(HttpHeaders.Accept, ContentType.Application.Json)
@@ -62,7 +62,7 @@ open class SyfosyketilfelleConsumer(urlEnv: UrlEnv, private val tokenConsumer: T
 
         return when (response.status) {
             HttpStatusCode.OK -> {
-                response.receive<Oppfolgingstilfelle39Uker>()
+                response.body<Oppfolgingstilfelle39Uker>()
             }
             HttpStatusCode.NoContent -> {
                 log.info("Could not get Oppfolgingstilfelle (39 uker): No content found in the response body")

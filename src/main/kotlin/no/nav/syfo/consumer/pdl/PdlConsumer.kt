@@ -23,8 +23,8 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: To
         return when (response?.status) {
             HttpStatusCode.OK -> {
                 runBlocking {
-                    val pdlResponse = response.receive<PdlIdentResponse>().data?.hentIdenter?.identer?.first()?.ident
-                    pdlResponse
+                    val pdlResponse: PdlIdentResponse = response.body()
+                    pdlResponse.data?.hentIdenter?.identer?.first()?.ident
                 }
             }
             HttpStatusCode.NoContent -> {
@@ -47,7 +47,9 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: To
 
         return when (response?.status) {
             HttpStatusCode.OK -> {
-                runBlocking { response.receive<PdlPersonResponse>().data?.isKode6Eller7() }
+                runBlocking {
+                    response.body<PdlPersonResponse>().data?.isKode6Eller7()
+                }
             }
             HttpStatusCode.NoContent -> {
                 log.error("Could not get adressesperre from PDL: No content found in the response body")
@@ -70,8 +72,7 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: To
         return when (response?.status) {
             HttpStatusCode.OK -> {
                 runBlocking {
-                    val pdlResponse = response.receive<PdlPersonResponse>().data
-                    pdlResponse
+                    response.body<PdlPersonResponse>().data
                 }
             }
             HttpStatusCode.NoContent -> {
@@ -99,7 +100,7 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: To
                     ?: throw FileNotFoundException("Could not found resource: $graphQueryResourcePath")
             val requestBody = PdlRequest(graphQuery, Variables(ident))
             try {
-                client.post<HttpResponse>(urlEnv.pdlUrl) {
+                client.post(urlEnv.pdlUrl) {
                     headers {
                         append(TEMA_HEADER, OPPFOLGING_TEMA_HEADERVERDI)
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
@@ -110,7 +111,7 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: To
                             append(NAV_CONSUMER_TOKEN_HEADER, bearerTokenString)
                         }
                     }
-                    body = requestBody
+                    setBody(requestBody)
                 }
             } catch (e: Exception) {
                 log.error("Error while calling PDL ($service): ${e.message}", e)

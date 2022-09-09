@@ -23,7 +23,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
         val response: HttpResponse? = callArbeidsgiverNotifikasjonProdusent(arbeidsgiverNotifikasjon)
         return when (response?.status) {
             HttpStatusCode.OK -> {
-                val beskjed = runBlocking { response.receive<OpprettNyBeskjedArbeidsgiverNotifikasjonResponse>() }
+                val beskjed: OpprettNyBeskjedArbeidsgiverNotifikasjonResponse = runBlocking { response.body() }
                 return if (beskjed.data !== null) {
                     if (beskjed.data.nyBeskjed.__typename?.let { OpprettNyBeskjedArbeidsgiverNotifikasjonMutationStatus.NY_BESKJED_VELLYKKET.status.equals(it) } == true) {
                         log.info("Have send new notification with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api")
@@ -33,8 +33,8 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
                         null
                     }
                 } else {
-                    val errors = runBlocking { response.receive<OpprettNyBeskjedArbeidsgiverNotifikasjonErrorResponse>().errors }
-                    log.error("Could not send notification because of error: ${errors[0].message}, data was null: $beskjed")
+                    val errorPart: OpprettNyBeskjedArbeidsgiverNotifikasjonErrorResponse = runBlocking { response.body() }
+                    log.error("Could not send notification because of error: ${errorPart.errors[0].message}, data was null: $beskjed")
                     null
                 }
             }
@@ -77,13 +77,13 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
             val requestBody = CreateNewNotificationAgRequest(graphQuery, variables)
 
             try {
-                client.post<HttpResponse>(arbeidsgiverNotifikasjonProdusentBasepath) {
+                client.post(arbeidsgiverNotifikasjonProdusentBasepath) {
                     headers {
                         append(HttpHeaders.Accept, ContentType.Application.Json)
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, "Bearer $token")
                     }
-                    body = requestBody
+                    setBody(requestBody)
                 }
             } catch (e: Exception) {
                 log.error("Error while calling ag-notifikasjon-produsent-api ($CREATE_NOTIFICATION_AG_MUTATION): ${e.message}", e)

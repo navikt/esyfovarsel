@@ -26,17 +26,17 @@ class DokarkivConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAd
     suspend fun postDocumentToDokarkiv(request: DokarkivRequest): DokarkivResponse? {
         try {
             val token = azureAdTokenConsumer.getToken(dokarkivScope)
-            val response = client.post<HttpResponse>(requestURL) {
+            val response = client.post(requestURL) {
                 parameter(JOURNALPOST_PARAM_STRING, JOURNALPOST_PARAM_VALUE)
                 header(HttpHeaders.Authorization, "Bearer $token")
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
-                body = request
+                setBody(request)
             }
             return when (response.status) {
                 HttpStatusCode.Created -> {
                     log.info("Sending to dokarkiv successful, journalpost created")
-                    response.receive<DokarkivResponse>()
+                    response.body<DokarkivResponse>()
                 }
                 HttpStatusCode.Unauthorized -> {
                     log.error("Failed to post document to Dokarkiv: Unable to authorize")

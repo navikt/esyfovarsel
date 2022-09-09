@@ -26,19 +26,19 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
 
         return runBlocking {
             try {
-                val response = client.post<HttpResponse>(requestURL) {
+                val response = client.post(requestURL) {
                     headers {
                         append(HttpHeaders.Accept, ContentType.Application.Json)
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, "Bearer $token")
                     }
-                    body = request
+                    setBody(request)
                 }
 
                 when (response.status) {
                     HttpStatusCode.OK -> {
                         log.info("Sent document to print")
-                        response.receive<JournalpostdistribusjonResponse>()
+                        response.body<JournalpostdistribusjonResponse>()
                     }
                     HttpStatusCode.Unauthorized -> {
                         log.error("Failed to send document to print: Unable to authorize, journalpostId: $journalpostId")
