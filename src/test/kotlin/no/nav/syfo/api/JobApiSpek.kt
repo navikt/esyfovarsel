@@ -21,10 +21,7 @@ import no.nav.syfo.getTestEnv
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
-import no.nav.syfo.service.AccessControlService
-import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
-import no.nav.syfo.service.DokarkivService
-import no.nav.syfo.service.SendVarselService
+import no.nav.syfo.service.*
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.*
 import no.nav.syfo.util.contentNegotationFeature
@@ -49,6 +46,7 @@ object JobApiSpek : Spek({
         val syfoMotebeovConsumer = mockk<SyfoMotebehovConsumer>()
         val journalpostdistribusjonConsumer = mockk<JournalpostdistribusjonConsumer>()
         val dokarkivService = mockk<DokarkivService>()
+        val merVeiledningVarselService = mockk<MerVeiledningVarselService>()
 
         coEvery { accessControlService.getUserAccessStatusByFnr(fnr1) } returns userAccessStatus1
         coEvery { accessControlService.getUserAccessStatusByFnr(fnr2) } returns userAccessStatus2
@@ -74,8 +72,7 @@ object JobApiSpek : Spek({
                 testEnv.appEnv,
                 syfoMotebeovConsumer,
                 arbeidsgiverNotifikasjonService,
-                journalpostdistribusjonConsumer,
-                dokarkivService,
+                merVeiledningVarselService
             )
         val varselSender = VarselSender(embeddedDatabase, sendVarselService, testEnv.toggleEnv)
 
@@ -98,8 +95,8 @@ object JobApiSpek : Spek({
 
                 with(handleRequest(HttpMethod.Post, urlPathJobTrigger)) {
                     response.status()?.isSuccess() shouldBeEqualTo true
-                    verify(exactly = 2) { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) }
-                    verify(exactly = 1) { runBlocking { dokarkivService.getJournalpostId(any(), any()) } }
+                    verify(exactly = 2) { merVeiledningVarselService.sendVarselTilArbeidstaker(any(), any(), any()) }
+                    verify(exactly = 1) { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) }
                 }
             }
         }

@@ -32,6 +32,7 @@ const val topicDineSykmeldteHendelse = "teamsykmelding.dinesykmeldte-hendelser-v
 const val topicVarselBus = "team-esyfo.varselbus"
 const val topicSykepengedagerInfotrygd = "aap.sykepengedager.infotrygd.v1"
 const val topicUtbetaling = "tbd.utbetaling"
+const val topicDittSykefravaerMelding = "flex.ditt-sykefravaer-melding"
 
 const val JAVA_KEYSTORE = "JKS"
 const val PKCS12 = "PKCS12"
@@ -92,7 +93,7 @@ fun consumerProperties(env: Environment): Properties {
     return properties
 }
 
-fun producerProperties(env: Environment) : Properties {
+fun producerProperties(env: Environment): Properties {
     val sslConfig = env.kafkaEnv.sslConfig
     val schemaRegistryConfig = env.kafkaEnv.schemaRegistry
     val userinfoConfig = "${schemaRegistryConfig.username}:${schemaRegistryConfig.password}"

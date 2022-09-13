@@ -13,7 +13,6 @@ class DokarkivService(val dokarkivConsumer: DokarkivConsumer, val pdfgenConsumer
     suspend fun getJournalpostId(fnr: String, uuid: String): String? {
         val mottakerNavn = pdlConsumer.hentPerson(fnr)?.getFullNameAsString()
         val pdf = pdfgenConsumer.getMerVeiledningPDF(mottakerNavn, null)
-
         val dokarkivRequest = pdf?.let { createDokarkivRequest(fnr, pdf, uuid) }
 
         return dokarkivRequest?.let { dokarkivConsumer.postDocumentToDokarkiv(dokarkivRequest)?.journalpostId.toString() }
