@@ -3,7 +3,6 @@ package no.nav.syfo.kafka.consumers.infotrygd
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
-import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.kafka.common.*
 import no.nav.syfo.kafka.consumers.infotrygd.domain.KInfotrygdSykepengedager
 import no.nav.syfo.service.AccessControlService
@@ -12,7 +11,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
 
-class SykepengedagerInfotrygdKafkaConsumer(
+class InfotrygdKafkaConsumer(
     val env: Environment,
     val accessControlService: AccessControlService,
 ) : KafkaListener {
