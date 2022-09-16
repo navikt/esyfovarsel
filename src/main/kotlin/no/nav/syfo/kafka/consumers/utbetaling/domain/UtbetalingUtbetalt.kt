@@ -6,7 +6,7 @@ data class UtbetalingUtbetalt(
     val event: String,
     val utbetalingId: String,
     val fødselsnummer: String,
-    val aktørId: String,
+    val aktørId: String?,
     val organisasjonsnummer: String,
     val fom: LocalDate,
     val tom: LocalDate,
