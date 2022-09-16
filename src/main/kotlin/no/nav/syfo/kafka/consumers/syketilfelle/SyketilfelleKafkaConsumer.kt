@@ -47,7 +47,7 @@ class SyketilfelleKafkaConsumer(
                                 if (planner.varselSkalLagres(userAccessStatus)) {
                                     it.processSyketilfelle(sykmeldtFnr, kSyketilfellebit.orgnummer)
                                 } else {
-                                    log.info("Prosesserer ikke varsel pga bruker med forespurt fnr er reservert og/eller gradert")
+                                    log.info("Prosesserer ikke record fra $topicFlexSyketilfellebiter pga bruker med forespurt fnr er reservert og/eller gradert")
                                 }
                             }
                         }

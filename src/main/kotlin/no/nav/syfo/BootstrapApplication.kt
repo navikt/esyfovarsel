@@ -18,10 +18,7 @@ import kotlinx.coroutines.launch
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.*
 import no.nav.syfo.consumer.LocalPdlConsumer
-import no.nav.syfo.consumer.syfosyketilfelle.LocalSyfosyketilfelleConsumer
 import no.nav.syfo.consumer.PdlConsumer
-import no.nav.syfo.consumer.syfosyketilfelle.SyfosyketilfelleConsumer
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
 import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.dokarkiv.DokarkivConsumer
@@ -30,19 +27,26 @@ import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
 import no.nav.syfo.consumer.syfomotebehov.SyfoMotebehovConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
-import no.nav.syfo.db.*
+import no.nav.syfo.consumer.syfosyketilfelle.LocalSyfosyketilfelleConsumer
+import no.nav.syfo.consumer.syfosyketilfelle.SyfosyketilfelleConsumer
+import no.nav.syfo.db.Database
+import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.LocalDatabase
+import no.nav.syfo.db.RemoteDatabase
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.job.sendNotificationsJob
 import no.nav.syfo.kafka.common.launchKafkaListener
+import no.nav.syfo.kafka.consumers.infotrygd.SykepengedagerInfotrygdKafkaConsumer
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.kafka.consumers.syketilfelle.SyketilfelleKafkaConsumer
 import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
+import no.nav.syfo.planner.*
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.service.*
 import no.nav.syfo.syketilfelle.SyketilfellebitService
-import no.nav.syfo.planner.*
 import no.nav.syfo.utils.LeaderElection
 import no.nav.syfo.utils.RunOnElection
 import java.util.concurrent.Executors
@@ -276,7 +280,7 @@ fun Application.kafkaModule(
                     OppfolgingstilfelleKafkaConsumer(env, accessControlService)
                         .addPlanner(aktivitetskravVarselPlanner)
                         .addPlanner(merVeiledningVarselPlanner)
-                        .addPlanner(svarMotebehovVarselPlanner)
+                        .addPlanner(svarMotebehovVarselPlanner),
                 )
             }
         }
@@ -290,6 +294,7 @@ fun Application.kafkaModule(
                         .addPlanner(aktivitetskravVarselPlannerSyketilfellebit)
                         .addPlanner(svarMotebehovVarselPlannerSyketilfellebit)
                 )
+                launchKafkaListener(state, SykepengedagerInfotrygdKafkaConsumer(env, accessControlService))
             }
         }
     }
