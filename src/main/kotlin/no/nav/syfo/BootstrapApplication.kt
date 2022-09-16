@@ -295,7 +295,7 @@ fun Application.kafkaModule(
         }
 
         runningInGCPCluster {
-            if (env.toggleEnv.toggleUtbetalingConsumer) {
+            if (env.toggleEnv.toggleUtbetalingKafkaConsumer) {
                 launch(backgroundTasksContext) {
                     launchKafkaListener(
                         state,

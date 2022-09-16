@@ -28,7 +28,7 @@ class UtbetalingKafkaConsumer(
         log.info("Started listening to topic $topicUtbetaling")
         while (applicationState.running) {
             kafkaListener.poll(zeroMillis).forEach {
-                log.info("Mottok melding ${it.key()} fra topic $topicUtbetaling")
+                log.info("Received message ${it.key()} from topic $topicUtbetaling")
                 try {
                     val utbetaling: UtbetalingUtbetalt = objectMapper.readValue(it.value())
                     log.info("Utbetaling content: {}", utbetaling)
