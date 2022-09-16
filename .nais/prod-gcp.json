@@ -13,6 +13,7 @@
     "TOGGLE_SEND_MERVEILEDNING_VARSLER": "true",
     "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "true",
     "TOGGLE_SEND_SVAR_MOTEBEHOV_VARSLER": "false",
+    "TOGGLE_UTBETALING_CONSUMER": "false",
     "BASE_URL_SYK_INFO": "https://www.nav.no/syk/info",
     "BASE_URL_DIALOGMOTER": "https://www.nav.no/syk/dialogmoter",
     "AG_NOTIFIKASJON_PRODUSENT_API_URL": "https://ag-notifikasjon-produsent-api.intern.nav.no/api/graphql",
