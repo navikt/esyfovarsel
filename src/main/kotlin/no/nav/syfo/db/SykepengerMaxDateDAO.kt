@@ -6,9 +6,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-fun DatabaseInterface.storeMaxDate(maxDate: LocalDate, fnr: String, source: String) {
+fun DatabaseInterface.storeSykepengerMaxDate(sykepengerMaxDate: LocalDate, fnr: String, source: String) {
     val now = LocalDateTime.now()
-    val insertStatement = """INSERT INTO MAX_DATE (
+    val insertStatement = """INSERT INTO SYKEPENGER_MAX_DATE  (
         uuid, 
         fnr, 
         max_date, 
@@ -20,7 +20,7 @@ fun DatabaseInterface.storeMaxDate(maxDate: LocalDate, fnr: String, source: Stri
         connection.prepareStatement(insertStatement).use {
             it.setObject(1, UUID.randomUUID())
             it.setString(2, fnr)
-            it.setDate(3, Date.valueOf(maxDate))
+            it.setDate(3, Date.valueOf(sykepengerMaxDate))
             it.setTimestamp(4, Timestamp.valueOf(now))
             it.setTimestamp(5, Timestamp.valueOf(now))
             it.setString(6, source)
@@ -30,8 +30,8 @@ fun DatabaseInterface.storeMaxDate(maxDate: LocalDate, fnr: String, source: Stri
     }
 }
 
-fun DatabaseInterface.updateMaxDateByFnr(maxDate: LocalDate, fnr: String, source: String) {
-    val updateStatement = """UPDATE MAX_DATE
+fun DatabaseInterface.updateMaxDateByFnr(sykepengerMaxDate: LocalDate, fnr: String, source: String) {
+    val updateStatement = """UPDATE SYKEPENGER_MAX_DATE 
                              SET SOURCE = ?,
                                  MAX_DATE = ?,
                                  SIST_ENDRET = ?
@@ -41,7 +41,7 @@ fun DatabaseInterface.updateMaxDateByFnr(maxDate: LocalDate, fnr: String, source
     connection.use { connection ->
         connection.prepareStatement(updateStatement).use {
             it.setString(1, source)
-            it.setDate(2, Date.valueOf(maxDate))
+            it.setDate(2, Date.valueOf(sykepengerMaxDate))
             it.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()))
             it.setString(4, fnr)
             it.executeUpdate()
@@ -51,7 +51,7 @@ fun DatabaseInterface.updateMaxDateByFnr(maxDate: LocalDate, fnr: String, source
 }
 
 fun DatabaseInterface.fetchMaxDateByFnr(fnr: String): LocalDate {
-    val fetchStatement = """SELECT *  FROM MAX_DATE WHERE FNR = ?""".trimIndent()
+    val fetchStatement = """SELECT *  FROM SYKEPENGER_MAX_DATE  WHERE FNR = ?""".trimIndent()
 
     return connection.use { connection ->
         connection.prepareStatement(fetchStatement).use {
@@ -62,7 +62,7 @@ fun DatabaseInterface.fetchMaxDateByFnr(fnr: String): LocalDate {
 }
 
 fun DatabaseInterface.deleteMaxDateByFnr(fnr: String) {
-    val deleteStatement = """DELETE FROM MAX_DATE WHERE fnr = ?""".trimIndent()
+    val deleteStatement = """DELETE FROM SYKEPENGER_MAX_DATE  WHERE fnr = ?""".trimIndent()
 
     connection.use { connection ->
         connection.prepareStatement(deleteStatement).use {
