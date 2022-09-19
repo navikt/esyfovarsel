@@ -106,6 +106,7 @@ fun main() {
                 val senderFacade = SenderFacade(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService, arbeidsgiverNotifikasjonService, database)
                 val motebehovVarselService = MotebehovVarselService(senderFacade, env.urlEnv.dialogmoterUrl)
                 val oppfolgingsplanVarselService = OppfolgingsplanVarselService(senderFacade)
+                val sykepengerMaxDateService = SykepengerMaxDateService(database)
 
                 val syfoMotebehovConsumer = SyfoMotebehovConsumer(env.urlEnv, stsConsumer)
 
@@ -138,7 +139,8 @@ fun main() {
                         merVeiledningVarselPlanner,
                         merVeiledningVarselPlannerSyketilfellebit,
                         svarMotebehovVarselPlanner,
-                        svarMotebehovVarselPlannerSyketilfellebit
+                        svarMotebehovVarselPlannerSyketilfellebit,
+                        sykepengerMaxDateService,
                     )
 
                     varselBusModule(
@@ -267,7 +269,8 @@ fun Application.kafkaModule(
     merVeiledningVarselPlanner: MerVeiledningVarselPlannerOppfolgingstilfelle,
     merVeiledningVarselPlannerSyketilfellebit: MerVeiledningVarselPlannerSyketilfellebit,
     svarMotebehovVarselPlanner: SvarMotebehovVarselPlannerOppfolgingstilfelle,
-    svarMotebehovVarselPlannerSyketilfellebit: SvarMotebehovVarselPlannerSyketilfellebit
+    svarMotebehovVarselPlannerSyketilfellebit: SvarMotebehovVarselPlannerSyketilfellebit,
+    sykepengerMaxDateService: SykepengerMaxDateService
 ) {
     runningRemotely {
 
@@ -311,7 +314,7 @@ fun Application.kafkaModule(
                 launch(backgroundTasksContext) {
                     launchKafkaListener(
                         state,
-                        UtbetalingKafkaConsumer(env)
+                        UtbetalingKafkaConsumer(env, sykepengerMaxDateService)
                     )
                 }
             }

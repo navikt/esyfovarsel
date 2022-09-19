@@ -37,10 +37,15 @@ object MaxDateDAOSpek : Spek({
             embeddedDatabase.updateMaxDateByFnr(sykepengerMaxDate.plusDays(1), arbeidstakerFnr1, "Spleis")
             embeddedDatabase.shouldContainMaxDate(arbeidstakerFnr1, sykepengerMaxDate.plusDays(1))
         }
+
+        it("Should return null for non-existing fnr") {
+            val nonExistingMaxDate = embeddedDatabase.fetchMaxDateByFnr(arbeidstakerFnr2)
+            nonExistingMaxDate.should { this == null }
+        }
     }
 })
 
 private fun DatabaseInterface.shouldContainMaxDate(fnr: String, maxDate: LocalDate) =
     this.should("Skal ha rad med forespurt fnr") {
-        this.fetchMaxDateByFnr(fnr).equals(maxDate)
+        this.fetchMaxDateByFnr(fnr)!! == maxDate
     }

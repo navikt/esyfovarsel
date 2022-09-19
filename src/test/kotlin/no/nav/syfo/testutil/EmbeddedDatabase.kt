@@ -29,12 +29,14 @@ fun Connection.dropData() {
     val query2 = "DELETE FROM SYKMELDING_IDS"
     val query3 = "DELETE FROM UTSENDT_VARSEL"
     val query4 = "DELETE FROM SYKETILFELLEBIT"
+    val query5 = "DELETE FROM SYKEPENGER_MAX_DATE"
 
     use { connection ->
         connection.prepareStatement(query1).executeUpdate()
         connection.prepareStatement(query2).executeUpdate()
         connection.prepareStatement(query3).executeUpdate()
         connection.prepareStatement(query4).executeUpdate()
+        connection.prepareStatement(query5).executeUpdate()
         connection.commit()
     }
 }

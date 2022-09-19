@@ -5,14 +5,16 @@ import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.*
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
+import no.nav.syfo.service.SykepengerMaxDateService
+import no.nav.syfo.service.SykepengerMaxDateSource
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
 
 class UtbetalingKafkaConsumer(
-    env: Environment,
-//    val somethingService: SomethingService
+    val env: Environment,
+    private val sykepengerMaxDateService: SykepengerMaxDateService
 ) : KafkaListener {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.UtbetalingKafkaConsumer")
     private val kafkaListener: KafkaConsumer<String, String>
@@ -31,8 +33,7 @@ class UtbetalingKafkaConsumer(
                 log.info("Received message ${it.key()} from topic $topicUtbetaling")
                 try {
                     val utbetaling: UtbetalingUtbetalt = objectMapper.readValue(it.value())
-                    log.info("Utbetaling content: {}", utbetaling)
-//                    somethingService.processUtbetalingMelding(utbetaling)
+                    sykepengerMaxDateService.saveOrUpdateSykepengerMaxDate(utbetaling.fødselsnummer, utbetaling.foreløpigBeregnetSluttPåSykepenger, SykepengerMaxDateSource.SPLEIS)
                 } catch (e: IOException) {
                     log.error(
                         "Error in [$topicUtbetaling]-listener: Could not parse message | ${e.message}",
