@@ -43,7 +43,7 @@ class InfotrygdKafkaConsumer(
                     val userAccess = accessControlService.getUserAccessStatusByFnr(fnr)
 
                     if (userAccess.canUserBePhysicallyNotified || userAccess.canUserBeDigitallyNotified) { //TODO: Implement planner and use it's check for access status
-                        sykepengerMaxDateService.saveOrUpdateSykepengerMaxDate(
+                        sykepengerMaxDateService.processNewMaxDate(
                             fnr,
                             parseDate(sykepengerMaxDate),
                             SykepengerMaxDateSource.INFOTRYGD

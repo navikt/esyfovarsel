@@ -33,7 +33,7 @@ class UtbetalingKafkaConsumer(
                 log.info("Received message ${it.key()} from topic $topicUtbetaling")
                 try {
                     val utbetaling: UtbetalingUtbetalt = objectMapper.readValue(it.value())
-                    sykepengerMaxDateService.saveOrUpdateSykepengerMaxDate(utbetaling.fødselsnummer, utbetaling.foreløpigBeregnetSluttPåSykepenger, SykepengerMaxDateSource.SPLEIS)
+                    sykepengerMaxDateService.processNewMaxDate(utbetaling.fødselsnummer, utbetaling.foreløpigBeregnetSluttPåSykepenger, SykepengerMaxDateSource.SPLEIS)
                 } catch (e: IOException) {
                     log.error(
                         "Error in [$topicUtbetaling]-listener: Could not parse message | ${e.message}",

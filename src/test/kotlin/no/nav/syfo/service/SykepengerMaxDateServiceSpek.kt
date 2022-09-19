@@ -24,7 +24,7 @@ object SykepengerMaxDateServiceSpek : Spek({
         it("Should store new dates") {
             val fiftyDaysFromNow = LocalDate.now().plusDays(50)
 
-            sykepengerMaxDateService.saveOrUpdateSykepengerMaxDate(
+            sykepengerMaxDateService.processNewMaxDate(
                 fnr = "123",
                 sykepengerMaxDate = fiftyDaysFromNow,
                 source = SykepengerMaxDateSource.SPLEIS
@@ -38,7 +38,7 @@ object SykepengerMaxDateServiceSpek : Spek({
             val fiftyDaysFromNow = LocalDate.now().plusDays(50)
             val fourtyDaysFromNow = LocalDate.now().plusDays(40)
 
-            sykepengerMaxDateService.saveOrUpdateSykepengerMaxDate(
+            sykepengerMaxDateService.processNewMaxDate(
                 fnr = "123",
                 sykepengerMaxDate = fiftyDaysFromNow,
                 source = SykepengerMaxDateSource.SPLEIS
@@ -47,7 +47,7 @@ object SykepengerMaxDateServiceSpek : Spek({
             val storedMaxDate = embeddedDatabase.fetchMaxDateByFnr("123");
             assertEquals(fiftyDaysFromNow, storedMaxDate)
 
-            sykepengerMaxDateService.saveOrUpdateSykepengerMaxDate(
+            sykepengerMaxDateService.processNewMaxDate(
                 fnr = "123",
                 sykepengerMaxDate = fourtyDaysFromNow,
                 source = SykepengerMaxDateSource.INFOTRYGD
@@ -58,13 +58,13 @@ object SykepengerMaxDateServiceSpek : Spek({
         }
 
         it("Should delete dates older than today") {
-            sykepengerMaxDateService.saveOrUpdateSykepengerMaxDate(
+            sykepengerMaxDateService.processNewMaxDate(
                 fnr = "123",
                 sykepengerMaxDate = LocalDate.now().minusDays(20),
                 source = SykepengerMaxDateSource.SPLEIS
             )
 
-            sykepengerMaxDateService.saveOrUpdateSykepengerMaxDate(
+            sykepengerMaxDateService.processNewMaxDate(
                 fnr = "123",
                 sykepengerMaxDate = LocalDate.now().minusDays(19),
                 source = SykepengerMaxDateSource.INFOTRYGD
