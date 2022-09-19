@@ -1,16 +1,11 @@
-package no.nav.syfo.planner
+package no.nav.syfo.service
 
 import no.nav.syfo.db.*
 import no.nav.syfo.utils.isEqualOrBefore
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-class MerVeiledningSykepengerMaxDatePlanner(private val databaseInterface: DatabaseInterface) : VarselPlannerMaxDate {
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.planner.MerVeiledningSykepengerMaxDatePlanner")
-    override val name: String = "MER_VEILEDNING_VARSEL_MAX_DATE"
-
-    override fun processNewMaxDate(fnr: String, sykepengerMaxDate: LocalDate, source: SykepengerMaxDateSource) {
+class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface) {
+    fun processNewMaxDate(fnr: String, sykepengerMaxDate: LocalDate, source: SykepengerMaxDateSource) {
         val currentStoredMaxDateForSykmeldt = databaseInterface.fetchMaxDateByFnr(fnr);
 
         if (LocalDate.now().isEqualOrBefore(sykepengerMaxDate)) {

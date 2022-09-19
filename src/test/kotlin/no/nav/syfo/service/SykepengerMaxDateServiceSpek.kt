@@ -1,8 +1,6 @@
-package no.nav.syfo.planner
+package no.nav.syfo.service
 
 import no.nav.syfo.db.fetchMaxDateByFnr
-import no.nav.syfo.planner.MerVeiledningSykepengerMaxDatePlanner
-import no.nav.syfo.planner.SykepengerMaxDateSource
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import org.spekframework.spek2.Spek
@@ -11,9 +9,9 @@ import java.time.LocalDate
 import kotlin.test.assertEquals
 
 object SykepengerMaxDateServiceSpek : Spek({
-    describe("MerVeiledningSykepengerMaxDatePlannerSpek") {
+    describe("SykepengerMaxDateService") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
-        val merVeiledningSykepengerMaxDatePlanner = MerVeiledningSykepengerMaxDatePlanner(embeddedDatabase)
+        val sykepengerMaxDateService = SykepengerMaxDateService(embeddedDatabase)
 
         afterEachTest {
             embeddedDatabase.connection.dropData()
@@ -26,7 +24,7 @@ object SykepengerMaxDateServiceSpek : Spek({
         it("Should store new dates") {
             val fiftyDaysFromNow = LocalDate.now().plusDays(50)
 
-            merVeiledningSykepengerMaxDatePlanner.processNewMaxDate(
+            sykepengerMaxDateService.processNewMaxDate(
                 fnr = "123",
                 sykepengerMaxDate = fiftyDaysFromNow,
                 source = SykepengerMaxDateSource.SPLEIS
@@ -40,7 +38,7 @@ object SykepengerMaxDateServiceSpek : Spek({
             val fiftyDaysFromNow = LocalDate.now().plusDays(50)
             val fourtyDaysFromNow = LocalDate.now().plusDays(40)
 
-            merVeiledningSykepengerMaxDatePlanner.processNewMaxDate(
+            sykepengerMaxDateService.processNewMaxDate(
                 fnr = "123",
                 sykepengerMaxDate = fiftyDaysFromNow,
                 source = SykepengerMaxDateSource.SPLEIS
@@ -49,7 +47,7 @@ object SykepengerMaxDateServiceSpek : Spek({
             val storedMaxDate = embeddedDatabase.fetchMaxDateByFnr("123");
             assertEquals(fiftyDaysFromNow, storedMaxDate)
 
-            merVeiledningSykepengerMaxDatePlanner.processNewMaxDate(
+            sykepengerMaxDateService.processNewMaxDate(
                 fnr = "123",
                 sykepengerMaxDate = fourtyDaysFromNow,
                 source = SykepengerMaxDateSource.INFOTRYGD
@@ -60,13 +58,13 @@ object SykepengerMaxDateServiceSpek : Spek({
         }
 
         it("Should delete dates older than today") {
-            merVeiledningSykepengerMaxDatePlanner.processNewMaxDate(
+            sykepengerMaxDateService.processNewMaxDate(
                 fnr = "123",
                 sykepengerMaxDate = LocalDate.now().minusDays(20),
                 source = SykepengerMaxDateSource.SPLEIS
             )
 
-            merVeiledningSykepengerMaxDatePlanner.processNewMaxDate(
+            sykepengerMaxDateService.processNewMaxDate(
                 fnr = "123",
                 sykepengerMaxDate = LocalDate.now().minusDays(19),
                 source = SykepengerMaxDateSource.INFOTRYGD
