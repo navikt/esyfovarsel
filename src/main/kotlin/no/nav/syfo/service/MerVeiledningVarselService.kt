@@ -70,8 +70,6 @@ class MerVeiledningVarselService(
             log.error("Syketilfelle finnes ikke for varsel med UUID: $uuid. Sender ikke oppgave")
             throw RuntimeException("Uventet null-verdi ved henting av syketilfelle")
         }
-        val test = LocalDateTime.now().plusMinutes(30L).toInstant(ZoneOffset.UTC)
-        log.info("DEBUG: $test")
         val melding = DittSykefravaerMelding(
             OpprettMelding(
                 DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT,
@@ -79,7 +77,7 @@ class MerVeiledningVarselService(
                 Variant.info,
                 false,
                 DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING,
-                test
+                syketilfelleEndDate.atStartOfDay().toInstant(ZoneOffset.UTC)
             ),
             null,
             fnr

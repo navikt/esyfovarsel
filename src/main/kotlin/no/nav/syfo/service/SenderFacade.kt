@@ -39,8 +39,8 @@ class SenderFacade(
         varselHendelse: ArbeidstakerHendelse,
         varsel: DittSykefravaerVarsel
     ) {
-        dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding)
-        lagreUtsendtArbeidstakerVarsel(DITT_SYKEFRAVAER, varselHendelse, varsel.uuid)
+        val eksternUUID = dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding)
+        lagreUtsendtArbeidstakerVarsel(DITT_SYKEFRAVAER, varselHendelse, eksternUUID)
     }
     fun sendTilBrukernotifikasjoner(
         uuid: String,
