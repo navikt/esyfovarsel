@@ -31,6 +31,7 @@ const val topicFlexSyketilfellebiter = "flex.syketilfellebiter"
 const val topicDineSykmeldteHendelse = "teamsykmelding.dinesykmeldte-hendelser-v2"
 const val topicVarselBus = "team-esyfo.varselbus"
 const val topicSykepengedagerInfotrygd = "aap.sykepengedager.infotrygd.v1"
+const val topicUtbetaling = "tbd.utbetaling"
 
 const val JAVA_KEYSTORE = "JKS"
 const val PKCS12 = "PKCS12"

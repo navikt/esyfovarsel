@@ -98,6 +98,7 @@ fun getEnv(): Environment {
                 sendAktivitetskravVarsler = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER"),
                 sendSvarMotebehovVarsler = getBooleanEnvVar("TOGGLE_SEND_SVAR_MOTEBEHOV_VARSLER"),
                 toggleInfotrygdKafkaConsumer = getBooleanEnvVar("TOGGLE_INFOTRYGD_KAFKA_CONSUMER"),
+                toggleUtbetalingKafkaConsumer = getBooleanEnvVar("TOGGLE_UTBETALING_KAFKA_CONSUMER"),
             )
         )
 }
@@ -191,6 +192,7 @@ data class ToggleEnv(
     val sendAktivitetskravVarsler: Boolean,
     val sendSvarMotebehovVarsler: Boolean,
     val toggleInfotrygdKafkaConsumer: Boolean,
+    val toggleUtbetalingKafkaConsumer: Boolean,
 )
 
 data class JobEnv(
