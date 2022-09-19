@@ -106,7 +106,7 @@ fun main() {
                 val senderFacade = SenderFacade(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService, arbeidsgiverNotifikasjonService, database)
                 val motebehovVarselService = MotebehovVarselService(senderFacade, env.urlEnv.dialogmoterUrl)
                 val oppfolgingsplanVarselService = OppfolgingsplanVarselService(senderFacade)
-                val sykepengerMaxDateService = SykepengerMaxDateService(database)
+                val merVeiledningSykepengerMaxDatePlanner = MerVeiledningSykepengerMaxDatePlanner(database)
 
                 val syfoMotebehovConsumer = SyfoMotebehovConsumer(env.urlEnv, stsConsumer)
 
@@ -140,7 +140,7 @@ fun main() {
                         merVeiledningVarselPlannerSyketilfellebit,
                         svarMotebehovVarselPlanner,
                         svarMotebehovVarselPlannerSyketilfellebit,
-                        sykepengerMaxDateService,
+                        merVeiledningSykepengerMaxDatePlanner,
                     )
 
                     varselBusModule(
@@ -270,7 +270,7 @@ fun Application.kafkaModule(
     merVeiledningVarselPlannerSyketilfellebit: MerVeiledningVarselPlannerSyketilfellebit,
     svarMotebehovVarselPlanner: SvarMotebehovVarselPlannerOppfolgingstilfelle,
     svarMotebehovVarselPlannerSyketilfellebit: SvarMotebehovVarselPlannerSyketilfellebit,
-    sykepengerMaxDateService: SykepengerMaxDateService
+    merVeiledningSykepengerMaxDatePlanner: MerVeiledningSykepengerMaxDatePlanner
 ) {
     runningRemotely {
 
@@ -303,7 +303,7 @@ fun Application.kafkaModule(
                 launch(backgroundTasksContext) {
                     launchKafkaListener(
                         state,
-                        InfotrygdKafkaConsumer(env, accessControlService, sykepengerMaxDateService)
+                        InfotrygdKafkaConsumer(env, accessControlService)
                     )
                 }
             }
@@ -314,7 +314,7 @@ fun Application.kafkaModule(
                 launch(backgroundTasksContext) {
                     launchKafkaListener(
                         state,
-                        UtbetalingKafkaConsumer(env, sykepengerMaxDateService)
+                        UtbetalingKafkaConsumer(env, merVeiledningSykepengerMaxDatePlanner)
                     )
                 }
             }
