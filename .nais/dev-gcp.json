@@ -10,6 +10,7 @@
     "SYFOSMREGISTER_SCOPE": "api://dev-gcp.teamsykmelding.syfosmregister/.default",
     "DKIF_SCOPE": "api://dev-gcp.team-rocket.digdir-krr-proxy/.default",
     "PDL_SCOPE": "api://dev-fss.pdl.pdl-api/.default",
+    "TOGGLE_INFOTRYGD_KAFKA_CONSUMER": "true",
     "TOGGLE_SEND_MERVEILEDNING_VARSLER": "true",
     "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "true",
     "TOGGLE_SEND_SVAR_MOTEBEHOV_VARSLER": "false",

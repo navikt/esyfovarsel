@@ -59,7 +59,7 @@ class OppfolgingstilfelleKafkaConsumer(
                                 tellFeilIPlanner()
                             }
                         } else {
-                            log.info("Prosesserer ikke varsel pga bruker med forespurt fnr er reservert og/eller gradert")
+                            log.info("Prosesserer ikke record fra $topicOppfolgingsTilfelle pga bruker med forespurt fnr er reservert og/eller gradert")
                         }
                     }
                 } catch (e: IOException) {

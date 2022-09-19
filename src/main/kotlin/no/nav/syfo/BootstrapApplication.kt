@@ -36,6 +36,7 @@ import no.nav.syfo.db.RemoteDatabase
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.job.sendNotificationsJob
 import no.nav.syfo.kafka.common.launchKafkaListener
+import no.nav.syfo.kafka.consumers.infotrygd.InfotrygdKafkaConsumer
 import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.kafka.consumers.syketilfelle.SyketilfelleKafkaConsumer
 import no.nav.syfo.kafka.consumers.utbetaling.UtbetalingKafkaConsumer
@@ -103,7 +104,7 @@ fun main() {
                 val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
                 val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControlService)
                 val senderFacade = SenderFacade(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService, arbeidsgiverNotifikasjonService, database)
-                val motebehovVarselService = MotebehovVarselService(senderFacade, env.urlEnv.dialogmoterUrl,)
+                val motebehovVarselService = MotebehovVarselService(senderFacade, env.urlEnv.dialogmoterUrl)
                 val oppfolgingsplanVarselService = OppfolgingsplanVarselService(senderFacade)
 
                 val syfoMotebehovConsumer = SyfoMotebehovConsumer(env.urlEnv, stsConsumer)
@@ -277,7 +278,7 @@ fun Application.kafkaModule(
                     OppfolgingstilfelleKafkaConsumer(env, accessControlService)
                         .addPlanner(aktivitetskravVarselPlanner)
                         .addPlanner(merVeiledningVarselPlanner)
-                        .addPlanner(svarMotebehovVarselPlanner)
+                        .addPlanner(svarMotebehovVarselPlanner),
                 )
             }
         }
@@ -291,6 +292,17 @@ fun Application.kafkaModule(
                         .addPlanner(aktivitetskravVarselPlannerSyketilfellebit)
                         .addPlanner(svarMotebehovVarselPlannerSyketilfellebit)
                 )
+            }
+        }
+
+        runningInGCPCluster {
+            if (env.toggleEnv.toggleInfotrygdKafkaConsumer) {
+                launch(backgroundTasksContext) {
+                    launchKafkaListener(
+                        state,
+                        InfotrygdKafkaConsumer(env, accessControlService)
+                    )
+                }
             }
         }
 
