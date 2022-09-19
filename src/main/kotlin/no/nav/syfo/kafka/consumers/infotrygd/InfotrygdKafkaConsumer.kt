@@ -15,7 +15,7 @@ class InfotrygdKafkaConsumer(
     val env: Environment,
     val accessControlService: AccessControlService,
 ) : KafkaListener {
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.consumers.SykepengedagerInfotrygdKafkaConsumer")
+    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.consumers.infotrygd.InfotrygdKafkaConsumer")
     private val kafkaListener: KafkaConsumer<String, String>
     private val objectMapper = createObjectMapper()
 

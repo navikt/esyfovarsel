@@ -294,7 +294,14 @@ fun Application.kafkaModule(
                         .addPlanner(aktivitetskravVarselPlannerSyketilfellebit)
                         .addPlanner(svarMotebehovVarselPlannerSyketilfellebit)
                 )
-                launchKafkaListener(state, InfotrygdKafkaConsumer(env, accessControlService))
+            }
+        }
+
+        runningInGCPCluster {
+            if (env.toggleEnv.toggleInfotrygdKafkaConsumer) {
+                launch(backgroundTasksContext) {
+                    launchKafkaListener(state, InfotrygdKafkaConsumer(env, accessControlService))
+                }
             }
         }
     }
