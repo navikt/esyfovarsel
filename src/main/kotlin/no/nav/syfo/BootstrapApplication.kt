@@ -303,7 +303,7 @@ fun Application.kafkaModule(
                 launch(backgroundTasksContext) {
                     launchKafkaListener(
                         state,
-                        InfotrygdKafkaConsumer(env, accessControlService)
+                        InfotrygdKafkaConsumer(env, accessControlService, sykepengerMaxDateService)
                     )
                 }
             }
