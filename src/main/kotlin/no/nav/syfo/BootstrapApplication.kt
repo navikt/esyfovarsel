@@ -298,7 +298,10 @@ fun Application.kafkaModule(
         runningInGCPCluster {
             if (env.toggleEnv.toggleInfotrygdKafkaConsumer) {
                 launch(backgroundTasksContext) {
-                    launchKafkaListener(state, InfotrygdKafkaConsumer(env, accessControlService))
+                    launchKafkaListener(
+                        state,
+                        InfotrygdKafkaConsumer(env, accessControlService)
+                    )
                 }
             }
         }
