@@ -1,4 +1,4 @@
-package no.nav.syfo.service
+package no.nav.syfo.planner
 
 import no.nav.syfo.db.fetchMaxDateByFnr
 import no.nav.syfo.planner.MerVeiledningSykepengerMaxDatePlanner
@@ -11,7 +11,7 @@ import java.time.LocalDate
 import kotlin.test.assertEquals
 
 object SykepengerMaxDateServiceSpek : Spek({
-    describe("SykepengerMaxDateServiceSpek") {
+    describe("MerVeiledningSykepengerMaxDatePlannerSpek") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
         val merVeiledningSykepengerMaxDatePlanner = MerVeiledningSykepengerMaxDatePlanner(embeddedDatabase)
 
