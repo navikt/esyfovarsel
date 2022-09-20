@@ -75,7 +75,7 @@ class MerVeiledningVarselService(
                 DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT,
                 DITT_SYKEFRAVAER_MER_VEILEDNING_URL,
                 Variant.info,
-                false,
+                true,
                 DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING,
                 syketilfelleEndDate.atStartOfDay().toInstant(ZoneOffset.UTC)
             ),
