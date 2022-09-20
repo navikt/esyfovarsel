@@ -50,15 +50,19 @@ fun DatabaseInterface.updateMaxDateByFnr(sykepengerMaxDate: LocalDate, fnr: Stri
     }
 }
 
-fun DatabaseInterface.fetchMaxDateByFnr(fnr: String): LocalDate {
+fun DatabaseInterface.fetchMaxDateByFnr(fnr: String): LocalDate? {
     val fetchStatement = """SELECT *  FROM SYKEPENGER_MAX_DATE  WHERE FNR = ?""".trimIndent()
 
-    return connection.use { connection ->
+    val storedMaxDateAsList = connection.use { connection ->
         connection.prepareStatement(fetchStatement).use {
             it.setString(1, fnr)
-            it.executeQuery().toList { getDate("max_date") }.first().toLocalDate()
+            it.executeQuery().toList { getDate("max_date") }
         }
     }
+
+    return if (storedMaxDateAsList.isNotEmpty()) {
+        storedMaxDateAsList.first().toLocalDate()
+    } else null
 }
 
 fun DatabaseInterface.deleteMaxDateByFnr(fnr: String) {
