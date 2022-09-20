@@ -1,5 +1,7 @@
 package no.nav.syfo.db
 
+import no.nav.syfo.db.domain.PPlanlagtVarselMerVeiledning
+import no.nav.syfo.utils.REMAINING_DAYS_UNTIL_39_UKERS_VARSEL
 import java.sql.Date
 import java.sql.Timestamp
 import java.time.LocalDate
@@ -63,6 +65,21 @@ fun DatabaseInterface.fetchMaxDateByFnr(fnr: String): LocalDate? {
     return if (storedMaxDateAsList.isNotEmpty()) {
         storedMaxDateAsList.first().toLocalDate()
     } else null
+}
+
+fun DatabaseInterface.fetchBySendingDate(sendingDate: LocalDate): List<PPlanlagtVarselMerVeiledning> {
+    val maxDate = sendingDate.plusDays(REMAINING_DAYS_UNTIL_39_UKERS_VARSEL)
+    val queryStatement = """SELECT *
+                            FROM SYKEPENGER_MAX_DATE
+                            WHERE MAX_DATE = ?
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setDate(1, Date.valueOf(maxDate))
+            it.executeQuery().toList { toPPlanlagtVarselMerVeiledning(sendingDate) }
+        }
+    }
 }
 
 fun DatabaseInterface.deleteMaxDateByFnr(fnr: String) {
