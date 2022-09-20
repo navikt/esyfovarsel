@@ -18,11 +18,9 @@ class PdfgenConsumer(urlEnv: UrlEnv) {
 
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.PdfgenConsumer")
 
-
     fun getMerVeiledningPDF(navn: String?, maxDate: LocalDate?): ByteArray? {
         val merVeiledningPdfUrl = syfooppdfgenUrl + "/api/v1/genpdf/oppfolging/mer_veiledning"
         val request = getPdfgenRequest(navn, maxDate)
-
         return runBlocking {
             try {
                 val response = client.post<HttpResponse>(merVeiledningPdfUrl) {
@@ -42,7 +40,6 @@ class PdfgenConsumer(urlEnv: UrlEnv) {
                         null
                     }
                 }
-
             } catch (e: Exception) {
                 log.error("Exception while calling syfooppdfgen: ${e.message}", e)
                 null

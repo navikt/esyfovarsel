@@ -6,6 +6,7 @@ const val DINE_SYKMELDTE_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST = "1 ny forespørsel om
 const val DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST = "Påminnelse om aktivitetsplikten"
 
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST = "NAV ønsker svar på om du trenger et dialogmøte"
+const val BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT = "Det nærmer seg datoen da du ikke lenger kan få sykepenger."
 
 const val ARBEIDSGIVERNOTIFIKASJON_MERKELAPP = "Oppfølging"
 const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT = "En av dine medarbeidere har snart vært sykmeldt i åtte uker"
@@ -20,3 +21,5 @@ const val ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY = "<body>Hei.<br>\n
     "Har du spørsmål, kan du kontakte oss på 55 55 33 36.<br>\n" +
     "Vennlig hilsen NAV<br>\n" +
     "Du kan ikke svare på denne meldingen.</body>"
+
+const val DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT = "Snart slutt på sykepengene"

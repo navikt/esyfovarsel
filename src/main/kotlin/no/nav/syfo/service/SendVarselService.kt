@@ -2,6 +2,7 @@ package no.nav.syfo.service
 
 import no.nav.syfo.*
 import no.nav.syfo.access.domain.UserAccessStatus
+import no.nav.syfo.access.domain.canUserBeNotified
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.syfomotebehov.SyfoMotebehovConsumer
@@ -10,7 +11,9 @@ import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
 import no.nav.syfo.db.domain.VarselType.MER_VEILEDNING
 import no.nav.syfo.db.domain.VarselType.SVAR_MOTEBEHOV
+import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.DineSykmeldteHendelseType
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
@@ -30,8 +33,7 @@ class SendVarselService(
     val appEnv: AppEnv,
     val syfoMotebehovConsumer: SyfoMotebehovConsumer,
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
-    val journalpostdistribusjonConsumer: JournalpostdistribusjonConsumer,
-    val dokarkivService: DokarkivService,
+    val merVeiledningVarselService: MerVeiledningVarselService
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.SendVarselService")
 
@@ -56,7 +58,7 @@ class SendVarselService(
                 if (userSkalVarsles(pPlanlagtVarsel.type, userAccessStatus)) {
                     when (pPlanlagtVarsel.type) {
                         AKTIVITETSKRAV.name -> {
-                            sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
+                            sendVarselTilSykmeldt(fnr, uuid, varselContent, varselUrl)
                             if (orgnummer !== null) {
                                 sendAktivitetskravVarselTilArbeidsgiver(
                                     uuid,
@@ -67,12 +69,8 @@ class SendVarselService(
                             pPlanlagtVarsel.type
                         }
                         MER_VEILEDNING.name -> {
-                            if (userAccessStatus.canUserBeDigitallyNotified) {
-                                sendVarselTilSykmeldt(fnr, varselContent, uuid, varselUrl)
-                                pPlanlagtVarsel.type
-                            } else if (userAccessStatus.canUserBePhysicallyNotified) {
-                                log.info("Skal sende fysisk brev for varsel med uuid: $uuid")
-                                sendFysiskBrevTilReservertBruker(fnr, pPlanlagtVarsel.uuid)
+                            if (userAccessStatus.canUserBeNotified()) {
+                                sendMerVeiledningVarselTilArbeidstaker(pPlanlagtVarsel, userAccessStatus)
                                 pPlanlagtVarsel.type
                             } else {
                                 log.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles")
@@ -129,20 +127,11 @@ class SendVarselService(
         }
     }
 
-    private suspend fun sendFysiskBrevTilReservertBruker(fnr: String, uuid: String) {
-        val journalpostId = dokarkivService.getJournalpostId(fnr, uuid)
-        log.info("Forsøkte å sende data til dokarkiv, journalpostId er $journalpostId, MER_VEILEDNING varsel med UUID: ${uuid}")
-
-        val bestillingsId = journalpostId?.let { journalpostdistribusjonConsumer.distribuerJournalpost(it)?.bestillingsId }
-
-        if (bestillingsId == null) {
-            log.info("Forsøkte å sende PDF til print, men noe gikk galt, bestillingsId er null, MER_VEILEDNING varsel med UUID: ${uuid}")
-        } else {
-            log.info("Sendte PDF til print, bestillingsId er $bestillingsId, MER_VEILEDNING varsel med UUID: ${uuid}")
-        }
-    }
-
-    private fun sendAktivitetskravVarselTilArbeidsgiver(uuid: String, arbeidstakerFnr: String, orgnummer: String) {
+    private fun sendAktivitetskravVarselTilArbeidsgiver(
+        uuid: String,
+        arbeidstakerFnr: String,
+        orgnummer: String
+    ) {
         val dineSykmeldteVarsel = DineSykmeldteVarsel(
             ansattFnr = arbeidstakerFnr,
             orgnr = orgnummer,
@@ -169,7 +158,25 @@ class SendVarselService(
         )
     }
 
-    private fun sendVarselTilSykmeldt(fnr: String, varselContent: String, uuid: String, varselUrl: URL) {
+    private fun sendMerVeiledningVarselTilArbeidstaker(pPlanlagtVarsel: PPlanlagtVarsel, userAccessStatus: UserAccessStatus) {
+        merVeiledningVarselService.sendVarselTilArbeidstaker(
+            ArbeidstakerHendelse(
+                HendelseType.SM_MER_VEILEDNING,
+                null,
+                pPlanlagtVarsel.fnr,
+                pPlanlagtVarsel.orgnummer
+            ),
+            pPlanlagtVarsel.uuid,
+            userAccessStatus
+        )
+    }
+
+    private fun sendVarselTilSykmeldt(
+        fnr: String,
+        uuid: String,
+        varselContent: String,
+        varselUrl: URL
+    ) {
         log.info("Sender varsel til Brukernotifikasjoner for uuid $uuid")
         beskjedKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl)
         log.info("Har sendt varsel til Brukernotifikasjoner for uuid $uuid")
