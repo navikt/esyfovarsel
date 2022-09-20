@@ -85,7 +85,7 @@ fun main() {
                 val journalpostdistribusjonConsumer = JournalpostdistribusjonConsumer(env.urlEnv, azureAdTokenConsumer)
                 val pdfgenConsumer = PdfgenConsumer(env.urlEnv)
                 val dokarkivConsumer = DokarkivConsumer(env.urlEnv, azureAdTokenConsumer)
-                val dokarkivService = DokarkivService(dokarkivConsumer, pdfgenConsumer, pdlConsumer)
+                val dokarkivService = DokarkivService(dokarkivConsumer, pdfgenConsumer, pdlConsumer, database)
 
                 val beskjedKafkaProducer = BeskjedKafkaProducer(env)
                 val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
