@@ -1,40 +1,38 @@
 {
   "app": {
     "KTOR_ENV": "remote",
-    "DB_HOST": "A01DBVL022.adeo.no",
-    "DB_VAULT_MOUNT_PATH": "postgresql/prod-fss",
     "KAFKA_BOOTSTRAP_SERVERS_URL": "SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443",
     "STS_URL": "https://security-token-service.nais.adeo.no",
-    "PDL_URL": "https://pdl-api.intern.nav.no/graphql",
-    "DKIF_URL": "https://dkif.intern.nav.no/api/v1/personer/kontaktinformasjon",
+    "PDL_URL": "https://pdl-api.prod-fss-pub.nais.io/graphql",
+    "DKIF_URL": "https://digdir-krr-proxy.intern.nav.no/rest/v1/person",
     "SYFOSYKETILFELLE_URL": "https://syfosyketilfelle.nais.adeo.no",
     "SYFOSMREGISTER_URL": "https://smregister.intern.nav.no",
     "SYFOSMREGISTER_SCOPE": "api://prod-gcp.teamsykmelding.syfosmregister/.default",
-    "DKIF_SCOPE": "api://prod-fss.team-rocket.digdir-krr-proxy/.default",
+    "DKIF_SCOPE": "api://prod-gcp.team-rocket.digdir-krr-proxy/.default",
     "PDL_SCOPE": "api://prod-fss.pdl.pdl-api/.default",
     "TOGGLE_INFOTRYGD_KAFKA_CONSUMER": "false",
-    "TOGGLE_SEND_MERVEILEDNING_VARSLER": "false",
-    "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "false",
+    "TOGGLE_SEND_MERVEILEDNING_VARSLER": "true",
+    "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "true",
     "TOGGLE_SEND_SVAR_MOTEBEHOV_VARSLER": "false",
     "TOGGLE_UTBETALING_KAFKA_CONSUMER": "false",
     "BASE_URL_SYK_INFO": "https://www.nav.no/syk/info",
-    "BASE_URL_DIALOGMOTER": "NOT_IN_USE",
+    "BASE_URL_DIALOGMOTER": "https://www.nav.no/syk/dialogmoter",
     "AG_NOTIFIKASJON_PRODUSENT_API_URL": "https://ag-notifikasjon-produsent-api.intern.nav.no/api/graphql",
     "AG_NOTIFIKASJON_PRODUSENT_API_SCOPE": "api://prod-gcp.fager.notifikasjon-produsent-api/.default",
     "NARMESTELEDER_URL": "https://narmesteleder.intern.nav.no",
     "NARMESTELEDER_SCOPE": "api://prod-gcp.teamsykmelding.narmesteleder/.default",
     "BASE_URL_DINE_SYKMELDTE": "https://www.nav.no/arbeidsgiver/sykmeldte",
-    "SYFOMOTEBEHOV_URL": "https://syfomotebehov.intern.nav.no",
-    "DOKDIST_FORDELING_URL": "https://dokdistfordeling.intern.nav.no",
+    "SYFOMOTEBEHOV_URL": "NOT IN USE",
+    "DOKDIST_FORDELING_URL": "https://dokdistfordeling.prod-fss-pub.nais.io",
     "DOKDIST_FORDELING_SCOPE": "api://prod-fss.teamdokumenthandtering.saf/.default",
-    "DOKARKIV_URL": "https://dokarkiv.intern.nav.no",
+    "DOKARKIV_URL": "https://dokarkiv.prod-fss-pub.nais.io",
     "DOKARKIV_SCOPE": "api://prod-fss.teamdokumenthandtering.dokarkiv/.default",
-    "SYFOOPPDFGEN_URL": "http://syfooppdfgen"
+    "SYFOOPPDFGEN_URL": "https://syfooppdfgen.intern.nav.no"
   },
   "job": {
     "KTOR_ENV": "remote",
     "JOB": "true",
     "SEND_VARSLER": "true",
-    "ESYFOVARSEL_JOB_TRIGGER_URL": "https://esyfovarsel.nais.adeo.no/job/trigger"
+    "ESYFOVARSEL_JOB_TRIGGER_URL": "https://esyfovarsel.intern.nav.no/job/trigger"
   }
 }

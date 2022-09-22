@@ -1,8 +1,7 @@
 {
   "appEnv": {
     "applicationPort": "8080",
-    "applicationThreads": "1",
-    "runningInGCPCluster": "false"
+    "applicationThreads": "1"
   },
   "authEnv": {
     "serviceuserUsername": "srvesyfovarsel",
@@ -18,22 +17,19 @@
     ]
   },
   "urlEnv": {
-    "syfosyketilfelleUrl": "http://localhost:9090",
     "syfosmregisterUrl": "http://localhost:9494",
     "syfosmregisterScope": "syfosmregisterScope",
     "dkifScope": "dkifScope",
     "pdlScope": "pdlScope",
     "baseUrlSykInfo": "http://ditt-sykefravaer:8080",
-    "stsUrl": "http://localhost:9094",
     "pdlUrl": "http://localhost:9091",
-    "dkifUrl": "http://localhost:9093/api/v1/personer/kontaktinfo",
+    "dkifUrl": "http://localhost:9093/rest/v1/person",
     "dialogmoterUrl": "http://dialogmoter:8080",
     "arbeidsgiverNotifikasjonProdusentApiUrl": "http://localhost:9095",
     "arbeidsgiverNotifikasjonProdusentApiScope": "agNotifikasjonProdusentScope",
     "narmestelederUrl": "http://localhost:9097",
     "narmestelederScope": "narmestelederScope",
     "baseUrlDineSykmeldte": "http://dine-sykmeldte:9099",
-    "syfomotebehovUrl": "http://localhost:9595",
     "dokdistfordelingUrl": "http://dokdistfordelingUrl:9099",
     "dokdistfordelingScope": "dokdistfordelingScope",
     "dokarkivUrl": "http://dokarkivUrl:9099",

@@ -33,20 +33,63 @@ spec:
   prometheus:
     enabled: true
     path: /prometheus
-  vault:
-    enabled: true
-    paths:
-      - kvPath: "/serviceuser/data/dev/srvesyfovarsel"
-        mountPath: "/var/run/secrets"
   azure:
     application:
       enabled: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: syfomotebehov
+          namespace: team-esyfo
+          cluster: dev-fss
+    outbound:
+      external:
+        - host: pdl-api.dev-fss-pub.nais.io
+        - host: dokdistfordeling.dev-fss-pub.nais.io
+        - host: dokarkiv.dev-fss-pub.nais.io
+      rules:
+        - application: digdir-krr-proxy
+        - application: security-token-service
+        - application: syfooppdfgen
+          namespace: team-esyfo
+          cluster: dev-gcp
+        - application: syfosmregister
+          namespace: teamsykmelding
+          cluster: dev-gcp
+        - application: narmesteleder
+          namespace: teamsykmelding
+          cluster: dev-gcp
+  gcp:
+    sqlInstances:
+      - autoBackupHour: 1
+        cascadingDelete: true
+        collation: nb_NO.UTF8
+        databases:
+          - envVarPrefix: GCP_DB
+            name: esyfovarsel
+        diskAutoresize: true
+        diskSize: 10
+        diskType: SSD
+        highAvailability: true
+        insights:
+          enabled: true
+          recordApplicationTags: true
+          recordClientAddress: true
+        maintenance:
+          day: 1
+          hour: 4
+        name: esyfovarsel-instance-dev
+        pointInTimeRecovery: true
+        tier: db-f1-micro
+        type: POSTGRES_13
   webproxy: true
   ingresses:
-    - "https://esyfovarsel.dev.adeo.no"
+    - "https://esyfovarsel.dev.intern.nav.no"
   kafka:
     pool: nav-dev
   leaderElection: true
+  filesFrom:
+    - secret: esyfovarsel-serviceuser
   envFrom:
     - configmap: loginservice-idporten
   env:

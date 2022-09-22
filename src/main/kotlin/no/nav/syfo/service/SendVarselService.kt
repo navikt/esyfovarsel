@@ -26,7 +26,6 @@ class SendVarselService(
     val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
     val accessControlService: AccessControlService,
     val urlEnv: UrlEnv,
-    val appEnv: AppEnv,
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
     val merVeiledningVarselService: MerVeiledningVarselService
 ) {
@@ -37,11 +36,7 @@ class SendVarselService(
     suspend fun sendVarsel(pPlanlagtVarsel: PPlanlagtVarsel): String {
         // Recheck if user can be notified in case of recent 'Addressesperre'
         return try {
-            val userAccessStatus =
-                if (appEnv.runningInGCPCluster)
-                    accessControlService.getUserAccessStatusByFnr(pPlanlagtVarsel.fnr)
-                else
-                    accessControlService.getUserAccessStatusByAktorId(pPlanlagtVarsel.aktorId)
+            val userAccessStatus = accessControlService.getUserAccessStatus(pPlanlagtVarsel.fnr)
             val fnr = userAccessStatus.fnr!!
             val uuid = pPlanlagtVarsel.uuid
 

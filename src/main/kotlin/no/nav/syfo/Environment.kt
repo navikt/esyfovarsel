@@ -20,22 +20,6 @@ fun getJobEnv() =
         )
 
 fun getEnv(): Environment {
-    val dbEnv = if (isGCP())
-        DbEnv(
-            dbHost = getEnvVar("GCP_DB_HOST", "127.0.0.1"),
-            dbPort = getEnvVar("GCP_DB_PORT", "5432"),
-            dbName = getEnvVar("GCP_DB_DATABASE"),
-            dbUsername = getEnvVar("GCP_DB_USERNAME"),
-            dbPassword = getEnvVar("GCP_DB_PASSWORD")
-        )
-    else
-        DbEnv(
-            dbHost = getEnvVar("DB_HOST", "127.0.0.1"),
-            dbPort = "5432",
-            dbName = "esyfovarsel",
-            dbCredMounthPath = getEnvVar("DB_VAULT_MOUNT_PATH")
-        )
-
     return if (isLocal())
         getTestEnv()
     else
@@ -43,8 +27,7 @@ fun getEnv(): Environment {
             AppEnv(
                 applicationPort = getEnvVar("APPLICATION_PORT", "8080").toInt(),
                 applicationThreads = getEnvVar("APPLICATION_THREADS", "4").toInt(),
-                remote = true,
-                runningInGCPCluster = isGCP()
+                remote = true
             ),
             AuthEnv(
                 serviceuserUsername = File("$serviceuserMounthPath/username").readText(),
@@ -56,13 +39,11 @@ fun getEnv(): Environment {
                 loginserviceAudience = getEnvVar("LOGINSERVICE_IDPORTEN_AUDIENCE").split(",")
             ),
             UrlEnv(
-                syfosyketilfelleUrl = getEnvVar("SYFOSYKETILFELLE_URL"),
                 syfosmregisterUrl = getEnvVar("SYFOSMREGISTER_URL"),
                 syfosmregisterScope = getEnvVar("SYFOSMREGISTER_SCOPE"),
                 dkifScope = getEnvVar("DKIF_SCOPE"),
                 pdlScope = getEnvVar("PDL_SCOPE"),
                 baseUrlSykInfo = getEnvVar("BASE_URL_SYK_INFO"),
-                stsUrl = getEnvVar("STS_URL"),
                 pdlUrl = getEnvVar("PDL_URL"),
                 dkifUrl = getEnvVar("DKIF_URL"),
                 dialogmoterUrl = getEnvVar("BASE_URL_DIALOGMOTER"),
@@ -71,7 +52,6 @@ fun getEnv(): Environment {
                 narmestelederUrl = getEnvVar("NARMESTELEDER_URL"),
                 narmestelederScope = getEnvVar("NARMESTELEDER_SCOPE"),
                 baseUrlDineSykmeldte = getEnvVar("BASE_URL_DINE_SYKMELDTE"),
-                syfomotebehovUrl = getEnvVar("SYFOMOTEBEHOV_URL"),
                 dokdistfordelingUrl = getEnvVar("DOKDIST_FORDELING_URL"),
                 dokdistfordelingScope = getEnvVar("DOKDIST_FORDELING_SCOPE"),
                 dokarkivUrl = getEnvVar("DOKARKIV_URL"),
@@ -92,7 +72,13 @@ fun getEnv(): Environment {
                     credstorePassword = getEnvVar("KAFKA_CREDSTORE_PASSWORD")
                 )
             ),
-            dbEnv,
+            DbEnv(
+                dbHost = getEnvVar("GCP_DB_HOST", "127.0.0.1"),
+                dbPort = getEnvVar("GCP_DB_PORT", "5432"),
+                dbName = getEnvVar("GCP_DB_DATABASE"),
+                dbUsername = getEnvVar("GCP_DB_USERNAME"),
+                dbPassword = getEnvVar("GCP_DB_PASSWORD")
+            ),
             ToggleEnv(
                 sendMerVeiledningVarsler = getBooleanEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER"),
                 sendAktivitetskravVarsler = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER"),
@@ -119,7 +105,6 @@ data class AppEnv(
     val applicationPort: Int,
     val applicationThreads: Int,
     val remote: Boolean = false,
-    val runningInGCPCluster: Boolean
 )
 
 data class AuthEnv(
@@ -133,13 +118,11 @@ data class AuthEnv(
 )
 
 data class UrlEnv(
-    val syfosyketilfelleUrl: String,
     val syfosmregisterUrl: String,
     val syfosmregisterScope: String,
     val dkifScope: String,
     val pdlScope: String,
     val baseUrlSykInfo: String,
-    val stsUrl: String,
     val pdlUrl: String,
     val dkifUrl: String,
     val dialogmoterUrl: String,
@@ -148,7 +131,6 @@ data class UrlEnv(
     val narmestelederUrl: String,
     val narmestelederScope: String,
     val baseUrlDineSykmeldte: String,
-    val syfomotebehovUrl: String,
     val dokdistfordelingUrl: String,
     val dokdistfordelingScope: String,
     val dokarkivUrl: String,
@@ -202,9 +184,6 @@ data class JobEnv(
 fun getEnvVar(varName: String, defaultValue: String? = null) =
     System.getenv(varName) ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
 
-fun isGCP(): Boolean = getEnvVar("NAIS_CLUSTER_NAME", "none").contains("gcp")
-
-fun isNotGCP(): Boolean = !isGCP()
 fun isLocal(): Boolean = getEnvVar("KTOR_ENV", "local") == "local"
 
 fun isJob(): Boolean = getBooleanEnvVar("JOB")

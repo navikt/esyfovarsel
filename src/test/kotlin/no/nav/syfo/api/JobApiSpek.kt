@@ -41,16 +41,11 @@ object JobApiSpek : Spek({
         val dokarkivService = mockk<DokarkivService>()
         val merVeiledningVarselService = mockk<MerVeiledningVarselService>()
 
-        coEvery { accessControlService.getUserAccessStatusByFnr(fnr1) } returns userAccessStatus1
-        coEvery { accessControlService.getUserAccessStatusByFnr(fnr2) } returns userAccessStatus2
-        coEvery { accessControlService.getUserAccessStatusByFnr(fnr3) } returns userAccessStatus3
-        coEvery { accessControlService.getUserAccessStatusByFnr(fnr4) } returns userAccessStatus4
-        coEvery { accessControlService.getUserAccessStatusByFnr(fnr5) } returns userAccessStatus5
-        coEvery { accessControlService.getUserAccessStatusByAktorId(aktorId) } returns userAccessStatus1
-        coEvery { accessControlService.getUserAccessStatusByAktorId(aktorId2) } returns userAccessStatus2
-        coEvery { accessControlService.getUserAccessStatusByAktorId(aktorId3) } returns userAccessStatus3
-        coEvery { accessControlService.getUserAccessStatusByAktorId(aktorId4) } returns userAccessStatus4
-        coEvery { accessControlService.getUserAccessStatusByAktorId(aktorId5) } returns userAccessStatus5
+        coEvery { accessControlService.getUserAccessStatus(fnr1) } returns userAccessStatus1
+        coEvery { accessControlService.getUserAccessStatus(fnr2) } returns userAccessStatus2
+        coEvery { accessControlService.getUserAccessStatus(fnr3) } returns userAccessStatus3
+        coEvery { accessControlService.getUserAccessStatus(fnr4) } returns userAccessStatus4
+        coEvery { accessControlService.getUserAccessStatus(fnr5) } returns userAccessStatus5
 
         coEvery { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
         coEvery { dokarkivService.getJournalpostId(any(), any()) } returns "1"
@@ -61,7 +56,6 @@ object JobApiSpek : Spek({
                 dineSykmeldteHendelseKafkaProducer,
                 accessControlService,
                 testEnv.urlEnv,
-                testEnv.appEnv,
                 arbeidsgiverNotifikasjonService,
                 merVeiledningVarselService
             )

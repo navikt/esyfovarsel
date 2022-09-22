@@ -22,37 +22,21 @@ val userAccessStatus5 = UserAccessStatus(fnr5, false, false) // Kan ikke varsles
 
 val dkifResponseSuccessKanVarslesResponseJSON = """
     {
-        "kontaktinfo": {
-            "$aktorId": {
-                "personident": $fnr1,
-                "kanVarsles": true,
-                "reservert": false,
-                "epostadresse": "test@nav.no",
-                "mobiltelefonnummer": "44556677",
-                "spraak": "nb"
-            }
-        }
+        "kanVarsles": true,
+        "reservert": false
     }
 """.trim()
 
 val dkifResponseSuccessReservertResponseJSON = """
     {
-        "kontaktinfo": {
-            "$aktorId2": {
-                "personident": $fnr2,
-                "kanVarsles": false,
-                "reservert": true,
-                "epostadresse": "test@nav.no",
-                "mobiltelefonnummer": "44556677",
-                "spraak": "nb"
-            }
-        }
+        "kanVarsles": false,
+        "reservert": true
     }
 """.trim()
 
 val dkifResponseMap = mapOf(
-    aktorId to dkifResponseSuccessKanVarslesResponseJSON,
-    aktorId2 to dkifResponseSuccessReservertResponseJSON
+    fnr1 to dkifResponseSuccessKanVarslesResponseJSON,
+    fnr2 to dkifResponseSuccessReservertResponseJSON
 )
 
 val tokenFromAzureServer = Token(

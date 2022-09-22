@@ -28,8 +28,6 @@ import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.DatabaseInterface
-import no.nav.syfo.db.LocalDatabase
-import no.nav.syfo.db.RemoteDatabase
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.job.sendNotificationsJob
 import no.nav.syfo.kafka.common.launchKafkaListener
@@ -186,7 +184,6 @@ fun Application.serverModule(
             dineSykmeldteHendelseKafkaProducer,
             accessControlService,
             env.urlEnv,
-            env.appEnv,
             arbeidsgiverNotifikasjonService,
             merVeiledningVarselService
         )
@@ -241,53 +238,44 @@ fun Application.kafkaModule(
     sykepengerMaxDateService: SykepengerMaxDateService
 ) {
     runningRemotely {
-        runningInGCPCluster {
+        launch(backgroundTasksContext) {
+            launchKafkaListener(
+                state,
+                SyketilfelleKafkaConsumer(env, accessControlService, database)
+                    .addPlanner(merVeiledningVarselPlanner)
+                    .addPlanner(aktivitetskravVarselPlanner)
+            )
+        }
+
+        if (env.toggleEnv.toggleInfotrygdKafkaConsumer) {
             launch(backgroundTasksContext) {
                 launchKafkaListener(
                     state,
-                    SyketilfelleKafkaConsumer(env, accessControlService, database)
-                        .addPlanner(merVeiledningVarselPlanner)
-                        .addPlanner(aktivitetskravVarselPlanner)
+                    InfotrygdKafkaConsumer(env, sykepengerMaxDateService)
                 )
             }
+        }
 
-            if (env.toggleEnv.toggleInfotrygdKafkaConsumer) {
-                launch(backgroundTasksContext) {
-                    launchKafkaListener(
-                        state,
-                        InfotrygdKafkaConsumer(env, sykepengerMaxDateService)
-                    )
-                }
-            }
-
-            if (env.toggleEnv.toggleUtbetalingKafkaConsumer) {
-                launch(backgroundTasksContext) {
-                    launchKafkaListener(
-                        state,
-                        UtbetalingKafkaConsumer(env, sykepengerMaxDateService)
-                    )
-                }
-            }
-
+        if (env.toggleEnv.toggleUtbetalingKafkaConsumer) {
             launch(backgroundTasksContext) {
                 launchKafkaListener(
                     state,
-                    VarselBusKafkaConsumer(env, varselbusService)
+                    UtbetalingKafkaConsumer(env, sykepengerMaxDateService)
                 )
             }
+        }
+
+        launch(backgroundTasksContext) {
+            launchKafkaListener(
+                state,
+                VarselBusKafkaConsumer(env, varselbusService)
+            )
         }
     }
 }
 
 val Application.envKind
     get() = environment.config.property("ktor.environment").getString()
-
-val Application.cluster
-    get() = environment.config.property("ktor.cluster").getString()
-
-fun Application.runningInGCPCluster(block: () -> Unit) {
-    if (cluster.contains("gcp")) block()
-}
 
 fun Application.runningRemotely(block: () -> Unit) {
     if (envKind == "remote") block()
@@ -299,11 +287,6 @@ fun Application.runningLocally(block: () -> Unit) {
 
 fun initDb(dbEnv: DbEnv): DatabaseInterface =
     when {
-        isLocal() -> localDatabase(dbEnv)
-        isGCP() -> Database(dbEnv)
-        else -> remoteDatabase(dbEnv)
+        isLocal() -> Database(dbEnv)
+        else ->  Database(dbEnv)
     }
-
-private fun localDatabase(dbEnv: DbEnv): DatabaseInterface = LocalDatabase(dbEnv)
-
-private fun remoteDatabase(dbEnv: DbEnv): DatabaseInterface = RemoteDatabase(dbEnv)

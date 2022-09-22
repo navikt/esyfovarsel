@@ -8,7 +8,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.consumer.pdl.*
-import no.nav.syfo.isNotGCP
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
@@ -104,11 +103,6 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
                         append(TEMA_HEADER, OPPFOLGING_TEMA_HEADERVERDI)
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, bearerTokenString)
-                    }
-                    if (isNotGCP()) {
-                        headers {
-                            append(NAV_CONSUMER_TOKEN_HEADER, bearerTokenString)
-                        }
                     }
                     body = requestBody
                 }

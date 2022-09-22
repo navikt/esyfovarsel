@@ -39,7 +39,7 @@ class SyketilfelleKafkaConsumer(
                     val kSyketilfellebit: KSyketilfellebit = objectMapper.readValue(it.value())
                     databaseInterface.storeSyketilfellebit(kSyketilfellebit.toPSyketilfellebit())
                     val sykmeldtFnr = kSyketilfellebit.fnr
-                    val userAccessStatus = accessControlService.getUserAccessStatusByFnr(sykmeldtFnr)
+                    val userAccessStatus = accessControlService.getUserAccessStatus(sykmeldtFnr)
 
                     varselPlanners.forEach { planner ->
                         if (planner.varselSkalLagres(userAccessStatus)) {

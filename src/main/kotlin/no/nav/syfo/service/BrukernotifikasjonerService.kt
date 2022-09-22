@@ -13,7 +13,7 @@ class BrukernotifikasjonerService(
 
     fun sendVarsel(uuid: String, mottakerFnr: String, content: String, url: URL) {
         // Recheck if user can be notified in case of recent 'Addressesperre'
-        if (accessControlService.getUserAccessStatusByFnr(mottakerFnr).canUserBeDigitallyNotified) {
+        if (accessControlService.getUserAccessStatus(mottakerFnr).canUserBeDigitallyNotified) {
             beskjedKafkaProducer.sendBeskjed(mottakerFnr, content, uuid, url)
             log.info("Har sendt melding med uuid $uuid til brukernotifikasjoner: $content")
         } else {
