@@ -3,7 +3,7 @@ package no.nav.syfo.kafka.consumers.syketilfelle.domain
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
-data class KSyketilfellebit (
+data class KSyketilfellebit(
     val id: String,
     val fnr: String,
     val orgnummer: String?,

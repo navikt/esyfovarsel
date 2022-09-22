@@ -1,6 +1,6 @@
 package no.nav.syfo.syketilfelle
 
-import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
+import no.nav.syfo.kafka.consumers.syketilfelle.domain.Syketilfelledag
 import no.nav.syfo.syketilfelle.domain.Oppfolgingstilfelle
 import no.nav.syfo.syketilfelle.domain.Tag
 import java.time.LocalDate

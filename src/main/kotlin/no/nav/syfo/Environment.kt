@@ -106,9 +106,6 @@ fun getEnv(): Environment {
 fun getTestEnv() =
     objectMapper.readValue(File(localAppPropertiesPath), Environment::class.java)
 
-fun getTestEnv(embeddedKafkaBrokerUrl: String) =
-    getTestEnv().apply { kafkaEnv.bootstrapServersUrl = embeddedKafkaBrokerUrl }
-
 data class Environment(
     val appEnv: AppEnv,
     val authEnv: AuthEnv,

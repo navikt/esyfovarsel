@@ -3,18 +3,18 @@ package no.nav.syfo.planner
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.consumer.syfosyketilfelle.SyfosyketilfelleConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
-import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
-import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
 import no.nav.syfo.db.storePlanlagtVarsel
-import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
+import no.nav.syfo.kafka.consumers.syketilfelle.domain.Syketilfelledag
 import no.nav.syfo.service.SykmeldingService
-import no.nav.syfo.syketilfelle.domain.Tag.*
+import no.nav.syfo.syketilfelle.KOppfolgingstilfellePerson
+import no.nav.syfo.syketilfelle.SyketilfellebitService
+import no.nav.syfo.syketilfelle.domain.Syketilfellebit
+import no.nav.syfo.syketilfelle.domain.Tag
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.utils.VarselUtil
@@ -27,19 +27,19 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.test.assertFailsWith
 
-object AktivitetskravVarselPlannerSpek : Spek({
+object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
     // The default timeout of 10 seconds is not sufficient to initialise the embedded database
     defaultTimeout = 20000L
 
     val embeddedDatabase by lazy { EmbeddedDatabase() }
     val sykmeldingerConsumer = mockk<SykmeldingerConsumer>()
-    val syfosyketilfelleConsumer = mockk<SyfosyketilfelleConsumer>()
+    val syketilfellebitService = mockk<SyketilfellebitService>()
     val varselUtil = VarselUtil(embeddedDatabase)
 
     val aktivitetskravVarselPlanner =
-        AktivitetskravVarselPlannerOppfolgingstilfelle(embeddedDatabase, syfosyketilfelleConsumer, SykmeldingService(sykmeldingerConsumer))
+        AktivitetskravVarselPlanner(embeddedDatabase, syketilfellebitService, SykmeldingService(sykmeldingerConsumer))
 
-    describe("AktivitetskravVarselPlannerSpek") {
+    describe("AktivitetskravVarselPlannerSyketilfellebitSpek") {
         val planlagtVarselToStore2 =
             PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), VarselType.MER_VEILEDNING)
         val planlagtVarselToStore3 =
@@ -67,7 +67,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf(ANNET_FRAVAR, SENDT),
+                    listOf(Tag.ANNET_FRAVAR, Tag.SENDT),
                     "3",
                     LocalDate.now(),
                     LocalDate.now().plusDays(7)
@@ -79,7 +79,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf(ANNET_FRAVAR, SENDT),
+                    listOf(Tag.ANNET_FRAVAR, Tag.SENDT),
                     "3",
                     LocalDate.now().plusDays(8),
                     LocalDate.now().plusDays(16)
@@ -91,7 +91,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf(ANNET_FRAVAR, SENDT),
+                    listOf(Tag.ANNET_FRAVAR, Tag.SENDT),
                     "3",
                     LocalDate.now().plusDays(17),
                     LocalDate.now().plusDays(50)
@@ -108,7 +108,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
                 tom = LocalDate.now().plusDays(50)
             )
             val oppfolgingstilfellePerson =
-                OppfolgingstilfellePerson(
+                KOppfolgingstilfellePerson(
                     arbeidstakerFnr1,
                     listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3),
                     syketilfelledag1,
@@ -118,10 +118,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
                 )
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
-            coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
-                aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
+                aktivitetskravVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
                 val nrOfRowsFetchedTotal = lagreteVarsler.size
@@ -141,7 +141,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     arbeidstakerAktorId1,
                     "2", LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf(SYKMELDING, SENDT),
+                    listOf(Tag.SYKMELDING, Tag.SENDT),
                     "3",
                     LocalDate.now().minusDays(100),
                     LocalDate.now().minusDays(100)
@@ -149,7 +149,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             val syketilfelledag1 = Syketilfelledag(LocalDate.now().minusDays(60), syketilfellebit1)
             val oppfolgingstilfellePerson =
-                OppfolgingstilfellePerson(
+                KOppfolgingstilfellePerson(
                     arbeidstakerFnr1,
                     listOf(syketilfelledag1),
                     syketilfelledag1,
@@ -162,10 +162,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
                 SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
-            coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
-                aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
+                aktivitetskravVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
                 val nrOfRowsFetchedTotal = lagreteVarsler.size
@@ -187,7 +187,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf(SYKMELDING, SENDT),
+                    listOf(Tag.SYKMELDING, Tag.SENDT),
                     "3",
                     LocalDate.now(),
                     LocalDate.now()
@@ -199,7 +199,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf(SYKMELDING, SENDT),
+                    listOf(Tag.SYKMELDING, Tag.SENDT),
                     "3",
                     LocalDate.now(),
                     LocalDate.now()
@@ -211,7 +211,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf(PAPIRSYKMELDING, SENDT),
+                    listOf(Tag.PAPIRSYKMELDING, Tag.SENDT),
                     "3",
                     LocalDate.now(),
                     LocalDate.now()
@@ -224,7 +224,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             val sykmeldtStatusResponse =
                 SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
             val oppfolgingstilfellePerson =
-                OppfolgingstilfellePerson(
+                KOppfolgingstilfellePerson(
                     arbeidstakerFnr1,
                     listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3),
                     syketilfelledag1,
@@ -234,11 +234,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
                 )
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
-            coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
-
-                aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
+                aktivitetskravVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
                 val nrOfRowsFetchedTotal = lagreteVarsler.size
@@ -260,7 +259,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf(SYKMELDING, SENDT),
+                    listOf(Tag.SYKMELDING, Tag.SENDT),
                     "3",
                     LocalDate.now(),
                     LocalDate.now().plusDays(7)
@@ -272,7 +271,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf(SYKMELDING, SENDT),
+                    listOf(Tag.SYKMELDING, Tag.SENDT),
                     "3",
                     LocalDate.now().plusDays(8),
                     LocalDate.now().plusDays(16)
@@ -284,7 +283,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf(SYKMELDING, SENDT),
+                    listOf(Tag.SYKMELDING, Tag.SENDT),
                     "3",
                     LocalDate.now().plusDays(17),
                     LocalDate.now().plusDays(50)
@@ -301,7 +300,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
                 tom = LocalDate.now().plusDays(50)
             )
             val oppfolgingstilfellePerson =
-                OppfolgingstilfellePerson(
+                KOppfolgingstilfellePerson(
                     arbeidstakerFnr1,
                     listOf(syketilfelledag1, syketilfelledag2, syketilfelledag3),
                     syketilfelledag1,
@@ -311,10 +310,10 @@ object AktivitetskravVarselPlannerSpek : Spek({
                 )
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
-            coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
-                aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
+                aktivitetskravVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
                 val nrOfRowsFetchedTotal = lagreteVarsler.size
@@ -345,7 +344,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
                     "2",
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    listOf(SYKMELDING, SENDT),
+                    listOf(Tag.SYKMELDING, Tag.SENDT),
                     "1",
                     utsendingsdato.minusDays(AKTIVITETSKRAV_DAGER).atStartOfDay().toLocalDate(),
                     utsendingsdato.plusDays(30).atStartOfDay().toLocalDate()
@@ -356,7 +355,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             val sykmeldtStatusResponse =
                 SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
-            val oppfolgingstilfellePerson = OppfolgingstilfellePerson(
+            val oppfolgingstilfellePerson = KOppfolgingstilfellePerson(
                 arbeidstakerFnr1,
                 listOf(syketilfelledag1, syketilfelledag2),
                 syketilfelledag1,
@@ -366,7 +365,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
             )
 
             coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
-            coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             val lagreteVarsler1 = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
             val nrOfRowsFetchedTotal1 = lagreteVarsler1.size
@@ -375,8 +374,7 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
             // Skal lagre varsel
             runBlocking {
-                aktivitetskravVarselPlanner.processOppfolgingstilfelle(
-                    arbeidstakerAktorId1,
+                aktivitetskravVarselPlanner.processSyketilfelle(
                     arbeidstakerFnr1,
                     orgnummer
                 )
@@ -390,10 +388,9 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
         it("AkvitietskravVarselPlanner kaster RuntimeException dersom syfosyketilfelleConsumer kaster exception") {
             assertFailsWith(RuntimeException::class) {
-                coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } throws RuntimeException()
+                coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } throws RuntimeException()
                 runBlocking {
-                    aktivitetskravVarselPlanner.processOppfolgingstilfelle(
-                        arbeidstakerAktorId1,
+                    aktivitetskravVarselPlanner.processSyketilfelle(
                         arbeidstakerFnr1,
                         orgnummer
                     )
@@ -403,15 +400,14 @@ object AktivitetskravVarselPlannerSpek : Spek({
 
         it("AkvitietskravVarselPlanner dropper planlegging når syfosyketilfelle returnerer null") {
 
-            coEvery { syfosyketilfelleConsumer.getOppfolgingstilfelle(any()) } returns null
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns null
 
             runBlocking {
-                aktivitetskravVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
+                aktivitetskravVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
 
                 lagreteVarsler.size shouldBeEqualTo 0
             }
-
         }
 
         it("AkvitietskravVarselPlanner fjerner perioder uten sykmelding når den faktiske fraværlengde blir beregnet") {
@@ -446,7 +442,7 @@ fun createValidSyketilfelledag(fom: LocalDateTime, tom: LocalDateTime): Syketilf
     return Syketilfelledag(
         LocalDate.now(),
         Syketilfellebit(
-            "", "", "", LocalDateTime.now(), LocalDateTime.now(), listOf(SYKMELDING, BEKREFTET), "", fom.toLocalDate(), tom.toLocalDate()
+            "", "", "", LocalDateTime.now(), LocalDateTime.now(), listOf(Tag.SYKMELDING, Tag.BEKREFTET), "", fom.toLocalDate(), tom.toLocalDate()
         )
     )
 }

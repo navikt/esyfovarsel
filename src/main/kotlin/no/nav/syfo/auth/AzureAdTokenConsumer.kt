@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory
 import java.net.ProxySelector
 import java.time.Instant
 
-class AzureAdTokenConsumer(authEnv: AuthEnv) : TokenConsumer {
+class AzureAdTokenConsumer(authEnv: AuthEnv) {
     private val aadAccessTokenUrl = authEnv.aadAccessTokenUrl
     private val clientId = authEnv.clientId
     private val clientSecret = authEnv.clientSecret
@@ -52,7 +52,7 @@ class AzureAdTokenConsumer(authEnv: AuthEnv) : TokenConsumer {
     @Volatile
     private var tokenMap = HashMap<String, AzureAdAccessToken>()
 
-    override suspend fun getToken(resource: String?): String {
+    suspend fun getToken(resource: String): String {
         val omToMinutter = Instant.now().plusSeconds(120L)
 
         val token: AzureAdAccessToken? = tokenMap.get(resource)
@@ -66,14 +66,14 @@ class AzureAdTokenConsumer(authEnv: AuthEnv) : TokenConsumer {
                 body = FormDataContent(
                     Parameters.build {
                         append("client_id", clientId)
-                        append("scope", resource!!)
+                        append("scope", resource)
                         append("grant_type", "client_credentials")
                         append("client_secret", clientSecret)
                     }
                 )
             }
             if (response.status == HttpStatusCode.OK) {
-                tokenMap[resource!!] = response.receive()
+                tokenMap[resource] = response.receive()
             } else {
                 log.error("Could not get token from Azure AD: $response")
             }

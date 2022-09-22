@@ -3,9 +3,6 @@ package no.nav.syfo.service
 import no.nav.syfo.*
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.access.domain.canUserBeNotified
-import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
-import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
-import no.nav.syfo.consumer.syfomotebehov.SyfoMotebehovConsumer
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
@@ -27,11 +24,9 @@ import java.util.*
 class SendVarselService(
     val beskjedKafkaProducer: BeskjedKafkaProducer,
     val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
-    val narmesteLederService: NarmesteLederService,
     val accessControlService: AccessControlService,
     val urlEnv: UrlEnv,
     val appEnv: AppEnv,
-    val syfoMotebehovConsumer: SyfoMotebehovConsumer,
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
     val merVeiledningVarselService: MerVeiledningVarselService
 ) {
@@ -76,21 +71,6 @@ class SendVarselService(
                                 log.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles")
                                 UTSENDING_FEILET
                             }
-                        }
-                        SVAR_MOTEBEHOV.name -> {
-                            syfoMotebehovConsumer.sendVarselTilArbeidstaker(pPlanlagtVarsel.aktorId, fnr)
-                            if (orgnummer !== null) {
-                                val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(fnr, orgnummer)
-                                if (narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
-                                    syfoMotebehovConsumer.sendVarselTilNaermesteLeder(
-                                        pPlanlagtVarsel.aktorId,
-                                        orgnummer,
-                                        narmesteLederRelasjon!!.narmesteLederFnr!!,
-                                        pPlanlagtVarsel.fnr
-                                    )
-                                }
-                            }
-                            pPlanlagtVarsel.type
                         }
                         else -> {
                             throw RuntimeException("Ukjent typestreng")

@@ -25,7 +25,6 @@ import org.apache.kafka.common.config.SslConfigs.*
 import java.time.Duration
 import java.util.*
 
-const val topicOppfolgingsTilfelle = "aapen-syfo-oppfolgingstilfelle-v1"
 const val topicBrukernotifikasjonBeskjed = "min-side.aapen-brukernotifikasjon-beskjed-v1"
 const val topicFlexSyketilfellebiter = "flex.syketilfellebiter"
 const val topicDineSykmeldteHendelse = "teamsykmelding.dinesykmeldte-hendelser-v2"

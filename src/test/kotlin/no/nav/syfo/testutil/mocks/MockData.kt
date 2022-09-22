@@ -1,15 +1,6 @@
 package no.nav.syfo.testutil.mocks
 
 import no.nav.syfo.access.domain.UserAccessStatus
-import no.nav.syfo.consumer.pdl.*
-import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.KOppfolgingstilfellePeker
-import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.OppfolgingstilfellePerson
-import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
-import no.nav.syfo.syketilfelle.domain.Syketilfellebit
-import no.nav.syfo.syketilfelle.domain.Tag
-import java.time.LocalDate
-
-// Syfosyketilfelle
 
 const val aktorId = "1234567890123"
 const val aktorId2 = "2345678901234"
@@ -29,38 +20,6 @@ val userAccessStatus3 = UserAccessStatus(fnr3, false, true) // Kan varsles fysis
 val userAccessStatus4 = UserAccessStatus(fnr4, false, true) // Kan varsles fysisk
 val userAccessStatus5 = UserAccessStatus(fnr5, false, false) // Kan ikke varsles
 
-val fom = LocalDate.of(2021, 5, 5)
-val tom = LocalDate.of(2021, 6, 5)
-val fomStartOfDay = fom.atStartOfDay()
-
-val syketilfellebit = Syketilfellebit(
-    id = "id",
-    fnr = fnr1,
-    orgnummer = orgnummer,
-    opprettet = fomStartOfDay,
-    inntruffet = fomStartOfDay,
-    tags = listOf(Tag.SYKMELDING, Tag.SENDT),
-    ressursId = "ressursId",
-    fom = fom,
-    tom = tom
-)
-
-val syketilfelledag = Syketilfelledag(
-    dag = LocalDate.of(2021, 5, 5),
-    prioritertSyketilfellebit = syketilfellebit
-)
-
-val oppfolgingstilfelleResponse = OppfolgingstilfellePerson(
-    aktorId = aktorId,
-    tidslinje = listOf(syketilfelledag),
-    sisteDagIArbeidsgiverperiode = syketilfelledag,
-    antallBrukteDager = 2,
-    oppbruktArbeidsgiverperiode = false,
-    utsendelsestidspunkt = fomStartOfDay
-)
-
-// DKIF
-
 val dkifResponseSuccessKanVarslesResponseJSON = """
     {
         "kontaktinfo": {
@@ -75,7 +34,6 @@ val dkifResponseSuccessKanVarslesResponseJSON = """
         }
     }
 """.trim()
-
 
 val dkifResponseSuccessReservertResponseJSON = """
     {
@@ -95,105 +53,6 @@ val dkifResponseSuccessReservertResponseJSON = """
 val dkifResponseMap = mapOf(
     aktorId to dkifResponseSuccessKanVarslesResponseJSON,
     aktorId2 to dkifResponseSuccessReservertResponseJSON
-)
-
-// PDL - Persondataløsningen
-
-val pdlGetBrukerReservert = mapOf(
-    aktorId to PdlPersonResponse(
-        null,
-        PdlHentPerson(
-            PdlPerson(
-                emptyList(), emptyList(),
-            )
-        )
-    ),
-    aktorId2 to PdlPersonResponse(
-        null,
-        PdlHentPerson(
-            PdlPerson(
-                emptyList(), emptyList(),
-            )
-        )
-    ),
-    aktorId3 to PdlPersonResponse(
-        null,
-        PdlHentPerson(
-            PdlPerson(
-                listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG)),
-                listOf(PersonNavn("Fornavn", "Mellomnavn", "Etternavn"))
-            )
-        )
-    ),
-    aktorId4 to PdlPersonResponse(
-        listOf(
-            PdlError(
-                message = "Cannot find person in PDL",
-                locations = listOf(PdlErrorLocation(line = 0, column = 0)),
-                path = null,
-                extensions = PdlErrorExtension(code = "code", classification = "classification")
-            )
-        ),
-        null
-    )
-)
-
-val pdlGetFnrResponseMap = mapOf(
-    aktorId to PdlIdentResponse(
-        null,
-        PdlHentIdenter(
-            PdlIdenter(
-                listOf(
-                    PdlIdent(
-                        ident = fnr1
-                    )
-                )
-            )
-        )
-    ),
-    aktorId2 to PdlIdentResponse(
-        null,
-        PdlHentIdenter(
-            PdlIdenter(
-                listOf(
-                    PdlIdent(
-                        ident = fnr2
-                    )
-                )
-            )
-        )
-    ),
-    aktorId3 to PdlIdentResponse(
-        null,
-        PdlHentIdenter(
-            PdlIdenter(
-                listOf(
-                    PdlIdent(
-                        ident = fnr3
-                    )
-                )
-            )
-        )
-    ),
-    aktorId4 to PdlIdentResponse(
-        null,
-        PdlHentIdenter(
-            PdlIdenter(
-                listOf(
-                    PdlIdent(
-                        ident = fnr4
-                    )
-                )
-            )
-        )
-    )
-)
-
-// Kafka - Oppfolgingstilfelle
-
-val kafkaOppfolgingstilfellePeker = KOppfolgingstilfellePeker(
-    aktorId = aktorId,
-    orgnummer = orgnummer
 )
 
 val tokenFromAzureServer = Token(

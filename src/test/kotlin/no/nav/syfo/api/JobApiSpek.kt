@@ -8,12 +8,8 @@ import io.ktor.server.testing.*
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.runBlocking
 import no.nav.syfo.api.job.registerJobTriggerApi
 import no.nav.syfo.api.job.urlPathJobTrigger
-import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
-import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
-import no.nav.syfo.consumer.syfomotebehov.SyfoMotebehovConsumer
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
@@ -42,9 +38,6 @@ object JobApiSpek : Spek({
         val beskjedKafkaProducer = mockk<BeskjedKafkaProducer>()
         val arbeidsgiverNotifikasjonService = mockk<ArbeidsgiverNotifikasjonService>()
         val dineSykmeldteHendelseKafkaProducer = mockk<DineSykmeldteHendelseKafkaProducer>()
-        val narmesteLederService = mockk<NarmesteLederService>()
-        val syfoMotebeovConsumer = mockk<SyfoMotebehovConsumer>()
-        val journalpostdistribusjonConsumer = mockk<JournalpostdistribusjonConsumer>()
         val dokarkivService = mockk<DokarkivService>()
         val merVeiledningVarselService = mockk<MerVeiledningVarselService>()
 
@@ -66,11 +59,9 @@ object JobApiSpek : Spek({
             SendVarselService(
                 beskjedKafkaProducer,
                 dineSykmeldteHendelseKafkaProducer,
-                narmesteLederService,
                 accessControlService,
                 testEnv.urlEnv,
                 testEnv.appEnv,
-                syfoMotebeovConsumer,
                 arbeidsgiverNotifikasjonService,
                 merVeiledningVarselService
             )

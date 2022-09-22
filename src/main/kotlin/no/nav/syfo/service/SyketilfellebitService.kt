@@ -3,8 +3,8 @@ package no.nav.syfo.syketilfelle
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.syketilfelle.domain.Tag.*
 import no.nav.syfo.db.fetchSyketilfellebiterByFnr
-import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
-import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
+import no.nav.syfo.kafka.consumers.syketilfelle.domain.Oppfolgingstilfelle39Uker
+import no.nav.syfo.kafka.consumers.syketilfelle.domain.Syketilfelledag
 import no.nav.syfo.syketilfelle.domain.*
 import java.time.LocalDate
 import java.time.LocalDateTime
