@@ -16,7 +16,6 @@ class DokarkivService(val dokarkivConsumer: DokarkivConsumer, val pdfgenConsumer
         val mottakerNavn = pdlConsumer.hentPerson(fnr)?.getFullNameAsString()
         val maxDate = databaseInterface.fetchMaxDateByFnr(fnr)
         val pdf = pdfgenConsumer.getMerVeiledningPDF(mottakerNavn, maxDate)
-
         val dokarkivRequest = pdf?.let { createDokarkivRequest(fnr, pdf, uuid) }
 
         return dokarkivRequest?.let { dokarkivConsumer.postDocumentToDokarkiv(dokarkivRequest)?.journalpostId.toString() }
