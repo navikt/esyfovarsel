@@ -1,14 +1,13 @@
 package no.nav.syfo.db
 
-import no.nav.syfo.db.domain.PPlanlagtVarsel
-import no.nav.syfo.db.domain.PSyketilfellebit
-import no.nav.syfo.db.domain.PUtsendtVarsel
+import no.nav.syfo.db.domain.*
 import no.nav.syfo.kafka.consumers.syketilfelle.domain.KSyketilfellebit
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import no.nav.syfo.syketilfelle.domain.tagsFromString
 import java.sql.Date
 import java.sql.ResultSet
 import java.sql.Timestamp
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -28,6 +27,17 @@ fun ResultSet.toPPlanlagtVarsel() = PPlanlagtVarsel(
     utsendingsdato = getDate("utsendingsdato").toLocalDate(),
     opprettet = getTimestamp("opprettet").toLocalDateTime(),
     sistEndret = getTimestamp("sist_endret").toLocalDateTime()
+)
+
+fun ResultSet.toPPlanlagtVarselMerVeiledning(sendingDate: LocalDate) = PPlanlagtVarselMerVeiledning(
+    uuid = getString("uuid"),
+    fnr = getString("fnr"),
+    maxDate = getDate("max_date").toLocalDate(),
+    source = getString("source"),
+    sendingDate = sendingDate,
+    created = getTimestamp("opprettet").toLocalDateTime(),
+    lastChanged = getTimestamp("sist_endret").toLocalDateTime(),
+    type = VarselType.MER_VEILEDNING,
 )
 
 fun ResultSet.toPUtsendtVarsel() = PUtsendtVarsel(
