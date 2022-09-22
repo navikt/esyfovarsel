@@ -8,11 +8,14 @@ import no.nav.syfo.consumer.dokarkiv.domain.Dokument
 import no.nav.syfo.consumer.dokarkiv.domain.Dokumentvariant
 import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
 import no.nav.syfo.consumer.pdl.getFullNameAsString
+import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.fetchMaxDateByFnr
 
-class DokarkivService(val dokarkivConsumer: DokarkivConsumer, val pdfgenConsumer: PdfgenConsumer, val pdlConsumer: PdlConsumer) {
+class DokarkivService(val dokarkivConsumer: DokarkivConsumer, val pdfgenConsumer: PdfgenConsumer, val pdlConsumer: PdlConsumer, val databaseInterface: DatabaseInterface) {
     suspend fun getJournalpostId(fnr: String, uuid: String): String? {
         val mottakerNavn = pdlConsumer.hentPerson(fnr)?.getFullNameAsString()
-        val pdf = pdfgenConsumer.getMerVeiledningPDF(mottakerNavn, null)
+        val maxDate = databaseInterface.fetchMaxDateByFnr(fnr)
+        val pdf = pdfgenConsumer.getMerVeiledningPDF(mottakerNavn, maxDate)
         val dokarkivRequest = pdf?.let { createDokarkivRequest(fnr, pdf, uuid) }
 
         return dokarkivRequest?.let { dokarkivConsumer.postDocumentToDokarkiv(dokarkivRequest)?.journalpostId.toString() }
