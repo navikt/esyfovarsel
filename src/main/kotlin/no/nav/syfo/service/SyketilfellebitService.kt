@@ -97,6 +97,9 @@ class SyketilfellebitService(
         }
     }
 
+    fun sisteDagISyketilfelle(fnr: String): LocalDate? =
+        beregnKOppfolgingstilfelle39UkersVarsel(fnr)?.tom
+
     private fun slaaSammenTilfeller(
         fnr: String,
         oppfolgingstilfeller: List<Oppfolgingstilfelle>

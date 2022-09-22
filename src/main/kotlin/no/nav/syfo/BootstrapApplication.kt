@@ -43,6 +43,7 @@ import no.nav.syfo.kafka.consumers.utbetaling.UtbetalingKafkaConsumer
 import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
+import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.planner.*
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
@@ -85,12 +86,14 @@ fun main() {
                 val journalpostdistribusjonConsumer = JournalpostdistribusjonConsumer(env.urlEnv, azureAdTokenConsumer)
                 val pdfgenConsumer = PdfgenConsumer(env.urlEnv)
                 val dokarkivConsumer = DokarkivConsumer(env.urlEnv, azureAdTokenConsumer)
-                val dokarkivService = DokarkivService(dokarkivConsumer, pdfgenConsumer, pdlConsumer)
+                val dokarkivService = DokarkivService(dokarkivConsumer, pdfgenConsumer, pdlConsumer, database)
 
                 val beskjedKafkaProducer = BeskjedKafkaProducer(env)
                 val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
+                val dittSykefravaerMeldingKafkaProdcuer = DittSykefravaerMeldingKafkaProducer(env)
 
                 val accessControlService = AccessControlService(pdlConsumer, dkifConsumer)
+                val fysiskBrevUtsendingService = FysiskBrevUtsendingService(dokarkivService, journalpostdistribusjonConsumer)
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
                 val syketilfellebitService = SyketilfellebitService(database)
                 val varselSendtService = VarselSendtService(pdlConsumer, syketilfellebitService, database)
@@ -103,10 +106,21 @@ fun main() {
                 val svarMotebehovVarselPlannerSyketilfellebit = SvarMotebehovVarselPlannerSyketilfellebit(database, syketilfellebitService, varselSendtService)
                 val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
                 val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControlService)
-                val senderFacade = SenderFacade(dineSykmeldteHendelseKafkaProducer, brukernotifikasjonerService, arbeidsgiverNotifikasjonService, database)
-                val motebehovVarselService = MotebehovVarselService(senderFacade, env.urlEnv.dialogmoterUrl)
+                val senderFacade = SenderFacade(
+                    dineSykmeldteHendelseKafkaProducer,
+                    dittSykefravaerMeldingKafkaProdcuer,
+                    brukernotifikasjonerService,
+                    arbeidsgiverNotifikasjonService,
+                    fysiskBrevUtsendingService,
+                    database,
+                )
+                val motebehovVarselService = MotebehovVarselService(
+                    senderFacade,
+                    env.urlEnv.dialogmoterUrl,
+                )
                 val oppfolgingsplanVarselService = OppfolgingsplanVarselService(senderFacade)
                 val sykepengerMaxDateService = SykepengerMaxDateService(database)
+                val merVeiledningVarselService = MerVeiledningVarselService(senderFacade, syketilfellebitService, env.urlEnv)
 
                 val syfoMotebehovConsumer = SyfoMotebehovConsumer(env.urlEnv, stsConsumer)
 
@@ -127,8 +141,7 @@ fun main() {
                         narmesteLederService,
                         syfoMotebehovConsumer,
                         arbeidsgiverNotifikasjonService,
-                        journalpostdistribusjonConsumer,
-                        dokarkivService,
+                        merVeiledningVarselService
                     )
 
                     kafkaModule(
@@ -202,8 +215,7 @@ fun Application.serverModule(
     narmesteLederService: NarmesteLederService,
     syfoMotebehovConsumer: SyfoMotebehovConsumer,
     arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
-    journalpostdistribusjonConsumer: JournalpostdistribusjonConsumer,
-    dokarkivService: DokarkivService,
+    merVeiledningVarselService: MerVeiledningVarselService
 ) {
 
     val sendVarselService =
@@ -216,8 +228,7 @@ fun Application.serverModule(
             env.appEnv,
             syfoMotebehovConsumer,
             arbeidsgiverNotifikasjonService,
-            journalpostdistribusjonConsumer,
-            dokarkivService,
+            merVeiledningVarselService
         )
 
     val varselSender = VarselSender(
