@@ -62,6 +62,7 @@ object VarselSenderSpek : Spek({
             sendVarselJobb.testSendVarsler()
 
             embeddedDatabase.skalHaMaxDate(maxDate)
+            // TODO: Add an assertion for varsel is send out, moved to utsendte varsler tabel when sending is implemented
         }
 
 
