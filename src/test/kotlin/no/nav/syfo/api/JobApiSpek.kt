@@ -8,12 +8,8 @@ import io.ktor.server.testing.*
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.runBlocking
 import no.nav.syfo.api.job.registerJobTriggerApi
 import no.nav.syfo.api.job.urlPathJobTrigger
-import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
-import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
-import no.nav.syfo.consumer.syfomotebehov.SyfoMotebehovConsumer
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storePlanlagtVarsel
@@ -42,22 +38,14 @@ object JobApiSpek : Spek({
         val beskjedKafkaProducer = mockk<BeskjedKafkaProducer>()
         val arbeidsgiverNotifikasjonService = mockk<ArbeidsgiverNotifikasjonService>()
         val dineSykmeldteHendelseKafkaProducer = mockk<DineSykmeldteHendelseKafkaProducer>()
-        val narmesteLederService = mockk<NarmesteLederService>()
-        val syfoMotebeovConsumer = mockk<SyfoMotebehovConsumer>()
-        val journalpostdistribusjonConsumer = mockk<JournalpostdistribusjonConsumer>()
         val dokarkivService = mockk<DokarkivService>()
         val merVeiledningVarselService = mockk<MerVeiledningVarselService>()
 
-        coEvery { accessControlService.getUserAccessStatusByFnr(fnr1) } returns userAccessStatus1
-        coEvery { accessControlService.getUserAccessStatusByFnr(fnr2) } returns userAccessStatus2
-        coEvery { accessControlService.getUserAccessStatusByFnr(fnr3) } returns userAccessStatus3
-        coEvery { accessControlService.getUserAccessStatusByFnr(fnr4) } returns userAccessStatus4
-        coEvery { accessControlService.getUserAccessStatusByFnr(fnr5) } returns userAccessStatus5
-        coEvery { accessControlService.getUserAccessStatusByAktorId(aktorId) } returns userAccessStatus1
-        coEvery { accessControlService.getUserAccessStatusByAktorId(aktorId2) } returns userAccessStatus2
-        coEvery { accessControlService.getUserAccessStatusByAktorId(aktorId3) } returns userAccessStatus3
-        coEvery { accessControlService.getUserAccessStatusByAktorId(aktorId4) } returns userAccessStatus4
-        coEvery { accessControlService.getUserAccessStatusByAktorId(aktorId5) } returns userAccessStatus5
+        coEvery { accessControlService.getUserAccessStatus(fnr1) } returns userAccessStatus1
+        coEvery { accessControlService.getUserAccessStatus(fnr2) } returns userAccessStatus2
+        coEvery { accessControlService.getUserAccessStatus(fnr3) } returns userAccessStatus3
+        coEvery { accessControlService.getUserAccessStatus(fnr4) } returns userAccessStatus4
+        coEvery { accessControlService.getUserAccessStatus(fnr5) } returns userAccessStatus5
 
         coEvery { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
         coEvery { dokarkivService.getJournalpostId(any(), any()) } returns "1"
@@ -66,11 +54,8 @@ object JobApiSpek : Spek({
             SendVarselService(
                 beskjedKafkaProducer,
                 dineSykmeldteHendelseKafkaProducer,
-                narmesteLederService,
                 accessControlService,
                 testEnv.urlEnv,
-                testEnv.appEnv,
-                syfoMotebeovConsumer,
                 arbeidsgiverNotifikasjonService,
                 merVeiledningVarselService
             )

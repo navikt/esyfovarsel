@@ -22,7 +22,6 @@ val jacksonVersion = "2.13.2"
 val jacksonDatabindVersion = "2.13.2.2"
 val postgresEmbeddedVersion = "0.13.3"
 val kafkaVersion = "2.7.0"
-val kafkaEmbeddedVersion = "2.8.1"
 val avroVersion = "1.11.0"
 val confluentVersion = "6.2.1"
 val brukernotifikasjonerSchemaVersion = "2.5.1"
@@ -106,9 +105,6 @@ dependencies {
     }
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
-    testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion") {
-        exclude(group = "log4j")
-    }
     testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spekVersion")
     testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spekVersion")
 }

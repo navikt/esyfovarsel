@@ -1,10 +1,10 @@
 package no.nav.syfo.db.domain
 
-import java.sql.Timestamp
 import java.sql.Date
+import java.sql.Timestamp
 import java.util.*
 
-data class PSyketilfellebit (
+data class PSyketilfellebit(
     val uuid: UUID,
     val id: String,
     val fnr: String,

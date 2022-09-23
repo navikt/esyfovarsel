@@ -10,9 +10,9 @@ import org.amshove.kluent.shouldNotBe
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
-const val aktorIdNonReservedUser = aktorId
-const val aktorIdReservedUser = aktorId2
-const val aktorIdInvalid = "${aktorId}-with-invalid-input"
+const val fnrNonReservedUser = fnr1
+const val fnrReservedUser = fnr2
+const val fnrInvalid = "${fnr1}-with-invalid-input"
 
 object DkifConsumerSpek : Spek({
 
@@ -36,19 +36,19 @@ object DkifConsumerSpek : Spek({
 
     describe("DkifConsumerSpek") {
         it("Call DKIF for non-reserved user") {
-            val dkifResponse = runBlocking { dkifConsumer.kontaktinfo(aktorIdNonReservedUser) }
+            val dkifResponse = runBlocking { dkifConsumer.person(fnrNonReservedUser) }
             dkifResponse shouldNotBe null
             dkifResponse!!.kanVarsles shouldBeEqualTo true
         }
 
         it("Call DKIF for reserved user") {
-            val dkifResponse = runBlocking { dkifConsumer.kontaktinfo(aktorIdReservedUser) }
+            val dkifResponse = runBlocking { dkifConsumer.person(fnrReservedUser) }
             dkifResponse shouldNotBe null
             dkifResponse!!.kanVarsles shouldBeEqualTo false
         }
 
         it("DKIF consumer should return null on invalid aktorid") {
-            val dkifResponse = runBlocking { dkifConsumer.kontaktinfo(aktorIdInvalid) }
+            val dkifResponse = runBlocking { dkifConsumer.person(fnrInvalid) }
             dkifResponse shouldBeEqualTo null
         }
     }

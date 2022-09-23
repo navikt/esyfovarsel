@@ -1,6 +1,6 @@
 package no.nav.syfo.syketilfelle.domain
 
-import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Syketilfelledag
+import no.nav.syfo.kafka.consumers.syketilfelle.domain.Syketilfelledag
 import java.time.temporal.ChronoUnit
 
 class Tidslinje(private val syketilfellebiter: Syketilfellebiter) {

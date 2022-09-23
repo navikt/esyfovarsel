@@ -7,12 +7,12 @@ on:
 jobs:
   deploy-topic-to-dev:
     if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/varselbus-')
-    name: Deploy topic to dev-gcp
+    name: Deploy topic to dev
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Deploy topic varselbus to dev-gcp
+      - name: Deploy topic varselbus to dev
         uses: nais/deploy/actions/deploy@master
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
@@ -22,12 +22,12 @@ jobs:
 
   deploy-varsel-migration-to-dev:
     if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/varsel-migration')
-    name: Deploy varsel-migration-topic to dev-gcp
+    name: Deploy varsel-migration-topic to dev
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Deploy topic varsel-migration to dev-gcp
+      - name: Deploy topic varsel-migration to dev
         uses: nais/deploy/actions/deploy@master
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
@@ -37,12 +37,12 @@ jobs:
 
   deploy-topic-to-prod:
     if: github.ref == 'refs/heads/master'
-    name: Deploy topic to prod-gcp
+    name: Deploy topic to prod
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Deploy topic varselbus to prod-gcp
+      - name: Deploy topic varselbus to prod
         uses: nais/deploy/actions/deploy@master
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
@@ -52,12 +52,12 @@ jobs:
 
   deploy-varsel-migration-to-prod:
     if: github.ref == 'refs/heads/master'
-    name: Deploy varsel-migration-topic to prod-gcp
+    name: Deploy varsel-migration-topic to prod
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Deploy topic varsel-migration to prod-gcp
+      - name: Deploy topic varsel-migration to prod
         uses: nais/deploy/actions/deploy@master
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}

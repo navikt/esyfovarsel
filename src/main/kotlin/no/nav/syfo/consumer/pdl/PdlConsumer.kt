@@ -6,14 +6,13 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
-import no.nav.syfo.auth.TokenConsumer
+import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.consumer.pdl.*
-import no.nav.syfo.isNotGCP
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
 
-open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: TokenConsumer) {
+open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client = httpClient()
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.PdlConsumer")
 
@@ -91,7 +90,7 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: To
 
     private fun callPdl(service: String, ident: String): HttpResponse? {
         return runBlocking {
-            val token = tokenConsumer.getToken(urlEnv.pdlScope)
+            val token = azureAdTokenConsumer.getToken(urlEnv.pdlScope)
             val bearerTokenString = "Bearer $token"
             val graphQueryResourcePath = "$QUERY_PATH_PREFIX/$service"
             val graphQuery =
@@ -105,11 +104,6 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: To
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, bearerTokenString)
                     }
-                    if (isNotGCP()) {
-                        headers {
-                            append(NAV_CONSUMER_TOKEN_HEADER, bearerTokenString)
-                        }
-                    }
                     body = requestBody
                 }
             } catch (e: Exception) {
@@ -120,7 +114,7 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val tokenConsumer: To
     }
 }
 
-class LocalPdlConsumer(urlEnv: UrlEnv, tokenConsumer: TokenConsumer) : PdlConsumer(urlEnv, tokenConsumer) {
+class LocalPdlConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer) : PdlConsumer(urlEnv, azureAdTokenConsumer) {
     override fun getFnr(aktorId: String): String {
         return aktorId.substring(0, 11)
     }

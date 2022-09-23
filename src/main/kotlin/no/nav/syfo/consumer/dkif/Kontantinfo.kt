@@ -20,21 +20,6 @@ object KontaktinfoMapper {
         configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
     }
 
-    fun map(json: String, aktorId: String): Kontaktinfo? {
-        val jsonNode = objectMapper.readTree(json)
-
-        if (jsonNode.has("feil")) {
-            return null
-        }
-
-        jsonNode.path("kontaktinfo").path(aktorId).let {
-            return Kontaktinfo(
-                it["kanVarsles"]?.asBoolean(),
-                it["reservert"]?.asBoolean()
-            )
-        }
-    }
-
     fun mapPerson(json: String): Kontaktinfo? {
         val jsonNode = objectMapper.readTree(json)
 

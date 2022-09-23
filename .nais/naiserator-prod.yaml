@@ -22,31 +22,77 @@ spec:
   resources:
     limits:
       cpu: 2000m
-      memory: 1024Mi
+      memory: 1536Mi
     requests:
       cpu: 1000m
-      memory: 512Mi
+      memory: 1024Mi
   replicas:
-    min: 1
-    max: 2
+    min: 4
+    max: 4
     cpuThresholdPercentage: 90
   prometheus:
     enabled: true
     path: /prometheus
-  vault:
-    enabled: true
-    paths:
-      - kvPath: "/serviceuser/data/prod/srvesyfovarsel"
-        mountPath: "/var/run/secrets"
   azure:
     application:
       enabled: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: syfomotebehov
+          namespace: team-esyfo
+          cluster: prod-fss
+    outbound:
+      external:
+        - host: pdl-api.prod-fss-pub.nais.io
+        - host: dokdistfordeling.prod-fss-pub.nais.io
+        - host: dokarkiv.prod-fss-pub.nais.io
+      rules:
+        - application: digdir-krr-proxy
+        - application: security-token-service
+        - application: syfooppdfgen
+          namespace: team-esyfo
+          cluster: prod-gcp
+        - application: syfosmregister
+          namespace: teamsykmelding
+          cluster: prod-gcp
+        - application: narmesteleder
+          namespace: teamsykmelding
+          cluster: prod-gcp
+  gcp:
+    sqlInstances:
+      - autoBackupHour: 1
+        cascadingDelete: true
+        collation: nb_NO.UTF8
+        databases:
+          - envVarPrefix: GCP_DB
+            name: esyfovarsel
+        diskAutoresize: true
+        diskSize: 80
+        diskType: SSD
+        flags:
+          - name: max_connections
+            value: "50"
+        highAvailability: true
+        insights:
+          enabled: true
+          recordApplicationTags: true
+          recordClientAddress: true
+        maintenance:
+          day: 1
+          hour: 4
+        name: esyfovarsel-instance
+        pointInTimeRecovery: true
+        tier: db-custom-4-15360
+        type: POSTGRES_13
   webproxy: true
   ingresses:
-    - "https://esyfovarsel.nais.adeo.no"
+    - "https://esyfovarsel.intern.nav.no"
   kafka:
     pool: nav-prod
   leaderElection: true
+  filesFrom:
+    - secret: esyfovarsel-serviceuser
   envFrom:
     - configmap: loginservice-idporten
   env:

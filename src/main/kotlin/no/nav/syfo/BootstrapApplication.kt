@@ -25,19 +25,13 @@ import no.nav.syfo.consumer.dokarkiv.DokarkivConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
-import no.nav.syfo.consumer.syfomotebehov.SyfoMotebehovConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
-import no.nav.syfo.consumer.syfosyketilfelle.LocalSyfosyketilfelleConsumer
-import no.nav.syfo.consumer.syfosyketilfelle.SyfosyketilfelleConsumer
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.DatabaseInterface
-import no.nav.syfo.db.LocalDatabase
-import no.nav.syfo.db.RemoteDatabase
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.job.sendNotificationsJob
 import no.nav.syfo.kafka.common.launchKafkaListener
 import no.nav.syfo.kafka.consumers.infotrygd.InfotrygdKafkaConsumer
-import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.OppfolgingstilfelleKafkaConsumer
 import no.nav.syfo.kafka.consumers.syketilfelle.SyketilfelleKafkaConsumer
 import no.nav.syfo.kafka.consumers.utbetaling.UtbetalingKafkaConsumer
 import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
@@ -72,12 +66,10 @@ fun main() {
                 config = HoconApplicationConfig(ConfigFactory.load())
                 database = initDb(env.dbEnv)
 
-                val stsConsumer = getStsConsumer(env.urlEnv, env.authEnv)
                 val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
 
-                val pdlConsumer = getPdlConsumer(env.urlEnv, azureAdTokenConsumer, stsConsumer)
-                val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer, stsConsumer)
-                val oppfolgingstilfelleConsumer = getSyfosyketilfelleConsumer(env.urlEnv, stsConsumer)
+                val pdlConsumer = getPdlConsumer(env.urlEnv, azureAdTokenConsumer)
+                val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer)
                 val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
                 val narmesteLederConsumer = NarmesteLederConsumer(env.urlEnv, azureAdTokenConsumer)
                 val narmesteLederService = NarmesteLederService(narmesteLederConsumer)
@@ -97,13 +89,9 @@ fun main() {
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
                 val syketilfellebitService = SyketilfellebitService(database)
                 val varselSendtService = VarselSendtService(pdlConsumer, syketilfellebitService, database)
-                val merVeiledningVarselPlanner = MerVeiledningVarselPlannerOppfolgingstilfelle(database, oppfolgingstilfelleConsumer, varselSendtService)
 
-                val merVeiledningVarselPlannerSyketilfellebit = MerVeiledningVarselPlannerSyketilfellebit(database, syketilfellebitService, varselSendtService)
-                val aktivitetskravVarselPlanner = AktivitetskravVarselPlannerOppfolgingstilfelle(database, oppfolgingstilfelleConsumer, sykmeldingService)
-                val aktivitetskravVarselPlannerSyketilfellebit = AktivitetskravVarselPlannerSyketilfellebit(database, syketilfellebitService, sykmeldingService)
-                val svarMotebehovVarselPlanner = SvarMotebehovVarselPlannerOppfolgingstilfelle(database, oppfolgingstilfelleConsumer, varselSendtService)
-                val svarMotebehovVarselPlannerSyketilfellebit = SvarMotebehovVarselPlannerSyketilfellebit(database, syketilfellebitService, varselSendtService)
+                val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, syketilfellebitService, varselSendtService)
+                val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, syketilfellebitService, sykmeldingService)
                 val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
                 val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControlService)
                 val senderFacade = SenderFacade(
@@ -122,7 +110,8 @@ fun main() {
                 val sykepengerMaxDateService = SykepengerMaxDateService(database)
                 val merVeiledningVarselService = MerVeiledningVarselService(senderFacade, syketilfellebitService, env.urlEnv)
 
-                val syfoMotebehovConsumer = SyfoMotebehovConsumer(env.urlEnv, stsConsumer)
+                val varselBusService =
+                    VarselBusService(motebehovVarselService, oppfolgingsplanVarselService)
 
                 connector {
                     port = env.appEnv.applicationPort
@@ -138,8 +127,6 @@ fun main() {
                         replanleggingService,
                         beskjedKafkaProducer,
                         dineSykmeldteHendelseKafkaProducer,
-                        narmesteLederService,
-                        syfoMotebehovConsumer,
                         arbeidsgiverNotifikasjonService,
                         merVeiledningVarselService
                     )
@@ -147,19 +134,10 @@ fun main() {
                     kafkaModule(
                         env,
                         accessControlService,
+                        varselBusService,
                         aktivitetskravVarselPlanner,
-                        aktivitetskravVarselPlannerSyketilfellebit,
                         merVeiledningVarselPlanner,
-                        merVeiledningVarselPlannerSyketilfellebit,
-                        svarMotebehovVarselPlanner,
-                        svarMotebehovVarselPlannerSyketilfellebit,
                         sykepengerMaxDateService,
-                    )
-
-                    varselBusModule(
-                        env,
-                        motebehovVarselService,
-                        oppfolgingsplanVarselService
                     )
                 }
             }
@@ -175,34 +153,18 @@ fun main() {
     }
 }
 
-private fun getStsConsumer(urlEnv: UrlEnv, authEnv: AuthEnv): TokenConsumer {
-    if (isLocal()) {
-        return LocalStsConsumer(urlEnv, authEnv)
-    }
-    return StsConsumer(urlEnv, authEnv)
-}
-
-private fun getPdlConsumer(urlEnv: UrlEnv, azureADConsumer: TokenConsumer, stsConsumer: TokenConsumer): PdlConsumer {
+private fun getPdlConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsumer): PdlConsumer {
     return when {
         isLocal() -> LocalPdlConsumer(urlEnv, azureADConsumer)
-        isGCP() -> PdlConsumer(urlEnv, azureADConsumer)
-        else -> PdlConsumer(urlEnv, stsConsumer)
+        else -> PdlConsumer(urlEnv, azureADConsumer)
     }
 }
 
-private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: TokenConsumer, stsConsumer: TokenConsumer): DkifConsumer {
+private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsumer): DkifConsumer {
     return when {
         isLocal() -> DkifConsumer(urlEnv, azureADConsumer)
-        isGCP() -> DkifConsumer(urlEnv, azureADConsumer)
-        else -> DkifConsumer(urlEnv, stsConsumer)
+        else -> DkifConsumer(urlEnv, azureADConsumer)
     }
-}
-
-private fun getSyfosyketilfelleConsumer(urlEnv: UrlEnv, tokenConsumer: TokenConsumer): SyfosyketilfelleConsumer {
-    if (isLocal()) {
-        return LocalSyfosyketilfelleConsumer(urlEnv, tokenConsumer)
-    }
-    return SyfosyketilfelleConsumer(urlEnv, tokenConsumer)
 }
 
 fun Application.serverModule(
@@ -212,8 +174,6 @@ fun Application.serverModule(
     replanleggingService: ReplanleggingService,
     beskjedKafkaProducer: BeskjedKafkaProducer,
     dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
-    narmesteLederService: NarmesteLederService,
-    syfoMotebehovConsumer: SyfoMotebehovConsumer,
     arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
     merVeiledningVarselService: MerVeiledningVarselService
 ) {
@@ -222,11 +182,8 @@ fun Application.serverModule(
         SendVarselService(
             beskjedKafkaProducer,
             dineSykmeldteHendelseKafkaProducer,
-            narmesteLederService,
             accessControlService,
             env.urlEnv,
-            env.appEnv,
-            syfoMotebehovConsumer,
             arbeidsgiverNotifikasjonService,
             merVeiledningVarselService
         )
@@ -275,97 +232,50 @@ fun Application.serverModule(
 fun Application.kafkaModule(
     env: Environment,
     accessControlService: AccessControlService,
-    aktivitetskravVarselPlanner: AktivitetskravVarselPlannerOppfolgingstilfelle,
-    aktivitetskravVarselPlannerSyketilfellebit: AktivitetskravVarselPlannerSyketilfellebit,
-    merVeiledningVarselPlanner: MerVeiledningVarselPlannerOppfolgingstilfelle,
-    merVeiledningVarselPlannerSyketilfellebit: MerVeiledningVarselPlannerSyketilfellebit,
-    svarMotebehovVarselPlanner: SvarMotebehovVarselPlannerOppfolgingstilfelle,
-    svarMotebehovVarselPlannerSyketilfellebit: SvarMotebehovVarselPlannerSyketilfellebit,
+    varselbusService: VarselBusService,
+    aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
+    merVeiledningVarselPlanner: MerVeiledningVarselPlanner,
     sykepengerMaxDateService: SykepengerMaxDateService
 ) {
     runningRemotely {
+        launch(backgroundTasksContext) {
+            launchKafkaListener(
+                state,
+                SyketilfelleKafkaConsumer(env, accessControlService, database)
+                    .addPlanner(merVeiledningVarselPlanner)
+                    .addPlanner(aktivitetskravVarselPlanner)
+            )
+        }
 
-        runningInFSSCluster {
+        if (env.toggleEnv.toggleInfotrygdKafkaConsumer) {
             launch(backgroundTasksContext) {
                 launchKafkaListener(
                     state,
-                    OppfolgingstilfelleKafkaConsumer(env, accessControlService)
-                        .addPlanner(aktivitetskravVarselPlanner)
-                        .addPlanner(merVeiledningVarselPlanner)
-                        .addPlanner(svarMotebehovVarselPlanner),
+                    InfotrygdKafkaConsumer(env, sykepengerMaxDateService)
                 )
             }
         }
 
-        runningInGCPCluster {
+        if (env.toggleEnv.toggleUtbetalingKafkaConsumer) {
             launch(backgroundTasksContext) {
                 launchKafkaListener(
                     state,
-                    SyketilfelleKafkaConsumer(env, accessControlService, database)
-                        .addPlanner(merVeiledningVarselPlannerSyketilfellebit)
-                        .addPlanner(aktivitetskravVarselPlannerSyketilfellebit)
-                        .addPlanner(svarMotebehovVarselPlannerSyketilfellebit)
+                    UtbetalingKafkaConsumer(env, sykepengerMaxDateService)
                 )
             }
         }
 
-        runningInGCPCluster {
-            if (env.toggleEnv.toggleInfotrygdKafkaConsumer) {
-                launch(backgroundTasksContext) {
-                    launchKafkaListener(
-                        state,
-                        InfotrygdKafkaConsumer(env, sykepengerMaxDateService)
-                    )
-                }
-            }
-        }
-
-        runningInGCPCluster {
-            if (env.toggleEnv.toggleUtbetalingKafkaConsumer) {
-                launch(backgroundTasksContext) {
-                    launchKafkaListener(
-                        state,
-                        UtbetalingKafkaConsumer(env, sykepengerMaxDateService)
-                    )
-                }
-            }
-        }
-    }
-}
-
-fun Application.varselBusModule(
-    env: Environment,
-    motebehovVarselService: MotebehovVarselService,
-    oppfolgingsplanVarselService: OppfolgingsplanVarselService
-) {
-    runningRemotely {
-        runningInGCPCluster {
-            val varselBusService =
-                VarselBusService(motebehovVarselService, oppfolgingsplanVarselService)
-
-            launch(backgroundTasksContext) {
-                launchKafkaListener(
-                    state,
-                    VarselBusKafkaConsumer(env, varselBusService)
-                )
-            }
+        launch(backgroundTasksContext) {
+            launchKafkaListener(
+                state,
+                VarselBusKafkaConsumer(env, varselbusService)
+            )
         }
     }
 }
 
 val Application.envKind
     get() = environment.config.property("ktor.environment").getString()
-
-val Application.cluster
-    get() = environment.config.property("ktor.cluster").getString()
-
-fun Application.runningInFSSCluster(block: () -> Unit) {
-    if (cluster.contains("fss")) block()
-}
-
-fun Application.runningInGCPCluster(block: () -> Unit) {
-    if (cluster.contains("gcp")) block()
-}
 
 fun Application.runningRemotely(block: () -> Unit) {
     if (envKind == "remote") block()
@@ -377,11 +287,6 @@ fun Application.runningLocally(block: () -> Unit) {
 
 fun initDb(dbEnv: DbEnv): DatabaseInterface =
     when {
-        isLocal() -> localDatabase(dbEnv)
-        isGCP() -> Database(dbEnv)
-        else -> remoteDatabase(dbEnv)
+        isLocal() -> Database(dbEnv)
+        else ->  Database(dbEnv)
     }
-
-private fun localDatabase(dbEnv: DbEnv): DatabaseInterface = LocalDatabase(dbEnv)
-
-private fun remoteDatabase(dbEnv: DbEnv): DatabaseInterface = RemoteDatabase(dbEnv)

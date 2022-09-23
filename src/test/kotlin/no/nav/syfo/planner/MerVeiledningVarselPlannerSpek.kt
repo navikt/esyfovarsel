@@ -4,14 +4,13 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.PdlConsumer
-import no.nav.syfo.consumer.syfosyketilfelle.SyfosyketilfelleConsumer
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
 import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.db.storeUtsendtVarselTest
-import no.nav.syfo.kafka.consumers.oppfolgingstilfelle.domain.Oppfolgingstilfelle39Uker
+import no.nav.syfo.kafka.consumers.syketilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.testutil.*
@@ -22,16 +21,15 @@ import java.time.temporal.ChronoUnit
 import java.util.*
 import kotlin.test.assertFailsWith
 
-object MerVeiledningVarselPlannerSpek : Spek({
+object MerVeiledningVarselPlannerSyketilfellebitSpek : Spek({
 
-    describe("MerVeiledningVarselPlannerSpek") {
+    describe("MerVeiledningVarselPlannerSyketilfellebitSpek") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
-        val syketilfelleConsumer = mockk<SyfosyketilfelleConsumer>()
         val syketilfellebitService = mockk<SyketilfellebitService>()
         val pdlConsumer = mockk<PdlConsumer>()
         val varselSendtService = VarselSendtService(pdlConsumer, syketilfellebitService, embeddedDatabase)
 
-        val merVeiledningVarselPlanner = MerVeiledningVarselPlannerOppfolgingstilfelle(embeddedDatabase, syketilfelleConsumer, varselSendtService)
+        val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(embeddedDatabase, syketilfellebitService, varselSendtService)
 
         afterEachTest {
             embeddedDatabase.connection.dropData()
@@ -53,10 +51,10 @@ object MerVeiledningVarselPlannerSpek : Spek({
                 tom
             )
 
-            coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             runBlocking {
-                merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
+                merVeiledningVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
                 lagreteVarsler.skalHaEt39UkersVarsel()
@@ -76,7 +74,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
                 tom
             )
 
-            coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             val dagenForTilfelleStartet = fom.minusDays(1)
             val tidligereUtsendtVarsel = PPlanlagtVarsel(
@@ -93,7 +91,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
             embeddedDatabase.storeUtsendtVarselTest(tidligereUtsendtVarsel)
 
             runBlocking {
-                merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
+                merVeiledningVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
                 lagreteVarsler.skalHaEt39UkersVarsel()
@@ -113,7 +111,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
                 tom
             )
 
-            coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             val tidligereUtsendtVarsel = PPlanlagtVarsel(
                 UUID.randomUUID().toString(),
@@ -129,7 +127,7 @@ object MerVeiledningVarselPlannerSpek : Spek({
             embeddedDatabase.storeUtsendtVarselTest(tidligereUtsendtVarsel)
 
             runBlocking {
-                merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
+                merVeiledningVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
                 lagreteVarsler.skalIkkeHa39UkersVarsel()
@@ -148,10 +146,10 @@ object MerVeiledningVarselPlannerSpek : Spek({
                 tom
             )
 
-            coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             runBlocking {
-                merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
+                merVeiledningVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
 
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
                 lagreteVarsler.skalIkkeHa39UkersVarsel()
@@ -171,10 +169,10 @@ object MerVeiledningVarselPlannerSpek : Spek({
                 tom
             )
 
-            coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             runBlocking {
-                merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
+                merVeiledningVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
 
                 lagreteVarsler.skalIkkeHa39UkersVarsel()
@@ -213,10 +211,10 @@ object MerVeiledningVarselPlannerSpek : Spek({
                 tom
             )
 
-            coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns oppfolgingstilfelle39Uker
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns oppfolgingstilfelle39Uker
 
             runBlocking {
-                merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
+                merVeiledningVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
 
                 lagreteVarsler.skalHaEt39UkersVarsel()
@@ -227,19 +225,19 @@ object MerVeiledningVarselPlannerSpek : Spek({
         it("MerVeiledningVarselPlanner kaster RuntimeException dersom syfosyketilfelleConsumer kaster exception") {
 
             assertFailsWith<RuntimeException> {
-                coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } throws RuntimeException()
+                coEvery { syketilfellebitService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } throws RuntimeException()
                 runBlocking {
-                    merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
+                    merVeiledningVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
                 }
             }
         }
 
         it("MerVeiledningVarselPlanner dropper planlegging når syfosyketilfelle returnerer null") {
 
-            coEvery { syketilfelleConsumer.getOppfolgingstilfelle39Uker(any()) } returns null
+            coEvery { syketilfellebitService.beregnKOppfolgingstilfelle39UkersVarsel(any()) } returns null
 
             runBlocking {
-                merVeiledningVarselPlanner.processOppfolgingstilfelle(arbeidstakerAktorId1, arbeidstakerFnr1, orgnummer)
+                merVeiledningVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
                 val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
 
                 lagreteVarsler.skalIkkeHa39UkersVarsel()
