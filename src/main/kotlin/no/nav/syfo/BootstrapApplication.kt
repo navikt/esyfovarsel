@@ -123,7 +123,6 @@ fun main() {
                     serverModule(
                         env,
                         accessControlService,
-                        varselSendtService,
                         replanleggingService,
                         beskjedKafkaProducer,
                         dineSykmeldteHendelseKafkaProducer,
@@ -170,7 +169,6 @@ private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsume
 fun Application.serverModule(
     env: Environment,
     accessControlService: AccessControlService,
-    varselSendtService: VarselSendtService,
     replanleggingService: ReplanleggingService,
     beskjedKafkaProducer: BeskjedKafkaProducer,
     dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
@@ -214,11 +212,11 @@ fun Application.serverModule(
     }
 
     runningRemotely {
-        setupRoutesWithAuthentication(varselSender, varselSendtService, replanleggingService, env.authEnv)
+        setupRoutesWithAuthentication(varselSender, replanleggingService, env.authEnv)
     }
 
     runningLocally {
-        setupLocalRoutesWithAuthentication(varselSender, varselSendtService, replanleggingService, env.authEnv)
+        setupLocalRoutesWithAuthentication(varselSender, replanleggingService, env.authEnv)
     }
 
     routing {
@@ -288,5 +286,5 @@ fun Application.runningLocally(block: () -> Unit) {
 fun initDb(dbEnv: DbEnv): DatabaseInterface =
     when {
         isLocal() -> Database(dbEnv)
-        else ->  Database(dbEnv)
+        else -> Database(dbEnv)
     }
