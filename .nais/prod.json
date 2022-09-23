@@ -13,7 +13,6 @@
     "TOGGLE_INFOTRYGD_KAFKA_CONSUMER": "false",
     "TOGGLE_SEND_MERVEILEDNING_VARSLER": "true",
     "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "true",
-    "TOGGLE_SEND_SVAR_MOTEBEHOV_VARSLER": "false",
     "TOGGLE_UTBETALING_KAFKA_CONSUMER": "false",
     "BASE_URL_SYK_INFO": "https://www.nav.no/syk/info",
     "BASE_URL_DIALOGMOTER": "https://www.nav.no/syk/dialogmoter",

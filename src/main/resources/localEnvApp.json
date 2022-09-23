@@ -60,7 +60,6 @@
   "toggleEnv": {
     "sendMerVeiledningVarsler": "true",
     "sendAktivitetskravVarsler": "true",
-    "sendSvarMotebehovVarsler": "true",
     "toggleInfotrygdKafkaConsumer": "true"
   }
 }
