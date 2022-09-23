@@ -64,7 +64,7 @@ fun main() {
             Netty,
             applicationEngineEnvironment {
                 config = HoconApplicationConfig(ConfigFactory.load())
-                database = initDb(env.dbEnv)
+                database = Database(env.dbEnv)
 
                 val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
 
@@ -282,9 +282,3 @@ fun Application.runningRemotely(block: () -> Unit) {
 fun Application.runningLocally(block: () -> Unit) {
     if (envKind == "local") block()
 }
-
-fun initDb(dbEnv: DbEnv): DatabaseInterface =
-    when {
-        isLocal() -> Database(dbEnv)
-        else -> Database(dbEnv)
-    }
