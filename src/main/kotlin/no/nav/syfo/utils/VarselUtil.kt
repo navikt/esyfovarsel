@@ -13,7 +13,6 @@ import java.time.temporal.ChronoUnit
 
 val antallUker39UkersVarsel = 39L
 val antallDager39UkersVarsel = antallUker39UkersVarsel * 7L + 1
-val SVAR_MOTEBEHOV_DAGER: Long = 112
 val REMAINING_WEEKS_UNTIL_39_UKERS_VARSEL = 13
 val REMAINING_DAYS_UNTIL_39_UKERS_VARSEL = REMAINING_WEEKS_UNTIL_39_UKERS_VARSEL * 7L + 1
 
@@ -54,11 +53,11 @@ class VarselUtil(private val databaseAccess: DatabaseInterface) {
 
     fun isValidSyketilfelledag(syketilfelledag: Syketilfelledag): Boolean {
         val hasValidDocumentType = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(Tag.SYKMELDING) == true ||
-            syketilfelledag.prioritertSyketilfellebit?.tags?.contains(Tag.PAPIRSYKMELDING) == true ||
-            syketilfelledag.prioritertSyketilfellebit?.tags?.contains(Tag.SYKEPENGESOKNAD) == true
+                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(Tag.PAPIRSYKMELDING) == true ||
+                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(Tag.SYKEPENGESOKNAD) == true
 
         val isAcceptedDocument = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(Tag.SENDT) == true ||
-            syketilfelledag.prioritertSyketilfellebit?.tags?.contains(Tag.BEKREFTET) == true
+                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(Tag.BEKREFTET) == true
 
         val isBehandlingsdag = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(Tag.BEHANDLINGSDAGER) == true
 

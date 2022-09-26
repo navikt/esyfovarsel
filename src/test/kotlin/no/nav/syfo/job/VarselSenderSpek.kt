@@ -41,7 +41,7 @@ object VarselSenderSpek : Spek({
         }
 
         it("Sender varsler") {
-            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true, true,  false, false))
+            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true, false, true, false, false))
 
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
@@ -54,20 +54,36 @@ object VarselSenderSpek : Spek({
         }
 
         it("Sender mer veiledning varsler basert på maksdato") {
-            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(false, false, true, true))
-            val maxDate = LocalDate.now().plusDays(REMAINING_DAYS_UNTIL_39_UKERS_VARSEL)
+            val oldPlanlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, "999888999", setOf("1"), MER_VEILEDNING)
+            embeddedDatabase.storePlanlagtVarsel(oldPlanlagtVarselToStore)
+            val oldPPlanlagtVarsel = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)[0]
 
+            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(false, true, false, true, true))
+
+            val maxDate = LocalDate.now().plusDays(REMAINING_DAYS_UNTIL_39_UKERS_VARSEL)
             embeddedDatabase.storeSykepengerMaxDate(maxDate, arbeidstakerFnr1, SykepengerMaxDateSource.INFOTRYGD.name)
+            val newPPlanlagtVarsel = embeddedDatabase.fetchBySendingDate(LocalDate.now())[0]
 
             sendVarselJobb.testSendVarsler()
+            verify(exactly = 0) {
+                runBlocking {
+                    sendVarselService.sendVarsel(oldPPlanlagtVarsel)
+                }
+            }
 
-            embeddedDatabase.skalHaMaxDate(maxDate)
-            // TODO: Add an assertion for varsel is send out, moved to utsendte varsler tabel when sending is implemented
+            verify(exactly = 1) {
+                runBlocking {
+                    sendVarselService.sendVarsel(newPPlanlagtVarsel)
+                }
+            }
+
+            embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
+            embeddedDatabase.skalIkkeHaPlanlagtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
         }
 
 
         it("Skal ikke sende mer veiledning-varsel hvis toggle er false") {
-            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(false, true,false, false))
+            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(false, false, true, false, false))
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, emptySet(), MER_VEILEDNING)
             val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), AKTIVITETSKRAV)
 
@@ -85,7 +101,7 @@ object VarselSenderSpek : Spek({
         }
 
         it("Skal ikke sende aktivitetskrav-varsel hvis toggle er false") {
-            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true, false, false, false))
+            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true, false, false, false, false))
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
             val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), AKTIVITETSKRAV)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
@@ -104,7 +120,7 @@ object VarselSenderSpek : Spek({
         }
 
         it("Skal ikke markere varsel som sendt dersom utsending feiler") {
-            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true, true,false, false))
+            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true, false, true, false, false))
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
 
@@ -139,10 +155,6 @@ private fun DatabaseInterface.skalHaPlanlagtVarsel(fnr: String, type: VarselType
 
 private fun DatabaseInterface.skalIkkeHaPlanlagtVarsel(fnr: String, type: VarselType) = this.should("Skal ikke ha planlagt varsel av type $type") {
     this.fetchPlanlagtVarselByFnr(fnr).filter { it.type.equals(type.name) }.isEmpty()
-}
-
-private fun DatabaseInterface.skalHaMaxDate(maxDate: LocalDate) = this.should("Skal hente maks dato") {
-    this.fetchBySendingDate(LocalDate.now())[0].maxDate.isEqual(maxDate)
 }
 
 private fun DatabaseInterface.skalHaUtsendtVarsel(fnr: String, type: VarselType) = this.should("Skal ha utsendt varsel av type $type") {

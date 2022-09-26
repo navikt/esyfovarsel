@@ -33,7 +33,7 @@ class SendVarselService(
 
     val WEEKS_BEFORE_DELETE_AKTIVITETSKRAV = 2L
 
-    suspend fun sendVarsel(pPlanlagtVarsel: PPlanlagtVarsel): String {
+    fun sendVarsel(pPlanlagtVarsel: PPlanlagtVarsel): String {
         // Recheck if user can be notified in case of recent 'Addressesperre'
         return try {
             val userAccessStatus = accessControlService.getUserAccessStatus(pPlanlagtVarsel.fnr)
@@ -139,7 +139,7 @@ class SendVarselService(
                 HendelseType.SM_MER_VEILEDNING,
                 null,
                 pPlanlagtVarsel.fnr,
-                pPlanlagtVarsel.orgnummer
+                null
             ),
             pPlanlagtVarsel.uuid,
             userAccessStatus

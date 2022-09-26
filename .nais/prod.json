@@ -12,6 +12,7 @@
     "PDL_SCOPE": "api://prod-fss.pdl.pdl-api/.default",
     "TOGGLE_INFOTRYGD_KAFKA_CONSUMER": "false",
     "TOGGLE_SEND_MERVEILEDNING_VARSLER": "true",
+    "TOGGLE_SEND_MERVEILEDNING_VARSLER_BASED_ON_MAX_DATE": "false",
     "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "true",
     "TOGGLE_UTBETALING_KAFKA_CONSUMER": "false",
     "BASE_URL_SYK_INFO": "https://www.nav.no/syk/info",
