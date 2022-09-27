@@ -59,7 +59,6 @@
   },
   "toggleEnv": {
     "sendMerVeiledningVarsler": "true",
-    "sendAktivitetskravVarsler": "true",
-    "toggleInfotrygdKafkaConsumer": "true"
+    "sendAktivitetskravVarsler": "true"
   }
 }
