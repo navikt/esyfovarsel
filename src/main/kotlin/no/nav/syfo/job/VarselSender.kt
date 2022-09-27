@@ -19,7 +19,7 @@ class VarselSender(
 ) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
 
-    suspend fun sendVarsler(): Int {
+    fun sendVarsler(): Int {
         log.info("Starter SendVarslerJobb")
 
         val varslerSendt = HashMap<String, Int>()
@@ -82,12 +82,13 @@ class VarselSender(
     }
 
     private fun mergePlanlagteVarsler(plannedVarslerFromDatabase: List<PPlanlagtVarsel>, plannedMerVeiledningVarslerBasedOnMaxDate: List<PPlanlagtVarsel>): List<PPlanlagtVarsel> {
+        var mergetVarslerList = listOf<PPlanlagtVarsel>()
         plannedMerVeiledningVarslerBasedOnMaxDate.forEach {
             val currentFnr = it.fnr
             deletePlannedMerVeiledningVarselDuplicateByFnr(currentFnr, plannedVarslerFromDatabase)
-            plannedVarslerFromDatabase.plus(it)
+            mergetVarslerList = mergetVarslerList.plus(it)
         }
-        return plannedVarslerFromDatabase
+        return mergetVarslerList
     }
 
     private fun deletePlannedMerVeiledningVarselDuplicateByFnr(fnr: String, plannedVarslerFromDatabase: List<PPlanlagtVarsel>) {
