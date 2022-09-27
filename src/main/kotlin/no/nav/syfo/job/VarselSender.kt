@@ -73,8 +73,7 @@ class VarselSender(
     }
 
     private fun skalSendeVarsel(it: PPlanlagtVarsel) =
-        (it.type == VarselType.MER_VEILEDNING.name && toggles.sendMerVeiledningVarsler && !toggles.sendMerVeiledningVarslerBasedOnMaxDate) ||
-                (it.type == VarselType.MER_VEILEDNING.name && toggles.sendMerVeiledningVarslerBasedOnMaxDate && !toggles.sendMerVeiledningVarsler) ||
+        (it.type == VarselType.MER_VEILEDNING.name && toggles.sendMerVeiledningVarsler || toggles.sendMerVeiledningVarslerBasedOnMaxDate) ||
                 (it.type == VarselType.AKTIVITETSKRAV.name && toggles.sendAktivitetskravVarsler)
 
     private fun String.sendtUtenFeil(): Boolean {
