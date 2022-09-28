@@ -93,8 +93,6 @@ spec:
   leaderElection: true
   filesFrom:
     - secret: esyfovarsel-serviceuser
-  envFrom:
-    - configmap: loginservice-idporten
   env:
   {{#each app}}
     - name: {{@key}}
