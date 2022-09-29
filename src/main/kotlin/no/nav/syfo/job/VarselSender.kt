@@ -19,16 +19,28 @@ class VarselSender(
 ) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
 
-    suspend fun sendVarsler(): Int {
+    fun sendVarsler(): Int {
         log.info("Starter SendVarslerJobb")
 
         val varslerSendt = HashMap<String, Int>()
-        val varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
-        log.info("Planlegger å sende ${varslerToSendToday.size} varsler")
+        var varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
+        var varslerToSendTodayMerVeiledning = listOf<PPlanlagtVarsel>()
+
+        if (toggles.toggleInfotrygdKafkaConsumer && toggles.toggleUtbetalingKafkaConsumer) {
+            varslerToSendTodayMerVeiledning = databaseAccess.fetchBySendingDate(LocalDate.now())
+        }
+
+
+        if (toggles.sendMerVeiledningVarslerBasedOnMaxDate) {
+            varslerToSendToday = mergePlanlagteVarsler(varslerToSendToday, varslerToSendTodayMerVeiledning)
+        }
+
+        log.info("Planlegger å sende ${varslerToSendTodayMerVeiledning.size} Mer veiledning varsler med utsending basert på maxdato")
+        log.info("Planlegger å sende ${varslerToSendToday.size} varsler totalt")
 
         if (!toggles.sendAktivitetskravVarsler) log.info("Utsending av Aktivitetskrav er ikke aktivert, og varsler av denne typen blir ikke sendt")
         if (!toggles.sendMerVeiledningVarsler) log.info("Utsending av Mer veiledning er ikke aktivert, og varsler av denne typen blir ikke sendt")
-        if (!toggles.toggleInfotrygdKafkaConsumer && !toggles.toggleUtbetalingKafkaConsumer) log.info("Utsending av  Mer veiledning med utsending basert på maxdato er ikke aktivert, og varsler av denne typen blir ikke sendt via denne pathen")
+        if (!toggles.sendMerVeiledningVarslerBasedOnMaxDate) log.info("Utsending av  Mer veiledning med utsending basert på maxdato er ikke aktivert, og varsler av denne typen blir ikke sendt via denne pathen")
 
         varslerToSendToday.forEach {
             if (skalSendeVarsel(it)) {
@@ -41,11 +53,6 @@ class VarselSender(
                     databaseAccess.deletePlanlagtVarselByVarselId(it.uuid)
                 }
             }
-        }
-
-        if (toggles.toggleInfotrygdKafkaConsumer && toggles.toggleUtbetalingKafkaConsumer) {
-            val varslerToSendTodayMerVeiledning = databaseAccess.fetchBySendingDate(LocalDate.now())
-            log.info("Planlegger å sende ${varslerToSendTodayMerVeiledning.size} Mer veiledning varsler med utsending basert på maxdato")
         }
 
         varslerSendt.forEach { (key, value) ->
@@ -71,10 +78,33 @@ class VarselSender(
     }
 
     private fun skalSendeVarsel(it: PPlanlagtVarsel) =
-        (it.type.equals(VarselType.MER_VEILEDNING.name) && toggles.sendMerVeiledningVarsler) ||
-            (it.type.equals(VarselType.AKTIVITETSKRAV.name) && toggles.sendAktivitetskravVarsler)
+        (it.type == VarselType.MER_VEILEDNING.name && toggles.sendMerVeiledningVarsler || toggles.sendMerVeiledningVarslerBasedOnMaxDate) ||
+                (it.type == VarselType.AKTIVITETSKRAV.name && toggles.sendAktivitetskravVarsler)
 
     private fun String.sendtUtenFeil(): Boolean {
         return this != UTSENDING_FEILET
+    }
+
+    private fun mergePlanlagteVarsler(plannedVarslerFromDatabase: List<PPlanlagtVarsel>, plannedMerVeiledningVarslerBasedOnMaxDate: List<PPlanlagtVarsel>): List<PPlanlagtVarsel> {
+        var mergetVarslerList = listOf<PPlanlagtVarsel>()
+        plannedMerVeiledningVarslerBasedOnMaxDate.forEach {
+            val currentFnr = it.fnr
+            deletePlannedMerVeiledningVarselDuplicateByFnr(currentFnr, plannedVarslerFromDatabase)
+            mergetVarslerList = mergetVarslerList.plus(it)
+        }
+        return mergetVarslerList
+    }
+
+    private fun deletePlannedMerVeiledningVarselDuplicateByFnr(fnr: String, plannedVarslerFromDatabase: List<PPlanlagtVarsel>) {
+        plannedVarslerFromDatabase as MutableList<PPlanlagtVarsel>
+        val iterator = plannedVarslerFromDatabase.iterator()
+
+        while (iterator.hasNext()) {
+            val i = iterator.next()
+            if (i.fnr == fnr && i.type == VarselType.MER_VEILEDNING.name) {
+                iterator.remove()
+                databaseAccess.deletePlanlagtVarselByVarselId(i.uuid)
+            }
+        }
     }
 }

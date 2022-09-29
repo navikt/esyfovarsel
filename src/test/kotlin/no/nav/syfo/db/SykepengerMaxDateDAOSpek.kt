@@ -60,5 +60,5 @@ private fun DatabaseInterface.shouldContainMaxDate(fnr: String, maxDate: LocalDa
 
 private fun DatabaseInterface.shouldReturnEntryWithSendingDateToday(sendingDate: LocalDate) =
     this.should("Should contain row with requested fnr") {
-        this.fetchBySendingDate(sendingDate)[0].sendingDate.isEqual(LocalDate.now())
+        this.fetchBySendingDate(sendingDate)[0].utsendingsdato.isEqual(LocalDate.now())
     }

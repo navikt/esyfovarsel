@@ -79,6 +79,7 @@ fun getEnv(): Environment {
             ),
             ToggleEnv(
                 sendMerVeiledningVarsler = getBooleanEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER"),
+                sendMerVeiledningVarslerBasedOnMaxDate = getBooleanEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER_BASED_ON_MAX_DATE"),
                 sendAktivitetskravVarsler = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER"),
                 toggleInfotrygdKafkaConsumer = getBooleanEnvVar("TOGGLE_INFOTRYGD_KAFKA_CONSUMER"),
                 toggleUtbetalingKafkaConsumer = getBooleanEnvVar("TOGGLE_UTBETALING_KAFKA_CONSUMER"),
@@ -163,6 +164,7 @@ data class DbEnv(
 
 data class ToggleEnv(
     val sendMerVeiledningVarsler: Boolean,
+    val sendMerVeiledningVarslerBasedOnMaxDate: Boolean,
     val sendAktivitetskravVarsler: Boolean,
     val toggleInfotrygdKafkaConsumer: Boolean,
     val toggleUtbetalingKafkaConsumer: Boolean,

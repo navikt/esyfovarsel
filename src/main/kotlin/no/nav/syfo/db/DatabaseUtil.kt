@@ -29,15 +29,15 @@ fun ResultSet.toPPlanlagtVarsel() = PPlanlagtVarsel(
     sistEndret = getTimestamp("sist_endret").toLocalDateTime()
 )
 
-fun ResultSet.toPPlanlagtVarselMerVeiledning(sendingDate: LocalDate) = PPlanlagtVarselMerVeiledning(
+fun ResultSet.toPPlanlagtVarselMerVeiledning(sendingDate: LocalDate) = PPlanlagtVarsel(
     uuid = getString("uuid"),
     fnr = getString("fnr"),
-    maxDate = getDate("max_date").toLocalDate(),
-    source = getString("source"),
-    sendingDate = sendingDate,
-    created = getTimestamp("opprettet").toLocalDateTime(),
-    lastChanged = getTimestamp("sist_endret").toLocalDateTime(),
-    type = VarselType.MER_VEILEDNING,
+    orgnummer = null,
+    aktorId = null,
+    type = VarselType.MER_VEILEDNING.name,
+    utsendingsdato = sendingDate,
+    opprettet = getTimestamp("opprettet").toLocalDateTime(),
+    sistEndret = getTimestamp("sist_endret").toLocalDateTime()
 )
 
 fun ResultSet.toPUtsendtVarsel() = PUtsendtVarsel(
