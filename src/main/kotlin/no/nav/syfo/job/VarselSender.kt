@@ -24,14 +24,19 @@ class VarselSender(
 
         val varslerSendt = HashMap<String, Int>()
         var varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
+        var varslerToSendTodayMerVeiledning = listOf<PPlanlagtVarsel>()
+
+        if (toggles.toggleInfotrygdKafkaConsumer && toggles.toggleUtbetalingKafkaConsumer) {
+            varslerToSendTodayMerVeiledning = databaseAccess.fetchBySendingDate(LocalDate.now())
+        }
+
 
         if (toggles.sendMerVeiledningVarslerBasedOnMaxDate) {
-            val varslerToSendTodayMerVeiledning = databaseAccess.fetchBySendingDate(LocalDate.now())
-            log.info("Planlegger å sende ${varslerToSendTodayMerVeiledning.size} Mer veiledning varsler med utsending basert på maxdato")
             varslerToSendToday = mergePlanlagteVarsler(varslerToSendToday, varslerToSendTodayMerVeiledning)
         }
 
-        log.info("Planlegger å sende ${varslerToSendToday.size} varsler")
+        log.info("Planlegger å sende ${varslerToSendTodayMerVeiledning.size} Mer veiledning varsler med utsending basert på maxdato")
+        log.info("Planlegger å sende ${varslerToSendToday.size} varsler totalt")
 
         if (!toggles.sendAktivitetskravVarsler) log.info("Utsending av Aktivitetskrav er ikke aktivert, og varsler av denne typen blir ikke sendt")
         if (!toggles.sendMerVeiledningVarsler) log.info("Utsending av Mer veiledning er ikke aktivert, og varsler av denne typen blir ikke sendt")
