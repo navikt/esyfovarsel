@@ -19,7 +19,7 @@ class VarselSender(
 ) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
 
-    fun sendVarsler(): Int {
+    suspend fun sendVarsler(): Int {
         log.info("Starter SendVarslerJobb")
 
         val varslerSendt = HashMap<String, Int>()
@@ -29,7 +29,6 @@ class VarselSender(
         if (toggles.toggleInfotrygdKafkaConsumer && toggles.toggleUtbetalingKafkaConsumer) {
             varslerToSendTodayMerVeiledning = databaseAccess.fetchPlanlagtVarselBySendingDate(LocalDate.now())
         }
-
 
         if (toggles.sendMerVeiledningVarslerBasedOnMaxDate) {
             varslerToSendToday = mergePlanlagteVarsler(varslerToSendToday, varslerToSendTodayMerVeiledning)
@@ -85,7 +84,10 @@ class VarselSender(
         return this != UTSENDING_FEILET
     }
 
-    private fun mergePlanlagteVarsler(plannedVarslerFromDatabase: List<PPlanlagtVarsel>, plannedMerVeiledningVarslerBasedOnMaxDate: List<PPlanlagtVarsel>): List<PPlanlagtVarsel> {
+    private fun mergePlanlagteVarsler(
+        plannedVarslerFromDatabase: List<PPlanlagtVarsel>,
+        plannedMerVeiledningVarslerBasedOnMaxDate: List<PPlanlagtVarsel>
+    ): List<PPlanlagtVarsel> {
         var mergetVarslerList = listOf<PPlanlagtVarsel>()
         plannedMerVeiledningVarslerBasedOnMaxDate.forEach {
             val currentFnr = it.fnr
@@ -95,7 +97,10 @@ class VarselSender(
         return mergetVarslerList
     }
 
-    private fun deletePlannedMerVeiledningVarselDuplicateByFnr(fnr: String, plannedVarslerFromDatabase: List<PPlanlagtVarsel>) {
+    private fun deletePlannedMerVeiledningVarselDuplicateByFnr(
+        fnr: String,
+        plannedVarslerFromDatabase: List<PPlanlagtVarsel>
+    ) {
         plannedVarslerFromDatabase as MutableList<PPlanlagtVarsel>
         val iterator = plannedVarslerFromDatabase.iterator()
 

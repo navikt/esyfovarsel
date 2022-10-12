@@ -3,14 +3,13 @@ package no.nav.syfo.planner
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
-import no.nav.syfo.consumer.syfosmregister.SykmeldtStatusResponse
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
 import no.nav.syfo.db.storePlanlagtVarsel
 import no.nav.syfo.kafka.consumers.syketilfelle.domain.Syketilfelledag
 import no.nav.syfo.service.SykmeldingService
+import no.nav.syfo.service.SykmeldingStatus
 import no.nav.syfo.syketilfelle.KOppfolgingstilfellePerson
 import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
@@ -26,18 +25,19 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
 
 object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
     // The default timeout of 10 seconds is not sufficient to initialise the embedded database
     defaultTimeout = 20000L
 
     val embeddedDatabase by lazy { EmbeddedDatabase() }
-    val sykmeldingerConsumer = mockk<SykmeldingerConsumer>()
     val syketilfellebitService = mockk<SyketilfellebitService>()
     val varselUtil = VarselUtil(embeddedDatabase)
+    val sykmeldingService = mockk<SykmeldingService>()
 
     val aktivitetskravVarselPlanner =
-        AktivitetskravVarselPlanner(embeddedDatabase, syketilfellebitService, SykmeldingService(sykmeldingerConsumer))
+        AktivitetskravVarselPlanner(embeddedDatabase, syketilfellebitService, sykmeldingService)
 
     describe("AktivitetskravVarselPlannerSyketilfellebitSpek") {
         val planlagtVarselToStore2 =
@@ -101,12 +101,6 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
             val syketilfelledag2 = Syketilfelledag(LocalDate.now().plusDays(16), syketilfellebit2)
             val syketilfelledag3 = Syketilfelledag(LocalDate.now().plusDays(50), syketilfellebit3)
 
-            val sykmeldtStatusResponse = SykmeldtStatusResponse(
-                erSykmeldt = true,
-                gradert = false,
-                fom = LocalDate.now(),
-                tom = LocalDate.now().plusDays(50)
-            )
             val oppfolgingstilfellePerson =
                 KOppfolgingstilfellePerson(
                     arbeidstakerFnr1,
@@ -117,8 +111,14 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                     LocalDateTime.now()
                 )
 
-            coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
             coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
+            coEvery {
+                sykmeldingService.checkSykmeldingStatus(
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns SykmeldingStatus(gradert = true, sendtArbeidsgiver = true)
 
             runBlocking {
                 aktivitetskravVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
@@ -158,10 +158,13 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                     LocalDateTime.now()
                 )
 
-            val sykmeldtStatusResponse =
-                SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
-
-            coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
+            coEvery {
+                sykmeldingService.checkSykmeldingStatus(
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns SykmeldingStatus(gradert = false, sendtArbeidsgiver = true)
             coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
@@ -221,8 +224,6 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
             val syketilfelledag2 = Syketilfelledag(LocalDate.now().minusDays(2), syketilfellebit2)
             val syketilfelledag3 = Syketilfelledag(LocalDate.now().plusDays(6), syketilfellebit3)
 
-            val sykmeldtStatusResponse =
-                SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
             val oppfolgingstilfellePerson =
                 KOppfolgingstilfellePerson(
                     arbeidstakerFnr1,
@@ -233,7 +234,13 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                     LocalDateTime.now()
                 )
 
-            coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
+            coEvery {
+                sykmeldingService.checkSykmeldingStatus(
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns SykmeldingStatus(gradert = false, sendtArbeidsgiver = true)
             coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
@@ -248,7 +255,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
             }
         }
 
-        it("Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, varsel skal ikke opprettes") {
+        it("Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, aktivitetskrav-varsel skal likevel opprettes (blir heller stoppet i utsendingen)") {
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore3)
 
@@ -293,12 +300,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
             val syketilfelledag2 = Syketilfelledag(LocalDate.now().plusDays(16), syketilfellebit2)
             val syketilfelledag3 = Syketilfelledag(LocalDate.now().plusDays(50), syketilfellebit3)
 
-            val sykmeldtStatusResponse = SykmeldtStatusResponse(
-                erSykmeldt = true,
-                gradert = true,
-                fom = LocalDate.now(),
-                tom = LocalDate.now().plusDays(50)
-            )
+
             val oppfolgingstilfellePerson =
                 KOppfolgingstilfellePerson(
                     arbeidstakerFnr1,
@@ -309,18 +311,26 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                     LocalDateTime.now()
                 )
 
-            coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
+            coEvery {
+                sykmeldingService.checkSykmeldingStatus(
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns SykmeldingStatus(gradert = true, sendtArbeidsgiver = true)
             coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
                 aktivitetskravVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
 
-                val lagreteVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
-                val nrOfRowsFetchedTotal = lagreteVarsler.size
+                val lagredeVarsler = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
+                val nrOfRowsFetchedTotal = lagredeVarsler.size
 
-                nrOfRowsFetchedTotal shouldBeEqualTo 1
+                nrOfRowsFetchedTotal shouldBeEqualTo 2
 
-                lagreteVarsler.filter { it.type == VarselType.AKTIVITETSKRAV.name } shouldBeEqualTo listOf()
+                val aktivitetskravVarsel =
+                    lagredeVarsler.find { varsel -> varsel.type == VarselType.AKTIVITETSKRAV.name }
+                assertNotNull(aktivitetskravVarsel, "Should store aktivitetskravVarsel")
             }
         }
 
@@ -353,8 +363,6 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
             val syketilfelledag1 = Syketilfelledag(utsendingsdato.minusDays(AKTIVITETSKRAV_DAGER), syketilfellebit1)
             val syketilfelledag2 = Syketilfelledag(LocalDate.now().plusMonths(1), syketilfellebit1)
 
-            val sykmeldtStatusResponse =
-                SykmeldtStatusResponse(erSykmeldt = true, gradert = false, fom = LocalDate.now(), tom = LocalDate.now())
             val oppfolgingstilfellePerson = KOppfolgingstilfellePerson(
                 arbeidstakerFnr1,
                 listOf(syketilfelledag1, syketilfelledag2),
@@ -364,7 +372,13 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                 LocalDateTime.now()
             )
 
-            coEvery { sykmeldingerConsumer.getSykmeldtStatusPaDato(any(), any()) } returns sykmeldtStatusResponse
+            coEvery {
+                sykmeldingService.checkSykmeldingStatus(
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns SykmeldingStatus(gradert = false, sendtArbeidsgiver = true)
             coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             val lagreteVarsler1 = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
@@ -413,26 +427,56 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
         it("AkvitietskravVarselPlanner fjerner perioder uten sykmelding når den faktiske fraværlengde blir beregnet") {
 
             val validSyketilfelledager: List<Syketilfelledag> = listOf(
-                createValidSyketilfelledag(LocalDate.of(2021, 12, 8).atStartOfDay(), LocalDate.of(2021, 12, 10).atStartOfDay()),
-                createValidSyketilfelledag(LocalDate.of(2021, 12, 8).atStartOfDay(), LocalDate.of(2021, 12, 10).atStartOfDay()),
-                createValidSyketilfelledag(LocalDate.of(2021, 12, 8).atStartOfDay(), LocalDate.of(2021, 12, 10).atStartOfDay()),
+                createValidSyketilfelledag(
+                    LocalDate.of(2021, 12, 8).atStartOfDay(),
+                    LocalDate.of(2021, 12, 10).atStartOfDay()
+                ),
+                createValidSyketilfelledag(
+                    LocalDate.of(2021, 12, 8).atStartOfDay(),
+                    LocalDate.of(2021, 12, 10).atStartOfDay()
+                ),
+                createValidSyketilfelledag(
+                    LocalDate.of(2021, 12, 8).atStartOfDay(),
+                    LocalDate.of(2021, 12, 10).atStartOfDay()
+                ),
 
-                createValidSyketilfelledag(LocalDate.of(2021, 12, 11).atStartOfDay(), LocalDate.of(2021, 12, 23).atStartOfDay()),
+                createValidSyketilfelledag(
+                    LocalDate.of(2021, 12, 11).atStartOfDay(),
+                    LocalDate.of(2021, 12, 23).atStartOfDay()
+                ),
 
-                createValidSyketilfelledag(LocalDate.of(2021, 12, 24).atStartOfDay(), LocalDate.of(2022, 1, 2).atStartOfDay()),
-                createValidSyketilfelledag(LocalDate.of(2021, 12, 24).atStartOfDay(), LocalDate.of(2022, 1, 2).atStartOfDay()),
-                createValidSyketilfelledag(LocalDate.of(2021, 12, 24).atStartOfDay(), LocalDate.of(2022, 1, 2).atStartOfDay()),
+                createValidSyketilfelledag(
+                    LocalDate.of(2021, 12, 24).atStartOfDay(),
+                    LocalDate.of(2022, 1, 2).atStartOfDay()
+                ),
+                createValidSyketilfelledag(
+                    LocalDate.of(2021, 12, 24).atStartOfDay(),
+                    LocalDate.of(2022, 1, 2).atStartOfDay()
+                ),
+                createValidSyketilfelledag(
+                    LocalDate.of(2021, 12, 24).atStartOfDay(),
+                    LocalDate.of(2022, 1, 2).atStartOfDay()
+                ),
 
-                createValidSyketilfelledag(LocalDate.of(2022, 1, 17).atStartOfDay(), LocalDate.of(2022, 1, 23).atStartOfDay()),
+                createValidSyketilfelledag(
+                    LocalDate.of(2022, 1, 17).atStartOfDay(),
+                    LocalDate.of(2022, 1, 23).atStartOfDay()
+                ),
             )
 
             val numberOfDaysActual = varselUtil.calculateActualNumberOfDaysInTimeline(validSyketilfelledager)
-            val numberOfDaysExpected = (ChronoUnit.DAYS.between(LocalDate.of(2021, 12, 8), LocalDate.of(2021, 12, 10)).toInt() +
-                ChronoUnit.DAYS.between(LocalDate.of(2021, 12, 11), LocalDate.of(2021, 12, 23)).toInt() +
-                ChronoUnit.DAYS.between(LocalDate.of(2021, 12, 24), LocalDate.of(2022, 1, 2)).toInt() +
-                ChronoUnit.DAYS.between(LocalDate.of(2022, 1, 17), LocalDate.of(2022, 1, 23)).toInt())
+            val numberOfDaysExpected =
+                (ChronoUnit.DAYS.between(LocalDate.of(2021, 12, 8), LocalDate.of(2021, 12, 10)).toInt() +
+                        ChronoUnit.DAYS.between(LocalDate.of(2021, 12, 11), LocalDate.of(2021, 12, 23)).toInt() +
+                        ChronoUnit.DAYS.between(LocalDate.of(2021, 12, 24), LocalDate.of(2022, 1, 2)).toInt() +
+                        ChronoUnit.DAYS.between(LocalDate.of(2022, 1, 17), LocalDate.of(2022, 1, 23)).toInt())
 
-            numberOfDaysActual.shouldNotBeEqualTo(ChronoUnit.DAYS.between(LocalDate.of(2021, 12, 8), LocalDate.of(2022, 1, 23)).toInt())
+            numberOfDaysActual.shouldNotBeEqualTo(
+                ChronoUnit.DAYS.between(
+                    LocalDate.of(2021, 12, 8),
+                    LocalDate.of(2022, 1, 23)
+                ).toInt()
+            )
             numberOfDaysActual.shouldBeEqualTo(numberOfDaysExpected)
         }
     }
@@ -442,7 +486,15 @@ fun createValidSyketilfelledag(fom: LocalDateTime, tom: LocalDateTime): Syketilf
     return Syketilfelledag(
         LocalDate.now(),
         Syketilfellebit(
-            "", "", "", LocalDateTime.now(), LocalDateTime.now(), listOf(Tag.SYKMELDING, Tag.BEKREFTET), "", fom.toLocalDate(), tom.toLocalDate()
+            "",
+            "",
+            "",
+            LocalDateTime.now(),
+            LocalDateTime.now(),
+            listOf(Tag.SYKMELDING, Tag.BEKREFTET),
+            "",
+            fom.toLocalDate(),
+            tom.toLocalDate()
         )
     )
 }

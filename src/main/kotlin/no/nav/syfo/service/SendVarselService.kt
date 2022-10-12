@@ -27,13 +27,14 @@ class SendVarselService(
     val accessControlService: AccessControlService,
     val urlEnv: UrlEnv,
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
-    val merVeiledningVarselService: MerVeiledningVarselService
+    val merVeiledningVarselService: MerVeiledningVarselService,
+    val sykmeldingService: SykmeldingService
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.SendVarselService")
 
     val WEEKS_BEFORE_DELETE_AKTIVITETSKRAV = 2L
 
-    fun sendVarsel(pPlanlagtVarsel: PPlanlagtVarsel): String {
+    suspend fun sendVarsel(pPlanlagtVarsel: PPlanlagtVarsel): String {
         // Recheck if user can be notified in case of recent 'Addressesperre'
         return try {
             val userAccessStatus = accessControlService.getUserAccessStatus(pPlanlagtVarsel.fnr)
@@ -48,16 +49,28 @@ class SendVarselService(
                 if (userSkalVarsles(pPlanlagtVarsel.type, userAccessStatus)) {
                     when (pPlanlagtVarsel.type) {
                         AKTIVITETSKRAV.name -> {
-                            sendVarselTilSykmeldt(fnr, uuid, varselContent, varselUrl)
-                            if (orgnummer !== null) {
-                                sendAktivitetskravVarselTilArbeidsgiver(
-                                    uuid,
-                                    fnr,
-                                    orgnummer
-                                )
+                            val sykmeldingStatus =
+                                sykmeldingService.checkSykmeldingStatus(pPlanlagtVarsel.utsendingsdato, fnr, orgnummer)
+
+                            if (!sykmeldingStatus.gradert) {
+                                sendVarselTilSykmeldt(fnr, uuid, varselContent, varselUrl)
+
+                                if (sykmeldingStatus.sendtArbeidsgiver) {
+                                    sendAktivitetskravVarselTilArbeidsgiver(
+                                        uuid,
+                                        fnr,
+                                        orgnummer!!
+                                    )
+                                } else {
+                                    log.info("Sender ikke varsel om aktivitetskrav til AG da sykmelding ikke er sendt AG")
+                                }
+                                pPlanlagtVarsel.type
+                            } else {
+                                log.info("Sender ikke varsel om aktivitetskrav da sykmelding er gradert")
+                                UTSENDING_FEILET
                             }
-                            pPlanlagtVarsel.type
                         }
+
                         MER_VEILEDNING.name -> {
                             if (userAccessStatus.canUserBeNotified()) {
                                 sendMerVeiledningVarselTilArbeidstaker(pPlanlagtVarsel, userAccessStatus)
@@ -67,6 +80,7 @@ class SendVarselService(
                                 UTSENDING_FEILET
                             }
                         }
+
                         else -> {
                             throw RuntimeException("Ukjent typestreng")
                         }
@@ -90,12 +104,15 @@ class SendVarselService(
             AKTIVITETSKRAV.name -> {
                 userAccessStatus.canUserBeDigitallyNotified
             }
+
             MER_VEILEDNING.name -> {
                 userAccessStatus.canUserBeDigitallyNotified || userAccessStatus.canUserBePhysicallyNotified
             }
+
             SVAR_MOTEBEHOV.name -> {
                 userAccessStatus.canUserBeDigitallyNotified
             }
+
             else -> {
                 false
             }
@@ -133,7 +150,10 @@ class SendVarselService(
         )
     }
 
-    private fun sendMerVeiledningVarselTilArbeidstaker(pPlanlagtVarsel: PPlanlagtVarsel, userAccessStatus: UserAccessStatus) {
+    private fun sendMerVeiledningVarselTilArbeidstaker(
+        pPlanlagtVarsel: PPlanlagtVarsel,
+        userAccessStatus: UserAccessStatus
+    ) {
         merVeiledningVarselService.sendVarselTilArbeidstaker(
             ArbeidstakerHendelse(
                 HendelseType.SM_MER_VEILEDNING,

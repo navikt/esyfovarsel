@@ -16,9 +16,9 @@ class SykmeldingerConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: Azu
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer")
     private val scope = urlEnv.syfosmregisterScope
 
-    suspend fun getSykmeldtStatusPaDato(dato: LocalDate, fnr: String): SykmeldtStatusResponse? {
-        val requestURL = "$basepath/api/v2/sykmelding/sykmeldtStatus"
-        val requestBody = SykmeldtStatusRequest(fnr, dato)
+    suspend fun getSykmeldingerPaDato(dato: LocalDate, fnr: String): List<SykmeldingDTO>? {
+        val requestURL = "$basepath/api/v2/sykmelding/sykmeldinger"
+        val requestBody = SykmeldingerRequest(fnr = fnr, fom = dato, tom=dato)
         val token = azureAdTokenConsumer.getToken(scope)
 
         val response = client.post<HttpResponse>(requestURL) {
@@ -32,7 +32,7 @@ class SykmeldingerConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: Azu
 
         return when (response.status) {
             HttpStatusCode.OK -> {
-                response.receive<SykmeldtStatusResponse>()
+                response.receive<List<SykmeldingDTO>>()
             }
             HttpStatusCode.Unauthorized -> {
                 log.error("Could not get sykmeldinger from syfosmregister: Unable to authorize")

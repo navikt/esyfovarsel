@@ -40,13 +40,20 @@ object JobApiSpek : Spek({
         val dineSykmeldteHendelseKafkaProducer = mockk<DineSykmeldteHendelseKafkaProducer>()
         val dokarkivService = mockk<DokarkivService>()
         val merVeiledningVarselService = mockk<MerVeiledningVarselService>()
+        val sykmeldingService = mockk<SykmeldingService>()
 
         coEvery { accessControlService.getUserAccessStatus(fnr1) } returns userAccessStatus1
         coEvery { accessControlService.getUserAccessStatus(fnr2) } returns userAccessStatus2
         coEvery { accessControlService.getUserAccessStatus(fnr3) } returns userAccessStatus3
         coEvery { accessControlService.getUserAccessStatus(fnr4) } returns userAccessStatus4
         coEvery { accessControlService.getUserAccessStatus(fnr5) } returns userAccessStatus5
-
+        coEvery {
+            sykmeldingService.checkSykmeldingStatus(
+                any(),
+                any(),
+                any()
+            )
+        } returns SykmeldingStatus(gradert = false, sendtArbeidsgiver = true)
         coEvery { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
         coEvery { dokarkivService.getJournalpostId(any(), any()) } returns "1"
 
@@ -57,7 +64,8 @@ object JobApiSpek : Spek({
                 accessControlService,
                 testEnv.urlEnv,
                 arbeidsgiverNotifikasjonService,
-                merVeiledningVarselService
+                merVeiledningVarselService,
+                sykmeldingService
             )
         val varselSender = VarselSender(embeddedDatabase, sendVarselService, testEnv.toggleEnv)
 
@@ -70,12 +78,49 @@ object JobApiSpek : Spek({
 
             it("esyfovarsel-job trigger utsending av 2 varsler digitalt og 1 varsel som brev") {
                 listOf(
-                    PlanlagtVarsel(fnr1, aktorId, orgnummer, setOf("1"), VarselType.MER_VEILEDNING), // Blir sendt digitalt
-                    PlanlagtVarsel(fnr2, aktorId2, orgnummer, setOf("2"), VarselType.AKTIVITETSKRAV), // Blir sendt digitalt
-                    PlanlagtVarsel(fnr2, aktorId2, orgnummer, setOf("3"), VarselType.MER_VEILEDNING, LocalDate.now().plusDays(1)), // Blir ikke sendt pga dato
-                    PlanlagtVarsel(fnr3, aktorId3, orgnummer, setOf("4"), VarselType.AKTIVITETSKRAV), // Blir ikke sendt, mottaker er reservert mot digital kommunikasjon
-                    PlanlagtVarsel(fnr4, aktorId4, orgnummer, setOf("5"), VarselType.MER_VEILEDNING), // Blir sendt som brev
-                    PlanlagtVarsel(fnr5, aktorId5, orgnummer, setOf("6"), VarselType.MER_VEILEDNING), // Blir ikke sendt, mottaker er reservert mot digital kommunikasjon og har kode 6 eller 7
+                    PlanlagtVarsel(
+                        fnr1,
+                        aktorId,
+                        orgnummer,
+                        setOf("1"),
+                        VarselType.MER_VEILEDNING
+                    ), // Blir sendt digitalt
+                    PlanlagtVarsel(
+                        fnr2,
+                        aktorId2,
+                        orgnummer,
+                        setOf("2"),
+                        VarselType.AKTIVITETSKRAV
+                    ), // Blir sendt digitalt
+                    PlanlagtVarsel(
+                        fnr2,
+                        aktorId2,
+                        orgnummer,
+                        setOf("3"),
+                        VarselType.MER_VEILEDNING,
+                        LocalDate.now().plusDays(1)
+                    ), // Blir ikke sendt pga dato
+                    PlanlagtVarsel(
+                        fnr3,
+                        aktorId3,
+                        orgnummer,
+                        setOf("4"),
+                        VarselType.AKTIVITETSKRAV
+                    ), // Blir ikke sendt, mottaker er reservert mot digital kommunikasjon
+                    PlanlagtVarsel(
+                        fnr4,
+                        aktorId4,
+                        orgnummer,
+                        setOf("5"),
+                        VarselType.MER_VEILEDNING
+                    ), // Blir sendt som brev
+                    PlanlagtVarsel(
+                        fnr5,
+                        aktorId5,
+                        orgnummer,
+                        setOf("6"),
+                        VarselType.MER_VEILEDNING
+                    ), // Blir ikke sendt, mottaker er reservert mot digital kommunikasjon og har kode 6 eller 7
                 ).forEach { embeddedDatabase.storePlanlagtVarsel(it) }
 
                 with(handleRequest(HttpMethod.Post, urlPathJobTrigger)) {
