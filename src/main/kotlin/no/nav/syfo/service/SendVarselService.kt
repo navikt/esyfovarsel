@@ -5,9 +5,7 @@ import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.access.domain.canUserBeNotified
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
-import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
-import no.nav.syfo.db.domain.VarselType.MER_VEILEDNING
-import no.nav.syfo.db.domain.VarselType.SVAR_MOTEBEHOV
+import no.nav.syfo.db.domain.VarselType.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.DineSykmeldteHendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
@@ -52,23 +50,19 @@ class SendVarselService(
                             val sykmeldingStatus =
                                 sykmeldingService.checkSykmeldingStatus(pPlanlagtVarsel.utsendingsdato, fnr, orgnummer)
 
-                            if (!sykmeldingStatus.gradert) {
-                                sendVarselTilSykmeldt(fnr, uuid, varselContent, varselUrl)
+                            sendVarselTilSykmeldt(fnr, uuid, varselContent, varselUrl)
 
-                                if (sykmeldingStatus.sendtArbeidsgiver) {
-                                    sendAktivitetskravVarselTilArbeidsgiver(
-                                        uuid,
-                                        fnr,
-                                        orgnummer!!
-                                    )
-                                } else {
-                                    log.info("Sender ikke varsel om aktivitetskrav til AG da sykmelding ikke er sendt AG")
-                                }
-                                pPlanlagtVarsel.type
+                            if (sykmeldingStatus.sendtArbeidsgiver) {
+                                sendAktivitetskravVarselTilArbeidsgiver(
+                                    uuid,
+                                    fnr,
+                                    orgnummer!!
+                                )
                             } else {
-                                log.info("Sender ikke varsel om aktivitetskrav da sykmelding er gradert")
-                                UTSENDING_FEILET
+                                log.info("Sender ikke varsel om aktivitetskrav til AG da sykmelding ikke er sendt AG")
                             }
+                            pPlanlagtVarsel.type
+
                         }
 
                         MER_VEILEDNING.name -> {

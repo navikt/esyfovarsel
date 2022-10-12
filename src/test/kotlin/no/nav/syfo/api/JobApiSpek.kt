@@ -53,7 +53,7 @@ object JobApiSpek : Spek({
                 any(),
                 any()
             )
-        } returns SykmeldingStatus(gradert = false, sendtArbeidsgiver = true)
+        } returns SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = true)
         coEvery { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
         coEvery { dokarkivService.getJournalpostId(any(), any()) } returns "1"
 

@@ -118,7 +118,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                     any(),
                     any()
                 )
-            } returns SykmeldingStatus(gradert = true, sendtArbeidsgiver = true)
+            } returns SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = true)
 
             runBlocking {
                 aktivitetskravVarselPlanner.processSyketilfelle(arbeidstakerFnr1, orgnummer)
@@ -164,7 +164,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                     any(),
                     any()
                 )
-            } returns SykmeldingStatus(gradert = false, sendtArbeidsgiver = true)
+            } returns SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = true)
             coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
@@ -240,7 +240,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                     any(),
                     any()
                 )
-            } returns SykmeldingStatus(gradert = false, sendtArbeidsgiver = true)
+            } returns SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = true)
             coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
@@ -317,7 +317,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                     any(),
                     any()
                 )
-            } returns SykmeldingStatus(gradert = true, sendtArbeidsgiver = true)
+            } returns SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = true)
             coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             runBlocking {
@@ -378,7 +378,8 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                     any(),
                     any()
                 )
-            } returns SykmeldingStatus(gradert = false, sendtArbeidsgiver = true)
+            } returns SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = true)
+
             coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
 
             val lagreteVarsler1 = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
