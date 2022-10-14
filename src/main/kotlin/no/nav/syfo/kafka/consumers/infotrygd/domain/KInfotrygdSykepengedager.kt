@@ -14,7 +14,7 @@ data class KInfotrygdSykepengedager(
         val IS10_UTBET_TOM: String?,
         @JsonProperty("IS10_MAX")
         @JsonAlias("is10_MAX")
-        val IS10_MAX: String?,
+        val IS10_MAX: String,
         @JsonProperty("F_NR")
         @JsonAlias("f_NR")
         val F_NR: String,
