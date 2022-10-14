@@ -34,7 +34,6 @@ class InfotrygdKafkaConsumer(
                 log.info("Received record from topic $topicSykepengedagerInfotrygd")
                 try {
                     val kInfotrygdSykepengedager: KInfotrygdSykepengedager = objectMapper.readValue(it.value())
-                    log.info("Infotrygd topic content: ${kInfotrygdSykepengedager.after.F_NR}, ${kInfotrygdSykepengedager.after.IS10_UTBET_TOM},${kInfotrygdSykepengedager.after.IS10_MAX}")
 
                     val fnr = kInfotrygdSykepengedager.after.F_NR
                     val sykepengerMaxDate = parseDate(kInfotrygdSykepengedager.after.IS10_MAX)
