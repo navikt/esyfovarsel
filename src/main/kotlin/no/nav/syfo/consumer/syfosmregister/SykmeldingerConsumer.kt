@@ -18,26 +18,31 @@ class SykmeldingerConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: Azu
 
     suspend fun getSykmeldingerPaDato(dato: LocalDate, fnr: String): List<SykmeldingDTO>? {
         val requestURL = "$basepath/api/v2/sykmelding/sykmeldinger"
-        val requestBody = SykmeldingerRequest(fnr = fnr, fom = dato, tom=dato)
         val token = azureAdTokenConsumer.getToken(scope)
 
-        val response = client.post<HttpResponse>(requestURL) {
+        val response = client.get<HttpResponse>(requestURL) {
             headers {
-                append(HttpHeaders.Accept, ContentType.Application.Json)
-                append(HttpHeaders.ContentType, ContentType.Application.Json)
+                append(HttpHeaders.Accept, "application/json")
+                append(HttpHeaders.ContentType, "application/json")
                 append(HttpHeaders.Authorization, "Bearer $token")
+                append("fnr", fnr)
             }
-            body = requestBody
+            url {
+                parameters.append("fom", dato.toString())
+                parameters.append("tom", dato.toString())
+            }
         }
 
         return when (response.status) {
             HttpStatusCode.OK -> {
                 response.receive<List<SykmeldingDTO>>()
             }
+
             HttpStatusCode.Unauthorized -> {
                 log.error("Could not get sykmeldinger from syfosmregister: Unable to authorize")
                 null
             }
+
             else -> {
                 log.error("Could not get sykmeldinger from syfosmregister: $response")
                 null

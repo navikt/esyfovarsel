@@ -5,13 +5,6 @@ import java.io.Serializable
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
-data class SykmeldingerRequest(
-    val fnr: String,
-    val fom: LocalDate?,
-    val tom: LocalDate?
-) : Serializable
-
-
 data class SykmeldingDTO(
     val id: String,
     val mottattTidspunkt: OffsetDateTime,
