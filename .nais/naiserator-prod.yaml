@@ -91,6 +91,8 @@ spec:
   kafka:
     pool: nav-prod
   leaderElection: true
+  envFrom:
+    - configmap: loginservice-idporten
   filesFrom:
     - secret: esyfovarsel-serviceuser
   env:

@@ -35,12 +35,12 @@ object SykepengerMaxDateDAOSpek : Spek({
         it("Update max date") {
             embeddedDatabase.storeSykepengerMaxDate(sykepengerMaxDate, arbeidstakerFnr1, "Infotrygd")
             embeddedDatabase.shouldContainMaxDate(arbeidstakerFnr1, sykepengerMaxDate)
-            embeddedDatabase.updateMaxDateByFnr(sykepengerMaxDate.plusDays(1), arbeidstakerFnr1, "Spleis")
+            embeddedDatabase.updateSykepengerMaxDateMaxDateByFnr(sykepengerMaxDate.plusDays(1), arbeidstakerFnr1, "Spleis")
             embeddedDatabase.shouldContainMaxDate(arbeidstakerFnr1, sykepengerMaxDate.plusDays(1))
         }
 
         it("Should return null for non-existing fnr") {
-            val nonExistingMaxDate = embeddedDatabase.fetchMaxDateByFnr(arbeidstakerFnr2)
+            val nonExistingMaxDate = embeddedDatabase.fetchSykepengerMaxDateByFnr(arbeidstakerFnr2)
             nonExistingMaxDate.should { this == null }
         }
 
@@ -55,10 +55,10 @@ object SykepengerMaxDateDAOSpek : Spek({
 
 private fun DatabaseInterface.shouldContainMaxDate(fnr: String, maxDate: LocalDate) =
     this.should("Should contain row with requested fnr and maxDate") {
-        this.fetchMaxDateByFnr(fnr)!! == maxDate
+        this.fetchSykepengerMaxDateByFnr(fnr)!! == maxDate
     }
 
 private fun DatabaseInterface.shouldReturnEntryWithSendingDateToday(sendingDate: LocalDate) =
     this.should("Should contain row with requested fnr") {
-        this.fetchBySendingDate(sendingDate)[0].utsendingsdato.isEqual(LocalDate.now())
+        this.fetchPlanlagtVarselBySendingDate(sendingDate)[0].utsendingsdato.isEqual(LocalDate.now())
     }

@@ -127,7 +127,8 @@ fun main() {
                         beskjedKafkaProducer,
                         dineSykmeldteHendelseKafkaProducer,
                         arbeidsgiverNotifikasjonService,
-                        merVeiledningVarselService
+                        merVeiledningVarselService,
+                        sykepengerMaxDateService
                     )
 
                     kafkaModule(
@@ -173,7 +174,8 @@ fun Application.serverModule(
     beskjedKafkaProducer: BeskjedKafkaProducer,
     dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
     arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
-    merVeiledningVarselService: MerVeiledningVarselService
+    merVeiledningVarselService: MerVeiledningVarselService,
+    sykepengerMaxDateService: SykepengerMaxDateService,
 ) {
 
     val sendVarselService =
@@ -212,11 +214,11 @@ fun Application.serverModule(
     }
 
     runningRemotely {
-        setupRoutesWithAuthentication(varselSender, replanleggingService, env.authEnv)
+        setupRoutesWithAuthentication(varselSender, replanleggingService, sykepengerMaxDateService, env.authEnv)
     }
 
     runningLocally {
-        setupLocalRoutesWithAuthentication(varselSender, replanleggingService, env.authEnv)
+        setupLocalRoutesWithAuthentication(varselSender, replanleggingService, sykepengerMaxDateService, env.authEnv)
     }
 
     routing {

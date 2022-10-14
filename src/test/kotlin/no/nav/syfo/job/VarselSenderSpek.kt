@@ -62,7 +62,7 @@ object VarselSenderSpek : Spek({
 
             val maxDate = LocalDate.now().plusDays(REMAINING_DAYS_UNTIL_39_UKERS_VARSEL)
             embeddedDatabase.storeSykepengerMaxDate(maxDate, arbeidstakerFnr1, SykepengerMaxDateSource.INFOTRYGD.name)
-            val newPPlanlagtVarsel = embeddedDatabase.fetchBySendingDate(LocalDate.now())[0]
+            val newPPlanlagtVarsel = embeddedDatabase.fetchPlanlagtVarselBySendingDate(LocalDate.now())[0]
 
             sendVarselJobb.testSendVarsler()
             verify(exactly = 0) {

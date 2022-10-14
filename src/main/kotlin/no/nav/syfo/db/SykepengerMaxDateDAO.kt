@@ -32,7 +32,7 @@ fun DatabaseInterface.storeSykepengerMaxDate(sykepengerMaxDate: LocalDate, fnr: 
     }
 }
 
-fun DatabaseInterface.updateMaxDateByFnr(sykepengerMaxDate: LocalDate, fnr: String, source: String) {
+fun DatabaseInterface.updateSykepengerMaxDateMaxDateByFnr(sykepengerMaxDate: LocalDate, fnr: String, source: String) {
     val updateStatement = """UPDATE SYKEPENGER_MAX_DATE 
                              SET SOURCE = ?,
                                  MAX_DATE = ?,
@@ -52,7 +52,7 @@ fun DatabaseInterface.updateMaxDateByFnr(sykepengerMaxDate: LocalDate, fnr: Stri
     }
 }
 
-fun DatabaseInterface.fetchMaxDateByFnr(fnr: String): LocalDate? {
+fun DatabaseInterface.fetchSykepengerMaxDateByFnr(fnr: String): LocalDate? {
     val fetchStatement = """SELECT *  FROM SYKEPENGER_MAX_DATE  WHERE FNR = ?""".trimIndent()
 
     val storedMaxDateAsList = connection.use { connection ->
@@ -67,7 +67,7 @@ fun DatabaseInterface.fetchMaxDateByFnr(fnr: String): LocalDate? {
     } else null
 }
 
-fun DatabaseInterface.fetchBySendingDate(sendingDate: LocalDate): List<PPlanlagtVarsel> {
+fun DatabaseInterface.fetchPlanlagtVarselBySendingDate(sendingDate: LocalDate): List<PPlanlagtVarsel> {
     val maxDate = sendingDate.plusDays(REMAINING_DAYS_UNTIL_39_UKERS_VARSEL)
     val queryStatement = """SELECT *
                             FROM SYKEPENGER_MAX_DATE
@@ -82,7 +82,7 @@ fun DatabaseInterface.fetchBySendingDate(sendingDate: LocalDate): List<PPlanlagt
     }
 }
 
-fun DatabaseInterface.deleteMaxDateByFnr(fnr: String) {
+fun DatabaseInterface.deleteSykepengerMaxDateMaxDateByFnr(fnr: String) {
     val deleteStatement = """DELETE FROM SYKEPENGER_MAX_DATE  WHERE fnr = ?""".trimIndent()
 
     connection.use { connection ->

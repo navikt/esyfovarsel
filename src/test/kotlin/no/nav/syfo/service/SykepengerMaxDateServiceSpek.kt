@@ -1,6 +1,6 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.db.fetchMaxDateByFnr
+import no.nav.syfo.db.fetchSykepengerMaxDateByFnr
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import org.spekframework.spek2.Spek
@@ -30,7 +30,7 @@ object SykepengerMaxDateServiceSpek : Spek({
                 source = SykepengerMaxDateSource.SPLEIS
             )
 
-            val storedMaxDate = embeddedDatabase.fetchMaxDateByFnr("123");
+            val storedMaxDate = embeddedDatabase.fetchSykepengerMaxDateByFnr("123");
             assertEquals(fiftyDaysFromNow, storedMaxDate)
         }
 
@@ -44,7 +44,7 @@ object SykepengerMaxDateServiceSpek : Spek({
                 source = SykepengerMaxDateSource.SPLEIS
             )
 
-            val storedMaxDate = embeddedDatabase.fetchMaxDateByFnr("123");
+            val storedMaxDate = embeddedDatabase.fetchSykepengerMaxDateByFnr("123");
             assertEquals(fiftyDaysFromNow, storedMaxDate)
 
             sykepengerMaxDateService.processNewMaxDate(
@@ -53,7 +53,7 @@ object SykepengerMaxDateServiceSpek : Spek({
                 source = SykepengerMaxDateSource.INFOTRYGD
             )
 
-            val newStoredMaxDate = embeddedDatabase.fetchMaxDateByFnr("123");
+            val newStoredMaxDate = embeddedDatabase.fetchSykepengerMaxDateByFnr("123");
             assertEquals(fourtyDaysFromNow, newStoredMaxDate)
         }
 
@@ -70,7 +70,7 @@ object SykepengerMaxDateServiceSpek : Spek({
                 source = SykepengerMaxDateSource.INFOTRYGD
             )
 
-            val storedDate = embeddedDatabase.fetchMaxDateByFnr("123");
+            val storedDate = embeddedDatabase.fetchSykepengerMaxDateByFnr("123");
             assertEquals(null, storedDate)
         }
     }
