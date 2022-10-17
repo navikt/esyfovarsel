@@ -36,7 +36,7 @@ class InfotrygdKafkaConsumer(
                     val kInfotrygdSykepengedager: KInfotrygdSykepengedager = objectMapper.readValue(it.value())
 
                     val fnr = kInfotrygdSykepengedager.after.F_NR
-                    val sykepengerMaxDate = parseDate(kInfotrygdSykepengedager.after.IS10_MAX)
+                    val sykepengerMaxDate = parseDate(kInfotrygdSykepengedager.after.MAX_DATO)
                     sykepengerMaxDateService.processNewMaxDate(fnr, sykepengerMaxDate, SykepengerMaxDateSource.INFOTRYGD)
                 } catch (e: IOException) {
                     log.error(
