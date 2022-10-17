@@ -27,7 +27,7 @@ class VarselSender(
         var varslerToSendTodayMerVeiledning = listOf<PPlanlagtVarsel>()
 
         if (toggles.toggleInfotrygdKafkaConsumer && toggles.toggleUtbetalingKafkaConsumer) {
-            varslerToSendTodayMerVeiledning = databaseAccess.fetchBySendingDate(LocalDate.now())
+            varslerToSendTodayMerVeiledning = databaseAccess.fetchPlanlagtVarselBySendingDate(LocalDate.now())
         }
 
 

@@ -35,6 +35,8 @@ fun getEnv(): Environment {
                 clientId = getEnvVar("AZURE_APP_CLIENT_ID"),
                 clientSecret = getEnvVar("AZURE_APP_CLIENT_SECRET"),
                 aadAccessTokenUrl = getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
+                loginserviceDiscoveryUrl = getEnvVar("LOGINSERVICE_IDPORTEN_DISCOVERY_URL"),
+                loginserviceAudience = getEnvVar("LOGINSERVICE_IDPORTEN_AUDIENCE").split(",")
             ),
             UrlEnv(
                 syfosmregisterUrl = getEnvVar("SYFOSMREGISTER_URL"),
@@ -111,6 +113,8 @@ data class AuthEnv(
     val clientId: String,
     val clientSecret: String,
     val aadAccessTokenUrl: String,
+    val loginserviceDiscoveryUrl: String,
+    val loginserviceAudience: List<String>,
 )
 
 data class UrlEnv(

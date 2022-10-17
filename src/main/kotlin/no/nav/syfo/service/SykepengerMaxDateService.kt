@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface) {
     fun processNewMaxDate(fnr: String, sykepengerMaxDate: LocalDate, source: SykepengerMaxDateSource) {
-        val currentStoredMaxDateForSykmeldt = databaseInterface.fetchMaxDateByFnr(fnr);
+        val currentStoredMaxDateForSykmeldt = databaseInterface.fetchSykepengerMaxDateByFnr(fnr)
 
         if (LocalDate.now().isEqualOrBefore(sykepengerMaxDate)) {
             if (currentStoredMaxDateForSykmeldt == null) {
@@ -14,14 +14,18 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface)
                 databaseInterface.storeSykepengerMaxDate(sykepengerMaxDate, fnr, source.name)
             } else {
                 //Update data if change exists
-                databaseInterface.updateMaxDateByFnr(sykepengerMaxDate, fnr, source.name)
+                databaseInterface.updateSykepengerMaxDateMaxDateByFnr(sykepengerMaxDate, fnr, source.name)
             }
         } else {
             if (currentStoredMaxDateForSykmeldt != null) {
                 //Delete data if maxDate is older than today
-                databaseInterface.deleteMaxDateByFnr(fnr)
+                databaseInterface.deleteSykepengerMaxDateMaxDateByFnr(fnr)
             }
         }
+    }
+
+    fun getSykepengerMaxDate(fnr: String): LocalDate? {
+        return databaseInterface.fetchSykepengerMaxDateByFnr(fnr)
     }
 }
 

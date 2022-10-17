@@ -8,7 +8,13 @@
     "serviceuserPassword": "password",
     "clientId": "clientId",
     "clientSecret": "clientSecret",
-    "aadAccessTokenUrl": "http://localhost:9595"
+    "aadAccessTokenUrl": "http://localhost:9595",
+    "loginserviceDiscoveryUrl": "https://loginservice.no/.well-known/openid-configuration",
+    "loginserviceAudience": [
+      "aud1",
+      "aud2",
+      "aud3"
+    ]
   },
   "urlEnv": {
     "syfosmregisterUrl": "http://localhost:9494",
