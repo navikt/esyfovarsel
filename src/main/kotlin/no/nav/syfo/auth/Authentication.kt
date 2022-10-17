@@ -8,7 +8,7 @@ import io.ktor.routing.*
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.api.admin.registerAdminApi
 import no.nav.syfo.api.job.registerJobTriggerApi
-import no.nav.syfo.api.maxdate.registerSykepengerMaxDateApi
+import no.nav.syfo.api.maxdate.registerSykepengerMaxDateRestApi
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.service.ReplanleggingService
 import no.nav.syfo.service.SykepengerMaxDateService
@@ -69,7 +69,7 @@ fun Application.setupLocalRoutesWithAuthentication(
     }
 
     routing {
-        registerSykepengerMaxDateApi(sykepengerMaxDateService)
+        registerSykepengerMaxDateRestApi(sykepengerMaxDateService)
         registerAdminApi(replanleggingService)
 
         authenticate("auth-basic") {
@@ -87,7 +87,7 @@ fun Application.setupRoutesWithAuthentication(
     setupAuthentication(authEnv)
     routing {
         authenticate("loginservice") {
-            registerSykepengerMaxDateApi(sykepengerMaxDateService)
+            registerSykepengerMaxDateRestApi(sykepengerMaxDateService)
         }
         authenticate("auth-basic") {
             registerAdminApi(replanleggingService)

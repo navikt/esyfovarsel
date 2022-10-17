@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 import java.io.Serializable
 
 
-fun Route.registerSykepengerMaxDateApi(
+fun Route.registerSykepengerMaxDateRestApi(
     sykepengerMaxDateService: SykepengerMaxDateService
 ) {
     val log = LoggerFactory.getLogger("no.nav.syfo.api.maxdate.SykepengerMaxDateRest")
@@ -23,7 +23,7 @@ fun Route.registerSykepengerMaxDateApi(
 
         try {
             val sykepengerMaxDate = sykepengerMaxDateService.getSykepengerMaxDate(sykmeldtFnr)?.let { it1 -> formatDateForLetter(it1) }
-            log.info("Fetched sykepengerMaxDate from databese: $sykepengerMaxDate")
+            log.info("Fetched sykepengerMaxDate from database: $sykepengerMaxDate")
             call.respond(SykepengerMaxDateResponse(sykepengerMaxDate))
         } catch (e: Exception) {
             log.error("Encountered exception during fetching sykepengerMaxDate from database: ${e.message}")
