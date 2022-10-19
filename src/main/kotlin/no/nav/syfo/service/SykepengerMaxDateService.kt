@@ -5,21 +5,27 @@ import no.nav.syfo.utils.isEqualOrBefore
 import java.time.LocalDate
 
 class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface) {
-    fun processNewMaxDate(fnr: String, sykepengerMaxDate: LocalDate, source: SykepengerMaxDateSource) {
+    fun processNewMaxDate(fnr: String, sykepengerMaxDate: LocalDate?, source: SykepengerMaxDateSource) {
         val currentStoredMaxDateForSykmeldt = databaseInterface.fetchSykepengerMaxDateByFnr(fnr)
 
-        if (LocalDate.now().isEqualOrBefore(sykepengerMaxDate)) {
-            if (currentStoredMaxDateForSykmeldt == null) {
-                //Store new data if none exists from before
-                databaseInterface.storeSykepengerMaxDate(sykepengerMaxDate, fnr, source.name)
-            } else {
-                //Update data if change exists
-                databaseInterface.updateSykepengerMaxDateMaxDateByFnr(sykepengerMaxDate, fnr, source.name)
+        when {
+            sykepengerMaxDate == null -> {
+                databaseInterface.deleteSykepengerMaxDateByFnr(fnr)
             }
-        } else {
-            if (currentStoredMaxDateForSykmeldt != null) {
-                //Delete data if maxDate is older than today
-                databaseInterface.deleteSykepengerMaxDateMaxDateByFnr(fnr)
+            LocalDate.now().isEqualOrBefore(sykepengerMaxDate) -> {
+                if (currentStoredMaxDateForSykmeldt == null) {
+                    //Store new data if none exists from before
+                    databaseInterface.storeSykepengerMaxDate(sykepengerMaxDate, fnr, source.name)
+                } else {
+                    //Update data if change exists
+                    databaseInterface.updateSykepengerMaxDateByFnr(sykepengerMaxDate, fnr, source.name)
+                }
+            }
+            else -> {
+                if (currentStoredMaxDateForSykmeldt != null) {
+                    //Delete data if maxDate is older than today
+                    databaseInterface.deleteSykepengerMaxDateByFnr(fnr)
+                }
             }
         }
     }

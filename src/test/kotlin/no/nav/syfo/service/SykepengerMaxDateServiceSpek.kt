@@ -30,7 +30,7 @@ object SykepengerMaxDateServiceSpek : Spek({
                 source = SykepengerMaxDateSource.SPLEIS
             )
 
-            val storedMaxDate = embeddedDatabase.fetchSykepengerMaxDateByFnr("123");
+            val storedMaxDate = embeddedDatabase.fetchSykepengerMaxDateByFnr("123")
             assertEquals(fiftyDaysFromNow, storedMaxDate)
         }
 
@@ -44,7 +44,7 @@ object SykepengerMaxDateServiceSpek : Spek({
                 source = SykepengerMaxDateSource.SPLEIS
             )
 
-            val storedMaxDate = embeddedDatabase.fetchSykepengerMaxDateByFnr("123");
+            val storedMaxDate = embeddedDatabase.fetchSykepengerMaxDateByFnr("123")
             assertEquals(fiftyDaysFromNow, storedMaxDate)
 
             sykepengerMaxDateService.processNewMaxDate(
@@ -53,7 +53,7 @@ object SykepengerMaxDateServiceSpek : Spek({
                 source = SykepengerMaxDateSource.INFOTRYGD
             )
 
-            val newStoredMaxDate = embeddedDatabase.fetchSykepengerMaxDateByFnr("123");
+            val newStoredMaxDate = embeddedDatabase.fetchSykepengerMaxDateByFnr("123")
             assertEquals(fourtyDaysFromNow, newStoredMaxDate)
         }
 
@@ -70,8 +70,30 @@ object SykepengerMaxDateServiceSpek : Spek({
                 source = SykepengerMaxDateSource.INFOTRYGD
             )
 
-            val storedDate = embeddedDatabase.fetchSykepengerMaxDateByFnr("123");
+            val storedDate = embeddedDatabase.fetchSykepengerMaxDateByFnr("123")
             assertEquals(null, storedDate)
+        }
+
+        it("Should delete maxdate if new date is null") {
+            val fourtyDaysFromNow = LocalDate.now().plusDays(40)
+
+            sykepengerMaxDateService.processNewMaxDate(
+                fnr = "123",
+                sykepengerMaxDate = fourtyDaysFromNow,
+                source = SykepengerMaxDateSource.SPLEIS
+            )
+
+            val storedDate = embeddedDatabase.fetchSykepengerMaxDateByFnr("123")
+            assertEquals(fourtyDaysFromNow, storedDate)
+
+            sykepengerMaxDateService.processNewMaxDate(
+                fnr = "123",
+                sykepengerMaxDate = null,
+                source = SykepengerMaxDateSource.INFOTRYGD
+            )
+
+            val newStoredDate = embeddedDatabase.fetchSykepengerMaxDateByFnr("123")
+            assertEquals(null, newStoredDate)
         }
     }
 })
