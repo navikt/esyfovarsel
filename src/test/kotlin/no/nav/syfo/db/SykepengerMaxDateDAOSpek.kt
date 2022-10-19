@@ -35,7 +35,7 @@ object SykepengerMaxDateDAOSpek : Spek({
         it("Update max date") {
             embeddedDatabase.storeSykepengerMaxDate(sykepengerMaxDate, arbeidstakerFnr1, "Infotrygd")
             embeddedDatabase.shouldContainMaxDate(arbeidstakerFnr1, sykepengerMaxDate)
-            embeddedDatabase.updateSykepengerMaxDateMaxDateByFnr(sykepengerMaxDate.plusDays(1), arbeidstakerFnr1, "Spleis")
+            embeddedDatabase.updateSykepengerMaxDateByFnr(sykepengerMaxDate.plusDays(1), arbeidstakerFnr1, "Spleis")
             embeddedDatabase.shouldContainMaxDate(arbeidstakerFnr1, sykepengerMaxDate.plusDays(1))
         }
 

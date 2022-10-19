@@ -10,7 +10,7 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface)
 
         when {
             sykepengerMaxDate == null -> {
-                databaseInterface.deleteSykepengerMaxDateMaxDateByFnr(fnr)
+                databaseInterface.deleteSykepengerMaxDateByFnr(fnr)
             }
             LocalDate.now().isEqualOrBefore(sykepengerMaxDate) -> {
                 if (currentStoredMaxDateForSykmeldt == null) {
@@ -18,13 +18,13 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface)
                     databaseInterface.storeSykepengerMaxDate(sykepengerMaxDate, fnr, source.name)
                 } else {
                     //Update data if change exists
-                    databaseInterface.updateSykepengerMaxDateMaxDateByFnr(sykepengerMaxDate, fnr, source.name)
+                    databaseInterface.updateSykepengerMaxDateByFnr(sykepengerMaxDate, fnr, source.name)
                 }
             }
             else -> {
                 if (currentStoredMaxDateForSykmeldt != null) {
                     //Delete data if maxDate is older than today
-                    databaseInterface.deleteSykepengerMaxDateMaxDateByFnr(fnr)
+                    databaseInterface.deleteSykepengerMaxDateByFnr(fnr)
                 }
             }
         }
