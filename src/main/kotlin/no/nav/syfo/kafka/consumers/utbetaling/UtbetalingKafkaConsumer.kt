@@ -36,12 +36,11 @@ class UtbetalingKafkaConsumer(
                     sykepengerMaxDateService.processNewMaxDate(utbetaling.fødselsnummer, utbetaling.foreløpigBeregnetSluttPåSykepenger, SykepengerMaxDateSource.SPLEIS)
                 } catch (e: IOException) {
                     log.error(
-                        "Error in [$topicUtbetaling]-listener: Could not parse message | ${e.message}",
-                        e
+                        "Error in [$topicUtbetaling]-listener: Could not parse message. Check topic Schema"
                     )
                 } catch (e: Exception) {
                     log.error(
-                        "Exception in [$topicUtbetaling]-listener: ${e.message}",
+                        "Exception in [$topicUtbetaling]-listener: $e",
                         e
                     )
                 }

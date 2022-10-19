@@ -13,7 +13,7 @@ data class UtbetalingUtbetalt(
     val forbrukteSykedager: Int,
     val stønadsdager: Int? = null,
     val antallVedtak: Int?,
-    val foreløpigBeregnetSluttPåSykepenger: LocalDate,
+    val foreløpigBeregnetSluttPåSykepenger: LocalDate? = null,
     val gjenståendeSykedager: Int,
     val automatiskBehandling: Boolean,
     val arbeidsgiverOppdrag: OppdragDto? = null,
