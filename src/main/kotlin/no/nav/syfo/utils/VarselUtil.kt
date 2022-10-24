@@ -15,6 +15,7 @@ val antallUker39UkersVarsel = 39L
 val antallDager39UkersVarsel = antallUker39UkersVarsel * 7L + 1
 val REMAINING_WEEKS_UNTIL_39_UKERS_VARSEL = 13
 val REMAINING_DAYS_UNTIL_39_UKERS_VARSEL = REMAINING_WEEKS_UNTIL_39_UKERS_VARSEL * 7L + 1
+val SYKEPENGER_SOKNAD_MAX_LENGTH_DAYS = 31L
 
 class VarselUtil(private val databaseAccess: DatabaseInterface) {
     fun isVarselDatoForIDag(varselDato: LocalDate): Boolean {

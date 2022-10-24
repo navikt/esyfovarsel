@@ -5,7 +5,9 @@ import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.access.domain.canUserBeNotified
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
-import no.nav.syfo.db.domain.VarselType.*
+import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
+import no.nav.syfo.db.domain.VarselType.MER_VEILEDNING
+import no.nav.syfo.db.domain.VarselType.SVAR_MOTEBEHOV
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.DineSykmeldteHendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
@@ -15,6 +17,7 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
@@ -48,7 +51,7 @@ class SendVarselService(
                     when (pPlanlagtVarsel.type) {
                         AKTIVITETSKRAV.name -> {
                             val sykmeldingStatus =
-                                sykmeldingService.checkSykmeldingStatus(pPlanlagtVarsel.utsendingsdato, fnr, orgnummer)
+                                sykmeldingService.checkSykmeldingStatusForArbeidgiver(pPlanlagtVarsel.utsendingsdato, fnr, orgnummer)
 
                             sendVarselTilSykmeldt(fnr, uuid, varselContent, varselUrl)
 
@@ -66,7 +69,7 @@ class SendVarselService(
                         }
 
                         MER_VEILEDNING.name -> {
-                            if (userAccessStatus.canUserBeNotified()) {
+                            if (userAccessStatus.canUserBeNotified() && sykmeldingService.isAktiveSykmeldingerPaVarseldato(LocalDate.now(), fnr)) {
                                 sendMerVeiledningVarselTilArbeidstaker(pPlanlagtVarsel, userAccessStatus)
                                 pPlanlagtVarsel.type
                             } else {

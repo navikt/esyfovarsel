@@ -2,6 +2,7 @@ package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.utils.REMAINING_DAYS_UNTIL_39_UKERS_VARSEL
+import no.nav.syfo.utils.SYKEPENGER_SOKNAD_MAX_LENGTH_DAYS
 import java.sql.Date
 import java.sql.Timestamp
 import java.time.LocalDate
@@ -78,6 +79,25 @@ fun DatabaseInterface.fetchPlanlagtVarselBySendingDate(sendingDate: LocalDate): 
         connection.prepareStatement(queryStatement).use {
             it.setDate(1, Date.valueOf(maxDate))
             it.executeQuery().toList { toPPlanlagtVarselMerVeiledning(sendingDate) }
+        }
+    }
+}
+
+fun DatabaseInterface.fetchPlanlagtVarselBySendingDateSisteManed(): List<PPlanlagtVarsel> {
+    val today = LocalDate.now()
+    val start = today.minusDays(SYKEPENGER_SOKNAD_MAX_LENGTH_DAYS).plusDays(REMAINING_DAYS_UNTIL_39_UKERS_VARSEL)
+    val end = today.minusDays(1).plusDays(REMAINING_DAYS_UNTIL_39_UKERS_VARSEL)
+
+    val queryStatement = """SELECT *
+                            FROM SYKEPENGER_MAX_DATE
+                            WHERE MAX_DATE  >= ? AND MAX_DATE <= ?
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setDate(1, Date.valueOf(start))
+            it.setDate(2, Date.valueOf(end))
+            it.executeQuery().toList { toPPlanlagtVarselMerVeiledning(today) }
         }
     }
 }

@@ -23,7 +23,7 @@ object SendVarselServiceTestSpek : Spek({
     val accessControlServiceMockk: AccessControlService = mockk(relaxed = true)
     val urlEnvMockk: UrlEnv = mockk(relaxed = true)
     val arbeidsgiverNotifikasjonServiceMockk: ArbeidsgiverNotifikasjonService = mockk(relaxed = true)
-    val merVeiledningVarselServiceMockk: MerVeiledningVarselService = mockk(relaxed = true)
+    val merVeiledningVarselServiceMockk: MerVeiledningVarselService = mockk()
     val sykmeldingerConsumerMock: SykmeldingerConsumer = mockk(relaxed = true)
     val sykmeldingServiceMockk = SykmeldingService(sykmeldingerConsumerMock)
 
@@ -38,12 +38,18 @@ object SendVarselServiceTestSpek : Spek({
     )
 
     val sykmeldtFnr = "01234567891"
+    val sykmeldtFnr1 = "00000000000"
     val orgnummer = "999988877"
 
     describe("SendVarselServiceSpek") {
         beforeEachTest {
             every { accessControlServiceMockk.getUserAccessStatus(sykmeldtFnr) } returns UserAccessStatus(
                 sykmeldtFnr,
+                canUserBeDigitallyNotified = true,
+                canUserBePhysicallyNotified = false
+            )
+            every { accessControlServiceMockk.getUserAccessStatus(sykmeldtFnr1) } returns UserAccessStatus(
+                sykmeldtFnr1,
                 canUserBeDigitallyNotified = true,
                 canUserBePhysicallyNotified = false
             )
@@ -108,6 +114,32 @@ object SendVarselServiceTestSpek : Spek({
             verify(exactly = 1) { beskjedKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
             verify(exactly = 0) { dineSykmeldteHendelseKafkaProducerMockk.sendVarsel(any()) }
             verify(exactly = 0) { arbeidsgiverNotifikasjonServiceMockk.sendNotifikasjon(any()) }
+        }
+
+        it("Should send mer-veiledning-varsel to SM if sykmelding is sendt AG") {
+            coEvery { sykmeldingerConsumerMock.getSykmeldingerPaDato(any(), sykmeldtFnr1) } returns listOf(
+                getSykmeldingDto(
+                    perioder = getSykmeldingPerioder(isGradert = false),
+                    sykmeldingStatus = getSykmeldingStatus(isSendt = true, orgnummer = orgnummer)
+                )
+            )
+
+            runBlocking {
+                sendVarselService.sendVarsel(
+                    PPlanlagtVarsel(
+                        uuid = UUID.randomUUID().toString(),
+                        fnr = sykmeldtFnr1,
+                        orgnummer = orgnummer,
+                        aktorId = null,
+                        type = VarselType.MER_VEILEDNING.name,
+                        utsendingsdato = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).toLocalDate(),
+                        opprettet = LocalDateTime.now(),
+                        sistEndret = LocalDateTime.now()
+                    )
+                )
+            }
+
+            verify(exactly = 1) { beskjedKafkaProducerMockk.sendBeskjed(sykmeldtFnr1, any(), any(), any()) }
         }
     }
 })
