@@ -33,7 +33,7 @@ fun DatabaseInterface.storeSykepengerMaxDate(sykepengerMaxDate: LocalDate, fnr: 
     }
 }
 
-fun DatabaseInterface.updateSykepengerMaxDateMaxDateByFnr(sykepengerMaxDate: LocalDate, fnr: String, source: String) {
+fun DatabaseInterface.updateSykepengerMaxDateByFnr(sykepengerMaxDate: LocalDate, fnr: String, source: String) {
     val updateStatement = """UPDATE SYKEPENGER_MAX_DATE 
                              SET SOURCE = ?,
                                  MAX_DATE = ?,
@@ -102,7 +102,7 @@ fun DatabaseInterface.fetchPlanlagtVarselBySendingDateSisteManed(): List<PPlanla
     }
 }
 
-fun DatabaseInterface.deleteSykepengerMaxDateMaxDateByFnr(fnr: String) {
+fun DatabaseInterface.deleteSykepengerMaxDateByFnr(fnr: String) {
     val deleteStatement = """DELETE FROM SYKEPENGER_MAX_DATE  WHERE fnr = ?""".trimIndent()
 
     connection.use { connection ->
