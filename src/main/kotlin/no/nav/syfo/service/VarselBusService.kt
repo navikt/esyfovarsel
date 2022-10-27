@@ -9,7 +9,8 @@ import org.slf4j.LoggerFactory
 
 class VarselBusService(
     val motebehovVarselService: MotebehovVarselService,
-    val oppfolgingsplanVarselService: OppfolgingsplanVarselService
+    val oppfolgingsplanVarselService: OppfolgingsplanVarselService,
+    val dialogmoteStatusVarselService: DialogmoteStatusVarselService
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.VarselBusService")
     fun processVarselHendelse(varselHendelse: EsyfovarselHendelse) {
@@ -19,6 +20,15 @@ class VarselBusService(
             NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
             NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
             SM_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+
+            NL_DIALOGMOTE_INNKALT -> dialogmoteStatusVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+            SM_DIALOGMOTE_INNKALT -> dialogmoteStatusVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+            NL_DIALOGMOTE_AVLYST -> dialogmoteStatusVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+            SM_DIALOGMOTE_AVLYST -> dialogmoteStatusVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+            NL_DIALOGMOTE_REFERAT -> dialogmoteStatusVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+            SM_DIALOGMOTE_REFERAT -> dialogmoteStatusVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+            NL_DIALOGMOTE_NYTT_TID_STED -> dialogmoteStatusVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+            SM_DIALOGMOTE_NYTT_TID_STED -> dialogmoteStatusVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
         }
     }
 

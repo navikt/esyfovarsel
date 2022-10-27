@@ -22,7 +22,7 @@ class MotebehovVarselService(
     }
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
-        val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_URL)
+        val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SYKMELDT_URL)
         senderFacade.sendTilBrukernotifikasjoner(
             UUID.randomUUID().toString(),
             varselHendelse.arbeidstakerFnr,
