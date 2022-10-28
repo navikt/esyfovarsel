@@ -9,6 +9,7 @@ import no.nav.syfo.ToggleEnv
 import no.nav.syfo.db.*
 import no.nav.syfo.db.domain.*
 import no.nav.syfo.db.domain.VarselType.MER_VEILEDNING
+import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
 import no.nav.syfo.planner.arbeidstakerFnr1
 import no.nav.syfo.service.SendVarselService
 import no.nav.syfo.service.SykepengerMaxDateSource
@@ -86,7 +87,7 @@ object VarselSenderSpek : Spek({
         it("Skal ikke sende mer veiledning-varsel hvis toggle er false") {
             val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(false, false, true, false, false))
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, emptySet(), MER_VEILEDNING)
-            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), VarselType.AKTIVITETSKRAV)
+            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), AKTIVITETSKRAV)
 
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
@@ -97,14 +98,14 @@ object VarselSenderSpek : Spek({
             embeddedDatabase.skalHaPlanlagtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
             embeddedDatabase.skalIkkeHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
 
-            embeddedDatabase.skalIkkeHaPlanlagtVarsel(arbeidstakerFnr1, VarselType.AKTIVITETSKRAV)
-            embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, VarselType.AKTIVITETSKRAV)
+            embeddedDatabase.skalIkkeHaPlanlagtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
+            embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
         }
 
         it("Skal ikke sende aktivitetskrav-varsel hvis toggle er false") {
             val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, ToggleEnv(true, false, false, false, false))
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
-            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), VarselType.AKTIVITETSKRAV)
+            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), AKTIVITETSKRAV)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
 
@@ -114,8 +115,8 @@ object VarselSenderSpek : Spek({
             embeddedDatabase.skalIkkeHaPlanlagtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
             embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
 
-            embeddedDatabase.skalHaPlanlagtVarsel(arbeidstakerFnr1, VarselType.AKTIVITETSKRAV)
-            embeddedDatabase.skalIkkeHaUtsendtVarsel(arbeidstakerFnr1, VarselType.AKTIVITETSKRAV)
+            embeddedDatabase.skalHaPlanlagtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
+            embeddedDatabase.skalIkkeHaUtsendtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
 
             sendVarselService.testSendVarsel()
         }
