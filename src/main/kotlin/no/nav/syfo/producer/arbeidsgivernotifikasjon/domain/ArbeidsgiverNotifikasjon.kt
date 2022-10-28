@@ -10,6 +10,7 @@ data class ArbeidsgiverNotifikasjon(
     val ansattFnr: String,
     val messageText: String,
     val narmesteLederEpostadresse: String,
+    val merkelapp: String,
     val emailTitle: String,
     val emailBody: String,
     val hardDeleteDate: LocalDateTime,

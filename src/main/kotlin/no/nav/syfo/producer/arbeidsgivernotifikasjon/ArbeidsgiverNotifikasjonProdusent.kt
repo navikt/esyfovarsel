@@ -5,7 +5,6 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MERKELAPP
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
@@ -66,7 +65,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
                 arbeidsgiverNotifikasjon.url,
                 arbeidsgiverNotifikasjon.narmesteLederFnr,
                 arbeidsgiverNotifikasjon.ansattFnr,
-                ARBEIDSGIVERNOTIFIKASJON_MERKELAPP,
+                arbeidsgiverNotifikasjon.merkelapp,
                 arbeidsgiverNotifikasjon.messageText,
                 arbeidsgiverNotifikasjon.narmesteLederEpostadresse,
                 arbeidsgiverNotifikasjon.emailTitle,

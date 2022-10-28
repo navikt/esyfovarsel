@@ -49,6 +49,7 @@ class DialogmoteStatusVarselService(val senderFacade: SenderFacade, val dialogmo
                 varselHendelse.orgnummer,
                 varselHendelse.narmesteLederFnr,
                 varselHendelse.arbeidstakerFnr,
+                ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
                 sms,
                 emailTitle,
                 emailBody,

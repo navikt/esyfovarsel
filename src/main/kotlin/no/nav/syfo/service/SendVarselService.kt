@@ -136,6 +136,7 @@ class SendVarselService(
                 orgnummer,
                 null,
                 arbeidstakerFnr,
+                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
                 ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT,
                 ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE,
                 ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY,

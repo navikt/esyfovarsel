@@ -8,7 +8,8 @@ const val DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST = "Påminnelse om aktivitetsplikte
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST = "NAV ønsker svar på om du trenger et dialogmøte"
 const val BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT = "Det nærmer seg datoen da du ikke lenger kan få sykepenger."
 
-const val ARBEIDSGIVERNOTIFIKASJON_MERKELAPP = "Oppfølging"
+const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP = "Oppfølging"
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP = "Dialogmøte"
 const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT = "En av dine medarbeidere har snart vært sykmeldt i åtte uker"
 const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE = "Varsel om nytt aktivitetskrav"
 const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY =

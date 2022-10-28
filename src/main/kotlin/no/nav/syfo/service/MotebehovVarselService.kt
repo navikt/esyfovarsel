@@ -40,6 +40,7 @@ class MotebehovVarselService(
                 varselHendelse.orgnummer,
                 varselHendelse.narmesteLederFnr,
                 varselHendelse.arbeidstakerFnr,
+                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
