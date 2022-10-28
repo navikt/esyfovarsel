@@ -38,7 +38,7 @@ class DialogmoteStatusVarselService(val senderFacade: SenderFacade, val dialogmo
     }
 
     private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
-        val texts = getArbeisgiverTexts(varselHendelse.type)
+        val texts = getArbeisgiverTexts(varselHendelse)
         val sms = texts[SMS_KEY]
         val emailTitle = texts[EMAIL_TITLE_KEY]
         val emailBody = texts[EMAIL_BODY_KEY]
@@ -98,29 +98,44 @@ class DialogmoteStatusVarselService(val senderFacade: SenderFacade, val dialogmo
         }
     }
 
-    private fun getArbeisgiverTexts(hendelseType: HendelseType): HashMap<String, String> {
-        return when (hendelseType) {
+    private fun getArbeisgiverTexts(hendelse: NarmesteLederHendelse): HashMap<String, String> {
+        return when (hendelse.type) {
             NL_DIALOGMOTE_INNKALT -> hashMapOf(
                 SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_MESSAGE_TEXT,
                 EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_TITLE,
-                EMAIL_BODY_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_BODY,
+                EMAIL_BODY_KEY to getEmailBody(hendelse),
             )
             NL_DIALOGMOTE_AVLYST -> hashMapOf(
                 SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_MESSAGE_TEXT,
                 EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_TITLE,
-                EMAIL_BODY_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_BODY,
+                EMAIL_BODY_KEY to getEmailBody(hendelse),
             )
             NL_DIALOGMOTE_REFERAT -> hashMapOf(
                 SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_MESSAGE_TEXT,
                 EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_TITLE,
-                EMAIL_BODY_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_BODY,
+                EMAIL_BODY_KEY to getEmailBody(hendelse),
             )
             NL_DIALOGMOTE_NYTT_TID_STED -> hashMapOf(
                 SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_MESSAGE_TEXT,
                 EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_TITLE,
-                EMAIL_BODY_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_BODY,
+                EMAIL_BODY_KEY to getEmailBody(hendelse),
             )
             else -> hashMapOf()
+        }
+    }
+
+    private fun getEmailBody(hendelse: NarmesteLederHendelse): String {
+        var greeting = "Til <body>Hei.<br><br>"
+        if (hendelse.narmesteLederNavn != null) {
+            greeting = "Til <body>${hendelse.narmesteLederNavn},<br><br>"
+        }
+
+        return when (hendelse.type) {
+            NL_DIALOGMOTE_INNKALT -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_BODY
+            NL_DIALOGMOTE_AVLYST -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_BODY
+            NL_DIALOGMOTE_REFERAT -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_BODY
+            NL_DIALOGMOTE_NYTT_TID_STED -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_BODY
+            else -> ""
         }
     }
 }
