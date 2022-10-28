@@ -56,7 +56,7 @@ class AktivitetskravVarselPlanner(
             } else if (varselUtil.isVarselDatoEtterTilfelleSlutt(aktivitetskravVarselDate, tom)) {
                 log.info("-$name-: Tilfelle er kortere enn 6 uker, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
                 databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds, VarselType.AKTIVITETSKRAV)
-            } else if (sykmeldingService.checkSykmeldingStatusForArbeidgiver(aktivitetskravVarselDate, fnr, orgnummer).isSykmeldtIJobb) {
+            } else if (sykmeldingService.checkSykmeldingStatusForVirksomhet(aktivitetskravVarselDate, fnr, orgnummer).isSykmeldtIJobb) {
                 log.info("-$name-: Sykmeldingsgrad er < enn 100% på beregnet varslingsdato, sletter tidligere planlagt varsel om det finnes i DB. -FOM, TOM, DATO: , $fom, $tom, $aktivitetskravVarselDate-")
                 databaseAccess.deletePlanlagtVarselBySykmeldingerId(ressursIds, VarselType.AKTIVITETSKRAV)
             } else if (lagreteVarsler.isNotEmpty() && lagreteVarsler.filter { it.utsendingsdato == aktivitetskravVarselDate }

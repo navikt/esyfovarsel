@@ -27,7 +27,7 @@ class SykmeldingService constructor(private val sykmeldingerConsumer: Sykmelding
         }
     }
 
-    suspend fun checkSykmeldingStatusForArbeidgiver(
+    suspend fun checkSykmeldingStatusForVirksomhet(
         varselDato: LocalDate, fnr: String, virksomhetsnummer: String?
     ): SykmeldingStatus {
         val sykmeldingerPaVarseldato: List<SykmeldingDTO> =

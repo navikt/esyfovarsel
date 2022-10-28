@@ -48,7 +48,7 @@ object JobApiSpek : Spek({
         coEvery { accessControlService.getUserAccessStatus(fnr4) } returns userAccessStatus4
         coEvery { accessControlService.getUserAccessStatus(fnr5) } returns userAccessStatus5
         coEvery {
-            sykmeldingService.checkSykmeldingStatusForArbeidgiver(
+            sykmeldingService.checkSykmeldingStatusForVirksomhet(
                 any(),
                 any(),
                 any()

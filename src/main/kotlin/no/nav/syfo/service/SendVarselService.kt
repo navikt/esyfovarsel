@@ -51,7 +51,7 @@ class SendVarselService(
                     when (pPlanlagtVarsel.type) {
                         AKTIVITETSKRAV.name -> {
                             val sykmeldingStatus =
-                                sykmeldingService.checkSykmeldingStatusForArbeidgiver(pPlanlagtVarsel.utsendingsdato, fnr, orgnummer)
+                                sykmeldingService.checkSykmeldingStatusForVirksomhet(pPlanlagtVarsel.utsendingsdato, fnr, orgnummer)
 
                             sendVarselTilSykmeldt(fnr, uuid, varselContent, varselUrl)
 

@@ -113,7 +113,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
 
             coEvery { syketilfellebitService.beregnKOppfolgingstilfelle(any()) } returns oppfolgingstilfellePerson
             coEvery {
-                sykmeldingService.checkSykmeldingStatusForArbeidgiver(
+                sykmeldingService.checkSykmeldingStatusForVirksomhet(
                     any(),
                     any(),
                     any()
@@ -159,7 +159,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                 )
 
             coEvery {
-                sykmeldingService.checkSykmeldingStatusForArbeidgiver(
+                sykmeldingService.checkSykmeldingStatusForVirksomhet(
                     any(),
                     any(),
                     any()
@@ -235,7 +235,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                 )
 
             coEvery {
-                sykmeldingService.checkSykmeldingStatusForArbeidgiver(
+                sykmeldingService.checkSykmeldingStatusForVirksomhet(
                     any(),
                     any(),
                     any()
@@ -312,7 +312,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
                 )
 
             coEvery {
-                sykmeldingService.checkSykmeldingStatusForArbeidgiver(
+                sykmeldingService.checkSykmeldingStatusForVirksomhet(
                     any(),
                     any(),
                     any()
@@ -373,7 +373,7 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
             )
 
             coEvery {
-                sykmeldingService.checkSykmeldingStatusForArbeidgiver(
+                sykmeldingService.checkSykmeldingStatusForVirksomhet(
                     any(),
                     any(),
                     any()
