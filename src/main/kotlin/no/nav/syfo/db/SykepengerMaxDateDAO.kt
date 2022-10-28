@@ -83,7 +83,7 @@ fun DatabaseInterface.fetchPlanlagtVarselBySendingDate(sendingDate: LocalDate): 
     }
 }
 
-fun DatabaseInterface.fetchPlanlagtVarselBySendingDateSisteManed(): List<PPlanlagtVarsel> {
+fun DatabaseInterface.fetchPlanlagtMerVeiledningVarselBySendingDateSisteManed(): List<PPlanlagtVarsel> {
     val today = LocalDate.now()
     val start = today.minusDays(SYKEPENGER_SOKNAD_MAX_LENGTH_DAYS).plusDays(REMAINING_DAYS_UNTIL_39_UKERS_VARSEL)
     val end = today.minusDays(1).plusDays(REMAINING_DAYS_UNTIL_39_UKERS_VARSEL)

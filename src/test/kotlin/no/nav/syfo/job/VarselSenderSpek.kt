@@ -159,7 +159,7 @@ object VarselSenderSpek : Spek({
             val allUnsendMerveiledning = sendVarselJobb.testGetAllUnsendMerveiledning()
             allUnsendMerveiledning.size shouldBeEqualTo 0
 
-            val merVeiledningVarselBasedOnMaxDate = embeddedDatabase.fetchPlanlagtVarselBySendingDateSisteManed()[0]
+            val merVeiledningVarselBasedOnMaxDate = embeddedDatabase.fetchPlanlagtMerVeiledningVarselBySendingDateSisteManed()[0]
             val merVeiledningVarselNotBasedOnMaxDate =
                 embeddedDatabase.fetchPlanlagtVarselByTypeAndUtsendingsdato(MER_VEILEDNING, LocalDate.now().minusDays(14), LocalDate.now().minusDays(14))[0]
 
@@ -188,7 +188,7 @@ object VarselSenderSpek : Spek({
             embeddedDatabase.storePlanlagtVarsel(oldPlanlagtVarselToStore)
             embeddedDatabase.storeUtsendtVarsel(utsendtVarselInnen31DagerToStore)
             embeddedDatabase.storeSykepengerMaxDate(maxDate, arbeidstakerFnr1, SykepengerMaxDateSource.INFOTRYGD.name)
-            val merVeiledningVarselBasedOnMaxDate = embeddedDatabase.fetchPlanlagtVarselBySendingDateSisteManed()[0]
+            val merVeiledningVarselBasedOnMaxDate = embeddedDatabase.fetchPlanlagtMerVeiledningVarselBySendingDateSisteManed()[0]
             val merVeiledningVarselNotBasedOnMaxDate =
                 embeddedDatabase.fetchPlanlagtVarselByTypeAndUtsendingsdato(MER_VEILEDNING, LocalDate.now().minusDays(14), LocalDate.now().minusDays(14))[0]
 

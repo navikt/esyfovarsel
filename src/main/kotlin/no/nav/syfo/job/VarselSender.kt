@@ -113,7 +113,7 @@ class VarselSender(
     }
 
     fun getAllUnsendMerVeiledningVarslerLastMonth(): List<PPlanlagtVarsel> {
-        var unsentMerVeiledningVarslerLastMonth = databaseAccess.fetchPlanlagtVarselBySendingDateSisteManed() // in max date table!
+        var unsentMerVeiledningVarslerLastMonth = databaseAccess.fetchPlanlagtMerVeiledningVarselBySendingDateSisteManed() // in max date table!
         val sentMerVeiledningVarslerLastMonth = databaseAccess.fetchUtsendteVarslerSisteManed().filter { it.type == VarselType.MER_VEILEDNING.name }
 
 
