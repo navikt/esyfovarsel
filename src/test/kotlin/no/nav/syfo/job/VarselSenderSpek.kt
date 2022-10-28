@@ -223,7 +223,7 @@ object VarselSenderSpek : Spek({
 })
 
 private fun VarselSender.testGetAllUnsendMerveiledning(): List<PPlanlagtVarsel> {
-    return runBlocking { getAllUnsendMerVeiledningVarslerLastMonth() }
+    return runBlocking { getAllUnsentMerVeiledningVarslerLastMonth() }
 }
 
 private fun VarselSender.testSendVarsler() {

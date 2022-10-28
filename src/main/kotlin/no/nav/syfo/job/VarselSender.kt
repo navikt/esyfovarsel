@@ -28,7 +28,7 @@ class VarselSender(
 
         if (toggles.sendMerVeiledningVarslerBasedOnMaxDate) {
             varslerToSendTodayMerVeiledning = databaseAccess.fetchPlanlagtMerVeiledningVarselByUtsendingsdato(LocalDate.now())
-            varslerToSendTodayMerVeiledning = varslerToSendTodayMerVeiledning.plus(getAllUnsendMerVeiledningVarslerLastMonth())
+            varslerToSendTodayMerVeiledning = varslerToSendTodayMerVeiledning.plus(getAllUnsentMerVeiledningVarslerLastMonth())
 
             varslerToSendToday = mergePlanlagteVarsler(varslerToSendToday, varslerToSendTodayMerVeiledning)
         }
@@ -112,7 +112,7 @@ class VarselSender(
         }
     }
 
-    fun getAllUnsendMerVeiledningVarslerLastMonth(): List<PPlanlagtVarsel> {
+    fun getAllUnsentMerVeiledningVarslerLastMonth(): List<PPlanlagtVarsel> {
         var unsentMerVeiledningVarslerLastMonth = databaseAccess.fetchPlanlagtMerVeiledningVarselBySendingDateSisteManed() // in max date table!
         val sentMerVeiledningVarslerLastMonth = databaseAccess.fetchUtsendteVarslerSisteManed().filter { it.type == VarselType.MER_VEILEDNING.name }
 
