@@ -64,7 +64,7 @@ object VarselSenderSpek : Spek({
 
             val maxDate = LocalDate.now().plusDays(REMAINING_DAYS_UNTIL_39_UKERS_VARSEL)
             embeddedDatabase.storeSykepengerMaxDate(maxDate, arbeidstakerFnr1, SykepengerMaxDateSource.INFOTRYGD.name)
-            val newPPlanlagtVarsel = embeddedDatabase.fetchPlanlagtVarselBySendingDate(LocalDate.now())[0]
+            val newPPlanlagtVarsel = embeddedDatabase.fetchPlanlagtMerVeiledningVarselByUtsendingsdato(LocalDate.now())[0]
 
             sendVarselJobb.testSendVarsler()
             verify(exactly = 0) {
@@ -209,7 +209,7 @@ object VarselSenderSpek : Spek({
             embeddedDatabase.storePlanlagtVarsel(oldPlanlagtVarselToStore)
             embeddedDatabase.storeSykepengerMaxDate(maxDate, arbeidstakerFnr1, SykepengerMaxDateSource.INFOTRYGD.name)
 
-            val merVeiledningVarselBasedOnMaxDate = embeddedDatabase.fetchPlanlagtVarselBySendingDate(utsendingDate)[0]
+            val merVeiledningVarselBasedOnMaxDate = embeddedDatabase.fetchPlanlagtMerVeiledningVarselByUtsendingsdato(utsendingDate)[0]
             val merVeiledningVarselNotBasedOnMaxDate =
                 embeddedDatabase.fetchPlanlagtVarselByTypeAndUtsendingsdato(MER_VEILEDNING, utsendingDate, utsendingDate)[0]
 

@@ -68,7 +68,7 @@ fun DatabaseInterface.fetchSykepengerMaxDateByFnr(fnr: String): LocalDate? {
     } else null
 }
 
-fun DatabaseInterface.fetchPlanlagtVarselBySendingDate(sendingDate: LocalDate): List<PPlanlagtVarsel> {
+fun DatabaseInterface.fetchPlanlagtMerVeiledningVarselByUtsendingsdato(sendingDate: LocalDate): List<PPlanlagtVarsel> {
     val maxDate = sendingDate.plusDays(REMAINING_DAYS_UNTIL_39_UKERS_VARSEL)
     val queryStatement = """SELECT *
                             FROM SYKEPENGER_MAX_DATE

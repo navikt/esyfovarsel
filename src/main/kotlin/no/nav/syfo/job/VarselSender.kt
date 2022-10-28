@@ -27,7 +27,7 @@ class VarselSender(
         var varslerToSendTodayMerVeiledning = listOf<PPlanlagtVarsel>()
 
         if (toggles.sendMerVeiledningVarslerBasedOnMaxDate) {
-            varslerToSendTodayMerVeiledning = databaseAccess.fetchPlanlagtVarselBySendingDate(LocalDate.now())
+            varslerToSendTodayMerVeiledning = databaseAccess.fetchPlanlagtMerVeiledningVarselByUtsendingsdato(LocalDate.now())
             varslerToSendTodayMerVeiledning = varslerToSendTodayMerVeiledning.plus(getAllUnsendMerVeiledningVarslerLastMonth())
 
             varslerToSendToday = mergePlanlagteVarsler(varslerToSendToday, varslerToSendTodayMerVeiledning)
