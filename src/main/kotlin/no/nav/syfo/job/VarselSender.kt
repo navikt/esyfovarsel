@@ -11,7 +11,6 @@ import no.nav.syfo.metrics.tellSvarMotebehovVarselSendt
 import no.nav.syfo.service.SendVarselService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 class VarselSender(
     private val databaseAccess: DatabaseInterface,
@@ -25,16 +24,15 @@ class VarselSender(
 
         val varslerSendt = HashMap<String, Int>()
         var varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
-        var varslerToSendTodayMerVeiledning = listOf<PPlanlagtVarsel>()
 
         if (toggles.sendMerVeiledningVarslerBasedOnMaxDate) {
-            varslerToSendTodayMerVeiledning = databaseAccess.fetchPlanlagtMerVeiledningVarselByUtsendingsdato(LocalDate.now())
+            var varslerToSendTodayMerVeiledning = databaseAccess.fetchPlanlagtMerVeiledningVarselByUtsendingsdato(LocalDate.now())
             varslerToSendTodayMerVeiledning = varslerToSendTodayMerVeiledning.plus(getAllUnsentMerVeiledningVarslerLastMonth())
 
             varslerToSendToday = mergePlanlagteVarsler(varslerToSendToday, varslerToSendTodayMerVeiledning)
+            log.info("Planlegger å sende ${varslerToSendTodayMerVeiledning.size} Mer veiledning varsler med utsending basert på maxdato")
         }
 
-        log.info("Planlegger å sende ${varslerToSendTodayMerVeiledning.size} Mer veiledning varsler med utsending basert på maxdato")
         log.info("Planlegger å sende ${varslerToSendToday.size} varsler totalt")
 
         if (!toggles.sendAktivitetskravVarsler) log.info("Utsending av Aktivitetskrav er ikke aktivert, og varsler av denne typen blir ikke sendt")
@@ -114,16 +112,9 @@ class VarselSender(
     }
 
     fun getAllUnsentMerVeiledningVarslerLastMonth(): List<PPlanlagtVarsel> {
-        var unsentMerVeiledningVarslerLastMonth = databaseAccess.fetchPlanlagtMerVeiledningVarselBySendingDateSisteManed() // in max date table!
+        val unsentMerVeiledningVarslerLastMonth = databaseAccess.fetchPlanlagtMerVeiledningVarselBySendingDateSisteManed() // in max date table!
         val sentMerVeiledningVarslerLastMonth = databaseAccess.fetchUtsendteVarslerSisteManed().filter { it.type == VarselType.MER_VEILEDNING.name }
 
-
-        unsentMerVeiledningVarslerLastMonth.forEach { planlagtVarsel ->
-            val currentFnr = planlagtVarsel.fnr
-            if (sentMerVeiledningVarslerLastMonth.any { it.fnr == currentFnr }) {
-                unsentMerVeiledningVarslerLastMonth = unsentMerVeiledningVarslerLastMonth.minus(planlagtVarsel)
-            }
-        }
-        return unsentMerVeiledningVarslerLastMonth
+        return unsentMerVeiledningVarslerLastMonth.filter { plannedVarsel -> sentMerVeiledningVarslerLastMonth.none { plannedVarsel.fnr == it.fnr } }
     }
 }
