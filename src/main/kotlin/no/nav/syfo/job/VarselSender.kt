@@ -26,11 +26,11 @@ class VarselSender(
         var varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
 
         if (toggles.sendMerVeiledningVarslerBasedOnMaxDate) {
-            var varslerToSendTodayMerVeiledning = databaseAccess.fetchPlanlagtMerVeiledningVarselByUtsendingsdato(LocalDate.now())
-            varslerToSendTodayMerVeiledning = varslerToSendTodayMerVeiledning.plus(getAllUnsentMerVeiledningVarslerLastMonth())
+            val varslerToSendTodayMonthMerVeiledning = databaseAccess.fetchPlanlagtMerVeiledningVarselByUtsendingsdato(LocalDate.now())
+            val allVarslerToSendTodayMerVeiledning = varslerToSendTodayMonthMerVeiledning.plus(getAllUnsentMerVeiledningVarslerLastMonth())
 
-            varslerToSendToday = mergePlanlagteVarsler(varslerToSendToday, varslerToSendTodayMerVeiledning)
-            log.info("Planlegger å sende ${varslerToSendTodayMerVeiledning.size} Mer veiledning varsler med utsending basert på maxdato")
+            varslerToSendToday = mergePlanlagteVarsler(varslerToSendToday, allVarslerToSendTodayMerVeiledning)
+            log.info("Planlegger å sende ${allVarslerToSendTodayMerVeiledning.size} Mer veiledning varsler med utsending basert på maxdato")
         }
 
         log.info("Planlegger å sende ${varslerToSendToday.size} varsler totalt")
