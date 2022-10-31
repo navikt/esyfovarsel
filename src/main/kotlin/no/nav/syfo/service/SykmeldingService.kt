@@ -41,7 +41,7 @@ class SykmeldingService constructor(private val sykmeldingerConsumer: Sykmelding
     }
 
     suspend fun isPersonSykmeldtPaDato(varselDato: LocalDate, fnr: String): Boolean {
-        val sykmeldingerPaVarseldato = sykmeldingerConsumer.getSykmeldtStatusPaDato(varselDato, fnr)
-        return sykmeldingerPaVarseldato != null && sykmeldingerPaVarseldato.erSykmeldt
+        val sykmeldtStatusPaVarseldato = sykmeldingerConsumer.getSykmeldtStatusPaDato(varselDato, fnr)
+        return sykmeldtStatusPaVarseldato != null && sykmeldtStatusPaVarseldato.erSykmeldt
     }
 }
