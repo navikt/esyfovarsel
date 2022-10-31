@@ -41,9 +41,7 @@ class SykmeldingService constructor(private val sykmeldingerConsumer: Sykmelding
     }
 
     suspend fun isAktiveSykmeldingerPaVarseldato(varselDato: LocalDate, fnr: String): Boolean {
-        val sykmeldingerPaVarseldato = sykmeldingerConsumer.getSykmeldingerPaDato(varselDato, fnr)
-        val sendteSykmeldinger: List<SykmeldingDTO> = sykmeldingerPaVarseldato?.filter { sykmelding -> sykmelding.sykmeldingStatus.statusEvent == "SENDT" } ?: listOf()
-
-        return sendteSykmeldinger.isNotEmpty()
+        val sykmeldingerPaVarseldato = sykmeldingerConsumer.getSykmeldtStatusPaDato(varselDato, fnr)
+        return sykmeldingerPaVarseldato != null && sykmeldingerPaVarseldato.erSykmeldt
     }
 }

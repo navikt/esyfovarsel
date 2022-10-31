@@ -49,4 +49,32 @@ class SykmeldingerConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: Azu
             }
         }
     }
+
+    suspend fun getSykmeldtStatusPaDato(dato: LocalDate, fnr: String): SykmeldtStatus? {
+        val requestURL = "$basepath/api/v2/sykmelding/sykmeldtStatus"
+        val token = azureAdTokenConsumer.getToken(scope)
+
+        val response = client.post<HttpResponse>(requestURL) {
+            header(HttpHeaders.Authorization, "Bearer $token")
+            accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            body = SykmeldtStatusRequest(fnr, dato)
+        }
+
+        return when (response.status) {
+            HttpStatusCode.OK -> {
+                response.receive<SykmeldtStatus>()
+            }
+
+            HttpStatusCode.Unauthorized -> {
+                log.error("Could not get sykmeldt status from syfosmregister: Unable to authorize")
+                null
+            }
+
+            else -> {
+                log.error("Could not get sykmeldt status from syfosmregister: $response")
+                null
+            }
+        }
+    }
 }
