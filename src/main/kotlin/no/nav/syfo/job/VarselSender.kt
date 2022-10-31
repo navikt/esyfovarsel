@@ -11,6 +11,7 @@ import no.nav.syfo.metrics.tellSvarMotebehovVarselSendt
 import no.nav.syfo.service.SendVarselService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class VarselSender(
     private val databaseAccess: DatabaseInterface,
@@ -39,6 +40,8 @@ class VarselSender(
         if (!toggles.sendAktivitetskravVarsler) log.info("Utsending av Aktivitetskrav er ikke aktivert, og varsler av denne typen blir ikke sendt")
         if (!toggles.sendMerVeiledningVarsler) log.info("Utsending av Mer veiledning er ikke aktivert, og varsler av denne typen blir ikke sendt")
         if (!toggles.sendMerVeiledningVarslerBasedOnMaxDate) log.info("Utsending av  Mer veiledning med utsending basert på maxdato er ikke aktivert, og varsler av denne typen blir ikke sendt via denne pathen")
+        //TODO: delete
+        sendVarselService.sendVarsel(PPlanlagtVarsel("", "26918198953", "", "", VarselType.MER_VEILEDNING.name, LocalDate.now(), LocalDateTime.now(), LocalDateTime.now()))
 
         varslerToSendToday.forEach {
             if (skalSendeVarsel(it)) {
