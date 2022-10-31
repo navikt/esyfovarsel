@@ -6,6 +6,7 @@ import no.nav.syfo.UrlEnv
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.consumer.syfosmregister.SykmeldingDTO
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
+import no.nav.syfo.consumer.syfosmregister.SykmeldtStatus
 import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.*
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PPlanlagtVarsel
@@ -127,12 +128,13 @@ object SendVarselServiceTestSpek : Spek({
         }
 
         it("Should send mer-veiledning-varsel to SM if sykmelding is sendt AG") {
-            coEvery { sykmeldingerConsumerMock.getSykmeldingerPaDato(any(), sykmeldtFnr) } returns listOf(
-                getSykmeldingDto(
-                    perioder = getSykmeldingPerioder(isGradert = false),
-                    sykmeldingStatus = getSykmeldingStatus(isSendt = true, orgnummer = orgnummer)
+            coEvery { sykmeldingerConsumerMock.getSykmeldtStatusPaDato(any(), sykmeldtFnr) } returns
+                SykmeldtStatus(
+                    true,
+                    true,
+                    LocalDate.now(),
+                    LocalDate.now()
                 )
-            )
 
             runBlocking {
                 sendVarselService.sendVarsel(
