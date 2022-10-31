@@ -13,8 +13,7 @@ class SykmeldingService constructor(private val sykmeldingerConsumer: Sykmelding
     ): Boolean {
         if (virksomhetsnummer == null) return false
 
-        val sendtSykmelding: SykmeldingDTO? = sykmeldingerPaaVarseldato
-            .filter { sykmelding -> sykmelding.sykmeldingStatus.statusEvent == "SENDT" }
+        val sendtSykmelding: SykmeldingDTO? = sykmeldingerPaaVarseldato.filter { sykmelding -> sykmelding.sykmeldingStatus.statusEvent == "SENDT" }
             .firstOrNull { sykmeldingDTO -> sykmeldingDTO.sykmeldingStatus.arbeidsgiver?.orgnummer == virksomhetsnummer }
 
         return sendtSykmelding !== null
@@ -28,18 +27,21 @@ class SykmeldingService constructor(private val sykmeldingerConsumer: Sykmelding
         }
     }
 
-    suspend fun checkSykmeldingStatus(
-        varselDato: LocalDate,
-        fnr: String,
-        virksomhetsnummer: String?
+    suspend fun checkSykmeldingStatusForVirksomhet(
+        varselDato: LocalDate, fnr: String, virksomhetsnummer: String?
     ): SykmeldingStatus {
-        val sykmeldingerPaaVarseldato: List<SykmeldingDTO> = sykmeldingerConsumer.getSykmeldingerPaDato(varselDato, fnr)
-            ?: return SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = false)
+        val sykmeldingerPaVarseldato: List<SykmeldingDTO> =
+            sykmeldingerConsumer.getSykmeldingerPaDato(varselDato, fnr) ?: return SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = false)
 
-        val isSendtAG = isSendtAG(sykmeldingerPaaVarseldato, virksomhetsnummer)
+        val isSendtAG = isSendtAG(sykmeldingerPaVarseldato, virksomhetsnummer)
 
-        val isSykmeldtIJobb = isSykmeldtIJobb(sykmeldingerPaaVarseldato)
+        val isSykmeldtIJobb = isSykmeldtIJobb(sykmeldingerPaVarseldato)
 
         return SykmeldingStatus(isSykmeldtIJobb = isSykmeldtIJobb, sendtArbeidsgiver = isSendtAG)
+    }
+
+    suspend fun isPersonSykmeldtPaDato(varselDato: LocalDate, fnr: String): Boolean {
+        val sykmeldtStatusPaVarseldato = sykmeldingerConsumer.getSykmeldtStatusPaDato(varselDato, fnr)
+        return sykmeldtStatusPaVarseldato != null && sykmeldtStatusPaVarseldato.erSykmeldt
     }
 }

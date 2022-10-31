@@ -48,7 +48,7 @@ object JobApiSpek : Spek({
         coEvery { accessControlService.getUserAccessStatus(fnr4) } returns userAccessStatus4
         coEvery { accessControlService.getUserAccessStatus(fnr5) } returns userAccessStatus5
         coEvery {
-            sykmeldingService.checkSykmeldingStatus(
+            sykmeldingService.checkSykmeldingStatusForVirksomhet(
                 any(),
                 any(),
                 any()
@@ -56,6 +56,7 @@ object JobApiSpek : Spek({
         } returns SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = true)
         coEvery { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
         coEvery { dokarkivService.getJournalpostId(any(), any()) } returns "1"
+        coEvery { sykmeldingService.isPersonSykmeldtPaDato(any(), any()) } returns true
 
         val sendVarselService =
             SendVarselService(
