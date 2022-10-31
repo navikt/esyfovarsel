@@ -56,7 +56,7 @@ object JobApiSpek : Spek({
         } returns SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = true)
         coEvery { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
         coEvery { dokarkivService.getJournalpostId(any(), any()) } returns "1"
-        coEvery { sykmeldingService.isAktiveSykmeldingerPaVarseldato(any(), any()) } returns true
+        coEvery { sykmeldingService.isPersonSykmeldtPaDato(any(), any()) } returns true
 
         val sendVarselService =
             SendVarselService(

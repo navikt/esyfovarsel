@@ -63,6 +63,7 @@ class SykmeldingerConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: Azu
 
         return when (response.status) {
             HttpStatusCode.OK -> {
+                log.info("Alt ok: $response")
                 response.receive<SykmeldtStatus>()
             }
 
