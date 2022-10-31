@@ -26,7 +26,6 @@ const val ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY = "<body>Hei.<br>\n
 
 const val DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT = "Snart slutt på sykepengene"
 
-//TODO: Oppdatere tekster
 const val SM_DIALOGMOTE_INNKALT_TEKST = "Du er innkalt til dialogmøte - vi trenger svaret ditt"
 const val SM_DIALOGMOTE_AVLYST_TEKST = "Du har mottatt et brev om avlyst dialogmøte"
 const val SM_DIALOGMOTE_NYTT_TID_STED_TEKST = "Du har mottatt et brev om endret dialogmøte"
