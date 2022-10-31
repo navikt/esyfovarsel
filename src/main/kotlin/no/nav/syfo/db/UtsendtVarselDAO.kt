@@ -2,7 +2,9 @@ package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarsel
+import no.nav.syfo.utils.SYKEPENGER_SOKNAD_MAX_LENGTH_DAYS
 import java.sql.Timestamp
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -70,6 +72,24 @@ fun DatabaseInterface.fetchUtsendtVarselByFnr(fnr: String): List<PUtsendtVarsel>
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
             it.setString(1, fnr)
+            it.executeQuery().toList { toPUtsendtVarsel() }
+        }
+    }
+}
+
+fun DatabaseInterface.fetchUtsendteVarslerSisteManed(): List<PUtsendtVarsel> {
+    val maxDateStart = Timestamp.valueOf(LocalDate.now().minusDays(SYKEPENGER_SOKNAD_MAX_LENGTH_DAYS).atStartOfDay())
+    val maxDateEnd = Timestamp.valueOf(LocalDate.now().minusDays(1).atStartOfDay())
+
+    val queryStatement = """SELECT *
+                            FROM UTSENDT_VARSEL
+                            WHERE UTSENDT_TIDSPUNKT  >= ? AND UTSENDT_TIDSPUNKT <= ?
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setTimestamp(1, maxDateStart)
+            it.setTimestamp(2, maxDateEnd)
             it.executeQuery().toList { toPUtsendtVarsel() }
         }
     }

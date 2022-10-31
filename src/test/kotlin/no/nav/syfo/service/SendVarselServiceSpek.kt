@@ -6,11 +6,15 @@ import no.nav.syfo.UrlEnv
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.consumer.syfosmregister.SykmeldingDTO
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
+import no.nav.syfo.consumer.syfosmregister.SykmeldtStatus
 import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.*
+import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
+import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
+import no.nav.syfo.syketilfelle.SyketilfellebitService
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.*
@@ -20,13 +24,26 @@ object SendVarselServiceTestSpek : Spek({
 
     val beskjedKafkaProducerMockk: BeskjedKafkaProducer = mockk(relaxed = true)
     val dineSykmeldteHendelseKafkaProducerMockk: DineSykmeldteHendelseKafkaProducer = mockk(relaxed = true)
+    val dittSykefravaerMeldingKafkaProducerMockk: DittSykefravaerMeldingKafkaProducer = mockk(relaxed = true)
+    val fysiskBrevUtsendingServiceMockk: FysiskBrevUtsendingService = mockk(relaxed = true)
     val accessControlServiceMockk: AccessControlService = mockk(relaxed = true)
     val urlEnvMockk: UrlEnv = mockk(relaxed = true)
+    val databaseInterfaceMockk: DatabaseInterface = mockk(relaxed = true)
     val arbeidsgiverNotifikasjonServiceMockk: ArbeidsgiverNotifikasjonService = mockk(relaxed = true)
-    val merVeiledningVarselServiceMockk: MerVeiledningVarselService = mockk(relaxed = true)
+    val syketilfellebitService: SyketilfellebitService = mockk(relaxed = true)
     val sykmeldingerConsumerMock: SykmeldingerConsumer = mockk(relaxed = true)
     val sykmeldingServiceMockk = SykmeldingService(sykmeldingerConsumerMock)
-
+    val brukernotifikasjonerServiceMockk = BrukernotifikasjonerService(beskjedKafkaProducerMockk, accessControlServiceMockk)
+    val senderFacade =
+        SenderFacade(
+            dineSykmeldteHendelseKafkaProducerMockk,
+            dittSykefravaerMeldingKafkaProducerMockk,
+            brukernotifikasjonerServiceMockk,
+            arbeidsgiverNotifikasjonServiceMockk,
+            fysiskBrevUtsendingServiceMockk,
+            databaseInterfaceMockk
+        )
+    val merVeiledningVarselServiceMockk = MerVeiledningVarselService(senderFacade, syketilfellebitService, urlEnvMockk)
     val sendVarselService = SendVarselService(
         beskjedKafkaProducerMockk,
         dineSykmeldteHendelseKafkaProducerMockk,
@@ -36,7 +53,6 @@ object SendVarselServiceTestSpek : Spek({
         merVeiledningVarselServiceMockk,
         sykmeldingServiceMockk
     )
-
     val sykmeldtFnr = "01234567891"
     val orgnummer = "999988877"
 
@@ -47,6 +63,7 @@ object SendVarselServiceTestSpek : Spek({
                 canUserBeDigitallyNotified = true,
                 canUserBePhysicallyNotified = false
             )
+
             every { urlEnvMockk.baseUrlSykInfo } returns "https://www-gcp.dev.nav.no/syk/info"
         }
 
@@ -108,6 +125,33 @@ object SendVarselServiceTestSpek : Spek({
             verify(exactly = 1) { beskjedKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
             verify(exactly = 0) { dineSykmeldteHendelseKafkaProducerMockk.sendVarsel(any()) }
             verify(exactly = 0) { arbeidsgiverNotifikasjonServiceMockk.sendNotifikasjon(any()) }
+        }
+
+        it("Should send mer-veiledning-varsel to SM if sykmelding is sendt AG") {
+            coEvery { sykmeldingerConsumerMock.getSykmeldtStatusPaDato(any(), sykmeldtFnr) } returns
+                SykmeldtStatus(
+                    true,
+                    true,
+                    LocalDate.now(),
+                    LocalDate.now()
+                )
+
+            runBlocking {
+                sendVarselService.sendVarsel(
+                    PPlanlagtVarsel(
+                        uuid = UUID.randomUUID().toString(),
+                        fnr = sykmeldtFnr,
+                        orgnummer = orgnummer,
+                        aktorId = null,
+                        type = VarselType.MER_VEILEDNING.name,
+                        utsendingsdato = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).toLocalDate(),
+                        opprettet = LocalDateTime.now(),
+                        sistEndret = LocalDateTime.now()
+                    )
+                )
+            }
+
+            verify(exactly = 1) { beskjedKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
         }
     }
 })
