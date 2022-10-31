@@ -69,8 +69,7 @@ class SendVarselService(
                         }
 
                         MER_VEILEDNING.name -> {
-                            //TODO
-                            if (true && sykmeldingService.isPersonSykmeldtPaDato(LocalDate.now(), fnr)) {
+                            if (userAccessStatus.canUserBeNotified() && sykmeldingService.isPersonSykmeldtPaDato(LocalDate.now(), fnr)) {
                                 sendMerVeiledningVarselTilArbeidstaker(pPlanlagtVarsel, userAccessStatus)
                                 pPlanlagtVarsel.type
                             } else {
