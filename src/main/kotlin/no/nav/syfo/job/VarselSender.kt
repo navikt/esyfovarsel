@@ -23,14 +23,15 @@ class VarselSender(
         log.info("Starter SendVarslerJobb")
 
         val varslerSendt = HashMap<String, Int>()
-        var varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
+        var varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now()) //Henter planlagte varsler av alle typer med utsending i dag
 
         if (toggles.sendMerVeiledningVarslerBasedOnMaxDate) {
-            val varslerToSendTodayMonthMerVeiledning = databaseAccess.fetchPlanlagtMerVeiledningVarselByUtsendingsdato(LocalDate.now())
-            val allVarslerToSendTodayMerVeiledning = varslerToSendTodayMonthMerVeiledning.plus(getAllUnsentMerVeiledningVarslerLastMonth())
+            val unsentMerVeiledningVarslerLastMonth = databaseAccess.fetchPlanlagtMerVeiledningVarselBySendingDateSisteManed() // Max date baserte mer veiledning varsler siste mnd inkl i dag
+            val sentMerVeiledningVarslerLastMonth = databaseAccess.fetchUtsendteVarslerSisteManed().filter { it.type == VarselType.MER_VEILEDNING.name }
+            val merVeiledningVarslerToSendNow = unsentMerVeiledningVarslerLastMonth.filter { plannedVarsel -> sentMerVeiledningVarslerLastMonth.none { plannedVarsel.fnr == it.fnr } } // Filter bort brukere som var varslet siste mnd
 
-            varslerToSendToday = mergePlanlagteVarsler(varslerToSendToday, allVarslerToSendTodayMerVeiledning)
-            log.info("Planlegger å sende ${allVarslerToSendTodayMerVeiledning.size} Mer veiledning varsler med utsending basert på maxdato")
+            varslerToSendToday = mergePlanlagteVarsler(varslerToSendToday, merVeiledningVarslerToSendNow) //Slår sammen  alle planlagte varsler og fjerner Mer veiledning varsel duplikater etter fnr
+            log.info("Planlegger å sende ${merVeiledningVarslerToSendNow.size} Mer veiledning varsler med utsending basert på maxdato")
         }
 
         log.info("Planlegger å sende ${varslerToSendToday.size} varsler totalt")
@@ -88,8 +89,9 @@ class VarselSender(
     ): List<PPlanlagtVarsel> {
         var mergetVarslerList = listOf<PPlanlagtVarsel>()
         plannedMerVeiledningVarslerBasedOnMaxDate.forEach {
-            val currentFnr = it.fnr
-            deletePlannedMerVeiledningVarselDuplicateByFnr(currentFnr, plannedVarslerFromDatabase)
+            if (it.type == VarselType.MER_VEILEDNING.name) {
+                deletePlannedMerVeiledningVarselDuplicateByFnr(it.fnr, plannedVarslerFromDatabase)
+            }
             mergetVarslerList = mergetVarslerList.plus(it)
         }
         return mergetVarslerList
@@ -109,12 +111,5 @@ class VarselSender(
                 databaseAccess.deletePlanlagtVarselByVarselId(i.uuid)
             }
         }
-    }
-
-    fun getAllUnsentMerVeiledningVarslerLastMonth(): List<PPlanlagtVarsel> {
-        val unsentMerVeiledningVarslerLastMonth = databaseAccess.fetchPlanlagtMerVeiledningVarselBySendingDateSisteManed() // in max date table!
-        val sentMerVeiledningVarslerLastMonth = databaseAccess.fetchUtsendteVarslerSisteManed().filter { it.type == VarselType.MER_VEILEDNING.name }
-
-        return unsentMerVeiledningVarslerLastMonth.filter { plannedVarsel -> sentMerVeiledningVarslerLastMonth.none { plannedVarsel.fnr == it.fnr } }
     }
 }
