@@ -33,6 +33,7 @@ class UtbetalingKafkaConsumer(
                 log.info("Received message ${it.key()} from topic $topicUtbetaling")
                 try {
                     val utbetaling: UtbetalingUtbetalt = objectMapper.readValue(it.value())
+                    log.info("Mottatt gjenståendeSykedager from $topicUtbetaling: ${utbetaling.gjenståendeSykedager}")
                     sykepengerMaxDateService.processNewMaxDate(utbetaling.fødselsnummer, utbetaling.foreløpigBeregnetSluttPåSykepenger, SykepengerMaxDateSource.SPLEIS)
                 } catch (e: IOException) {
                     log.error(
