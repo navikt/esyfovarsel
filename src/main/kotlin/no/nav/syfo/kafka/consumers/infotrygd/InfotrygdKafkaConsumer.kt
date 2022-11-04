@@ -37,6 +37,8 @@ class InfotrygdKafkaConsumer(
 
                     val fnr = kInfotrygdSykepengedager.after.F_NR
                     val sykepengerMaxDate = parseDate(kInfotrygdSykepengedager.after.MAX_DATO)
+                    val utbetaltTom = kInfotrygdSykepengedager.after.UTBET_TOM
+                    log.info("Mottatt utbetaltTom fra infotrygd: $utbetaltTom")
                     sykepengerMaxDateService.processNewMaxDate(fnr, sykepengerMaxDate, SykepengerMaxDateSource.INFOTRYGD)
                 } catch (e: IOException) {
                     log.error(
