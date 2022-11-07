@@ -1,6 +1,7 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.db.*
+import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
 import no.nav.syfo.utils.isEqualOrBefore
 import java.time.LocalDate
 
@@ -28,6 +29,10 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface)
                 }
             }
         }
+    }
+
+    fun processUtbetalingSpleisEvent(utbetaling: UtbetalingUtbetalt) {
+        databaseInterface.storeSpleisUtbetaling(utbetaling)
     }
 
     fun getSykepengerMaxDate(fnr: String): LocalDate? {
