@@ -6,11 +6,12 @@ import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.*
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
 import no.nav.syfo.service.SykepengerMaxDateService
-import no.nav.syfo.service.SykepengerMaxDateSource
+import org.apache.kafka.clients.CommonClientConfigs.GROUP_ID_CONFIG
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
+import java.util.*
 
 class UtbetalingKafkaConsumer(
     val env: Environment,
@@ -21,7 +22,7 @@ class UtbetalingKafkaConsumer(
     private val objectMapper = createObjectMapper()
 
     init {
-        val kafkaConfig = aivenConsumerProperties(env)
+        val kafkaConfig = utbetalingSpleisConsumerProperties(env)
         kafkaListener = KafkaConsumer(kafkaConfig)
         kafkaListener.subscribe(listOf(topicUtbetaling))
     }
@@ -33,8 +34,9 @@ class UtbetalingKafkaConsumer(
                 log.info("Received message ${it.key()} from topic $topicUtbetaling")
                 try {
                     val utbetaling: UtbetalingUtbetalt = objectMapper.readValue(it.value())
-                    log.info("Mottatt gjenståendeSykedager from $topicUtbetaling: ${utbetaling.gjenståendeSykedager}")
-                    sykepengerMaxDateService.processNewMaxDate(utbetaling.fødselsnummer, utbetaling.foreløpigBeregnetSluttPåSykepenger, SykepengerMaxDateSource.SPLEIS)
+                    if (utbetaling.event == "utbetaling_utbetalt") {
+                        sykepengerMaxDateService.processUtbetalingSpleisEvent(utbetaling)
+                    }
                 } catch (e: IOException) {
                     log.error(
                         "Error in [$topicUtbetaling]-listener: Could not parse message. Check topic Schema"
@@ -47,6 +49,14 @@ class UtbetalingKafkaConsumer(
                 }
                 kafkaListener.commitSync()
             }
+        }
+    }
+
+    fun utbetalingSpleisConsumerProperties(env: Environment): Properties {
+        val commonConsumerProperties = aivenConsumerProperties(env)
+        return commonConsumerProperties.apply {
+            remove(GROUP_ID_CONFIG)
+            put(GROUP_ID_CONFIG, "esyfovarsel-group-utbetaling-spleis-01")
         }
     }
 }
