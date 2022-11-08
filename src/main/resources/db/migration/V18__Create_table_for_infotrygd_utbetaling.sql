@@ -1,9 +1,10 @@
 CREATE TABLE UTBETALING_INFOTRYGD
 (
-    uuid                       UUID PRIMARY KEY,
-    fnr                        VARCHAR(11) NOT NULL,
-    max_date                   DATE        NOT NULL,
-    utbet_tom                  DATE        NOT NULL,
-    gjenstaende_sykepengedager INTEGER     NOT NULL,
-    opprettet                  TIMESTAMP   NOT NULL
+    ID                    UUID PRIMARY KEY,
+    FNR                   VARCHAR(11) NOT NULL,
+    MAX_DATE              DATE        NOT NULL,
+    UTBET_TOM             DATE        NOT NULL,
+    GJENSTAENDE_SYKEDAGER INTEGER     NOT NULL,
+    OPPRETTET             TIMESTAMP   NOT NULL,
+    UNIQUE (FNR, MAX_DATE, UTBET_TOM)
 );
