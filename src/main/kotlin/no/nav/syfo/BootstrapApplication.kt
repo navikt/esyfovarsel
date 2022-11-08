@@ -28,6 +28,7 @@ import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.grantAccessToIAMUsers
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.job.sendNotificationsJob
 import no.nav.syfo.kafka.common.launchKafkaListener
@@ -65,6 +66,7 @@ fun main() {
             applicationEngineEnvironment {
                 config = HoconApplicationConfig(ConfigFactory.load())
                 database = Database(env.dbEnv)
+                database.grantAccessToIAMUsers()
 
                 val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
 
