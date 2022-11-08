@@ -40,7 +40,7 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface)
     }
 
     fun processInfotrygdEvent(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int) {
-        databaseInterface.storeInfotrygdMaxDate(fnr, sykepengerMaxDate, utbetaltTilDate, gjenstaendeSykepengedager)
+        databaseInterface.storeInfotrygdUtbetaling(fnr, sykepengerMaxDate, utbetaltTilDate, gjenstaendeSykepengedager)
     }
 
 }

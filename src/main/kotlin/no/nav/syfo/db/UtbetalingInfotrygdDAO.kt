@@ -6,9 +6,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-fun DatabaseInterface.storeInfotrygdMaxDate(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int) {
+fun DatabaseInterface.storeInfotrygdUtbetaling(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int) {
     val now = LocalDateTime.now()
-    val insertStatement = """INSERT INTO SYKEPENGER_MAX_DATE_INFOTRYGD  (
+    val insertStatement = """INSERT INTO UTBETALING_INFOTRYGD  (
         uuid, 
         fnr, 
         max_date, 
