@@ -6,7 +6,6 @@ import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.*
 import no.nav.syfo.kafka.consumers.infotrygd.domain.KInfotrygdSykepengedager
 import no.nav.syfo.service.SykepengerMaxDateService
-import no.nav.syfo.service.SykepengerMaxDateSource
 import no.nav.syfo.utils.parseDate
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -40,7 +39,6 @@ class InfotrygdKafkaConsumer(
                     val fnr = kInfotrygdSykepengedager.after.F_NR
                     val sykepengerMaxDate = parseDate(kInfotrygdSykepengedager.after.MAX_DATO)
                     val utbetaltTom = kInfotrygdSykepengedager.after.UTBET_TOM
-                    log.info("Mottatt utbetaltTom fra infotrygd: $utbetaltTom")
                     if (utbetaltTom != null) {
                         val utbetaltTomDate = parseDate(utbetaltTom)
                         sykepengerMaxDateService.processInfotrygdEvent(
@@ -50,7 +48,6 @@ class InfotrygdKafkaConsumer(
                             utbetaltTomDate.gjenstaendeSykepengedager(sykepengerMaxDate)
                         )
                     }
-                    sykepengerMaxDateService.processNewMaxDate(fnr, sykepengerMaxDate, SykepengerMaxDateSource.INFOTRYGD)
                 } catch (e: IOException) {
                     log.error(
                         "Error in [$topicSykepengedagerInfotrygd]-listener: Could not parse message | ${e.message}",
