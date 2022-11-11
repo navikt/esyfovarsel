@@ -1,13 +1,17 @@
 package no.nav.syfo.job
 
 import no.nav.syfo.ToggleEnv
-import no.nav.syfo.db.*
+import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.deletePlanlagtVarselByVarselId
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
+import no.nav.syfo.db.fetchPlanlagtVarselByUtsendingsdato
+import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.metrics.tellAktivitetskravVarselSendt
 import no.nav.syfo.metrics.tellMerVeiledningVarselSendt
 import no.nav.syfo.metrics.tellSvarMotebehovVarselSendt
+import no.nav.syfo.service.VarselSenderService
 import no.nav.syfo.service.SendVarselService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -15,6 +19,7 @@ import java.time.LocalDate
 class VarselSender(
     private val databaseAccess: DatabaseInterface,
     private val sendVarselService: SendVarselService,
+    private val varselSenderService: VarselSenderService,
     private val toggles: ToggleEnv,
 ) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
@@ -23,14 +28,11 @@ class VarselSender(
         log.info("Starter SendVarslerJobb")
 
         val varslerSendt = HashMap<String, Int>()
-        var varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
+        val varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
 
-        if (toggles.sendMerVeiledningVarslerBasedOnMaxDate) {
-            val varslerToSendTodayMonthMerVeiledning = databaseAccess.fetchPlanlagtMerVeiledningVarselByUtsendingsdato(LocalDate.now())
-            val allVarslerToSendTodayMerVeiledning = varslerToSendTodayMonthMerVeiledning.plus(getAllUnsentMerVeiledningVarslerLastMonth())
 
-            varslerToSendToday = mergePlanlagteVarsler(varslerToSendToday, allVarslerToSendTodayMerVeiledning)
-            log.info("Planlegger å sende ${allVarslerToSendTodayMerVeiledning.size} Mer veiledning varsler med utsending basert på maxdato")
+        if (toggles.toggleInfotrygdKafkaConsumer && toggles.toggleUtbetalingKafkaConsumer) {
+            varselSenderService.getVarslerToSendToday()
         }
 
         log.info("Planlegger å sende ${varslerToSendToday.size} varsler totalt")
@@ -80,41 +82,5 @@ class VarselSender(
 
     private fun String.sendtUtenFeil(): Boolean {
         return this != UTSENDING_FEILET
-    }
-
-    fun mergePlanlagteVarsler(
-        plannedVarslerFromDatabase: List<PPlanlagtVarsel>,
-        plannedMerVeiledningVarslerBasedOnMaxDate: List<PPlanlagtVarsel>,
-    ): List<PPlanlagtVarsel> {
-        var mergetVarslerList = listOf<PPlanlagtVarsel>()
-        plannedMerVeiledningVarslerBasedOnMaxDate.forEach {
-            val currentFnr = it.fnr
-            deletePlannedMerVeiledningVarselDuplicateByFnr(currentFnr, plannedVarslerFromDatabase)
-            mergetVarslerList = mergetVarslerList.plus(it)
-        }
-        return mergetVarslerList
-    }
-
-    fun deletePlannedMerVeiledningVarselDuplicateByFnr(
-        fnr: String,
-        plannedVarslerFromDatabase: List<PPlanlagtVarsel>,
-    ) {
-        plannedVarslerFromDatabase as MutableList<PPlanlagtVarsel>
-        val iterator = plannedVarslerFromDatabase.iterator()
-
-        while (iterator.hasNext()) {
-            val i = iterator.next()
-            if (i.fnr == fnr && i.type == VarselType.MER_VEILEDNING.name) {
-                iterator.remove()
-                databaseAccess.deletePlanlagtVarselByVarselId(i.uuid)
-            }
-        }
-    }
-
-    fun getAllUnsentMerVeiledningVarslerLastMonth(): List<PPlanlagtVarsel> {
-        val unsentMerVeiledningVarslerLastMonth = databaseAccess.fetchPlanlagtMerVeiledningVarselBySendingDateSisteManed() // in max date table!
-        val sentMerVeiledningVarslerLastMonth = databaseAccess.fetchUtsendteVarslerSisteManed().filter { it.type == VarselType.MER_VEILEDNING.name }
-
-        return unsentMerVeiledningVarslerLastMonth.filter { plannedVarsel -> sentMerVeiledningVarslerLastMonth.none { plannedVarsel.fnr == it.fnr } }
     }
 }

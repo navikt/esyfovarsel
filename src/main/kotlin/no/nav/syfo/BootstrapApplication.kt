@@ -193,10 +193,16 @@ fun Application.serverModule(
             sykmeldingService
         )
 
+    val varselSenderService = VarselSenderService(
+        database,
+        sykmeldingService,
+    )
+
     val varselSender = VarselSender(
         database,
         sendVarselService,
-        env.toggleEnv
+        varselSenderService,
+        env.toggleEnv,
     )
 
     install(ContentNegotiation) {
