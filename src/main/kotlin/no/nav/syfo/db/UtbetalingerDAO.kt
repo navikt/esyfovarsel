@@ -15,7 +15,7 @@ fun DatabaseInterface.fetchMerVeiledningVarslerToSend(): List<PUtbetaling> {
                                 ORDER BY UTBETALT_TOM DESC, OPPRETTET DESC
                                 LIMIT 1)
                             AND GJENSTAENDE_SYKEDAGER < $gjenstaendeSykedagerLimit
-                            AND FORELOPIG_BEREGNET_SLUTT > NOW() + INTERVAL '$maxDateLimit' DAY;"""
+                            AND FORELOPIG_BEREGNET_SLUTT > NOW() + INTERVAL '$maxDateLimit' DAY"""
         .trimIndent()
 
     return connection.use { connection ->
