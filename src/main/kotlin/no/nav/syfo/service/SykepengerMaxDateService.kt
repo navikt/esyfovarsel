@@ -32,6 +32,7 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface)
     }
 
     fun processUtbetalingSpleisEvent(utbetaling: UtbetalingUtbetalt) {
+        processNewMaxDate(utbetaling.fødselsnummer, utbetaling.foreløpigBeregnetSluttPåSykepenger, SykepengerMaxDateSource.SPLEIS)
         databaseInterface.storeSpleisUtbetaling(utbetaling)
     }
 
@@ -40,6 +41,7 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface)
     }
 
     fun processInfotrygdEvent(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int) {
+        processNewMaxDate(fnr,sykepengerMaxDate, SykepengerMaxDateSource.INFOTRYGD)
         databaseInterface.storeInfotrygdUtbetaling(fnr, sykepengerMaxDate, utbetaltTilDate, gjenstaendeSykepengedager)
     }
 
