@@ -21,7 +21,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-object VarselSenderServiceSpek : Spek({
+object MerVeiledningVarselFinderSpek : Spek({
 
     val embeddedDatabase by lazy { EmbeddedDatabase() }
     val sykmeldingerConsumerMock: SykmeldingerConsumer = mockk(relaxed = true)

@@ -13,19 +13,19 @@ class MerVeiledningVarselFinder(
     private val databaseAccess: DatabaseInterface,
     private val sykmeldingService: SykmeldingService
 ) {
-    private val log = LoggerFactory.getLogger("no.nav.syfo.service.VarselSenderService")
+    private val log = LoggerFactory.getLogger("no.nav.syfo.service.MerVeiledningVarselFinder")
 
     suspend fun findMerVeiledningVarslerToSendToday(): List<PPlanlagtVarsel> {
-        val alleMerVeiledningVarslerToSendBasertPaUtbetaling = databaseAccess.fetchMerVeiledningVarslerToSend() //UTB
+        val alleMerVeiledningVarsler = databaseAccess.fetchMerVeiledningVarslerToSend() //UTB
         val utsendteMerVeiledningVarslerSiste3Maneder = databaseAccess.fetchUtsendteMerVeiledningVarslerSiste3Maneder()
-        val merVeiledningVarslerBasertPaUtbetalingUtenVarslete = alleMerVeiledningVarslerToSendBasertPaUtbetaling.filter { v -> utsendteMerVeiledningVarslerSiste3Maneder.none { v.fnr == it.fnr } }
-        val merVeiledningVarslerSomErSykmeldtIDag = merVeiledningVarslerBasertPaUtbetalingUtenVarslete.filter { sykmeldingService.isPersonSykmeldtPaDato(LocalDate.now(), it.fnr) }
 
-        log.info("Antall MER_VEILEDNING varsler fra Spleis/Infotrygd: ${alleMerVeiledningVarslerToSendBasertPaUtbetaling.size}")
-        log.info("Antall MER_VEILEDNING varsler fra Spleis/Infotrygd som ikke har fått varsel siste 3mnd: ${merVeiledningVarslerBasertPaUtbetalingUtenVarslete.size}")
-        log.info("Antall MER_VEILEDNING varsler fra Spleis/Infotrygd som ikke har fått varsel siste 3mnd og som er sykmeldt: ${merVeiledningVarslerSomErSykmeldtIDag.size}")
+        val merVeiledningVarslerSomSkalSendesIDag = alleMerVeiledningVarsler
+            .filter { v -> utsendteMerVeiledningVarslerSiste3Maneder.none { v.fnr == it.fnr } }
+            .filter { sykmeldingService.isPersonSykmeldtPaDato(LocalDate.now(), it.fnr) }
 
-        return merVeiledningVarslerSomErSykmeldtIDag.map {
+        log.info("Antall MER_VEILEDNING varsler fra Spleis/Infotrygd: ${alleMerVeiledningVarsler.size}")
+
+        return merVeiledningVarslerSomSkalSendesIDag.map {
             PPlanlagtVarsel(
                 uuid = it.id.toString(),
                 fnr = it.fnr,
