@@ -6,7 +6,7 @@ import no.nav.syfo.db.deletePlanlagtVarselByVarselId
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
-import no.nav.syfo.db.fetchPlanlagtVarselByUtsendingsdato
+import no.nav.syfo.db.fetchPlanlagtVarselByUtsendingsdatoAndType
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.metrics.tellAktivitetskravVarselSendt
 import no.nav.syfo.metrics.tellMerVeiledningVarselSendt
@@ -28,18 +28,20 @@ class VarselSender(
         log.info("Starter SendVarslerJobb")
 
         val varslerSendt = HashMap<String, Int>()
-        val varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
+        var varslerToSendToday =
+            databaseAccess.fetchPlanlagtVarselByUtsendingsdatoAndType(LocalDate.now(), VarselType.AKTIVITETSKRAV.name)
 
 
-        if (toggles.toggleInfotrygdKafkaConsumer && toggles.toggleUtbetalingKafkaConsumer) {
-            merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
+        if (toggles.sendMerVeiledningVarslerBasedOnSisteUtbtalingDate) {
+            varslerToSendToday =
+                varslerToSendToday.plus(merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday())
         }
 
         log.info("Planlegger å sende ${varslerToSendToday.size} varsler totalt")
 
         if (!toggles.sendAktivitetskravVarsler) log.info("Utsending av Aktivitetskrav er ikke aktivert, og varsler av denne typen blir ikke sendt")
         if (!toggles.sendMerVeiledningVarsler) log.info("Utsending av Mer veiledning er ikke aktivert, og varsler av denne typen blir ikke sendt")
-        if (!toggles.sendMerVeiledningVarslerBasedOnMaxDate) log.info("Utsending av  Mer veiledning med utsending basert på maxdato er ikke aktivert, og varsler av denne typen blir ikke sendt via denne pathen")
+        if (!toggles.sendMerVeiledningVarslerBasedOnSisteUtbtalingDate) log.info("Utsending av  Mer veiledning med utsending basert på maxdato er ikke aktivert, og varsler av denne typen blir ikke sendt via denne pathen")
 
         varslerToSendToday.forEach {
             if (skalSendeVarsel(it)) {
@@ -77,7 +79,7 @@ class VarselSender(
     }
 
     private fun skalSendeVarsel(it: PPlanlagtVarsel) =
-        (it.type == VarselType.MER_VEILEDNING.name && toggles.sendMerVeiledningVarsler || toggles.sendMerVeiledningVarslerBasedOnMaxDate) ||
+        (it.type == VarselType.MER_VEILEDNING.name && toggles.sendMerVeiledningVarslerBasedOnSisteUtbtalingDate) ||
                 (it.type == VarselType.AKTIVITETSKRAV.name && toggles.sendAktivitetskravVarsler)
 
     private fun String.sendtUtenFeil(): Boolean {
