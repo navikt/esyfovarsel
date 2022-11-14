@@ -1,7 +1,6 @@
 package no.nav.syfo.job
 
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
@@ -13,18 +12,14 @@ import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
 import no.nav.syfo.db.domain.VarselType.MER_VEILEDNING
 import no.nav.syfo.planner.arbeidstakerFnr1
-import no.nav.syfo.service.SendVarselService
-import no.nav.syfo.service.SykepengerMaxDateSource
 import no.nav.syfo.service.MerVeiledningVarselFinder
+import no.nav.syfo.service.SendVarselService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.mocks.orgnummer
-import no.nav.syfo.utils.REMAINING_DAYS_UNTIL_39_UKERS_VARSEL
 import org.amshove.kluent.should
-import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import java.time.LocalDate
 
 object VarselSenderSpek : Spek({
 
@@ -56,35 +51,6 @@ object VarselSenderSpek : Spek({
             embeddedDatabase.skalIkkeHaPlanlagtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
             embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
         }
-
-        it("Sender mer veiledning varsler basert på maksdato") {
-            val oldPlanlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, "999888999", setOf("1"), MER_VEILEDNING)
-            embeddedDatabase.storePlanlagtVarsel(oldPlanlagtVarselToStore)
-            val oldPPlanlagtVarsel = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)[0]
-
-            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, merVeiledningVarselFinder, ToggleEnv(false, true, false, true, true))
-
-            val maxDate = LocalDate.now().plusDays(REMAINING_DAYS_UNTIL_39_UKERS_VARSEL)
-            embeddedDatabase.storeSykepengerMaxDate(maxDate, arbeidstakerFnr1, SykepengerMaxDateSource.INFOTRYGD.name)
-            val newPPlanlagtVarsel = embeddedDatabase.fetchPlanlagtMerVeiledningVarselByUtsendingsdato(LocalDate.now())[0]
-
-            sendVarselJobb.testSendVarsler()
-            verify(exactly = 0) {
-                runBlocking {
-                    sendVarselService.sendVarsel(oldPPlanlagtVarsel)
-                }
-            }
-
-            verify(exactly = 1) {
-                runBlocking {
-                    sendVarselService.sendVarsel(newPPlanlagtVarsel)
-                }
-            }
-
-            embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
-            embeddedDatabase.skalIkkeHaPlanlagtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
-        }
-
 
         it("Skal ikke sende mer veiledning-varsel hvis toggle er false") {
             val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, merVeiledningVarselFinder, ToggleEnv(false, false, true, false, false))
@@ -135,26 +101,6 @@ object VarselSenderSpek : Spek({
 
             embeddedDatabase.skalHaPlanlagtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
             embeddedDatabase.skalIkkeHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
-        }
-
-        it("Sender mer veiledning varsler basert på maksdato i framtid og ikke planlagt på gammel måte") {
-            val utsendingDate = LocalDate.now()
-            val maxDate = utsendingDate.plusDays(REMAINING_DAYS_UNTIL_39_UKERS_VARSEL)
-            val sendVarselJobb = VarselSender(embeddedDatabase, sendVarselService, merVeiledningVarselFinder, ToggleEnv(false, true, false, true, true))
-            val oldPlanlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING, utsendingDate)
-
-            embeddedDatabase.storePlanlagtVarsel(oldPlanlagtVarselToStore)
-            embeddedDatabase.storeSykepengerMaxDate(maxDate, arbeidstakerFnr1, SykepengerMaxDateSource.INFOTRYGD.name)
-
-            val merVeiledningVarselBasedOnMaxDate = embeddedDatabase.fetchPlanlagtMerVeiledningVarselByUtsendingsdato(utsendingDate)[0]
-            val merVeiledningVarselNotBasedOnMaxDate =
-                embeddedDatabase.fetchPlanlagtVarselByTypeAndUtsendingsdato(MER_VEILEDNING, utsendingDate, utsendingDate)[0]
-
-            sendVarselJobb.testSendVarsler()
-
-            merVeiledningVarselBasedOnMaxDate.utsendingsdato shouldBeEqualTo merVeiledningVarselNotBasedOnMaxDate.utsendingsdato
-            coVerify(exactly = 1) { sendVarselService.sendVarsel(merVeiledningVarselBasedOnMaxDate) }
-            coVerify(exactly = 0) { sendVarselService.sendVarsel(merVeiledningVarselNotBasedOnMaxDate) }
         }
     }
 })
