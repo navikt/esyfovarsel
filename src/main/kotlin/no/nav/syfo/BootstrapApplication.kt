@@ -193,10 +193,16 @@ fun Application.serverModule(
             sykmeldingService
         )
 
+    val merVeiledningVarselFinder = MerVeiledningVarselFinder(
+        database,
+        sykmeldingService,
+    )
+
     val varselSender = VarselSender(
         database,
         sendVarselService,
-        env.toggleEnv
+        merVeiledningVarselFinder,
+        env.toggleEnv,
     )
 
     install(ContentNegotiation) {
