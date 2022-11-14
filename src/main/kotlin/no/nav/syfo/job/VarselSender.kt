@@ -11,7 +11,7 @@ import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.metrics.tellAktivitetskravVarselSendt
 import no.nav.syfo.metrics.tellMerVeiledningVarselSendt
 import no.nav.syfo.metrics.tellSvarMotebehovVarselSendt
-import no.nav.syfo.service.VarselSenderService
+import no.nav.syfo.service.MerVeiledningVarselFinder
 import no.nav.syfo.service.SendVarselService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -19,7 +19,7 @@ import java.time.LocalDate
 class VarselSender(
     private val databaseAccess: DatabaseInterface,
     private val sendVarselService: SendVarselService,
-    private val varselSenderService: VarselSenderService,
+    private val merVeiledningVarselFinder: MerVeiledningVarselFinder,
     private val toggles: ToggleEnv,
 ) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
@@ -32,7 +32,7 @@ class VarselSender(
 
 
         if (toggles.toggleInfotrygdKafkaConsumer && toggles.toggleUtbetalingKafkaConsumer) {
-            varselSenderService.getVarslerToSendToday()
+            merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
         }
 
         log.info("Planlegger å sende ${varslerToSendToday.size} varsler totalt")

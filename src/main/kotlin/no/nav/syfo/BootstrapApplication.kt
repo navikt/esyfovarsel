@@ -193,7 +193,7 @@ fun Application.serverModule(
             sykmeldingService
         )
 
-    val varselSenderService = VarselSenderService(
+    val merVeiledningVarselFinder = MerVeiledningVarselFinder(
         database,
         sykmeldingService,
     )
@@ -201,7 +201,7 @@ fun Application.serverModule(
     val varselSender = VarselSender(
         database,
         sendVarselService,
-        varselSenderService,
+        merVeiledningVarselFinder,
         env.toggleEnv,
     )
 
