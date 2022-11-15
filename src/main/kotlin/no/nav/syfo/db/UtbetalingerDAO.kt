@@ -15,7 +15,12 @@ fun DatabaseInterface.fetchMerVeiledningVarslerToSend(): List<PUtbetaling> {
                                 ORDER BY UTBETALT_TOM DESC, OPPRETTET DESC
                                 LIMIT 1)
                             AND GJENSTAENDE_SYKEDAGER < $gjenstaendeSykedagerLimit
-                            AND FORELOPIG_BEREGNET_SLUTT >= current_date + INTERVAL '$maxDateLimit' DAY"""
+                            AND FORELOPIG_BEREGNET_SLUTT >= current_date + INTERVAL '$maxDateLimit' DAY
+                            AND FNR NOT IN 
+                                (SELECT FNR 
+                                FROM UTSENDT_VARSEL 
+                                WHERE TYPE = 'MER_VEILEDNING' 
+                                AND UTSENDT_TIDSPUNKT > NOW() - INTERVAL '90' DAY)"""
         .trimIndent()
 
     return connection.use { connection ->
