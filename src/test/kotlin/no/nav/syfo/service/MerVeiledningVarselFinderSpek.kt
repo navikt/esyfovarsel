@@ -3,6 +3,9 @@ package no.nav.syfo.service
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.domain.PUtsendtVarsel
@@ -17,16 +20,13 @@ import no.nav.syfo.testutil.mocks.orgnummer
 import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 object MerVeiledningVarselFinderSpek : Spek({
 
     val embeddedDatabase by lazy { EmbeddedDatabase() }
     val sykmeldingerConsumerMock: SykmeldingerConsumer = mockk(relaxed = true)
     val sykmeldingServiceMockk = SykmeldingService(sykmeldingerConsumerMock)
-    val merVeiledningVarselFinderMockk = MerVeiledningVarselFinder(embeddedDatabase, sykmeldingServiceMockk)
+    val merVeiledningVarselFinder = MerVeiledningVarselFinder(embeddedDatabase, sykmeldingServiceMockk)
 
     val spleisUtbetalingWhichResultsToVarsel = UtbetalingUtbetalt(
         fødselsnummer = arbeidstakerFnr1,
@@ -63,7 +63,7 @@ object MerVeiledningVarselFinderSpek : Spek({
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
 
             val varslerToSendToday = runBlocking {
-                merVeiledningVarselFinderMockk.findMerVeiledningVarslerToSendToday()
+                merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
             }
 
             varslerToSendToday.size shouldBeEqualTo 1
@@ -75,7 +75,7 @@ object MerVeiledningVarselFinderSpek : Spek({
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
 
             val varslerToSendToday = runBlocking {
-                merVeiledningVarselFinderMockk.findMerVeiledningVarslerToSendToday()
+                merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
             }
 
             varslerToSendToday.size shouldBeEqualTo 0
@@ -87,7 +87,7 @@ object MerVeiledningVarselFinderSpek : Spek({
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
 
             val varslerToSendToday = runBlocking {
-                merVeiledningVarselFinderMockk.findMerVeiledningVarslerToSendToday()
+                merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
             }
 
             varslerToSendToday.size shouldBeEqualTo 0

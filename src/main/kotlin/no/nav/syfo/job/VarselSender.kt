@@ -1,11 +1,13 @@
 package no.nav.syfo.job
 
+import java.time.LocalDate
 import no.nav.syfo.ToggleEnv
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselByVarselId
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
+import no.nav.syfo.db.fetchPlanlagtVarselByUtsendingsdato
 import no.nav.syfo.db.fetchPlanlagtVarselByUtsendingsdatoAndType
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.metrics.tellAktivitetskravVarselSendt
@@ -14,7 +16,6 @@ import no.nav.syfo.metrics.tellSvarMotebehovVarselSendt
 import no.nav.syfo.service.MerVeiledningVarselFinder
 import no.nav.syfo.service.SendVarselService
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 class VarselSender(
     private val databaseAccess: DatabaseInterface,
@@ -28,13 +29,17 @@ class VarselSender(
         log.info("Starter SendVarslerJobb")
 
         val varslerSendt = HashMap<String, Int>()
-        var varslerToSendToday =
-            databaseAccess.fetchPlanlagtVarselByUtsendingsdatoAndType(LocalDate.now(), VarselType.AKTIVITETSKRAV.name)
+        val varslerToSendToday: List<PPlanlagtVarsel>
 
 
         if (toggles.sendMerVeiledningVarslerBasedOnSisteUtbtalingDate) {
-            varslerToSendToday =
-                varslerToSendToday.plus(merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday())
+            varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdatoAndType(
+                LocalDate.now(),
+                VarselType.AKTIVITETSKRAV.name
+            )
+                .plus(merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday())
+        } else {
+            varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
         }
 
         log.info("Planlegger å sende ${varslerToSendToday.size} varsler totalt")
