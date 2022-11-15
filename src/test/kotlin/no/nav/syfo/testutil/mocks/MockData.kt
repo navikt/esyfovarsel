@@ -2,11 +2,6 @@ package no.nav.syfo.testutil.mocks
 
 import no.nav.syfo.access.domain.UserAccessStatus
 
-const val aktorId = "1234567890123"
-const val aktorId2 = "2345678901234"
-const val aktorId3 = "3456789012345"
-const val aktorId4 = "4567890123456"
-const val aktorId5 = "4567890123450"
 const val fnr1 = "12345678901"
 const val fnr2 = "23456789012"
 const val fnr3 = "34567890123"
