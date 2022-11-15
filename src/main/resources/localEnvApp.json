@@ -58,7 +58,8 @@
     "dbPassword": "password"
   },
   "toggleEnv": {
-    "sendMerVeiledningVarsler": "true",
+    "sendMerVeiledningVarsler": "false",
+    "sendMerVeiledningVarslerBasedOnSisteUtbtalingDate": "true",
     "sendAktivitetskravVarsler": "true"
   }
 }

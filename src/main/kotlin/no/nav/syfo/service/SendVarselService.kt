@@ -17,7 +17,6 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
@@ -69,7 +68,7 @@ class SendVarselService(
                         }
 
                         MER_VEILEDNING.name -> {
-                            if (userAccessStatus.canUserBeNotified() && sykmeldingService.isPersonSykmeldtPaDato(LocalDate.now(), fnr)) {
+                            if (userAccessStatus.canUserBeNotified()) {
                                 sendMerVeiledningVarselTilArbeidstaker(pPlanlagtVarsel, userAccessStatus)
                                 pPlanlagtVarsel.type
                             } else {
