@@ -37,7 +37,7 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface)
     }
 
     fun getSykepengerMaxDate(fnr: String): LocalDate? {
-        return databaseInterface.fetchSykepengerMaxDateByFnr(fnr)
+        return databaseInterface.fetchMaxDateByFnr(fnr)
     }
 
     fun processInfotrygdEvent(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int) {
