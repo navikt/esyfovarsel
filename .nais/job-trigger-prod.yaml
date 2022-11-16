@@ -7,7 +7,7 @@ metadata:
     team: team-esyfo
 spec:
   image: {{ image }}
-  schedule: "35 07 * * *"
+  schedule: "20 08 * * *"
   filesFrom:
     - secret: esyfovarsel-serviceuser
   env:
