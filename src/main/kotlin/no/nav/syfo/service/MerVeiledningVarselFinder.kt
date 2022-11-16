@@ -15,8 +15,10 @@ class MerVeiledningVarselFinder(
     private val log = LoggerFactory.getLogger("no.nav.syfo.service.MerVeiledningVarselFinder")
 
     suspend fun findMerVeiledningVarslerToSendToday(): List<PPlanlagtVarsel> {
+        log.info("[MerVeiledningVarselFinder] Henter kandidater for Mer veiledning-varsler")
         val alleMerVeiledningVarsler = databaseAccess.fetchMerVeiledningVarslerToSend() //UTB
 
+        log.info("[MerVeiledningVarselFinder] Slår opp sykmeldinger")
         val merVeiledningVarslerSomSkalSendesIDag = alleMerVeiledningVarsler
             .filter { sykmeldingService.isPersonSykmeldtPaDato(LocalDate.now(), it.fnr) }
 
