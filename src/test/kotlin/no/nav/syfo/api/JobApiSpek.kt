@@ -15,6 +15,7 @@ import java.time.LocalDateTime
 import java.util.*
 import no.nav.syfo.api.job.registerJobTriggerApi
 import no.nav.syfo.api.job.urlPathJobTrigger
+import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.getTestEnv
@@ -36,6 +37,7 @@ import no.nav.syfo.testutil.mocks.fnr3
 import no.nav.syfo.testutil.mocks.fnr4
 import no.nav.syfo.testutil.mocks.fnr5
 import no.nav.syfo.testutil.mocks.orgnummer
+import no.nav.syfo.testutil.mocks.pdlPerson
 import no.nav.syfo.testutil.mocks.userAccessStatus1
 import no.nav.syfo.testutil.mocks.userAccessStatus2
 import no.nav.syfo.testutil.mocks.userAccessStatus3
@@ -62,7 +64,9 @@ object JobApiSpek : Spek({
         val dokarkivService = mockk<DokarkivService>()
         val merVeiledningVarselService = mockk<MerVeiledningVarselService>()
         val sykmeldingService = mockk<SykmeldingService>()
+        val pdlConsumer = mockk<PdlConsumer>()
 
+        coEvery { pdlConsumer.hentPerson(any()) } returns pdlPerson
         coEvery { accessControlService.getUserAccessStatus(fnr1) } returns userAccessStatus1
         coEvery { accessControlService.getUserAccessStatus(fnr2) } returns userAccessStatus2
         coEvery { accessControlService.getUserAccessStatus(fnr3) } returns userAccessStatus3
@@ -146,7 +150,8 @@ object JobApiSpek : Spek({
                 testEnv.urlEnv,
                 arbeidsgiverNotifikasjonService,
                 merVeiledningVarselService,
-                sykmeldingService
+                sykmeldingService,
+                pdlConsumer,
             )
         val varselSender = VarselSender(embeddedDatabase, sendVarselService, merVeiledningVarselFinder, testEnv.toggleEnv)
 

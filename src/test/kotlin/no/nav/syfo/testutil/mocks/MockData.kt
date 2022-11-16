@@ -1,6 +1,9 @@
 package no.nav.syfo.testutil.mocks
 
 import no.nav.syfo.access.domain.UserAccessStatus
+import no.nav.syfo.consumer.pdl.PdlFoedsel
+import no.nav.syfo.consumer.pdl.PdlHentPerson
+import no.nav.syfo.consumer.pdl.PdlPerson
 
 const val fnr1 = "12345678901"
 const val fnr2 = "23456789012"
@@ -14,6 +17,8 @@ val userAccessStatus2 = UserAccessStatus(fnr2, true, false) // Kan varsles digit
 val userAccessStatus3 = UserAccessStatus(fnr3, false, true) // Kan varsles fysisk
 val userAccessStatus4 = UserAccessStatus(fnr4, false, true) // Kan varsles fysisk
 val userAccessStatus5 = UserAccessStatus(fnr5, false, false) // Kan ikke varsles
+
+val pdlPerson = PdlHentPerson(PdlPerson(adressebeskyttelse = null, navn = null, foedsel = listOf(PdlFoedsel(foedselsdato = "2020-02-25"))))
 
 val dkifResponseSuccessKanVarslesResponseJSON = """
     {

@@ -30,8 +30,11 @@ data class PdlHentPerson(
 
 data class PdlPerson(
     val adressebeskyttelse: List<Adressebeskyttelse>?,
-    val navn: List<PersonNavn>?
+    val navn: List<PersonNavn>?,
+    val foedsel: List<PdlFoedsel>?
 ) : Serializable
+
+data class PdlFoedsel(val foedselsdato: String?)
 
 data class PersonNavn(
     val fornavn: String?,
@@ -93,6 +96,10 @@ fun PdlHentPerson.getFullNameAsString(): String? {
     } else {
         "${navn.fornavn}${getMellomnavn(navn.mellomnavn)} ${navn.etternavn}"
     }
+}
+
+fun PdlHentPerson.getFodselsdato(): String? {
+    return this.hentPerson?.foedsel?.first()?.foedselsdato
 }
 
 private fun getMellomnavn(mellomnavn: String?): String {

@@ -1,8 +1,19 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.*
+import java.net.URL
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.Period
+import java.util.*
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT
+import no.nav.syfo.DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST
+import no.nav.syfo.UrlEnv
 import no.nav.syfo.access.domain.UserAccessStatus
-import no.nav.syfo.access.domain.canUserBeNotified
+import no.nav.syfo.consumer.PdlConsumer
+import no.nav.syfo.consumer.pdl.getFodselsdato
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
@@ -14,12 +25,9 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
+import no.nav.syfo.utils.parsePDLDate
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.URL
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.util.*
 
 class SendVarselService(
     val beskjedKafkaProducer: BeskjedKafkaProducer,
@@ -28,7 +36,8 @@ class SendVarselService(
     val urlEnv: UrlEnv,
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
     val merVeiledningVarselService: MerVeiledningVarselService,
-    val sykmeldingService: SykmeldingService
+    val sykmeldingService: SykmeldingService,
+    val pdlConsumer: PdlConsumer
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.SendVarselService")
 
@@ -40,13 +49,14 @@ class SendVarselService(
             val userAccessStatus = accessControlService.getUserAccessStatus(pPlanlagtVarsel.fnr)
             val fnr = userAccessStatus.fnr!!
             val uuid = pPlanlagtVarsel.uuid
+            val birthDate = pdlConsumer.hentPerson(fnr)?.getFodselsdato()?.let { parsePDLDate(it) }
 
             val varselUrl = varselUrlFromType(pPlanlagtVarsel.type)
             val varselContent = varselContentFromType(pPlanlagtVarsel.type)
             val orgnummer = pPlanlagtVarsel.orgnummer
 
             if (varselUrl !== null && varselContent !== null) {
-                if (userSkalVarsles(pPlanlagtVarsel.type, userAccessStatus)) {
+                if (userSkalVarsles(pPlanlagtVarsel.type, userAccessStatus, birthDate)) {
                     when (pPlanlagtVarsel.type) {
                         AKTIVITETSKRAV.name -> {
                             val sykmeldingStatus =
@@ -68,13 +78,8 @@ class SendVarselService(
                         }
 
                         MER_VEILEDNING.name -> {
-                            if (userAccessStatus.canUserBeNotified()) {
-                                sendMerVeiledningVarselTilArbeidstaker(pPlanlagtVarsel, userAccessStatus)
-                                pPlanlagtVarsel.type
-                            } else {
-                                log.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles")
-                                UTSENDING_FEILET
-                            }
+                            sendMerVeiledningVarselTilArbeidstaker(pPlanlagtVarsel, userAccessStatus)
+                            pPlanlagtVarsel.type
                         }
 
                         else -> {
@@ -94,7 +99,7 @@ class SendVarselService(
         }
     }
 
-    private fun userSkalVarsles(varselType: String, userAccessStatus: UserAccessStatus): Boolean {
+    private fun userSkalVarsles(varselType: String, userAccessStatus: UserAccessStatus, birthDate: LocalDate?): Boolean {
         log.info("[${varselType}] - userAccessStatus.canUserBeDigitallyNotified: ${userAccessStatus.canUserBeDigitallyNotified} | userAccessStatus.canUserBePhysicallyNotified: ${userAccessStatus.canUserBePhysicallyNotified}")
         return when (varselType) {
             AKTIVITETSKRAV.name -> {
@@ -102,7 +107,7 @@ class SendVarselService(
             }
 
             MER_VEILEDNING.name -> {
-                userAccessStatus.canUserBeDigitallyNotified || userAccessStatus.canUserBePhysicallyNotified
+                (userAccessStatus.canUserBeDigitallyNotified || userAccessStatus.canUserBePhysicallyNotified) && isUserYongerThan67(birthDate)
             }
 
             SVAR_MOTEBEHOV.name -> {
@@ -113,6 +118,11 @@ class SendVarselService(
                 false
             }
         }
+    }
+
+    private fun isUserYongerThan67(birthDate: LocalDate?): Boolean {
+        val age = Period.between(birthDate, LocalDate.now()).years
+        return age < 67
     }
 
     private fun sendAktivitetskravVarselTilArbeidsgiver(
