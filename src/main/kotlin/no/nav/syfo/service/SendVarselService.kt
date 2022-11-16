@@ -50,6 +50,7 @@ class SendVarselService(
             val fnr = userAccessStatus.fnr!!
             val uuid = pPlanlagtVarsel.uuid
             val birthDate = pdlConsumer.hentPerson(fnr)?.getFodselsdato()?.let { parsePDLDate(it) }
+            log.info("[FODSELSDATO] Parsed fodselsdato: ${birthDate}")
 
             val varselUrl = varselUrlFromType(pPlanlagtVarsel.type)
             val varselContent = varselContentFromType(pPlanlagtVarsel.type)
