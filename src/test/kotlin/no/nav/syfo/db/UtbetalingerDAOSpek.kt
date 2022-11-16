@@ -4,6 +4,7 @@ import no.nav.syfo.db.domain.PUtbetaling
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
+import org.amshove.kluent.should
 import org.amshove.kluent.shouldBeEmpty
 import org.amshove.kluent.shouldHaveSingleItem
 import org.amshove.kluent.shouldMatchAtLeastOneOf
@@ -20,6 +21,10 @@ object UtbetalingerDAOSpek : Spek({
 
     describe("UtbetalingerDAOSpek") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
+        val nowPlus1Day = now().plusDays(1)
+        val nowPlus2Days = now().plusDays(2)
+        val nowMinus1Day = now().minusDays(1)
+        val nowMinus2Days = now().minusDays(2)
 
         afterEachTest {
             embeddedDatabase.connection.dropData()
@@ -85,6 +90,40 @@ object UtbetalingerDAOSpek : Spek({
             merVeiledningVarslerToSend.shouldHaveSingleItem()
             merVeiledningVarslerToSend.skalInneholde(spleisUtbetaling2)
         }
+
+        it("Should fetch maxdate from latest utbetaling") {
+            val spleisUtbetaling1 = spleisUtbetaling(fnr = arbeidstakerFnr1, tom = nowMinus1Day, forelopigBeregnetSluttPaSykepenger = nowPlus1Day)
+            val spleisUtbetaling2 = spleisUtbetaling(fnr = arbeidstakerFnr1, tom = nowMinus2Days, forelopigBeregnetSluttPaSykepenger = nowPlus2Days)
+            embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
+            embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling2)
+
+            embeddedDatabase.shouldContainForelopigBeregnetSlutt(arbeidstakerFnr1, nowPlus1Day)
+        }
+
+        it("Should fetch maxdate from spleis when latest utbetaling from spleis") {
+            val spleisUtbetaling1 = spleisUtbetaling(fnr = arbeidstakerFnr1, tom = nowMinus1Day, forelopigBeregnetSluttPaSykepenger = nowPlus1Day)
+            embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
+            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, nowPlus2Days, nowMinus2Days, 60)
+
+            embeddedDatabase.shouldContainForelopigBeregnetSlutt(arbeidstakerFnr1, nowPlus1Day)
+        }
+
+        it("Should fetch maxdate from infotrygd when latest utbetaling from infotrygd") {
+            val spleisUtbetaling1 = spleisUtbetaling(fnr = arbeidstakerFnr1, tom = nowMinus2Days, forelopigBeregnetSluttPaSykepenger = nowPlus2Days)
+            embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
+            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, nowPlus1Day, nowMinus1Day, 60)
+
+            embeddedDatabase.shouldContainForelopigBeregnetSlutt(arbeidstakerFnr1, nowPlus1Day)
+        }
+
+        it("Should fetch maxdate for correct fnr") {
+            val spleisUtbetaling1 = spleisUtbetaling(fnr = arbeidstakerFnr1, tom = nowMinus1Day, forelopigBeregnetSluttPaSykepenger = nowPlus1Day)
+            val spleisUtbetaling2 = spleisUtbetaling(fnr = arbeidstakerFnr2, tom = nowMinus2Days, forelopigBeregnetSluttPaSykepenger = nowPlus2Days)
+            embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
+            embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling2)
+
+            embeddedDatabase.shouldContainForelopigBeregnetSlutt(arbeidstakerFnr2, nowPlus2Days)
+        }
     }
 })
 
@@ -111,3 +150,8 @@ private fun spleisUtbetaling(
 
 private fun List<PUtbetaling>.skalInneholde(spleisUtbetaling: UtbetalingUtbetalt) =
     this.shouldMatchAtLeastOneOf { pUtbetaling: PUtbetaling -> pUtbetaling.fnr == spleisUtbetaling.fødselsnummer && pUtbetaling.utbetaltTom == spleisUtbetaling.tom && pUtbetaling.forelopigBeregnetSlutt == spleisUtbetaling.foreløpigBeregnetSluttPåSykepenger && pUtbetaling.gjenstaendeSykedager == spleisUtbetaling.gjenståendeSykedager }
+
+private fun DatabaseInterface.shouldContainForelopigBeregnetSlutt(fnr: String, forelopigBeregnetSlutt: LocalDate) =
+    this.should("Should contain row with requested fnr and forelopigBeregnetSlutt") {
+        this.fetchForelopigBeregnetSluttPaSykepengerByFnr(fnr) == forelopigBeregnetSlutt
+    }
