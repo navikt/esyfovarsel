@@ -20,7 +20,9 @@ fun DatabaseInterface.fetchMerVeiledningVarslerToSend(): List<PUtbetaling> {
                                 (SELECT FNR 
                                 FROM UTSENDT_VARSEL 
                                 WHERE TYPE = 'MER_VEILEDNING' 
-                                AND UTSENDT_TIDSPUNKT > NOW() - INTERVAL '90' DAY)"""
+                                AND UTSENDT_TIDSPUNKT > NOW() - INTERVAL '90' DAY)
+                                LIMIT 500
+                                """
         .trimIndent()
 
     return connection.use { connection ->
