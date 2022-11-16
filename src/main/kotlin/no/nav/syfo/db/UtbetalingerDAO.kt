@@ -32,7 +32,7 @@ fun DatabaseInterface.fetchMerVeiledningVarslerToSend(): List<PUtbetaling> {
     }
 }
 
-fun DatabaseInterface.fetchMaxDateByFnr(fnr: String): LocalDate? {
+fun DatabaseInterface.fetchForelopigBeregnetSluttPaSykepengerByFnr(fnr: String): LocalDate? {
     val queryStatement = """SELECT  FORELOPIG_BEREGNET_SLUTT
                             FROM UTBETALINGER AS UTBETALINGER1
                             WHERE ID =
@@ -45,14 +45,14 @@ fun DatabaseInterface.fetchMaxDateByFnr(fnr: String): LocalDate? {
                             """
         .trimIndent()
 
-    val storedMaxDateAsList = connection.use { connection ->
+    val list = connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
             it.setString(1, fnr)
             it.executeQuery().toList { getDate("FORELOPIG_BEREGNET_SLUTT") }
         }
     }
 
-    return if (storedMaxDateAsList.isNotEmpty()) {
-        storedMaxDateAsList.first().toLocalDate()
+    return if (list.isNotEmpty()) {
+        list.first().toLocalDate()
     } else null
 }

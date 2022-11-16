@@ -97,7 +97,7 @@ object UtbetalingerDAOSpek : Spek({
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling2)
 
-            embeddedDatabase.shouldContainMaxDate(arbeidstakerFnr1, nowPlus1Day)
+            embeddedDatabase.shouldContainForelopigBeregnetSlutt(arbeidstakerFnr1, nowPlus1Day)
         }
 
         it("Should fetch maxdate from spleis when latest utbetaling from spleis") {
@@ -105,7 +105,7 @@ object UtbetalingerDAOSpek : Spek({
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
             embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, nowPlus2Days, nowMinus2Days, 60)
 
-            embeddedDatabase.shouldContainMaxDate(arbeidstakerFnr1, nowPlus1Day)
+            embeddedDatabase.shouldContainForelopigBeregnetSlutt(arbeidstakerFnr1, nowPlus1Day)
         }
 
         it("Should fetch maxdate from infotrygd when latest utbetaling from infotrygd") {
@@ -113,7 +113,7 @@ object UtbetalingerDAOSpek : Spek({
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
             embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, nowPlus1Day, nowMinus1Day, 60)
 
-            embeddedDatabase.shouldContainMaxDate(arbeidstakerFnr1, nowPlus1Day)
+            embeddedDatabase.shouldContainForelopigBeregnetSlutt(arbeidstakerFnr1, nowPlus1Day)
         }
 
         it("Should fetch maxdate for correct fnr") {
@@ -122,7 +122,7 @@ object UtbetalingerDAOSpek : Spek({
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling2)
 
-            embeddedDatabase.shouldContainMaxDate(arbeidstakerFnr2, nowPlus2Days)
+            embeddedDatabase.shouldContainForelopigBeregnetSlutt(arbeidstakerFnr2, nowPlus2Days)
         }
     }
 })
@@ -151,7 +151,7 @@ private fun spleisUtbetaling(
 private fun List<PUtbetaling>.skalInneholde(spleisUtbetaling: UtbetalingUtbetalt) =
     this.shouldMatchAtLeastOneOf { pUtbetaling: PUtbetaling -> pUtbetaling.fnr == spleisUtbetaling.fødselsnummer && pUtbetaling.utbetaltTom == spleisUtbetaling.tom && pUtbetaling.forelopigBeregnetSlutt == spleisUtbetaling.foreløpigBeregnetSluttPåSykepenger && pUtbetaling.gjenstaendeSykedager == spleisUtbetaling.gjenståendeSykedager }
 
-private fun DatabaseInterface.shouldContainMaxDate(fnr: String, forelopigBeregnetSlutt: LocalDate) =
+private fun DatabaseInterface.shouldContainForelopigBeregnetSlutt(fnr: String, forelopigBeregnetSlutt: LocalDate) =
     this.should("Should contain row with requested fnr and forelopigBeregnetSlutt") {
-        this.fetchMaxDateByFnr(fnr) == forelopigBeregnetSlutt
+        this.fetchForelopigBeregnetSluttPaSykepengerByFnr(fnr) == forelopigBeregnetSlutt
     }
