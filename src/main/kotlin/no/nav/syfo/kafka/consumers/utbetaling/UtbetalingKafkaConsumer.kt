@@ -5,7 +5,7 @@ import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.*
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
-import no.nav.syfo.service.SykepengerMaxDateService
+import no.nav.syfo.service.UtbetalingProcessor
 import org.apache.kafka.clients.CommonClientConfigs.GROUP_ID_CONFIG
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
@@ -15,7 +15,7 @@ import java.util.*
 
 class UtbetalingKafkaConsumer(
     val env: Environment,
-    private val sykepengerMaxDateService: SykepengerMaxDateService
+    private val utbetalingProcessor: UtbetalingProcessor
 ) : KafkaListener {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.UtbetalingKafkaConsumer")
     private val kafkaListener: KafkaConsumer<String, String>
@@ -35,7 +35,7 @@ class UtbetalingKafkaConsumer(
                 try {
                     val utbetaling: UtbetalingUtbetalt = objectMapper.readValue(it.value())
                     if (utbetaling.event == "utbetaling_utbetalt") {
-                        sykepengerMaxDateService.processUtbetalingSpleisEvent(utbetaling)
+                        utbetalingProcessor.processUtbetalingSpleisEvent(utbetaling)
                     }
                 } catch (e: IOException) {
                     log.error(

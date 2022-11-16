@@ -1,19 +1,21 @@
 package no.nav.syfo.api.maxdate
 
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
-import io.ktor.http.*
-import io.ktor.response.*
-import io.ktor.routing.*
-import no.nav.syfo.service.SykepengerMaxDateService
+import io.ktor.application.call
+import io.ktor.auth.authentication
+import io.ktor.auth.jwt.JWTPrincipal
+import io.ktor.http.HttpStatusCode
+import io.ktor.response.respond
+import io.ktor.routing.Route
+import io.ktor.routing.get
+import java.io.Serializable
+import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.fetchForelopigBeregnetSluttPaSykepengerByFnr
 import no.nav.syfo.utils.formatDateForLetter
 import org.slf4j.LoggerFactory
-import java.io.Serializable
 
 
-fun Route.registerSykepengerMaxDateRestApi(
-    sykepengerMaxDateService: SykepengerMaxDateService
+fun Route.registerForelopigBeregnetSluttPaSykepengerRestApi(
+    databaseInterface: DatabaseInterface
 ) {
     val log = LoggerFactory.getLogger("no.nav.syfo.api.maxdate.SykepengerMaxDateRest")
     get("/api/v1/sykepenger/maxdate") {
@@ -22,7 +24,8 @@ fun Route.registerSykepengerMaxDateRestApi(
         val sykmeldtFnr = principal.payload.getClaim("pid").asString()
 
         try {
-            val sykepengerMaxDate = sykepengerMaxDateService.getSykepengerMaxDate(sykmeldtFnr)?.let { it1 -> formatDateForLetter(it1) }
+            val sykepengerMaxDate = databaseInterface.fetchForelopigBeregnetSluttPaSykepengerByFnr(sykmeldtFnr)?.let { it1 -> formatDateForLetter(it1) }
+
             log.info("Fetched sykepengerMaxDate from database: $sykepengerMaxDate")
             call.respond(SykepengerMaxDateResponse(sykepengerMaxDate))
         } catch (e: Exception) {

@@ -1,21 +1,26 @@
 package no.nav.syfo.auth
 
 import com.auth0.jwk.JwkProviderBuilder
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
-import io.ktor.routing.*
+import io.ktor.application.Application
+import io.ktor.application.install
+import io.ktor.auth.Authentication
+import io.ktor.auth.UserIdPrincipal
+import io.ktor.auth.authenticate
+import io.ktor.auth.basic
+import io.ktor.auth.jwt.JWTPrincipal
+import io.ktor.auth.jwt.jwt
+import io.ktor.routing.routing
+import java.net.URL
+import java.util.concurrent.TimeUnit
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.api.admin.registerAdminApi
 import no.nav.syfo.api.job.registerJobTriggerApi
-import no.nav.syfo.api.maxdate.registerSykepengerMaxDateRestApi
+import no.nav.syfo.api.maxdate.registerForelopigBeregnetSluttPaSykepengerRestApi
+import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.service.ReplanleggingService
-import no.nav.syfo.service.SykepengerMaxDateService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.URL
-import java.util.concurrent.TimeUnit
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.JwtValidation")
 
@@ -53,7 +58,7 @@ fun Application.setupAuthentication(
 fun Application.setupLocalRoutesWithAuthentication(
     varselSender: VarselSender,
     replanleggingService: ReplanleggingService,
-    sykepengerMaxDateService: SykepengerMaxDateService,
+    database: DatabaseInterface,
     authEnv: AuthEnv
 ) {
     install(Authentication) {
@@ -69,7 +74,7 @@ fun Application.setupLocalRoutesWithAuthentication(
     }
 
     routing {
-        registerSykepengerMaxDateRestApi(sykepengerMaxDateService)
+        registerForelopigBeregnetSluttPaSykepengerRestApi(database)
         registerAdminApi(replanleggingService)
 
         authenticate("auth-basic") {
@@ -81,13 +86,13 @@ fun Application.setupLocalRoutesWithAuthentication(
 fun Application.setupRoutesWithAuthentication(
     varselSender: VarselSender,
     replanleggingService: ReplanleggingService,
-    sykepengerMaxDateService: SykepengerMaxDateService,
+    database: DatabaseInterface,
     authEnv: AuthEnv
 ) {
     setupAuthentication(authEnv)
     routing {
         authenticate("loginservice") {
-            registerSykepengerMaxDateRestApi(sykepengerMaxDateService)
+            registerForelopigBeregnetSluttPaSykepengerRestApi(database)
         }
         authenticate("auth-basic") {
             registerAdminApi(replanleggingService)

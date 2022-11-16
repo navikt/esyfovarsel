@@ -5,7 +5,7 @@ import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.*
 import no.nav.syfo.kafka.consumers.infotrygd.domain.KInfotrygdSykepengedager
-import no.nav.syfo.service.SykepengerMaxDateService
+import no.nav.syfo.service.UtbetalingProcessor
 import no.nav.syfo.utils.parseDate
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -16,7 +16,7 @@ import java.util.*
 
 class InfotrygdKafkaConsumer(
     val env: Environment,
-    private val sykepengerMaxDateService: SykepengerMaxDateService
+    private val utbetalingProcessor: UtbetalingProcessor
 ) : KafkaListener {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.consumers.infotrygd.InfotrygdKafkaConsumer")
     private val kafkaListener: KafkaConsumer<String, String>
@@ -41,7 +41,7 @@ class InfotrygdKafkaConsumer(
                     val utbetaltTom = kInfotrygdSykepengedager.after.UTBET_TOM
                     if (utbetaltTom != null) {
                         val utbetaltTomDate = parseDate(utbetaltTom)
-                        sykepengerMaxDateService.processInfotrygdEvent(
+                        utbetalingProcessor.processInfotrygdEvent(
                             fnr,
                             sykepengerMaxDate,
                             utbetaltTomDate,
