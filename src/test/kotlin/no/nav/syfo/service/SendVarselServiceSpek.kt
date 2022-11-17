@@ -35,7 +35,8 @@ import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.syketilfelle.SyketilfellebitService
-import no.nav.syfo.testutil.mocks.pdlPerson
+import no.nav.syfo.testutil.mocks.pdlPersonOver67Years
+import no.nav.syfo.testutil.mocks.pdlPersonUnder67Years
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
@@ -94,7 +95,7 @@ object SendVarselServiceTestSpek : Spek({
         }
 
         it("Should send aktivitetskrav-varsel to AG if sykmelding sendt AG") {
-            coEvery { pdlConsumerMockk.hentPerson(any()) } returns pdlPerson
+            coEvery { pdlConsumerMockk.hentPerson(any()) } returns pdlPersonUnder67Years
             coEvery { sykmeldingerConsumerMock.getSykmeldingerPaDato(any(), any()) } returns listOf(
                 getSykmeldingDto(
                     perioder = getSykmeldingPerioder(isGradert = false),
@@ -123,7 +124,7 @@ object SendVarselServiceTestSpek : Spek({
         }
 
         it("Should not send aktivitetskrav-varsel to AG if sykmelding not sendt AG") {
-            coEvery { pdlConsumerMockk.hentPerson(any()) } returns pdlPerson
+            coEvery { pdlConsumerMockk.hentPerson(any()) } returns pdlPersonUnder67Years
             coEvery { sykmeldingerConsumerMock.getSykmeldingerPaDato(any(), any()) } returns listOf(
                 getSykmeldingDto(
                     perioder = getSykmeldingPerioder(isGradert = false),
@@ -152,7 +153,7 @@ object SendVarselServiceTestSpek : Spek({
         }
 
         it("Should send mer-veiledning-varsel to SM if sykmelding is sendt AG") {
-            coEvery { pdlConsumerMockk.hentPerson(any()) } returns pdlPerson
+            coEvery { pdlConsumerMockk.hentPerson(any()) } returns pdlPersonUnder67Years
             coEvery { sykmeldingerConsumerMock.getSykmeldtStatusPaDato(any(), sykmeldtFnr) } returns
                     SykmeldtStatus(
                         true,
@@ -177,6 +178,34 @@ object SendVarselServiceTestSpek : Spek({
             }
 
             verify(exactly = 1) { beskjedKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
+        }
+
+        it("Should not send mer-veiledning-varsel to SM if person is older yhan 67") {
+            coEvery { pdlConsumerMockk.hentPerson(any()) } returns pdlPersonOver67Years
+            coEvery { sykmeldingerConsumerMock.getSykmeldtStatusPaDato(any(), sykmeldtFnr) } returns
+                    SykmeldtStatus(
+                        true,
+                        true,
+                        LocalDate.now(),
+                        LocalDate.now()
+                    )
+
+            runBlocking {
+                sendVarselService.sendVarsel(
+                    PPlanlagtVarsel(
+                        uuid = UUID.randomUUID().toString(),
+                        fnr = sykmeldtFnr,
+                        orgnummer = orgnummer,
+                        aktorId = null,
+                        type = VarselType.MER_VEILEDNING.name,
+                        utsendingsdato = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).toLocalDate(),
+                        opprettet = LocalDateTime.now(),
+                        sistEndret = LocalDateTime.now()
+                    )
+                )
+            }
+
+            verify(exactly = 0) { beskjedKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
         }
     }
 })

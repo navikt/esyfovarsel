@@ -1,5 +1,6 @@
 package no.nav.syfo.testutil.mocks
 
+import java.time.LocalDate
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.consumer.pdl.PdlFoedsel
 import no.nav.syfo.consumer.pdl.PdlHentPerson
@@ -18,7 +19,8 @@ val userAccessStatus3 = UserAccessStatus(fnr3, false, true) // Kan varsles fysis
 val userAccessStatus4 = UserAccessStatus(fnr4, false, true) // Kan varsles fysisk
 val userAccessStatus5 = UserAccessStatus(fnr5, false, false) // Kan ikke varsles
 
-val pdlPerson = PdlHentPerson(PdlPerson(adressebeskyttelse = null, navn = null, foedsel = listOf(PdlFoedsel(foedselsdato = "2020-02-25"))))
+val pdlPersonUnder67Years = PdlHentPerson(PdlPerson(adressebeskyttelse = null, navn = null, foedsel = listOf(PdlFoedsel(foedselsdato = LocalDate.now().minusYears(30).toString()))))
+val pdlPersonOver67Years = PdlHentPerson(PdlPerson(adressebeskyttelse = null, navn = null, foedsel = listOf(PdlFoedsel(foedselsdato = "1920-03-25"))))
 
 val dkifResponseSuccessKanVarslesResponseJSON = """
     {
