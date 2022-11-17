@@ -153,7 +153,7 @@ object JobApiSpek : Spek({
                 sykmeldingService,
                 pdlConsumer,
             )
-        val varselSender = VarselSender(embeddedDatabase, sendVarselService, merVeiledningVarselFinder, testEnv.toggleEnv, pdlConsumer)
+        val varselSender = VarselSender(embeddedDatabase, sendVarselService, merVeiledningVarselFinder, testEnv.toggleEnv)
 
         with(TestApplicationEngine()) {
             start()

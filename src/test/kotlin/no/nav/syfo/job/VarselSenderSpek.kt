@@ -8,7 +8,6 @@ import java.time.LocalDateTime
 import java.util.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.ToggleEnv
-import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.arbeidstakerAktorId1
 import no.nav.syfo.db.domain.PPlanlagtVarsel
@@ -26,7 +25,6 @@ import no.nav.syfo.service.SendVarselService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.mocks.orgnummer
-import no.nav.syfo.testutil.mocks.pdlPersonUnder67Years
 import org.amshove.kluent.should
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
@@ -39,7 +37,6 @@ object VarselSenderSpek : Spek({
 
     val sendVarselService = mockk<SendVarselService>(relaxed = true)
     val merVeiledningVarselFinder = mockk<MerVeiledningVarselFinder>(relaxed = true)
-    val pdlConsumer = mockk<PdlConsumer>(relaxed = true)
     val merVeiledningVarsel = PPlanlagtVarsel(
         UUID.randomUUID().toString(),
         arbeidstakerFnr1,
@@ -66,11 +63,10 @@ object VarselSenderSpek : Spek({
                 sendVarselService,
                 merVeiledningVarselFinder,
                 ToggleEnv(false, true, true, false, false)
-            ,pdlConsumer)
+            )
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
 
             coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(merVeiledningVarsel)
-            coEvery { pdlConsumer.hentPerson(any()) } returns pdlPersonUnder67Years
 
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
 
@@ -86,7 +82,7 @@ object VarselSenderSpek : Spek({
                 embeddedDatabase,
                 sendVarselService,
                 merVeiledningVarselFinder,
-                ToggleEnv(false, false, true, false, false), pdlConsumer
+                ToggleEnv(false, false, true, false, false)
             )
             val planlagtVarselToStore =
                 PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, emptySet(), MER_VEILEDNING)
@@ -98,7 +94,6 @@ object VarselSenderSpek : Spek({
             coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(
                 merVeiledningVarsel
             )
-            coEvery { pdlConsumer.hentPerson(any()) } returns pdlPersonUnder67Years
             sendVarselJobb.testSendVarsler()
             sendVarselService.testSendVarsel()
 
@@ -115,7 +110,7 @@ object VarselSenderSpek : Spek({
                 sendVarselService,
                 merVeiledningVarselFinder,
                 ToggleEnv(false, true, false, false, false)
-            ,pdlConsumer)
+            )
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
             val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), AKTIVITETSKRAV)
 
@@ -123,7 +118,7 @@ object VarselSenderSpek : Spek({
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
 
             coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(merVeiledningVarsel)
-            coEvery { pdlConsumer.hentPerson(any()) } returns pdlPersonUnder67Years
+
             sendVarselJobb.testSendVarsler()
             sendVarselService.testSendVarsel()
 
@@ -142,14 +137,13 @@ object VarselSenderSpek : Spek({
                 sendVarselService,
                 merVeiledningVarselFinder,
                 ToggleEnv(true, false, true, false, false)
-                    ,pdlConsumer)
+            )
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
 
             coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(merVeiledningVarsel)
-
             coEvery { sendVarselService.sendVarsel(any()) } returns UTSENDING_FEILET
-            coEvery { pdlConsumer.hentPerson(any()) } returns pdlPersonUnder67Years
+
             sendVarselJobb.testSendVarsler()
             sendVarselService.testSendVarsel()
 

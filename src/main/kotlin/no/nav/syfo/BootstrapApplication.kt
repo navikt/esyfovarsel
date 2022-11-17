@@ -206,7 +206,6 @@ fun Application.serverModule(
         sendVarselService,
         merVeiledningVarselFinder,
         env.toggleEnv,
-        pdlConsumer,
     )
 
     install(ContentNegotiation) {

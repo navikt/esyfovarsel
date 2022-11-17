@@ -2,8 +2,6 @@ package no.nav.syfo.job
 
 import java.time.LocalDate
 import no.nav.syfo.ToggleEnv
-import no.nav.syfo.consumer.PdlConsumer
-import no.nav.syfo.consumer.pdl.getFodselsdato
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deletePlanlagtVarselByVarselId
 import no.nav.syfo.db.domain.PPlanlagtVarsel
@@ -17,7 +15,6 @@ import no.nav.syfo.metrics.tellMerVeiledningVarselSendt
 import no.nav.syfo.metrics.tellSvarMotebehovVarselSendt
 import no.nav.syfo.service.MerVeiledningVarselFinder
 import no.nav.syfo.service.SendVarselService
-import no.nav.syfo.utils.parsePDLDate
 import org.slf4j.LoggerFactory
 
 class VarselSender(
@@ -25,7 +22,6 @@ class VarselSender(
     private val sendVarselService: SendVarselService,
     private val merVeiledningVarselFinder: MerVeiledningVarselFinder,
     private val toggles: ToggleEnv,
-    val pdlConsumer: PdlConsumer
 ) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
 
@@ -51,8 +47,7 @@ class VarselSender(
         if (!toggles.sendAktivitetskravVarsler) log.info("Utsending av Aktivitetskrav er ikke aktivert, og varsler av denne typen blir ikke sendt")
         if (!toggles.sendMerVeiledningVarsler) log.info("Utsending av Mer veiledning er ikke aktivert, og varsler av denne typen blir ikke sendt")
         if (!toggles.sendMerVeiledningVarslerBasedOnSisteUtbtalingDate) log.info("Utsending av  Mer veiledning med utsending basert på siste utbetaling er ikke aktivert, og varsler av denne typen blir ikke sendt via denne pathen")
-        val birthDate = pdlConsumer.hentPerson("26918198953")?.getFodselsdato()?.let { parsePDLDate(it) }
-        log.info("[FODSELSDATO] Parsed fodselsdato: ${birthDate}")
+
         varslerToSendToday.forEach {
             if (skalSendeVarsel(it)) {
                 log.info("Sender varsel med UUID ${it.uuid}")
