@@ -21,6 +21,7 @@ val userAccessStatus5 = UserAccessStatus(fnr5, false, false) // Kan ikke varsles
 
 val pdlPersonUnder67Years = PdlHentPerson(PdlPerson(adressebeskyttelse = null, navn = null, foedsel = listOf(PdlFoedsel(foedselsdato = LocalDate.now().minusYears(30).toString()))))
 val pdlPersonOver67Years = PdlHentPerson(PdlPerson(adressebeskyttelse = null, navn = null, foedsel = listOf(PdlFoedsel(foedselsdato = "1920-03-25"))))
+val pdlPersonNoBirthday = PdlHentPerson(PdlPerson(adressebeskyttelse = null, navn = null, foedsel = listOf(PdlFoedsel(foedselsdato = null))))
 
 val dkifResponseSuccessKanVarslesResponseJSON = """
     {

@@ -35,6 +35,7 @@ import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.syketilfelle.SyketilfellebitService
+import no.nav.syfo.testutil.mocks.pdlPersonNoBirthday
 import no.nav.syfo.testutil.mocks.pdlPersonOver67Years
 import no.nav.syfo.testutil.mocks.pdlPersonUnder67Years
 import org.spekframework.spek2.Spek
@@ -180,7 +181,7 @@ object SendVarselServiceTestSpek : Spek({
             verify(exactly = 1) { beskjedKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
         }
 
-        it("Should not send mer-veiledning-varsel to SM if person is older yhan 67") {
+        it("Should not send mer-veiledning-varsel to SM if person is older than 67") {
             coEvery { pdlConsumerMockk.hentPerson(any()) } returns pdlPersonOver67Years
             coEvery { sykmeldingerConsumerMock.getSykmeldtStatusPaDato(any(), sykmeldtFnr) } returns
                     SykmeldtStatus(
@@ -206,6 +207,34 @@ object SendVarselServiceTestSpek : Spek({
             }
 
             verify(exactly = 0) { beskjedKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
+        }
+
+        it("Should send mer-veiledning-varsel to SM if person's birthdate is unknown") {
+            coEvery { pdlConsumerMockk.hentPerson(any()) } returns pdlPersonNoBirthday
+            coEvery { sykmeldingerConsumerMock.getSykmeldtStatusPaDato(any(), sykmeldtFnr) } returns
+                    SykmeldtStatus(
+                        true,
+                        true,
+                        LocalDate.now(),
+                        LocalDate.now()
+                    )
+
+            runBlocking {
+                sendVarselService.sendVarsel(
+                    PPlanlagtVarsel(
+                        uuid = UUID.randomUUID().toString(),
+                        fnr = sykmeldtFnr,
+                        orgnummer = orgnummer,
+                        aktorId = null,
+                        type = VarselType.MER_VEILEDNING.name,
+                        utsendingsdato = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).toLocalDate(),
+                        opprettet = LocalDateTime.now(),
+                        sistEndret = LocalDateTime.now()
+                    )
+                )
+            }
+
+            verify(exactly = 1) { beskjedKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
         }
     }
 })

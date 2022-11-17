@@ -108,7 +108,7 @@ class SendVarselService(
             }
 
             MER_VEILEDNING.name -> {
-                (userAccessStatus.canUserBeDigitallyNotified || userAccessStatus.canUserBePhysicallyNotified) && isUserYongerThan67(birthDate)
+                (userAccessStatus.canUserBeDigitallyNotified || userAccessStatus.canUserBePhysicallyNotified) && isUserYoungerThan67(birthDate)
             }
 
             SVAR_MOTEBEHOV.name -> {
@@ -121,9 +121,8 @@ class SendVarselService(
         }
     }
 
-    private fun isUserYongerThan67(birthDate: LocalDate?): Boolean {
-        val age = Period.between(birthDate, LocalDate.now()).years
-        return age < 67
+    private fun isUserYoungerThan67(birthDate: LocalDate?): Boolean {
+        return birthDate == null || (Period.between(birthDate, LocalDate.now()).years < 67)
     }
 
     private fun sendAktivitetskravVarselTilArbeidsgiver(
