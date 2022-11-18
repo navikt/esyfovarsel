@@ -1,6 +1,6 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.consumer.PdlConsumer
+import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.dokarkiv.DokarkivConsumer
 import no.nav.syfo.consumer.dokarkiv.domain.AvsenderMottaker
 import no.nav.syfo.consumer.dokarkiv.domain.DokarkivRequest
