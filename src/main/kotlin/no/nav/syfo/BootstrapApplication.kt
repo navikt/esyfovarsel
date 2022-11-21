@@ -19,8 +19,7 @@ import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.auth.setupLocalRoutesWithAuthentication
 import no.nav.syfo.auth.setupRoutesWithAuthentication
-import no.nav.syfo.consumer.LocalPdlConsumer
-import no.nav.syfo.consumer.PdlConsumer
+import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
 import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.dokarkiv.DokarkivConsumer
@@ -156,10 +155,7 @@ fun main() {
 }
 
 private fun getPdlConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsumer): PdlConsumer {
-    return when {
-        isLocal() -> LocalPdlConsumer(urlEnv, azureADConsumer)
-        else -> PdlConsumer(urlEnv, azureADConsumer)
-    }
+    return PdlConsumer(urlEnv, azureADConsumer)
 }
 
 private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsumer): DkifConsumer {
