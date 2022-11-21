@@ -14,7 +14,6 @@ import java.util.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.access.domain.UserAccessStatus
-import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingDTO
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatus
@@ -35,9 +34,6 @@ import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.syketilfelle.SyketilfellebitService
-import no.nav.syfo.testutil.mocks.pdlPersonNoBirthday
-import no.nav.syfo.testutil.mocks.pdlPersonOver67Years
-import no.nav.syfo.testutil.mocks.pdlPersonUnder67Years
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
@@ -55,7 +51,6 @@ object SendVarselServiceTestSpek : Spek({
     val sykmeldingerConsumerMock: SykmeldingerConsumer = mockk(relaxed = true)
     val sykmeldingServiceMockk = SykmeldingService(sykmeldingerConsumerMock)
     val brukernotifikasjonerServiceMockk = BrukernotifikasjonerService(beskjedKafkaProducerMockk, accessControlServiceMockk)
-    val pdlConsumerMockk = mockk<PdlConsumer>()
 
     val senderFacade =
         SenderFacade(
@@ -75,7 +70,6 @@ object SendVarselServiceTestSpek : Spek({
         arbeidsgiverNotifikasjonServiceMockk,
         merVeiledningVarselServiceMockk,
         sykmeldingServiceMockk,
-        pdlConsumerMockk,
     )
     val sykmeldtFnr = "01234567891"
     val orgnummer = "999988877"
@@ -96,7 +90,6 @@ object SendVarselServiceTestSpek : Spek({
         }
 
         it("Should send aktivitetskrav-varsel to AG if sykmelding sendt AG") {
-            coEvery { pdlConsumerMockk.hentPerson(any()) } returns pdlPersonUnder67Years
             coEvery { sykmeldingerConsumerMock.getSykmeldingerPaDato(any(), any()) } returns listOf(
                 getSykmeldingDto(
                     perioder = getSykmeldingPerioder(isGradert = false),
@@ -125,7 +118,6 @@ object SendVarselServiceTestSpek : Spek({
         }
 
         it("Should not send aktivitetskrav-varsel to AG if sykmelding not sendt AG") {
-            coEvery { pdlConsumerMockk.hentPerson(any()) } returns pdlPersonUnder67Years
             coEvery { sykmeldingerConsumerMock.getSykmeldingerPaDato(any(), any()) } returns listOf(
                 getSykmeldingDto(
                     perioder = getSykmeldingPerioder(isGradert = false),
@@ -154,63 +146,6 @@ object SendVarselServiceTestSpek : Spek({
         }
 
         it("Should send mer-veiledning-varsel to SM if sykmelding is sendt AG") {
-            coEvery { pdlConsumerMockk.hentPerson(any()) } returns pdlPersonUnder67Years
-            coEvery { sykmeldingerConsumerMock.getSykmeldtStatusPaDato(any(), sykmeldtFnr) } returns
-                    SykmeldtStatus(
-                        true,
-                        true,
-                        LocalDate.now(),
-                        LocalDate.now()
-                    )
-
-            runBlocking {
-                sendVarselService.sendVarsel(
-                    PPlanlagtVarsel(
-                        uuid = UUID.randomUUID().toString(),
-                        fnr = sykmeldtFnr,
-                        orgnummer = orgnummer,
-                        aktorId = null,
-                        type = VarselType.MER_VEILEDNING.name,
-                        utsendingsdato = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).toLocalDate(),
-                        opprettet = LocalDateTime.now(),
-                        sistEndret = LocalDateTime.now()
-                    )
-                )
-            }
-
-            verify(exactly = 1) { beskjedKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
-        }
-
-        it("Should not send mer-veiledning-varsel to SM if person is older than 67") {
-            coEvery { pdlConsumerMockk.hentPerson(any()) } returns pdlPersonOver67Years
-            coEvery { sykmeldingerConsumerMock.getSykmeldtStatusPaDato(any(), sykmeldtFnr) } returns
-                    SykmeldtStatus(
-                        true,
-                        true,
-                        LocalDate.now(),
-                        LocalDate.now()
-                    )
-
-            runBlocking {
-                sendVarselService.sendVarsel(
-                    PPlanlagtVarsel(
-                        uuid = UUID.randomUUID().toString(),
-                        fnr = sykmeldtFnr,
-                        orgnummer = orgnummer,
-                        aktorId = null,
-                        type = VarselType.MER_VEILEDNING.name,
-                        utsendingsdato = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).toLocalDate(),
-                        opprettet = LocalDateTime.now(),
-                        sistEndret = LocalDateTime.now()
-                    )
-                )
-            }
-
-            verify(exactly = 0) { beskjedKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
-        }
-
-        it("Should send mer-veiledning-varsel to SM if person's birthdate is unknown") {
-            coEvery { pdlConsumerMockk.hentPerson(any()) } returns pdlPersonNoBirthday
             coEvery { sykmeldingerConsumerMock.getSykmeldtStatusPaDato(any(), sykmeldtFnr) } returns
                     SykmeldtStatus(
                         true,

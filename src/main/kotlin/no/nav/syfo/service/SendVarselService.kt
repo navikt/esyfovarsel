@@ -12,8 +12,6 @@ import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT
 import no.nav.syfo.DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.access.domain.UserAccessStatus
-import no.nav.syfo.consumer.PdlConsumer
-import no.nav.syfo.consumer.pdl.getFodselsdato
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
@@ -25,7 +23,6 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
-import no.nav.syfo.utils.parsePDLDate
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -37,7 +34,6 @@ class SendVarselService(
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
     val merVeiledningVarselService: MerVeiledningVarselService,
     val sykmeldingService: SykmeldingService,
-    val pdlConsumer: PdlConsumer
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.SendVarselService")
 
@@ -49,15 +45,13 @@ class SendVarselService(
             val userAccessStatus = accessControlService.getUserAccessStatus(pPlanlagtVarsel.fnr)
             val fnr = userAccessStatus.fnr!!
             val uuid = pPlanlagtVarsel.uuid
-            val birthDate = pdlConsumer.hentPerson(fnr)?.getFodselsdato()?.let { parsePDLDate(it) }
-            log.info("[FODSELSDATO] Parsed fodselsdato: ${birthDate}")
 
             val varselUrl = varselUrlFromType(pPlanlagtVarsel.type)
             val varselContent = varselContentFromType(pPlanlagtVarsel.type)
             val orgnummer = pPlanlagtVarsel.orgnummer
 
             if (varselUrl !== null && varselContent !== null) {
-                if (userSkalVarsles(pPlanlagtVarsel.type, userAccessStatus, birthDate)) {
+                if (userSkalVarsles(pPlanlagtVarsel.type, userAccessStatus)) {
                     when (pPlanlagtVarsel.type) {
                         AKTIVITETSKRAV.name -> {
                             val sykmeldingStatus =
@@ -100,7 +94,7 @@ class SendVarselService(
         }
     }
 
-    private fun userSkalVarsles(varselType: String, userAccessStatus: UserAccessStatus, birthDate: LocalDate?): Boolean {
+    private fun userSkalVarsles(varselType: String, userAccessStatus: UserAccessStatus): Boolean {
         log.info("[${varselType}] - userAccessStatus.canUserBeDigitallyNotified: ${userAccessStatus.canUserBeDigitallyNotified} | userAccessStatus.canUserBePhysicallyNotified: ${userAccessStatus.canUserBePhysicallyNotified}")
         return when (varselType) {
             AKTIVITETSKRAV.name -> {
@@ -108,7 +102,7 @@ class SendVarselService(
             }
 
             MER_VEILEDNING.name -> {
-                (userAccessStatus.canUserBeDigitallyNotified || userAccessStatus.canUserBePhysicallyNotified) && isUserYoungerThan67(birthDate)
+                userAccessStatus.canUserBeDigitallyNotified || userAccessStatus.canUserBePhysicallyNotified
             }
 
             SVAR_MOTEBEHOV.name -> {
@@ -120,11 +114,6 @@ class SendVarselService(
             }
         }
     }
-
-    private fun isUserYoungerThan67(birthDate: LocalDate?): Boolean {
-        return birthDate == null || (Period.between(birthDate, LocalDate.now()).years < 67)
-    }
-
     private fun sendAktivitetskravVarselTilArbeidsgiver(
         uuid: String,
         arbeidstakerFnr: String,

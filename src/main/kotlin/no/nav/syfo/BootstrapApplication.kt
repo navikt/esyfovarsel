@@ -188,12 +188,12 @@ fun Application.serverModule(
             arbeidsgiverNotifikasjonService,
             merVeiledningVarselService,
             sykmeldingService,
-            pdlConsumer,
         )
 
     val merVeiledningVarselFinder = MerVeiledningVarselFinder(
         database,
         sykmeldingService,
+        pdlConsumer,
     )
 
     val varselSender = VarselSender(
