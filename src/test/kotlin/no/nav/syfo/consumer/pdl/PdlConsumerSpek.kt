@@ -1,4 +1,3 @@
-import io.mockk.clearAllMocks
 import io.mockk.mockk
 import java.time.LocalDate
 import no.nav.syfo.auth.AzureAdTokenConsumer
@@ -14,10 +13,6 @@ class PdlConsumerSpek : Spek({
     val pdlConsumer = PdlConsumer(testEnv.urlEnv, azureAdConsumer)
 
     describe("PdlConsumerSpek") {
-        afterEachTest {
-            clearAllMocks()
-        }
-
         it("Should return true if birthdate is under 67") {
             val birthDate = LocalDate.now().minusYears(30).toString()
             val isBrukerUnder67 = pdlConsumer.isFodselsdatoMindreEnn67Ar(birthDate)
