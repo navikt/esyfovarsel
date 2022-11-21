@@ -42,7 +42,7 @@ class SyketilfelleKafkaConsumer(
                     val userAccessStatus = accessControlService.getUserAccessStatus(sykmeldtFnr)
 
                     varselPlanners.forEach { planner ->
-                        if (planner.varselSkalLagres(userAccessStatus)) {
+                        if (userAccessStatus.canUserBeDigitallyNotified) {
                             planner.processSyketilfelle(sykmeldtFnr, kSyketilfellebit.orgnummer)
                         } else {
                             log.info("Prosesserer ikke record fra $topicFlexSyketilfellebiter pga bruker med forespurt fnr er reservert og/eller gradert")
