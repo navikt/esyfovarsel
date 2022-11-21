@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 class MerVeiledningVarselFinder(
     private val databaseAccess: DatabaseInterface,
     private val sykmeldingService: SykmeldingService,
-    val pdlConsumer: PdlConsumer,
+    private val pdlConsumer: PdlConsumer,
 ) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.service.MerVeiledningVarselFinder")
 
