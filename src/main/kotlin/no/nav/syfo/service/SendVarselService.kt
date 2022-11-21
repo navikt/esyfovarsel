@@ -1,10 +1,8 @@
 package no.nav.syfo.service
 
 import java.net.URL
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
-import java.time.Period
 import java.util.*
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE
