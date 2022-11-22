@@ -146,7 +146,7 @@ object JobApiSpek : Spek({
                 testEnv.urlEnv,
                 arbeidsgiverNotifikasjonService,
                 merVeiledningVarselService,
-                sykmeldingService
+                sykmeldingService,
             )
         val varselSender = VarselSender(embeddedDatabase, sendVarselService, merVeiledningVarselFinder, testEnv.toggleEnv)
 

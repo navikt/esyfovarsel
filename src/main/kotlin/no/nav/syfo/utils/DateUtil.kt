@@ -18,6 +18,11 @@ fun parseDate(date: String): LocalDate {
     return LocalDate.parse(date, formatter)
 }
 
+fun parsePDLDate(date: String): LocalDate {
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    return LocalDate.parse(date, formatter)
+}
+
 fun formatDateForLetter(date: LocalDate): String {
     return date.format(DateTimeFormatter.ofPattern(BREV_DATE_FORMAT_PATTERN))
 }

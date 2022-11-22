@@ -1,13 +1,32 @@
 package no.nav.syfo.service
 
-import io.mockk.*
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import java.time.Clock
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.util.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.consumer.syfosmregister.SykmeldingDTO
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatus
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.*
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.AdresseDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.ArbeidsgiverStatusDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.BehandlerDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.BehandlingsutfallDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.GradertDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.KontaktMedPasientDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.PeriodetypeDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.RegelStatusDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.SykmeldingStatusDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.SykmeldingsperiodeDTO
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
@@ -17,8 +36,6 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaPr
 import no.nav.syfo.syketilfelle.SyketilfellebitService
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import java.time.*
-import java.util.*
 
 object SendVarselServiceTestSpek : Spek({
 
@@ -34,6 +51,7 @@ object SendVarselServiceTestSpek : Spek({
     val sykmeldingerConsumerMock: SykmeldingerConsumer = mockk(relaxed = true)
     val sykmeldingServiceMockk = SykmeldingService(sykmeldingerConsumerMock)
     val brukernotifikasjonerServiceMockk = BrukernotifikasjonerService(beskjedKafkaProducerMockk, accessControlServiceMockk)
+
     val senderFacade =
         SenderFacade(
             dineSykmeldteHendelseKafkaProducerMockk,
@@ -51,7 +69,7 @@ object SendVarselServiceTestSpek : Spek({
         urlEnvMockk,
         arbeidsgiverNotifikasjonServiceMockk,
         merVeiledningVarselServiceMockk,
-        sykmeldingServiceMockk
+        sykmeldingServiceMockk,
     )
     val sykmeldtFnr = "01234567891"
     val orgnummer = "999988877"
@@ -129,12 +147,12 @@ object SendVarselServiceTestSpek : Spek({
 
         it("Should send mer-veiledning-varsel to SM if sykmelding is sendt AG") {
             coEvery { sykmeldingerConsumerMock.getSykmeldtStatusPaDato(any(), sykmeldtFnr) } returns
-                SykmeldtStatus(
-                    true,
-                    true,
-                    LocalDate.now(),
-                    LocalDate.now()
-                )
+                    SykmeldtStatus(
+                        true,
+                        true,
+                        LocalDate.now(),
+                        LocalDate.now()
+                    )
 
             runBlocking {
                 sendVarselService.sendVarsel(

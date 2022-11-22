@@ -94,7 +94,6 @@ object VarselSenderSpek : Spek({
             coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(
                 merVeiledningVarsel
             )
-
             sendVarselJobb.testSendVarsler()
             sendVarselService.testSendVarsel()
 
@@ -143,7 +142,6 @@ object VarselSenderSpek : Spek({
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
 
             coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(merVeiledningVarsel)
-
             coEvery { sendVarselService.sendVarsel(any()) } returns UTSENDING_FEILET
 
             sendVarselJobb.testSendVarsler()

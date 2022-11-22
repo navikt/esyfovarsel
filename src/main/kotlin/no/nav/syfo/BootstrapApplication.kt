@@ -130,7 +130,8 @@ fun main() {
                         arbeidsgiverNotifikasjonService,
                         merVeiledningVarselService,
                         sykepengerMaxDateService,
-                        sykmeldingService
+                        sykmeldingService,
+                        pdlConsumer,
                     )
 
                     kafkaModule(
@@ -175,6 +176,7 @@ fun Application.serverModule(
     merVeiledningVarselService: MerVeiledningVarselService,
     sykepengerMaxDateService: SykepengerMaxDateService,
     sykmeldingService: SykmeldingService,
+    pdlConsumer: PdlConsumer,
 ) {
 
     val sendVarselService =
@@ -185,12 +187,13 @@ fun Application.serverModule(
             env.urlEnv,
             arbeidsgiverNotifikasjonService,
             merVeiledningVarselService,
-            sykmeldingService
+            sykmeldingService,
         )
 
     val merVeiledningVarselFinder = MerVeiledningVarselFinder(
         database,
         sykmeldingService,
+        pdlConsumer,
     )
 
     val varselSender = VarselSender(
