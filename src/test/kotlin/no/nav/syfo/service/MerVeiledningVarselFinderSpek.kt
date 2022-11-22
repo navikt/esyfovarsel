@@ -101,7 +101,6 @@ object MerVeiledningVarselFinderSpek : Spek({
         it("Should send MER_VEILEDNING when user is under 67") {
             coEvery { pdlConsumerMockk.isBrukerYngreEnn67(any()) } returns true
             coEvery { sykmeldingServiceMockk.isPersonSykmeldtPaDato(LocalDate.now(), arbeidstakerFnr1) } returns true
-            embeddedDatabase.storeUtsendtVarsel(getUtsendtVarselToStore(LocalDateTime.now().minusMonths(5)))
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
 
             val varslerToSendToday = runBlocking {
@@ -114,7 +113,6 @@ object MerVeiledningVarselFinderSpek : Spek({
         it("Should not send MER_VEILEDNING when user is over 67") {
             coEvery { pdlConsumerMockk.isBrukerYngreEnn67(any()) } returns false
             coEvery { sykmeldingServiceMockk.isPersonSykmeldtPaDato(LocalDate.now(), arbeidstakerFnr1) } returns true
-            embeddedDatabase.storeUtsendtVarsel(getUtsendtVarselToStore(LocalDateTime.now().minusMonths(5)))
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
 
             val varslerToSendToday = runBlocking {

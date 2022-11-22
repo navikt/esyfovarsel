@@ -28,7 +28,7 @@ class MerVeiledningVarselFinder(
         val merVeiledningVarslerSomSkalSendesIDag = merVeiledningVarslerSomHarSykmelding
             .filter { it -> pdlConsumer.isBrukerYngreEnn67(it.fnr) }
 
-        log.info("Antall MER_VEILEDNING varsler fra Spleis/Infotrygd: ${merVeiledningVarslerSomSkalSendesIDag.size}")
+        log.info("[MerVeiledningVarselFinder] Antall MER_VEILEDNING varsler fra Spleis/Infotrygd: ${merVeiledningVarslerSomSkalSendesIDag.size}")
 
         return merVeiledningVarslerSomSkalSendesIDag.map {
             PPlanlagtVarsel(
