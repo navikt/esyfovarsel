@@ -1,4 +1,4 @@
-package no.nav.syfo.consumer.pdl
+package no.nav.syfo.consumer
 
 import io.ktor.client.call.receive
 import io.ktor.client.request.headers
@@ -14,6 +14,7 @@ import java.time.Period
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.consumer.pdl.*
 import no.nav.syfo.utils.httpClient
 import no.nav.syfo.utils.parsePDLDate
 import org.slf4j.LoggerFactory
@@ -21,6 +22,31 @@ import org.slf4j.LoggerFactory
 open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client = httpClient()
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.pdl.PdlConsumer")
+
+    open fun getFnr(aktorId: String): String? {
+        val response = callPdl(IDENTER_QUERY, aktorId)
+
+        return when (response?.status) {
+            HttpStatusCode.OK -> {
+                runBlocking {
+                    val pdlResponse = response.receive<PdlIdentResponse>().data?.hentIdenter?.identer?.first()?.ident
+                    pdlResponse
+                }
+            }
+            HttpStatusCode.NoContent -> {
+                log.error("Could not get fnr from PDL: No content found in the response body")
+                null
+            }
+            HttpStatusCode.Unauthorized -> {
+                log.error("Could not get fnr from PDL: Unable to authorize")
+                null
+            }
+            else -> {
+                log.error("Could not get fnr from PDL: $response")
+                null
+            }
+        }
+    }
 
     fun isBrukerGradertForInformasjon(ident: String): Boolean? {
         val response = callPdl(PERSON_QUERY, ident)
@@ -129,5 +155,11 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
                 null
             }
         }
+    }
+}
+
+class LocalPdlConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer) : PdlConsumer(urlEnv, azureAdTokenConsumer) {
+    override fun getFnr(aktorId: String): String {
+        return aktorId.substring(0, 11)
     }
 }

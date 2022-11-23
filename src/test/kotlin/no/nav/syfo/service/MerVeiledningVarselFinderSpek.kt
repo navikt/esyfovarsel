@@ -7,7 +7,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.consumer.pdl.PdlConsumer
+import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.VarselType
