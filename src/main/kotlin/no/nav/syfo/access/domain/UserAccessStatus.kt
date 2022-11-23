@@ -5,3 +5,5 @@ data class UserAccessStatus(
     val canUserBeDigitallyNotified: Boolean,
     val canUserBePhysicallyNotified: Boolean,
 )
+
+fun UserAccessStatus.canUserBeNotified(): Boolean = canUserBeDigitallyNotified || canUserBePhysicallyNotified
