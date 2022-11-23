@@ -8,6 +8,7 @@ import io.ktor.routing.*
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.api.admin.registerAdminApi
 import no.nav.syfo.api.job.registerJobTriggerApi
+import no.nav.syfo.api.maxdate.registerSykepengerMaxDateAzureApi
 import no.nav.syfo.api.maxdate.registerSykepengerMaxDateRestApi
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.service.ReplanleggingService
@@ -42,12 +43,61 @@ fun Application.setupAuthentication(
             verifier(jwkProvider, wellKnown.issuer)
             validate { credentials ->
                 when {
-                    hasLoginserviceIdportenClientIdAudience(credentials, authEnv.loginserviceAudience) && isNiva4(credentials) -> JWTPrincipal(credentials.payload)
+                    hasLoginserviceIdportenClientIdAudience(credentials, authEnv.loginserviceAudience) && isNiva4(
+                        credentials
+                    ) -> JWTPrincipal(credentials.payload)
+
                     else -> null
                 }
             }
         }
+
+        val jwtIssuerList = listOf(
+            JwtIssuer(
+                acceptedAudienceList = listOf(authEnv.clientId),
+                jwtIssuerType = JwtIssuerType.INTERNAL_AZUREAD,
+                wellKnown = getWellKnown(
+                    wellKnownUrl = authEnv.aadAppWellKnownUrl,
+                ),
+            ),
+        )
+
+        jwtIssuerList.forEach {
+            configureJwt(
+                jwtIssuer = it,
+            )
+        }
     }
+}
+
+private fun Authentication.Configuration.configureJwt(
+    jwtIssuer: JwtIssuer,
+) {
+    val jwkProvider = JwkProviderBuilder(URL(jwtIssuer.wellKnown.jwks_uri))
+        .cached(10, 24, TimeUnit.HOURS)
+        .rateLimited(10, 1, TimeUnit.MINUTES)
+        .build()
+    jwt(name = jwtIssuer.jwtIssuerType.name) {
+        verifier(
+            jwkProvider = jwkProvider,
+            issuer = jwtIssuer.wellKnown.issuer,
+        )
+        validate { credential ->
+            val credentialsHasExpectedAudience = credential.inExpectedAudience(
+                expectedAudience = jwtIssuer.acceptedAudienceList
+            )
+            if (credentialsHasExpectedAudience) {
+                JWTPrincipal(credential.payload)
+            } else {
+                log.warn("Auth: Unexpected audience for jwt ${credential.payload.issuer}, ${credential.payload.audience}")
+                null
+            }
+        }
+    }
+}
+
+private fun JWTCredential.inExpectedAudience(expectedAudience: List<String>) = expectedAudience.any {
+    this.payload.audience.contains(it)
 }
 
 fun Application.setupLocalRoutesWithAuthentication(
@@ -75,6 +125,9 @@ fun Application.setupLocalRoutesWithAuthentication(
         authenticate("auth-basic") {
             registerJobTriggerApi(varselSender)
         }
+        authenticate(JwtIssuerType.INTERNAL_AZUREAD.name) {
+            registerSykepengerMaxDateAzureApi(sykepengerMaxDateService)
+        }
     }
 }
 
@@ -92,6 +145,9 @@ fun Application.setupRoutesWithAuthentication(
         authenticate("auth-basic") {
             registerAdminApi(replanleggingService)
             registerJobTriggerApi(varselSender)
+        }
+        authenticate(JwtIssuerType.INTERNAL_AZUREAD.name) {
+            registerSykepengerMaxDateAzureApi(sykepengerMaxDateService)
         }
     }
 }

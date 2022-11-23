@@ -9,6 +9,7 @@
     "clientId": "clientId",
     "clientSecret": "clientSecret",
     "aadAccessTokenUrl": "http://localhost:9595",
+    "aadAppWellKnownUrl": "http://localhost:9591",
     "loginserviceDiscoveryUrl": "https://loginservice.no/.well-known/openid-configuration",
     "loginserviceAudience": [
       "aud1",
