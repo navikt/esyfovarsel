@@ -45,6 +45,9 @@ spec:
         - application: esyfo-info-frontend
           namespace: team-esyfo
           cluster: prod-gcp
+        - application: syfomodiaperson
+          namespace: teamsykefravr
+          cluster: prod-fss
     outbound:
       external:
         - host: pdl-api.prod-fss-pub.nais.io

@@ -35,6 +35,7 @@ fun getEnv(): Environment {
                 clientId = getEnvVar("AZURE_APP_CLIENT_ID"),
                 clientSecret = getEnvVar("AZURE_APP_CLIENT_SECRET"),
                 aadAccessTokenUrl = getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
+                aadAppWellKnownUrl = getEnvVar("AZURE_APP_WELL_KNOWN_URL"),
                 tokenXWellKnownUrl = getEnvVar("TOKEN_X_WELL_KNOWN_URL"),
                 tokenXClientId = getEnvVar("TOKEN_X_CLIENT_ID"),
             ),
@@ -114,6 +115,7 @@ data class AuthEnv(
     val clientId: String,
     val clientSecret: String,
     val aadAccessTokenUrl: String,
+    val aadAppWellKnownUrl: String,
     val tokenXWellKnownUrl: String,
     val tokenXClientId: String,
 )
