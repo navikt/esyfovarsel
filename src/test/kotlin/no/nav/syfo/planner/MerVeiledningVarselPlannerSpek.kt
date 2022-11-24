@@ -2,8 +2,11 @@ package no.nav.syfo.planner
 
 import io.mockk.coEvery
 import io.mockk.mockk
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+import java.util.*
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.consumer.PdlConsumer
+import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
@@ -13,12 +16,13 @@ import no.nav.syfo.db.storeUtsendtVarselTest
 import no.nav.syfo.kafka.consumers.syketilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.syketilfelle.SyketilfellebitService
-import no.nav.syfo.testutil.*
+import no.nav.syfo.testutil.EmbeddedDatabase
+import no.nav.syfo.testutil.dropData
+import no.nav.syfo.testutil.skalHaEt39UkersVarsel
+import no.nav.syfo.testutil.skalHaUtsendingPaDato
+import no.nav.syfo.testutil.skalIkkeHa39UkersVarsel
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
-import java.util.*
 import kotlin.test.assertFailsWith
 
 object MerVeiledningVarselPlannerSyketilfellebitSpek : Spek({

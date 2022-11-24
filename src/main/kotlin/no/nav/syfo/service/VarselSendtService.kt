@@ -1,7 +1,9 @@
 package no.nav.syfo.service
 
+import java.time.LocalDate
+import javax.ws.rs.ForbiddenException
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.consumer.PdlConsumer
+import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchUtsendtVarselByFnr
@@ -10,9 +12,6 @@ import no.nav.syfo.utils.dateIsInInterval
 import no.nav.syfo.utils.isEqualOrBefore
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.lang.RuntimeException
-import java.time.LocalDate
-import javax.ws.rs.ForbiddenException
 
 class VarselSendtService(
     val pdlConsumer: PdlConsumer,

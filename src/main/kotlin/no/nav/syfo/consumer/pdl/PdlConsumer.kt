@@ -1,4 +1,4 @@
-package no.nav.syfo.consumer
+package no.nav.syfo.consumer.pdl
 
 import io.ktor.client.call.receive
 import io.ktor.client.request.headers
@@ -14,7 +14,6 @@ import java.time.Period
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
-import no.nav.syfo.consumer.pdl.*
 import no.nav.syfo.utils.httpClient
 import no.nav.syfo.utils.parsePDLDate
 import org.slf4j.LoggerFactory

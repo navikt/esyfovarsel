@@ -1,7 +1,7 @@
 import io.mockk.mockk
 import java.time.LocalDate
 import no.nav.syfo.auth.AzureAdTokenConsumer
-import no.nav.syfo.consumer.PdlConsumer
+import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.getTestEnv
 import org.amshove.kluent.shouldBe
 import org.spekframework.spek2.Spek

@@ -1,12 +1,12 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.dokarkiv.DokarkivConsumer
 import no.nav.syfo.consumer.dokarkiv.domain.AvsenderMottaker
 import no.nav.syfo.consumer.dokarkiv.domain.DokarkivRequest
 import no.nav.syfo.consumer.dokarkiv.domain.Dokument
 import no.nav.syfo.consumer.dokarkiv.domain.Dokumentvariant
 import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
+import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.pdl.getFullNameAsString
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.fetchForelopigBeregnetSluttPaSykepengerByFnr

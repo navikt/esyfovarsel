@@ -2,7 +2,7 @@ package no.nav.syfo.service
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.syfo.consumer.PdlConsumer
+import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
