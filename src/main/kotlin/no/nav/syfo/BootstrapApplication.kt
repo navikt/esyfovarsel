@@ -22,16 +22,15 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import no.nav.syfo.api.registerNaisApi
-import no.nav.syfo.auth.AzureAdTokenConsumer
-import no.nav.syfo.auth.setupLocalRoutesWithAuthentication
-import no.nav.syfo.auth.setupRoutesWithAuthentication
+import no.nav.syfo.auth.*
+import no.nav.syfo.consumer.LocalPdlConsumer
+import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
 import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.dokarkiv.DokarkivConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
-import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.DatabaseInterface
@@ -47,7 +46,7 @@ import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
-import no.nav.syfo.planner.AktivitetskravVarselPlanner
+import no.nav.syfo.planner.*
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.service.AccessControlService
 import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
@@ -64,6 +63,7 @@ import no.nav.syfo.service.SenderFacade
 import no.nav.syfo.service.SykepengerMaxDateService
 import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.service.VarselBusService
+import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.utils.LeaderElection
 import no.nav.syfo.utils.RunOnElection
@@ -109,9 +109,11 @@ fun main() {
                 val fysiskBrevUtsendingService = FysiskBrevUtsendingService(dokarkivService, journalpostdistribusjonConsumer)
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
                 val syketilfellebitService = SyketilfellebitService(database)
+                val varselSendtService = VarselSendtService(pdlConsumer, syketilfellebitService, database)
 
+                val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, syketilfellebitService, varselSendtService)
                 val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, syketilfellebitService, sykmeldingService)
-                val replanleggingService = ReplanleggingService(database, aktivitetskravVarselPlanner)
+                val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
                 val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControlService)
                 val senderFacade = SenderFacade(
                     dineSykmeldteHendelseKafkaProducer,
@@ -157,6 +159,7 @@ fun main() {
                         accessControlService,
                         varselBusService,
                         aktivitetskravVarselPlanner,
+                        merVeiledningVarselPlanner,
                         sykepengerMaxDateService,
                     )
                 }
@@ -174,7 +177,10 @@ fun main() {
 }
 
 private fun getPdlConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsumer): PdlConsumer {
-    return PdlConsumer(urlEnv, azureADConsumer)
+    return when {
+        isLocal() -> LocalPdlConsumer(urlEnv, azureADConsumer)
+        else -> PdlConsumer(urlEnv, azureADConsumer)
+    }
 }
 
 private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsumer): DkifConsumer {
@@ -261,6 +267,7 @@ fun Application.kafkaModule(
     accessControlService: AccessControlService,
     varselbusService: VarselBusService,
     aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
+    merVeiledningVarselPlanner: MerVeiledningVarselPlanner,
     sykepengerMaxDateService: SykepengerMaxDateService
 ) {
     runningRemotely {
@@ -268,6 +275,7 @@ fun Application.kafkaModule(
             launchKafkaListener(
                 state,
                 SyketilfelleKafkaConsumer(env, accessControlService, database)
+                    .addPlanner(merVeiledningVarselPlanner)
                     .addPlanner(aktivitetskravVarselPlanner)
             )
         }
