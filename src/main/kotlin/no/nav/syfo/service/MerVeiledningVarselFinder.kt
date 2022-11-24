@@ -6,6 +6,7 @@ import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
+import no.nav.syfo.db.fetchFodselsdatoByFnr
 import no.nav.syfo.db.fetchMerVeiledningVarslerToSend
 import org.slf4j.LoggerFactory
 
@@ -24,9 +25,9 @@ class MerVeiledningVarselFinder(
         val merVeiledningVarslerSomHarSykmelding = alleMerVeiledningVarsler
             .filter { sykmeldingService.isPersonSykmeldtPaDato(LocalDate.now(), it.fnr) }
 
-        log.info("[MerVeiledningVarselFinder] sjekker fodselsdato fra PDL")
+        log.info("[MerVeiledningVarselFinder] sjekker fodselsdato")
         val merVeiledningVarslerSomSkalSendesIDag = merVeiledningVarslerSomHarSykmelding
-            .filter { it -> pdlConsumer.isBrukerYngreEnn67(it.fnr) }
+            .filter { isBrukerUnder67Ar(it.fnr) }
 
         log.info("[MerVeiledningVarselFinder] Antall MER_VEILEDNING varsler fra Spleis/Infotrygd: ${merVeiledningVarslerSomSkalSendesIDag.size}")
 
@@ -41,6 +42,17 @@ class MerVeiledningVarselFinder(
                 sistEndret = LocalDateTime.now(),
                 opprettet = LocalDateTime.now(),
             )
+        }
+    }
+
+    private fun isBrukerUnder67Ar(fnr: String): Boolean {
+        val storedBirthdate = databaseAccess.fetchFodselsdatoByFnr(fnr)
+        return if (storedBirthdate.isEmpty() || storedBirthdate[0].isNullOrEmpty()) {
+            log.info("[MerVeiledningVarselFinder] Mangler lagret fodselsdato, sjekker PDL pa nytt")
+            pdlConsumer.isBrukerYngreEnn67(fnr)
+        } else {
+            log.info("[MerVeiledningVarselFinder] Sjekker om person er under 67 ut fra lagret fodselsdato")
+            pdlConsumer.isFodselsdatoMindreEnn67Ar(storedBirthdate.first())
         }
     }
 }

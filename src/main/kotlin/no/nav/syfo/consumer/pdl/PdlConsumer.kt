@@ -75,7 +75,9 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
 
     fun isFodselsdatoMindreEnn67Ar(fodselsdato: String?): Boolean {
         val parsedFodselsdato = fodselsdato?.let { parsePDLDate(it) }
-        return parsedFodselsdato == null || (Period.between(parsedFodselsdato, LocalDate.now()).years < 67)
+        val isFodselsdatoMindreEnn67Ar = parsedFodselsdato == null || (Period.between(parsedFodselsdato, LocalDate.now()).years < 67)
+        if (!isFodselsdatoMindreEnn67Ar) log.info("[PdlConsumer] Person is over 67 years")
+        return isFodselsdatoMindreEnn67Ar
     }
 
     open fun hentPerson(fnr: String): PdlHentPerson? {

@@ -1,5 +1,13 @@
 package no.nav.syfo.service
 
+import io.mockk.coEvery
+import io.mockk.mockk
+import java.time.LocalDate
+import java.util.*
+import no.nav.syfo.consumer.pdl.PdlConsumer
+import no.nav.syfo.consumer.pdl.PdlFoedsel
+import no.nav.syfo.consumer.pdl.PdlHentPerson
+import no.nav.syfo.consumer.pdl.PdlPerson
 import no.nav.syfo.db.fetchSpleisUtbetalingByFnr
 import no.nav.syfo.db.fetchSykepengerMaxDateByFnr
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
@@ -7,15 +15,14 @@ import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import java.time.LocalDate
-import java.util.*
 import kotlin.test.assertEquals
 
 object SykepengerMaxDateServiceSpek : Spek({
     describe("SykepengerMaxDateService") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
-        val sykepengerMaxDateService = SykepengerMaxDateService(embeddedDatabase)
-
+        val pdlConsumer = mockk<PdlConsumer>(relaxed = true)
+        val sykepengerMaxDateService = SykepengerMaxDateService(embeddedDatabase, pdlConsumer)
+        coEvery { pdlConsumer.hentPerson(any()) } returns PdlHentPerson(hentPerson = PdlPerson(adressebeskyttelse = null, navn = null, foedsel = listOf(PdlFoedsel("01-01-1986"))))
         afterEachTest {
             embeddedDatabase.connection.dropData()
         }
