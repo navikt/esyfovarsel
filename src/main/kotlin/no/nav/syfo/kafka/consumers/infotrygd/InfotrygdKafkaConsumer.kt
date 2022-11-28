@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.*
+import no.nav.syfo.kafka.consumers.infotrygd.domain.InfotrygdSource
 import no.nav.syfo.kafka.consumers.infotrygd.domain.KInfotrygdSykepengedager
 import no.nav.syfo.service.SykepengerMaxDateService
 import no.nav.syfo.utils.parseDate
@@ -46,7 +47,7 @@ class InfotrygdKafkaConsumer(
                             sykepengerMaxDate,
                             utbetaltTomDate,
                             utbetaltTomDate.gjenstaendeSykepengedager(sykepengerMaxDate),
-                            topicSykepengedagerInfotrygd
+                            InfotrygdSource.AAP_KAFKA_TOPIC
                         )
                     }
                 } catch (e: IOException) {

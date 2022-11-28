@@ -1,6 +1,7 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.db.*
+import no.nav.syfo.kafka.consumers.infotrygd.domain.InfotrygdSource
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
 import no.nav.syfo.utils.isEqualOrBefore
 import java.time.LocalDate
@@ -40,7 +41,7 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface)
         return databaseInterface.fetchForelopigBeregnetSluttPaSykepengerByFnr(fnr)
     }
 
-    fun processInfotrygdEvent(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int, source: String) {
+    fun processInfotrygdEvent(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int, source: InfotrygdSource) {
         processNewMaxDate(fnr, sykepengerMaxDate, SykepengerMaxDateSource.INFOTRYGD)
         databaseInterface.storeInfotrygdUtbetaling(fnr, sykepengerMaxDate, utbetaltTilDate, gjenstaendeSykepengedager, source)
     }
