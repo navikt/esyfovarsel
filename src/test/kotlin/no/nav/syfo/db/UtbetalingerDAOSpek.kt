@@ -1,6 +1,7 @@
 package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PUtbetaling
+import no.nav.syfo.kafka.consumers.infotrygd.domain.InfotrygdSource.AAP_KAFKA_TOPIC
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
@@ -62,7 +63,7 @@ object UtbetalingerDAOSpek : Spek({
         it("Should fetch utbetaling with latest utbetalt tom") {
             val spleisUtbetaling = spleisUtbetaling()
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling)
-            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, now().plusMonths(3), now().minusMonths(1), 60, "TEST")
+            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, now().plusMonths(3), now().minusMonths(1), 60, AAP_KAFKA_TOPIC)
 
             val merVeiledningVarslerToSend = embeddedDatabase.fetchMerVeiledningVarslerToSend()
             merVeiledningVarslerToSend.shouldHaveSingleItem()
@@ -103,7 +104,7 @@ object UtbetalingerDAOSpek : Spek({
         it("Should fetch maxdate from spleis when latest utbetaling from spleis") {
             val spleisUtbetaling1 = spleisUtbetaling(fnr = arbeidstakerFnr1, tom = nowMinus1Day, forelopigBeregnetSluttPaSykepenger = nowPlus1Day)
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
-            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, nowPlus2Days, nowMinus2Days, 60, "TEST")
+            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, nowPlus2Days, nowMinus2Days, 60, AAP_KAFKA_TOPIC)
 
             embeddedDatabase.shouldContainForelopigBeregnetSlutt(arbeidstakerFnr1, nowPlus1Day)
         }
@@ -111,7 +112,7 @@ object UtbetalingerDAOSpek : Spek({
         it("Should fetch maxdate from infotrygd when latest utbetaling from infotrygd") {
             val spleisUtbetaling1 = spleisUtbetaling(fnr = arbeidstakerFnr1, tom = nowMinus2Days, forelopigBeregnetSluttPaSykepenger = nowPlus2Days)
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
-            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, nowPlus1Day, nowMinus1Day, 60, "TEST")
+            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, nowPlus1Day, nowMinus1Day, 60, AAP_KAFKA_TOPIC)
 
             embeddedDatabase.shouldContainForelopigBeregnetSlutt(arbeidstakerFnr1, nowPlus1Day)
         }

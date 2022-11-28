@@ -1,5 +1,6 @@
 package no.nav.syfo.db
 
+import no.nav.syfo.kafka.consumers.infotrygd.domain.InfotrygdSource.AAP_KAFKA_TOPIC
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import org.spekframework.spek2.Spek
@@ -25,12 +26,12 @@ object UtbetalingInfotrygdDAOSpek : Spek({
 
 
         it("Store utbetaling") {
-            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, sykepengerMaxDate, sykepengerMaxDate, 0, "TEST")
+            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, sykepengerMaxDate, sykepengerMaxDate, 0, AAP_KAFKA_TOPIC)
         }
 
         it("Store duplicate utbetaling") {
-            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, sykepengerMaxDate, sykepengerMaxDate, 0, "TEST")
-            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, sykepengerMaxDate, sykepengerMaxDate, 30, "TEST")
+            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, sykepengerMaxDate, sykepengerMaxDate, 0, AAP_KAFKA_TOPIC)
+            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, sykepengerMaxDate, sykepengerMaxDate, 30, AAP_KAFKA_TOPIC)
         }
 
     }
