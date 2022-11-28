@@ -45,9 +45,6 @@ spec:
         - application: esyfo-info-frontend
           namespace: team-esyfo
           cluster: dev-gcp
-        - application: isdialogmote
-          namespace: teamsykefravr
-          cluster: dev-gcp
     outbound:
       external:
         - host: pdl-api.dev-fss-pub.nais.io
