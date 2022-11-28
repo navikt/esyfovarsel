@@ -7,14 +7,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime.now
 import java.util.*
 
-fun DatabaseInterface.storeInfotrygdUtbetaling(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int) {
+fun DatabaseInterface.storeInfotrygdUtbetaling(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int, source: String) {
     val insertStatement = """INSERT INTO UTBETALING_INFOTRYGD  (
         ID, 
         FNR, 
         MAX_DATE, 
         UTBET_TOM,
         GJENSTAENDE_SYKEDAGER,
-        OPPRETTET) VALUES (?,?,?,?,?,?)
+        OPPRETTET,
+        SOURCE) VALUES (?,?,?,?,?,?,?)
     """.trimIndent()
     connection.use { connection ->
         try {
@@ -25,6 +26,7 @@ fun DatabaseInterface.storeInfotrygdUtbetaling(fnr: String, sykepengerMaxDate: L
                 it.setDate(4, Date.valueOf(utbetaltTilDate))
                 it.setInt(5, gjenstaendeSykepengedager)
                 it.setTimestamp(6, Timestamp.valueOf(now()))
+                it.setString(7, source)
                 it.executeUpdate()
             }
             connection.commit()

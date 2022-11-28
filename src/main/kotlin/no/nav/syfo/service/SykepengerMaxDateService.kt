@@ -40,9 +40,9 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface)
         return databaseInterface.fetchForelopigBeregnetSluttPaSykepengerByFnr(fnr)
     }
 
-    fun processInfotrygdEvent(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int) {
-        processNewMaxDate(fnr,sykepengerMaxDate, SykepengerMaxDateSource.INFOTRYGD)
-        databaseInterface.storeInfotrygdUtbetaling(fnr, sykepengerMaxDate, utbetaltTilDate, gjenstaendeSykepengedager)
+    fun processInfotrygdEvent(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int, source: String) {
+        processNewMaxDate(fnr, sykepengerMaxDate, SykepengerMaxDateSource.INFOTRYGD)
+        databaseInterface.storeInfotrygdUtbetaling(fnr, sykepengerMaxDate, utbetaltTilDate, gjenstaendeSykepengedager, source)
     }
 
 }

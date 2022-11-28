@@ -45,7 +45,8 @@ class InfotrygdKafkaConsumer(
                             fnr,
                             sykepengerMaxDate,
                             utbetaltTomDate,
-                            utbetaltTomDate.gjenstaendeSykepengedager(sykepengerMaxDate)
+                            utbetaltTomDate.gjenstaendeSykepengedager(sykepengerMaxDate),
+                            topicSykepengedagerInfotrygd
                         )
                     }
                 } catch (e: IOException) {

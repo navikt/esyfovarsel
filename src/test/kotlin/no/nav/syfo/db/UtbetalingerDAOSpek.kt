@@ -62,7 +62,7 @@ object UtbetalingerDAOSpek : Spek({
         it("Should fetch utbetaling with latest utbetalt tom") {
             val spleisUtbetaling = spleisUtbetaling()
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling)
-            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, now().plusMonths(3), now().minusMonths(1), 60)
+            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, now().plusMonths(3), now().minusMonths(1), 60, "TEST")
 
             val merVeiledningVarslerToSend = embeddedDatabase.fetchMerVeiledningVarslerToSend()
             merVeiledningVarslerToSend.shouldHaveSingleItem()
@@ -103,7 +103,7 @@ object UtbetalingerDAOSpek : Spek({
         it("Should fetch maxdate from spleis when latest utbetaling from spleis") {
             val spleisUtbetaling1 = spleisUtbetaling(fnr = arbeidstakerFnr1, tom = nowMinus1Day, forelopigBeregnetSluttPaSykepenger = nowPlus1Day)
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
-            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, nowPlus2Days, nowMinus2Days, 60)
+            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, nowPlus2Days, nowMinus2Days, 60, "TEST")
 
             embeddedDatabase.shouldContainForelopigBeregnetSlutt(arbeidstakerFnr1, nowPlus1Day)
         }
@@ -111,7 +111,7 @@ object UtbetalingerDAOSpek : Spek({
         it("Should fetch maxdate from infotrygd when latest utbetaling from infotrygd") {
             val spleisUtbetaling1 = spleisUtbetaling(fnr = arbeidstakerFnr1, tom = nowMinus2Days, forelopigBeregnetSluttPaSykepenger = nowPlus2Days)
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
-            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, nowPlus1Day, nowMinus1Day, 60)
+            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, nowPlus1Day, nowMinus1Day, 60, "TEST")
 
             embeddedDatabase.shouldContainForelopigBeregnetSlutt(arbeidstakerFnr1, nowPlus1Day)
         }

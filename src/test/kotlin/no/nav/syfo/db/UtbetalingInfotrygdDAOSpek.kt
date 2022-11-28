@@ -25,12 +25,12 @@ object UtbetalingInfotrygdDAOSpek : Spek({
 
 
         it("Store utbetaling") {
-            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, sykepengerMaxDate, sykepengerMaxDate, 0)
+            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, sykepengerMaxDate, sykepengerMaxDate, 0, "TEST")
         }
 
         it("Store duplicate utbetaling") {
-            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, sykepengerMaxDate, sykepengerMaxDate, 0)
-            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, sykepengerMaxDate, sykepengerMaxDate, 30)
+            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, sykepengerMaxDate, sykepengerMaxDate, 0, "TEST")
+            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, sykepengerMaxDate, sykepengerMaxDate, 30, "TEST")
         }
 
     }
