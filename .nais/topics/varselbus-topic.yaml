@@ -29,4 +29,4 @@ spec:
       access: write
     - team: teamsykefravr
       application: isdialogmote
-      access: read
+      access: write
