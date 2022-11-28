@@ -11,14 +11,18 @@ import java.net.URL
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class DialogmoteStatusVarselService(val senderFacade: SenderFacade, val dialogmoterUrl: String) {
     val WEEKS_BEFORE_DELETE = 4L
     val SMS_KEY = "smsText"
     val EMAIL_TITLE_KEY = "emailTitle"
     val EMAIL_BODY_KEY = "emailBody"
+    private val log: Logger = LoggerFactory.getLogger("DialogmoteStatusVarselService")
 
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
+        log.info("[DIALOGMOTESTATUSVARSELSERVICE]: sender dm hendelse til NL ${varselHendelse.type}")
         sendVarselTilDineSykmeldte(varselHendelse)
         sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
     }
