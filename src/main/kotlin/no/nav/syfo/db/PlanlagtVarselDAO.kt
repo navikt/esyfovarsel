@@ -87,6 +87,22 @@ fun DatabaseInterface.fetchPlanlagtVarselByUtsendingsdato(utsendingsdato: LocalD
     }
 }
 
+fun DatabaseInterface.fetchPlanlagtVarselByUtsendingsdatoAndType(utsendingsdato: LocalDate, varselType: String): List<PPlanlagtVarsel> {
+    val queryStatement = """SELECT *
+                            FROM PLANLAGT_VARSEL
+                            WHERE utsendingsdato = ?
+                            AND type = ?
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setTimestamp(1, Timestamp.valueOf(utsendingsdato.atStartOfDay()))
+            it.setString(2, varselType)
+            it.executeQuery().toList { toPPlanlagtVarsel() }
+        }
+    }
+}
+
 fun DatabaseInterface.fetchPlanlagtVarselByTypeAndUtsendingsdato(type: VarselType, fromDate: LocalDate, toDate: LocalDate): List<PPlanlagtVarsel> {
     val queryStatement = """SELECT *
                             FROM PLANLAGT_VARSEL

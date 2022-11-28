@@ -1,11 +1,14 @@
 package no.nav.syfo.service
 
+import no.nav.syfo.db.fetchSpleisUtbetalingByFnr
 import no.nav.syfo.db.fetchSykepengerMaxDateByFnr
+import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
+import java.util.*
 import kotlin.test.assertEquals
 
 object SykepengerMaxDateServiceSpek : Spek({
@@ -94,6 +97,56 @@ object SykepengerMaxDateServiceSpek : Spek({
 
             val newStoredDate = embeddedDatabase.fetchSykepengerMaxDateByFnr("123")
             assertEquals(null, newStoredDate)
+        }
+
+        it("Should store spleis utbetaling") {
+            val utbetalingUtbetalt = UtbetalingUtbetalt(
+                fødselsnummer = "123",
+                organisasjonsnummer = "234",
+                event = "ubetaling_utbetalt",
+                type = "UTBETALING",
+                foreløpigBeregnetSluttPåSykepenger = LocalDate.now().plusDays(100),
+                forbrukteSykedager = 100,
+                gjenståendeSykedager = 122,
+                stønadsdager = 10,
+                antallVedtak = 4,
+                fom = LocalDate.now().minusDays(50),
+                tom = LocalDate.now().minusDays(10),
+                utbetalingId = UUID.randomUUID().toString(),
+                korrelasjonsId = UUID.randomUUID().toString(),
+            )
+
+            sykepengerMaxDateService.processUtbetalingSpleisEvent(utbetalingUtbetalt)
+
+            val storedGjenstaaendeDager = embeddedDatabase.fetchSpleisUtbetalingByFnr("123")
+
+            assertEquals(122, storedGjenstaaendeDager.first())
+        }
+
+        it("Should ignore duplicate spleis utbetaling") {
+            val utbetalingUtbetalt = UtbetalingUtbetalt(
+                fødselsnummer = "123",
+                organisasjonsnummer = "234",
+                event = "ubetaling_utbetalt",
+                type = "UTBETALING",
+                foreløpigBeregnetSluttPåSykepenger = LocalDate.now().plusDays(100),
+                forbrukteSykedager = 100,
+                gjenståendeSykedager = 122,
+                stønadsdager = 10,
+                antallVedtak = 4,
+                fom = LocalDate.now().minusDays(50),
+                tom = LocalDate.now().minusDays(10),
+                utbetalingId = UUID.randomUUID().toString(),
+                korrelasjonsId = UUID.randomUUID().toString(),
+            )
+
+            sykepengerMaxDateService.processUtbetalingSpleisEvent(utbetalingUtbetalt)
+            sykepengerMaxDateService.processUtbetalingSpleisEvent(utbetalingUtbetalt)
+
+            val storedGjenstaaendeDager = embeddedDatabase.fetchSpleisUtbetalingByFnr("123")
+
+            assertEquals(1, storedGjenstaaendeDager.size)
+            assertEquals(122, storedGjenstaaendeDager.first())
         }
     }
 })

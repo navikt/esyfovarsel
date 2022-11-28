@@ -40,6 +40,15 @@ fun ResultSet.toPPlanlagtVarselMerVeiledning(sendingDate: LocalDate) = PPlanlagt
     sistEndret = getTimestamp("sist_endret").toLocalDateTime()
 )
 
+fun ResultSet.toPUtbetaling() = PUtbetaling(
+    id = UUID.fromString(getString("id")),
+    fnr = getString("fnr"),
+    utbetaltTom = getDate("utbetalt_tom").toLocalDate(),
+    forelopigBeregnetSlutt = getDate("forelopig_beregnet_slutt").toLocalDate(),
+    gjenstaendeSykedager = getInt("gjenstaende_sykedager"),
+    opprettet = getTimestamp("opprettet").toLocalDateTime(),
+)
+
 fun ResultSet.toPUtsendtVarsel() = PUtsendtVarsel(
     uuid = getString("uuid"),
     fnr = getString("fnr"),

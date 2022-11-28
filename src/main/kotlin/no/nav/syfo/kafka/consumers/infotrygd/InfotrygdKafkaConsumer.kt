@@ -6,12 +6,13 @@ import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.*
 import no.nav.syfo.kafka.consumers.infotrygd.domain.KInfotrygdSykepengedager
 import no.nav.syfo.service.SykepengerMaxDateService
-import no.nav.syfo.service.SykepengerMaxDateSource
 import no.nav.syfo.utils.parseDate
+import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
+import java.util.*
 
 class InfotrygdKafkaConsumer(
     val env: Environment,
@@ -22,7 +23,7 @@ class InfotrygdKafkaConsumer(
     private val objectMapper = createObjectMapper()
 
     init {
-        val kafkaConfig = aivenConsumerProperties(env)
+        val kafkaConfig = infotrygdConsumerProperties(env)
         kafkaListener = KafkaConsumer(kafkaConfig)
         kafkaListener.subscribe(listOf(topicSykepengedagerInfotrygd))
     }
@@ -37,7 +38,16 @@ class InfotrygdKafkaConsumer(
 
                     val fnr = kInfotrygdSykepengedager.after.F_NR
                     val sykepengerMaxDate = parseDate(kInfotrygdSykepengedager.after.MAX_DATO)
-                    sykepengerMaxDateService.processNewMaxDate(fnr, sykepengerMaxDate, SykepengerMaxDateSource.INFOTRYGD)
+                    val utbetaltTom = kInfotrygdSykepengedager.after.UTBET_TOM
+                    if (utbetaltTom != null) {
+                        val utbetaltTomDate = parseDate(utbetaltTom)
+                        sykepengerMaxDateService.processInfotrygdEvent(
+                            fnr,
+                            sykepengerMaxDate,
+                            utbetaltTomDate,
+                            utbetaltTomDate.gjenstaendeSykepengedager(sykepengerMaxDate)
+                        )
+                    }
                 } catch (e: IOException) {
                     log.error(
                         "Error in [$topicSykepengedagerInfotrygd]-listener: Could not parse message | ${e.message}",
@@ -51,6 +61,14 @@ class InfotrygdKafkaConsumer(
                 }
                 kafkaListener.commitSync()
             }
+        }
+    }
+
+    fun infotrygdConsumerProperties(env: Environment): Properties {
+        val commonConsumerProperties = aivenConsumerProperties(env)
+        return commonConsumerProperties.apply {
+            remove(CommonClientConfigs.GROUP_ID_CONFIG)
+            put(CommonClientConfigs.GROUP_ID_CONFIG, "esyfovarsel-group-infotrygd-01")
         }
     }
 }

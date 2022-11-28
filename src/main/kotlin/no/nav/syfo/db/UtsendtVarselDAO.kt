@@ -95,3 +95,21 @@ fun DatabaseInterface.fetchUtsendteVarslerSisteManed(): List<PUtsendtVarsel> {
     }
 }
 
+fun DatabaseInterface.fetchUtsendteMerVeiledningVarslerSiste3Maneder(): List<PUtsendtVarsel> {
+    val threeMonthsAgo = LocalDate.now().minusMonths(3).atStartOfDay()
+
+    val queryStatement = """SELECT *
+                            FROM UTSENDT_VARSEL
+                            WHERE TYPE = 'MER_VEILEDNING'
+                            AND UTSENDT_TIDSPUNKT  >= ?
+                            
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setTimestamp(1, Timestamp.valueOf(threeMonthsAgo))
+            it.executeQuery().toList { toPUtsendtVarsel() }
+        }
+    }
+}
+

@@ -35,7 +35,9 @@ enum class Tag {
     DELTID,
     REDUSERT_ARBEIDSGIVERPERIODE,
     REISETILSKUDD,
-    AVVENTENDE
+    AVVENTENDE,
+    INNTEKTSMELDING,
+    ARBEIDSGIVERPERIODE
 }
 
 data class Syketilfellebit(

@@ -1,8 +1,15 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.*
+import java.net.URL
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.util.*
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT
+import no.nav.syfo.DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST
+import no.nav.syfo.UrlEnv
 import no.nav.syfo.access.domain.UserAccessStatus
-import no.nav.syfo.access.domain.canUserBeNotified
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
@@ -16,11 +23,6 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProdu
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.URL
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.util.*
 
 class SendVarselService(
     val beskjedKafkaProducer: BeskjedKafkaProducer,
@@ -29,7 +31,7 @@ class SendVarselService(
     val urlEnv: UrlEnv,
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
     val merVeiledningVarselService: MerVeiledningVarselService,
-    val sykmeldingService: SykmeldingService
+    val sykmeldingService: SykmeldingService,
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.SendVarselService")
 
@@ -69,13 +71,8 @@ class SendVarselService(
                         }
 
                         MER_VEILEDNING.name -> {
-                            if (userAccessStatus.canUserBeNotified() && sykmeldingService.isPersonSykmeldtPaDato(LocalDate.now(), fnr)) {
-                                sendMerVeiledningVarselTilArbeidstaker(pPlanlagtVarsel, userAccessStatus)
-                                pPlanlagtVarsel.type
-                            } else {
-                                log.info("Bruker med forespurt fnr er reservert eller gradert og kan ikke varsles")
-                                UTSENDING_FEILET
-                            }
+                            sendMerVeiledningVarselTilArbeidstaker(pPlanlagtVarsel, userAccessStatus)
+                            pPlanlagtVarsel.type
                         }
 
                         else -> {
@@ -115,7 +112,6 @@ class SendVarselService(
             }
         }
     }
-
     private fun sendAktivitetskravVarselTilArbeidsgiver(
         uuid: String,
         arbeidstakerFnr: String,

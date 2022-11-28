@@ -8,5 +8,8 @@ query($ident: ID!) {
             mellomnavn
             etternavn
         }
+        foedsel{
+            foedselsdato
+        }
     }
 }

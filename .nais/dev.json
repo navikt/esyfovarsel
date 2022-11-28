@@ -11,7 +11,7 @@
     "DKIF_SCOPE": "api://dev-gcp.team-rocket.digdir-krr-proxy/.default",
     "PDL_SCOPE": "api://dev-fss.pdl.pdl-api/.default",
     "TOGGLE_SEND_MERVEILEDNING_VARSLER": "false",
-    "TOGGLE_SEND_MERVEILEDNING_VARSLER_BASED_ON_MAX_DATE": "true",
+    "TOGGLE_SEND_MERVEILEDNING_VARSLER_BASED_ON_SISTE_UTBETALING_DATE": "true",
     "TOGGLE_SEND_AKTIVITETSKRAV_VARSLER": "true",
     "TOGGLE_INFOTRYGD_KAFKA_CONSUMER": "true",
     "TOGGLE_UTBETALING_KAFKA_CONSUMER": "true",
