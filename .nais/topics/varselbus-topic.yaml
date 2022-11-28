@@ -30,6 +30,3 @@ spec:
     - team: teamsykefravr
       application: isdialogmote
       access: write
-    - team: teamsykefravr
-      application: syfomodiaperson
-      access: write
