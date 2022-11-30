@@ -16,7 +16,9 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import no.nav.syfo.api.registerNaisApi
-import no.nav.syfo.auth.*
+import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.auth.setupLocalRoutesWithAuthentication
+import no.nav.syfo.auth.setupRoutesWithAuthentication
 import no.nav.syfo.consumer.LocalPdlConsumer
 import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
@@ -40,7 +42,8 @@ import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
-import no.nav.syfo.planner.*
+import no.nav.syfo.planner.AktivitetskravVarselPlanner
+import no.nav.syfo.planner.MerVeiledningVarselPlanner
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.service.*
 import no.nav.syfo.syketilfelle.SyketilfellebitService
@@ -108,12 +111,16 @@ fun main() {
                     senderFacade,
                     env.urlEnv.dialogmoterUrl,
                 )
+                val dialogmoteStatusVarselService = DialogmoteStatusVarselService(
+                    senderFacade,
+                    env.urlEnv.dialogmoterUrl,
+                )
                 val oppfolgingsplanVarselService = OppfolgingsplanVarselService(senderFacade)
                 val sykepengerMaxDateService = SykepengerMaxDateService(database)
                 val merVeiledningVarselService = MerVeiledningVarselService(senderFacade, syketilfellebitService, env.urlEnv)
 
                 val varselBusService =
-                    VarselBusService(motebehovVarselService, oppfolgingsplanVarselService)
+                    VarselBusService(motebehovVarselService, oppfolgingsplanVarselService, dialogmoteStatusVarselService)
 
                 connector {
                     port = env.appEnv.applicationPort

@@ -1,15 +1,13 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
-import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import org.slf4j.*
 
 class VarselBusService(
     val motebehovVarselService: MotebehovVarselService,
-    val oppfolgingsplanVarselService: OppfolgingsplanVarselService
+    val oppfolgingsplanVarselService: OppfolgingsplanVarselService,
+    val dialogmoteStatusVarselService: DialogmoteStatusVarselService
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.VarselBusService")
     fun processVarselHendelse(varselHendelse: EsyfovarselHendelse) {
@@ -17,8 +15,21 @@ class VarselBusService(
         when (varselHendelse.type) {
             NL_OPPFOLGINGSPLAN_OPPRETTET,
             NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+
             NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
             SM_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+
+            NL_DIALOGMOTE_INNKALT -> dialogmoteStatusVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+            SM_DIALOGMOTE_INNKALT -> dialogmoteStatusVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+            NL_DIALOGMOTE_AVLYST -> dialogmoteStatusVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+            SM_DIALOGMOTE_AVLYST -> dialogmoteStatusVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+            NL_DIALOGMOTE_REFERAT -> dialogmoteStatusVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+            SM_DIALOGMOTE_REFERAT -> dialogmoteStatusVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+            NL_DIALOGMOTE_NYTT_TID_STED -> dialogmoteStatusVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+            SM_DIALOGMOTE_NYTT_TID_STED -> dialogmoteStatusVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+            else -> {
+                log.warn("Klarte ikke mappe varsel av type ${varselHendelse.type} ved behandling forsøk")
+            }
         }
     }
 

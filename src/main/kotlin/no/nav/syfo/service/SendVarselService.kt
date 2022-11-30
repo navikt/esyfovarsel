@@ -7,6 +7,7 @@ import java.util.*
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.access.domain.UserAccessStatus
@@ -135,6 +136,7 @@ class SendVarselService(
                 orgnummer,
                 null,
                 arbeidstakerFnr,
+                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
                 ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT,
                 ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE,
                 ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY,
