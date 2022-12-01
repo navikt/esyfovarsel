@@ -6,6 +6,8 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.net.URL
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -18,6 +20,7 @@ class MotebehovVarselService(
     val sykmeldingService: SykmeldingService,
 ) {
     val WEEKS_BEFORE_DELETE = 4L
+    private val log: Logger = LoggerFactory.getLogger(MotebehovVarselService::class.qualifiedName)
 
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         runBlocking {
@@ -29,6 +32,8 @@ class MotebehovVarselService(
             if (sykmeldingStatusForVirksomhet.sendtArbeidsgiver) {
                 sendVarselTilDineSykmeldte(varselHendelse)
                 sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
+            } else {
+                log.info("[MotebehovVarselService]: Sender ikke Svar møtebehov-varsel til NL fordi arbeidstaker ikke er sykmeldt fra bedriften")
             }
 
         }
