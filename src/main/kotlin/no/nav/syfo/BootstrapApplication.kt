@@ -5,26 +5,34 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.typesafe.config.ConfigFactory
-import io.ktor.application.*
-import io.ktor.config.*
-import io.ktor.features.*
-import io.ktor.jackson.*
-import io.ktor.routing.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
+import io.ktor.application.Application
+import io.ktor.application.install
+import io.ktor.config.HoconApplicationConfig
+import io.ktor.features.ContentNegotiation
+import io.ktor.jackson.jackson
+import io.ktor.routing.routing
+import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.connector
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.engine.stop
+import io.ktor.server.netty.Netty
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import no.nav.syfo.api.registerNaisApi
-import no.nav.syfo.auth.*
-import no.nav.syfo.consumer.LocalPdlConsumer
-import no.nav.syfo.consumer.PdlConsumer
+import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.auth.setupLocalRoutesWithAuthentication
+import no.nav.syfo.auth.setupRoutesWithAuthentication
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
 import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.dokarkiv.DokarkivConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
+import no.nav.syfo.consumer.pdl.LocalPdlConsumer
+import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.DatabaseInterface
@@ -40,14 +48,28 @@ import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
-import no.nav.syfo.planner.*
+import no.nav.syfo.planner.AktivitetskravVarselPlanner
+import no.nav.syfo.planner.MerVeiledningVarselPlanner
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
-import no.nav.syfo.service.*
+import no.nav.syfo.service.AccessControlService
+import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
+import no.nav.syfo.service.BrukernotifikasjonerService
+import no.nav.syfo.service.DokarkivService
+import no.nav.syfo.service.FysiskBrevUtsendingService
+import no.nav.syfo.service.MerVeiledningVarselFinder
+import no.nav.syfo.service.MerVeiledningVarselService
+import no.nav.syfo.service.MotebehovVarselService
+import no.nav.syfo.service.OppfolgingsplanVarselService
+import no.nav.syfo.service.ReplanleggingService
+import no.nav.syfo.service.SendVarselService
+import no.nav.syfo.service.SenderFacade
+import no.nav.syfo.service.SykepengerMaxDateService
+import no.nav.syfo.service.SykmeldingService
+import no.nav.syfo.service.VarselBusService
+import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.utils.LeaderElection
 import no.nav.syfo.utils.RunOnElection
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 data class ApplicationState(var running: Boolean = false, var initialized: Boolean = false)
 
@@ -109,7 +131,7 @@ fun main() {
                     env.urlEnv.dialogmoterUrl,
                 )
                 val oppfolgingsplanVarselService = OppfolgingsplanVarselService(senderFacade)
-                val sykepengerMaxDateService = SykepengerMaxDateService(database)
+                val sykepengerMaxDateService = SykepengerMaxDateService(database, pdlConsumer)
                 val merVeiledningVarselService = MerVeiledningVarselService(senderFacade, syketilfellebitService, env.urlEnv)
 
                 val varselBusService =

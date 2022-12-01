@@ -1,12 +1,11 @@
 package no.nav.syfo.service
 
-import java.time.LocalDate
-import no.nav.syfo.consumer.PdlConsumer
-import no.nav.syfo.db.DatabaseInterface
-import no.nav.syfo.db.domain.VarselType
-import no.nav.syfo.db.fetchUtsendtVarselByFnr
-import no.nav.syfo.syketilfelle.SyketilfellebitService
-import no.nav.syfo.utils.dateIsInInterval
+import java.time.*
+import no.nav.syfo.consumer.pdl.*
+import no.nav.syfo.db.*
+import no.nav.syfo.db.domain.*
+import no.nav.syfo.syketilfelle.*
+import no.nav.syfo.utils.*
 
 class VarselSendtService(
     val pdlConsumer: PdlConsumer,

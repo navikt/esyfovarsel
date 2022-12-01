@@ -1,7 +1,7 @@
 import io.mockk.coEvery
 import io.mockk.mockk
-import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.dkif.DkifConsumer
+import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.service.AccessControlService
 import no.nav.syfo.testutil.mocks.fnr1
 import org.amshove.kluent.shouldBeEqualTo

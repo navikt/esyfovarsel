@@ -1,23 +1,15 @@
-package no.nav.syfo.consumer
+package no.nav.syfo.consumer.pdl
 
-import io.ktor.client.call.receive
-import io.ktor.client.request.headers
-import io.ktor.client.request.post
-import io.ktor.client.statement.HttpResponse
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.append
-import java.io.FileNotFoundException
-import java.time.LocalDate
-import java.time.Period
-import kotlinx.coroutines.runBlocking
-import no.nav.syfo.UrlEnv
-import no.nav.syfo.auth.AzureAdTokenConsumer
-import no.nav.syfo.consumer.pdl.*
-import no.nav.syfo.utils.httpClient
-import no.nav.syfo.utils.parsePDLDate
-import org.slf4j.LoggerFactory
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import java.io.*
+import kotlinx.coroutines.*
+import no.nav.syfo.*
+import no.nav.syfo.auth.*
+import no.nav.syfo.utils.*
+import org.slf4j.*
 
 open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client = httpClient()
@@ -97,11 +89,6 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
                 true
             }
         }
-    }
-
-    fun isFodselsdatoMindreEnn67Ar(fodselsdato: String?): Boolean {
-        val parsedFodselsdato = fodselsdato?.let { parsePDLDate(it) }
-        return parsedFodselsdato == null || (Period.between(parsedFodselsdato, LocalDate.now()).years < 67)
     }
 
     open fun hentPerson(fnr: String): PdlHentPerson? {
