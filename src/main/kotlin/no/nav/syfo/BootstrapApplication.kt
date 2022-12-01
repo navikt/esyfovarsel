@@ -129,6 +129,7 @@ fun main() {
                 val motebehovVarselService = MotebehovVarselService(
                     senderFacade,
                     env.urlEnv.dialogmoterUrl,
+                    sykmeldingService
                 )
                 val oppfolgingsplanVarselService = OppfolgingsplanVarselService(senderFacade)
                 val sykepengerMaxDateService = SykepengerMaxDateService(database, pdlConsumer)
