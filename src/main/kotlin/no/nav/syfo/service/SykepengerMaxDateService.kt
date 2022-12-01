@@ -1,19 +1,11 @@
 package no.nav.syfo.service
 
-import java.time.LocalDate
-import no.nav.syfo.consumer.pdl.PdlConsumer
-import no.nav.syfo.db.DatabaseInterface
-import no.nav.syfo.db.deleteSykepengerMaxDateByFnr
-import no.nav.syfo.db.fetchFodselsdatoByFnr
-import no.nav.syfo.db.fetchForelopigBeregnetSluttPaSykepengerByFnr
-import no.nav.syfo.db.fetchSykepengerMaxDateByFnr
-import no.nav.syfo.db.storeFodselsdato
-import no.nav.syfo.db.storeInfotrygdUtbetaling
-import no.nav.syfo.db.storeSpleisUtbetaling
-import no.nav.syfo.db.storeSykepengerMaxDate
-import no.nav.syfo.db.updateSykepengerMaxDateByFnr
-import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
-import no.nav.syfo.utils.isEqualOrBefore
+import java.time.*
+import no.nav.syfo.consumer.pdl.*
+import no.nav.syfo.db.*
+import no.nav.syfo.kafka.consumers.infotrygd.domain.*
+import no.nav.syfo.kafka.consumers.utbetaling.domain.*
+import no.nav.syfo.utils.*
 
 class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface, private val pdlConsumer: PdlConsumer) {
     fun processNewMaxDate(fnr: String, sykepengerMaxDate: LocalDate?, source: SykepengerMaxDateSource) {
@@ -54,10 +46,10 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface,
         return databaseInterface.fetchForelopigBeregnetSluttPaSykepengerByFnr(fnr)
     }
 
-    fun processInfotrygdEvent(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int) {
+    fun processInfotrygdEvent(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int, source: InfotrygdSource) {
         processNewMaxDate(fnr, sykepengerMaxDate, SykepengerMaxDateSource.INFOTRYGD)
         processFodselsdato(fnr)
-        databaseInterface.storeInfotrygdUtbetaling(fnr, sykepengerMaxDate, utbetaltTilDate, gjenstaendeSykepengedager)
+        databaseInterface.storeInfotrygdUtbetaling(fnr, sykepengerMaxDate, utbetaltTilDate, gjenstaendeSykepengedager, source)
     }
 
     private fun processFodselsdato(fnr: String) {

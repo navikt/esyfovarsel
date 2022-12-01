@@ -1,15 +1,14 @@
 package no.nav.syfo.db
 
-import no.nav.syfo.db.domain.PPlanlagtVarsel
-import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
-import no.nav.syfo.utils.REMAINING_DAYS_UNTIL_39_UKERS_VARSEL
-import no.nav.syfo.utils.SYKEPENGER_SOKNAD_MAX_LENGTH_DAYS
-import org.postgresql.util.PSQLException
 import java.sql.Date
 import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.syfo.db.domain.PPlanlagtVarsel
+import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
+import no.nav.syfo.utils.REMAINING_DAYS_UNTIL_39_UKERS_VARSEL
+import org.postgresql.util.PSQLException
 
 fun DatabaseInterface.storeSykepengerMaxDate(sykepengerMaxDate: LocalDate, fnr: String, source: String) {
     val now = LocalDateTime.now()
@@ -81,25 +80,6 @@ fun DatabaseInterface.fetchPlanlagtMerVeiledningVarselByUtsendingsdato(sendingDa
         connection.prepareStatement(queryStatement).use {
             it.setDate(1, Date.valueOf(maxDate))
             it.executeQuery().toList { toPPlanlagtVarselMerVeiledning(sendingDate) }
-        }
-    }
-}
-
-fun DatabaseInterface.fetchPlanlagtMerVeiledningVarselBySendingDateSisteManed(): List<PPlanlagtVarsel> {
-    val today = LocalDate.now()
-    val start = today.minusDays(SYKEPENGER_SOKNAD_MAX_LENGTH_DAYS).plusDays(REMAINING_DAYS_UNTIL_39_UKERS_VARSEL)
-    val end = today.minusDays(1).plusDays(REMAINING_DAYS_UNTIL_39_UKERS_VARSEL)
-
-    val queryStatement = """SELECT *
-                            FROM SYKEPENGER_MAX_DATE
-                            WHERE MAX_DATE  >= ? AND MAX_DATE <= ?
-    """.trimIndent()
-
-    return connection.use { connection ->
-        connection.prepareStatement(queryStatement).use {
-            it.setDate(1, Date.valueOf(start))
-            it.setDate(2, Date.valueOf(end))
-            it.executeQuery().toList { toPPlanlagtVarselMerVeiledning(today) }
         }
     }
 }
