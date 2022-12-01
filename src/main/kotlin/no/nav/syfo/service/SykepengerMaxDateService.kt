@@ -61,8 +61,8 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface,
     }
 
     private fun processFodselsdato(fnr: String) {
-        val lagretFotselsdato = databaseInterface.fetchFodselsdatoByFnr(fnr)
-        if (lagretFotselsdato.isEmpty()|| lagretFotselsdato.first().isNullOrEmpty()){
+        val lagretFodselsdato = databaseInterface.fetchFodselsdatoByFnr(fnr)
+        if (lagretFodselsdato.isNullOrEmpty()){
             val pdlFodsel = pdlConsumer.hentPerson(fnr)?.hentPerson?.foedsel
             val fodselsdato = if (!pdlFodsel.isNullOrEmpty()) pdlFodsel.first().foedselsdato else null
             databaseInterface.storeFodselsdato(fnr, fodselsdato)

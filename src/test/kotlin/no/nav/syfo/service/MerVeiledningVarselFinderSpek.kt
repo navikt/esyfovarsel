@@ -68,10 +68,9 @@ object MerVeiledningVarselFinderSpek : Spek({
     //The default timeout of 10 seconds is not sufficient to initialise the embedded database
     defaultTimeout = 20000L
 
-    describe("VarselSenderServiceSpek") {
+    describe("MerVeiledningVarselFinderSpek") {
         afterEachTest {
             clearAllMocks()
-//            clearMocks(sykmeldingerConsumerMock, sykmeldingServiceMockk, pdlConsumerMockk)
             embeddedDatabase.connection.dropData()
         }
 
@@ -147,15 +146,15 @@ object MerVeiledningVarselFinderSpek : Spek({
             coEvery { sykmeldingServiceMockk.isPersonSykmeldtPaDato(LocalDate.now(), arbeidstakerFnr1) } returns true
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
 
-            val varslerToSendToday = runBlocking {
+           runBlocking {
                 merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
             }
 
             coVerify(exactly = 1) { pdlConsumerMockk.isBrukerYngreEnn67(arbeidstakerFnr1) }
         }
 
-        it("Should not call PDL if stored birthdate is not null") {
-            embeddedDatabase.storeFodselsdato(arbeidstakerFnr2, "01-01-1986")
+       it("Should not call PDL if stored birthdate is not null") {
+            embeddedDatabase.storeFodselsdato(arbeidstakerFnr2, "1986-01-01")
             coEvery { sykmeldingServiceMockk.isPersonSykmeldtPaDato(LocalDate.now(), arbeidstakerFnr2) } returns true
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel2)
 

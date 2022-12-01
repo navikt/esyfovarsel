@@ -22,7 +22,7 @@ object SykepengerMaxDateServiceSpek : Spek({
         val embeddedDatabase by lazy { EmbeddedDatabase() }
         val pdlConsumer = mockk<PdlConsumer>(relaxed = true)
         val sykepengerMaxDateService = SykepengerMaxDateService(embeddedDatabase, pdlConsumer)
-        coEvery { pdlConsumer.hentPerson(any()) } returns PdlHentPerson(hentPerson = PdlPerson(adressebeskyttelse = null, navn = null, foedsel = listOf(PdlFoedsel("01-01-1986"))))
+        coEvery { pdlConsumer.hentPerson(any()) } returns PdlHentPerson(hentPerson = PdlPerson(adressebeskyttelse = null, navn = null, foedsel = listOf(PdlFoedsel("1986-01-01"))))
         afterEachTest {
             embeddedDatabase.connection.dropData()
         }
