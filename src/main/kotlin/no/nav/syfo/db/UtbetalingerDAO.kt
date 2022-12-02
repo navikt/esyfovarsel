@@ -22,7 +22,6 @@ fun DatabaseInterface.fetchMerVeiledningVarslerToSend(): List<PUtbetaling> {
                                 FROM UTSENDT_VARSEL 
                                 WHERE TYPE = 'MER_VEILEDNING' 
                                 AND UTSENDT_TIDSPUNKT > NOW() - INTERVAL '90' DAY)
-                                LIMIT 1000
                                 """
         .trimIndent()
 
