@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 fun DatabaseInterface.fetchMerVeiledningVarslerToSend(): List<PUtbetaling> {
     val gjenstaendeSykedagerLimit = 80
-    val maxDateLimit = 14
+    val maxDateLimit = 5
     val queryStatement = """SELECT ID, FNR, UTBETALT_TOM, FORELOPIG_BEREGNET_SLUTT, GJENSTAENDE_SYKEDAGER, OPPRETTET
                             FROM UTBETALINGER AS UTBETALINGER1
                             WHERE ID =
