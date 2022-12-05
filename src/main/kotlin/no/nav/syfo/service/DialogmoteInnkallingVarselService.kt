@@ -128,7 +128,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     }
 
     private fun getEmailBody(hendelse: NarmesteLederHendelse): String {
-        var greeting = "Til <body>Hei.<br><br>"
+        var greeting = "<body>Hei.<br><br>"
         if (hendelse.narmesteLederNavn != null) {
             greeting = "Til <body>${hendelse.narmesteLederNavn},<br><br>"
         }
