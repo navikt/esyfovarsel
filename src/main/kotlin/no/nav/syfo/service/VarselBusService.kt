@@ -7,7 +7,7 @@ import org.slf4j.*
 class VarselBusService(
     val motebehovVarselService: MotebehovVarselService,
     val oppfolgingsplanVarselService: OppfolgingsplanVarselService,
-    val dialogmoteStatusVarselService: DialogmoteStatusVarselService
+    val dialogmoteInnkallingVarselService: DialogmoteInnkallingVarselService
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.VarselBusService")
     fun processVarselHendelse(varselHendelse: EsyfovarselHendelse) {
@@ -19,14 +19,14 @@ class VarselBusService(
             NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
             SM_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
-            NL_DIALOGMOTE_INNKALT -> dialogmoteStatusVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
-            SM_DIALOGMOTE_INNKALT -> dialogmoteStatusVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
-            NL_DIALOGMOTE_AVLYST -> dialogmoteStatusVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
-            SM_DIALOGMOTE_AVLYST -> dialogmoteStatusVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
-            NL_DIALOGMOTE_REFERAT -> dialogmoteStatusVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
-            SM_DIALOGMOTE_REFERAT -> dialogmoteStatusVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
-            NL_DIALOGMOTE_NYTT_TID_STED -> dialogmoteStatusVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
-            SM_DIALOGMOTE_NYTT_TID_STED -> dialogmoteStatusVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+            NL_DIALOGMOTE_INNKALT -> dialogmoteInnkallingVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+            SM_DIALOGMOTE_INNKALT -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+            NL_DIALOGMOTE_AVLYST -> dialogmoteInnkallingVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+            SM_DIALOGMOTE_AVLYST -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+            NL_DIALOGMOTE_REFERAT -> dialogmoteInnkallingVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+            SM_DIALOGMOTE_REFERAT -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+            NL_DIALOGMOTE_NYTT_TID_STED -> dialogmoteInnkallingVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+            SM_DIALOGMOTE_NYTT_TID_STED -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
             else -> {
                 log.warn("Klarte ikke mappe varsel av type ${varselHendelse.type} ved behandling forsøk")
             }

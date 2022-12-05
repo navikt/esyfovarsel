@@ -111,7 +111,7 @@ fun main() {
                     senderFacade,
                     env.urlEnv.dialogmoterUrl,
                 )
-                val dialogmoteStatusVarselService = DialogmoteStatusVarselService(
+                val dialogmoteInnkallingVarselService = DialogmoteInnkallingVarselService(
                     senderFacade,
                     env.urlEnv.dialogmoterUrl,
                 )
@@ -120,7 +120,7 @@ fun main() {
                 val merVeiledningVarselService = MerVeiledningVarselService(senderFacade, syketilfellebitService, env.urlEnv)
 
                 val varselBusService =
-                    VarselBusService(motebehovVarselService, oppfolgingsplanVarselService, dialogmoteStatusVarselService)
+                    VarselBusService(motebehovVarselService, oppfolgingsplanVarselService, dialogmoteInnkallingVarselService)
 
                 connector {
                     port = env.appEnv.applicationPort
