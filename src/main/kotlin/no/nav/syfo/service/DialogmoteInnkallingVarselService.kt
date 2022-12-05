@@ -29,7 +29,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SYKMELDT_URL)
         val text = getArbeidstakerVarselText(varselHendelse.type)
-        if (!text.isNullOrBlank()) {
+        if (text.isNotBlank()) {
             senderFacade.sendTilBrukernotifikasjoner(
                 UUID.randomUUID().toString(),
                 varselHendelse.arbeidstakerFnr,
@@ -68,7 +68,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
 
     private fun sendVarselTilDineSykmeldte(varselHendelse: NarmesteLederHendelse) {
         val varselText = getDineSykmeldteVarselText(varselHendelse.type)
-        if (!varselText.isNullOrBlank()) {
+        if (varselText.isNotBlank()) {
             val dineSykmeldteVarsel = DineSykmeldteVarsel(
                 ansattFnr = varselHendelse.arbeidstakerFnr,
                 orgnr = varselHendelse.orgnummer,
@@ -81,23 +81,27 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         }
     }
 
-    private fun getArbeidstakerVarselText(hendelseType: HendelseType): String? {
+    private fun getArbeidstakerVarselText(hendelseType: HendelseType): String {
         return when (hendelseType) {
             SM_DIALOGMOTE_INNKALT -> SM_DIALOGMOTE_INNKALT_TEKST
             SM_DIALOGMOTE_AVLYST -> SM_DIALOGMOTE_AVLYST_TEKST
             SM_DIALOGMOTE_NYTT_TID_STED -> SM_DIALOGMOTE_NYTT_TID_STED_TEKST
             SM_DIALOGMOTE_REFERAT -> SM_DIALOGMOTE_REFERAT_TEKST
-            else -> null
+            else -> {
+                throw IllegalArgumentException("Kan ikke mappe $hendelseType til arbeidstaker varsel text")
+            }
         }
     }
 
-    private fun getDineSykmeldteVarselText(hendelseType: HendelseType): String? {
+    private fun getDineSykmeldteVarselText(hendelseType: HendelseType): String {
         return when (hendelseType) {
             NL_DIALOGMOTE_INNKALT -> DINE_SYKMELDTE_DIALOGMOTE_INNKALT_TEKST
             NL_DIALOGMOTE_AVLYST -> DINE_SYKMELDTE_DIALOGMOTE_AVLYST_TEKST
             NL_DIALOGMOTE_REFERAT -> DINE_SYKMELDTE_DIALOGMOTE_NYTT_TID_STED_TEKST
             NL_DIALOGMOTE_NYTT_TID_STED -> DINE_SYKMELDTE_DIALOGMOTE_REFERAT_TEKST
-            else -> null
+            else -> {
+                throw IllegalArgumentException("Kan ikke mappe $hendelseType til Dine sykmeldte varsel text")
+            }
         }
     }
 
