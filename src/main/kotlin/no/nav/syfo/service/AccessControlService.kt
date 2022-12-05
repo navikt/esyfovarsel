@@ -1,8 +1,8 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.access.domain.UserAccessStatus
-import no.nav.syfo.consumer.PdlConsumer
 import no.nav.syfo.consumer.dkif.DkifConsumer
+import no.nav.syfo.consumer.pdl.PdlConsumer
 
 class AccessControlService(val pdlConsumer: PdlConsumer, val dkifConsumer: DkifConsumer) {
     fun getUserAccessStatus(fnr: String): UserAccessStatus {

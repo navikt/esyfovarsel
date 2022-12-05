@@ -1,11 +1,15 @@
 package no.nav.syfo.service
 
+import kotlinx.coroutines.runBlocking
 import no.nav.syfo.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.net.URL
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
@@ -13,12 +17,26 @@ import java.util.*
 class MotebehovVarselService(
     val senderFacade: SenderFacade,
     val dialogmoterUrl: String,
+    val sykmeldingService: SykmeldingService,
 ) {
     val WEEKS_BEFORE_DELETE = 4L
+    private val log: Logger = LoggerFactory.getLogger(MotebehovVarselService::class.qualifiedName)
 
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
-        sendVarselTilDineSykmeldte(varselHendelse)
-        sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
+        runBlocking {
+            //Quickfix for å unngå å sende varsel til bedrifter der bruker ikke er sykmeldt. Det kan skje når den sykmeldte har vært sykmeldt fra flere arbeidsforhold,
+            // men bare er sykmeldt ved én av dem nå
+            val sykmeldingStatusForVirksomhet =
+                sykmeldingService.checkSykmeldingStatusForVirksomhet(LocalDate.now(), varselHendelse.arbeidstakerFnr, varselHendelse.orgnummer)
+
+            if (sykmeldingStatusForVirksomhet.sendtArbeidsgiver) {
+                sendVarselTilDineSykmeldte(varselHendelse)
+                sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
+            } else {
+                log.info("[MotebehovVarselService]: Sender ikke Svar møtebehov-varsel til NL fordi arbeidstaker ikke er sykmeldt fra bedriften")
+            }
+
+        }
     }
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {

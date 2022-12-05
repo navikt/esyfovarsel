@@ -1,6 +1,6 @@
 package no.nav.syfo.utils
 
-import java.time.LocalDate
+import java.time.*
 import java.time.format.DateTimeFormatter
 
 private val BREV_DATE_FORMAT_PATTERN = "dd. MMMM yyyy"
@@ -34,4 +34,11 @@ fun parsePDLDate(date: String): LocalDate {
 
 fun formatDateForLetter(date: LocalDate): String {
     return date.format(DateTimeFormatter.ofPattern(BREV_DATE_FORMAT_PATTERN))
+}
+
+fun isFodselsdatoMindreEnn67Ar(fodselsdato: String?): Boolean {
+    val parsedFodselsdato = fodselsdato?.let { parsePDLDate(it) }
+    val isFodselsdatoMindreEnn67Ar = parsedFodselsdato == null || (Period.between(parsedFodselsdato, LocalDate.now()).years < 67)
+
+    return isFodselsdatoMindreEnn67Ar
 }
