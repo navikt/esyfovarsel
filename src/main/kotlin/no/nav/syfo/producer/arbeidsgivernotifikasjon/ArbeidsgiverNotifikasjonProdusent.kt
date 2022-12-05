@@ -8,13 +8,14 @@ import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
+import no.nav.syfo.service.DialogmoteInnkallingVarselService
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 
 open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client = httpClient()
     private val arbeidsgiverNotifikasjonProdusentBasepath = urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl
-    private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.ArbeidsgiverNotifikasjonProdusent")
+    private val log = LoggerFactory.getLogger(ArbeidsgiverNotifikasjonProdusent::class.qualifiedName)
     private val scope = urlEnv.arbeidsgiverNotifikasjonProdusentApiScope
 
     open fun createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? {
