@@ -1,8 +1,11 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.kafka.consumers.varselbus.domain.*
+import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
-import org.slf4j.*
+import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class VarselBusService(
     val motebehovVarselService: MotebehovVarselService,
@@ -19,13 +22,14 @@ class VarselBusService(
             NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
             SM_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
-            NL_DIALOGMOTE_INNKALT -> dialogmoteInnkallingVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
-            SM_DIALOGMOTE_INNKALT -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
-            NL_DIALOGMOTE_AVLYST -> dialogmoteInnkallingVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
-            SM_DIALOGMOTE_AVLYST -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
-            NL_DIALOGMOTE_REFERAT -> dialogmoteInnkallingVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
-            SM_DIALOGMOTE_REFERAT -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+            NL_DIALOGMOTE_INNKALT,
+            NL_DIALOGMOTE_AVLYST,
+            NL_DIALOGMOTE_REFERAT,
             NL_DIALOGMOTE_NYTT_TID_STED -> dialogmoteInnkallingVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+
+            SM_DIALOGMOTE_INNKALT,
+            SM_DIALOGMOTE_AVLYST,
+            SM_DIALOGMOTE_REFERAT,
             SM_DIALOGMOTE_NYTT_TID_STED -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
             else -> {
                 log.warn("Klarte ikke mappe varsel av type ${varselHendelse.type} ved behandling forsøk")
