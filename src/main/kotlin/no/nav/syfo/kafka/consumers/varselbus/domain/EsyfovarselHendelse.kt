@@ -13,7 +13,6 @@ data class NarmesteLederHendelse(
     override val type: HendelseType,
     override var data: Any?,
     val narmesteLederFnr: String,
-    val narmesteLederNavn: String?,
     val arbeidstakerFnr: String,
     val orgnummer: String
 ) : EsyfovarselHendelse

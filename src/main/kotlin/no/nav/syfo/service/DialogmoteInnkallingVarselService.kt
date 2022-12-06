@@ -1,11 +1,8 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.*
-import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import no.nav.syfo.kafka.consumers.varselbus.domain.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
-import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import org.slf4j.LoggerFactory
 import java.net.URL
@@ -133,8 +130,10 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
 
     private fun getEmailBody(hendelse: NarmesteLederHendelse): String {
         var greeting = "<body>Hei.<br><br>"
-        if (hendelse.narmesteLederNavn != null) {
-            greeting = "Til <body>${hendelse.narmesteLederNavn},<br><br>"
+
+        val data = hendelse.data as DialogmoteInnkallingNarmesteLederData
+        if (data.narmesteLederNavn.isNullOrBlank()) {
+            greeting = "Til <body>${data.narmesteLederNavn},<br><br>"
         }
 
         return when (hendelse.type) {
