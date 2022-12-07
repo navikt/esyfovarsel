@@ -1,5 +1,7 @@
 package no.nav.syfo.service
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import java.io.IOException
 import no.nav.syfo.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
@@ -9,6 +11,7 @@ import java.net.URL
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
+import org.apache.commons.cli.MissingArgumentException
 
 class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dialogmoterUrl: String) {
     val WEEKS_BEFORE_DELETE = 4L
@@ -18,9 +21,10 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     private val log = LoggerFactory.getLogger(DialogmoteInnkallingVarselService::class.qualifiedName)
 
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
-        log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}")
+        val ledernavn  = varselHendelse.data as DialogmoteInnkallingNarmesteLederData
+        log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}, NL navn er ${ledernavn.narmesteLederNavn}")
         sendVarselTilDineSykmeldte(varselHendelse)
-        sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
+        sendVarselTilArbeidsgiverNotifikasjon(varselHendelse, ledernavn.narmesteLederNavn)
     }
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
@@ -37,7 +41,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         }
     }
 
-    private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
+    private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse, ledernavn: String?) {
         val texts = getArbeisgiverTexts(varselHendelse)
         val sms = texts[SMS_KEY]
         val emailTitle = texts[EMAIL_TITLE_KEY]
@@ -133,7 +137,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
 
         val data = hendelse.data as DialogmoteInnkallingNarmesteLederData
         if (data.narmesteLederNavn.isNullOrBlank()) {
-            greeting = "Til <body>${data.narmesteLederNavn},<br><br>"
+            greeting = "Til <body>${data},<br><br>"
         }
 
         return when (hendelse.type) {
@@ -143,5 +147,15 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
             NL_DIALOGMOTE_NYTT_TID_STED -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_BODY
             else -> ""
         }
+    }
+
+    fun EsyfovarselHendelse.dataToDialogmoteInnkallingNarmesteLederData(): DialogmoteInnkallingNarmesteLederData {
+        return data?.let {
+            try {
+                return@let objectMapper.readValue(data.toString())
+            } catch (e: IOException) {
+                throw IOException("EsyfovarselHendelse har feil format i 'data'-felt")
+            }
+        } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
 }

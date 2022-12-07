@@ -1,6 +1,7 @@
 package no.nav.syfo.kafka.consumers.varselbus
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.io.IOException
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.*
@@ -9,7 +10,6 @@ import no.nav.syfo.service.VarselBusService
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.io.IOException
 
 class VarselBusKafkaConsumer(
     env: Environment,
