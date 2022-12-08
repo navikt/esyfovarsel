@@ -7,10 +7,10 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
 import no.nav.syfo.*
+import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
-import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.LoggerFactory
 
 class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dialogmoterUrl: String) {
@@ -19,7 +19,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     val EMAIL_TITLE_KEY = "emailTitle"
     val EMAIL_BODY_KEY = "emailBody"
     private val log = LoggerFactory.getLogger(DialogmoteInnkallingVarselService::class.qualifiedName)
-
+    private val objectMapper = createObjectMapper()
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}, NL navn er ${varselHendelse.data}")
         val nvn: DialogmoteInnkallingNarmesteLederData = dataToDialogmoteInnkallingNarmesteLederData(varselHendelse.data)
@@ -155,12 +155,14 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     }
 
     fun dataToDialogmoteInnkallingNarmesteLederData(data: Any?): DialogmoteInnkallingNarmesteLederData {
-        return data?.let {
+        return data.let {
             try {
-                return@let objectMapper.readValue(data.toString())
+//                return@let objectMapper.readValue(data.toString())
+                val dialogmoteInnkallingNarmesteLederData: DialogmoteInnkallingNarmesteLederData = objectMapper.readValue(data.toString())
+                return@let dialogmoteInnkallingNarmesteLederData
             } catch (e: IOException) {
                 throw IOException("EsyfovarselHendelse har feil format i 'data'-felt> ${e.message}" )
             }
-        } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
+        }
     }
 }
