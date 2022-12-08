@@ -30,15 +30,13 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SYKMELDT_URL)
         val text = getArbeidstakerVarselText(varselHendelse.type)
-        if (text.isNotBlank()) {
-            senderFacade.sendTilBrukernotifikasjoner(
-                UUID.randomUUID().toString(),
-                varselHendelse.arbeidstakerFnr,
-                text,
-                url,
-                varselHendelse
-            )
-        }
+        senderFacade.sendTilBrukernotifikasjoner(
+            UUID.randomUUID().toString(),
+            varselHendelse.arbeidstakerFnr,
+            text,
+            url,
+            varselHendelse
+        )
     }
 
     private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
