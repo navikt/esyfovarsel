@@ -159,7 +159,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         return data.let {
             try {
 //                return@let objectMapper.readValue(data.toString())
-                return@let objectMapper.readValue<DialogmoteInnkallingNarmesteLederData>(data.toString())
+                return@let objectMapper.readValue(data.toString(), DialogmoteInnkallingNarmesteLederData::class.java)
             } catch (e: IOException) {
                 throw IOException("EsyfovarselHendelse har feil format i 'data'-felt> ${e.message}")
             }
