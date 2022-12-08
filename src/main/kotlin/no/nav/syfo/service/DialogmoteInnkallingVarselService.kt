@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import java.io.IOException
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -9,6 +10,7 @@ import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
+import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.LoggerFactory
 
 class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dialogmoterUrl: String) {
@@ -19,11 +21,8 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     private val log = LoggerFactory.getLogger(DialogmoteInnkallingVarselService::class.qualifiedName)
     private val objectMapper = createObjectMapper()
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
-        log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}, NL navn er ${varselHendelse.data}")
-        log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}, NL navn er ${varselHendelse}")
-        val dialogmoteInnkallingNarmesteLederData: DialogmoteInnkallingNarmesteLederData = dataToDialogmoteInnkallingNarmesteLederData(varselHendelse.data)
-        varselHendelse.data = dialogmoteInnkallingNarmesteLederData
-//        log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: snvn er ${varselHendelse.data.narmesteLederNavn})
+        log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}")
+        varselHendelse.data = dataToDialogmoteInnkallingNarmesteLederData(varselHendelse.data)
         sendVarselTilDineSykmeldte(varselHendelse)
         sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
     }
@@ -155,8 +154,14 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     }
 
     fun dataToDialogmoteInnkallingNarmesteLederData(data: Any?): DialogmoteInnkallingNarmesteLederData {
-        val narmesteLederDataString = data.toString()
-        val narmesteLederNavn = objectMapper.readTree(narmesteLederDataString)["narmesteLederNavn"].textValue()
-        return DialogmoteInnkallingNarmesteLederData(narmesteLederNavn = narmesteLederNavn)
+        return data?.let {
+            try {
+                val narmesteLederDataString = data.toString()
+                val narmesteLederNavn = objectMapper.readTree(narmesteLederDataString)["narmesteLederNavn"].textValue()
+                return DialogmoteInnkallingNarmesteLederData(narmesteLederNavn = narmesteLederNavn)
+            } catch (e: IOException) {
+                throw IOException("DialogmoteInnkallingNarmesteLederData har feil format")
+            }
+        } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
 }
