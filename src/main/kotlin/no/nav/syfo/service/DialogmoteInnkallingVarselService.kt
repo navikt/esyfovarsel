@@ -22,10 +22,10 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
 
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}, NL navn er ${varselHendelse.data}")
-        val nvn = dataToDialogmoteInnkallingNarmesteLederData(varselHendelse.data).narmesteLederNavn
+        val nvn: DialogmoteInnkallingNarmesteLederData = dataToDialogmoteInnkallingNarmesteLederData(varselHendelse.data)
         log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: snvn er $nvn")
         sendVarselTilDineSykmeldte(varselHendelse)
-        sendVarselTilArbeidsgiverNotifikasjon(varselHendelse, nvn)
+        sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
     }
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
@@ -42,8 +42,8 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         }
     }
 
-    private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse, nvn: String?) {
-        val texts = getArbeisgiverTexts(varselHendelse,nvn)
+    private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
+        val texts = getArbeisgiverTexts(varselHendelse)
         val sms = texts[SMS_KEY]
         val emailTitle = texts[EMAIL_TITLE_KEY]
         val emailBody = texts[EMAIL_BODY_KEY]
@@ -107,42 +107,42 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         }
     }
 
-    private fun getArbeisgiverTexts(hendelse: NarmesteLederHendelse, nvn: String?): HashMap<String, String> {
+    private fun getArbeisgiverTexts(hendelse: NarmesteLederHendelse): HashMap<String, String> {
         return when (hendelse.type) {
             NL_DIALOGMOTE_INNKALT -> hashMapOf(
                 SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_MESSAGE_TEXT,
                 EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_TITLE,
-                EMAIL_BODY_KEY to getEmailBody(hendelse, nvn),
+                EMAIL_BODY_KEY to getEmailBody(hendelse),
             )
 
             NL_DIALOGMOTE_AVLYST -> hashMapOf(
                 SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_MESSAGE_TEXT,
                 EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_TITLE,
-                EMAIL_BODY_KEY to getEmailBody(hendelse, nvn),
+                EMAIL_BODY_KEY to getEmailBody(hendelse),
             )
 
             NL_DIALOGMOTE_REFERAT -> hashMapOf(
                 SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_MESSAGE_TEXT,
                 EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_TITLE,
-                EMAIL_BODY_KEY to getEmailBody(hendelse, nvn),
+                EMAIL_BODY_KEY to getEmailBody(hendelse),
             )
 
             NL_DIALOGMOTE_NYTT_TID_STED -> hashMapOf(
                 SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_MESSAGE_TEXT,
                 EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_TITLE,
-                EMAIL_BODY_KEY to getEmailBody(hendelse, nvn),
+                EMAIL_BODY_KEY to getEmailBody(hendelse),
             )
 
             else -> hashMapOf()
         }
     }
 
-    private fun getEmailBody(hendelse: NarmesteLederHendelse, nvn: String?): String {
+    private fun getEmailBody(hendelse: NarmesteLederHendelse): String {
         var greeting = "<body>Hei.<br><br>"
 
-//        val data = hendelse.data as DialogmoteInnkallingNarmesteLederData
-        if (nvn.isNullOrEmpty()) {
-            greeting = "Til <body>${nvn},<br><br>"
+        val data = hendelse.data as DialogmoteInnkallingNarmesteLederData
+        if (!data.narmesteLederNavn.isNullOrBlank()) {
+            greeting = "Til <body>${data.narmesteLederNavn},<br><br>"
         }
 
         return when (hendelse.type) {
@@ -159,7 +159,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
             try {
                 return@let objectMapper.readValue(data.toString())
             } catch (e: IOException) {
-                throw IOException("EsyfovarselHendelse har feil format i 'data'-felt")
+                throw IOException("EsyfovarselHendelse har feil format i 'data'-felt> ${e.message}" )
             }
         } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
