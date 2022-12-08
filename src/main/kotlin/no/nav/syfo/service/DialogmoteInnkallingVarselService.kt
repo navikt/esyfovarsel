@@ -21,8 +21,9 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}, NL navn er ${varselHendelse.data}")
         log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}, NL navn er ${varselHendelse}")
-        val nvn: DialogmoteInnkallingNarmesteLederData = dataToDialogmoteInnkallingNarmesteLederData(varselHendelse.data)
-        log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: snvn er $nvn")
+        val dialogmoteInnkallingNarmesteLederData: DialogmoteInnkallingNarmesteLederData = dataToDialogmoteInnkallingNarmesteLederData(varselHendelse.data)
+        varselHendelse.data = dialogmoteInnkallingNarmesteLederData
+//        log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: snvn er ${varselHendelse.data.narmesteLederNavn})
         sendVarselTilDineSykmeldte(varselHendelse)
         sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
     }
