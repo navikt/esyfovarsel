@@ -1,7 +1,5 @@
 package no.nav.syfo.service
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import java.io.IOException
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -156,13 +154,8 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     }
 
     fun dataToDialogmoteInnkallingNarmesteLederData(data: Any?): DialogmoteInnkallingNarmesteLederData {
-        return data.let {
-            try {
-//                return@let objectMapper.readValue(data.toString())
-                return@let objectMapper.readValue(data.toString(), DialogmoteInnkallingNarmesteLederData::class.java)
-            } catch (e: IOException) {
-                throw IOException("EsyfovarselHendelse har feil format i 'data'-felt> ${e.message}")
-            }
-        }
+        val narmesteLederDataString = data.toString()
+        val narmesteLederNavn = objectMapper.readTree(narmesteLederDataString)["narmesteLederNavn"].textValue()
+        return DialogmoteInnkallingNarmesteLederData(narmesteLederNavn = narmesteLederNavn)
     }
 }
