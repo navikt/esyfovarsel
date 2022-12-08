@@ -158,7 +158,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
             try {
                 val narmesteLederDataString = data.toString()
                 val narmesteLederNavn = objectMapper.readTree(narmesteLederDataString)["narmesteLederNavn"].textValue()
-                return DialogmoteInnkallingNarmesteLederData(narmesteLederNavn = narmesteLederNavn)
+                return DialogmoteInnkallingNarmesteLederData(narmesteLederNavn)
             } catch (e: IOException) {
                 throw IOException("DialogmoteInnkallingNarmesteLederData har feil format")
             }
