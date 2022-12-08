@@ -82,10 +82,10 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
 
     private fun getArbeidstakerVarselText(hendelseType: HendelseType): String {
         return when (hendelseType) {
-            SM_DIALOGMOTE_INNKALT -> SM_DIALOGMOTE_INNKALT_TEKST
-            SM_DIALOGMOTE_AVLYST -> SM_DIALOGMOTE_AVLYST_TEKST
-            SM_DIALOGMOTE_NYTT_TID_STED -> SM_DIALOGMOTE_NYTT_TID_STED_TEKST
-            SM_DIALOGMOTE_REFERAT -> SM_DIALOGMOTE_REFERAT_TEKST
+            SM_DIALOGMOTE_INNKALT -> BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST
+            SM_DIALOGMOTE_AVLYST -> BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST
+            SM_DIALOGMOTE_NYTT_TID_STED -> BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST
+            SM_DIALOGMOTE_REFERAT -> BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST
             else -> {
                 throw IllegalArgumentException("Kan ikke mappe $hendelseType til arbeidstaker varsel text")
             }

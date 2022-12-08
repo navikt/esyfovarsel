@@ -4,9 +4,17 @@ const val DINE_SYKMELDTE_OPPFOLGINGSPLAN_OPPRETTET_TEKST = "1 oppfølgingsplan e
 const val DINE_SYKMELDTE_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST = "1 oppfølgingsplan til godkjenning"
 const val DINE_SYKMELDTE_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST = "1 ny forespørsel om behov for dialogmøte"
 const val DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST = "Påminnelse om aktivitetsplikten"
+const val DINE_SYKMELDTE_DIALOGMOTE_INNKALT_TEKST = "Innkalling til dialogmøte"
+const val DINE_SYKMELDTE_DIALOGMOTE_AVLYST_TEKST = "Avlysning av dialogmøte"
+const val DINE_SYKMELDTE_DIALOGMOTE_NYTT_TID_STED_TEKST = "Endring av dialogmøte"
+const val DINE_SYKMELDTE_DIALOGMOTE_REFERAT_TEKST = "Referat fra dialogmøte"
 
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST = "NAV ønsker svar på om du trenger et dialogmøte"
 const val BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT = "Det nærmer seg datoen da du ikke lenger kan få sykepenger."
+const val BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST = "Du er innkalt til dialogmøte - vi trenger svaret ditt"
+const val BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST = "Du har mottatt et brev om avlyst dialogmøte"
+const val BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST = "Du har mottatt et brev om endret dialogmøte"
+const val BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST = "Du har mottatt et referat fra dialogmøte"
 
 const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP = "Oppfølging"
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP = "Dialogmøte"
@@ -26,16 +34,6 @@ const val ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY = "<body>Hei.<br>\n
         "Du kan ikke svare på denne meldingen.</body>"
 
 const val DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT = "Snart slutt på sykepengene"
-
-const val SM_DIALOGMOTE_INNKALT_TEKST = "Du er innkalt til dialogmøte - vi trenger svaret ditt"
-const val SM_DIALOGMOTE_AVLYST_TEKST = "Du har mottatt et brev om avlyst dialogmøte"
-const val SM_DIALOGMOTE_NYTT_TID_STED_TEKST = "Du har mottatt et brev om endret dialogmøte"
-const val SM_DIALOGMOTE_REFERAT_TEKST = "Du har mottatt et referat fra dialogmøte"
-
-const val DINE_SYKMELDTE_DIALOGMOTE_INNKALT_TEKST = "Innkalling til dialogmøte"
-const val DINE_SYKMELDTE_DIALOGMOTE_AVLYST_TEKST = "Avlysning av dialogmøte"
-const val DINE_SYKMELDTE_DIALOGMOTE_NYTT_TID_STED_TEKST = "Endring av dialogmøte"
-const val DINE_SYKMELDTE_DIALOGMOTE_REFERAT_TEKST = "Referat fra dialogmøte"
 
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_MESSAGE_TEXT = "Du er innkalt til dialogmøte - vi trenger svaret ditt"
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_TITLE = "Innkalling til dialogmøte med NAV"
