@@ -22,6 +22,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     private val objectMapper = createObjectMapper()
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}, NL navn er ${varselHendelse.data}")
+        log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}, NL navn er ${varselHendelse}")
         val nvn: DialogmoteInnkallingNarmesteLederData = dataToDialogmoteInnkallingNarmesteLederData(varselHendelse.data)
         log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: snvn er $nvn")
         sendVarselTilDineSykmeldte(varselHendelse)
@@ -158,10 +159,9 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         return data.let {
             try {
 //                return@let objectMapper.readValue(data.toString())
-                val dialogmoteInnkallingNarmesteLederData: DialogmoteInnkallingNarmesteLederData = objectMapper.readValue(data.toString())
-                return@let dialogmoteInnkallingNarmesteLederData
+                return@let objectMapper.readValue<DialogmoteInnkallingNarmesteLederData>(data.toString())
             } catch (e: IOException) {
-                throw IOException("EsyfovarselHendelse har feil format i 'data'-felt> ${e.message}" )
+                throw IOException("EsyfovarselHendelse har feil format i 'data'-felt> ${e.message}")
             }
         }
     }
