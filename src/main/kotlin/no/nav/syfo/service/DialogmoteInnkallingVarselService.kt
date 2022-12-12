@@ -40,28 +40,35 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     }
 
     private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
+        val uuid = UUID.randomUUID()
+        val orgnummer = varselHendelse.orgnummer
+        val narmesteLederFnr = varselHendelse.narmesteLederFnr
+        val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
         val texts = getArbeisgiverTexts(varselHendelse)
         val sms = texts[SMS_KEY]
         val emailTitle = texts[EMAIL_TITLE_KEY]
         val emailBody = texts[EMAIL_BODY_KEY]
+        val hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
 
         if (!sms.isNullOrBlank() && !emailTitle.isNullOrBlank() && !emailBody.isNullOrBlank()) {
             val input = ArbeidsgiverNotifikasjonInput(
-                UUID.randomUUID(),
-                varselHendelse.orgnummer,
-                varselHendelse.narmesteLederFnr,
-                varselHendelse.arbeidstakerFnr,
+                uuid,
+                orgnummer,
+                narmesteLederFnr,
+                arbeidstakerFnr,
                 ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
                 sms,
                 emailTitle,
                 emailBody,
-                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
+                hardDeleteDate
             )
 
             senderFacade.sendTilArbeidsgiverNotifikasjon(
                 varselHendelse,
                 input
             )
+        } else {
+            log.warn("Kunne ikke mappe tekstene til arbeidsgiver-tekst for dialogmote varsel av type: ${varselHendelse.type.name}")
         }
     }
 
