@@ -5,17 +5,17 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MERKELAPP
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
+import no.nav.syfo.service.DialogmoteInnkallingVarselService
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 
 open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client = httpClient()
     private val arbeidsgiverNotifikasjonProdusentBasepath = urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl
-    private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.AgNotifikasjonProdusentConsumer")
+    private val log = LoggerFactory.getLogger(ArbeidsgiverNotifikasjonProdusent::class.qualifiedName)
     private val scope = urlEnv.arbeidsgiverNotifikasjonProdusentApiScope
 
     open fun createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? {
@@ -66,7 +66,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
                 arbeidsgiverNotifikasjon.url,
                 arbeidsgiverNotifikasjon.narmesteLederFnr,
                 arbeidsgiverNotifikasjon.ansattFnr,
-                ARBEIDSGIVERNOTIFIKASJON_MERKELAPP,
+                arbeidsgiverNotifikasjon.merkelapp,
                 arbeidsgiverNotifikasjon.messageText,
                 arbeidsgiverNotifikasjon.narmesteLederEpostadresse,
                 arbeidsgiverNotifikasjon.emailTitle,

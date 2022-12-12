@@ -9,7 +9,8 @@ import org.slf4j.LoggerFactory
 
 class VarselBusService(
     val motebehovVarselService: MotebehovVarselService,
-    val oppfolgingsplanVarselService: OppfolgingsplanVarselService
+    val oppfolgingsplanVarselService: OppfolgingsplanVarselService,
+    val dialogmoteInnkallingVarselService: DialogmoteInnkallingVarselService
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.VarselBusService")
     fun processVarselHendelse(varselHendelse: EsyfovarselHendelse) {
@@ -17,8 +18,22 @@ class VarselBusService(
         when (varselHendelse.type) {
             NL_OPPFOLGINGSPLAN_OPPRETTET,
             NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+
             NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
             SM_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+
+            NL_DIALOGMOTE_INNKALT,
+            NL_DIALOGMOTE_AVLYST,
+            NL_DIALOGMOTE_REFERAT,
+            NL_DIALOGMOTE_NYTT_TID_STED -> dialogmoteInnkallingVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+
+            SM_DIALOGMOTE_INNKALT,
+            SM_DIALOGMOTE_AVLYST,
+            SM_DIALOGMOTE_REFERAT,
+            SM_DIALOGMOTE_NYTT_TID_STED -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+            else -> {
+                log.warn("Klarte ikke mappe varsel av type ${varselHendelse.type} ved behandling forsøk")
+            }
         }
     }
 

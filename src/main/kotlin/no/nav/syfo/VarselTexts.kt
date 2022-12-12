@@ -4,11 +4,20 @@ const val DINE_SYKMELDTE_OPPFOLGINGSPLAN_OPPRETTET_TEKST = "1 oppfølgingsplan e
 const val DINE_SYKMELDTE_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST = "1 oppfølgingsplan til godkjenning"
 const val DINE_SYKMELDTE_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST = "1 ny forespørsel om behov for dialogmøte"
 const val DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST = "Påminnelse om aktivitetsplikten"
+const val DINE_SYKMELDTE_DIALOGMOTE_INNKALT_TEKST = "Innkalling til dialogmøte"
+const val DINE_SYKMELDTE_DIALOGMOTE_AVLYST_TEKST = "Avlysning av dialogmøte"
+const val DINE_SYKMELDTE_DIALOGMOTE_NYTT_TID_STED_TEKST = "Endring av dialogmøte"
+const val DINE_SYKMELDTE_DIALOGMOTE_REFERAT_TEKST = "Referat fra dialogmøte"
 
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST = "NAV ønsker svar på om du trenger et dialogmøte"
 const val BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT = "Det nærmer seg datoen da du ikke lenger kan få sykepenger."
+const val BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST = "Du er innkalt til dialogmøte - vi trenger svaret ditt"
+const val BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST = "Du har mottatt et brev om avlyst dialogmøte"
+const val BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST = "Du har mottatt et brev om endret dialogmøte"
+const val BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST = "Du har mottatt et referat fra dialogmøte"
 
-const val ARBEIDSGIVERNOTIFIKASJON_MERKELAPP = "Oppfølging"
+const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP = "Oppfølging"
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP = "Dialogmøte"
 const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT = "En av dine medarbeidere har snart vært sykmeldt i åtte uker"
 const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE = "Varsel om nytt aktivitetskrav"
 const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY =
@@ -25,3 +34,38 @@ const val ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY = "<body>Hei.<br>\n
         "Du kan ikke svare på denne meldingen.</body>"
 
 const val DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT = "Snart slutt på sykepengene"
+
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_MESSAGE_TEXT = "Du er innkalt til dialogmøte - vi trenger svaret ditt"
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_TITLE = "Innkalling til dialogmøte med NAV"
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_BODY =
+    "NAV innkaller deg til et dialogmøte i forbindelse med en av dine ansatte sitt sykefravær. Av hensyn til personvernet kan vi ikke oppgi navnet i e-posten.<br>\n" +
+            "Du kan lese og svare på møteinnkallingen ved å logge inn på “Min side - arbeidsgiver” og trykke på “Sykmeldte”. Da vil du også se hvem det gjelder.<br><br>\n" +
+            "Har du spørsmål, kan du kontakte oss på 55 55 33 36.<br>\n" +
+            "Vennlig hilsen NAV<br>\n" +
+            "Du kan ikke svare på denne meldingen.</body>"
+
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_MESSAGE_TEXT = "Du har mottatt et brev om avlyst dialogmøte"
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_TITLE = "Dialogmøte med NAV er avlyst"
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_BODY = "Dialogmøtet er avlyst.<br>" +
+        "Du har tidligere fått en innkalling til et dialogmøte. Dette møtet vil likevel ikke bli avholdt. " +
+        "Du kan lese avlysningen ved å logge inn på “Min side – arbeidsgiver” og trykke på “Sykmeldte”. Der kan du også lese begrunnelsen.<br><br>\n" +
+        "Har du spørsmål, kan du kontakte oss på 55 55 33 36.\n" +
+        "Vennlig hilsen NAV\n" +
+        "Du kan ikke svare på denne meldingen.</body>"
+
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_MESSAGE_TEXT = "Du har mottatt et brev om endret dialogmøte"
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_TITLE = "Nytt tidspunkt for dialogmøte med NAV"
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_BODY =
+    "Du er innkalt til et dialogmøte med NAV i forbindelse med en av dine ansatte sitt sykefravær. Tidspunktet eller stedet for et dialogmøte har blitt endret.<br>\n" +
+            "Du kan lese og svare på endringen ved å logge inn på “Min side – arbeidsgiver” og trykke på “Sykmeldte”. Da vil du også se hvem det gjelder.<br><br>\n" +
+            "Har du spørsmål, kan du kontakte oss på 55 55 33 36.<br>\n" +
+            "Vennlig hilsen NAV<br>\n" +
+            "Du kan ikke svare på denne meldingen.</body>"
+
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_MESSAGE_TEXT = "Du har mottatt et referat fra dialogmøte"
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_TITLE = "Referat fra dialogmøte med NAV er blitt tilgjengelig"
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_BODY = "Et referat fra dialogmøte med NAV er blitt tilgjengelig.<br>\n" +
+        "Du kan lese referatet ved å logge inn på \"Min side – arbeidsgiver\" og trykke på \"Sykmeldte\". Da vil du også se hvem det gjelder.<br><br>\n" +
+        "Har du spørsmål, kan du kontakte oss på 55 55 33 36.<br>\n" +
+        "Vennlig hilsen NAV<br>\n" +
+        "Du kan ikke svare på denne meldingen.</body>"

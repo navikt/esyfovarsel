@@ -51,22 +51,7 @@ import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.planner.AktivitetskravVarselPlanner
 import no.nav.syfo.planner.MerVeiledningVarselPlanner
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
-import no.nav.syfo.service.AccessControlService
-import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
-import no.nav.syfo.service.BrukernotifikasjonerService
-import no.nav.syfo.service.DokarkivService
-import no.nav.syfo.service.FysiskBrevUtsendingService
-import no.nav.syfo.service.MerVeiledningVarselFinder
-import no.nav.syfo.service.MerVeiledningVarselService
-import no.nav.syfo.service.MotebehovVarselService
-import no.nav.syfo.service.OppfolgingsplanVarselService
-import no.nav.syfo.service.ReplanleggingService
-import no.nav.syfo.service.SendVarselService
-import no.nav.syfo.service.SenderFacade
-import no.nav.syfo.service.SykepengerMaxDateService
-import no.nav.syfo.service.SykmeldingService
-import no.nav.syfo.service.VarselBusService
-import no.nav.syfo.service.VarselSendtService
+import no.nav.syfo.service.*
 import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.utils.LeaderElection
 import no.nav.syfo.utils.RunOnElection
@@ -129,14 +114,18 @@ fun main() {
                 val motebehovVarselService = MotebehovVarselService(
                     senderFacade,
                     env.urlEnv.dialogmoterUrl,
-                    sykmeldingService
+                    sykmeldingService,
+                )
+                val dialogmoteInnkallingVarselService = DialogmoteInnkallingVarselService(
+                    senderFacade,
+                    env.urlEnv.dialogmoterUrl,
                 )
                 val oppfolgingsplanVarselService = OppfolgingsplanVarselService(senderFacade)
                 val sykepengerMaxDateService = SykepengerMaxDateService(database, pdlConsumer)
                 val merVeiledningVarselService = MerVeiledningVarselService(senderFacade, syketilfellebitService, env.urlEnv)
 
                 val varselBusService =
-                    VarselBusService(motebehovVarselService, oppfolgingsplanVarselService)
+                    VarselBusService(motebehovVarselService, oppfolgingsplanVarselService, dialogmoteInnkallingVarselService)
 
                 connector {
                     port = env.appEnv.applicationPort
