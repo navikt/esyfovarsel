@@ -65,8 +65,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
 
             senderFacade.sendTilArbeidsgiverNotifikasjon(
                 varselHendelse,
-                input,
-                ArbeidsgiverNotifikasjonService.LinkDestination.DIALOGMOTE
+                input
             )
         } else {
             log.warn("Kunne ikke mappe tekstene til arbeidsgiver-tekst for dialogmote varsel av type: ${varselHendelse.type.name}")

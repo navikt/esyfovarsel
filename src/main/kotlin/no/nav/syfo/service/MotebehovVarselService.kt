@@ -63,8 +63,7 @@ class MotebehovVarselService(
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
                 LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
-            ),
-            ArbeidsgiverNotifikasjonService.LinkDestination.DIALOGMOTE
+            )
         )
     }
 

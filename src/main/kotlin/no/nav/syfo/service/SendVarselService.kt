@@ -141,8 +141,7 @@ class SendVarselService(
                 ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE,
                 ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY,
                 LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE_AKTIVITETSKRAV)
-            ),
-            ArbeidsgiverNotifikasjonService.LinkDestination.DINESYKMELDTE
+            )
         )
     }
 

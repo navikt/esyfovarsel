@@ -17,52 +17,27 @@ class ArbeidsgiverNotifikasjonService(
 
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.ArbeidsgiverNotifikasjonService")
 
-    enum class LinkDestination {
-        DINESYKMELDTE,
-        OPPFOLGINGSPLAN,
-        DIALOGMOTE
-    }
-
-    private fun urlForLinkDestination(linkDestination: LinkDestination, narmesteLederId: String): String {
-        return when (linkDestination) {
-            LinkDestination.DIALOGMOTE -> "$dineSykmeldteUrl/dialogmoter/$narmesteLederId"
-            LinkDestination.OPPFOLGINGSPLAN -> "$dineSykmeldteUrl/oppfolgingsplaner/$narmesteLederId"
-            else -> "$dineSykmeldteUrl/$narmesteLederId"
-        }
-    }
-
     fun sendNotifikasjon(
-        arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonInput,
-        linkDestination: LinkDestination
+        arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonInput
     ) {
         runBlocking {
-            val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(
-                arbeidsgiverNotifikasjon.ansattFnr,
-                arbeidsgiverNotifikasjon.virksomhetsnummer
-            )
+            val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(arbeidsgiverNotifikasjon.ansattFnr, arbeidsgiverNotifikasjon.virksomhetsnummer)
 
             if (narmesteLederRelasjon == null || !narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
                 log.warn("Sender ikke varsel til ag-notifikasjon: narmesteLederRelasjon er null eller har ikke kontaktinfo")
                 return@runBlocking
             }
 
-            if (arbeidsgiverNotifikasjon.narmesteLederFnr !== null && !arbeidsgiverNotifikasjon.narmesteLederFnr.equals(
-                    narmesteLederRelasjon.narmesteLederFnr
-                )
-            ) {
+            if (arbeidsgiverNotifikasjon.narmesteLederFnr !== null && !arbeidsgiverNotifikasjon.narmesteLederFnr.equals(narmesteLederRelasjon.narmesteLederFnr)) {
                 log.warn("Sender ikke varsel til ag-notifikasjon: den ansatte har nærmeste leder med annet fnr enn mottaker i varselHendelse")
                 return@runBlocking
             }
 
-            if (narmesteLederRelasjon.narmesteLederId === null) {
-                log.warn("Sender ikke varsel til ag-notifikasjon: Mangler nærmeste leder ID")
-                return@runBlocking
-            }
-
+            val url = dineSykmeldteUrl + "/${narmesteLederRelasjon.narmesteLederId}"
             val arbeidsgiverNotifikasjonen = ArbeidsgiverNotifikasjon(
                 arbeidsgiverNotifikasjon.uuid.toString(),
                 arbeidsgiverNotifikasjon.virksomhetsnummer,
-                urlForLinkDestination(linkDestination, narmesteLederRelasjon.narmesteLederId!!),
+                url,
                 narmesteLederRelasjon.narmesteLederFnr!!,
                 arbeidsgiverNotifikasjon.ansattFnr,
                 arbeidsgiverNotifikasjon.messageText,

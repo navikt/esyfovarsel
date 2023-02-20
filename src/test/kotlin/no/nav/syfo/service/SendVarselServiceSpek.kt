@@ -50,8 +50,7 @@ object SendVarselServiceTestSpek : Spek({
     val syketilfellebitService: SyketilfellebitService = mockk(relaxed = true)
     val sykmeldingerConsumerMock: SykmeldingerConsumer = mockk(relaxed = true)
     val sykmeldingServiceMockk = SykmeldingService(sykmeldingerConsumerMock)
-    val brukernotifikasjonerServiceMockk =
-        BrukernotifikasjonerService(beskjedKafkaProducerMockk, accessControlServiceMockk)
+    val brukernotifikasjonerServiceMockk = BrukernotifikasjonerService(beskjedKafkaProducerMockk, accessControlServiceMockk)
 
     val senderFacade =
         SenderFacade(
@@ -115,7 +114,7 @@ object SendVarselServiceTestSpek : Spek({
 
             verify(exactly = 1) { beskjedKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
             verify(exactly = 1) { dineSykmeldteHendelseKafkaProducerMockk.sendVarsel(any()) }
-            verify(exactly = 1) { arbeidsgiverNotifikasjonServiceMockk.sendNotifikasjon(any(), any()) }
+            verify(exactly = 1) { arbeidsgiverNotifikasjonServiceMockk.sendNotifikasjon(any()) }
         }
 
         it("Should not send aktivitetskrav-varsel to AG if sykmelding not sendt AG") {
@@ -143,7 +142,7 @@ object SendVarselServiceTestSpek : Spek({
 
             verify(exactly = 1) { beskjedKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
             verify(exactly = 0) { dineSykmeldteHendelseKafkaProducerMockk.sendVarsel(any()) }
-            verify(exactly = 0) { arbeidsgiverNotifikasjonServiceMockk.sendNotifikasjon(any(), any()) }
+            verify(exactly = 0) { arbeidsgiverNotifikasjonServiceMockk.sendNotifikasjon(any()) }
         }
 
         it("Should send mer-veiledning-varsel to SM if sykmelding is sendt AG") {

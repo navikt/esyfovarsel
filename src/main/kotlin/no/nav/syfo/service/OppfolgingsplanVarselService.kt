@@ -35,8 +35,7 @@ class OppfolgingsplanVarselService(
                 ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_TITLE,
                 ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_BODY,
                 LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
-            ),
-            ArbeidsgiverNotifikasjonService.LinkDestination.OPPFOLGINGSPLAN
+            )
         )
     }
 }

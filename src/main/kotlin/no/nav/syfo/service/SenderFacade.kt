@@ -55,10 +55,9 @@ class SenderFacade(
 
     fun sendTilArbeidsgiverNotifikasjon(
         varselHendelse: NarmesteLederHendelse,
-        varsel: ArbeidsgiverNotifikasjonInput,
-        linkDestination: ArbeidsgiverNotifikasjonService.LinkDestination
+        varsel: ArbeidsgiverNotifikasjonInput
     ) {
-        arbeidsgiverNotifikasjonService.sendNotifikasjon(varsel, linkDestination)
+        arbeidsgiverNotifikasjonService.sendNotifikasjon(varsel)
         lagreUtsendtNarmesteLederVarsel(ARBEIDSGIVERNOTIFIKASJON, varselHendelse, varsel.uuid.toString())
     }
 
