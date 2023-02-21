@@ -16,7 +16,6 @@ class VarselBusService(
     fun processVarselHendelse(varselHendelse: EsyfovarselHendelse) {
         log.info("Behandler varsel av type ${varselHendelse.type}")
         when (varselHendelse.type) {
-            NL_OPPFOLGINGSPLAN_OPPRETTET,
             NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
 
             NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
