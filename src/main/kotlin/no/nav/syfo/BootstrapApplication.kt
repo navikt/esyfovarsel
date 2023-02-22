@@ -120,7 +120,7 @@ fun main() {
                     senderFacade,
                     env.urlEnv.dialogmoterUrl,
                 )
-                val oppfolgingsplanVarselService = OppfolgingsplanVarselService(senderFacade)
+                val oppfolgingsplanVarselService = OppfolgingsplanVarselService(senderFacade, env.urlEnv.oppfolgingsplanerUrl)
                 val sykepengerMaxDateService = SykepengerMaxDateService(database, pdlConsumer)
                 val merVeiledningVarselService = MerVeiledningVarselService(senderFacade, syketilfellebitService, env.urlEnv)
 

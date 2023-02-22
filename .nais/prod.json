@@ -17,6 +17,7 @@
     "TOGGLE_UTBETALING_KAFKA_CONSUMER": "true",
     "BASE_URL_SYK_INFO": "https://www.nav.no/syk/info",
     "BASE_URL_DIALOGMOTER": "https://www.nav.no/syk/dialogmoter",
+    "BASE_URL_OPPFOLGINGSPLANER": "https://www.nav.no/syk/oppfolgingsplaner",
     "AG_NOTIFIKASJON_PRODUSENT_API_URL": "https://ag-notifikasjon-produsent-api.intern.nav.no/api/graphql",
     "AG_NOTIFIKASJON_PRODUSENT_API_SCOPE": "api://prod-gcp.fager.notifikasjon-produsent-api/.default",
     "NARMESTELEDER_URL": "https://narmesteleder.intern.nav.no",

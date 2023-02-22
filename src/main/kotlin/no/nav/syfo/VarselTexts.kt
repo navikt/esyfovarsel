@@ -14,6 +14,7 @@ const val BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST = "Du er innkalt til dia
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST = "Du har mottatt et brev om avlyst dialogmøte"
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST = "Du har mottatt et brev om endret dialogmøte"
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST = "Du har mottatt et referat fra dialogmøte"
+const val BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT = "Du har en oppfølgingsplan som venter på godkjenning av deg"
 
 const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP = "Oppfølging"
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP = "Dialogmøte"
@@ -77,4 +78,3 @@ const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_BODY = "En 
         "Har du spørsmål, kan du kontakte oss på 55 55 33 36.<br>\n" +
         "Vennlig hilsen NAV<br>\n" +
         "Du kan ikke svare på denne meldingen.</body>"
-
