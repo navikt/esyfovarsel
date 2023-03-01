@@ -42,3 +42,5 @@ fun isFodselsdatoMindreEnn67Ar(fodselsdato: String?): Boolean {
 
     return isFodselsdatoMindreEnn67Ar
 }
+
+fun norwegianOffsetDateTime() = OffsetDateTime.now(ZoneId.of("Europe/Oslo"))

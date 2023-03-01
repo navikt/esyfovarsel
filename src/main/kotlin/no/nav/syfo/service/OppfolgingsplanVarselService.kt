@@ -1,9 +1,8 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.*
-import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
+import no.nav.syfo.kafka.common.createObjectMapper
+import no.nav.syfo.kafka.consumers.varselbus.domain.*
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import java.net.URL
 import java.time.LocalDateTime
@@ -13,23 +12,49 @@ import java.util.*
 const val WEEKS_BEFORE_DELETE = 4L
 
 class OppfolgingsplanVarselService(
-    val senderFacade: SenderFacade, val oppfolgingsplanerUrl: String
+    val senderFacade: SenderFacade,
+    val oppfolgingsplanerUrl: String
 ) {
+    private val objectMapper = createObjectMapper()
 
-    fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
-        val url = URL(oppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL)
+    fun sendEllerFerdigstillVarselTilArbeidstaker(
+        varselHendelse: ArbeidstakerHendelse
+    ) {
+        if (varselHendelse.skalFerdigstilles()) {
+            ferdigstillVarselArbeidstaker(varselHendelse)
+        } else {
+            sendVarselTilArbeidstaker(varselHendelse)
+        }
+    }
+
+    fun sendEllerFerdigstillVarselTilNarmesteLeder(
+        varselHendelse: NarmesteLederHendelse
+    ) {
+        if (varselHendelse.skalFerdigstilles()) {
+            ferdigstillVarselNarmesteLeder(varselHendelse)
+        } else {
+            sendVarselTilNarmesteLeder(varselHendelse)
+        }
+    }
+
+    private fun sendVarselTilArbeidstaker(
+        varselHendelse: ArbeidstakerHendelse
+    ) {
         senderFacade.sendTilBrukernotifikasjoner(
             UUID.randomUUID().toString(),
             varselHendelse.arbeidstakerFnr,
             BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT,
-            url,
+            URL(oppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL),
             varselHendelse
         )
     }
 
-    fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
+    fun sendVarselTilNarmesteLeder(
+        varselHendelse: NarmesteLederHendelse
+    ) {
         senderFacade.sendTilDineSykmeldte(
-            varselHendelse, DineSykmeldteVarsel(
+            varselHendelse,
+            DineSykmeldteVarsel(
                 ansattFnr = varselHendelse.arbeidstakerFnr,
                 orgnr = varselHendelse.orgnummer,
                 oppgavetype = varselHendelse.type.toDineSykmeldteHendelseType().toString(),
@@ -39,7 +64,8 @@ class OppfolgingsplanVarselService(
             )
         )
         senderFacade.sendTilArbeidsgiverNotifikasjon(
-            varselHendelse, ArbeidsgiverNotifikasjonInput(
+            varselHendelse,
+            ArbeidsgiverNotifikasjonInput(
                 UUID.randomUUID(),
                 varselHendelse.orgnummer,
                 varselHendelse.narmesteLederFnr,
@@ -51,5 +77,28 @@ class OppfolgingsplanVarselService(
                 LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
             )
         )
+    }
+
+    private fun ferdigstillVarselArbeidstaker(varselHendelse: ArbeidstakerHendelse) =
+        senderFacade.ferdigstillBrukernotifkasjonVarsler(varselHendelse)
+
+    private fun ferdigstillVarselNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
+        senderFacade.ferdigstillDineSykmeldteVarsler(
+            varselHendelse
+        )
+        senderFacade.ferdigstillArbeidsgiverNotifikasjoner(
+            varselHendelse,
+            ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
+        )
+    }
+
+    private fun EsyfovarselHendelse.skalFerdigstilles(): Boolean {
+        val data = this.data?.toString()
+        return data?.let {
+            objectMapper.readValue(
+                it,
+                VarselData::class.java
+            )?.status?.ferdigstilt
+        } ?: false
     }
 }

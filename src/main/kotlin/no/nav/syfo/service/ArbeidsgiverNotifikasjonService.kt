@@ -3,6 +3,7 @@ package no.nav.syfo.service
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -50,6 +51,14 @@ class ArbeidsgiverNotifikasjonService(
             arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjonen)
         }
     }
+
+    fun deleteNotifikasjon(merkelapp: String, eksternReferanse: String) =
+        arbeidsgiverNotifikasjonProdusent.deleteNotifikasjonForArbeidsgiver(
+            ArbeidsgiverDeleteNotifikasjon(
+                merkelapp,
+                eksternReferanse
+            )
+        )
 }
 
 data class ArbeidsgiverNotifikasjonInput(

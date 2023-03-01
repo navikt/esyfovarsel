@@ -13,11 +13,13 @@ class VarselBusService(
     val dialogmoteInnkallingVarselService: DialogmoteInnkallingVarselService
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.VarselBusService")
-    fun processVarselHendelse(varselHendelse: EsyfovarselHendelse) {
+    fun processVarselHendelse(
+        varselHendelse: EsyfovarselHendelse
+    ) {
         log.info("Behandler varsel av type ${varselHendelse.type}")
         when (varselHendelse.type) {
-            NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
-            SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+            NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendEllerFerdigstillVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+            SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendEllerFerdigstillVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
             NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
             SM_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())

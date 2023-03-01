@@ -15,3 +15,8 @@ data class ArbeidsgiverNotifikasjon(
     val emailBody: String,
     val hardDeleteDate: LocalDateTime,
 )
+
+data class ArbeidsgiverDeleteNotifikasjon(
+    val merkelapp: String,
+    val eksternReferanse: String
+)

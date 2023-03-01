@@ -21,7 +21,7 @@ import java.util.*
 
 object UtsendtVarselDAOSpek : Spek({
 
-    //The default timeout of 10 seconds is not sufficient to initialise the embedded database
+    // The default timeout of 10 seconds is not sufficient to initialise the embedded database
     defaultTimeout = 20000L
 
     describe("UtsendtVarselDAOSpek") {
@@ -40,7 +40,6 @@ object UtsendtVarselDAOSpek : Spek({
             val aktivitetskravVarsel = planlagtVarsel(AKTIVITETSKRAV)
             embeddedDatabase.storeUtsendtVarsel(aktivitetskravVarsel)
             embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV, aktivitetskravVarsel.uuid)
-
         }
 
         it("Fetch mer veiledning varsel sent last 3 months") {
@@ -80,7 +79,8 @@ private fun utsendtVarsel(type: VarselType, utsendtTidspunkt: LocalDateTime) = P
     "kanal",
     utsendtTidspunkt,
     "000",
-    "000"
+    "000",
+    null
 )
 
 private fun DatabaseInterface.skalHaUtsendtVarsel(fnr: String, type: VarselType, planlagtVarselId: String) =
