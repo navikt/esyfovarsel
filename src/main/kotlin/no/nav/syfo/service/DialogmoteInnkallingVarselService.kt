@@ -103,8 +103,8 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         return when (hendelseType) {
             NL_DIALOGMOTE_INNKALT -> DINE_SYKMELDTE_DIALOGMOTE_INNKALT_TEKST
             NL_DIALOGMOTE_AVLYST -> DINE_SYKMELDTE_DIALOGMOTE_AVLYST_TEKST
-            NL_DIALOGMOTE_REFERAT -> DINE_SYKMELDTE_DIALOGMOTE_NYTT_TID_STED_TEKST
-            NL_DIALOGMOTE_NYTT_TID_STED -> DINE_SYKMELDTE_DIALOGMOTE_REFERAT_TEKST
+            NL_DIALOGMOTE_NYTT_TID_STED -> DINE_SYKMELDTE_DIALOGMOTE_NYTT_TID_STED_TEKST
+            NL_DIALOGMOTE_REFERAT -> DINE_SYKMELDTE_DIALOGMOTE_REFERAT_TEKST
             else -> {
                 throw IllegalArgumentException("Kan ikke mappe $hendelseType til Dine sykmeldte varsel text")
             }
@@ -125,13 +125,13 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
                 EMAIL_BODY_KEY to getEmailBody(hendelse),
             )
 
-            NL_DIALOGMOTE_REFERAT -> hashMapOf(
+            NL_DIALOGMOTE_NYTT_TID_STED -> hashMapOf(
                 SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_MESSAGE_TEXT,
                 EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_TITLE,
                 EMAIL_BODY_KEY to getEmailBody(hendelse),
             )
 
-            NL_DIALOGMOTE_NYTT_TID_STED -> hashMapOf(
+            NL_DIALOGMOTE_REFERAT -> hashMapOf(
                 SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_MESSAGE_TEXT,
                 EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_TITLE,
                 EMAIL_BODY_KEY to getEmailBody(hendelse),
@@ -152,8 +152,8 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         return when (hendelse.type) {
             NL_DIALOGMOTE_INNKALT -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_BODY
             NL_DIALOGMOTE_AVLYST -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_BODY
-            NL_DIALOGMOTE_REFERAT -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_BODY
-            NL_DIALOGMOTE_NYTT_TID_STED -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_BODY
+            NL_DIALOGMOTE_REFERAT -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_BODY
+            NL_DIALOGMOTE_NYTT_TID_STED -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_BODY
             else -> ""
         }
     }

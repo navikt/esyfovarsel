@@ -1,6 +1,5 @@
 package no.nav.syfo
 
-const val DINE_SYKMELDTE_OPPFOLGINGSPLAN_OPPRETTET_TEKST = "1 oppfølgingsplan er påbegynt"
 const val DINE_SYKMELDTE_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST = "1 oppfølgingsplan til godkjenning"
 const val DINE_SYKMELDTE_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST = "1 ny forespørsel om behov for dialogmøte"
 const val DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST = "Påminnelse om aktivitetsplikten"
@@ -15,6 +14,7 @@ const val BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST = "Du er innkalt til dia
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST = "Du har mottatt et brev om avlyst dialogmøte"
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST = "Du har mottatt et brev om endret dialogmøte"
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST = "Du har mottatt et referat fra dialogmøte"
+const val BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT = "Du har en oppfølgingsplan som venter på godkjenning av deg"
 
 const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP = "Oppfølging"
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP = "Dialogmøte"
@@ -65,6 +65,15 @@ const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_BODY =
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_MESSAGE_TEXT = "Du har mottatt et referat fra dialogmøte"
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_TITLE = "Referat fra dialogmøte med NAV er blitt tilgjengelig"
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_BODY = "Et referat fra dialogmøte med NAV er blitt tilgjengelig.<br>\n" +
+        "Du finner oppfølgingsplanen ved å logge inn på \"Min side – arbeidsgiver\". I \"bjella\" ser du hvem det gjelder.<br><br>\n" +
+        "Har du spørsmål, kan du kontakte oss på 55 55 33 36.<br>\n" +
+        "Vennlig hilsen NAV<br>\n" +
+        "Du kan ikke svare på denne meldingen.</body>"
+
+
+const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT = "Oppfølgingsplan til godkjenning"
+const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_TITLE = "En oppfølgingsplan venter på godkjenning fra deg"
+const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_BODY = "En av dine ansatte har sendt en oppfølgingsplan som venter på godkjenning fra deg.<br>\n" +
         "Du kan lese referatet ved å logge inn på \"Min side – arbeidsgiver\" og trykke på \"Sykmeldte\". Da vil du også se hvem det gjelder.<br><br>\n" +
         "Har du spørsmål, kan du kontakte oss på 55 55 33 36.<br>\n" +
         "Vennlig hilsen NAV<br>\n" +
