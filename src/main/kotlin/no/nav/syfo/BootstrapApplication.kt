@@ -1,7 +1,5 @@
 package no.nav.syfo
 
-import com.auth0.jwk.JwkProvider
-import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -18,7 +16,6 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.engine.stop
 import io.ktor.server.netty.Netty
-import java.net.URL
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -26,7 +23,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.AzureAdTokenConsumer
-import no.nav.syfo.auth.getWellKnown
 import no.nav.syfo.auth.setupLocalRoutesWithAuthentication
 import no.nav.syfo.auth.setupRoutesWithAuthentication
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
@@ -79,14 +75,7 @@ fun main() {
                 database = Database(env.dbEnv)
                 database.grantAccessToIAMUsers()
 
-                val wellKnownTokenX = getWellKnown(env.authEnv.tokenXWellKnownUrl)
-                val jwkProviderTokenX = JwkProviderBuilder(URL(wellKnownTokenX.jwks_uri))
-                    .cached(10, 24, TimeUnit.HOURS)
-                    .rateLimited(10, 1, TimeUnit.MINUTES)
-                    .build()
-
                 val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
-
                 val pdlConsumer = getPdlConsumer(env.urlEnv, azureAdTokenConsumer)
                 val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer)
                 val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
@@ -155,8 +144,6 @@ fun main() {
                         sykepengerMaxDateService,
                         sykmeldingService,
                         pdlConsumer,
-                        jwkProviderTokenX,
-                        tokenXIssuer = wellKnownTokenX.issuer,
                     )
 
                     kafkaModule(
@@ -206,8 +193,6 @@ fun Application.serverModule(
     sykepengerMaxDateService: SykepengerMaxDateService,
     sykmeldingService: SykmeldingService,
     pdlConsumer: PdlConsumer,
-    jwkProviderTokenX: JwkProvider,
-    tokenXIssuer: String,
 ) {
 
     val sendVarselService =
@@ -254,7 +239,7 @@ fun Application.serverModule(
     }
 
     runningRemotely {
-        setupRoutesWithAuthentication(varselSender, replanleggingService, sykepengerMaxDateService, env.authEnv, jwkProviderTokenX, tokenXIssuer)
+        setupRoutesWithAuthentication(varselSender, replanleggingService, sykepengerMaxDateService, env.authEnv)
     }
 
     runningLocally {
