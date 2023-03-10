@@ -9,7 +9,7 @@ spec:
   groups:
     - name: esyfovarsel-alerts
       rules:
-        - alert: esyfovarsel er nede
+        - alert: ESYFOVARSEL IS DOWN!
           expr: kube_deployment_status_replicas_available{deployment="esyfovarsel"} == 0
           for: 2m
           annotations:
@@ -18,7 +18,7 @@ spec:
           labels:
             namespace: team-esyfo
             severity: critical
-        - alert: høy feilrate i logger
+        - alert: HIGH RATIO OF WARNING/ERRORS IN LOG
           expr: (100 * sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="esyfovarsel",log_level=~"Warning|Error"}[3m])) / sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="esyfovarsel"}[3m]))) > 10
           for: 3m
           annotations:
@@ -27,7 +27,7 @@ spec:
           labels:
             namespace: team-esyfo
             severity: warning
-        - alert: esyfovarsel-job har feilet
+        - alert: ESYFOVARSEL-JOB HAS FAILED
           expr: kube_job_failed{job_name=~"esyfovarsel-job.*", namespace="team-esyfo"} > 0
           for: 2m
           annotations:
