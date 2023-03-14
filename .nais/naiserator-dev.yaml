@@ -87,7 +87,7 @@ spec:
         type: POSTGRES_13
   webproxy: true
   ingresses:
-    - "https://esyfovarsel.dev.intern.nav.no"
+    - "https://esyfovarsel.intern.dev.nav.no"
   kafka:
     pool: nav-dev
   leaderElection: true
