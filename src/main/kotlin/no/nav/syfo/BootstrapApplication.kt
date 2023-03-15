@@ -76,7 +76,6 @@ fun main() {
                 database.grantAccessToIAMUsers()
 
                 val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
-
                 val pdlConsumer = getPdlConsumer(env.urlEnv, azureAdTokenConsumer)
                 val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer)
                 val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)

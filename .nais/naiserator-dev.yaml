@@ -88,11 +88,11 @@ spec:
   webproxy: true
   ingresses:
     - "https://esyfovarsel.dev.intern.nav.no"
+  tokenx:
+    enabled: true
   kafka:
     pool: nav-dev
   leaderElection: true
-  envFrom:
-    - configmap: loginservice-idporten
   filesFrom:
     - secret: esyfovarsel-serviceuser
   env:
