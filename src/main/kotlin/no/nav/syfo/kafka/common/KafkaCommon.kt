@@ -26,6 +26,7 @@ import java.time.Duration
 import java.util.*
 
 const val topicBrukernotifikasjonBeskjed = "min-side.aapen-brukernotifikasjon-beskjed-v1"
+const val topicBrukernotifikasjonOppgave = "min-side.aapen-brukernotifikasjon-oppgave-v1"
 const val topicFlexSyketilfellebiter = "flex.syketilfellebiter"
 const val topicDineSykmeldteHendelse = "teamsykmelding.dinesykmeldte-hendelser-v2"
 const val topicVarselBus = "team-esyfo.varselbus"

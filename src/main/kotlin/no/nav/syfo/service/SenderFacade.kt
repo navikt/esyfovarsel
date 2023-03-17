@@ -18,6 +18,7 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import java.net.URL
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 
 class SenderFacade(
     val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
@@ -47,9 +48,10 @@ class SenderFacade(
         mottakerFnr: String,
         content: String,
         url: URL,
-        varselHendelse: ArbeidstakerHendelse
+        varselHendelse: ArbeidstakerHendelse,
+        meldingType: BrukernotifikasjonKafkaProducer.MeldingType? = BrukernotifikasjonKafkaProducer.MeldingType.BESKJED
     ) {
-        brukernotifikasjonerService.sendVarsel(uuid, mottakerFnr, content, url)
+        brukernotifikasjonerService.sendVarsel(uuid, mottakerFnr, content, url, meldingType)
         lagreUtsendtArbeidstakerVarsel(BRUKERNOTIFIKASJON, varselHendelse, uuid)
     }
 

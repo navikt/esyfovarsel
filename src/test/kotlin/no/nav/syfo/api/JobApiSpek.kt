@@ -19,7 +19,7 @@ import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.getTestEnv
 import no.nav.syfo.job.VarselSender
-import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
+import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.service.AccessControlService
 import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
@@ -55,7 +55,7 @@ object JobApiSpek : Spek({
     describe("JobTriggerApi test") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
         val accessControlService = mockk<AccessControlService>()
-        val beskjedKafkaProducer = mockk<BeskjedKafkaProducer>()
+        val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProducer>()
         val arbeidsgiverNotifikasjonService = mockk<ArbeidsgiverNotifikasjonService>()
         val dineSykmeldteHendelseKafkaProducer = mockk<DineSykmeldteHendelseKafkaProducer>()
         val merVeiledningVarselFinder = mockk<MerVeiledningVarselFinder>(relaxed = true)
@@ -134,13 +134,13 @@ object JobApiSpek : Spek({
                 any()
             )
         } returns SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = true)
-        coEvery { beskjedKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
+        coEvery { brukernotifikasjonKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
         coEvery { dokarkivService.getJournalpostId(any(), any()) } returns "1"
         coEvery { sykmeldingService.isPersonSykmeldtPaDato(any(), any()) } returns true
 
         val sendVarselService =
             SendVarselService(
-                beskjedKafkaProducer,
+                brukernotifikasjonKafkaProducer,
                 dineSykmeldteHendelseKafkaProducer,
                 accessControlService,
                 testEnv.urlEnv,
