@@ -33,9 +33,10 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SYKMELDT_URL)
         val text = getArbeidstakerVarselText(varselHendelse.type)
         val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
+        val varselUuid = dataToDialogmoteInnkallingArbeidstakerData(varselHendelse.data)
 
         senderFacade.sendTilBrukernotifikasjoner(
-            getVarselUUID(varselHendelse),
+            varselUuid.varselUuid,
             varselHendelse.arbeidstakerFnr,
             text,
             url,
@@ -191,5 +192,17 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
                 throw IllegalArgumentException("Kan ikke mappe $hendelseType")
             }
         }
+    }
+
+    fun dataToDialogmoteInnkallingArbeidstakerData(data: Any?): ArbeidstakerHendelseUUID {
+        return data?.let {
+            try {
+                val uuid = data.toString()
+                val varselUuid = objectMapper.readTree(uuid)["varselUuid"].textValue()
+                return ArbeidstakerHendelseUUID(varselUuid)
+            } catch (e: IOException) {
+                throw IOException("ArbeidstakerHendelseUUID har feil format")
+            }
+        } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
 }
