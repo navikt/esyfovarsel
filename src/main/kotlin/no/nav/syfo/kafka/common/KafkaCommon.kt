@@ -5,9 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig.USER_INFO_CONFIG
+import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig.*
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
+import java.time.Duration
+import java.util.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import no.nav.syfo.ApplicationState
@@ -19,14 +20,12 @@ import org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG
 import org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG
 import org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG
-import org.apache.kafka.common.config.SaslConfigs.SASL_JAAS_CONFIG
-import org.apache.kafka.common.config.SaslConfigs.SASL_MECHANISM
+import org.apache.kafka.common.config.SaslConfigs.*
 import org.apache.kafka.common.config.SslConfigs.*
-import java.time.Duration
-import java.util.*
 
 const val topicBrukernotifikasjonBeskjed = "min-side.aapen-brukernotifikasjon-beskjed-v1"
 const val topicBrukernotifikasjonOppgave = "min-side.aapen-brukernotifikasjon-oppgave-v1"
+const val topicBrukernotifikasjonDone = "min-side.aapen-brukernotifikasjon-done-v1"
 const val topicFlexSyketilfellebiter = "flex.syketilfellebiter"
 const val topicDineSykmeldteHendelse = "teamsykmelding.dinesykmeldte-hendelser-v2"
 const val topicVarselBus = "team-esyfo.varselbus"
@@ -81,7 +80,10 @@ fun consumerProperties(env: Environment): Properties {
         put(SASL_MECHANISM, "PLAIN")
         put(KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer")
         put(VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer")
-        put(SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${env.authEnv.serviceuserUsername}\" password=\"${env.authEnv.serviceuserPassword}\";")
+        put(
+            SASL_JAAS_CONFIG,
+            "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${env.authEnv.serviceuserUsername}\" password=\"${env.authEnv.serviceuserPassword}\";"
+        )
         put(BOOTSTRAP_SERVERS_CONFIG, env.kafkaEnv.bootstrapServersUrl)
     }.toProperties()
     if (!env.appEnv.remote) {

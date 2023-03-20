@@ -19,9 +19,15 @@ class BrukernotifikasjonerService(
                     brukernotifikasjonKafkaProducer.sendBeskjed(mottakerFnr, content, uuid, url)
                     log.info("Har sendt beskjed med uuid $uuid til brukernotifikasjoner: $content")
                 }
+
                 BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE -> {
                     brukernotifikasjonKafkaProducer.sendOppgave(mottakerFnr, content, uuid, url)
                     log.info("Har sendt oppgave med uuid $uuid til brukernotifikasjoner: $content")
+                }
+
+                BrukernotifikasjonKafkaProducer.MeldingType.DONE -> {
+                    brukernotifikasjonKafkaProducer.sendDone(mottakerFnr, uuid)
+                    log.info("Har sendt done med uuid $uuid til brukernotifikasjoner")
                 }
             }
         } else {

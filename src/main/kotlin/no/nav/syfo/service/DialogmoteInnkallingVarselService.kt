@@ -32,10 +32,10 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SYKMELDT_URL)
         val text = getArbeidstakerVarselText(varselHendelse.type)
-        val meldingType = getMeldingType(varselHendelse.type)
+        val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
 
         senderFacade.sendTilBrukernotifikasjoner(
-            UUID.randomUUID().toString(),
+            getVarselUUID(varselHendelse),
             varselHendelse.arbeidstakerFnr,
             text,
             url,
@@ -90,6 +90,11 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
             )
             senderFacade.sendTilDineSykmeldte(varselHendelse, dineSykmeldteVarsel)
         }
+    }
+
+    private fun getVarselUUID(varselHendelse: ArbeidstakerHendelse): String {
+        val data = varselHendelse.data as ArbeidstakerHendelseUUID
+        return data.varselUuid
     }
 
     private fun getArbeidstakerVarselText(hendelseType: HendelseType): String {
@@ -175,12 +180,13 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
 
-    private fun getMeldingType(hendelseType: HendelseType): BrukernotifikasjonKafkaProducer.MeldingType {
+    private fun getMeldingTypeForSykmeldtVarsling(hendelseType: HendelseType): BrukernotifikasjonKafkaProducer.MeldingType {
         return when (hendelseType) {
-            NL_DIALOGMOTE_INNKALT -> BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
-            NL_DIALOGMOTE_AVLYST -> BrukernotifikasjonKafkaProducer.MeldingType.BESKJED
-            NL_DIALOGMOTE_NYTT_TID_STED -> BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
-            NL_DIALOGMOTE_REFERAT -> BrukernotifikasjonKafkaProducer.MeldingType.BESKJED
+            SM_DIALOGMOTE_INNKALT -> BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
+            SM_DIALOGMOTE_AVLYST -> BrukernotifikasjonKafkaProducer.MeldingType.BESKJED
+            SM_DIALOGMOTE_NYTT_TID_STED -> BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
+            SM_DIALOGMOTE_REFERAT -> BrukernotifikasjonKafkaProducer.MeldingType.BESKJED
+            SM_DIALOGMOTE_LEST -> BrukernotifikasjonKafkaProducer.MeldingType.DONE
             else -> {
                 throw IllegalArgumentException("Kan ikke mappe $hendelseType")
             }
