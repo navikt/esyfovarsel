@@ -93,17 +93,13 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         }
     }
 
-    private fun getVarselUUID(varselHendelse: ArbeidstakerHendelse): String {
-        val data = varselHendelse.data as ArbeidstakerHendelseUUID
-        return data.varselUuid
-    }
-
     private fun getArbeidstakerVarselText(hendelseType: HendelseType): String {
         return when (hendelseType) {
             SM_DIALOGMOTE_INNKALT -> BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST
             SM_DIALOGMOTE_AVLYST -> BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST
             SM_DIALOGMOTE_NYTT_TID_STED -> BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST
             SM_DIALOGMOTE_REFERAT -> BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST
+            SM_DIALOGMOTE_LEST -> ""
             else -> {
                 throw IllegalArgumentException("Kan ikke mappe $hendelseType til arbeidstaker varsel text")
             }
