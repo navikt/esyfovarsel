@@ -24,8 +24,6 @@ data class ArbeidstakerHendelse(
     val orgnummer: String?
 ) : EsyfovarselHendelse
 
-data class ArbeidstakerHendelseUUID(val varselUuid: String)
-
 enum class HendelseType {
     NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
     SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,

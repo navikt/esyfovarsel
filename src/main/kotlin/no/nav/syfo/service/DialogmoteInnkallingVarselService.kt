@@ -190,12 +190,12 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         }
     }
 
-    fun dataToDialogmoteInnkallingArbeidstakerData(data: Any?): ArbeidstakerHendelseUUID {
+    fun dataToDialogmoteInnkallingArbeidstakerData(data: Any?): DialogmoteInnkallingArbeidstakerData {
         return data?.let {
             try {
                 val uuid = data.toString()
                 val varselUuid = objectMapper.readTree(uuid)["varselUuid"].textValue()
-                return ArbeidstakerHendelseUUID(varselUuid)
+                return DialogmoteInnkallingArbeidstakerData(varselUuid)
             } catch (e: IOException) {
                 throw IOException("ArbeidstakerHendelseUUID har feil format")
             }
