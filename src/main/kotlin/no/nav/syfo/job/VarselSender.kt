@@ -23,7 +23,7 @@ class VarselSender(
     private val merVeiledningVarselFinder: MerVeiledningVarselFinder,
     private val toggles: ToggleEnv,
 ) {
-    private val log = LoggerFactory.getLogger("no.nav.syfo.job.SendVarslerJobb")
+    private val log = LoggerFactory.getLogger(VarselSender::class.qualifiedName)
 
     suspend fun sendVarsler(): Int {
         log.info("Starter SendVarslerJobb")

@@ -8,7 +8,7 @@ metadata:
 spec:
   image: {{ image }}
 #  schedule: "*/5 * * * *"
-  schedule: "*/60 9-11 * * *"
+  schedule: "*/60 10-12 * * *"
   filesFrom:
     - secret: esyfovarsel-serviceuser
   env:
