@@ -8,7 +8,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
-import no.nav.syfo.service.DialogmoteInnkallingVarselService
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 

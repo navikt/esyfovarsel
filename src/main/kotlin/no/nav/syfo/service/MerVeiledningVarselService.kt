@@ -10,7 +10,6 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import no.nav.syfo.syketilfelle.SyketilfellebitService
 import org.slf4j.LoggerFactory
 import java.net.URL
-import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 

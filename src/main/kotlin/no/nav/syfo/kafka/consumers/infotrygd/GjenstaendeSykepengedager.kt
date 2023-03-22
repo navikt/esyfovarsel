@@ -2,7 +2,6 @@ package no.nav.syfo.kafka.consumers.infotrygd
 
 import java.time.DayOfWeek
 import java.time.LocalDate
-import kotlin.streams.toList
 
 fun LocalDate.gjenstaendeSykepengedager(other: LocalDate): Int {
     return this
