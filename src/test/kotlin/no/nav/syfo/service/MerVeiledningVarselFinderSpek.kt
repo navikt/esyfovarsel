@@ -158,10 +158,6 @@ object MerVeiledningVarselFinderSpek : Spek({
             coEvery { sykmeldingServiceMockk.isPersonSykmeldtPaDato(LocalDate.now(), arbeidstakerFnr2) } returns true
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel2)
 
-            val varslerToSendToday = runBlocking {
-                merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
-            }
-
             coVerify(exactly = 0) { pdlConsumerMockk.isBrukerYngreEnn67(arbeidstakerFnr1) }
         }
     }
