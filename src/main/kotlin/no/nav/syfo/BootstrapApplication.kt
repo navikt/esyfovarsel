@@ -44,7 +44,7 @@ import no.nav.syfo.kafka.consumers.infotrygd.InfotrygdKafkaConsumer
 import no.nav.syfo.kafka.consumers.syketilfelle.SyketilfelleKafkaConsumer
 import no.nav.syfo.kafka.consumers.utbetaling.UtbetalingKafkaConsumer
 import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
-import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
+import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
@@ -88,7 +88,7 @@ fun main() {
                 val dokarkivConsumer = DokarkivConsumer(env.urlEnv, azureAdTokenConsumer)
                 val dokarkivService = DokarkivService(dokarkivConsumer, pdfgenConsumer, pdlConsumer, database)
 
-                val beskjedKafkaProducer = BeskjedKafkaProducer(env)
+                val brukernotifikasjonKafkaProducer = BrukernotifikasjonKafkaProducer(env)
                 val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
                 val dittSykefravaerMeldingKafkaProdcuer = DittSykefravaerMeldingKafkaProducer(env)
 
@@ -101,7 +101,7 @@ fun main() {
                 val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, syketilfellebitService, varselSendtService)
                 val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, syketilfellebitService, sykmeldingService)
                 val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
-                val brukernotifikasjonerService = BrukernotifikasjonerService(beskjedKafkaProducer, accessControlService)
+                val brukernotifikasjonerService = BrukernotifikasjonerService(brukernotifikasjonKafkaProducer, accessControlService)
                 val senderFacade = SenderFacade(
                     dineSykmeldteHendelseKafkaProducer,
                     dittSykefravaerMeldingKafkaProdcuer,
@@ -137,7 +137,7 @@ fun main() {
                         env,
                         accessControlService,
                         replanleggingService,
-                        beskjedKafkaProducer,
+                        brukernotifikasjonKafkaProducer,
                         dineSykmeldteHendelseKafkaProducer,
                         arbeidsgiverNotifikasjonService,
                         merVeiledningVarselService,
@@ -186,7 +186,7 @@ fun Application.serverModule(
     env: Environment,
     accessControlService: AccessControlService,
     replanleggingService: ReplanleggingService,
-    beskjedKafkaProducer: BeskjedKafkaProducer,
+    brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,
     dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
     arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
     merVeiledningVarselService: MerVeiledningVarselService,
@@ -197,7 +197,7 @@ fun Application.serverModule(
 
     val sendVarselService =
         SendVarselService(
-            beskjedKafkaProducer,
+            brukernotifikasjonKafkaProducer,
             dineSykmeldteHendelseKafkaProducer,
             accessControlService,
             env.urlEnv,

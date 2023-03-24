@@ -19,14 +19,14 @@ import no.nav.syfo.db.domain.VarselType.SVAR_MOTEBEHOV
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.DineSykmeldteHendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
-import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
+import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class SendVarselService(
-    val beskjedKafkaProducer: BeskjedKafkaProducer,
+    val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,
     val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
     val accessControlService: AccessControlService,
     val urlEnv: UrlEnv,
@@ -168,7 +168,7 @@ class SendVarselService(
         varselUrl: URL
     ) {
         log.info("Sender varsel til Brukernotifikasjoner for uuid $uuid")
-        beskjedKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl)
+        brukernotifikasjonKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl)
         log.info("Har sendt varsel til Brukernotifikasjoner for uuid $uuid")
     }
 

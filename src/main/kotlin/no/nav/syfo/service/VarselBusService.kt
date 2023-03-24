@@ -30,7 +30,9 @@ class VarselBusService(
             SM_DIALOGMOTE_INNKALT,
             SM_DIALOGMOTE_AVLYST,
             SM_DIALOGMOTE_REFERAT,
-            SM_DIALOGMOTE_NYTT_TID_STED -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+            SM_DIALOGMOTE_NYTT_TID_STED,
+            SM_DIALOGMOTE_LEST -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+
             else -> {
                 log.warn("Klarte ikke mappe varsel av type ${varselHendelse.type} ved behandling forsøk")
             }

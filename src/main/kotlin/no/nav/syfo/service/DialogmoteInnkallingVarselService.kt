@@ -9,6 +9,7 @@ import no.nav.syfo.*
 import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
+import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.LoggerFactory
@@ -20,6 +21,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     val EMAIL_BODY_KEY = "emailBody"
     private val log = LoggerFactory.getLogger(DialogmoteInnkallingVarselService::class.qualifiedName)
     private val objectMapper = createObjectMapper()
+
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}")
         varselHendelse.data = dataToDialogmoteInnkallingNarmesteLederData(varselHendelse.data)
@@ -30,12 +32,16 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SYKMELDT_URL)
         val text = getArbeidstakerVarselText(varselHendelse.type)
+        val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
+        val varselUuid = dataToDialogmoteInnkallingArbeidstakerData(varselHendelse.data)
+
         senderFacade.sendTilBrukernotifikasjoner(
-            UUID.randomUUID().toString(),
+            varselUuid.varselUuid,
             varselHendelse.arbeidstakerFnr,
             text,
             url,
-            varselHendelse
+            varselHendelse,
+            meldingType
         )
     }
 
@@ -93,6 +99,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
             SM_DIALOGMOTE_AVLYST -> BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST
             SM_DIALOGMOTE_NYTT_TID_STED -> BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST
             SM_DIALOGMOTE_REFERAT -> BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST
+            SM_DIALOGMOTE_LEST -> ""
             else -> {
                 throw IllegalArgumentException("Kan ikke mappe $hendelseType til arbeidstaker varsel text")
             }
@@ -166,6 +173,31 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
                 return DialogmoteInnkallingNarmesteLederData(narmesteLederNavn)
             } catch (e: IOException) {
                 throw IOException("DialogmoteInnkallingNarmesteLederData har feil format")
+            }
+        } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
+    }
+
+    private fun getMeldingTypeForSykmeldtVarsling(hendelseType: HendelseType): BrukernotifikasjonKafkaProducer.MeldingType {
+        return when (hendelseType) {
+            SM_DIALOGMOTE_INNKALT -> BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
+            SM_DIALOGMOTE_AVLYST -> BrukernotifikasjonKafkaProducer.MeldingType.BESKJED
+            SM_DIALOGMOTE_NYTT_TID_STED -> BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
+            SM_DIALOGMOTE_REFERAT -> BrukernotifikasjonKafkaProducer.MeldingType.BESKJED
+            SM_DIALOGMOTE_LEST -> BrukernotifikasjonKafkaProducer.MeldingType.DONE
+            else -> {
+                throw IllegalArgumentException("Kan ikke mappe $hendelseType")
+            }
+        }
+    }
+
+    fun dataToDialogmoteInnkallingArbeidstakerData(data: Any?): DialogmoteInnkallingArbeidstakerData {
+        return data?.let {
+            try {
+                val uuid = data.toString()
+                val varselUuid = objectMapper.readTree(uuid)["varselUuid"].textValue()
+                return DialogmoteInnkallingArbeidstakerData(varselUuid)
+            } catch (e: IOException) {
+                throw IOException("ArbeidstakerHendelseUUID har feil format")
             }
         } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }

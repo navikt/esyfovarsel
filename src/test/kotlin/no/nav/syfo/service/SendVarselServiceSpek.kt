@@ -30,7 +30,7 @@ import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.SykmeldingsperiodeDTO
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
-import no.nav.syfo.kafka.producers.brukernotifikasjoner.BeskjedKafkaProducer
+import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.syketilfelle.SyketilfellebitService
@@ -39,7 +39,7 @@ import org.spekframework.spek2.style.specification.describe
 
 object SendVarselServiceTestSpek : Spek({
 
-    val beskjedKafkaProducerMockk: BeskjedKafkaProducer = mockk(relaxed = true)
+    val brukernotifikasjonKafkaProducerMockk: BrukernotifikasjonKafkaProducer = mockk(relaxed = true)
     val dineSykmeldteHendelseKafkaProducerMockk: DineSykmeldteHendelseKafkaProducer = mockk(relaxed = true)
     val dittSykefravaerMeldingKafkaProducerMockk: DittSykefravaerMeldingKafkaProducer = mockk(relaxed = true)
     val fysiskBrevUtsendingServiceMockk: FysiskBrevUtsendingService = mockk(relaxed = true)
@@ -50,7 +50,7 @@ object SendVarselServiceTestSpek : Spek({
     val syketilfellebitService: SyketilfellebitService = mockk(relaxed = true)
     val sykmeldingerConsumerMock: SykmeldingerConsumer = mockk(relaxed = true)
     val sykmeldingServiceMockk = SykmeldingService(sykmeldingerConsumerMock)
-    val brukernotifikasjonerServiceMockk = BrukernotifikasjonerService(beskjedKafkaProducerMockk, accessControlServiceMockk)
+    val brukernotifikasjonerServiceMockk = BrukernotifikasjonerService(brukernotifikasjonKafkaProducerMockk, accessControlServiceMockk)
 
     val senderFacade =
         SenderFacade(
@@ -63,7 +63,7 @@ object SendVarselServiceTestSpek : Spek({
         )
     val merVeiledningVarselServiceMockk = MerVeiledningVarselService(senderFacade, syketilfellebitService, urlEnvMockk)
     val sendVarselService = SendVarselService(
-        beskjedKafkaProducerMockk,
+        brukernotifikasjonKafkaProducerMockk,
         dineSykmeldteHendelseKafkaProducerMockk,
         accessControlServiceMockk,
         urlEnvMockk,
@@ -112,7 +112,7 @@ object SendVarselServiceTestSpek : Spek({
                 )
             }
 
-            verify(exactly = 1) { beskjedKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
+            verify(exactly = 1) { brukernotifikasjonKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
             verify(exactly = 1) { dineSykmeldteHendelseKafkaProducerMockk.sendVarsel(any()) }
             verify(exactly = 1) { arbeidsgiverNotifikasjonServiceMockk.sendNotifikasjon(any()) }
         }
@@ -140,7 +140,7 @@ object SendVarselServiceTestSpek : Spek({
                 )
             }
 
-            verify(exactly = 1) { beskjedKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
+            verify(exactly = 1) { brukernotifikasjonKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
             verify(exactly = 0) { dineSykmeldteHendelseKafkaProducerMockk.sendVarsel(any()) }
             verify(exactly = 0) { arbeidsgiverNotifikasjonServiceMockk.sendNotifikasjon(any()) }
         }
@@ -169,7 +169,7 @@ object SendVarselServiceTestSpek : Spek({
                 )
             }
 
-            verify(exactly = 1) { beskjedKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
+            verify(exactly = 1) { brukernotifikasjonKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
         }
     }
 })
