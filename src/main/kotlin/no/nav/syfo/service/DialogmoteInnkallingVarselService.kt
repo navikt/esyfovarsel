@@ -14,7 +14,7 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.LoggerFactory
 
-class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dialogmoterUrl: String) {
+class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dialogmoterUrl: String, val accessControlService: AccessControlService) {
     val WEEKS_BEFORE_DELETE = 4L
     val SMS_KEY = "smsText"
     val EMAIL_TITLE_KEY = "emailTitle"
@@ -34,15 +34,29 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         val text = getArbeidstakerVarselText(varselHendelse.type)
         val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
         val varselUuid = dataToDialogmoteInnkallingArbeidstakerData(varselHendelse.data)
+        val userAccessStatus = accessControlService.getUserAccessStatus(varselHendelse.arbeidstakerFnr)
 
-        senderFacade.sendTilBrukernotifikasjoner(
-            varselUuid.varselUuid,
-            varselHendelse.arbeidstakerFnr,
-            text,
-            url,
-            varselHendelse,
-            meldingType
-        )
+        if (userAccessStatus.canUserBeDigitallyNotified) {
+            senderFacade.sendTilBrukernotifikasjoner(
+                varselUuid.varselUuid, varselHendelse.arbeidstakerFnr, text, url, varselHendelse, meldingType
+            )
+        } else {
+            val pdf = varselHendelse.data //TODO: implement pdf from data field
+            sendFysiskBrevlTilArbeidstaker(varselHendelse.arbeidstakerFnr, varselUuid.varselUuid, varselHendelse, pdf as ByteArray)
+        }
+    }
+
+    private fun sendFysiskBrevlTilArbeidstaker(
+        fnr: String,
+        uuid: String,
+        arbeidstakerHendelse: ArbeidstakerHendelse,
+        pdf: ByteArray,
+    ) {
+        try {
+            senderFacade.sendBrevTilFysiskPrint(fnr, uuid, arbeidstakerHendelse, pdf)
+        } catch (e: RuntimeException) {
+            log.info("Feil i sending av fysisk brev om dialogmote: ${e.message}")
+        }
     }
 
     private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
@@ -58,20 +72,11 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
 
         if (!sms.isNullOrBlank() && !emailTitle.isNullOrBlank() && !emailBody.isNullOrBlank()) {
             val input = ArbeidsgiverNotifikasjonInput(
-                uuid,
-                orgnummer,
-                narmesteLederFnr,
-                arbeidstakerFnr,
-                ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
-                sms,
-                emailTitle,
-                emailBody,
-                hardDeleteDate
+                uuid, orgnummer, narmesteLederFnr, arbeidstakerFnr, ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP, sms, emailTitle, emailBody, hardDeleteDate
             )
 
             senderFacade.sendTilArbeidsgiverNotifikasjon(
-                varselHendelse,
-                input
+                varselHendelse, input
             )
         } else {
             log.warn("Kunne ikke mappe tekstene til arbeidsgiver-tekst for dialogmote varsel av type: ${varselHendelse.type.name}")

@@ -31,20 +31,20 @@ object FysiskBrevUtsendingServiceSpek : Spek({
         )
 
         it("Journalpost skal distribueres dersom brev blir sendt til dokarkiv") {
-            coEvery { dokarkivService.getJournalpostId(any(), any()) } returns gyldigJournalpostId
-            runBlocking { fysiskBrevUtsendingService.sendBrev(fnr, uuid) }
-            coVerify(exactly = 1) { dokarkivService.getJournalpostId(fnr, uuid) }
+            coEvery { dokarkivService.getJournalpostId(any(), any(), any()) } returns gyldigJournalpostId
+            runBlocking { fysiskBrevUtsendingService.sendBrev(fnr, uuid, ByteArray(1)) }
+            coVerify(exactly = 1) { dokarkivService.getJournalpostId(fnr, uuid, ByteArray(1)) }
             coVerify(exactly = 1) { journalpostdistribusjonConsumer.distribuerJournalpost(gyldigJournalpostId) }
         }
 
         it("Journalpost skal IKKE distribueres dersom brev ikke lagres dokarkiv") {
-            coEvery { dokarkivService.getJournalpostId(any(), any()) } returns null
+            coEvery { dokarkivService.getJournalpostId(any(), any(), ByteArray(1)) } returns null
 
             assertFailsWith(RuntimeException::class) {
-                runBlocking { fysiskBrevUtsendingService.sendBrev(fnr, uuid) }
+                runBlocking { fysiskBrevUtsendingService.sendBrev(fnr, uuid, ByteArray(1)) }
             }
 
-            coVerify(exactly = 2) { dokarkivService.getJournalpostId(fnr, uuid) }
+            coVerify(exactly = 2) { dokarkivService.getJournalpostId(fnr, uuid, ByteArray(1)) }
             coVerify(exactly = 1) { journalpostdistribusjonConsumer.distribuerJournalpost(any()) }
         }
     }

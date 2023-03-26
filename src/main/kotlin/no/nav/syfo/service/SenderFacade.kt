@@ -1,24 +1,20 @@
 package no.nav.syfo.service
 
+import java.net.URL
+import java.time.LocalDateTime
+import java.util.*
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.Kanal
-import no.nav.syfo.db.domain.Kanal.ARBEIDSGIVERNOTIFIKASJON
-import no.nav.syfo.db.domain.Kanal.BREV
-import no.nav.syfo.db.domain.Kanal.BRUKERNOTIFIKASJON
-import no.nav.syfo.db.domain.Kanal.DINE_SYKMELDTE
-import no.nav.syfo.db.domain.Kanal.DITT_SYKEFRAVAER
+import no.nav.syfo.db.domain.Kanal.*
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
+import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
-import java.net.URL
-import java.time.LocalDateTime
-import java.util.*
-import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 
 class SenderFacade(
     val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
@@ -43,6 +39,7 @@ class SenderFacade(
         val eksternUUID = dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding)
         lagreUtsendtArbeidstakerVarsel(DITT_SYKEFRAVAER, varselHendelse, eksternUUID)
     }
+
     fun sendTilBrukernotifikasjoner(
         uuid: String,
         mottakerFnr: String,
@@ -66,9 +63,10 @@ class SenderFacade(
     fun sendBrevTilFysiskPrint(
         fnr: String,
         uuid: String,
-        varselHendelse: ArbeidstakerHendelse
+        varselHendelse: ArbeidstakerHendelse,
+        pdf: ByteArray,
     ) {
-        fysiskBrevUtsendingService.sendBrev(fnr, uuid)
+        fysiskBrevUtsendingService.sendBrev(fnr, uuid, pdf)
         lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid)
     }
 

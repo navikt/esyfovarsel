@@ -1,7 +1,11 @@
 package no.nav.syfo.service
 
+import java.net.URL
+import java.time.ZoneOffset
+import java.util.*
 import no.nav.syfo.*
 import no.nav.syfo.access.domain.UserAccessStatus
+import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
@@ -9,26 +13,26 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import no.nav.syfo.syketilfelle.SyketilfellebitService
 import org.slf4j.LoggerFactory
-import java.net.URL
-import java.time.ZoneOffset
-import java.util.*
 
 const val DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING = "ESYFOVARSEL_MER_VEILEDNING"
+
 class MerVeiledningVarselService(
     val senderFacade: SenderFacade,
     val syketilfellebitService: SyketilfellebitService,
-    val urlEnv: UrlEnv
+    val urlEnv: UrlEnv,
+    val pdfgenConsumer: PdfgenConsumer,
 ) {
-    private val log = LoggerFactory.getLogger("no.nav.syfo.service.MerVeiledningVarselService")
+    private val log = LoggerFactory.getLogger(MerVeiledningVarselService::class.qualifiedName)
     fun sendVarselTilArbeidstaker(
         arbeidstakerHendelse: ArbeidstakerHendelse,
         planlagtVarselUuid: String,
-        userAccessStatus: UserAccessStatus
+        userAccessStatus: UserAccessStatus,
     ) {
         if (userAccessStatus.canUserBeDigitallyNotified) {
             sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
         } else {
-            sendBrevVarselTilArbeidstaker(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, arbeidstakerHendelse)
+            val pdf = pdfgenConsumer.getMerVeiledningPDF(arbeidstakerHendelse.arbeidstakerFnr)
+            sendBrevVarselTilArbeidstaker(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, arbeidstakerHendelse, pdf!!)
         }
         sendOppgaveTilDittSykefravaer(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, arbeidstakerHendelse)
     }
@@ -50,12 +54,13 @@ class MerVeiledningVarselService(
     private fun sendBrevVarselTilArbeidstaker(
         fnr: String,
         uuid: String,
-        arbeidstakerHendelse: ArbeidstakerHendelse
+        arbeidstakerHendelse: ArbeidstakerHendelse,
+        pdf: ByteArray,
     ) {
         try {
-            senderFacade.sendBrevTilFysiskPrint(fnr, uuid, arbeidstakerHendelse)
+            senderFacade.sendBrevTilFysiskPrint(fnr, uuid, arbeidstakerHendelse, pdf)
         } catch (e: RuntimeException) {
-            log.info("Feil i sending av fysisk brev: ${e.message}")
+            log.info("Feil i sending av fysisk brev om mer veildning: ${e.message}")
         }
     }
 

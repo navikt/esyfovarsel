@@ -84,9 +84,8 @@ fun main() {
                 val arbeidsgiverNotifikasjonProdusent = ArbeidsgiverNotifikasjonProdusent(env.urlEnv, azureAdTokenConsumer)
                 val arbeidsgiverNotifikasjonService = ArbeidsgiverNotifikasjonService(arbeidsgiverNotifikasjonProdusent, narmesteLederService, env.urlEnv.baseUrlDineSykmeldte)
                 val journalpostdistribusjonConsumer = JournalpostdistribusjonConsumer(env.urlEnv, azureAdTokenConsumer)
-                val pdfgenConsumer = PdfgenConsumer(env.urlEnv)
                 val dokarkivConsumer = DokarkivConsumer(env.urlEnv, azureAdTokenConsumer)
-                val dokarkivService = DokarkivService(dokarkivConsumer, pdfgenConsumer, pdlConsumer, database)
+                val dokarkivService = DokarkivService(dokarkivConsumer)
 
                 val brukernotifikasjonKafkaProducer = BrukernotifikasjonKafkaProducer(env)
                 val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
@@ -118,10 +117,12 @@ fun main() {
                 val dialogmoteInnkallingVarselService = DialogmoteInnkallingVarselService(
                     senderFacade,
                     env.urlEnv.dialogmoterUrl,
+                    accessControlService,
                 )
                 val oppfolgingsplanVarselService = OppfolgingsplanVarselService(senderFacade, env.urlEnv.oppfolgingsplanerUrl)
                 val sykepengerMaxDateService = SykepengerMaxDateService(database, pdlConsumer)
-                val merVeiledningVarselService = MerVeiledningVarselService(senderFacade, syketilfellebitService, env.urlEnv)
+                val pdfgenConsumer = PdfgenConsumer(env.urlEnv, pdlConsumer, database)
+                val merVeiledningVarselService = MerVeiledningVarselService(senderFacade, syketilfellebitService, env.urlEnv, pdfgenConsumer)
 
                 val varselBusService =
                     VarselBusService(motebehovVarselService, oppfolgingsplanVarselService, dialogmoteInnkallingVarselService)
