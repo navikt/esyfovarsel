@@ -33,16 +33,25 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SYKMELDT_URL)
         val text = getArbeidstakerVarselText(varselHendelse.type)
         val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
-        val varselUuid = dataToDialogmoteInnkallingArbeidstakerData(varselHendelse.data)
+        val dialogmoteInnkallingArbeidstakerData = dataToDialogmoteInnkallingArbeidstakerData(varselHendelse.data)
+        val varselUuid = dialogmoteInnkallingArbeidstakerData.varselUuid
         val userAccessStatus = accessControlService.getUserAccessStatus(varselHendelse.arbeidstakerFnr)
 
         if (userAccessStatus.canUserBeDigitallyNotified) {
             senderFacade.sendTilBrukernotifikasjoner(
-                varselUuid.varselUuid, varselHendelse.arbeidstakerFnr, text, url, varselHendelse, meldingType
+                varselUuid, varselHendelse.arbeidstakerFnr, text, url, varselHendelse, meldingType
             )
         } else {
-            val pdf = varselHendelse.data //TODO: implement pdf from data field
-            sendFysiskBrevlTilArbeidstaker(varselHendelse.arbeidstakerFnr, varselUuid.varselUuid, varselHendelse, pdf as ByteArray)
+            val pdfString = dialogmoteInnkallingArbeidstakerData.pdf
+            try {
+                val pdf = pdfString?.toByteArray()
+                if (pdf != null) {
+                    sendFysiskBrevlTilArbeidstaker(varselHendelse.arbeidstakerFnr, varselUuid, varselHendelse, pdf)
+                }
+                log.info("Received PDF is null")
+            } catch (e: Exception) {
+                log.error("Exception while converting PDF string to byte array, message: ${e.message}")
+            }
         }
     }
 
@@ -198,11 +207,12 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     fun dataToDialogmoteInnkallingArbeidstakerData(data: Any?): DialogmoteInnkallingArbeidstakerData {
         return data?.let {
             try {
-                val uuid = data.toString()
-                val varselUuid = objectMapper.readTree(uuid)["varselUuid"].textValue()
-                return DialogmoteInnkallingArbeidstakerData(varselUuid)
+                val arbeidstakerDataString = data.toString()
+                val varselUuid = objectMapper.readTree(arbeidstakerDataString)["varselUuid"].textValue()
+                val pdfString = objectMapper.readTree(arbeidstakerDataString)["pdf"].textValue()
+                return DialogmoteInnkallingArbeidstakerData(varselUuid, pdfString)
             } catch (e: IOException) {
-                throw IOException("ArbeidstakerHendelseUUID har feil format")
+                throw IOException("ArbeidstakerHendelse har feil format")
             }
         } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
