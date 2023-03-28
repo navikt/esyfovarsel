@@ -61,12 +61,11 @@ class SenderFacade(
     }
 
     fun sendBrevTilFysiskPrint(
-        fnr: String,
         uuid: String,
         varselHendelse: ArbeidstakerHendelse,
-        pdf: ByteArray,
+        journalpostId: String,
     ) {
-        fysiskBrevUtsendingService.sendBrev(fnr, uuid, pdf)
+        fysiskBrevUtsendingService.sendBrev(uuid, journalpostId)
         lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid)
     }
 

@@ -21,9 +21,10 @@ class MerVeiledningVarselService(
     val syketilfellebitService: SyketilfellebitService,
     val urlEnv: UrlEnv,
     val pdfgenConsumer: PdfgenConsumer,
+    val dokarkivService: DokarkivService,
 ) {
     private val log = LoggerFactory.getLogger(MerVeiledningVarselService::class.qualifiedName)
-    fun sendVarselTilArbeidstaker(
+    suspend fun sendVarselTilArbeidstaker(
         arbeidstakerHendelse: ArbeidstakerHendelse,
         planlagtVarselUuid: String,
         userAccessStatus: UserAccessStatus,
@@ -32,7 +33,9 @@ class MerVeiledningVarselService(
             sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
         } else {
             val pdf = pdfgenConsumer.getMerVeiledningPDF(arbeidstakerHendelse.arbeidstakerFnr)
-            sendBrevVarselTilArbeidstaker(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, arbeidstakerHendelse, pdf!!)
+            val journalpostId = pdf?.let { dokarkivService.getJournalpostId(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, it) }
+            log.info("Forsøkte å sende data til dokarkiv, journalpostId er $journalpostId")
+            sendBrevVarselTilArbeidstaker(planlagtVarselUuid, arbeidstakerHendelse, journalpostId!!)
         }
         sendOppgaveTilDittSykefravaer(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, arbeidstakerHendelse)
     }
@@ -52,13 +55,12 @@ class MerVeiledningVarselService(
     }
 
     private fun sendBrevVarselTilArbeidstaker(
-        fnr: String,
         uuid: String,
         arbeidstakerHendelse: ArbeidstakerHendelse,
-        pdf: ByteArray,
+        journalpostId: String,
     ) {
         try {
-            senderFacade.sendBrevTilFysiskPrint(fnr, uuid, arbeidstakerHendelse, pdf)
+            senderFacade.sendBrevTilFysiskPrint(uuid, arbeidstakerHendelse, journalpostId)
         } catch (e: RuntimeException) {
             log.info("Feil i sending av fysisk brev om mer veildning: ${e.message}")
         }

@@ -35,34 +35,29 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
         val dialogmoteInnkallingArbeidstakerData = dataToDialogmoteInnkallingArbeidstakerData(varselHendelse.data)
         val varselUuid = dialogmoteInnkallingArbeidstakerData.varselUuid
-        val userAccessStatus = accessControlService.getUserAccessStatus(varselHendelse.arbeidstakerFnr)
+        val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
+        val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerFnr)
 
         if (userAccessStatus.canUserBeDigitallyNotified) {
             senderFacade.sendTilBrukernotifikasjoner(
-                varselUuid, varselHendelse.arbeidstakerFnr, text, url, varselHendelse, meldingType
+                varselUuid, arbeidstakerFnr, text, url, varselHendelse, meldingType
             )
         } else {
-            val pdfString = dialogmoteInnkallingArbeidstakerData.pdf
-            try {
-                val pdf = pdfString?.toByteArray()
-                if (pdf != null) {
-                    sendFysiskBrevlTilArbeidstaker(varselHendelse.arbeidstakerFnr, varselUuid, varselHendelse, pdf)
-                }
-                log.info("Received PDF is null")
-            } catch (e: Exception) {
-                log.error("Exception while converting PDF string to byte array, message: ${e.message}")
+            val journalpostId = dialogmoteInnkallingArbeidstakerData.journalpostId
+            if (journalpostId != null) {
+                sendFysiskBrevlTilArbeidstaker(varselUuid, varselHendelse, journalpostId)
             }
+            log.info("Received journalpostId is null")
         }
     }
 
     private fun sendFysiskBrevlTilArbeidstaker(
-        fnr: String,
         uuid: String,
         arbeidstakerHendelse: ArbeidstakerHendelse,
-        pdf: ByteArray,
+        journalpostId: String,
     ) {
         try {
-            senderFacade.sendBrevTilFysiskPrint(fnr, uuid, arbeidstakerHendelse, pdf)
+            senderFacade.sendBrevTilFysiskPrint(uuid, arbeidstakerHendelse, journalpostId)
         } catch (e: RuntimeException) {
             log.info("Feil i sending av fysisk brev om dialogmote: ${e.message}")
         }
@@ -209,8 +204,8 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
             try {
                 val arbeidstakerDataString = data.toString()
                 val varselUuid = objectMapper.readTree(arbeidstakerDataString)["varselUuid"].textValue()
-                val pdfString = objectMapper.readTree(arbeidstakerDataString)["pdf"].textValue()
-                return DialogmoteInnkallingArbeidstakerData(varselUuid, pdfString)
+                val journalpostId = objectMapper.readTree(arbeidstakerDataString)["journalpostId"].textValue()
+                return DialogmoteInnkallingArbeidstakerData(varselUuid, journalpostId)
             } catch (e: IOException) {
                 throw IOException("ArbeidstakerHendelse har feil format")
             }
