@@ -145,7 +145,7 @@ class SendVarselService(
         )
     }
 
-    private fun sendMerVeiledningVarselTilArbeidstaker(
+    private suspend fun sendMerVeiledningVarselTilArbeidstaker(
         pPlanlagtVarsel: PPlanlagtVarsel,
         userAccessStatus: UserAccessStatus
     ) {

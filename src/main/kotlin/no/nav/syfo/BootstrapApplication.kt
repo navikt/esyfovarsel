@@ -92,7 +92,7 @@ fun main() {
                 val dittSykefravaerMeldingKafkaProdcuer = DittSykefravaerMeldingKafkaProducer(env)
 
                 val accessControlService = AccessControlService(pdlConsumer, dkifConsumer)
-                val fysiskBrevUtsendingService = FysiskBrevUtsendingService(dokarkivService, journalpostdistribusjonConsumer)
+                val fysiskBrevUtsendingService = FysiskBrevUtsendingService(journalpostdistribusjonConsumer)
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
                 val syketilfellebitService = SyketilfellebitService(database)
                 val varselSendtService = VarselSendtService(database)
@@ -122,7 +122,7 @@ fun main() {
                 val oppfolgingsplanVarselService = OppfolgingsplanVarselService(senderFacade, env.urlEnv.oppfolgingsplanerUrl)
                 val sykepengerMaxDateService = SykepengerMaxDateService(database, pdlConsumer)
                 val pdfgenConsumer = PdfgenConsumer(env.urlEnv, pdlConsumer, database)
-                val merVeiledningVarselService = MerVeiledningVarselService(senderFacade, syketilfellebitService, env.urlEnv, pdfgenConsumer)
+                val merVeiledningVarselService = MerVeiledningVarselService(senderFacade, syketilfellebitService, env.urlEnv, pdfgenConsumer, dokarkivService)
 
                 val varselBusService =
                     VarselBusService(motebehovVarselService, oppfolgingsplanVarselService, dialogmoteInnkallingVarselService)

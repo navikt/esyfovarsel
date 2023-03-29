@@ -9,43 +9,28 @@ import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonRespons
 import no.nav.syfo.testutil.mocks.fnr1
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import kotlin.test.assertFailsWith
 
 object FysiskBrevUtsendingServiceSpek : Spek({
     val dokarkivService = mockk<DokarkivService>()
     val journalpostdistribusjonConsumer = mockk<JournalpostdistribusjonConsumer>()
 
-    val fnr = fnr1
     val uuid = "UUID"
-    val gyldigJournalpostId = "journalpostid"
+    val journalpostId = "journalpostid"
     val bestillingsId = "bestillingsid"
 
     describe("FysiskBrevUtsendingServiceSpek") {
-        coEvery { journalpostdistribusjonConsumer.distribuerJournalpost(gyldigJournalpostId) } returns JournalpostdistribusjonResponse(
+        coEvery { journalpostdistribusjonConsumer.distribuerJournalpost(journalpostId) } returns JournalpostdistribusjonResponse(
             bestillingsId
         )
 
         val fysiskBrevUtsendingService = FysiskBrevUtsendingService(
-            dokarkivService,
             journalpostdistribusjonConsumer
         )
 
         it("Journalpost skal distribueres dersom brev blir sendt til dokarkiv") {
-            coEvery { dokarkivService.getJournalpostId(any(), any(), any()) } returns gyldigJournalpostId
-            runBlocking { fysiskBrevUtsendingService.sendBrev(fnr, uuid, ByteArray(1)) }
-            coVerify(exactly = 1) { dokarkivService.getJournalpostId(fnr, uuid, ByteArray(1)) }
-            coVerify(exactly = 1) { journalpostdistribusjonConsumer.distribuerJournalpost(gyldigJournalpostId) }
-        }
-
-        it("Journalpost skal IKKE distribueres dersom brev ikke lagres dokarkiv") {
-            coEvery { dokarkivService.getJournalpostId(any(), any(), ByteArray(1)) } returns null
-
-            assertFailsWith(RuntimeException::class) {
-                runBlocking { fysiskBrevUtsendingService.sendBrev(fnr, uuid, ByteArray(1)) }
-            }
-
-            coVerify(exactly = 2) { dokarkivService.getJournalpostId(fnr, uuid, ByteArray(1)) }
-            coVerify(exactly = 1) { journalpostdistribusjonConsumer.distribuerJournalpost(any()) }
+            coEvery { dokarkivService.getJournalpostId(any(), any(), any()) } returns journalpostId
+            runBlocking { fysiskBrevUtsendingService.sendBrev(uuid, journalpostId) }
+            coVerify(exactly = 1) { journalpostdistribusjonConsumer.distribuerJournalpost(journalpostId) }
         }
     }
 })

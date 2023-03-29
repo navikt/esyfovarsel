@@ -8,8 +8,8 @@ import io.ktor.routing.routing
 import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.handleRequest
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
-import io.mockk.verify
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -143,7 +143,7 @@ object JobApiSpek : Spek({
             it("esyfovarsel-job trigger utsending av 2 varsler digitalt og 2 varsler som brev") {
                 with(handleRequest(HttpMethod.Post, urlPathJobTrigger)) {
                     response.status()?.isSuccess() shouldBeEqualTo true
-                    verify(exactly = 4) { merVeiledningVarselService.sendVarselTilArbeidstaker(any(), any(), any()) }
+                    coVerify(exactly = 4) { merVeiledningVarselService.sendVarselTilArbeidstaker(any(), any(), any()) }
                 }
             }
         }
