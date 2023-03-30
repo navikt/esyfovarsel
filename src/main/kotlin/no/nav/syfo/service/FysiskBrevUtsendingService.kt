@@ -17,7 +17,7 @@ class FysiskBrevUtsendingService(
             val bestillingsId = journalpostdistribusjonConsumer.distribuerJournalpost(journalpostId)?.bestillingsId
 
             if (bestillingsId == null) {
-                log.error("Forsøkte å sende til print, men noe gikk galt, bestillingsId er null, varsel med UUID: $uuid")
+                log.error("Forsøkte å sende til print, men noe gikk galt, bestillingsId er null, varsel med UUID: $uuid, journalpostId: $journalpostId")
                 throw RuntimeException("Bestillingsid er null")
             }
             log.info("Sendte til print, bestillingsId er $bestillingsId, MER_VEILEDNING varsel med UUID: $uuid")
