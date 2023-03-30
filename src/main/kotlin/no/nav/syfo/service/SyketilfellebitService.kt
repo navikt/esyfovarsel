@@ -5,6 +5,7 @@ import no.nav.syfo.syketilfelle.domain.Tag.*
 import no.nav.syfo.db.fetchSyketilfellebiterByFnr
 import no.nav.syfo.kafka.consumers.syketilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.kafka.consumers.syketilfelle.domain.Syketilfelledag
+import no.nav.syfo.syketilfelle.ListContainsPredicate.Companion.tagsSize
 import no.nav.syfo.syketilfelle.domain.*
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -71,12 +72,13 @@ class SyketilfellebitService(
                         SYKEPENGESOKNAD and SENDT and KORRIGERT_ARBEIDSTID and (GRADERT_AKTIVITET or INGEN_AKTIVITET),
                         SYKEPENGESOKNAD and SENDT and (PERMISJON or FERIE),
                         SYKEPENGESOKNAD and SENDT and (EGENMELDING or PAPIRSYKMELDING or FRAVAR_FOR_SYKMELDING),
-                        SYKEPENGESOKNAD and SENDT and ListContainsPredicate.tagsSize(2),
+                        SYKEPENGESOKNAD and SENDT and tagsSize(2),
                         SYKEPENGESOKNAD and SENDT and BEHANDLINGSDAG,
                         SYKEPENGESOKNAD and SENDT and BEHANDLINGSDAGER,
                         SYKMELDING and (SENDT or BEKREFTET) and PERIODE and BEHANDLINGSDAGER,
                         SYKMELDING and (SENDT or BEKREFTET) and PERIODE and FULL_AKTIVITET,
                         SYKMELDING and (SENDT or BEKREFTET) and PERIODE and (GRADERT_AKTIVITET or INGEN_AKTIVITET),
+                        SYKMELDING and (SENDT or BEKREFTET) and EGENMELDING,
                         SYKMELDING and BEKREFTET and ANNET_FRAVAR,
                         SYKMELDING and SENDT and PERIODE and REISETILSKUDD and UKJENT_AKTIVITET,
                         SYKMELDING and NY and PERIODE and BEHANDLINGSDAGER,
