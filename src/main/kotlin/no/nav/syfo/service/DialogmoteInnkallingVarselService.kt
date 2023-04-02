@@ -59,7 +59,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         try {
             senderFacade.sendBrevTilFysiskPrint(uuid, arbeidstakerHendelse, journalpostId)
         } catch (e: RuntimeException) {
-            log.info("Feil i sending av fysisk brev om dialogmote: ${e.message}")
+            log.info("Feil i sending av fysisk brev om dialogmote: ${e.message} for hendelsetype: ${arbeidstakerHendelse.type.name}")
         }
     }
 
@@ -205,6 +205,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
                 val arbeidstakerDataString = data.toString()
                 val varselUuid = objectMapper.readTree(arbeidstakerDataString)["varselUuid"].textValue()
                 val journalpostId = objectMapper.readTree(arbeidstakerDataString)["journalpostId"].textValue()
+                log.info("journalpostId form object mapper $journalpostId")
                 return DialogmoteInnkallingArbeidstakerData(varselUuid, journalpostId)
             } catch (e: IOException) {
                 throw IOException("ArbeidstakerHendelse har feil format")
