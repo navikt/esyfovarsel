@@ -39,6 +39,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerFnr)
 
         if (userAccessStatus.canUserBeDigitallyNotified) {
+            log.info("sendVarselTilArbeidstaker. canUserBeDigitallyNotified is true. ${varselHendelse.type}")
             senderFacade.sendTilBrukernotifikasjoner(
                 varselUuid, arbeidstakerFnr, text, url, varselHendelse, meldingType
             )
