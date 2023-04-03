@@ -44,7 +44,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
             )
         } else {
             val journalpostId = dialogmoteInnkallingArbeidstakerData.journalpostId
-            if (journalpostId != null) {
+            if (journalpostId !== null) {
                 sendFysiskBrevlTilArbeidstaker(varselUuid, varselHendelse, journalpostId)
             }
             log.info("Received journalpostId is null")
