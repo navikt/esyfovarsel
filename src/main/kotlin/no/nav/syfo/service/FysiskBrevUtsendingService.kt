@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 class FysiskBrevUtsendingService(
     val journalpostdistribusjonConsumer: JournalpostdistribusjonConsumer
 ) {
-    private val log = LoggerFactory.getLogger("no.nav.syfo.service.FysiskBrevService")
+    private val log = LoggerFactory.getLogger(FysiskBrevUtsendingService::class.qualifiedName)
 
     fun sendBrev(
         uuid: String,
@@ -20,7 +20,7 @@ class FysiskBrevUtsendingService(
                 log.error("Forsøkte å sende til print, men noe gikk galt, bestillingsId er null, varsel med UUID: $uuid, journalpostId: $journalpostId")
                 throw RuntimeException("Bestillingsid er null")
             }
-            log.info("Sendte til print, bestillingsId er $bestillingsId, MER_VEILEDNING varsel med UUID: $uuid")
+            log.info("Sendte til print, bestillingsId er $bestillingsId, varsel med UUID: $uuid")
         }
     }
 }

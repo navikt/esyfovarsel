@@ -39,7 +39,6 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerFnr)
 
         if (userAccessStatus.canUserBeDigitallyNotified) {
-            log.info("sendVarselTilArbeidstaker. canUserBeDigitallyNotified is true. ${varselHendelse.type}")
             senderFacade.sendTilBrukernotifikasjoner(
                 varselUuid, arbeidstakerFnr, text, url, varselHendelse, meldingType
             )
@@ -48,7 +47,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
             if (journalpostId !== null) {
                 sendFysiskBrevlTilArbeidstaker(varselUuid, varselHendelse, journalpostId)
             }
-            log.info("Received journalpostId is null")
+            log.info("Received journalpostId is null for user reserved from digital communication")
         }
     }
 
@@ -206,7 +205,6 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
                 val arbeidstakerDataString = data.toString()
                 val varselUuid = objectMapper.readTree(arbeidstakerDataString)["varselUuid"].textValue()
                 val journalpostId = objectMapper.readTree(arbeidstakerDataString)["journalpostId"].textValue()
-                log.info("journalpostId form object mapper $journalpostId")
                 return DialogmoteInnkallingArbeidstakerData(varselUuid, journalpostId)
             } catch (e: IOException) {
                 throw IOException("ArbeidstakerHendelse har feil format")
