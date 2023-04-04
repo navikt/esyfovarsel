@@ -13,7 +13,7 @@ data class LukkMelding(
 )
 
 enum class Variant {
-    info
+    INFO
 }
 
 data class OpprettMelding(
