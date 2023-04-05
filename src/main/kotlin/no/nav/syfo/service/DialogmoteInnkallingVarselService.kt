@@ -47,7 +47,7 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
             if (journalpostId !== null) {
                 sendFysiskBrevlTilArbeidstaker(varselUuid, varselHendelse, journalpostId)
             }
-            log.info("Received journalpostId is null for user reserved from digital communication, fnr: ${arbeidstakerFnr}") // TODO: delete
+            log.info("Received journalpostId is null for user reserved from digital communication")
         }
     }
 
