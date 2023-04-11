@@ -36,16 +36,20 @@ class SyketilfelleKafkaConsumer(
         while (applicationState.running) {
             kafkaListener.poll(zeroMillis).forEach {
                 try {
-                    val kSyketilfellebit: KSyketilfellebit = objectMapper.readValue(it.value())
-                    databaseInterface.storeSyketilfellebit(kSyketilfellebit.toPSyketilfellebit())
-                    val sykmeldtFnr = kSyketilfellebit.fnr
-                    val userAccessStatus = accessControlService.getUserAccessStatus(sykmeldtFnr)
+                    val kSyketilfellebit: KSyketilfellebit? = objectMapper.readValue(it.value())
+                    if (kSyketilfellebit == null) {
+                        log.info("Received tombstone record with key ${it.key()}")
+                    } else {
+                        databaseInterface.storeSyketilfellebit(kSyketilfellebit.toPSyketilfellebit())
+                        val sykmeldtFnr = kSyketilfellebit.fnr
+                        val userAccessStatus = accessControlService.getUserAccessStatus(sykmeldtFnr)
 
-                    varselPlanners.forEach { planner ->
-                        if (planner.varselSkalLagres(userAccessStatus)) {
-                            planner.processSyketilfelle(sykmeldtFnr, kSyketilfellebit.orgnummer)
-                        } else {
-                            log.info("Prosesserer ikke record fra $topicFlexSyketilfellebiter pga bruker med forespurt fnr er reservert og/eller gradert")
+                        varselPlanners.forEach { planner ->
+                            if (planner.varselSkalLagres(userAccessStatus)) {
+                                planner.processSyketilfelle(sykmeldtFnr, kSyketilfellebit.orgnummer)
+                            } else {
+                                log.info("Prosesserer ikke record fra $topicFlexSyketilfellebiter pga bruker med forespurt fnr er reservert og/eller gradert")
+                            }
                         }
                     }
                 } catch (e: IOException) {
