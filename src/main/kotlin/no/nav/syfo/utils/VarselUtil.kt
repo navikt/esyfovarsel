@@ -61,7 +61,8 @@ class VarselUtil(private val databaseAccess: DatabaseInterface) {
 
         val isBehandlingsdag = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(Tag.BEHANDLINGSDAGER) == true
 
-        val isFravarForSykmelding = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(Tag.FRAVAR_FOR_SYKMELDING) == true
+        val isFravarForSykmelding = syketilfelledag.prioritertSyketilfellebit?.tags?.contains(Tag.FRAVAR_FOR_SYKMELDING) == true ||
+                syketilfelledag.prioritertSyketilfellebit?.tags?.contains(Tag.EGENMELDING) == true
 
         return hasValidDocumentType && isAcceptedDocument && !isBehandlingsdag && !isFravarForSykmelding
     }
