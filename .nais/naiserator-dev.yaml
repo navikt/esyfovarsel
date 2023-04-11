@@ -52,6 +52,7 @@ spec:
         - host: dokarkiv.dev-fss-pub.nais.io
       rules:
         - application: digdir-krr-proxy
+          namespace: team-rocket
         - application: security-token-service
         - application: syfooppdfgen
           namespace: team-esyfo
