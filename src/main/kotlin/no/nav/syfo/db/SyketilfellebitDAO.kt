@@ -63,3 +63,19 @@ fun DatabaseInterface.fetchSyketilfellebiterByFnr(fnr: String): List<Syketilfell
         }
     }
 }
+
+fun DatabaseInterface.deleteSyketilfellebitById(id: String) {
+    val queryStatement1 = """DELETE
+                            FROM SYKETILFELLEBIT
+                            WHERE id = ?
+    """.trimIndent()
+
+    connection.use { connection ->
+        connection.prepareStatement(queryStatement1).use {
+            it.setString(1, id)
+            it.executeUpdate()
+        }
+
+        connection.commit()
+    }
+}
