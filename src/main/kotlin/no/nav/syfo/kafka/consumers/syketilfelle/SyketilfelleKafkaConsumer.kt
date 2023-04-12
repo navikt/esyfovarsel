@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.deleteSyketilfellebitById
 import no.nav.syfo.db.storeSyketilfellebit
 import no.nav.syfo.db.toPSyketilfellebit
 import no.nav.syfo.kafka.common.*
@@ -38,7 +39,8 @@ class SyketilfelleKafkaConsumer(
                 try {
                     val kSyketilfellebit: KSyketilfellebit? = objectMapper.readValue(it.value())
                     if (kSyketilfellebit == null) {
-                        log.info("Received tombstone record with key ${it.key()}")
+                        log.info("Received tombstone record. Deleting record with id ${it.key()}")
+                        databaseInterface.deleteSyketilfellebitById(it.key())
                     } else {
                         databaseInterface.storeSyketilfellebit(kSyketilfellebit.toPSyketilfellebit())
                         val sykmeldtFnr = kSyketilfellebit.fnr
