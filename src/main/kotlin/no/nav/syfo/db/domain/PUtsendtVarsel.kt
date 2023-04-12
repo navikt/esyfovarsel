@@ -12,5 +12,6 @@ data class PUtsendtVarsel(
     val kanal: String?,
     val utsendtTidspunkt: LocalDateTime,
     val planlagtVarselId: String?,
-    val eksternReferanse: String?
+    val eksternReferanse: String?,
+    val ferdigstiltTidspunkt: LocalDateTime?
 )

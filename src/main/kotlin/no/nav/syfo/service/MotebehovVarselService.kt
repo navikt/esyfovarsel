@@ -24,7 +24,7 @@ class MotebehovVarselService(
 
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         runBlocking {
-            //Quickfix for å unngå å sende varsel til bedrifter der bruker ikke er sykmeldt. Det kan skje når den sykmeldte har vært sykmeldt fra flere arbeidsforhold,
+            // Quickfix for å unngå å sende varsel til bedrifter der bruker ikke er sykmeldt. Det kan skje når den sykmeldte har vært sykmeldt fra flere arbeidsforhold,
             // men bare er sykmeldt ved én av dem nå
             val sykmeldingStatusForVirksomhet =
                 sykmeldingService.checkSykmeldingStatusForVirksomhet(LocalDate.now(), varselHendelse.arbeidstakerFnr, varselHendelse.orgnummer)
@@ -35,7 +35,6 @@ class MotebehovVarselService(
             } else {
                 log.info("[MotebehovVarselService]: Sender ikke Svar møtebehov-varsel til NL fordi arbeidstaker ikke er sykmeldt fra bedriften")
             }
-
         }
     }
 

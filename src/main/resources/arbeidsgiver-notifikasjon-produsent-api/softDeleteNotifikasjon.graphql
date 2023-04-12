@@ -1,0 +1,11 @@
+mutation SoftDeleteNotifikasjon(
+    $merkelapp: String!,
+    $eksternId: String!
+) {
+    softDeleteNotifikasjonByEksternId_V2(merkelapp: $merkelapp, eksternId: $eksternId) {
+        __typename
+        ... on Error {
+            feilmelding
+        }
+    }
+}

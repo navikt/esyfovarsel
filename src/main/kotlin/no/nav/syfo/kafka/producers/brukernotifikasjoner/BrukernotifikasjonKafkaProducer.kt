@@ -1,8 +1,5 @@
 package no.nav.syfo.kafka.producers.brukernotifikasjoner
 
-import java.net.URL
-import java.time.LocalDateTime
-import java.time.ZoneId
 import no.nav.brukernotifikasjon.schemas.builders.BeskjedInputBuilder
 import no.nav.brukernotifikasjon.schemas.builders.DoneInputBuilder
 import no.nav.brukernotifikasjon.schemas.builders.NokkelInputBuilder
@@ -19,6 +16,10 @@ import no.nav.syfo.kafka.common.topicBrukernotifikasjonDone
 import no.nav.syfo.kafka.common.topicBrukernotifikasjonOppgave
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import java.net.URL
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 
 class BrukernotifikasjonKafkaProducer(
     val env: Environment
@@ -26,20 +27,19 @@ class BrukernotifikasjonKafkaProducer(
     private val kafkaBeskjedProducer = KafkaProducer<NokkelInput, BeskjedInput>(producerProperties(env))
     private val kafkaOppgaveProducer = KafkaProducer<NokkelInput, OppgaveInput>(producerProperties(env))
     private val kafkaDoneProducer = KafkaProducer<NokkelInput, DoneInput>(producerProperties(env))
-
     private val UTCPlus1 = ZoneId.of("Europe/Oslo")
     private val appNavn = "esyfovarsel"
     private val namespace = "team-esyfo"
     private val groupingId = "ESYFOVARSEL"
 
     fun sendBeskjed(fnr: String, content: String, uuid: String, varselUrl: URL) {
-        val nokkel = buildNewNokkel(uuid, fnr)
-        val beskjed = buildNewBeskjed(content, varselUrl)
+        val nokkelInput = buildNewNokkelInput(uuid, fnr)
+        val beskjedInput = buildNewBeskjed(content, varselUrl)
 
         val record = ProducerRecord(
             topicBrukernotifikasjonBeskjed,
-            nokkel,
-            beskjed
+            nokkelInput,
+            beskjedInput
         )
 
         kafkaBeskjedProducer
@@ -48,14 +48,17 @@ class BrukernotifikasjonKafkaProducer(
     }
 
     fun sendOppgave(
-        fnr: String, content: String, uuid: String, varselUrl: URL
+        fnr: String,
+        content: String,
+        uuid: String,
+        varselUrl: URL
     ) {
-        val nokkel = buildNewNokkel(uuid, fnr)
+        val nokkelInput = buildNewNokkelInput(uuid, fnr)
         val oppgave = buildNewOppgave(content, varselUrl)
 
         val record = ProducerRecord(
             topicBrukernotifikasjonOppgave,
-            nokkel,
+            nokkelInput,
             oppgave
         )
         kafkaOppgaveProducer
@@ -63,22 +66,26 @@ class BrukernotifikasjonKafkaProducer(
             .get() // Block until record has been sent
     }
 
-    fun sendDone(
-        fnr: String, uuid: String
-    ) {
-        val nokkel = buildNewNokkel(uuid, fnr)
-        val done = buildNewDone()
+    fun sendDone(uuid: String, fnr: String) {
+        val nokkelInput = buildNewNokkelInput(uuid, fnr)
+        val doneInput = buildNewDoneInput()
+
         val record = ProducerRecord(
             topicBrukernotifikasjonDone,
-            nokkel,
-            done
+            nokkelInput,
+            doneInput
         )
+
         kafkaDoneProducer
             .send(record)
             .get() // Block until record has been sent
     }
 
-    private fun buildNewNokkel(uuid: String, fnr: String): NokkelInput {
+    private fun buildNewDoneInput() = DoneInputBuilder()
+        .withTidspunkt(LocalDateTime.now().toLocalDateTimeUTCPlus1())
+        .build()
+
+    private fun buildNewNokkelInput(uuid: String, fnr: String): NokkelInput {
         return NokkelInputBuilder()
             .withEventId(uuid)
             .withGrupperingsId(groupingId)
@@ -109,9 +116,8 @@ class BrukernotifikasjonKafkaProducer(
         .withPrefererteKanaler(PreferertKanal.SMS)
         .build()
 
-    fun buildNewDone(): DoneInput = DoneInputBuilder()
-        .withTidspunkt(LocalDateTime.now(UTCPlus1))
-        .build()
+    private fun LocalDateTime.toLocalDateTimeUTCPlus1() =
+        this.atZone(UTCPlus1).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()
 
     companion object {
         val sikkerhetsNiva = 4

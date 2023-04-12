@@ -68,7 +68,6 @@ class SendVarselService(
                                 log.info("Sender ikke varsel om aktivitetskrav til AG da sykmelding ikke er sendt AG")
                             }
                             pPlanlagtVarsel.type
-
                         }
 
                         MER_VEILEDNING.name -> {

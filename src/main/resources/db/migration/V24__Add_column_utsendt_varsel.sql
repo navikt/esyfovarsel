@@ -1,0 +1,2 @@
+ALTER TABLE UTSENDT_VARSEL
+    ADD COLUMN ferdigstilt_tidspunkt TIMESTAMP;

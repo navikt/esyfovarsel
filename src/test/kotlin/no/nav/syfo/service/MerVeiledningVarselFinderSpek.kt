@@ -174,6 +174,7 @@ private fun getUtsendtVarselToStore(utsendtTidspunkt: LocalDateTime): PUtsendtVa
         null,
         utsendtTidspunkt,
         null,
+        null,
         null
     )
 }

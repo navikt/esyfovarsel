@@ -1,15 +1,16 @@
 package no.nav.syfo.producer.arbeidsgivernotifikasjon
 
-data class CreateNewNotificationAgRequest(
+data class NotificationAgRequest(
     val query: String,
     val variables: Variables
 )
 
 enum class EpostSendevinduTypes {
-    LOEPENDE, DAGTID_IKKE_SOENDAG, NKS_AAPNINGSTID;
+    LOEPENDE;
 }
 
-data class Variables(
+sealed interface Variables
+data class VariablesCreate(
     val eksternId: String,
     val virksomhetsnummer: String,
     val lenke: String,
@@ -23,4 +24,9 @@ data class Variables(
     val epostHtmlBody: String,
     val sendevindu: EpostSendevinduTypes,
     val hardDeleteDate: String,
-)
+) : Variables
+
+data class VariablesDelete(
+    val merkelapp: String,
+    val eksternId: String
+) : Variables
