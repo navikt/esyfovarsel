@@ -1,9 +1,9 @@
 package no.nav.syfo.service
 
-import java.net.URL
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.URL
 
 class BrukernotifikasjonerService(
     val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,
@@ -32,12 +32,19 @@ class BrukernotifikasjonerService(
                 }
 
                 BrukernotifikasjonKafkaProducer.MeldingType.DONE -> {
-                    brukernotifikasjonKafkaProducer.sendDone(mottakerFnr, uuid)
-                    log.info("Har sendt done med uuid $uuid til brukernotifikasjoner")
+                    ferdigstillVarsel(uuid, mottakerFnr)
                 }
             }
         } else {
             log.info("Kan ikke sende melding til bruker for melding med uuid $uuid, dette kan skyldes adressesperre")
         }
+    }
+
+    fun ferdigstillVarsel(
+        uuid: String,
+        mottakerFnr: String
+    ) {
+        brukernotifikasjonKafkaProducer.sendDone(uuid, mottakerFnr)
+        log.info("Har sendt done med uuid $uuid til brukernotifikasjoner")
     }
 }

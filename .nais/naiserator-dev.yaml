@@ -51,8 +51,11 @@ spec:
         - host: dokdistfordeling.dev-fss-pub.nais.io
         - host: dokarkiv.dev-fss-pub.nais.io
       rules:
-        - application: digdir-krr-proxy
         - application: security-token-service
+        - application: digdir-krr-proxy
+          namespace: team-rocket
+        - application: notifikasjon-produsent-api
+          namespace: fager
         - application: syfooppdfgen
           namespace: team-esyfo
           cluster: dev-gcp

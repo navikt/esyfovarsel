@@ -99,5 +99,42 @@ object SyketilfellebitDAOSpek : Spek({
 
             syketilfellebitListe.size shouldBeEqualTo 2
         }
+
+        it("Delete syketilfellebit") {
+            val syketilfellebitToStore1 = KSyketilfellebit(
+                fnr = fnr1,
+                id = "1",
+                orgnummer = "123456789",
+                opprettet = OffsetDateTime.now(),
+                inntruffet = OffsetDateTime.now(),
+                tags = setOf("SYKMELDING", "SENDT"),
+                ressursId = "ressursId_1",
+                fom = LocalDate.now(),
+                tom = LocalDate.now().plusDays(14),
+                korrigererSendtSoknad = null
+            )
+
+            val syketilfellebitToStore2 = KSyketilfellebit(
+                fnr = fnr1,
+                id = "2",
+                orgnummer = "123456789",
+                opprettet = OffsetDateTime.now(),
+                inntruffet = OffsetDateTime.now(),
+                tags = setOf("SYKMELDING", "SENDT"),
+                ressursId = "ressursId_2",
+                fom = LocalDate.now().plusDays(15),
+                tom = LocalDate.now().plusDays(30),
+                korrigererSendtSoknad = null
+            )
+
+            embeddedDatabase.storeSyketilfellebit(syketilfellebitToStore1.toPSyketilfellebit())
+            embeddedDatabase.storeSyketilfellebit(syketilfellebitToStore2.toPSyketilfellebit())
+
+            embeddedDatabase.deleteSyketilfellebitById(syketilfellebitToStore1.id)
+            val syketilfellebitListe = embeddedDatabase.fetchSyketilfellebiterByFnr(fnr1)
+
+            syketilfellebitListe.size shouldBeEqualTo 1
+        }
+
     }
 })

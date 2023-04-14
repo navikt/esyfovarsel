@@ -58,6 +58,7 @@ fun ResultSet.toPUtsendtVarsel() = PUtsendtVarsel(
     type = getString("type"),
     kanal = getString("kanal"),
     utsendtTidspunkt = getTimestamp("utsendt_tidspunkt").toLocalDateTime(),
+    ferdigstiltTidspunkt = getTimestamp("ferdigstilt_tidspunkt")?.toLocalDateTime(),
     planlagtVarselId = getString("planlagt_varsel_id"),
     eksternReferanse = getString("ekstern_ref")
 )

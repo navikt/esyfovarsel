@@ -7,8 +7,11 @@ import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.Kanal.*
 import no.nav.syfo.db.domain.PUtsendtVarsel
+import no.nav.syfo.db.fetchUtsendtVarsel
+import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
@@ -22,7 +25,7 @@ class SenderFacade(
     val brukernotifikasjonerService: BrukernotifikasjonerService,
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
     val fysiskBrevUtsendingService: FysiskBrevUtsendingService,
-    val databaseInterface: DatabaseInterface,
+    val database: DatabaseInterface
 ) {
     fun sendTilDineSykmeldte(
         varselHendelse: NarmesteLederHendelse,
@@ -52,12 +55,57 @@ class SenderFacade(
         lagreUtsendtArbeidstakerVarsel(BRUKERNOTIFIKASJON, varselHendelse, uuid)
     }
 
+    fun ferdigstillBrukernotifkasjonVarsler(varselHendelse: ArbeidstakerHendelse) {
+        val eksterneReferanser = database.fetchUtsendtVarsel(
+            varselHendelse.arbeidstakerFnr,
+            varselHendelse.orgnummer!!,
+            varselHendelse.type,
+            BRUKERNOTIFIKASJON
+        ).eksterneRefUferdigstilteVarsler(varselHendelse.type)
+        for (eksternReferanse in eksterneReferanser) {
+            brukernotifikasjonerService.ferdigstillVarsel(eksternReferanse!!, varselHendelse.arbeidstakerFnr)
+            database.setUtsendtVarselToFerdigstilt(eksternReferanse)
+        }
+    }
+
     fun sendTilArbeidsgiverNotifikasjon(
         varselHendelse: NarmesteLederHendelse,
         varsel: ArbeidsgiverNotifikasjonInput,
     ) {
         arbeidsgiverNotifikasjonService.sendNotifikasjon(varsel)
         lagreUtsendtNarmesteLederVarsel(ARBEIDSGIVERNOTIFIKASJON, varselHendelse, varsel.uuid.toString())
+    }
+
+    fun ferdigstillArbeidsgiverNotifikasjoner(
+        varselHendelse: NarmesteLederHendelse,
+        merkelapp: String
+    ) {
+        val eksterneReferanser = database.fetchUtsendtVarsel(
+            varselHendelse.arbeidstakerFnr,
+            varselHendelse.orgnummer,
+            varselHendelse.type,
+            ARBEIDSGIVERNOTIFIKASJON
+        ).eksterneRefUferdigstilteVarsler(varselHendelse.type)
+        for (eksternReferanse in eksterneReferanser) {
+            arbeidsgiverNotifikasjonService.deleteNotifikasjon(
+                merkelapp,
+                eksternReferanse!!
+            )
+            database.setUtsendtVarselToFerdigstilt(eksternReferanse)
+        }
+    }
+
+    fun ferdigstillDineSykmeldteVarsler(varselHendelse: NarmesteLederHendelse) {
+        val eksterneReferanser = database.fetchUtsendtVarsel(
+            varselHendelse.arbeidstakerFnr,
+            varselHendelse.orgnummer,
+            varselHendelse.type,
+            DINE_SYKMELDTE
+        ).eksterneRefUferdigstilteVarsler(varselHendelse.type)
+        for (eksternReferanse in eksterneReferanser) {
+            dineSykmeldteHendelseKafkaProducer.ferdigstillVarsel(eksternReferanse!!)
+            database.setUtsendtVarselToFerdigstilt(eksternReferanse)
+        }
     }
 
     fun sendBrevTilFysiskPrint(
@@ -74,7 +122,7 @@ class SenderFacade(
         varselHendelse: NarmesteLederHendelse,
         eksternReferanse: String,
     ) {
-        databaseInterface.storeUtsendtVarsel(
+        database.storeUtsendtVarsel(
             PUtsendtVarsel(
                 UUID.randomUUID().toString(),
                 varselHendelse.arbeidstakerFnr,
@@ -86,6 +134,7 @@ class SenderFacade(
                 LocalDateTime.now(),
                 null,
                 eksternReferanse,
+                null
             )
         )
     }
@@ -95,7 +144,7 @@ class SenderFacade(
         varselHendelse: ArbeidstakerHendelse,
         eksternReferanse: String,
     ) {
-        databaseInterface.storeUtsendtVarsel(
+        database.storeUtsendtVarsel(
             PUtsendtVarsel(
                 UUID.randomUUID().toString(),
                 varselHendelse.arbeidstakerFnr,
@@ -107,7 +156,18 @@ class SenderFacade(
                 LocalDateTime.now(),
                 null,
                 eksternReferanse,
+                null,
             )
         )
     }
 }
+
+fun List<PUtsendtVarsel>.eksterneRefUferdigstilteVarsler(hendelseType: HendelseType) =
+    this
+        .sortedByDescending { it.utsendtTidspunkt }
+        .filter {
+            it.eksternReferanse != null &&
+                it.type == hendelseType.toString() &&
+                it.ferdigstiltTidspunkt == null
+        }
+        .map { it.eksternReferanse }

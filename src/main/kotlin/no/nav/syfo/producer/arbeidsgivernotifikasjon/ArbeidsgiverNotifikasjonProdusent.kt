@@ -7,9 +7,11 @@ import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
+import java.util.*
 
 open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client = httpClient()
@@ -19,7 +21,23 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
 
     open fun createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? {
         log.info("About to send new notification with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api")
-        val response: HttpResponse? = callArbeidsgiverNotifikasjonProdusent(arbeidsgiverNotifikasjon)
+        val response: HttpResponse? = callArbeidsgiverNotifikasjonProdusent(
+            CREATE_NOTIFICATION_AG_MUTATION,
+            VariablesCreate(
+                arbeidsgiverNotifikasjon.varselId,
+                arbeidsgiverNotifikasjon.virksomhetsnummer,
+                arbeidsgiverNotifikasjon.url,
+                arbeidsgiverNotifikasjon.narmesteLederFnr,
+                arbeidsgiverNotifikasjon.ansattFnr,
+                arbeidsgiverNotifikasjon.merkelapp,
+                arbeidsgiverNotifikasjon.messageText,
+                arbeidsgiverNotifikasjon.narmesteLederEpostadresse,
+                arbeidsgiverNotifikasjon.emailTitle,
+                arbeidsgiverNotifikasjon.emailBody,
+                EpostSendevinduTypes.LOEPENDE,
+                arbeidsgiverNotifikasjon.hardDeleteDate.toString()
+            )
+        )
         return when (response?.status) {
             HttpStatusCode.OK -> {
                 val beskjed = runBlocking { response.receive<OpprettNyBeskjedArbeidsgiverNotifikasjonResponse>() }
@@ -46,34 +64,32 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
                 return null
             }
             else -> {
-                log.error("Could not send send notification to arbeidsgiver")
+                log.error("Could not send send notification to arbeidsgiver. Status code: ${response?.status?.value ?: "Unknown"}")
                 return null
             }
         }
     }
 
+    open fun deleteNotifikasjonForArbeidsgiver(arbeidsgiverDeleteNotifikasjon: ArbeidsgiverDeleteNotifikasjon) {
+        log.info("About to delete notification with uuid ${arbeidsgiverDeleteNotifikasjon.eksternReferanse} and merkelapp ${arbeidsgiverDeleteNotifikasjon.merkelapp} from ag-notifikasjon-produsent-api")
+        callArbeidsgiverNotifikasjonProdusent(
+            DELETE_NOTIFICATION_AG_MUTATION,
+            VariablesDelete(
+                arbeidsgiverDeleteNotifikasjon.merkelapp,
+                arbeidsgiverDeleteNotifikasjon.eksternReferanse
+            )
+        )
+    }
+
     private fun callArbeidsgiverNotifikasjonProdusent(
-        arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon,
+        mutationPath: String,
+        variables: Variables
     ): HttpResponse? {
         return runBlocking {
             val token = azureAdTokenConsumer.getToken(scope)
-            val graphQuery = this::class.java.getResource("$MUTATION_PATH_PREFIX/$CREATE_NOTIFICATION_AG_MUTATION").readText().replace("[\n\r]", "")
+            val graphQuery = this::class.java.getResource("$MUTATION_PATH_PREFIX/$mutationPath").readText().replace("[\n\r]", "")
 
-            val variables = Variables(
-                arbeidsgiverNotifikasjon.varselId,
-                arbeidsgiverNotifikasjon.virksomhetsnummer,
-                arbeidsgiverNotifikasjon.url,
-                arbeidsgiverNotifikasjon.narmesteLederFnr,
-                arbeidsgiverNotifikasjon.ansattFnr,
-                arbeidsgiverNotifikasjon.merkelapp,
-                arbeidsgiverNotifikasjon.messageText,
-                arbeidsgiverNotifikasjon.narmesteLederEpostadresse,
-                arbeidsgiverNotifikasjon.emailTitle,
-                arbeidsgiverNotifikasjon.emailBody,
-                EpostSendevinduTypes.LOEPENDE,
-                arbeidsgiverNotifikasjon.hardDeleteDate.toString()
-            )
-            val requestBody = CreateNewNotificationAgRequest(graphQuery, variables)
+            val requestBody = NotificationAgRequest(graphQuery, variables)
 
             try {
                 client.post<HttpResponse>(arbeidsgiverNotifikasjonProdusentBasepath) {
@@ -85,7 +101,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
                     body = requestBody
                 }
             } catch (e: Exception) {
-                log.error("Error while calling ag-notifikasjon-produsent-api ($CREATE_NOTIFICATION_AG_MUTATION): ${e.message}", e)
+                log.error("Error while calling ag-notifikasjon-produsent-api ($mutationPath): ${e.message}", e)
                 null
             }
         }
