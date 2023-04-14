@@ -22,11 +22,11 @@ class SenderFacade(
     val brukernotifikasjonerService: BrukernotifikasjonerService,
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
     val fysiskBrevUtsendingService: FysiskBrevUtsendingService,
-    val databaseInterface: DatabaseInterface
+    val databaseInterface: DatabaseInterface,
 ) {
     fun sendTilDineSykmeldte(
         varselHendelse: NarmesteLederHendelse,
-        varsel: DineSykmeldteVarsel
+        varsel: DineSykmeldteVarsel,
     ) {
         dineSykmeldteHendelseKafkaProducer.sendVarsel(varsel)
         lagreUtsendtNarmesteLederVarsel(DINE_SYKMELDTE, varselHendelse, varsel.id.toString())
@@ -34,7 +34,7 @@ class SenderFacade(
 
     fun sendTilDittSykefravaer(
         varselHendelse: ArbeidstakerHendelse,
-        varsel: DittSykefravaerVarsel
+        varsel: DittSykefravaerVarsel,
     ) {
         val eksternUUID = dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding)
         lagreUtsendtArbeidstakerVarsel(DITT_SYKEFRAVAER, varselHendelse, eksternUUID)
@@ -46,7 +46,7 @@ class SenderFacade(
         content: String,
         url: URL,
         varselHendelse: ArbeidstakerHendelse,
-        meldingType: BrukernotifikasjonKafkaProducer.MeldingType? = BrukernotifikasjonKafkaProducer.MeldingType.BESKJED
+        meldingType: BrukernotifikasjonKafkaProducer.MeldingType? = BrukernotifikasjonKafkaProducer.MeldingType.BESKJED,
     ) {
         brukernotifikasjonerService.sendVarsel(uuid, mottakerFnr, content, url, meldingType)
         lagreUtsendtArbeidstakerVarsel(BRUKERNOTIFIKASJON, varselHendelse, uuid)
@@ -54,7 +54,7 @@ class SenderFacade(
 
     fun sendTilArbeidsgiverNotifikasjon(
         varselHendelse: NarmesteLederHendelse,
-        varsel: ArbeidsgiverNotifikasjonInput
+        varsel: ArbeidsgiverNotifikasjonInput,
     ) {
         arbeidsgiverNotifikasjonService.sendNotifikasjon(varsel)
         lagreUtsendtNarmesteLederVarsel(ARBEIDSGIVERNOTIFIKASJON, varselHendelse, varsel.uuid.toString())
@@ -72,7 +72,7 @@ class SenderFacade(
     fun lagreUtsendtNarmesteLederVarsel(
         kanal: Kanal,
         varselHendelse: NarmesteLederHendelse,
-        eksternReferanse: String
+        eksternReferanse: String,
     ) {
         databaseInterface.storeUtsendtVarsel(
             PUtsendtVarsel(
@@ -93,7 +93,7 @@ class SenderFacade(
     fun lagreUtsendtArbeidstakerVarsel(
         kanal: Kanal,
         varselHendelse: ArbeidstakerHendelse,
-        eksternReferanse: String
+        eksternReferanse: String,
     ) {
         databaseInterface.storeUtsendtVarsel(
             PUtsendtVarsel(

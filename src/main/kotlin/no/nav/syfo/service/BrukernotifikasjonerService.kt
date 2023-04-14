@@ -11,7 +11,13 @@ class BrukernotifikasjonerService(
 ) {
     private val log: Logger = LoggerFactory.getLogger(BrukernotifikasjonerService::class.qualifiedName)
 
-    fun sendVarsel(uuid: String, mottakerFnr: String, content: String, url: URL, meldingType: BrukernotifikasjonKafkaProducer.MeldingType?) {
+    fun sendVarsel(
+        uuid: String,
+        mottakerFnr: String,
+        content: String,
+        url: URL,
+        meldingType: BrukernotifikasjonKafkaProducer.MeldingType?,
+    ) {
         // Recheck if user can be notified in case of recent 'Addressesperre'
         if (accessControlService.getUserAccessStatus(mottakerFnr).canUserBeDigitallyNotified) {
             when (meldingType) {
@@ -34,5 +40,4 @@ class BrukernotifikasjonerService(
             log.info("Kan ikke sende melding til bruker for melding med uuid $uuid, dette kan skyldes adressesperre")
         }
     }
-
 }

@@ -6,7 +6,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonResponse
-import no.nav.syfo.testutil.mocks.fnr1
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 

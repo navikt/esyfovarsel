@@ -5,13 +5,13 @@ import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsume
 import org.slf4j.LoggerFactory
 
 class FysiskBrevUtsendingService(
-    val journalpostdistribusjonConsumer: JournalpostdistribusjonConsumer
+    val journalpostdistribusjonConsumer: JournalpostdistribusjonConsumer,
 ) {
     private val log = LoggerFactory.getLogger(FysiskBrevUtsendingService::class.qualifiedName)
 
     fun sendBrev(
         uuid: String,
-        journalpostId: String
+        journalpostId: String,
     ) {
         runBlocking {
             val bestillingsId = journalpostdistribusjonConsumer.distribuerJournalpost(journalpostId)?.bestillingsId

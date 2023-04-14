@@ -14,7 +14,11 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.LoggerFactory
 
-class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dialogmoterUrl: String, val accessControlService: AccessControlService) {
+class DialogmoteInnkallingVarselService(
+    val senderFacade: SenderFacade,
+    val dialogmoterUrl: String,
+    val accessControlService: AccessControlService,
+) {
     val WEEKS_BEFORE_DELETE = 4L
     val SMS_KEY = "smsText"
     val EMAIL_TITLE_KEY = "emailTitle"
@@ -76,11 +80,20 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
 
         if (!sms.isNullOrBlank() && !emailTitle.isNullOrBlank() && !emailBody.isNullOrBlank()) {
             val input = ArbeidsgiverNotifikasjonInput(
-                uuid, orgnummer, narmesteLederFnr, arbeidstakerFnr, ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP, sms, emailTitle, emailBody, hardDeleteDate
+                uuid,
+                orgnummer,
+                narmesteLederFnr,
+                arbeidstakerFnr,
+                ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
+                sms,
+                emailTitle,
+                emailBody,
+                hardDeleteDate
             )
 
             senderFacade.sendTilArbeidsgiverNotifikasjon(
-                varselHendelse, input
+                varselHendelse,
+                input
             )
         } else {
             log.warn("Kunne ikke mappe tekstene til arbeidsgiver-tekst for dialogmote varsel av type: ${varselHendelse.type.name}")

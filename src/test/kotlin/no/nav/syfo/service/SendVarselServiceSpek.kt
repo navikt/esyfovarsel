@@ -35,7 +35,8 @@ object SendVarselServiceTestSpek : Spek({
     val dokarkivServiceMockk: DokarkivService = mockk(relaxed = true)
     val sykmeldingerConsumerMock: SykmeldingerConsumer = mockk(relaxed = true)
     val sykmeldingServiceMockk = SykmeldingService(sykmeldingerConsumerMock)
-    val brukernotifikasjonerServiceMockk = BrukernotifikasjonerService(brukernotifikasjonKafkaProducerMockk, accessControlServiceMockk)
+    val brukernotifikasjonerServiceMockk =
+        BrukernotifikasjonerService(brukernotifikasjonKafkaProducerMockk, accessControlServiceMockk)
     val pdfgenConsumerMockk: PdfgenConsumer = mockk(relaxed = true)
 
     val senderFacade =
@@ -47,7 +48,13 @@ object SendVarselServiceTestSpek : Spek({
             fysiskBrevUtsendingServiceMockk,
             databaseInterfaceMockk
         )
-    val merVeiledningVarselServiceMockk = MerVeiledningVarselService(senderFacade, syketilfellebitService, urlEnvMockk, pdfgenConsumerMockk, dokarkivServiceMockk)
+    val merVeiledningVarselServiceMockk = MerVeiledningVarselService(
+        senderFacade,
+        syketilfellebitService,
+        urlEnvMockk,
+        pdfgenConsumerMockk,
+        dokarkivServiceMockk
+    )
     val sendVarselService = SendVarselService(
         brukernotifikasjonKafkaProducerMockk,
         dineSykmeldteHendelseKafkaProducerMockk,
