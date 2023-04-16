@@ -47,6 +47,7 @@ import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
+import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.planner.AktivitetskravVarselPlanner
 import no.nav.syfo.planner.MerVeiledningVarselPlanner
@@ -94,7 +95,8 @@ fun main() {
 
                 val brukernotifikasjonKafkaProducer = BrukernotifikasjonKafkaProducer(env)
                 val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
-                val dittSykefravaerMeldingKafkaProdcuer = DittSykefravaerMeldingKafkaProducer(env)
+                val dittSykefravaerMeldingKafkaProducer = DittSykefravaerMeldingKafkaProducer(env)
+                val minSideMicrofrontendKafkaProducer = MinSideMicrofrontendKafkaProducer(env)
 
                 val accessControlService = AccessControlService(pdlConsumer, dkifConsumer)
                 val fysiskBrevUtsendingService = FysiskBrevUtsendingService(journalpostdistribusjonConsumer)
@@ -112,7 +114,7 @@ fun main() {
                     BrukernotifikasjonerService(brukernotifikasjonKafkaProducer, accessControlService)
                 val senderFacade = SenderFacade(
                     dineSykmeldteHendelseKafkaProducer,
-                    dittSykefravaerMeldingKafkaProdcuer,
+                    dittSykefravaerMeldingKafkaProducer,
                     brukernotifikasjonerService,
                     arbeidsgiverNotifikasjonService,
                     fysiskBrevUtsendingService,
@@ -139,12 +141,14 @@ fun main() {
                     pdfgenConsumer,
                     dokarkivService
                 )
+                val microFrontendService = MicroFrontendService(minSideMicrofrontendKafkaProducer)
 
                 val varselBusService =
                     VarselBusService(
                         motebehovVarselService,
                         oppfolgingsplanVarselService,
-                        dialogmoteInnkallingVarselService
+                        dialogmoteInnkallingVarselService,
+                        microFrontendService
                     )
 
                 connector {
