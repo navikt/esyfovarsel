@@ -1,32 +1,16 @@
 package no.nav.syfo.service
 
-import io.mockk.clearAllMocks
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import java.time.Clock
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
+import io.mockk.*
+import java.time.*
 import java.util.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.access.domain.UserAccessStatus
+import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingDTO
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatus
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.AdresseDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.ArbeidsgiverStatusDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.BehandlerDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.BehandlingsutfallDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.GradertDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.KontaktMedPasientDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.PeriodetypeDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.RegelStatusDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.SykmeldingStatusDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.SykmeldingsperiodeDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.*
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
@@ -47,9 +31,12 @@ object SendVarselServiceTestSpek : Spek({
     val databaseInterfaceMockk: DatabaseInterface = mockk(relaxed = true)
     val arbeidsgiverNotifikasjonServiceMockk: ArbeidsgiverNotifikasjonService = mockk(relaxed = true)
     val syketilfellebitService: SyketilfellebitService = mockk(relaxed = true)
+    val dokarkivServiceMockk: DokarkivService = mockk(relaxed = true)
     val sykmeldingerConsumerMock: SykmeldingerConsumer = mockk(relaxed = true)
     val sykmeldingServiceMockk = SykmeldingService(sykmeldingerConsumerMock)
-    val brukernotifikasjonerServiceMockk = BrukernotifikasjonerService(brukernotifikasjonKafkaProducerMockk, accessControlServiceMockk)
+    val brukernotifikasjonerServiceMockk =
+        BrukernotifikasjonerService(brukernotifikasjonKafkaProducerMockk, accessControlServiceMockk)
+    val pdfgenConsumerMockk: PdfgenConsumer = mockk(relaxed = true)
 
     val senderFacade =
         SenderFacade(
@@ -60,7 +47,13 @@ object SendVarselServiceTestSpek : Spek({
             fysiskBrevUtsendingServiceMockk,
             databaseInterfaceMockk
         )
-    val merVeiledningVarselServiceMockk = MerVeiledningVarselService(senderFacade, syketilfellebitService, urlEnvMockk)
+    val merVeiledningVarselServiceMockk = MerVeiledningVarselService(
+        senderFacade,
+        syketilfellebitService,
+        urlEnvMockk,
+        pdfgenConsumerMockk,
+        dokarkivServiceMockk
+    )
     val sendVarselService = SendVarselService(
         brukernotifikasjonKafkaProducerMockk,
         dineSykmeldteHendelseKafkaProducerMockk,

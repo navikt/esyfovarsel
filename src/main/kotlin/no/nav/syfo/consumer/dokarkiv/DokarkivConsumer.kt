@@ -1,9 +1,15 @@
 package no.nav.syfo.consumer.dokarkiv
 
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.call.receive
+import io.ktor.client.request.accept
+import io.ktor.client.request.header
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.consumer.dokarkiv.domain.DokarkivRequest
@@ -21,7 +27,7 @@ class DokarkivConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAd
     private val JOURNALPOST_PARAM_VALUE = true
     private val requestURL: String = "$dokarkivUrl$JOURNALPOST_PATH"
 
-    private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.DokarkivClient")
+    private val log = LoggerFactory.getLogger(DokarkivConsumer::class.qualifiedName)
 
     suspend fun postDocumentToDokarkiv(request: DokarkivRequest): DokarkivResponse? {
         try {
@@ -38,10 +44,12 @@ class DokarkivConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAd
                     log.info("Sending to dokarkiv successful, journalpost created")
                     response.receive<DokarkivResponse>()
                 }
+
                 HttpStatusCode.Unauthorized -> {
                     log.error("Failed to post document to Dokarkiv: Unable to authorize")
                     null
                 }
+
                 else -> {
                     log.error("Failed to post document to Dokarkiv: $response")
                     null

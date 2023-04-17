@@ -4,18 +4,11 @@ import java.net.URL
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
-import no.nav.syfo.DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST
-import no.nav.syfo.UrlEnv
+import no.nav.syfo.*
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
-import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
-import no.nav.syfo.db.domain.VarselType.MER_VEILEDNING
-import no.nav.syfo.db.domain.VarselType.SVAR_MOTEBEHOV
+import no.nav.syfo.db.domain.VarselType.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.DineSykmeldteHendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
@@ -54,7 +47,11 @@ class SendVarselService(
                     when (pPlanlagtVarsel.type) {
                         AKTIVITETSKRAV.name -> {
                             val sykmeldingStatus =
-                                sykmeldingService.checkSykmeldingStatusForVirksomhet(pPlanlagtVarsel.utsendingsdato, fnr, orgnummer)
+                                sykmeldingService.checkSykmeldingStatusForVirksomhet(
+                                    pPlanlagtVarsel.utsendingsdato,
+                                    fnr,
+                                    orgnummer
+                                )
 
                             sendVarselTilSykmeldt(fnr, uuid, varselContent, varselUrl)
 
@@ -112,10 +109,11 @@ class SendVarselService(
             }
         }
     }
+
     private fun sendAktivitetskravVarselTilArbeidsgiver(
         uuid: String,
         arbeidstakerFnr: String,
-        orgnummer: String
+        orgnummer: String,
     ) {
         val dineSykmeldteVarsel = DineSykmeldteVarsel(
             ansattFnr = arbeidstakerFnr,
@@ -144,9 +142,9 @@ class SendVarselService(
         )
     }
 
-    private fun sendMerVeiledningVarselTilArbeidstaker(
+    private suspend fun sendMerVeiledningVarselTilArbeidstaker(
         pPlanlagtVarsel: PPlanlagtVarsel,
-        userAccessStatus: UserAccessStatus
+        userAccessStatus: UserAccessStatus,
     ) {
         merVeiledningVarselService.sendVarselTilArbeidstaker(
             ArbeidstakerHendelse(
@@ -164,7 +162,7 @@ class SendVarselService(
         fnr: String,
         uuid: String,
         varselContent: String,
-        varselUrl: URL
+        varselUrl: URL,
     ) {
         log.info("Sender varsel til Brukernotifikasjoner for uuid $uuid")
         brukernotifikasjonKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl)

@@ -8,8 +8,8 @@ import io.ktor.routing.routing
 import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.handleRequest
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
-import io.mockk.verify
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -21,26 +21,9 @@ import no.nav.syfo.getTestEnv
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
-import no.nav.syfo.service.AccessControlService
-import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
-import no.nav.syfo.service.DokarkivService
-import no.nav.syfo.service.MerVeiledningVarselFinder
-import no.nav.syfo.service.MerVeiledningVarselService
-import no.nav.syfo.service.SendVarselService
-import no.nav.syfo.service.SykmeldingService
-import no.nav.syfo.service.SykmeldingStatus
+import no.nav.syfo.service.*
 import no.nav.syfo.testutil.EmbeddedDatabase
-import no.nav.syfo.testutil.mocks.fnr1
-import no.nav.syfo.testutil.mocks.fnr2
-import no.nav.syfo.testutil.mocks.fnr3
-import no.nav.syfo.testutil.mocks.fnr4
-import no.nav.syfo.testutil.mocks.fnr5
-import no.nav.syfo.testutil.mocks.orgnummer
-import no.nav.syfo.testutil.mocks.userAccessStatus1
-import no.nav.syfo.testutil.mocks.userAccessStatus2
-import no.nav.syfo.testutil.mocks.userAccessStatus3
-import no.nav.syfo.testutil.mocks.userAccessStatus4
-import no.nav.syfo.testutil.mocks.userAccessStatus5
+import no.nav.syfo.testutil.mocks.*
 import no.nav.syfo.util.contentNegotationFeature
 import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
@@ -135,7 +118,7 @@ object JobApiSpek : Spek({
             )
         } returns SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = true)
         coEvery { brukernotifikasjonKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
-        coEvery { dokarkivService.getJournalpostId(any(), any()) } returns "1"
+        coEvery { dokarkivService.getJournalpostId(any(), any(), any()) } returns "1"
         coEvery { sykmeldingService.isPersonSykmeldtPaDato(any(), any()) } returns true
 
         val sendVarselService =
@@ -148,7 +131,8 @@ object JobApiSpek : Spek({
                 merVeiledningVarselService,
                 sykmeldingService,
             )
-        val varselSender = VarselSender(embeddedDatabase, sendVarselService, merVeiledningVarselFinder, testEnv.toggleEnv)
+        val varselSender =
+            VarselSender(embeddedDatabase, sendVarselService, merVeiledningVarselFinder, testEnv.toggleEnv)
 
         with(TestApplicationEngine()) {
             start()
@@ -160,7 +144,7 @@ object JobApiSpek : Spek({
             it("esyfovarsel-job trigger utsending av 2 varsler digitalt og 2 varsler som brev") {
                 with(handleRequest(HttpMethod.Post, urlPathJobTrigger)) {
                     response.status()?.isSuccess() shouldBeEqualTo true
-                    verify(exactly = 4) { merVeiledningVarselService.sendVarselTilArbeidstaker(any(), any(), any()) }
+                    coVerify(exactly = 4) { merVeiledningVarselService.sendVarselTilArbeidstaker(any(), any(), any()) }
                 }
             }
         }

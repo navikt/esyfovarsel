@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory
 class VarselBusService(
     val motebehovVarselService: MotebehovVarselService,
     val oppfolgingsplanVarselService: OppfolgingsplanVarselService,
-    val dialogmoteInnkallingVarselService: DialogmoteInnkallingVarselService
+    val dialogmoteInnkallingVarselService: DialogmoteInnkallingVarselService,
 ) {
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.VarselBusService")
+    private val log: Logger = LoggerFactory.getLogger(VarselBusService::class.qualifiedName)
     fun processVarselHendelse(
         varselHendelse: EsyfovarselHendelse
     ) {

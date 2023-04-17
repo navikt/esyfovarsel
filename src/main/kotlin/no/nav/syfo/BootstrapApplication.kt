@@ -81,27 +81,35 @@ fun main() {
                 val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
                 val narmesteLederConsumer = NarmesteLederConsumer(env.urlEnv, azureAdTokenConsumer)
                 val narmesteLederService = NarmesteLederService(narmesteLederConsumer)
-                val arbeidsgiverNotifikasjonProdusent = ArbeidsgiverNotifikasjonProdusent(env.urlEnv, azureAdTokenConsumer)
-                val arbeidsgiverNotifikasjonService = ArbeidsgiverNotifikasjonService(arbeidsgiverNotifikasjonProdusent, narmesteLederService, env.urlEnv.baseUrlDineSykmeldte)
+                val arbeidsgiverNotifikasjonProdusent =
+                    ArbeidsgiverNotifikasjonProdusent(env.urlEnv, azureAdTokenConsumer)
+                val arbeidsgiverNotifikasjonService = ArbeidsgiverNotifikasjonService(
+                    arbeidsgiverNotifikasjonProdusent,
+                    narmesteLederService,
+                    env.urlEnv.baseUrlDineSykmeldte
+                )
                 val journalpostdistribusjonConsumer = JournalpostdistribusjonConsumer(env.urlEnv, azureAdTokenConsumer)
-                val pdfgenConsumer = PdfgenConsumer(env.urlEnv)
                 val dokarkivConsumer = DokarkivConsumer(env.urlEnv, azureAdTokenConsumer)
-                val dokarkivService = DokarkivService(dokarkivConsumer, pdfgenConsumer, pdlConsumer, database)
+                val dokarkivService = DokarkivService(dokarkivConsumer)
 
                 val brukernotifikasjonKafkaProducer = BrukernotifikasjonKafkaProducer(env)
                 val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
                 val dittSykefravaerMeldingKafkaProdcuer = DittSykefravaerMeldingKafkaProducer(env)
 
                 val accessControlService = AccessControlService(pdlConsumer, dkifConsumer)
-                val fysiskBrevUtsendingService = FysiskBrevUtsendingService(dokarkivService, journalpostdistribusjonConsumer)
+                val fysiskBrevUtsendingService = FysiskBrevUtsendingService(journalpostdistribusjonConsumer)
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
                 val syketilfellebitService = SyketilfellebitService(database)
                 val varselSendtService = VarselSendtService(database)
 
-                val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(database, syketilfellebitService, varselSendtService)
-                val aktivitetskravVarselPlanner = AktivitetskravVarselPlanner(database, syketilfellebitService, sykmeldingService)
-                val replanleggingService = ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
-                val brukernotifikasjonerService = BrukernotifikasjonerService(brukernotifikasjonKafkaProducer, accessControlService)
+                val merVeiledningVarselPlanner =
+                    MerVeiledningVarselPlanner(database, syketilfellebitService, varselSendtService)
+                val aktivitetskravVarselPlanner =
+                    AktivitetskravVarselPlanner(database, syketilfellebitService, sykmeldingService)
+                val replanleggingService =
+                    ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
+                val brukernotifikasjonerService =
+                    BrukernotifikasjonerService(brukernotifikasjonKafkaProducer, accessControlService)
                 val senderFacade = SenderFacade(
                     dineSykmeldteHendelseKafkaProducer,
                     dittSykefravaerMeldingKafkaProdcuer,
@@ -118,13 +126,26 @@ fun main() {
                 val dialogmoteInnkallingVarselService = DialogmoteInnkallingVarselService(
                     senderFacade,
                     env.urlEnv.dialogmoterUrl,
+                    accessControlService,
                 )
-                val oppfolgingsplanVarselService = OppfolgingsplanVarselService(senderFacade, env.urlEnv.oppfolgingsplanerUrl)
+                val oppfolgingsplanVarselService =
+                    OppfolgingsplanVarselService(senderFacade, env.urlEnv.oppfolgingsplanerUrl)
                 val sykepengerMaxDateService = SykepengerMaxDateService(database, pdlConsumer)
-                val merVeiledningVarselService = MerVeiledningVarselService(senderFacade, syketilfellebitService, env.urlEnv)
+                val pdfgenConsumer = PdfgenConsumer(env.urlEnv, pdlConsumer, database)
+                val merVeiledningVarselService = MerVeiledningVarselService(
+                    senderFacade,
+                    syketilfellebitService,
+                    env.urlEnv,
+                    pdfgenConsumer,
+                    dokarkivService
+                )
 
                 val varselBusService =
-                    VarselBusService(motebehovVarselService, oppfolgingsplanVarselService, dialogmoteInnkallingVarselService)
+                    VarselBusService(
+                        motebehovVarselService,
+                        oppfolgingsplanVarselService,
+                        dialogmoteInnkallingVarselService
+                    )
 
                 connector {
                     port = env.appEnv.applicationPort
@@ -260,7 +281,7 @@ fun Application.kafkaModule(
     varselbusService: VarselBusService,
     aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
     merVeiledningVarselPlanner: MerVeiledningVarselPlanner,
-    sykepengerMaxDateService: SykepengerMaxDateService
+    sykepengerMaxDateService: SykepengerMaxDateService,
 ) {
     runningRemotely {
         launch(backgroundTasksContext) {

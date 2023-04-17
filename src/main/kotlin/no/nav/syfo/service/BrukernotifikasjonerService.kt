@@ -9,14 +9,14 @@ class BrukernotifikasjonerService(
     val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,
     val accessControlService: AccessControlService,
 ) {
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.BrukernotifikasjonerService")
+    private val log: Logger = LoggerFactory.getLogger(BrukernotifikasjonerService::class.qualifiedName)
 
     fun sendVarsel(
         uuid: String,
         mottakerFnr: String,
         content: String,
         url: URL,
-        meldingType: BrukernotifikasjonKafkaProducer.MeldingType?
+        meldingType: BrukernotifikasjonKafkaProducer.MeldingType?,
     ) {
         // Recheck if user can be notified in case of recent 'Addressesperre'
         if (accessControlService.getUserAccessStatus(mottakerFnr).canUserBeDigitallyNotified) {

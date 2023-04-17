@@ -14,7 +14,11 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.LoggerFactory
 
-class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dialogmoterUrl: String) {
+class DialogmoteInnkallingVarselService(
+    val senderFacade: SenderFacade,
+    val dialogmoterUrl: String,
+    val accessControlService: AccessControlService,
+) {
     val WEEKS_BEFORE_DELETE = 4L
     val SMS_KEY = "smsText"
     val EMAIL_TITLE_KEY = "emailTitle"
@@ -33,16 +37,34 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
         val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SYKMELDT_URL)
         val text = getArbeidstakerVarselText(varselHendelse.type)
         val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
-        val varselUuid = dataToDialogmoteInnkallingArbeidstakerData(varselHendelse.data)
+        val dialogmoteInnkallingArbeidstakerData = dataToDialogmoteInnkallingArbeidstakerData(varselHendelse.data)
+        val varselUuid = dialogmoteInnkallingArbeidstakerData.varselUuid
+        val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
+        val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerFnr)
 
-        senderFacade.sendTilBrukernotifikasjoner(
-            varselUuid.varselUuid,
-            varselHendelse.arbeidstakerFnr,
-            text,
-            url,
-            varselHendelse,
-            meldingType
-        )
+        if (userAccessStatus.canUserBeDigitallyNotified) {
+            senderFacade.sendTilBrukernotifikasjoner(
+                varselUuid, arbeidstakerFnr, text, url, varselHendelse, meldingType
+            )
+        } else {
+            val journalpostId = dialogmoteInnkallingArbeidstakerData.journalpostId
+            if (userAccessStatus.canUserBePhysicallyNotified && journalpostId !== null ) {
+                sendFysiskBrevlTilArbeidstaker(varselUuid, varselHendelse, journalpostId)
+            }
+            log.info("Received journalpostId is null for user reserved from digital communication and with no addressebeskyttelse")
+        }
+    }
+
+    private fun sendFysiskBrevlTilArbeidstaker(
+        uuid: String,
+        arbeidstakerHendelse: ArbeidstakerHendelse,
+        journalpostId: String,
+    ) {
+        try {
+            senderFacade.sendBrevTilFysiskPrint(uuid, arbeidstakerHendelse, journalpostId)
+        } catch (e: RuntimeException) {
+            log.info("Feil i sending av fysisk brev om dialogmote: ${e.message} for hendelsetype: ${arbeidstakerHendelse.type.name}")
+        }
     }
 
     private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
@@ -193,11 +215,12 @@ class DialogmoteInnkallingVarselService(val senderFacade: SenderFacade, val dial
     fun dataToDialogmoteInnkallingArbeidstakerData(data: Any?): DialogmoteInnkallingArbeidstakerData {
         return data?.let {
             try {
-                val uuid = data.toString()
-                val varselUuid = objectMapper.readTree(uuid)["varselUuid"].textValue()
-                return DialogmoteInnkallingArbeidstakerData(varselUuid)
+                val arbeidstakerDataString = data.toString()
+                val varselUuid = objectMapper.readTree(arbeidstakerDataString)["varselUuid"].textValue()
+                val journalpostId = objectMapper.readTree(arbeidstakerDataString)["journalpostId"].textValue()
+                return DialogmoteInnkallingArbeidstakerData(varselUuid, journalpostId)
             } catch (e: IOException) {
-                throw IOException("ArbeidstakerHendelseUUID har feil format")
+                throw IOException("ArbeidstakerHendelse har feil format")
             }
         } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
