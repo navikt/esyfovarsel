@@ -48,10 +48,10 @@ class DialogmoteInnkallingVarselService(
             )
         } else {
             val journalpostId = dialogmoteInnkallingArbeidstakerData.journalpostId
-            if (journalpostId !== null) {
+            if (userAccessStatus.canUserBePhysicallyNotified && journalpostId !== null ) {
                 sendFysiskBrevlTilArbeidstaker(varselUuid, varselHendelse, journalpostId)
             }
-            log.info("Received journalpostId is null for user reserved from digital communication")
+            log.info("Received journalpostId is null for user reserved from digital communication and with no addressebeskyttelse")
         }
     }
 
