@@ -39,6 +39,7 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: esyfovarsel-job
         - application: syfomotebehov
           namespace: team-esyfo
           cluster: prod-fss
