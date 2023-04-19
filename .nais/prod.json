@@ -27,7 +27,7 @@
     "DOKDIST_FORDELING_SCOPE": "api://prod-fss.teamdokumenthandtering.saf/.default",
     "DOKARKIV_URL": "https://dokarkiv.prod-fss-pub.nais.io",
     "DOKARKIV_SCOPE": "api://prod-fss.teamdokumenthandtering.dokarkiv/.default",
-    "SYFOOPPDFGEN_URL": "https://syfooppdfgen.intern.nav.no"
+    "SYFOOPPDFGEN_URL": "http://syfooppdfgen.team-esyfo"
   },
   "job": {
     "KTOR_ENV": "remote",
