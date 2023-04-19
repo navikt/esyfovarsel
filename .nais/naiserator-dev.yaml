@@ -60,9 +60,6 @@ spec:
           namespace: teamsykmelding
         - application: narmesteleder
           namespace: teamsykmelding
-        - application: security-token-service
-          namespace: aura
-          cluster: dev-fss
   gcp:
     sqlInstances:
       - autoBackupHour: 1

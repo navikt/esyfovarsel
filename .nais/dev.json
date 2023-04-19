@@ -2,7 +2,6 @@
   "app": {
     "KTOR_ENV": "remote",
     "KAFKA_BOOTSTRAP_SERVERS_URL": "SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443",
-    "STS_URL": "https://security-token-service.nais.preprod.local",
     "PDL_URL": "https://pdl-api.dev-fss-pub.nais.io/graphql",
     "DKIF_URL": "http://digdir-krr-proxy.team-rocket/rest/v1/person",
     "SYFOSMREGISTER_URL": "https://smregister.dev.intern.nav.no",
