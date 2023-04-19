@@ -51,22 +51,18 @@ spec:
         - host: dokdistfordeling.dev-fss-pub.nais.io
         - host: dokarkiv.dev-fss-pub.nais.io
       rules:
-        - application: security-token-service
-          namespace: aura
-          cluster: dev-fss
+        - application: syfooppdfgen
         - application: digdir-krr-proxy
           namespace: team-rocket
         - application: notifikasjon-produsent-api
           namespace: fager
-        - application: syfooppdfgen
-          namespace: team-esyfo
-          cluster: dev-gcp
         - application: syfosmregister
           namespace: teamsykmelding
-          cluster: dev-gcp
         - application: narmesteleder
           namespace: teamsykmelding
-          cluster: dev-gcp
+        - application: security-token-service
+          namespace: aura
+          cluster: dev-fss
   gcp:
     sqlInstances:
       - autoBackupHour: 1
