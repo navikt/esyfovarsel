@@ -7,6 +7,10 @@ metadata:
     team: team-esyfo
 spec:
   image: {{ image }}
+  accessPolicy:
+    outbound:
+      rules:
+        - application: esyfovarsel
   schedule: "05 09,18 * * *"
   filesFrom:
     - secret: esyfovarsel-serviceuser

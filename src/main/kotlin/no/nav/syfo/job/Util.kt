@@ -13,6 +13,7 @@ fun sendNotificationsJob(env: JobEnv) {
     val logg = LoggerFactory.getLogger("no.nav.syfo.job.Util")
     if (env.sendVarsler) {
         runBlocking {
+            logg.info("Starter jobb")
             val credentials = "${env.serviceuserUsername}:${env.serviceuserPassword}"
             val encodededCredentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
             val httpClient = httpClient()
