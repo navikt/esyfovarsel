@@ -52,6 +52,8 @@ spec:
         - host: dokarkiv.dev-fss-pub.nais.io
       rules:
         - application: security-token-service
+          namespace: aura
+          cluster: dev-fss
         - application: digdir-krr-proxy
           namespace: team-rocket
         - application: notifikasjon-produsent-api
