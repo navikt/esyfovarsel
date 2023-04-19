@@ -25,7 +25,7 @@ data class ArbeidstakerHendelse(
 ) : EsyfovarselHendelse
 
 data class VarselData(
-    val status: VarselStatus? = null
+    val status: VarselStatus? = null,
 )
 
 data class VarselStatus(

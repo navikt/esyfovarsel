@@ -3,13 +3,11 @@ package no.nav.syfo.service
 import java.net.URL
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.*
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.Kanal.*
 import no.nav.syfo.db.domain.PUtsendtVarsel
-import no.nav.syfo.db.fetchUtsendtVarsel
-import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
-import no.nav.syfo.db.storeUtsendtVarsel
+import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
@@ -20,18 +18,28 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaPr
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 
 class SenderFacade(
-    val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
-    val dittSykefravaerMeldingKafkaProducer: DittSykefravaerMeldingKafkaProducer,
-    val brukernotifikasjonerService: BrukernotifikasjonerService,
-    val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
-    val fysiskBrevUtsendingService: FysiskBrevUtsendingService,
-    val database: DatabaseInterface
+    private val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
+    private val dittSykefravaerMeldingKafkaProducer: DittSykefravaerMeldingKafkaProducer,
+    private val brukernotifikasjonerService: BrukernotifikasjonerService,
+    private val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
+    private val fysiskBrevUtsendingService: FysiskBrevUtsendingService,
+    val database: DatabaseInterface,
 ) {
     fun sendTilDineSykmeldte(
         varselHendelse: NarmesteLederHendelse,
         varsel: DineSykmeldteVarsel,
     ) {
-        dineSykmeldteHendelseKafkaProducer.sendVarsel(varsel)
+        try {
+            dineSykmeldteHendelseKafkaProducer.sendVarsel(varsel)
+        } catch (e: Exception) {
+            log.error("Error while sending varsel to DINE_SYKMELDTE: ${e.message}", e)
+            lagreIkkeUtsendtNarmesteLederVarsel(
+                kanal = DINE_SYKMELDTE,
+                varselHendelse = varselHendelse,
+                eksternReferanse = varsel.id.toString(),
+                feilmelding = e.message,
+            )
+        }
         lagreUtsendtNarmesteLederVarsel(DINE_SYKMELDTE, varselHendelse, varsel.id.toString())
     }
 
@@ -39,7 +47,20 @@ class SenderFacade(
         varselHendelse: ArbeidstakerHendelse,
         varsel: DittSykefravaerVarsel,
     ) {
-        val eksternUUID = dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding)
+        var eksternUUID = ""
+        try {
+            eksternUUID = dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding)
+        } catch (e: Exception) {
+            log.error("Error while sending varsel to DITT_SYKEFRAVAER: ${e.message}", e)
+            lagreIkkeUtsendtArbeidstakerVarsel(
+                kanal = DITT_SYKEFRAVAER,
+                varselHendelse = varselHendelse,
+                eksternReferanse = varsel.uuid,
+                feilmelding = e.message,
+                journalpostId = null,
+            )
+        }
+        log.info("eksternUUID: $eksternUUID")
         lagreUtsendtArbeidstakerVarsel(DITT_SYKEFRAVAER, varselHendelse, eksternUUID)
     }
 
@@ -51,7 +72,19 @@ class SenderFacade(
         varselHendelse: ArbeidstakerHendelse,
         meldingType: BrukernotifikasjonKafkaProducer.MeldingType? = BrukernotifikasjonKafkaProducer.MeldingType.BESKJED,
     ) {
-        brukernotifikasjonerService.sendVarsel(uuid, mottakerFnr, content, url, meldingType)
+        try {
+            brukernotifikasjonerService.sendVarsel(uuid, mottakerFnr, content, url, meldingType)
+        } catch (e: Exception) {
+            log.error("Error while sending varsel to BRUKERNOTIFIKASJON: ${e.message}", e)
+            lagreIkkeUtsendtArbeidstakerVarsel(
+                kanal = BRUKERNOTIFIKASJON,
+                varselHendelse = varselHendelse,
+                eksternReferanse = uuid,
+                feilmelding = e.message,
+                journalpostId = null,
+            )
+            throw Exception("Error while sending varsel to BRUKERNOTIFIKASJON: ${e.message}", e)
+        }
         lagreUtsendtArbeidstakerVarsel(BRUKERNOTIFIKASJON, varselHendelse, uuid)
     }
 
@@ -72,13 +105,23 @@ class SenderFacade(
         varselHendelse: NarmesteLederHendelse,
         varsel: ArbeidsgiverNotifikasjonInput,
     ) {
-        arbeidsgiverNotifikasjonService.sendNotifikasjon(varsel)
+        try {
+            arbeidsgiverNotifikasjonService.sendNotifikasjon(varsel)
+        } catch (e: Exception) {
+            log.error("Error while sending varsel to ARBEIDSGIVERNOTIFIKASJON: ${e.message}", e)
+            lagreIkkeUtsendtNarmesteLederVarsel(
+                kanal = ARBEIDSGIVERNOTIFIKASJON,
+                varselHendelse = varselHendelse,
+                eksternReferanse = varsel.uuid.toString(),
+                feilmelding = e.message,
+            )
+        }
         lagreUtsendtNarmesteLederVarsel(ARBEIDSGIVERNOTIFIKASJON, varselHendelse, varsel.uuid.toString())
     }
 
     fun ferdigstillArbeidsgiverNotifikasjoner(
         varselHendelse: NarmesteLederHendelse,
-        merkelapp: String
+        merkelapp: String,
     ) {
         val eksterneReferanser = database.fetchUtsendtVarsel(
             varselHendelse.arbeidstakerFnr,
@@ -113,7 +156,21 @@ class SenderFacade(
         varselHendelse: ArbeidstakerHendelse,
         journalpostId: String,
     ) {
-        fysiskBrevUtsendingService.sendBrev(uuid, journalpostId)
+        try {
+            fysiskBrevUtsendingService.sendBrev(uuid, journalpostId)
+        } catch (e: Exception) {
+            log.error(
+                "Error while distribuering av journalpost med journalpostId: $journalpostId, error message: ${e.message}",
+                e
+            )
+            lagreIkkeUtsendtArbeidstakerVarsel(
+                kanal = BREV,
+                varselHendelse = varselHendelse,
+                eksternReferanse = uuid,
+                feilmelding = e.message,
+                journalpostId = journalpostId,
+            )
+        }
         lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid)
     }
 
@@ -160,6 +217,51 @@ class SenderFacade(
             )
         )
     }
+
+    fun lagreIkkeUtsendtArbeidstakerVarsel(
+        kanal: Kanal,
+        varselHendelse: ArbeidstakerHendelse,
+        eksternReferanse: String,
+        feilmelding: String?,
+        journalpostId: String? = null,
+    ) {
+        database.storeUtsendtVarselFeilet(
+            PUtsendtVarselFeilet(
+                uuid = UUID.randomUUID().toString(),
+                fnr = varselHendelse.arbeidstakerFnr,
+                narmesteLederFnr = null,
+                orgnummer = varselHendelse.orgnummer,
+                type = varselHendelse.type.name,
+                kanal = kanal.name,
+                utsendtForsokTidspunkt = LocalDateTime.now(),
+                feilmelding = feilmelding,
+                journalpostId = journalpostId,
+                eksternReferanse = eksternReferanse,
+            )
+        )
+    }
+
+    fun lagreIkkeUtsendtNarmesteLederVarsel(
+        kanal: Kanal,
+        varselHendelse: NarmesteLederHendelse,
+        eksternReferanse: String,
+        feilmelding: String?,
+    ) {
+        database.storeUtsendtVarselFeilet(
+            PUtsendtVarselFeilet(
+                uuid = UUID.randomUUID().toString(),
+                fnr = varselHendelse.arbeidstakerFnr,
+                narmesteLederFnr = varselHendelse.narmesteLederFnr,
+                orgnummer = varselHendelse.orgnummer,
+                type = varselHendelse.type.name,
+                kanal = kanal.name,
+                utsendtForsokTidspunkt = LocalDateTime.now(),
+                feilmelding = feilmelding,
+                journalpostId = null,
+                eksternReferanse = eksternReferanse,
+            )
+        )
+    }
 }
 
 fun List<PUtsendtVarsel>.eksterneRefUferdigstilteVarsler(hendelseType: HendelseType) =
@@ -167,7 +269,7 @@ fun List<PUtsendtVarsel>.eksterneRefUferdigstilteVarsler(hendelseType: HendelseT
         .sortedByDescending { it.utsendtTidspunkt }
         .filter {
             it.eksternReferanse != null &&
-                it.type == hendelseType.toString() &&
-                it.ferdigstiltTidspunkt == null
+                    it.type == hendelseType.toString() &&
+                    it.ferdigstiltTidspunkt == null
         }
         .map { it.eksternReferanse }
