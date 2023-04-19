@@ -51,20 +51,15 @@ spec:
         - host: dokdistfordeling.prod-fss-pub.nais.io
         - host: dokarkiv.prod-fss-pub.nais.io
       rules:
-        - application: security-token-service
+        - application: syfooppdfgen
         - application: digdir-krr-proxy
           namespace: team-rocket
         - application: notifikasjon-produsent-api
           namespace: fager
-        - application: syfooppdfgen
-          namespace: team-esyfo
-          cluster: prod-gcp
         - application: syfosmregister
           namespace: teamsykmelding
-          cluster: prod-gcp
         - application: narmesteleder
           namespace: teamsykmelding
-          cluster: prod-gcp
   gcp:
     sqlInstances:
       - autoBackupHour: 1
