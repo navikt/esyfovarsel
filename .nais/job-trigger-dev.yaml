@@ -11,8 +11,6 @@ spec:
     outbound:
       rules:
         - application: esyfovarsel
-          namespace: team-esyfo
-          cluster: dev-gcp
   schedule: "*/5 * * * *"
   filesFrom:
     - secret: esyfovarsel-serviceuser
