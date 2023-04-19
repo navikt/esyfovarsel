@@ -5,7 +5,6 @@
     "STS_URL": "https://security-token-service.nais.adeo.no",
     "PDL_URL": "https://pdl-api.prod-fss-pub.nais.io/graphql",
     "DKIF_URL": "http://digdir-krr-proxy.team-rocket/rest/v1/person",
-    "SYFOSYKETILFELLE_URL": "https://syfosyketilfelle.nais.adeo.no",
     "SYFOSMREGISTER_URL": "https://smregister.intern.nav.no",
     "SYFOSMREGISTER_SCOPE": "api://prod-gcp.teamsykmelding.syfosmregister/.default",
     "DKIF_SCOPE": "api://prod-gcp.team-rocket.digdir-krr-proxy/.default",
