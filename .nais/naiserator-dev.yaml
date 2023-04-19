@@ -39,6 +39,9 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: esyfovarsel-job
+          namespace: team-esyfo
+          cluster: dev-gcp
         - application: syfomotebehov
           namespace: team-esyfo
           cluster: dev-fss
@@ -85,7 +88,7 @@ spec:
         type: POSTGRES_13
   webproxy: true
   ingresses:
-    - "https://esyfovarsel.dev.intern.nav.no"
+    - "https://esyfovarsel.intern.dev.nav.no"
   tokenx:
     enabled: true
   kafka:

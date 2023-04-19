@@ -13,14 +13,17 @@ fun sendNotificationsJob(env: JobEnv) {
     val logg = LoggerFactory.getLogger("no.nav.syfo.job.Util")
     if (env.sendVarsler) {
         runBlocking {
+            logg.info("Entering job..")
             val credentials = "${env.serviceuserUsername}:${env.serviceuserPassword}"
             val encodededCredentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
             val httpClient = httpClient()
+            logg.info("Attempting to POST to esyfovarsel with URL: ${env.jobTriggerUrl}")
             val response: HttpResponse = httpClient.post(env.jobTriggerUrl) {
                 headers {
                     append("Authorization", "Basic $encodededCredentials")
                 }
             }
+            logg.info("POST done")
             val status = response.status
             if (status == HttpStatusCode.OK) {
                 logg.info("Har trigget varselutsending")
