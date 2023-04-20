@@ -44,6 +44,7 @@ class VarselBusService(
 
     fun processVarselHendelseAsMinSideMicrofrontendEvent(event: EsyfovarselHendelse) {
         if (event is ArbeidstakerHendelse) {
+            log.info("Toggling min-side frontend")
             val fnr = event.arbeidstakerFnr
             when (event.type) {
                 SM_DIALOGMOTE_INNKALT -> microFrontendService.enableDialogmoteFrontendForFnr(fnr)

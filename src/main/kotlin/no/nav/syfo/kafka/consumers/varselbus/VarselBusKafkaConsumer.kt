@@ -12,7 +12,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class VarselBusKafkaConsumer(
-    env: Environment,
+    val env: Environment,
     val varselBusService: VarselBusService
 ) : KafkaListener {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.VarselBusConsumer")
@@ -35,7 +35,9 @@ class VarselBusKafkaConsumer(
                     varselEvent.data = objectMapper.readTree(it.value())["data"]
                     log.info("VARSEL BUS: Melding med UUID ${it.key()} er av type: ${varselEvent.type}")
                     varselBusService.processVarselHendelse(varselEvent)
-                    varselBusService.processVarselHendelseAsMinSideMicrofrontendEvent(varselEvent)
+                    if (env.toggleEnv.toggleMicrofrontendEnabling) {
+                        varselBusService.processVarselHendelseAsMinSideMicrofrontendEvent(varselEvent)
+                    }
                 } catch (e: IOException) {
                     log.error(
                         "Error in [$topicVarselBus]-listener: Could not parse message | ${e.message}",
