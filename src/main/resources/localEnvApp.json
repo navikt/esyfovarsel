@@ -57,6 +57,9 @@
   "toggleEnv": {
     "sendMerVeiledningVarsler": "false",
     "sendMerVeiledningVarslerBasedOnSisteUtbtalingDate": "true",
-    "sendAktivitetskravVarsler": "true"
+    "sendAktivitetskravVarsler": "true",
+    "toggleInfotrygdKafkaConsumer": "true",
+    "toggleUtbetalingKafkaConsumer": "true",
+    "toggleMicrofrontendEnabling": "true"
   }
 }
