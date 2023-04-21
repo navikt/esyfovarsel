@@ -18,7 +18,7 @@ object FysiskBrevUtsendingServiceSpek : Spek({
     val bestillingsId = "bestillingsid"
 
     describe("FysiskBrevUtsendingServiceSpek") {
-        coEvery { journalpostdistribusjonConsumer.distribuerJournalpost(journalpostId) } returns JournalpostdistribusjonResponse(
+        coEvery { journalpostdistribusjonConsumer.distribuerJournalpost(journalpostId, uuid) } returns JournalpostdistribusjonResponse(
             bestillingsId
         )
 
@@ -29,7 +29,7 @@ object FysiskBrevUtsendingServiceSpek : Spek({
         it("Journalpost skal distribueres dersom brev blir sendt til dokarkiv") {
             coEvery { dokarkivService.getJournalpostId(any(), any(), any()) } returns journalpostId
             runBlocking { fysiskBrevUtsendingService.sendBrev(uuid, journalpostId) }
-            coVerify(exactly = 1) { journalpostdistribusjonConsumer.distribuerJournalpost(journalpostId) }
+            coVerify(exactly = 1) { journalpostdistribusjonConsumer.distribuerJournalpost(journalpostId, uuid) }
         }
     }
 })

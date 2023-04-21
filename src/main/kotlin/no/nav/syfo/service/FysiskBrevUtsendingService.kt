@@ -14,7 +14,7 @@ class FysiskBrevUtsendingService(
         journalpostId: String,
     ) {
         runBlocking {
-            val bestillingsId = journalpostdistribusjonConsumer.distribuerJournalpost(journalpostId).bestillingsId
+            val bestillingsId = journalpostdistribusjonConsumer.distribuerJournalpost(journalpostId, uuid).bestillingsId
             log.info("Sendte til print, bestillingsId er $bestillingsId, varsel med UUID: $uuid")
         }
     }
