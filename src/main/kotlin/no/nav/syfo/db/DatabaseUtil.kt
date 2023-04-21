@@ -104,3 +104,12 @@ fun KSyketilfellebit.toPSyketilfellebit(): PSyketilfellebit {
         this.korrigererSendtSoknad
     )
 }
+
+fun ResultSet.toPMikrofrontendSynlighet() = PMikrofrontendSynlighet(
+    uuid = getString("uuid"),
+    synligFor = getString("synlig_for"),
+    tjeneste = getString("tjeneste"),
+    synligTom = getDate("synlig_tom")?.toLocalDate(),
+    opprettet = getTimestamp("opprettet").toLocalDateTime(),
+    sistEndret = getTimestamp("sist_endret").toLocalDateTime()
+)

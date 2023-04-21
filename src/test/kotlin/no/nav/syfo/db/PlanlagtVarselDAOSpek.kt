@@ -14,10 +14,7 @@ import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 
-const val arbeidstakerFnr1 = "12345678901"
-const val arbeidstakerFnr2 = "23456789012"
-const val arbeidstakerAktorId1 = "1234567890123"
-const val arbeidstakerAktorId2 = "2345678901234"
+
 
 object PlanlagtVarselDAOSpek : Spek({
 

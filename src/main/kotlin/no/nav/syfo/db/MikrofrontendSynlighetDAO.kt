@@ -1,0 +1,90 @@
+package no.nav.syfo.db
+
+import no.nav.syfo.db.domain.PMikrofrontendSynlighet
+import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
+import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import java.sql.Date
+import java.sql.Timestamp
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
+
+fun DatabaseInterface.storeMikrofrontendSynlighetEntry(mikrofrontendSynlighet: MikrofrontendSynlighet) {
+    val insertStatement = """INSERT INTO MIKROFRONTEND_SYNLIGHET (
+        uuid,
+        synlig_for,
+        tjeneste,
+        synlig_tom,
+        sist_endret,
+        opprettet) VALUES (?, ?, ?, ?, ?, ?)
+    """.trimIndent()
+
+    val now = Timestamp.valueOf(LocalDateTime.now())
+    val varselUUID = UUID.randomUUID()
+
+    connection.use { connection ->
+        connection.prepareStatement(insertStatement).use {
+            it.setObject(1, varselUUID)
+            it.setString(2, mikrofrontendSynlighet.synligFor)
+            it.setString(3, mikrofrontendSynlighet.tjeneste.name)
+            it.setDate(4, mikrofrontendSynlighet.synligTom?.let { Date.valueOf(it) })
+            it.setTimestamp(5, now)
+            it.setTimestamp(6, now)
+            it.executeUpdate()
+        }
+        connection.commit()
+    }
+}
+
+fun DatabaseInterface.updateMikrofrontendEntrySynligTom(
+    entry: MikrofrontendSynlighet,
+    newSynligTom: LocalDate
+) {
+    val now = LocalDateTime.now()
+    val updateStatement = """UPDATE MIKROFRONTEND_SYNLIGHET
+                             SET synlig_tom = ?,
+                                 sist_endret = ?
+                             WHERE synlig_for = ? AND tjeneste = ?
+    """.trimMargin()
+
+    connection.use { connection ->
+        connection.prepareStatement(updateStatement).use {
+            it.setDate(1, Date.valueOf(newSynligTom))
+            it.setTimestamp(2, Timestamp.valueOf(now))
+            it.setString(3, entry.synligFor)
+            it.setString(4, entry.tjeneste.name)
+            it.executeUpdate()
+        }
+        connection.commit()
+    }
+}
+
+fun DatabaseInterface.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste(fnr: String, tjeneste: Tjeneste) {
+    val updateStatement = """DELETE
+                             FROM MIKROFRONTEND_SYNLIGHET
+                             WHERE synlig_for = ? AND tjeneste = ?
+    """.trimIndent()
+
+    connection.use { connection ->
+        connection.prepareStatement(updateStatement).use {
+            it.setString(1, fnr)
+            it.setString(2, tjeneste.name)
+            it.executeUpdate()
+        }
+        connection.commit()
+    }
+}
+
+fun DatabaseInterface.fetchMikrofrontendSynlighetEntriesByFnr(fnr: String): List<PMikrofrontendSynlighet> {
+    val queryStatement = """SELECT *
+                            FROM MIKROFRONTEND_SYNLIGHET
+                            WHERE synlig_for = ?
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, fnr)
+            it.executeQuery().toList { toPMikrofrontendSynlighet() }
+        }
+    }
+}
