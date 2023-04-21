@@ -39,6 +39,7 @@ class SenderFacade(
                 eksternReferanse = varsel.id.toString(),
                 feilmelding = e.message,
             )
+            throw Exception("Error while sending varsel to DINE_SYKMELDTE: ${e.message}", e)
         }
         lagreUtsendtNarmesteLederVarsel(DINE_SYKMELDTE, varselHendelse, varsel.id.toString())
     }
