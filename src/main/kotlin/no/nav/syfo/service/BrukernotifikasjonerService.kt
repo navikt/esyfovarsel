@@ -36,7 +36,7 @@ class BrukernotifikasjonerService(
                 }
             }
         } else {
-            throw RuntimeException("Kan ikke sende melding til bruker for melding med uuid $uuid: burker er reservert for digital kommunikasjon")
+            throw RuntimeException("Kan ikke sende melding til bruker for melding med uuid $uuid: bruker er reservert for digital kommunikasjon")
         }
     }
 
