@@ -29,29 +29,35 @@ class SenderFacade(
         varselHendelse: NarmesteLederHendelse,
         varsel: DineSykmeldteVarsel,
     ) {
+        var isSendingSucceed = true
         try {
             dineSykmeldteHendelseKafkaProducer.sendVarsel(varsel)
         } catch (e: Exception) {
-            log.error("Error while sending varsel to DINE_SYKMELDTE: ${e.message}", e)
+            isSendingSucceed = false
+            log.warn("Error while sending varsel to DINE_SYKMELDTE: ${e.message}", e)
             lagreIkkeUtsendtNarmesteLederVarsel(
                 kanal = DINE_SYKMELDTE,
                 varselHendelse = varselHendelse,
                 eksternReferanse = varsel.id.toString(),
                 feilmelding = e.message,
             )
-            throw Exception("Error while sending varsel to DINE_SYKMELDTE: ${e.message}", e)
         }
-        lagreUtsendtNarmesteLederVarsel(DINE_SYKMELDTE, varselHendelse, varsel.id.toString())
+        if (isSendingSucceed) {
+            lagreUtsendtNarmesteLederVarsel(DINE_SYKMELDTE, varselHendelse, varsel.id.toString())
+        }
     }
 
     fun sendTilDittSykefravaer(
         varselHendelse: ArbeidstakerHendelse,
         varsel: DittSykefravaerVarsel,
     ) {
-        val eksternUUID: String
+        var eksternUUID = ""
+        var isSendingSucceed = true
         try {
             eksternUUID = dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding)
         } catch (e: Exception) {
+            log.warn("Error while sending varsel to DITT_SYKEFRAVAER: ${e.message}")
+            isSendingSucceed = false
             lagreIkkeUtsendtArbeidstakerVarsel(
                 kanal = DITT_SYKEFRAVAER,
                 varselHendelse = varselHendelse,
@@ -59,9 +65,10 @@ class SenderFacade(
                 feilmelding = e.message,
                 journalpostId = null,
             )
-            throw Exception("Error while sending varsel to DITT_SYKEFRAVAER: ${e.message}", e)
         }
-        lagreUtsendtArbeidstakerVarsel(DITT_SYKEFRAVAER, varselHendelse, eksternUUID)
+        if (isSendingSucceed && eksternUUID.isNotBlank()) {
+            lagreUtsendtArbeidstakerVarsel(DITT_SYKEFRAVAER, varselHendelse, eksternUUID)
+        }
     }
 
     fun sendTilBrukernotifikasjoner(
@@ -72,9 +79,12 @@ class SenderFacade(
         varselHendelse: ArbeidstakerHendelse,
         meldingType: BrukernotifikasjonKafkaProducer.MeldingType? = BrukernotifikasjonKafkaProducer.MeldingType.BESKJED,
     ) {
+        var isSendingSucceed = true
         try {
             brukernotifikasjonerService.sendVarsel(uuid, mottakerFnr, content, url, meldingType)
         } catch (e: Exception) {
+            log.warn("Error while sending varsel to BRUKERNOTIFIKASJON: ${e.message}")
+            isSendingSucceed = false
             lagreIkkeUtsendtArbeidstakerVarsel(
                 kanal = BRUKERNOTIFIKASJON,
                 varselHendelse = varselHendelse,
@@ -82,9 +92,10 @@ class SenderFacade(
                 feilmelding = e.message,
                 journalpostId = null,
             )
-            throw Exception("Error while sending varsel to BRUKERNOTIFIKASJON: ${e.message}", e)
         }
-        lagreUtsendtArbeidstakerVarsel(BRUKERNOTIFIKASJON, varselHendelse, uuid)
+        if (isSendingSucceed) {
+            lagreUtsendtArbeidstakerVarsel(BRUKERNOTIFIKASJON, varselHendelse, uuid)
+        }
     }
 
     fun ferdigstillBrukernotifkasjonVarsler(varselHendelse: ArbeidstakerHendelse) {
@@ -104,18 +115,22 @@ class SenderFacade(
         varselHendelse: NarmesteLederHendelse,
         varsel: ArbeidsgiverNotifikasjonInput,
     ) {
+        var isSendingSucceed = true
         try {
             arbeidsgiverNotifikasjonService.sendNotifikasjon(varsel)
         } catch (e: Exception) {
+            log.warn("Error while sending varsel to ARBEIDSGIVERNOTIFIKASJON: ${e.message}")
+            isSendingSucceed = false
             lagreIkkeUtsendtNarmesteLederVarsel(
                 kanal = ARBEIDSGIVERNOTIFIKASJON,
                 varselHendelse = varselHendelse,
                 eksternReferanse = varsel.uuid.toString(),
                 feilmelding = e.message,
             )
-            throw Exception("Error while sending varsel to ARBEIDSGIVERNOTIFIKASJON: ${e.message}", e)
         }
-        lagreUtsendtNarmesteLederVarsel(ARBEIDSGIVERNOTIFIKASJON, varselHendelse, varsel.uuid.toString())
+        if (isSendingSucceed) {
+            lagreUtsendtNarmesteLederVarsel(ARBEIDSGIVERNOTIFIKASJON, varselHendelse, varsel.uuid.toString())
+        }
     }
 
     fun ferdigstillArbeidsgiverNotifikasjoner(
@@ -155,9 +170,12 @@ class SenderFacade(
         varselHendelse: ArbeidstakerHendelse,
         journalpostId: String,
     ) {
+        var isSendingSucceed = true
         try {
             fysiskBrevUtsendingService.sendBrev(uuid, journalpostId)
         } catch (e: Exception) {
+            isSendingSucceed = false
+            log.warn("Error while sending brev til fysisk print: ${e.message}")
             lagreIkkeUtsendtArbeidstakerVarsel(
                 kanal = BREV,
                 varselHendelse = varselHendelse,
@@ -165,12 +183,13 @@ class SenderFacade(
                 feilmelding = e.message,
                 journalpostId = journalpostId,
             )
-            throw Exception("Error while sending brev til fysisk print: ${e.message}", e)
         }
-        lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid)
+        if (isSendingSucceed) {
+            lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid)
+        }
     }
 
-    fun lagreUtsendtNarmesteLederVarsel(
+    private fun lagreUtsendtNarmesteLederVarsel(
         kanal: Kanal,
         varselHendelse: NarmesteLederHendelse,
         eksternReferanse: String,
@@ -192,7 +211,7 @@ class SenderFacade(
         )
     }
 
-    fun lagreUtsendtArbeidstakerVarsel(
+    private fun lagreUtsendtArbeidstakerVarsel(
         kanal: Kanal,
         varselHendelse: ArbeidstakerHendelse,
         eksternReferanse: String,
@@ -214,7 +233,7 @@ class SenderFacade(
         )
     }
 
-    fun lagreIkkeUtsendtArbeidstakerVarsel(
+    private fun lagreIkkeUtsendtArbeidstakerVarsel(
         kanal: Kanal,
         varselHendelse: ArbeidstakerHendelse,
         eksternReferanse: String,
@@ -237,7 +256,7 @@ class SenderFacade(
         )
     }
 
-    fun lagreIkkeUtsendtNarmesteLederVarsel(
+    private fun lagreIkkeUtsendtNarmesteLederVarsel(
         kanal: Kanal,
         varselHendelse: NarmesteLederHendelse,
         eksternReferanse: String,
