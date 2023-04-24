@@ -47,7 +47,7 @@ spec:
           cluster: prod-gcp
         - application: syfomodiaperson
           namespace: teamsykefravr
-          cluster: prod-fss
+          cluster: prod-gcp
     outbound:
       external:
         - host: pdl-api.prod-fss-pub.nais.io
