@@ -9,6 +9,7 @@
     "clientId": "clientId",
     "clientSecret": "clientSecret",
     "aadAccessTokenUrl": "http://localhost:9595",
+    "aadAppWellKnownUrl": "http://localhost:9591",
     "tokenXWellKnownUrl": "http://localhost:4546",
     "tokenXClientId": "http://localhost:4547"
   },

@@ -35,7 +35,12 @@ spec:
     path: /prometheus
   azure:
     application:
+      allowAllUsers: true
       enabled: true
+      tenant: nav.no
+      claims:
+        extra:
+          - "NAVident"
   accessPolicy:
     inbound:
       rules:
@@ -45,6 +50,9 @@ spec:
           cluster: prod-fss
         - application: esyfo-info-frontend
           namespace: team-esyfo
+          cluster: prod-gcp
+        - application: syfomodiaperson
+          namespace: teamsykefravr
           cluster: prod-gcp
     outbound:
       external:
