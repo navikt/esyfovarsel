@@ -59,6 +59,8 @@ fun getEnv(): Environment {
                 dokarkivUrl = getEnvVar("DOKARKIV_URL"),
                 dokarkivScope = getEnvVar("DOKARKIV_SCOPE"),
                 syfooppdfgenUrl = getEnvVar("SYFOOPPDFGEN_URL"),
+                syfoTilgangskontrollUrl = getEnvVar("SYFOTILGANGSKONTROLL_URL"),
+                syfoTilgangskontrollScope = getEnvVar("SYFOTILGANGSKONTROLL_SCOPE"),
             ),
             KafkaEnv(
                 bootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
@@ -141,6 +143,8 @@ data class UrlEnv(
     val dokarkivUrl: String,
     val dokarkivScope: String,
     val syfooppdfgenUrl: String,
+    val syfoTilgangskontrollUrl: String,
+    val syfoTilgangskontrollScope: String,
 )
 
 data class KafkaEnv(

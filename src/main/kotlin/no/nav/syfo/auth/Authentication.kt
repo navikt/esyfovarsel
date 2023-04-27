@@ -18,6 +18,7 @@ import no.nav.syfo.api.admin.registerAdminApi
 import no.nav.syfo.api.job.registerJobTriggerApi
 import no.nav.syfo.api.maxdate.registerSykepengerMaxDateAzureApi
 import no.nav.syfo.api.maxdate.registerSykepengerMaxDateRestApi
+import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.service.ReplanleggingService
 import no.nav.syfo.service.SykepengerMaxDateService
@@ -118,6 +119,7 @@ fun Application.setupLocalRoutesWithAuthentication(
     varselSender: VarselSender,
     replanleggingService: ReplanleggingService,
     sykepengerMaxDateService: SykepengerMaxDateService,
+    veilederTilgangskontrollConsumer: VeilederTilgangskontrollConsumer,
     authEnv: AuthEnv,
 ) {
     install(Authentication) {
@@ -140,7 +142,7 @@ fun Application.setupLocalRoutesWithAuthentication(
             registerJobTriggerApi(varselSender)
         }
         authenticate(JwtIssuerType.INTERNAL_AZUREAD.name) {
-            registerSykepengerMaxDateAzureApi(sykepengerMaxDateService)
+            registerSykepengerMaxDateAzureApi(sykepengerMaxDateService, veilederTilgangskontrollConsumer)
         }
     }
 }
@@ -149,6 +151,7 @@ fun Application.setupRoutesWithAuthentication(
     varselSender: VarselSender,
     replanleggingService: ReplanleggingService,
     sykepengerMaxDateService: SykepengerMaxDateService,
+    veilederTilgangskontrollConsumer: VeilederTilgangskontrollConsumer,
     authEnv: AuthEnv,
 ) {
     val wellKnownTokenX = getWellKnown(authEnv.tokenXWellKnownUrl)
@@ -165,7 +168,7 @@ fun Application.setupRoutesWithAuthentication(
             registerJobTriggerApi(varselSender)
         }
         authenticate(JwtIssuerType.INTERNAL_AZUREAD.name) {
-            registerSykepengerMaxDateAzureApi(sykepengerMaxDateService)
+            registerSykepengerMaxDateAzureApi(sykepengerMaxDateService, veilederTilgangskontrollConsumer)
         }
         authenticate("tokenx") {
             registerSykepengerMaxDateRestApi(sykepengerMaxDateService)

@@ -80,11 +80,39 @@ class AzureAdTokenConsumer(authEnv: AuthEnv) {
         }
         return tokenMap[resource]!!.access_token
     }
+
+    suspend fun getOnBehalfOfToken(resource: String, token: String): String? {
+        log.info("Henter nytt obo-token fra Azure AD for scope : $resource")
+
+        val response = httpClientWithProxy.post<HttpResponse>(aadAccessTokenUrl) {
+            accept(ContentType.Application.Json)
+
+            body = FormDataContent(
+                Parameters.build {
+                    append("client_id", clientId)
+                    append("scope", resource)
+                    append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
+                    append("client_secret", clientSecret)
+                    append("assertion", token)
+                    append("client_assertion_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
+                    append("requested_token_use", "on_behalf_of")
+                }
+            )
+        }
+
+        return if (response.status == HttpStatusCode.OK) {
+            response.receive<AzureAdAccessToken>().access_token
+        } else {
+            log.error("Could not get obo-token from Azure AD: $response")
+            null
+        }
+
+    }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class AzureAdAccessToken(
     val access_token: String,
     val expires_in: Long,
-    val issuedOn: Instant? = Instant.now()
+    val issuedOn: Instant? = Instant.now(),
 )

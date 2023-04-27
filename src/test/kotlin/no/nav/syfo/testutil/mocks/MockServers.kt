@@ -18,17 +18,17 @@ import io.ktor.server.netty.Netty
 import io.ktor.server.netty.NettyApplicationEngine
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.UrlEnv
-import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.testutil.extractPortFromUrl
+import no.nav.syfo.utils.NAV_PERSONIDENT_HEADER
 
 class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
 
     fun mockDkifServer(): NettyApplicationEngine {
         return mockServer(urlEnv.dkifUrl) {
             get("/rest/v1/person") {
-                if (call.request.headers[DkifConsumer.NAV_PERSONIDENT_HEADER]?.isValidHeader() == true) {
+                if (call.request.headers[NAV_PERSONIDENT_HEADER]?.isValidHeader() == true) {
                     call.respond(
-                        dkifResponseMap[call.request.headers[DkifConsumer.NAV_PERSONIDENT_HEADER]]
+                        dkifResponseMap[call.request.headers[NAV_PERSONIDENT_HEADER]]
                             ?: dkifResponseSuccessKanVarslesResponseJSON
                     )
                 } else {
