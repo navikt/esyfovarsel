@@ -32,7 +32,9 @@
     "dokdistfordelingScope": "dokdistfordelingScope",
     "dokarkivUrl": "http://dokarkivUrl:9099",
     "dokarkivScope": "dokarkivScope",
-    "syfooppdfgenUrl": "http://localhost:4545"
+    "syfooppdfgenUrl": "http://localhost:4545",
+    "syfoTilgangskontrollUrl": "http://syfotilgangskontrollUrl:9099",
+    "syfoTilgangskontrollScope": "syfotilgangskontrollScope"
   },
   "kafkaEnv": {
     "bootstrapServersUrl": "http://localhost:9092",

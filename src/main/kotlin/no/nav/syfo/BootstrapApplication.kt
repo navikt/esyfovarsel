@@ -34,6 +34,7 @@ import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
 import no.nav.syfo.consumer.pdl.LocalPdlConsumer
 import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
+import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.grantAccessToIAMUsers
@@ -151,6 +152,9 @@ fun main() {
                         microFrontendService
                     )
 
+                val veilederTilgangskontrollConsumer =
+                    VeilederTilgangskontrollConsumer(env.urlEnv, azureAdTokenConsumer)
+
                 connector {
                     port = env.appEnv.applicationPort
                 }
@@ -169,6 +173,7 @@ fun main() {
                         sykepengerMaxDateService,
                         sykmeldingService,
                         pdlConsumer,
+                        veilederTilgangskontrollConsumer,
                     )
 
                     kafkaModule(
@@ -218,6 +223,7 @@ fun Application.serverModule(
     sykepengerMaxDateService: SykepengerMaxDateService,
     sykmeldingService: SykmeldingService,
     pdlConsumer: PdlConsumer,
+    veilederTilgangskontrollConsumer: VeilederTilgangskontrollConsumer,
 ) {
 
     val sendVarselService =
@@ -264,11 +270,23 @@ fun Application.serverModule(
     }
 
     runningRemotely {
-        setupRoutesWithAuthentication(varselSender, replanleggingService, sykepengerMaxDateService, env.authEnv)
+        setupRoutesWithAuthentication(
+            varselSender,
+            replanleggingService,
+            sykepengerMaxDateService,
+            veilederTilgangskontrollConsumer,
+            env.authEnv
+        )
     }
 
     runningLocally {
-        setupLocalRoutesWithAuthentication(varselSender, replanleggingService, sykepengerMaxDateService, env.authEnv)
+        setupLocalRoutesWithAuthentication(
+            varselSender,
+            replanleggingService,
+            sykepengerMaxDateService,
+            veilederTilgangskontrollConsumer,
+            env.authEnv
+        )
     }
 
     routing {
