@@ -1,5 +1,7 @@
 package no.nav.syfo.db.domain
 
+import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
+import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -11,3 +13,10 @@ data class PMikrofrontendSynlighet(
     val opprettet: LocalDateTime,
     val sistEndret: LocalDateTime
 )
+
+fun PMikrofrontendSynlighet.toMikrofrontendSynlighet() =
+    MikrofrontendSynlighet(
+        synligFor = this.synligFor,
+        tjeneste = Tjeneste.valueOf(this.tjeneste),
+        synligTom = this.synligTom
+    )

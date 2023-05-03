@@ -1,12 +1,12 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.db.DatabaseInterface
-import no.nav.syfo.db.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste
-import no.nav.syfo.db.storeMikrofrontendSynlighetEntry
+import no.nav.syfo.db.*
+import no.nav.syfo.db.domain.toMikrofrontendSynlighet
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
 import no.nav.syfo.kafka.producers.mineside_microfrontend.*
 import org.apache.commons.cli.MissingArgumentException
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
 class MikrofrontendService(
@@ -16,6 +16,7 @@ class MikrofrontendService(
     private val actionEnabled = MinSideEvent.enable.toString()
     private val actionDisabled = MinSideEvent.disable.toString()
     private val dialogmoteMicrofrontendId = "syfo-dialog"
+    private val log = LoggerFactory.getLogger(MikrofrontendService::class.java)
 
     fun enableDialogmoteFrontendForFnr(hendelse: ArbeidstakerHendelse) {
         storeMikrofrontendSynlighetEntryInDb(hendelse)
@@ -31,6 +32,24 @@ class MikrofrontendService(
             actionDisabled
         )
         database.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste(hendelse.arbeidstakerFnr, Tjeneste.DIALOGMOTE)
+    }
+
+    fun updateDialogmoteFrontendForFnr(hendelse: ArbeidstakerHendelse) {
+        database.fetchMikrofrontendSynlighetEntriesByFnr(hendelse.arbeidstakerFnr)
+            .lastOrNull { entry -> entry.tjeneste == Tjeneste.DIALOGMOTE.name }
+            ?.let {
+                database.updateMikrofrontendEntrySynligTom(
+                    it.toMikrofrontendSynlighet(),
+                    hendelse.motetidspunkt().toLocalDate()
+                )
+            }
+            ?: run {
+                log.warn(
+                    "[MIKROFRONTEND_SERVICE]: Received ${hendelse.type} from VarselBus without corresponding entry" +
+                        "in MIKROFRONTEND_SYNLIGHET DB-table. Creating new entry ..."
+                )
+                enableDialogmoteFrontendForFnr(hendelse)
+            }
     }
 
     private fun toggleDialogmoteFrontendForFnr(

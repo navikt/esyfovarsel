@@ -47,6 +47,7 @@ class VarselBusService(
             log.info("Toggling min-side frontend")
             when (event.type) {
                 SM_DIALOGMOTE_INNKALT -> mikrofrontendService.enableDialogmoteFrontendForFnr(event)
+                SM_DIALOGMOTE_NYTT_TID_STED -> mikrofrontendService.updateDialogmoteFrontendForFnr(event)
                 SM_DIALOGMOTE_AVLYST,
                 SM_DIALOGMOTE_REFERAT -> mikrofrontendService.disableDialogmoteFrontendForFnr(event)
                 else -> return

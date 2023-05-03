@@ -5,8 +5,6 @@ import no.nav.syfo.db.arbeidstakerFnr1
 import no.nav.syfo.db.orgnummer1
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
-import no.nav.syfo.kafka.consumers.varselbus.domain.VarselData
-import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataMotetidspunkt
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import no.nav.syfo.testutil.EmbeddedDatabase
