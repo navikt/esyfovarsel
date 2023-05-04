@@ -20,6 +20,7 @@ import no.nav.syfo.api.maxdate.registerSykepengerMaxDateAzureApi
 import no.nav.syfo.api.maxdate.registerSykepengerMaxDateRestApi
 import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
 import no.nav.syfo.job.VarselSender
+import no.nav.syfo.service.MikrofrontendService
 import no.nav.syfo.service.ReplanleggingService
 import no.nav.syfo.service.SykepengerMaxDateService
 import org.slf4j.Logger
@@ -117,6 +118,7 @@ private fun JWTCredential.inExpectedAudience(expectedAudience: List<String>) = e
 
 fun Application.setupLocalRoutesWithAuthentication(
     varselSender: VarselSender,
+    mikrofrontendService: MikrofrontendService,
     replanleggingService: ReplanleggingService,
     sykepengerMaxDateService: SykepengerMaxDateService,
     veilederTilgangskontrollConsumer: VeilederTilgangskontrollConsumer,
@@ -139,7 +141,7 @@ fun Application.setupLocalRoutesWithAuthentication(
         registerAdminApi(replanleggingService)
 
         authenticate("auth-basic") {
-            registerJobTriggerApi(varselSender)
+            registerJobTriggerApi(varselSender, mikrofrontendService)
         }
         authenticate(JwtIssuerType.INTERNAL_AZUREAD.name) {
             registerSykepengerMaxDateAzureApi(sykepengerMaxDateService, veilederTilgangskontrollConsumer)
@@ -149,6 +151,7 @@ fun Application.setupLocalRoutesWithAuthentication(
 
 fun Application.setupRoutesWithAuthentication(
     varselSender: VarselSender,
+    mikrofrontendService: MikrofrontendService,
     replanleggingService: ReplanleggingService,
     sykepengerMaxDateService: SykepengerMaxDateService,
     veilederTilgangskontrollConsumer: VeilederTilgangskontrollConsumer,
@@ -165,7 +168,7 @@ fun Application.setupRoutesWithAuthentication(
     routing {
         authenticate("auth-basic") {
             registerAdminApi(replanleggingService)
-            registerJobTriggerApi(varselSender)
+            registerJobTriggerApi(varselSender, mikrofrontendService)
         }
         authenticate(JwtIssuerType.INTERNAL_AZUREAD.name) {
             registerSykepengerMaxDateAzureApi(sykepengerMaxDateService, veilederTilgangskontrollConsumer)

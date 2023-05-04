@@ -88,3 +88,19 @@ fun DatabaseInterface.fetchMikrofrontendSynlighetEntriesByFnr(fnr: String): List
         }
     }
 }
+
+fun DatabaseInterface.fetchFnrsWithExpiredMicrofrontendEntries(tjeneste: Tjeneste): List<String> {
+    val today = LocalDate.now()
+    val queryStatement = """SELECT synlig_for
+                        FROM MIKROFRONTEND_SYNLIGHET
+                        WHERE tjeneste = ? AND synlig_tom <= ?
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, tjeneste.name)
+            it.setDate(2, Date.valueOf(today))
+            it.executeQuery().toList { getString("synlig_for") }
+        }
+    }
+}

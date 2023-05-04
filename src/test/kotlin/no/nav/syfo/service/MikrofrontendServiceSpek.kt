@@ -10,7 +10,7 @@ import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.shouldContainMikrofrontendEntry
-import no.nav.syfo.testutil.shouldNotContainMikrofrontendEntryForFnr
+import no.nav.syfo.testutil.shouldNotContainMikrofrontendEntryForUser
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDateTime
@@ -55,7 +55,7 @@ object MikrofrontendServiceSpek : Spek({
         )
 
         it("Enabling MF should result in motetidspunkt storage in DB and publication on min-side topic") {
-            mikrofrontendService.enableDialogmoteFrontendForFnr(arbeidstakerHendelseDialogmoteInnkalt)
+            mikrofrontendService.enableDialogmoteFrontendForUser(arbeidstakerHendelseDialogmoteInnkalt)
             embeddedDatabase.shouldContainMikrofrontendEntry(
                 arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr,
                 Tjeneste.DIALOGMOTE
@@ -66,9 +66,9 @@ object MikrofrontendServiceSpek : Spek({
         }
 
         it("Disabling MF should result in removal of entry from DB and publication on min-side topic") {
-            mikrofrontendService.enableDialogmoteFrontendForFnr(arbeidstakerHendelseDialogmoteInnkalt)
-            mikrofrontendService.disableDialogmoteFrontendForFnr(arbeidstakerHendelseDialogmoteAvlyst)
-            embeddedDatabase.shouldNotContainMikrofrontendEntryForFnr(
+            mikrofrontendService.enableDialogmoteFrontendForUser(arbeidstakerHendelseDialogmoteInnkalt)
+            mikrofrontendService.disableDialogmoteFrontendForUser(arbeidstakerHendelseDialogmoteAvlyst)
+            embeddedDatabase.shouldNotContainMikrofrontendEntryForUser(
                 arbeidstakerHendelseDialogmoteAvlyst.arbeidstakerFnr
             )
             verify(exactly = 2) {

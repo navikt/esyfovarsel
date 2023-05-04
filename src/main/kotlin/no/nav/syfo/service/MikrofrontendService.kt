@@ -18,23 +18,27 @@ class MikrofrontendService(
     private val dialogmoteMicrofrontendId = "syfo-dialog"
     private val log = LoggerFactory.getLogger(MikrofrontendService::class.java)
 
-    fun enableDialogmoteFrontendForFnr(hendelse: ArbeidstakerHendelse) {
+    fun enableDialogmoteFrontendForUser(hendelse: ArbeidstakerHendelse) {
         storeMikrofrontendSynlighetEntryInDb(hendelse)
-        toggleDialogmoteFrontendForFnr(
+        toggleDialogmoteFrontendForUser(
             hendelse.arbeidstakerFnr,
             actionEnabled
         )
     }
 
-    fun disableDialogmoteFrontendForFnr(hendelse: ArbeidstakerHendelse) {
-        toggleDialogmoteFrontendForFnr(
-            hendelse.arbeidstakerFnr,
-            actionDisabled
-        )
-        database.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste(hendelse.arbeidstakerFnr, Tjeneste.DIALOGMOTE)
+    fun disableDialogmoteFrontendForUser(hendelse: ArbeidstakerHendelse) {
+        disableDialogmoteFrontendForUser(hendelse.arbeidstakerFnr)
     }
 
-    fun updateDialogmoteFrontendForFnr(hendelse: ArbeidstakerHendelse) {
+    fun disableDialogmoteFrontendForUser(fnr: String) {
+        toggleDialogmoteFrontendForUser(
+            fnr,
+            actionDisabled
+        )
+        database.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste(fnr, Tjeneste.DIALOGMOTE)
+    }
+
+    fun updateDialogmoteFrontendForUser(hendelse: ArbeidstakerHendelse) {
         database.fetchMikrofrontendSynlighetEntriesByFnr(hendelse.arbeidstakerFnr)
             .lastOrNull { entry -> entry.tjeneste == Tjeneste.DIALOGMOTE.name }
             ?.let {
@@ -48,11 +52,21 @@ class MikrofrontendService(
                     "[MIKROFRONTEND_SERVICE]: Received ${hendelse.type} from VarselBus without corresponding entry" +
                         "in MIKROFRONTEND_SYNLIGHET DB-table. Creating new entry ..."
                 )
-                enableDialogmoteFrontendForFnr(hendelse)
+                enableDialogmoteFrontendForUser(hendelse)
             }
     }
 
-    private fun toggleDialogmoteFrontendForFnr(
+    // TODO: Rename?
+    fun findAndCloseExpiredDialogmoteMikrofrontends() {
+        log.info("DEBUG: Running findAndCloseExpiredDialogmoteMikrofrontends()")
+        database.fetchFnrsWithExpiredMicrofrontendEntries(Tjeneste.DIALOGMOTE).forEach { fnr ->
+            log.info("DEBUG: Deleting MF for $fnr")
+            disableDialogmoteFrontendForUser(fnr)
+        }
+        log.info("DEBUG: findAndCloseExpiredDialogmoteMikrofrontends() completed")
+    }
+
+    private fun toggleDialogmoteFrontendForUser(
         fnr: String,
         action: String
     ) {

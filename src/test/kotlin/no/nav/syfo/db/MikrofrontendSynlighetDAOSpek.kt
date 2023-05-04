@@ -5,7 +5,7 @@ import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.shouldContainMikrofrontendEntry
-import no.nav.syfo.testutil.shouldNotContainMikrofrontendEntryForFnr
+import no.nav.syfo.testutil.shouldNotContainMikrofrontendEntryForUser
 import org.amshove.kluent.should
 import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
@@ -48,7 +48,7 @@ object MikrofrontendSynlighetDAOSpek : Spek({
             embeddedDatabase.storeMikrofrontendSynlighetEntry(mikrofrontendSynlighet2)
             embeddedDatabase.shouldContainMikrofrontendEntry(arbeidstakerFnr2, Tjeneste.DIALOGMOTE)
             embeddedDatabase.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste(arbeidstakerFnr2, Tjeneste.DIALOGMOTE)
-            embeddedDatabase.shouldNotContainMikrofrontendEntryForFnr(arbeidstakerFnr2)
+            embeddedDatabase.shouldNotContainMikrofrontendEntryForUser(arbeidstakerFnr2)
         }
 
         it("Update miktrofrontend entry") {

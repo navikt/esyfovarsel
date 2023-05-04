@@ -38,7 +38,7 @@ fun DatabaseInterface.shouldContainMikrofrontendEntry(fnr: String, tjeneste: Tje
         }
     }
 
-fun DatabaseInterface.shouldNotContainMikrofrontendEntryForFnr(fnr: String) =
+fun DatabaseInterface.shouldNotContainMikrofrontendEntryForUser(fnr: String) =
     this.should("Should have no rows with specified fnr") {
         this.fetchMikrofrontendSynlighetEntriesByFnr(fnr).none {
             it.synligFor == fnr
