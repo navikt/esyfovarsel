@@ -58,12 +58,9 @@ class MikrofrontendService(
 
     // TODO: Rename?
     fun findAndCloseExpiredDialogmoteMikrofrontends() {
-        log.info("DEBUG: Running findAndCloseExpiredDialogmoteMikrofrontends()")
         database.fetchFnrsWithExpiredMicrofrontendEntries(Tjeneste.DIALOGMOTE).forEach { fnr ->
-            log.info("DEBUG: Deleting MF for $fnr")
             disableDialogmoteFrontendForUser(fnr)
         }
-        log.info("DEBUG: findAndCloseExpiredDialogmoteMikrofrontends() completed")
     }
 
     private fun toggleDialogmoteFrontendForUser(
