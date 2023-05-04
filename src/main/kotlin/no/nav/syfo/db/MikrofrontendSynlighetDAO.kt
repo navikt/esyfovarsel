@@ -92,8 +92,8 @@ fun DatabaseInterface.fetchMikrofrontendSynlighetEntriesByFnr(fnr: String): List
 fun DatabaseInterface.fetchFnrsWithExpiredMicrofrontendEntries(tjeneste: Tjeneste): List<String> {
     val today = LocalDate.now()
     val queryStatement = """SELECT synlig_for
-                        FROM MIKROFRONTEND_SYNLIGHET
-                        WHERE tjeneste = ? AND synlig_tom <= ?
+                            FROM MIKROFRONTEND_SYNLIGHET
+                            WHERE tjeneste = ? AND synlig_tom <= ?
     """.trimIndent()
 
     return connection.use { connection ->
