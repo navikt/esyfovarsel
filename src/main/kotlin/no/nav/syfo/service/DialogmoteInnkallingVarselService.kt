@@ -1,10 +1,5 @@
 package no.nav.syfo.service
 
-import java.io.IOException
-import java.net.URL
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.util.*
 import no.nav.syfo.*
 import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.*
@@ -13,6 +8,11 @@ import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaP
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.LoggerFactory
+import java.io.IOException
+import java.net.URL
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.util.*
 
 class DialogmoteInnkallingVarselService(
     val senderFacade: SenderFacade,
@@ -28,7 +28,7 @@ class DialogmoteInnkallingVarselService(
 
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}")
-        varselHendelse.data = dataToDialogmoteInnkallingNarmesteLederData(varselHendelse.data)
+        varselHendelse.data = dataToVarselDataNarmesteLeder(varselHendelse.data)
         sendVarselTilDineSykmeldte(varselHendelse)
         sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
     }
@@ -37,8 +37,8 @@ class DialogmoteInnkallingVarselService(
         val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SYKMELDT_URL)
         val text = getArbeidstakerVarselText(varselHendelse.type)
         val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
-        val dialogmoteInnkallingArbeidstakerData = dataToDialogmoteInnkallingArbeidstakerData(varselHendelse.data)
-        val varselUuid = dialogmoteInnkallingArbeidstakerData.varselUuid
+        val jounalpostData = dataToVarselDataJournalpost(varselHendelse.data)
+        val varselUuid = jounalpostData.uuid
         val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerFnr)
 
@@ -47,8 +47,8 @@ class DialogmoteInnkallingVarselService(
                 varselUuid, arbeidstakerFnr, text, url, varselHendelse, meldingType
             )
         } else {
-            val journalpostId = dialogmoteInnkallingArbeidstakerData.journalpostId
-            if (userAccessStatus.canUserBePhysicallyNotified && journalpostId !== null ) {
+            val journalpostId = jounalpostData.id
+            if (userAccessStatus.canUserBePhysicallyNotified && journalpostId !== null) {
                 sendFysiskBrevlTilArbeidstaker(varselUuid, varselHendelse, journalpostId)
             }
             log.info("Received journalpostId is null for user reserved from digital communication and with no addressebeskyttelse")
@@ -173,9 +173,9 @@ class DialogmoteInnkallingVarselService(
     private fun getEmailBody(hendelse: NarmesteLederHendelse): String {
         var greeting = "<body>Hei.<br><br>"
 
-        val data = hendelse.data as DialogmoteInnkallingNarmesteLederData
-        if (!data.narmesteLederNavn.isNullOrBlank()) {
-            greeting = "Til <body>${data.narmesteLederNavn},<br><br>"
+        val narmesteLeder = hendelse.data as VarselDataNarmesteLeder
+        if (!narmesteLeder.navn.isNullOrBlank()) {
+            greeting = "Til <body>${narmesteLeder.navn},<br><br>"
         }
 
         return when (hendelse.type) {
@@ -187,15 +187,11 @@ class DialogmoteInnkallingVarselService(
         }
     }
 
-    fun dataToDialogmoteInnkallingNarmesteLederData(data: Any?): DialogmoteInnkallingNarmesteLederData {
+    fun dataToVarselDataNarmesteLeder(data: Any?): VarselDataNarmesteLeder {
         return data?.let {
-            try {
-                val narmesteLederDataString = data.toString()
-                val narmesteLederNavn = objectMapper.readTree(narmesteLederDataString)["narmesteLederNavn"].textValue()
-                return DialogmoteInnkallingNarmesteLederData(narmesteLederNavn)
-            } catch (e: IOException) {
-                throw IOException("DialogmoteInnkallingNarmesteLederData har feil format")
-            }
+            val varselData = data.toVarselData()
+            varselData.narmesteLeder
+                ?: throw IOException("VarselDataNarmesteLeder har feil format")
         } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
 
@@ -212,13 +208,13 @@ class DialogmoteInnkallingVarselService(
         }
     }
 
-    fun dataToDialogmoteInnkallingArbeidstakerData(data: Any?): DialogmoteInnkallingArbeidstakerData {
+    fun dataToVarselDataJournalpost(data: Any?): VarselDataJournalpost {
         return data?.let {
             try {
-                val arbeidstakerDataString = data.toString()
-                val varselUuid = objectMapper.readTree(arbeidstakerDataString)["varselUuid"].textValue()
-                val journalpostId = objectMapper.readTree(arbeidstakerDataString)["journalpostId"].textValue()
-                return DialogmoteInnkallingArbeidstakerData(varselUuid, journalpostId)
+                val varselData = data.toVarselData()
+                val journalpostdata = varselData.journalpost
+                return journalpostdata?.uuid?.let { journalpostdata }
+                    ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'varselUuid'-felt")
             } catch (e: IOException) {
                 throw IOException("ArbeidstakerHendelse har feil format")
             }

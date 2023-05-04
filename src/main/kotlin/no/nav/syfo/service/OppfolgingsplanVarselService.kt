@@ -92,13 +92,9 @@ class OppfolgingsplanVarselService(
         )
     }
 
-    private fun EsyfovarselHendelse.skalFerdigstilles(): Boolean {
-        val data = this.data?.toString()
-        return data?.let {
-            objectMapper.readValue(
-                it,
-                VarselData::class.java
-            )?.status?.ferdigstilt
+    private fun EsyfovarselHendelse.skalFerdigstilles() =
+        data?.let { data ->
+            val varseldata = data.toVarselData()
+            varseldata.status?.ferdigstilt
         } ?: false
-    }
 }

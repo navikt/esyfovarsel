@@ -10,5 +10,6 @@ enum class MinSideEvent {
 data class MinSideRecord(
     @JsonProperty("@action") val eventType: String,
     @JsonProperty("ident") val fnr: String,
-    @JsonProperty("microfrontend_id") val microfrontendId: String
+    @JsonProperty("microfrontend_id") val microfrontendId: String,
+    @JsonProperty("sikkerhetsnivå") val acr: Int = 4
 )

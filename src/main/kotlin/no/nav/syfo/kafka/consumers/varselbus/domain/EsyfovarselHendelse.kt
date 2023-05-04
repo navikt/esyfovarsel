@@ -1,8 +1,11 @@
 package no.nav.syfo.kafka.consumers.varselbus.domain
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import no.nav.syfo.kafka.common.createObjectMapper
 import java.io.Serializable
+import java.time.LocalDateTime
 
+private val objectMapper = createObjectMapper()
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
 sealed interface EsyfovarselHendelse : Serializable {
     val type: HendelseType
@@ -25,11 +28,27 @@ data class ArbeidstakerHendelse(
 ) : EsyfovarselHendelse
 
 data class VarselData(
-    val status: VarselStatus? = null
+    val status: VarselDataStatus? = null,
+    val journalpost: VarselDataJournalpost? = null,
+    val narmesteLeder: VarselDataNarmesteLeder? = null,
+    val motetidspunkt: VarselDataMotetidspunkt? = null
 )
 
-data class VarselStatus(
+data class VarselDataStatus(
     val ferdigstilt: Boolean
+)
+
+data class VarselDataJournalpost(
+    val uuid: String,
+    val id: String?
+)
+
+data class VarselDataNarmesteLeder(
+    val navn: String?
+)
+
+data class VarselDataMotetidspunkt(
+    val tidspunkt: LocalDateTime
 )
 
 enum class HendelseType {
@@ -48,3 +67,10 @@ enum class HendelseType {
     SM_DIALOGMOTE_NYTT_TID_STED,
     SM_DIALOGMOTE_LEST,
 }
+
+fun Any.toVarselData(): VarselData =
+    objectMapper.readValue(
+        this.toString(),
+        VarselData::class.java
+    )
+

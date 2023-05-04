@@ -142,14 +142,14 @@ fun main() {
                     pdfgenConsumer,
                     dokarkivService
                 )
-                val microFrontendService = MicroFrontendService(minSideMicrofrontendKafkaProducer)
+                val mikrofrontendService = MikrofrontendService(minSideMicrofrontendKafkaProducer, database)
 
                 val varselBusService =
                     VarselBusService(
                         motebehovVarselService,
                         oppfolgingsplanVarselService,
                         dialogmoteInnkallingVarselService,
-                        microFrontendService
+                        mikrofrontendService
                     )
 
                 val veilederTilgangskontrollConsumer =
