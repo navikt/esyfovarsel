@@ -172,6 +172,7 @@ fun main() {
                         merVeiledningVarselService,
                         sykepengerMaxDateService,
                         sykmeldingService,
+                        mikrofrontendService,
                         pdlConsumer,
                         veilederTilgangskontrollConsumer,
                     )
@@ -222,6 +223,7 @@ fun Application.serverModule(
     merVeiledningVarselService: MerVeiledningVarselService,
     sykepengerMaxDateService: SykepengerMaxDateService,
     sykmeldingService: SykmeldingService,
+    mikrofrontendService: MikrofrontendService,
     pdlConsumer: PdlConsumer,
     veilederTilgangskontrollConsumer: VeilederTilgangskontrollConsumer,
 ) {
@@ -272,6 +274,7 @@ fun Application.serverModule(
     runningRemotely {
         setupRoutesWithAuthentication(
             varselSender,
+            mikrofrontendService,
             replanleggingService,
             sykepengerMaxDateService,
             veilederTilgangskontrollConsumer,
@@ -282,6 +285,7 @@ fun Application.serverModule(
     runningLocally {
         setupLocalRoutesWithAuthentication(
             varselSender,
+            mikrofrontendService,
             replanleggingService,
             sykepengerMaxDateService,
             veilederTilgangskontrollConsumer,
