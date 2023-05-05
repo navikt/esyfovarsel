@@ -22,7 +22,6 @@
     "NARMESTELEDER_URL": "http://narmesteleder.teamsykmelding",
     "NARMESTELEDER_SCOPE": "api://prod-gcp.teamsykmelding.narmesteleder/.default",
     "BASE_URL_DINE_SYKMELDTE": "https://www.nav.no/arbeidsgiver/sykmeldte",
-    "SYFOMOTEBEHOV_URL": "NOT IN USE",
     "DOKDIST_FORDELING_URL": "https://dokdistfordeling.prod-fss-pub.nais.io",
     "DOKDIST_FORDELING_SCOPE": "api://prod-fss.teamdokumenthandtering.saf/.default",
     "DOKARKIV_URL": "https://dokarkiv.prod-fss-pub.nais.io",

@@ -3,7 +3,7 @@ package no.nav.syfo.utils
 import java.time.*
 import java.time.format.DateTimeFormatter
 
-private val BREV_DATE_FORMAT_PATTERN = "dd. MMMM yyyy"
+private const val BREV_DATE_FORMAT_PATTERN = "dd. MMMM yyyy"
 
 fun LocalDate.isEqualOrAfter(other: LocalDate): Boolean {
     return this == other || this.isAfter(other)

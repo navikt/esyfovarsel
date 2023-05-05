@@ -6,7 +6,7 @@ enum class VarselType {
     AKTIVITETSKRAV, MER_VEILEDNING, SVAR_MOTEBEHOV
 }
 
-val UTSENDING_FEILET = "UTSENDING_FEILET"
+const val UTSENDING_FEILET = "UTSENDING_FEILET"
 
 data class PlanlagtVarsel(
     val fnr: String,
