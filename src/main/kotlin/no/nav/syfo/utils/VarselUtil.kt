@@ -11,10 +11,10 @@ import no.nav.syfo.kafka.consumers.syketilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.kafka.consumers.syketilfelle.domain.Syketilfelledag
 import no.nav.syfo.syketilfelle.domain.Tag
 
-val antallUker39UkersVarsel = 39L
-val antallDager39UkersVarsel = antallUker39UkersVarsel * 7L + 1
-val REMAINING_WEEKS_UNTIL_39_UKERS_VARSEL = 13
-val REMAINING_DAYS_UNTIL_39_UKERS_VARSEL = REMAINING_WEEKS_UNTIL_39_UKERS_VARSEL * 7L + 1
+const val antallUker39UkersVarsel = 39L
+const val antallDager39UkersVarsel = antallUker39UkersVarsel * 7L + 1
+const val REMAINING_WEEKS_UNTIL_39_UKERS_VARSEL = 13
+const val REMAINING_DAYS_UNTIL_39_UKERS_VARSEL = REMAINING_WEEKS_UNTIL_39_UKERS_VARSEL * 7L + 1
 
 class VarselUtil(private val databaseAccess: DatabaseInterface) {
     fun isVarselDatoForIDag(varselDato: LocalDate): Boolean {

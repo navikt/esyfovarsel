@@ -120,7 +120,7 @@ class BrukernotifikasjonKafkaProducer(
         this.atZone(UTCPlus1).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()
 
     companion object {
-        val sikkerhetsNiva = 4
+        const val sikkerhetsNiva = 4
     }
 
     enum class MeldingType {

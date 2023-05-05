@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 import no.nav.syfo.job.VarselSender
 import no.nav.syfo.service.MikrofrontendService
 
-val urlPathJobTrigger = "/job/trigger"
+const val urlPathJobTrigger = "/job/trigger"
 
 fun Route.registerJobTriggerApi(varselSender: VarselSender, mikrofrontendService: MikrofrontendService) {
     accept(ContentType.Application.Json) {
