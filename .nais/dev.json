@@ -4,7 +4,7 @@
     "KAFKA_BOOTSTRAP_SERVERS_URL": "SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443",
     "PDL_URL": "https://pdl-api.dev-fss-pub.nais.io/graphql",
     "DKIF_URL": "http://digdir-krr-proxy.team-rocket/rest/v1/person",
-    "SYFOSMREGISTER_URL": "https://smregister.dev.intern.nav.no",
+    "SYFOSMREGISTER_URL": "http://smregister.teamsykmelding",
     "SYFOSMREGISTER_SCOPE": "api://dev-gcp.teamsykmelding.syfosmregister/.default",
     "DKIF_SCOPE": "api://dev-gcp.team-rocket.digdir-krr-proxy/.default",
     "PDL_SCOPE": "api://dev-fss.pdl.pdl-api/.default",
@@ -27,7 +27,7 @@
     "DOKDIST_FORDELING_SCOPE": "api://dev-fss.teamdokumenthandtering.saf/.default",
     "DOKARKIV_URL": "https://dokarkiv.dev-fss-pub.nais.io",
     "DOKARKIV_SCOPE": "api://dev-fss.teamdokumenthandtering.dokarkiv/.default",
-    "SYFOOPPDFGEN_URL": "https://syfooppdfgen.dev.intern.nav.no",
+    "SYFOOPPDFGEN_URL": "http://syfooppdfgen.team-esyfo",
     "SYFOTILGANGSKONTROLL_URL": "https://syfo-tilgangskontroll.dev-fss-pub.nais.io",
     "SYFOTILGANGSKONTROLL_SCOPE": "api://dev-fss.teamsykefravr.syfo-tilgangskontroll/.default"
   },
