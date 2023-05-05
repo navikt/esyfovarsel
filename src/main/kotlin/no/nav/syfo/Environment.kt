@@ -35,6 +35,7 @@ fun getEnv(): Environment {
                 clientId = getEnvVar("AZURE_APP_CLIENT_ID"),
                 clientSecret = getEnvVar("AZURE_APP_CLIENT_SECRET"),
                 aadAccessTokenUrl = getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
+                aadAppWellKnownUrl = getEnvVar("AZURE_APP_WELL_KNOWN_URL"),
                 tokenXWellKnownUrl = getEnvVar("TOKEN_X_WELL_KNOWN_URL"),
                 tokenXClientId = getEnvVar("TOKEN_X_CLIENT_ID"),
             ),
@@ -58,6 +59,8 @@ fun getEnv(): Environment {
                 dokarkivUrl = getEnvVar("DOKARKIV_URL"),
                 dokarkivScope = getEnvVar("DOKARKIV_SCOPE"),
                 syfooppdfgenUrl = getEnvVar("SYFOOPPDFGEN_URL"),
+                syfoTilgangskontrollUrl = getEnvVar("SYFOTILGANGSKONTROLL_URL"),
+                syfoTilgangskontrollScope = getEnvVar("SYFOTILGANGSKONTROLL_SCOPE"),
             ),
             KafkaEnv(
                 bootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
@@ -86,6 +89,7 @@ fun getEnv(): Environment {
                 sendAktivitetskravVarsler = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER"),
                 toggleInfotrygdKafkaConsumer = getBooleanEnvVar("TOGGLE_INFOTRYGD_KAFKA_CONSUMER"),
                 toggleUtbetalingKafkaConsumer = getBooleanEnvVar("TOGGLE_UTBETALING_KAFKA_CONSUMER"),
+                toggleMicrofrontendEnabling = getBooleanEnvVar("TOGGLE_MICROFRONTEND_ENABLING")
             )
         )
 }
@@ -114,6 +118,7 @@ data class AuthEnv(
     val clientId: String,
     val clientSecret: String,
     val aadAccessTokenUrl: String,
+    val aadAppWellKnownUrl: String,
     val tokenXWellKnownUrl: String,
     val tokenXClientId: String,
 )
@@ -138,6 +143,8 @@ data class UrlEnv(
     val dokarkivUrl: String,
     val dokarkivScope: String,
     val syfooppdfgenUrl: String,
+    val syfoTilgangskontrollUrl: String,
+    val syfoTilgangskontrollScope: String,
 )
 
 data class KafkaEnv(
@@ -174,6 +181,7 @@ data class ToggleEnv(
     val sendAktivitetskravVarsler: Boolean,
     val toggleInfotrygdKafkaConsumer: Boolean,
     val toggleUtbetalingKafkaConsumer: Boolean,
+    val toggleMicrofrontendEnabling: Boolean
 )
 
 data class JobEnv(

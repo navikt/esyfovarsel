@@ -9,6 +9,7 @@ import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.handleRequest
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.justRun
 import io.mockk.mockk
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -45,6 +46,7 @@ object JobApiSpek : Spek({
         val dokarkivService = mockk<DokarkivService>()
         val merVeiledningVarselService = mockk<MerVeiledningVarselService>()
         val sykmeldingService = mockk<SykmeldingService>()
+        val mikrofrontendService = mockk<MikrofrontendService>()
 
         coEvery { accessControlService.getUserAccessStatus(fnr1) } returns userAccessStatus1
         coEvery { accessControlService.getUserAccessStatus(fnr2) } returns userAccessStatus2
@@ -121,6 +123,8 @@ object JobApiSpek : Spek({
         coEvery { dokarkivService.getJournalpostId(any(), any(), any()) } returns "1"
         coEvery { sykmeldingService.isPersonSykmeldtPaDato(any(), any()) } returns true
 
+        justRun { mikrofrontendService.findAndCloseExpiredDialogmoteMikrofrontends() }
+
         val sendVarselService =
             SendVarselService(
                 brukernotifikasjonKafkaProducer,
@@ -138,7 +142,7 @@ object JobApiSpek : Spek({
             start()
             application.install(ContentNegotiation, contentNegotationFeature())
             application.routing {
-                registerJobTriggerApi(varselSender)
+                registerJobTriggerApi(varselSender, mikrofrontendService)
             }
 
             it("esyfovarsel-job trigger utsending av 2 varsler digitalt og 2 varsler som brev") {

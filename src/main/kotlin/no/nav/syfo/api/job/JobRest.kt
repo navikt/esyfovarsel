@@ -6,15 +6,19 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.launch
 import no.nav.syfo.job.VarselSender
+import no.nav.syfo.service.MikrofrontendService
 
 val urlPathJobTrigger = "/job/trigger"
 
-fun Route.registerJobTriggerApi(varselSender: VarselSender) {
+fun Route.registerJobTriggerApi(varselSender: VarselSender, mikrofrontendService: MikrofrontendService) {
     accept(ContentType.Application.Json) {
         post(urlPathJobTrigger) {
             call.respond(HttpStatusCode.OK)
             launch {
                 varselSender.sendVarsler()
+            }
+            launch {
+                mikrofrontendService.findAndCloseExpiredDialogmoteMikrofrontends()
             }
         }
     }

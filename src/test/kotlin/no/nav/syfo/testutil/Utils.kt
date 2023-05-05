@@ -1,7 +1,10 @@
 package no.nav.syfo.testutil
 
+import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
+import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
+import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import org.amshove.kluent.should
 import java.time.LocalDate
 
@@ -23,6 +26,21 @@ fun List<PPlanlagtVarsel>.skalIkkeHa39UkersVarsel() = this.should("Skal IKKE ha 
     size == 0
 }
 
-fun List<PPlanlagtVarsel>.skalHaUtsendingPaDato(utsendingsdato: LocalDate) = this.should("Skal ha 39-ukersvarsel med utsendingsdato: $utsendingsdato") {
-    filter { it.utsendingsdato == utsendingsdato }.size == 1
-}
+fun List<PPlanlagtVarsel>.skalHaUtsendingPaDato(utsendingsdato: LocalDate) =
+    this.should("Skal ha 39-ukersvarsel med utsendingsdato: $utsendingsdato") {
+        filter { it.utsendingsdato == utsendingsdato }.size == 1
+    }
+
+fun DatabaseInterface.shouldContainMikrofrontendEntry(fnr: String, tjeneste: Tjeneste) =
+    this.should("Should contain at least one row with specified fnr and 'tjeneste'") {
+        this.fetchMikrofrontendSynlighetEntriesByFnr(fnr).any {
+            it.synligFor == fnr && it.tjeneste == tjeneste.name
+        }
+    }
+
+fun DatabaseInterface.shouldNotContainMikrofrontendEntryForUser(fnr: String) =
+    this.should("Should have no rows with specified fnr") {
+        this.fetchMikrofrontendSynlighetEntriesByFnr(fnr).none {
+            it.synligFor == fnr
+        }
+    }

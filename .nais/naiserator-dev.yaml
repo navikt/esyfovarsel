@@ -35,15 +35,24 @@ spec:
     path: /prometheus
   azure:
     application:
+      allowAllUsers: true
       enabled: true
+      tenant: trygdeetaten.no
+      claims:
+        extra:
+          - "NAVident"
   accessPolicy:
     inbound:
       rules:
+        - application: esyfovarsel-job
         - application: syfomotebehov
           namespace: team-esyfo
           cluster: dev-fss
         - application: esyfo-info-frontend
           namespace: team-esyfo
+          cluster: dev-gcp
+        - application: syfomodiaperson
+          namespace: teamsykefravr
           cluster: dev-gcp
     outbound:
       external:
@@ -51,20 +60,15 @@ spec:
         - host: dokdistfordeling.dev-fss-pub.nais.io
         - host: dokarkiv.dev-fss-pub.nais.io
       rules:
-        - application: security-token-service
+        - application: syfooppdfgen
         - application: digdir-krr-proxy
           namespace: team-rocket
         - application: notifikasjon-produsent-api
           namespace: fager
-        - application: syfooppdfgen
-          namespace: team-esyfo
-          cluster: dev-gcp
         - application: syfosmregister
           namespace: teamsykmelding
-          cluster: dev-gcp
         - application: narmesteleder
           namespace: teamsykmelding
-          cluster: dev-gcp
   gcp:
     sqlInstances:
       - autoBackupHour: 1
@@ -88,9 +92,9 @@ spec:
         pointInTimeRecovery: true
         tier: db-f1-micro
         type: POSTGRES_13
-  webproxy: true
   ingresses:
     - "https://esyfovarsel.dev.intern.nav.no"
+    - "https://esyfovarsel.intern.dev.nav.no"
   tokenx:
     enabled: true
   kafka:

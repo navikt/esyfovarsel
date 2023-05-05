@@ -9,6 +9,7 @@
     "clientId": "clientId",
     "clientSecret": "clientSecret",
     "aadAccessTokenUrl": "http://localhost:9595",
+    "aadAppWellKnownUrl": "http://localhost:9591",
     "tokenXWellKnownUrl": "http://localhost:4546",
     "tokenXClientId": "http://localhost:4547"
   },
@@ -31,7 +32,9 @@
     "dokdistfordelingScope": "dokdistfordelingScope",
     "dokarkivUrl": "http://dokarkivUrl:9099",
     "dokarkivScope": "dokarkivScope",
-    "syfooppdfgenUrl": "http://localhost:4545"
+    "syfooppdfgenUrl": "http://localhost:4545",
+    "syfoTilgangskontrollUrl": "http://syfotilgangskontrollUrl:9099",
+    "syfoTilgangskontrollScope": "syfotilgangskontrollScope"
   },
   "kafkaEnv": {
     "bootstrapServersUrl": "http://localhost:9092",
@@ -57,6 +60,9 @@
   "toggleEnv": {
     "sendMerVeiledningVarsler": "false",
     "sendMerVeiledningVarslerBasedOnSisteUtbtalingDate": "true",
-    "sendAktivitetskravVarsler": "true"
+    "sendAktivitetskravVarsler": "true",
+    "toggleInfotrygdKafkaConsumer": "true",
+    "toggleUtbetalingKafkaConsumer": "true",
+    "toggleMicrofrontendEnabling": "true"
   }
 }

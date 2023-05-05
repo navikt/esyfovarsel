@@ -8,8 +8,7 @@ import io.ktor.auth.Authentication
 import io.ktor.auth.UserIdPrincipal
 import io.ktor.auth.authenticate
 import io.ktor.auth.basic
-import io.ktor.auth.jwt.JWTPrincipal
-import io.ktor.auth.jwt.jwt
+import io.ktor.auth.jwt.*
 import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.routing.routing
 import java.net.URL
@@ -17,8 +16,11 @@ import java.util.concurrent.TimeUnit
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.api.admin.registerAdminApi
 import no.nav.syfo.api.job.registerJobTriggerApi
+import no.nav.syfo.api.maxdate.registerSykepengerMaxDateAzureApi
 import no.nav.syfo.api.maxdate.registerSykepengerMaxDateRestApi
+import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
 import no.nav.syfo.job.VarselSender
+import no.nav.syfo.service.MikrofrontendService
 import no.nav.syfo.service.ReplanleggingService
 import no.nav.syfo.service.SykepengerMaxDateService
 import org.slf4j.Logger
@@ -64,14 +66,62 @@ fun Application.setupAuthentication(
                 }
             }
         }
+
+        val jwtIssuerList = listOf(
+            JwtIssuer(
+                acceptedAudienceList = listOf(authEnv.clientId),
+                jwtIssuerType = JwtIssuerType.INTERNAL_AZUREAD,
+                wellKnown = getWellKnown(
+                    wellKnownUrl = authEnv.aadAppWellKnownUrl,
+                ),
+            ),
+        )
+
+        jwtIssuerList.forEach {
+            configureJwt(
+                jwtIssuer = it,
+            )
+        }
     }
 
 }
 
+private fun Authentication.Configuration.configureJwt(
+    jwtIssuer: JwtIssuer,
+) {
+    val jwkProvider = JwkProviderBuilder(URL(jwtIssuer.wellKnown.jwks_uri))
+        .cached(10, 24, TimeUnit.HOURS)
+        .rateLimited(10, 1, TimeUnit.MINUTES)
+        .build()
+    jwt(name = jwtIssuer.jwtIssuerType.name) {
+        verifier(
+            jwkProvider = jwkProvider,
+            issuer = jwtIssuer.wellKnown.issuer,
+        )
+        validate { credential ->
+            val credentialsHasExpectedAudience = credential.inExpectedAudience(
+                expectedAudience = jwtIssuer.acceptedAudienceList
+            )
+            if (credentialsHasExpectedAudience) {
+                JWTPrincipal(credential.payload)
+            } else {
+                log.warn("Auth: Unexpected audience for jwt ${credential.payload.issuer}, ${credential.payload.audience}")
+                null
+            }
+        }
+    }
+}
+
+private fun JWTCredential.inExpectedAudience(expectedAudience: List<String>) = expectedAudience.any {
+    this.payload.audience.contains(it)
+}
+
 fun Application.setupLocalRoutesWithAuthentication(
     varselSender: VarselSender,
+    mikrofrontendService: MikrofrontendService,
     replanleggingService: ReplanleggingService,
     sykepengerMaxDateService: SykepengerMaxDateService,
+    veilederTilgangskontrollConsumer: VeilederTilgangskontrollConsumer,
     authEnv: AuthEnv,
 ) {
     install(Authentication) {
@@ -91,15 +141,20 @@ fun Application.setupLocalRoutesWithAuthentication(
         registerAdminApi(replanleggingService)
 
         authenticate("auth-basic") {
-            registerJobTriggerApi(varselSender)
+            registerJobTriggerApi(varselSender, mikrofrontendService)
+        }
+        authenticate(JwtIssuerType.INTERNAL_AZUREAD.name) {
+            registerSykepengerMaxDateAzureApi(sykepengerMaxDateService, veilederTilgangskontrollConsumer)
         }
     }
 }
 
 fun Application.setupRoutesWithAuthentication(
     varselSender: VarselSender,
+    mikrofrontendService: MikrofrontendService,
     replanleggingService: ReplanleggingService,
     sykepengerMaxDateService: SykepengerMaxDateService,
+    veilederTilgangskontrollConsumer: VeilederTilgangskontrollConsumer,
     authEnv: AuthEnv,
 ) {
     val wellKnownTokenX = getWellKnown(authEnv.tokenXWellKnownUrl)
@@ -113,7 +168,10 @@ fun Application.setupRoutesWithAuthentication(
     routing {
         authenticate("auth-basic") {
             registerAdminApi(replanleggingService)
-            registerJobTriggerApi(varselSender)
+            registerJobTriggerApi(varselSender, mikrofrontendService)
+        }
+        authenticate(JwtIssuerType.INTERNAL_AZUREAD.name) {
+            registerSykepengerMaxDateAzureApi(sykepengerMaxDateService, veilederTilgangskontrollConsumer)
         }
         authenticate("tokenx") {
             registerSykepengerMaxDateRestApi(sykepengerMaxDateService)

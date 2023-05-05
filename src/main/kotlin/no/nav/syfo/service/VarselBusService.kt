@@ -11,6 +11,7 @@ class VarselBusService(
     val motebehovVarselService: MotebehovVarselService,
     val oppfolgingsplanVarselService: OppfolgingsplanVarselService,
     val dialogmoteInnkallingVarselService: DialogmoteInnkallingVarselService,
+    val mikrofrontendService: MikrofrontendService
 ) {
     private val log: Logger = LoggerFactory.getLogger(VarselBusService::class.qualifiedName)
     fun processVarselHendelse(
@@ -37,6 +38,19 @@ class VarselBusService(
 
             else -> {
                 log.warn("Klarte ikke mappe varsel av type ${varselHendelse.type} ved behandling forsøk")
+            }
+        }
+    }
+
+    fun processVarselHendelseAsMinSideMicrofrontendEvent(event: EsyfovarselHendelse) {
+        if (event is ArbeidstakerHendelse) {
+            log.info("Toggling min-side frontend")
+            when (event.type) {
+                SM_DIALOGMOTE_INNKALT -> mikrofrontendService.enableDialogmoteFrontendForUser(event)
+                SM_DIALOGMOTE_NYTT_TID_STED -> mikrofrontendService.updateDialogmoteFrontendForUser(event)
+                SM_DIALOGMOTE_AVLYST,
+                SM_DIALOGMOTE_REFERAT -> mikrofrontendService.disableDialogmoteFrontendForUser(event)
+                else -> return
             }
         }
     }

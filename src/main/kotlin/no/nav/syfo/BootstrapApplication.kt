@@ -34,6 +34,7 @@ import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
 import no.nav.syfo.consumer.pdl.LocalPdlConsumer
 import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
+import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.grantAccessToIAMUsers
@@ -47,6 +48,7 @@ import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
+import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.planner.AktivitetskravVarselPlanner
 import no.nav.syfo.planner.MerVeiledningVarselPlanner
@@ -94,7 +96,8 @@ fun main() {
 
                 val brukernotifikasjonKafkaProducer = BrukernotifikasjonKafkaProducer(env)
                 val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
-                val dittSykefravaerMeldingKafkaProdcuer = DittSykefravaerMeldingKafkaProducer(env)
+                val dittSykefravaerMeldingKafkaProducer = DittSykefravaerMeldingKafkaProducer(env)
+                val minSideMicrofrontendKafkaProducer = MinSideMicrofrontendKafkaProducer(env)
 
                 val accessControlService = AccessControlService(pdlConsumer, dkifConsumer)
                 val fysiskBrevUtsendingService = FysiskBrevUtsendingService(journalpostdistribusjonConsumer)
@@ -112,7 +115,7 @@ fun main() {
                     BrukernotifikasjonerService(brukernotifikasjonKafkaProducer, accessControlService)
                 val senderFacade = SenderFacade(
                     dineSykmeldteHendelseKafkaProducer,
-                    dittSykefravaerMeldingKafkaProdcuer,
+                    dittSykefravaerMeldingKafkaProducer,
                     brukernotifikasjonerService,
                     arbeidsgiverNotifikasjonService,
                     fysiskBrevUtsendingService,
@@ -139,13 +142,18 @@ fun main() {
                     pdfgenConsumer,
                     dokarkivService
                 )
+                val mikrofrontendService = MikrofrontendService(minSideMicrofrontendKafkaProducer, database)
 
                 val varselBusService =
                     VarselBusService(
                         motebehovVarselService,
                         oppfolgingsplanVarselService,
-                        dialogmoteInnkallingVarselService
+                        dialogmoteInnkallingVarselService,
+                        mikrofrontendService
                     )
+
+                val veilederTilgangskontrollConsumer =
+                    VeilederTilgangskontrollConsumer(env.urlEnv, azureAdTokenConsumer)
 
                 connector {
                     port = env.appEnv.applicationPort
@@ -164,7 +172,9 @@ fun main() {
                         merVeiledningVarselService,
                         sykepengerMaxDateService,
                         sykmeldingService,
+                        mikrofrontendService,
                         pdlConsumer,
+                        veilederTilgangskontrollConsumer,
                     )
 
                     kafkaModule(
@@ -213,7 +223,9 @@ fun Application.serverModule(
     merVeiledningVarselService: MerVeiledningVarselService,
     sykepengerMaxDateService: SykepengerMaxDateService,
     sykmeldingService: SykmeldingService,
+    mikrofrontendService: MikrofrontendService,
     pdlConsumer: PdlConsumer,
+    veilederTilgangskontrollConsumer: VeilederTilgangskontrollConsumer,
 ) {
 
     val sendVarselService =
@@ -260,11 +272,25 @@ fun Application.serverModule(
     }
 
     runningRemotely {
-        setupRoutesWithAuthentication(varselSender, replanleggingService, sykepengerMaxDateService, env.authEnv)
+        setupRoutesWithAuthentication(
+            varselSender,
+            mikrofrontendService,
+            replanleggingService,
+            sykepengerMaxDateService,
+            veilederTilgangskontrollConsumer,
+            env.authEnv
+        )
     }
 
     runningLocally {
-        setupLocalRoutesWithAuthentication(varselSender, replanleggingService, sykepengerMaxDateService, env.authEnv)
+        setupLocalRoutesWithAuthentication(
+            varselSender,
+            mikrofrontendService,
+            replanleggingService,
+            sykepengerMaxDateService,
+            veilederTilgangskontrollConsumer,
+            env.authEnv
+        )
     }
 
     routing {

@@ -62,7 +62,7 @@ object VarselSenderSpek : Spek({
                 embeddedDatabase,
                 sendVarselService,
                 merVeiledningVarselFinder,
-                ToggleEnv(false, true, true, false, false)
+                ToggleEnv(false, true, true, false, false, true)
             )
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
 
@@ -82,7 +82,7 @@ object VarselSenderSpek : Spek({
                 embeddedDatabase,
                 sendVarselService,
                 merVeiledningVarselFinder,
-                ToggleEnv(false, false, true, false, false)
+                ToggleEnv(false, false, true, false, false, true)
             )
             val planlagtVarselToStore =
                 PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, emptySet(), MER_VEILEDNING)
@@ -109,7 +109,7 @@ object VarselSenderSpek : Spek({
                 embeddedDatabase,
                 sendVarselService,
                 merVeiledningVarselFinder,
-                ToggleEnv(false, true, false, false, false)
+                ToggleEnv(false, true, false, false, false, true)
             )
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
             val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), AKTIVITETSKRAV)
@@ -136,7 +136,7 @@ object VarselSenderSpek : Spek({
                 embeddedDatabase,
                 sendVarselService,
                 merVeiledningVarselFinder,
-                ToggleEnv(true, false, true, false, false)
+                ToggleEnv(true, false, true, false, false, true)
             )
             val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
