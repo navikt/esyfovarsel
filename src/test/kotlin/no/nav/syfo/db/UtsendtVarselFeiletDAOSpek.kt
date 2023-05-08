@@ -2,6 +2,7 @@ package no.nav.syfo.db
 
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
@@ -40,15 +41,17 @@ object UtsendtVarselFeiletDAOSpek : Spek({
 
 private fun ikkeUtsendtVarsel(fnr: String) = PUtsendtVarselFeilet(
     uuid = UUID.randomUUID().toString(),
-    fnr = fnr,
+    arbeidstakerFnr = fnr,
     narmesteLederFnr = "01010101010",
     orgnummer = null,
-    type = HendelseType.NL_DIALOGMOTE_NYTT_TID_STED.name,
+    hendelsetypeNavn = HendelseType.NL_DIALOGMOTE_NYTT_TID_STED.name,
     kanal = Kanal.DINE_SYKMELDTE.name,
     utsendtForsokTidspunkt = LocalDateTime.now(),
-    eksternReferanse = "00000",
+    uuidEksternReferanse = "00000",
     feilmelding = "Achtung!",
-    journalpostId = null
+    journalpostId = null,
+    brukernotifikasjonerMeldingType = null,
+    arbeidsgivernotifikasjonMerkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 )
 
 private fun DatabaseInterface.skalHaLagretIkkeUtsendtVarsel(
@@ -58,5 +61,5 @@ private fun DatabaseInterface.skalHaLagretIkkeUtsendtVarsel(
 ) =
     this.should("Skal ha lagret ikke-utsendt varsel av type ${type.name} ") {
         this.fetchUtsendtVarselFeiletByFnr(fnr)
-            .filter { it.type == type.name }.any { it.kanal.equals(kanal.name) }
+            .filter { it.hendelsetypeNavn == type.name }.any { it.kanal.equals(kanal.name) }
     }

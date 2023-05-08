@@ -40,6 +40,7 @@ class SenderFacade(
                 varselHendelse = varselHendelse,
                 eksternReferanse = varsel.id.toString(),
                 feilmelding = e.message,
+                merkelapp = null,
             )
         }
         if (isSendingSucceed) {
@@ -64,6 +65,7 @@ class SenderFacade(
                 eksternReferanse = varsel.uuid,
                 feilmelding = e.message,
                 journalpostId = null,
+                brukernotifikasjonerMeldingType = null,
             )
         }
         if (isSendingSucceed && eksternUUID.isNotBlank()) {
@@ -91,7 +93,8 @@ class SenderFacade(
                 eksternReferanse = uuid,
                 feilmelding = e.message,
                 journalpostId = null,
-                brukernotifikasjonerMeldingType = meldingType?.name ?: BrukernotifikasjonKafkaProducer.MeldingType.BESKJED.name,
+                brukernotifikasjonerMeldingType = meldingType?.name
+                    ?: BrukernotifikasjonKafkaProducer.MeldingType.BESKJED.name,
             )
         }
         if (isSendingSucceed) {
@@ -127,6 +130,7 @@ class SenderFacade(
                 varselHendelse = varselHendelse,
                 eksternReferanse = varsel.uuid.toString(),
                 feilmelding = e.message,
+                merkelapp = varsel.merkelapp
             )
         }
         if (isSendingSucceed) {
@@ -183,6 +187,7 @@ class SenderFacade(
                 eksternReferanse = uuid,
                 feilmelding = e.message,
                 journalpostId = journalpostId,
+                brukernotifikasjonerMeldingType = null,
             )
         }
         if (isSendingSucceed) {
@@ -245,16 +250,17 @@ class SenderFacade(
         database.storeUtsendtVarselFeilet(
             PUtsendtVarselFeilet(
                 uuid = UUID.randomUUID().toString(),
-                fnr = varselHendelse.arbeidstakerFnr,
+                uuidEksternReferanse = eksternReferanse,
+                arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
                 narmesteLederFnr = null,
                 orgnummer = varselHendelse.orgnummer,
-                type = varselHendelse.type.name,
-                kanal = kanal.name,
+                hendelsetypeNavn = varselHendelse.type.name,
+                arbeidsgivernotifikasjonMerkelapp = null,
                 brukernotifikasjonerMeldingType = brukernotifikasjonerMeldingType,
-                utsendtForsokTidspunkt = LocalDateTime.now(),
-                feilmelding = feilmelding,
                 journalpostId = journalpostId,
-                eksternReferanse = eksternReferanse,
+                kanal = kanal.name,
+                feilmelding = feilmelding,
+                utsendtForsokTidspunkt = LocalDateTime.now(),
             )
         )
     }
@@ -264,20 +270,22 @@ class SenderFacade(
         varselHendelse: NarmesteLederHendelse,
         eksternReferanse: String,
         feilmelding: String?,
+        merkelapp: String?,
     ) {
         database.storeUtsendtVarselFeilet(
             PUtsendtVarselFeilet(
                 uuid = UUID.randomUUID().toString(),
-                fnr = varselHendelse.arbeidstakerFnr,
+                uuidEksternReferanse = eksternReferanse,
+                arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
                 narmesteLederFnr = varselHendelse.narmesteLederFnr,
                 orgnummer = varselHendelse.orgnummer,
-                type = varselHendelse.type.name,
-                kanal = kanal.name,
+                hendelsetypeNavn = varselHendelse.type.name,
+                arbeidsgivernotifikasjonMerkelapp = merkelapp,
                 brukernotifikasjonerMeldingType = null,
-                utsendtForsokTidspunkt = LocalDateTime.now(),
-                feilmelding = feilmelding,
                 journalpostId = null,
-                eksternReferanse = eksternReferanse,
+                kanal = kanal.name,
+                feilmelding = feilmelding,
+                utsendtForsokTidspunkt = LocalDateTime.now(),
             )
         )
     }
