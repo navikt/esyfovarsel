@@ -1,8 +1,9 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.*
-import no.nav.syfo.kafka.common.createObjectMapper
-import no.nav.syfo.kafka.consumers.varselbus.domain.*
+import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import java.net.URL
 import java.time.LocalDateTime
@@ -15,29 +16,8 @@ class OppfolgingsplanVarselService(
     val senderFacade: SenderFacade,
     val oppfolgingsplanerUrl: String
 ) {
-    private val objectMapper = createObjectMapper()
 
-    fun sendEllerFerdigstillVarselTilArbeidstaker(
-        varselHendelse: ArbeidstakerHendelse
-    ) {
-        if (varselHendelse.skalFerdigstilles()) {
-            ferdigstillVarselArbeidstaker(varselHendelse)
-        } else {
-            sendVarselTilArbeidstaker(varselHendelse)
-        }
-    }
-
-    fun sendEllerFerdigstillVarselTilNarmesteLeder(
-        varselHendelse: NarmesteLederHendelse
-    ) {
-        if (varselHendelse.skalFerdigstilles()) {
-            ferdigstillVarselNarmesteLeder(varselHendelse)
-        } else {
-            sendVarselTilNarmesteLeder(varselHendelse)
-        }
-    }
-
-    private fun sendVarselTilArbeidstaker(
+    fun sendVarselTilArbeidstaker(
         varselHendelse: ArbeidstakerHendelse
     ) {
         senderFacade.sendTilBrukernotifikasjoner(
@@ -78,23 +58,4 @@ class OppfolgingsplanVarselService(
             )
         )
     }
-
-    private fun ferdigstillVarselArbeidstaker(varselHendelse: ArbeidstakerHendelse) =
-        senderFacade.ferdigstillBrukernotifkasjonVarsler(varselHendelse)
-
-    private fun ferdigstillVarselNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
-        senderFacade.ferdigstillDineSykmeldteVarsler(
-            varselHendelse
-        )
-        senderFacade.ferdigstillArbeidsgiverNotifikasjoner(
-            varselHendelse,
-            ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
-        )
-    }
-
-    private fun EsyfovarselHendelse.skalFerdigstilles() =
-        data?.let { data ->
-            val varseldata = data.toVarselData()
-            varseldata.status?.ferdigstilt
-        } ?: false
 }

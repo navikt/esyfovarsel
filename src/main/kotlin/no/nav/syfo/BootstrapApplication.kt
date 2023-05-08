@@ -146,6 +146,7 @@ fun main() {
 
                 val varselBusService =
                     VarselBusService(
+                        senderFacade,
                         motebehovVarselService,
                         oppfolgingsplanVarselService,
                         dialogmoteInnkallingVarselService,
