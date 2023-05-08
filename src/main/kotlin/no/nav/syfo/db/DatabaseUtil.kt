@@ -105,6 +105,15 @@ fun KSyketilfellebit.toPSyketilfellebit(): PSyketilfellebit {
     )
 }
 
+fun ResultSet.toPMaksDato() = PMaksDato(
+    id = getString("id"),
+    fnr = getString("fnr"),
+    forelopig_beregnet_slutt = getTimestamp("forelopig_beregnet_slutt").toLocalDateTime().toLocalDate(),
+    utbetalt_tom = getTimestamp("utbetalt_tom").toLocalDateTime().toLocalDate(),
+    gjenstaende_sykedager = getString("gjenstaende_sykedager"),
+    opprettet = getTimestamp("opprettet").toLocalDateTime(),
+)
+
 fun ResultSet.toPMikrofrontendSynlighet() = PMikrofrontendSynlighet(
     uuid = getString("uuid"),
     synligFor = getString("synlig_for"),

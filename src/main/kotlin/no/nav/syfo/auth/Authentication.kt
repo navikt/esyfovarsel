@@ -17,6 +17,7 @@ import no.nav.syfo.AuthEnv
 import no.nav.syfo.api.admin.registerAdminApi
 import no.nav.syfo.api.job.registerJobTriggerApi
 import no.nav.syfo.api.maxdate.registerSykepengerMaxDateAzureApi
+import no.nav.syfo.api.maxdate.registerSykepengerMaxDateAzureApiV2
 import no.nav.syfo.api.maxdate.registerSykepengerMaxDateRestApi
 import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
 import no.nav.syfo.job.VarselSender
@@ -145,6 +146,7 @@ fun Application.setupLocalRoutesWithAuthentication(
         }
         authenticate(JwtIssuerType.INTERNAL_AZUREAD.name) {
             registerSykepengerMaxDateAzureApi(sykepengerMaxDateService, veilederTilgangskontrollConsumer)
+            registerSykepengerMaxDateAzureApiV2(sykepengerMaxDateService, veilederTilgangskontrollConsumer)
         }
     }
 }
@@ -172,6 +174,7 @@ fun Application.setupRoutesWithAuthentication(
         }
         authenticate(JwtIssuerType.INTERNAL_AZUREAD.name) {
             registerSykepengerMaxDateAzureApi(sykepengerMaxDateService, veilederTilgangskontrollConsumer)
+            registerSykepengerMaxDateAzureApiV2(sykepengerMaxDateService, veilederTilgangskontrollConsumer)
         }
         authenticate("tokenx") {
             registerSykepengerMaxDateRestApi(sykepengerMaxDateService)
