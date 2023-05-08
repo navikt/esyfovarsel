@@ -69,6 +69,8 @@ spec:
           namespace: teamsykmelding
         - application: narmesteleder
           namespace: teamsykmelding
+        - application: syfo-tilgangskontroll
+          namespace: teamsykefravr
   gcp:
     sqlInstances:
       - autoBackupHour: 1
