@@ -15,6 +15,7 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
         kanal,
         feilmelding,
         journalpost_id,
+        brukernotifikasjoner_melding_type,
         utsendt_forsok_tidspunkt,
         ekstern_referanse
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""".trimIndent()
@@ -29,6 +30,7 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
             it.setString(6, varsel.kanal)
             it.setString(7, varsel.feilmelding)
             it.setString(8, varsel.journalpostId)
+            it.setString(8, varsel.brukernotifikasjonerMeldingType)
             it.setTimestamp(9, Timestamp.valueOf(varsel.utsendtForsokTidspunkt))
             it.setString(10, varsel.eksternReferanse)
             it.executeUpdate()
@@ -59,6 +61,7 @@ fun ResultSet.toPUtsendtVarselFeilet() = PUtsendtVarselFeilet(
     orgnummer = getString("orgnummer"),
     type = getString("type"),
     kanal = getString("kanal"),
+    brukernotifikasjonerMeldingType = getString("brukernotifikasjoner_melding_type"),
     utsendtForsokTidspunkt = getTimestamp("utsendt_forsok_tidspunkt").toLocalDateTime(),
     eksternReferanse = getString("ekstern_referanse"),
     feilmelding = getString("feilmelding"),

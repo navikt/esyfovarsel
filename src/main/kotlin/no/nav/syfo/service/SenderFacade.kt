@@ -91,6 +91,7 @@ class SenderFacade(
                 eksternReferanse = uuid,
                 feilmelding = e.message,
                 journalpostId = null,
+                brukernotifikasjonerMeldingType = meldingType?.name ?: BrukernotifikasjonKafkaProducer.MeldingType.BESKJED.name,
             )
         }
         if (isSendingSucceed) {
@@ -239,6 +240,7 @@ class SenderFacade(
         eksternReferanse: String,
         feilmelding: String?,
         journalpostId: String? = null,
+        brukernotifikasjonerMeldingType: String? = null,
     ) {
         database.storeUtsendtVarselFeilet(
             PUtsendtVarselFeilet(
@@ -248,6 +250,7 @@ class SenderFacade(
                 orgnummer = varselHendelse.orgnummer,
                 type = varselHendelse.type.name,
                 kanal = kanal.name,
+                brukernotifikasjonerMeldingType = brukernotifikasjonerMeldingType,
                 utsendtForsokTidspunkt = LocalDateTime.now(),
                 feilmelding = feilmelding,
                 journalpostId = journalpostId,
@@ -270,6 +273,7 @@ class SenderFacade(
                 orgnummer = varselHendelse.orgnummer,
                 type = varselHendelse.type.name,
                 kanal = kanal.name,
+                brukernotifikasjonerMeldingType = null,
                 utsendtForsokTidspunkt = LocalDateTime.now(),
                 feilmelding = feilmelding,
                 journalpostId = null,

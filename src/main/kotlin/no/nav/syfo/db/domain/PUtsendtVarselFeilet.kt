@@ -9,6 +9,7 @@ data class PUtsendtVarselFeilet(
     val orgnummer: String?,
     val type: String,
     val kanal: String?,
+    val brukernotifikasjonerMeldingType: String?,
     val utsendtForsokTidspunkt: LocalDateTime,
     val eksternReferanse: String?,
     val feilmelding: String?,
