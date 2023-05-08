@@ -89,10 +89,9 @@ class VarselBusService(
     }
 
     private fun EsyfovarselHendelse.isArbeidstakerHendelse(): Boolean {
-        return type.name.startsWith("SM")
+        return this is ArbeidstakerHendelse
     }
-
-
+    
     private fun EsyfovarselHendelse.skalFerdigstilles() =
         data?.let { data ->
             val varseldata = data.toVarselData()
