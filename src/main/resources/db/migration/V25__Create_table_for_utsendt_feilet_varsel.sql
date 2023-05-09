@@ -1,15 +1,13 @@
 CREATE TABLE UTSENDT_VARSEL_FEILET
 (
-    uuid                                UUID PRIMARY KEY,
-    ekstern_referanse                   VARCHAR(50),
-    arbeidstaker_fnr                    VARCHAR(11)  NOT NULL,
-    narmesteleder_fnr                   VARCHAR(11),
-    orgnummer                           VARCHAR(9),
-    hendelsetype_navn                   VARCHAR(100) NOT NULL,
-    arbeidsgivernotifikasjon_merkelapp  VARCHAR(50),
-    brukernotifikasjoner_melding_type   VARCHAR(50),
-    journalpost_id                      VARCHAR(50),
-    kanal                               VARCHAR(50),
-    feilmelding                         VARCHAR(100),
-    utsendt_forsok_tidspunkt            TIMESTAMP    NOT NULL,
+    uuid                     UUID PRIMARY KEY,
+    narmesteleder_fnr        VARCHAR(11),
+    fnr                      VARCHAR(11)  NOT NULL,
+    orgnummer                varchar(9),
+    type                     VARCHAR(100) NOT NULL,
+    kanal                    varchar(50),
+    feilmelding              varchar(100),
+    journalpost_id           varchar(50),
+    utsendt_forsok_tidspunkt TIMESTAMP    NOT NULL,
+    ekstern_referanse        varchar(50)
 );

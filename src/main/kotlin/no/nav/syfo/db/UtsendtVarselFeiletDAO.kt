@@ -6,7 +6,7 @@ import java.util.*
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 
 fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
-    val insertStatement = """INSERT INTO UTSENDT_VARSEL_FEILET (
+    val insertStatement = """INSERT INTO UTSENDING_VARSEL_FEILET (
         uuid,
         uuid_ekstern_referanse,
         arbeidstaker_fnr,   
@@ -18,8 +18,7 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
         journalpost_id,
         kanal,
         feilmelding,
-        utsendt_forsok_tidspunkt,
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""".trimIndent()
+        utsendt_forsok_tidspunkt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""".trimIndent()
 
     connection.use { connection ->
         connection.prepareStatement(insertStatement).use {
@@ -44,8 +43,8 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
 
 fun DatabaseInterface.fetchUtsendtVarselFeiletByFnr(fnr: String): List<PUtsendtVarselFeilet> {
     val queryStatement = """SELECT *
-                            FROM UTSENDT_VARSEL_FEILET
-                            WHERE fnr = ?
+                            FROM UTSENDING_VARSEL_FEILET
+                            WHERE arbeidstaker_fnr = ?
     """.trimIndent()
 
     return connection.use { connection ->
@@ -60,7 +59,7 @@ fun ResultSet.toPUtsendtVarselFeilet() = PUtsendtVarselFeilet(
     uuid = getString("uuid"),
     uuidEksternReferanse = getString("uuid_ekstern_referanse"),
     narmesteLederFnr = getString("narmesteleder_fnr"),
-    arbeidstakerFnr = getString("fnr"),
+    arbeidstakerFnr = getString("arbeidstaker_fnr"),
     orgnummer = getString("orgnummer"),
     hendelsetypeNavn = getString("hendelsetype_navn"),
     arbeidsgivernotifikasjonMerkelapp = getString("arbeidsgivernotifikasjon_merkelapp"),
@@ -70,18 +69,3 @@ fun ResultSet.toPUtsendtVarselFeilet() = PUtsendtVarselFeilet(
     feilmelding = getString("feilmelding"),
     utsendtForsokTidspunkt = getTimestamp("utsendt_forsok_tidspunkt").toLocalDateTime(),
 )
-
-/*
-*  uuid,
-        uuid_ekstern_referanse,
-        arbeidsgiver_fnr,
-        arbeidstaker_fnr,
-        orgnummer,
-        hendelsetype_navn,
-        arbeidsgivernotifikasjon_merkelapp,
-        brukernotifikasjoner_melding_type,
-        journalpost_id,
-        kanal,
-        feilmelding,
-        utsendt_forsok_tidspunkt,
-        * */
