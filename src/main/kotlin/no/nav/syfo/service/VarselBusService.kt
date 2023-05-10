@@ -1,6 +1,5 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
@@ -57,8 +56,7 @@ class VarselBusService(
                 varselHendelse.toNarmestelederHendelse()
             )
             senderFacade.ferdigstillArbeidsgiverNotifikasjoner(
-                varselHendelse.toNarmestelederHendelse(),
-                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
+                varselHendelse.toNarmestelederHendelse()
             )
         }
     }

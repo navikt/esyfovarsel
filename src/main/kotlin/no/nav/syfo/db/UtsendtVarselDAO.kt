@@ -45,7 +45,8 @@ fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
         type,
         kanal,
         utsendt_tidspunkt,
-        ekstern_ref) VALUES (?, ?, ?, ?, ?, ?, ?,?)""".trimIndent()
+        ekstern_ref,
+        arbeidsgivernotifikasjon_merkelapp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""".trimIndent()
 
     connection.use { connection ->
         connection.prepareStatement(insertStatement).use {
@@ -57,6 +58,7 @@ fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
             it.setString(6, PUtsendtVarsel.kanal)
             it.setTimestamp(7, Timestamp.valueOf(PUtsendtVarsel.utsendtTidspunkt))
             it.setString(8, PUtsendtVarsel.eksternReferanse)
+            it.setString(9, PUtsendtVarsel.arbeidsgivernotifikasjonMerkelapp)
             it.executeUpdate()
         }
 

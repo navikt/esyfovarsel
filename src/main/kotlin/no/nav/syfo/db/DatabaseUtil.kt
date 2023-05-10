@@ -60,7 +60,8 @@ fun ResultSet.toPUtsendtVarsel() = PUtsendtVarsel(
     utsendtTidspunkt = getTimestamp("utsendt_tidspunkt").toLocalDateTime(),
     ferdigstiltTidspunkt = getTimestamp("ferdigstilt_tidspunkt")?.toLocalDateTime(),
     planlagtVarselId = getString("planlagt_varsel_id"),
-    eksternReferanse = getString("ekstern_ref")
+    eksternReferanse = getString("ekstern_ref"),
+    arbeidsgivernotifikasjonMerkelapp = getString("arbeidsgivernotifikasjon_merkelapp")
 )
 
 fun ResultSet.toSyketilfellebit() = Syketilfellebit(
