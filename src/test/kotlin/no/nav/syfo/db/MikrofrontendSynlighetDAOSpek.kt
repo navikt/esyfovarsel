@@ -54,7 +54,7 @@ object MikrofrontendSynlighetDAOSpek : Spek({
         it("Update miktrofrontend entry") {
             embeddedDatabase.storeMikrofrontendSynlighetEntry(mikrofrontendSynlighet2)
             val newSynligTom = mikrofrontendSynlighet2.synligTom!!.plusDays(1L)
-            embeddedDatabase.updateMikrofrontendEntrySynligTom(mikrofrontendSynlighet2, newSynligTom)
+            embeddedDatabase.updateMikrofrontendEntrySynligTomByExistingEntry(mikrofrontendSynlighet2, newSynligTom)
             embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(mikrofrontendSynlighet2.synligFor)
                 .size shouldBeEqualTo 1
             embeddedDatabase.entryShouldHaveCorrectSynligTom(mikrofrontendSynlighet2, newSynligTom)

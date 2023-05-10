@@ -62,7 +62,6 @@
     "sendMerVeiledningVarslerBasedOnSisteUtbtalingDate": "true",
     "sendAktivitetskravVarsler": "true",
     "toggleInfotrygdKafkaConsumer": "true",
-    "toggleUtbetalingKafkaConsumer": "true",
-    "toggleMicrofrontendEnabling": "true"
+    "toggleUtbetalingKafkaConsumer": "true"
   }
 }

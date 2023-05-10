@@ -13,3 +13,4 @@ data class MinSideRecord(
     @JsonProperty("microfrontend_id") val microfrontendId: String,
     @JsonProperty("sikkerhetsnivå") val acr: Int = 4
 )
+

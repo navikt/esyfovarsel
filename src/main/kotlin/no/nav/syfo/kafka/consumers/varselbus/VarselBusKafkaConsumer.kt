@@ -35,9 +35,7 @@ class VarselBusKafkaConsumer(
                     varselEvent.data = objectMapper.readTree(it.value())["data"]
                     log.info("VARSEL BUS: Melding med UUID ${it.key()} er av type: ${varselEvent.type}")
                     varselBusService.processVarselHendelse(varselEvent)
-                    if (env.toggleEnv.toggleMicrofrontendEnabling) {
-                        varselBusService.processVarselHendelseAsMinSideMicrofrontendEvent(varselEvent)
-                    }
+                    varselBusService.processVarselHendelseAsMinSideMicrofrontendEvent(varselEvent)
                 } catch (e: IOException) {
                     log.error(
                         "Error in [$topicVarselBus]-listener: Could not parse message | ${e.message}",

@@ -88,8 +88,7 @@ fun getEnv(): Environment {
                 sendMerVeiledningVarslerBasedOnSisteUtbtalingDate = getBooleanEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER_BASED_ON_SISTE_UTBETALING_DATE"),
                 sendAktivitetskravVarsler = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER"),
                 toggleInfotrygdKafkaConsumer = getBooleanEnvVar("TOGGLE_INFOTRYGD_KAFKA_CONSUMER"),
-                toggleUtbetalingKafkaConsumer = getBooleanEnvVar("TOGGLE_UTBETALING_KAFKA_CONSUMER"),
-                toggleMicrofrontendEnabling = getBooleanEnvVar("TOGGLE_MICROFRONTEND_ENABLING")
+                toggleUtbetalingKafkaConsumer = getBooleanEnvVar("TOGGLE_UTBETALING_KAFKA_CONSUMER")
             )
         )
 }
@@ -180,8 +179,7 @@ data class ToggleEnv(
     val sendMerVeiledningVarslerBasedOnSisteUtbtalingDate: Boolean,
     val sendAktivitetskravVarsler: Boolean,
     val toggleInfotrygdKafkaConsumer: Boolean,
-    val toggleUtbetalingKafkaConsumer: Boolean,
-    val toggleMicrofrontendEnabling: Boolean
+    val toggleUtbetalingKafkaConsumer: Boolean
 )
 
 data class JobEnv(

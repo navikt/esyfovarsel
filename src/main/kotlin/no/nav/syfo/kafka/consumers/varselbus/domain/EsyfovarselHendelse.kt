@@ -2,6 +2,7 @@ package no.nav.syfo.kafka.consumers.varselbus.domain
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.syfo.kafka.common.createObjectMapper
+import org.apache.commons.cli.MissingArgumentException
 import java.io.Serializable
 import java.time.LocalDateTime
 
@@ -66,9 +67,30 @@ enum class HendelseType {
     SM_DIALOGMOTE_LEST,
 }
 
+fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
+    val eventType = this.type
+    if (eventType !in listOf(
+            HendelseType.SM_DIALOGMOTE_INNKALT,
+            HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
+            HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV
+        )
+    ) throw IllegalArgumentException(
+        "${eventType.name} er ikke gyldig hendelse for å hente ut" +
+            "'synligTom'-felt"
+    )
+    return if (eventType != HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV) this.motetidspunkt() else null
+}
+
+private fun ArbeidstakerHendelse.motetidspunkt(): LocalDateTime {
+    this.data?.let { data ->
+        val varseldata = data.toVarselData()
+        val varselMotetidspunkt = varseldata.motetidspunkt
+        return varselMotetidspunkt?.tidspunkt
+            ?: throw NullPointerException("'tidspunkt'-felt er null i VarselDataMotetidspunkt-objekt")
+    } ?: throw MissingArgumentException("Mangler datafelt i ArbeidstakerHendelse til MicrofrontendService")
+}
 fun Any.toVarselData(): VarselData =
     objectMapper.readValue(
         this.toString(),
         VarselData::class.java
     )
-
