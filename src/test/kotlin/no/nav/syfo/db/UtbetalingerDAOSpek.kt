@@ -154,5 +154,5 @@ private fun List<PUtbetaling>.skalInneholde(spleisUtbetaling: UtbetalingUtbetalt
 
 private fun DatabaseInterface.shouldContainForelopigBeregnetSlutt(fnr: String, forelopigBeregnetSlutt: LocalDate) =
     this.should("Should contain row with requested fnr and forelopigBeregnetSlutt") {
-        this.fetchForelopigBeregnetSluttPaSykepengerByFnr(fnr) == forelopigBeregnetSlutt
+        this.fetchMaksDatoByFnr(fnr)?.forelopig_beregnet_slutt == forelopigBeregnetSlutt
     }

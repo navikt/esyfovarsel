@@ -1,7 +1,7 @@
 package no.nav.syfo.db
 
+import no.nav.syfo.db.domain.PMaksDato
 import no.nav.syfo.db.domain.PUtbetaling
-import java.time.LocalDate
 
 
 fun DatabaseInterface.fetchMerVeiledningVarslerToSend(): List<PUtbetaling> {
@@ -32,8 +32,8 @@ fun DatabaseInterface.fetchMerVeiledningVarslerToSend(): List<PUtbetaling> {
     }
 }
 
-fun DatabaseInterface.fetchForelopigBeregnetSluttPaSykepengerByFnr(fnr: String): LocalDate? {
-    val queryStatement = """SELECT  FORELOPIG_BEREGNET_SLUTT
+fun DatabaseInterface.fetchMaksDatoByFnr(fnr: String): PMaksDato? {
+    val queryStatement = """SELECT *
                             FROM UTBETALINGER AS UTBETALINGER1
                             WHERE ID =
                                 (SELECT UTBETALINGER2.ID
@@ -48,11 +48,11 @@ fun DatabaseInterface.fetchForelopigBeregnetSluttPaSykepengerByFnr(fnr: String):
     val list = connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
             it.setString(1, fnr)
-            it.executeQuery().toList { getDate("FORELOPIG_BEREGNET_SLUTT") }
+            it.executeQuery().toList { toPMaksDato() }
         }
     }
 
     return if (list.isNotEmpty()) {
-        list.first().toLocalDate()
+        list.first()
     } else null
 }

@@ -14,7 +14,7 @@ import no.nav.syfo.UrlEnv
 import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.pdl.getFullNameAsString
 import no.nav.syfo.db.DatabaseInterface
-import no.nav.syfo.db.fetchForelopigBeregnetSluttPaSykepengerByFnr
+import no.nav.syfo.db.fetchMaksDatoByFnr
 import no.nav.syfo.utils.formatDateForLetter
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
@@ -27,9 +27,9 @@ class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseI
 
     fun getMerVeiledningPDF(fnr: String): ByteArray? {
         val mottakerNavn = pdlConsumer.hentPerson(fnr)?.getFullNameAsString()
-        val sykepengerMaxDate = databaseInterface.fetchForelopigBeregnetSluttPaSykepengerByFnr(fnr)
+        val sykepengerMaxDate = databaseInterface.fetchMaksDatoByFnr(fnr)
         val merVeiledningPdfUrl = syfooppdfgenUrl + "/api/v1/genpdf/oppfolging/mer_veiledning"
-        val request = getPdfgenRequest(mottakerNavn, sykepengerMaxDate)
+        val request = getPdfgenRequest(mottakerNavn, sykepengerMaxDate?.forelopig_beregnet_slutt)
 
         return runBlocking {
             try {

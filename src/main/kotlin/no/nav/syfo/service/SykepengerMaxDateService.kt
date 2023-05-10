@@ -3,6 +3,7 @@ package no.nav.syfo.service
 import java.time.*
 import no.nav.syfo.consumer.pdl.*
 import no.nav.syfo.db.*
+import no.nav.syfo.db.domain.PMaksDato
 import no.nav.syfo.kafka.consumers.infotrygd.domain.*
 import no.nav.syfo.kafka.consumers.utbetaling.domain.*
 import no.nav.syfo.utils.*
@@ -42,8 +43,8 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface,
         databaseInterface.storeSpleisUtbetaling(utbetaling)
     }
 
-    fun getSykepengerMaxDate(fnr: String): LocalDate? {
-        return databaseInterface.fetchForelopigBeregnetSluttPaSykepengerByFnr(fnr)
+    fun getSykepengerMaxDate(fnr: String): PMaksDato? {
+        return databaseInterface.fetchMaksDatoByFnr(fnr)
     }
 
     fun processInfotrygdEvent(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int, source: InfotrygdSource) {

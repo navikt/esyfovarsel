@@ -6,19 +6,19 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
+import no.nav.syfo.db.domain.PMaksDato
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.service.SykepengerMaxDateService
 import no.nav.syfo.utils.*
 import org.slf4j.LoggerFactory
 import java.io.Serializable
-import java.time.LocalDate
 
-fun Route.registerSykepengerMaxDateAzureApi(
+fun Route.registerSykepengerMaxDateAzureApiV2(
     sykepengerMaxDateService: SykepengerMaxDateService,
     veilederTilgangskontrollConsumer: VeilederTilgangskontrollConsumer,
 ) {
-    val log = LoggerFactory.getLogger("no.nav.syfo.api.maxdate.SykepengerMaxDateAzureApi")
-    get("/api/azure/v1/sykepenger/maxdate") {
+    val log = LoggerFactory.getLogger("no.nav.syfo.api.maxdate.SykepengerMaxDateAzureApiV2")
+    get("/api/azure/v2/sykepenger/maxdate") {
         val personIdent = call.personIdent()
         val token = call.bearerToken()
         val callId = call.getCallId()
@@ -27,7 +27,7 @@ fun Route.registerSykepengerMaxDateAzureApi(
             try {
                 val sykepengerMaxDate = sykepengerMaxDateService.getSykepengerMaxDate(personIdent.value)
                 log.info("Fetched sykepengerMaxDate from database: $sykepengerMaxDate")
-                call.respond(SykepengerMaxDateAzureResponse(sykepengerMaxDate?.forelopig_beregnet_slutt))
+                call.respond(SykepengerMaxDateAzureV2Response(sykepengerMaxDate))
             } catch (e: Exception) {
                 log.error("Encountered exception during fetching sykepengerMaxDate from database: ${e.message}")
                 call.respond(
@@ -43,8 +43,8 @@ fun Route.registerSykepengerMaxDateAzureApi(
     }
 }
 
-data class SykepengerMaxDateAzureResponse(
-    val maxDate: LocalDate?,
+data class SykepengerMaxDateAzureV2Response(
+    val maxDate: PMaksDato?,
 ) : Serializable
 
 private fun ApplicationCall.personIdent(): PersonIdent = this.getPersonIdent()
