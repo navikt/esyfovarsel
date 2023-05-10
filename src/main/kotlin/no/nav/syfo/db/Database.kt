@@ -2,9 +2,9 @@ package no.nav.syfo.db
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import java.sql.Connection
 import no.nav.syfo.DbEnv
 import org.flywaydb.core.Flyway
-import java.sql.Connection
 
 const val postgresJdbcPrefix = "jdbc:postgresql"
 const val errorCodeUniqueViolation = "23505"
@@ -35,10 +35,12 @@ class Database(val env: DbEnv) : DatabaseInterface {
     override val connection: Connection
         get() = hikariDataSource.connection
 
-    private fun runFlywayMigrations(hikariDataSource: HikariDataSource) = Flyway.configure().run {
-        dataSource(hikariDataSource)
-        load().migrate().migrationsExecuted
-    }
+    private fun runFlywayMigrations(hikariDataSource: HikariDataSource) =
+        Flyway.configure().run {
+            ignoreIgnoredMigrations(true)
+            dataSource(hikariDataSource)
+            load().migrate().migrationsExecuted
+        }
 }
 
 fun generateJdbcUrlFromEnv(env: DbEnv): String {
