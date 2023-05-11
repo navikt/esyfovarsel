@@ -59,8 +59,8 @@ spec:
         - host: pdl-api.dev-fss-pub.nais.io
         - host: dokdistfordeling.dev-fss-pub.nais.io
         - host: dokarkiv.dev-fss-pub.nais.io
+        - host: syfooppdfgen.intern.dev.nav.no
       rules:
-        - application: syfooppdfgen
         - application: digdir-krr-proxy
           namespace: team-rocket
         - application: notifikasjon-produsent-api
