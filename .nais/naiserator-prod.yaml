@@ -61,7 +61,6 @@ spec:
         - host: dokarkiv.prod-fss-pub.nais.io
         - host: syfooppdfgen.intern.nav.no
       rules:
-        - application: syfooppdfgen
         - application: digdir-krr-proxy
           namespace: team-rocket
         - application: notifikasjon-produsent-api
