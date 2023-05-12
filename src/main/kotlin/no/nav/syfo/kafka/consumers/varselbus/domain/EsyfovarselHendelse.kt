@@ -31,7 +31,7 @@ data class VarselData(
     val status: VarselDataStatus? = null,
     val journalpost: VarselDataJournalpost? = null,
     val narmesteLeder: VarselDataNarmesteLeder? = null,
-    val motetidspunkt: VarselDataMotetidspunkt? = null
+    val motetidspunkt: VarselDataMotetidspunkt? = null,
 )
 
 data class VarselDataStatus(

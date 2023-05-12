@@ -36,7 +36,7 @@ class BrukernotifikasjonerService(
                 }
             }
         } else {
-            log.info("Kan ikke sende melding til bruker for melding med uuid $uuid, dette kan skyldes adressesperre")
+            throw RuntimeException("Kan ikke sende melding til bruker for melding med uuid $uuid: bruker er reservert for digital kommunikasjon")
         }
     }
 
