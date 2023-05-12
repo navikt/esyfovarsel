@@ -16,6 +16,8 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProdu
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class SenderFacade(
     private val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
@@ -25,6 +27,7 @@ class SenderFacade(
     private val fysiskBrevUtsendingService: FysiskBrevUtsendingService,
     val database: DatabaseInterface,
 ) {
+    private val log: Logger = LoggerFactory.getLogger(SenderFacade::class.qualifiedName)
     fun sendTilDineSykmeldte(
         varselHendelse: NarmesteLederHendelse,
         varsel: DineSykmeldteVarsel,
@@ -141,12 +144,14 @@ class SenderFacade(
             ARBEIDSGIVERNOTIFIKASJON
         ).uferdigstilteVarsler(varselHendelse.type)
         for (varsel in uferdigstilteVarsler) {
-            varsel.eksternReferanse?.let {
+            if (varsel.eksternReferanse != null && varsel.arbeidsgivernotifikasjonMerkelapp != null) {
                 arbeidsgiverNotifikasjonService.deleteNotifikasjon(
-                    varsel.arbeidsgivernotifikasjonMerkelapp!!,
-                    it
+                    varsel.arbeidsgivernotifikasjonMerkelapp,
+                    varsel.eksternReferanse
                 )
-                database.setUtsendtVarselToFerdigstilt(it)
+                database.setUtsendtVarselToFerdigstilt(varsel.eksternReferanse)
+            } else {
+                log.warn("Kan ikke ferdigstille varsel med uuid ${varsel.uuid} fordi den mangler eksternReferanse eller arbeidsgivernotifikasjonMerkelapp")
             }
         }
     }
