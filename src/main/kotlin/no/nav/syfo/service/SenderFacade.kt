@@ -29,11 +29,10 @@ class SenderFacade(
         varselHendelse: NarmesteLederHendelse,
         varsel: DineSykmeldteVarsel,
     ) {
-        var isSendingSucceed = true
         try {
             dineSykmeldteHendelseKafkaProducer.sendVarsel(varsel)
+            lagreUtsendtNarmesteLederVarsel(DINE_SYKMELDTE, varselHendelse, varsel.id.toString())
         } catch (e: Exception) {
-            isSendingSucceed = false
             log.warn("Error while sending varsel to DINE_SYKMELDTE: ${e.message}", e)
             lagreIkkeUtsendtNarmesteLederVarsel(
                 kanal = DINE_SYKMELDTE,
@@ -43,22 +42,17 @@ class SenderFacade(
                 merkelapp = null,
             )
         }
-        if (isSendingSucceed) {
-            lagreUtsendtNarmesteLederVarsel(DINE_SYKMELDTE, varselHendelse, varsel.id.toString())
-        }
     }
 
     fun sendTilDittSykefravaer(
         varselHendelse: ArbeidstakerHendelse,
         varsel: DittSykefravaerVarsel,
     ) {
-        var eksternUUID = ""
-        var isSendingSucceed = true
         try {
-            eksternUUID = dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding)
+           val eksternUUID = dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding)
+            lagreUtsendtArbeidstakerVarsel(DITT_SYKEFRAVAER, varselHendelse, eksternUUID)
         } catch (e: Exception) {
             log.warn("Error while sending varsel to DITT_SYKEFRAVAER: ${e.message}")
-            isSendingSucceed = false
             lagreIkkeUtsendtArbeidstakerVarsel(
                 kanal = DITT_SYKEFRAVAER,
                 varselHendelse = varselHendelse,
@@ -67,9 +61,6 @@ class SenderFacade(
                 journalpostId = null,
                 brukernotifikasjonerMeldingType = null,
             )
-        }
-        if (isSendingSucceed && eksternUUID.isNotBlank()) {
-            lagreUtsendtArbeidstakerVarsel(DITT_SYKEFRAVAER, varselHendelse, eksternUUID)
         }
     }
 
