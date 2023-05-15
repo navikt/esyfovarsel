@@ -16,6 +16,8 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProdu
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class SenderFacade(
     private val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
@@ -25,6 +27,7 @@ class SenderFacade(
     private val fysiskBrevUtsendingService: FysiskBrevUtsendingService,
     val database: DatabaseInterface,
 ) {
+    private val log: Logger = LoggerFactory.getLogger(SenderFacade::class.qualifiedName)
     fun sendTilDineSykmeldte(
         varselHendelse: NarmesteLederHendelse,
         varsel: DineSykmeldteVarsel,
@@ -94,15 +97,17 @@ class SenderFacade(
     }
 
     fun ferdigstillBrukernotifkasjonVarsler(varselHendelse: ArbeidstakerHendelse) {
-        val eksterneReferanser = database.fetchUtsendtVarsel(
+        val uferdigstilteVarsler = database.fetchUtsendtVarsel(
             varselHendelse.arbeidstakerFnr,
             varselHendelse.orgnummer!!,
             varselHendelse.type,
             BRUKERNOTIFIKASJON
-        ).eksterneRefUferdigstilteVarsler(varselHendelse.type)
-        for (eksternReferanse in eksterneReferanser) {
-            brukernotifikasjonerService.ferdigstillVarsel(eksternReferanse!!, varselHendelse.arbeidstakerFnr)
-            database.setUtsendtVarselToFerdigstilt(eksternReferanse)
+        ).uferdigstilteVarsler(varselHendelse.type)
+        for (varsel in uferdigstilteVarsler) {
+            varsel.eksternReferanse?.let {
+                brukernotifikasjonerService.ferdigstillVarsel(it, varselHendelse.arbeidstakerFnr)
+                database.setUtsendtVarselToFerdigstilt(it)
+            }
         }
     }
 
@@ -125,39 +130,42 @@ class SenderFacade(
             )
         }
         if (isSendingSucceed) {
-            lagreUtsendtNarmesteLederVarsel(ARBEIDSGIVERNOTIFIKASJON, varselHendelse, varsel.uuid.toString())
+            lagreUtsendtNarmesteLederVarsel(ARBEIDSGIVERNOTIFIKASJON, varselHendelse, varsel.uuid.toString(), varsel.merkelapp)
         }
     }
 
     fun ferdigstillArbeidsgiverNotifikasjoner(
-        varselHendelse: NarmesteLederHendelse,
-        merkelapp: String,
+        varselHendelse: NarmesteLederHendelse
     ) {
-        val eksterneReferanser = database.fetchUtsendtVarsel(
+        val uferdigstilteVarsler = database.fetchUtsendtVarsel(
             varselHendelse.arbeidstakerFnr,
             varselHendelse.orgnummer,
             varselHendelse.type,
             ARBEIDSGIVERNOTIFIKASJON
-        ).eksterneRefUferdigstilteVarsler(varselHendelse.type)
-        for (eksternReferanse in eksterneReferanser) {
-            arbeidsgiverNotifikasjonService.deleteNotifikasjon(
-                merkelapp,
-                eksternReferanse!!
-            )
-            database.setUtsendtVarselToFerdigstilt(eksternReferanse)
+        ).uferdigstilteVarsler(varselHendelse.type)
+        for (varsel in uferdigstilteVarsler) {
+            if (varsel.eksternReferanse != null && varsel.arbeidsgivernotifikasjonMerkelapp != null) {
+                arbeidsgiverNotifikasjonService.deleteNotifikasjon(
+                    varsel.arbeidsgivernotifikasjonMerkelapp,
+                    varsel.eksternReferanse
+                )
+                database.setUtsendtVarselToFerdigstilt(varsel.eksternReferanse)
+            } else {
+                log.warn("Kan ikke ferdigstille varsel med uuid ${varsel.uuid} fordi den mangler eksternReferanse eller arbeidsgivernotifikasjonMerkelapp")
+            }
         }
     }
 
     fun ferdigstillDineSykmeldteVarsler(varselHendelse: NarmesteLederHendelse) {
-        val eksterneReferanser = database.fetchUtsendtVarsel(
+        val uferdigstilteVarsler = database.fetchUtsendtVarsel(
             varselHendelse.arbeidstakerFnr,
             varselHendelse.orgnummer,
             varselHendelse.type,
             DINE_SYKMELDTE
-        ).eksterneRefUferdigstilteVarsler(varselHendelse.type)
-        for (eksternReferanse in eksterneReferanser) {
-            dineSykmeldteHendelseKafkaProducer.ferdigstillVarsel(eksternReferanse!!)
-            database.setUtsendtVarselToFerdigstilt(eksternReferanse)
+        ).uferdigstilteVarsler(varselHendelse.type)
+        for (varsel in uferdigstilteVarsler) {
+            dineSykmeldteHendelseKafkaProducer.ferdigstillVarsel(varsel.eksternReferanse!!)
+            database.setUtsendtVarselToFerdigstilt(varsel.eksternReferanse)
         }
     }
 
@@ -190,6 +198,7 @@ class SenderFacade(
         kanal: Kanal,
         varselHendelse: NarmesteLederHendelse,
         eksternReferanse: String,
+        arbeidsgivernotifikasjonMerkelapp: String? = null
     ) {
         database.storeUtsendtVarsel(
             PUtsendtVarsel(
@@ -203,7 +212,8 @@ class SenderFacade(
                 LocalDateTime.now(),
                 null,
                 eksternReferanse,
-                null
+                null,
+                arbeidsgivernotifikasjonMerkelapp
             )
         )
     }
@@ -226,6 +236,7 @@ class SenderFacade(
                 null,
                 eksternReferanse,
                 null,
+                null
             )
         )
     }
@@ -282,7 +293,7 @@ class SenderFacade(
     }
 }
 
-fun List<PUtsendtVarsel>.eksterneRefUferdigstilteVarsler(hendelseType: HendelseType) =
+fun List<PUtsendtVarsel>.uferdigstilteVarsler(hendelseType: HendelseType) =
     this
         .sortedByDescending { it.utsendtTidspunkt }
         .filter {
@@ -290,4 +301,3 @@ fun List<PUtsendtVarsel>.eksterneRefUferdigstilteVarsler(hendelseType: HendelseT
                     it.type == hendelseType.toString() &&
                     it.ferdigstiltTidspunkt == null
         }
-        .map { it.eksternReferanse }

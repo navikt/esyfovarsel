@@ -146,14 +146,14 @@ object MerVeiledningVarselFinderSpek : Spek({
             coEvery { sykmeldingServiceMockk.isPersonSykmeldtPaDato(LocalDate.now(), arbeidstakerFnr1) } returns true
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
 
-           runBlocking {
+            runBlocking {
                 merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
             }
 
             coVerify(exactly = 1) { pdlConsumerMockk.isBrukerYngreEnn67(arbeidstakerFnr1) }
         }
 
-       it("Should not call PDL if stored birthdate is not null") {
+        it("Should not call PDL if stored birthdate is not null") {
             embeddedDatabase.storeFodselsdato(arbeidstakerFnr2, "1986-01-01")
             coEvery { sykmeldingServiceMockk.isPersonSykmeldtPaDato(LocalDate.now(), arbeidstakerFnr2) } returns true
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel2)
@@ -173,6 +173,7 @@ private fun getUtsendtVarselToStore(utsendtTidspunkt: LocalDateTime): PUtsendtVa
         VarselType.MER_VEILEDNING.name,
         null,
         utsendtTidspunkt,
+        null,
         null,
         null,
         null

@@ -80,6 +80,7 @@ private fun utsendtVarsel(type: VarselType, utsendtTidspunkt: LocalDateTime) = P
     utsendtTidspunkt,
     "000",
     "000",
+    null,
     null
 )
 
