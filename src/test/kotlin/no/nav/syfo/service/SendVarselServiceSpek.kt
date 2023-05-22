@@ -1,8 +1,6 @@
 package no.nav.syfo.service
 
 import io.mockk.*
-import java.time.*
-import java.util.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.access.domain.UserAccessStatus
@@ -20,6 +18,8 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaPr
 import no.nav.syfo.syketilfelle.SyketilfellebitService
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.*
+import java.util.*
 
 object SendVarselServiceTestSpek : Spek({
     val brukernotifikasjonKafkaProducerMockk: BrukernotifikasjonKafkaProducer = mockk(relaxed = true)
@@ -33,6 +33,8 @@ object SendVarselServiceTestSpek : Spek({
     val syketilfellebitService: SyketilfellebitService = mockk(relaxed = true)
     val dokarkivServiceMockk: DokarkivService = mockk(relaxed = true)
     val sykmeldingerConsumerMock: SykmeldingerConsumer = mockk(relaxed = true)
+    val merVeiledningVarselFinder = mockk<MerVeiledningVarselFinder>(relaxed = true)
+    val aktivitetskravVarselFinder = mockk<AktivitetskravVarselFinder>(relaxed = true)
     val sykmeldingServiceMockk = SykmeldingService(sykmeldingerConsumerMock)
     val brukernotifikasjonerServiceMockk =
         BrukernotifikasjonerService(brukernotifikasjonKafkaProducerMockk, accessControlServiceMockk)
@@ -45,14 +47,14 @@ object SendVarselServiceTestSpek : Spek({
             brukernotifikasjonerServiceMockk,
             arbeidsgiverNotifikasjonServiceMockk,
             fysiskBrevUtsendingServiceMockk,
-            databaseInterfaceMockk
+            databaseInterfaceMockk,
         )
     val merVeiledningVarselServiceMockk = MerVeiledningVarselService(
         senderFacade,
         syketilfellebitService,
         urlEnvMockk,
         pdfgenConsumerMockk,
-        dokarkivServiceMockk
+        dokarkivServiceMockk,
     )
     val sendVarselService = SendVarselService(
         brukernotifikasjonKafkaProducerMockk,
@@ -62,6 +64,7 @@ object SendVarselServiceTestSpek : Spek({
         arbeidsgiverNotifikasjonServiceMockk,
         merVeiledningVarselServiceMockk,
         sykmeldingServiceMockk,
+        aktivitetskravVarselFinder, merVeiledningVarselFinder,
     )
     val sykmeldtFnr = "01234567891"
     val orgnummer = "999988877"
@@ -71,7 +74,7 @@ object SendVarselServiceTestSpek : Spek({
             every { accessControlServiceMockk.getUserAccessStatus(sykmeldtFnr) } returns UserAccessStatus(
                 sykmeldtFnr,
                 canUserBeDigitallyNotified = true,
-                canUserBePhysicallyNotified = false
+                canUserBePhysicallyNotified = false,
             )
 
             every { urlEnvMockk.baseUrlSykInfo } returns "https://www-gcp.dev.nav.no/syk/info"
@@ -85,8 +88,8 @@ object SendVarselServiceTestSpek : Spek({
             coEvery { sykmeldingerConsumerMock.getSykmeldingerPaDato(any(), any()) } returns listOf(
                 getSykmeldingDto(
                     perioder = getSykmeldingPerioder(isGradert = false),
-                    sykmeldingStatus = getSykmeldingStatus(isSendt = true, orgnummer = orgnummer)
-                )
+                    sykmeldingStatus = getSykmeldingStatus(isSendt = true, orgnummer = orgnummer),
+                ),
             )
 
             runBlocking {
@@ -99,8 +102,8 @@ object SendVarselServiceTestSpek : Spek({
                         type = VarselType.AKTIVITETSKRAV.name,
                         utsendingsdato = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).toLocalDate(),
                         opprettet = LocalDateTime.now().minusDays(30),
-                        sistEndret = LocalDateTime.now().minusDays(30)
-                    )
+                        sistEndret = LocalDateTime.now().minusDays(30),
+                    ),
                 )
             }
 
@@ -113,8 +116,8 @@ object SendVarselServiceTestSpek : Spek({
             coEvery { sykmeldingerConsumerMock.getSykmeldingerPaDato(any(), any()) } returns listOf(
                 getSykmeldingDto(
                     perioder = getSykmeldingPerioder(isGradert = false),
-                    sykmeldingStatus = getSykmeldingStatus(isSendt = false, orgnummer = orgnummer)
-                )
+                    sykmeldingStatus = getSykmeldingStatus(isSendt = false, orgnummer = orgnummer),
+                ),
             )
 
             runBlocking {
@@ -127,8 +130,8 @@ object SendVarselServiceTestSpek : Spek({
                         type = VarselType.AKTIVITETSKRAV.name,
                         utsendingsdato = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).toLocalDate(),
                         opprettet = LocalDateTime.now().minusDays(30),
-                        sistEndret = LocalDateTime.now().minusDays(30)
-                    )
+                        sistEndret = LocalDateTime.now().minusDays(30),
+                    ),
                 )
             }
 
@@ -139,12 +142,12 @@ object SendVarselServiceTestSpek : Spek({
 
         it("Should send mer-veiledning-varsel to SM if sykmelding is sendt AG") {
             coEvery { sykmeldingerConsumerMock.getSykmeldtStatusPaDato(any(), sykmeldtFnr) } returns
-                    SykmeldtStatus(
-                        true,
-                        true,
-                        LocalDate.now(),
-                        LocalDate.now()
-                    )
+                SykmeldtStatus(
+                    true,
+                    true,
+                    LocalDate.now(),
+                    LocalDate.now(),
+                )
 
             runBlocking {
                 sendVarselService.sendVarsel(
@@ -156,8 +159,8 @@ object SendVarselServiceTestSpek : Spek({
                         type = VarselType.MER_VEILEDNING.name,
                         utsendingsdato = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).toLocalDate(),
                         opprettet = LocalDateTime.now(),
-                        sistEndret = LocalDateTime.now()
-                    )
+                        sistEndret = LocalDateTime.now(),
+                    ),
                 )
             }
 
@@ -177,7 +180,7 @@ fun getSykmeldingDto(perioder: List<SykmeldingsperiodeDTO>, sykmeldingStatus: Sy
         behandler = BehandlerDTO(
             "fornavn", null, "etternavn",
             "123", "444", null, null,
-            AdresseDTO(null, null, null, null, null), null
+            AdresseDTO(null, null, null, null, null), null,
         ),
         behandletTidspunkt = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)),
         mottattTidspunkt = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)),
@@ -196,7 +199,7 @@ fun getSykmeldingDto(perioder: List<SykmeldingsperiodeDTO>, sykmeldingStatus: Sy
         egenmeldt = false,
         harRedusertArbeidsgiverperiode = false,
         papirsykmelding = false,
-        merknader = null
+        merknader = null,
     )
 }
 
@@ -212,8 +215,8 @@ fun getSykmeldingPerioder(isGradert: Boolean): List<SykmeldingsperiodeDTO> {
             null,
             PeriodetypeDTO.AKTIVITET_IKKE_MULIG,
             null,
-            false
-        )
+            false,
+        ),
     )
 }
 
@@ -225,9 +228,9 @@ fun getSykmeldingStatus(isSendt: Boolean, orgnummer: String): SykmeldingStatusDT
             ArbeidsgiverStatusDTO(
                 orgnummer = orgnummer,
                 juridiskOrgnummer = null,
-                orgNavn = "Reke"
+                orgNavn = "Reke",
             ),
-            emptyList()
+            emptyList(),
         )
     }
 
@@ -235,6 +238,6 @@ fun getSykmeldingStatus(isSendt: Boolean, orgnummer: String): SykmeldingStatusDT
         "APEN",
         OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)),
         null,
-        emptyList()
+        emptyList(),
     )
 }

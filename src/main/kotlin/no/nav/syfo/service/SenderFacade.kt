@@ -1,8 +1,5 @@
 package no.nav.syfo.service
 
-import java.net.URL
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.Kanal.*
@@ -18,6 +15,9 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProdu
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
+import java.net.URL
+import java.time.LocalDateTime
+import java.util.*
 
 class SenderFacade(
     val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
@@ -25,7 +25,7 @@ class SenderFacade(
     val brukernotifikasjonerService: BrukernotifikasjonerService,
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
     val fysiskBrevUtsendingService: FysiskBrevUtsendingService,
-    val database: DatabaseInterface
+    val database: DatabaseInterface,
 ) {
     fun sendTilDineSykmeldte(
         varselHendelse: NarmesteLederHendelse,
@@ -60,7 +60,7 @@ class SenderFacade(
             varselHendelse.arbeidstakerFnr,
             varselHendelse.orgnummer!!,
             varselHendelse.type,
-            BRUKERNOTIFIKASJON
+            BRUKERNOTIFIKASJON,
         ).eksterneRefUferdigstilteVarsler(varselHendelse.type)
         for (eksternReferanse in eksterneReferanser) {
             brukernotifikasjonerService.ferdigstillVarsel(eksternReferanse!!, varselHendelse.arbeidstakerFnr)
@@ -78,18 +78,18 @@ class SenderFacade(
 
     fun ferdigstillArbeidsgiverNotifikasjoner(
         varselHendelse: NarmesteLederHendelse,
-        merkelapp: String
+        merkelapp: String,
     ) {
         val eksterneReferanser = database.fetchUtsendtVarsel(
             varselHendelse.arbeidstakerFnr,
             varselHendelse.orgnummer,
             varselHendelse.type,
-            ARBEIDSGIVERNOTIFIKASJON
+            ARBEIDSGIVERNOTIFIKASJON,
         ).eksterneRefUferdigstilteVarsler(varselHendelse.type)
         for (eksternReferanse in eksterneReferanser) {
             arbeidsgiverNotifikasjonService.deleteNotifikasjon(
                 merkelapp,
-                eksternReferanse!!
+                eksternReferanse!!,
             )
             database.setUtsendtVarselToFerdigstilt(eksternReferanse)
         }
@@ -100,7 +100,7 @@ class SenderFacade(
             varselHendelse.arbeidstakerFnr,
             varselHendelse.orgnummer,
             varselHendelse.type,
-            DINE_SYKMELDTE
+            DINE_SYKMELDTE,
         ).eksterneRefUferdigstilteVarsler(varselHendelse.type)
         for (eksternReferanse in eksterneReferanser) {
             dineSykmeldteHendelseKafkaProducer.ferdigstillVarsel(eksternReferanse!!)
@@ -134,8 +134,8 @@ class SenderFacade(
                 LocalDateTime.now(),
                 null,
                 eksternReferanse,
-                null
-            )
+                null,
+            ),
         )
     }
 
@@ -157,7 +157,7 @@ class SenderFacade(
                 null,
                 eksternReferanse,
                 null,
-            )
+            ),
         )
     }
 }

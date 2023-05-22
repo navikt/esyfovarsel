@@ -11,9 +11,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.justRun
 import io.mockk.mockk
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.syfo.api.job.registerJobTriggerApi
 import no.nav.syfo.api.job.urlPathJobTrigger
 import no.nav.syfo.db.domain.PPlanlagtVarsel
@@ -29,6 +26,9 @@ import no.nav.syfo.util.contentNegotationFeature
 import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 object JobApiSpek : Spek({
 
@@ -43,6 +43,7 @@ object JobApiSpek : Spek({
         val arbeidsgiverNotifikasjonService = mockk<ArbeidsgiverNotifikasjonService>()
         val dineSykmeldteHendelseKafkaProducer = mockk<DineSykmeldteHendelseKafkaProducer>()
         val merVeiledningVarselFinder = mockk<MerVeiledningVarselFinder>(relaxed = true)
+        val aktivitetskravVarselFinder = mockk<AktivitetskravVarselFinder>(relaxed = true)
         val dokarkivService = mockk<DokarkivService>()
         val merVeiledningVarselService = mockk<MerVeiledningVarselService>()
         val sykmeldingService = mockk<SykmeldingService>()
@@ -69,7 +70,7 @@ object JobApiSpek : Spek({
                 VarselType.MER_VEILEDNING.name,
                 LocalDate.now(),
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
             ),
             PPlanlagtVarsel(
                 UUID.randomUUID().toString(),
@@ -79,7 +80,7 @@ object JobApiSpek : Spek({
                 VarselType.MER_VEILEDNING.name,
                 LocalDate.now(),
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
             ),
             PPlanlagtVarsel(
                 UUID.randomUUID().toString(),
@@ -89,7 +90,7 @@ object JobApiSpek : Spek({
                 VarselType.MER_VEILEDNING.name,
                 LocalDate.now(),
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
             ),
             PPlanlagtVarsel(
                 UUID.randomUUID().toString(),
@@ -99,7 +100,7 @@ object JobApiSpek : Spek({
                 VarselType.MER_VEILEDNING.name,
                 LocalDate.now(),
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
             ),
             PPlanlagtVarsel(
                 UUID.randomUUID().toString(),
@@ -109,14 +110,14 @@ object JobApiSpek : Spek({
                 VarselType.MER_VEILEDNING.name,
                 LocalDate.now(),
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
             ),
         )
         coEvery {
             sykmeldingService.checkSykmeldingStatusForVirksomhet(
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = true)
         coEvery { brukernotifikasjonKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
@@ -134,9 +135,11 @@ object JobApiSpek : Spek({
                 arbeidsgiverNotifikasjonService,
                 merVeiledningVarselService,
                 sykmeldingService,
+                aktivitetskravVarselFinder,
+                merVeiledningVarselFinder,
             )
         val varselSender =
-            VarselSender(embeddedDatabase, sendVarselService, merVeiledningVarselFinder, testEnv.toggleEnv)
+            VarselSender(embeddedDatabase, sendVarselService, aktivitetskravVarselFinder, merVeiledningVarselFinder, testEnv.toggleEnv)
 
         with(TestApplicationEngine()) {
             start()

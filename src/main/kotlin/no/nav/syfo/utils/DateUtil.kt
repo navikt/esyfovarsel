@@ -36,11 +36,10 @@ fun formatDateForLetter(date: LocalDate): String {
     return date.format(DateTimeFormatter.ofPattern(BREV_DATE_FORMAT_PATTERN))
 }
 
-fun isFodselsdatoMindreEnn67Ar(fodselsdato: String?): Boolean {
+fun isAlderMindreEnnGittAr(fodselsdato: String?, maxAlder: Int): Boolean {
     val parsedFodselsdato = fodselsdato?.let { parsePDLDate(it) }
-    val isFodselsdatoMindreEnn67Ar = parsedFodselsdato == null || (Period.between(parsedFodselsdato, LocalDate.now()).years < 67)
 
-    return isFodselsdatoMindreEnn67Ar
+    return parsedFodselsdato == null || (Period.between(parsedFodselsdato, LocalDate.now()).years < maxAlder)
 }
 
 fun norwegianOffsetDateTime() = OffsetDateTime.now(ZoneId.of("Europe/Oslo"))

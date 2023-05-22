@@ -1,19 +1,24 @@
 package no.nav.syfo.consumer.pdl
 
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import java.io.*
-import kotlinx.coroutines.*
-import no.nav.syfo.*
-import no.nav.syfo.auth.*
-import no.nav.syfo.utils.*
-import org.slf4j.*
+import io.ktor.client.call.receive
+import io.ktor.client.request.headers
+import io.ktor.client.request.post
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.append
+import kotlinx.coroutines.runBlocking
+import no.nav.syfo.UrlEnv
+import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.utils.httpClient
+import no.nav.syfo.utils.isAlderMindreEnnGittAr
+import org.slf4j.LoggerFactory
+import java.io.FileNotFoundException
 
 open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client = httpClient()
-    private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.pdl.PdlConsumer")
+    private val log = LoggerFactory.getLogger(PdlConsumer::class.java)
 
     open fun getFnr(aktorId: String): String? {
         val response = callPdl(IDENTER_QUERY, aktorId)
@@ -25,14 +30,17 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
                     pdlResponse
                 }
             }
+
             HttpStatusCode.NoContent -> {
                 log.error("Could not get fnr from PDL: No content found in the response body")
                 null
             }
+
             HttpStatusCode.Unauthorized -> {
                 log.error("Could not get fnr from PDL: Unable to authorize")
                 null
             }
+
             else -> {
                 log.error("Could not get fnr from PDL: $response")
                 null
@@ -65,13 +73,13 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
         }
     }
 
-    fun isBrukerYngreEnn67(ident: String): Boolean {
+    fun isBrukerYngreEnnGittMaxAlder(ident: String, maxAlder: Int): Boolean {
         val response = callPdl(PERSON_QUERY, ident)
 
         return when (response?.status) {
             HttpStatusCode.OK -> {
                 val fodselsdato = runBlocking { response.receive<PdlPersonResponse>().data?.getFodselsdato() }
-                return isFodselsdatoMindreEnn67Ar(fodselsdato)
+                return isAlderMindreEnnGittAr(fodselsdato, maxAlder)
             }
 
             HttpStatusCode.NoContent -> {
@@ -145,7 +153,8 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
     }
 }
 
-class LocalPdlConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer) : PdlConsumer(urlEnv, azureAdTokenConsumer) {
+class LocalPdlConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer) :
+    PdlConsumer(urlEnv, azureAdTokenConsumer) {
     override fun getFnr(aktorId: String): String {
         return aktorId.substring(0, 11)
     }
