@@ -91,6 +91,28 @@ fun DatabaseInterface.fetchUtsendtVarsel(
     }
 }
 
+fun DatabaseInterface.fetchUtsendtVarsel(
+    fnr: String,
+    type: HendelseType,
+    kanal: Kanal
+): List<PUtsendtVarsel> {
+    val queryStatement = """SELECT *
+                            FROM UTSENDT_VARSEL
+                            WHERE fnr = ?
+                            AND type = ?
+                            AND kanal = ?
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, fnr)
+            it.setString(2, type.name)
+            it.setString(3, kanal.name)
+            it.executeQuery().toList { toPUtsendtVarsel() }
+        }
+    }
+}
+
 fun DatabaseInterface.fetchUtsendtVarselByFnr(fnr: String): List<PUtsendtVarsel> {
     val queryStatement = """SELECT *
                             FROM UTSENDT_VARSEL

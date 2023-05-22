@@ -97,12 +97,23 @@ class SenderFacade(
     }
 
     fun ferdigstillBrukernotifkasjonVarsler(varselHendelse: ArbeidstakerHendelse) {
-        val uferdigstilteVarsler = database.fetchUtsendtVarsel(
-            varselHendelse.arbeidstakerFnr,
-            varselHendelse.orgnummer!!,
-            varselHendelse.type,
-            BRUKERNOTIFIKASJON
-        ).uferdigstilteVarsler(varselHendelse.type)
+        val fetchUtsendtVarsel = if (varselHendelse.orgnummer != null) {
+            database.fetchUtsendtVarsel(
+                varselHendelse.arbeidstakerFnr,
+                varselHendelse.orgnummer,
+                varselHendelse.type,
+                BRUKERNOTIFIKASJON
+            )
+        } else {
+            database.fetchUtsendtVarsel(
+                varselHendelse.arbeidstakerFnr,
+                varselHendelse.type,
+                BRUKERNOTIFIKASJON
+            )
+        }
+
+        val uferdigstilteVarsler = fetchUtsendtVarsel.uferdigstilteVarsler(varselHendelse.type)
+
         for (varsel in uferdigstilteVarsler) {
             varsel.eksternReferanse?.let {
                 brukernotifikasjonerService.ferdigstillVarsel(it, varselHendelse.arbeidstakerFnr)
