@@ -69,6 +69,7 @@ class VarselBusService(
                 SM_DIALOGMOTE_NYTT_TID_STED -> mikrofrontendService.updateDialogmoteFrontendForUser(event)
                 SM_DIALOGMOTE_AVLYST,
                 SM_DIALOGMOTE_REFERAT -> mikrofrontendService.disableDialogmoteFrontendForUser(event)
+
                 else -> return
             }
         }
@@ -89,10 +90,15 @@ class VarselBusService(
     private fun EsyfovarselHendelse.isArbeidstakerHendelse(): Boolean {
         return this is ArbeidstakerHendelse
     }
-    
+
     private fun EsyfovarselHendelse.skalFerdigstilles() =
-        data?.let { data ->
-            val varseldata = data.toVarselData()
-            varseldata.status?.ferdigstilt
-        } ?: false
+        if (ferdigstill == true) {
+            true
+        } else {
+            data?.let { data ->
+                val varseldata = data.toVarselData()
+                varseldata.status?.ferdigstilt
+            } ?: false
+        }
+
 }
