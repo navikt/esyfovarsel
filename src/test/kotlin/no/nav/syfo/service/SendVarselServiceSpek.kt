@@ -92,6 +92,9 @@ object SendVarselServiceTestSpek : Spek({
                 ),
             )
 
+            coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(sykmeldtFnr) } returns true
+            coEvery { merVeiledningVarselFinder.isBrukerYngre67Ar(sykmeldtFnr) } returns true
+
             runBlocking {
                 sendVarselService.sendVarsel(
                     PPlanlagtVarsel(
@@ -119,6 +122,9 @@ object SendVarselServiceTestSpek : Spek({
                     sykmeldingStatus = getSykmeldingStatus(isSendt = false, orgnummer = orgnummer),
                 ),
             )
+
+            coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(sykmeldtFnr) } returns true
+            coEvery { merVeiledningVarselFinder.isBrukerYngre67Ar(sykmeldtFnr) } returns true
 
             runBlocking {
                 sendVarselService.sendVarsel(
@@ -148,6 +154,9 @@ object SendVarselServiceTestSpek : Spek({
                     LocalDate.now(),
                     LocalDate.now(),
                 )
+
+            coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(sykmeldtFnr) } returns true
+            coEvery { merVeiledningVarselFinder.isBrukerYngre67Ar(sykmeldtFnr) } returns true
 
             runBlocking {
                 sendVarselService.sendVarsel(

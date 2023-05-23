@@ -85,8 +85,8 @@ class VarselSender(
             (it.type == VarselType.AKTIVITETSKRAV.name && toggles.sendAktivitetskravVarsler)
 
     private fun skalVarsleBrukerPgaAlder(pPlanlagtVarsel: PPlanlagtVarsel) =
-        (pPlanlagtVarsel.type === VarselType.AKTIVITETSKRAV.name && aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(pPlanlagtVarsel.fnr)) ||
-            (pPlanlagtVarsel.type === VarselType.MER_VEILEDNING.name && merVeiledningVarselFinder.isBrukerYngre67Ar(pPlanlagtVarsel.fnr))
+        (pPlanlagtVarsel.type == VarselType.AKTIVITETSKRAV.name && aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(pPlanlagtVarsel.fnr)) ||
+            (pPlanlagtVarsel.type == VarselType.MER_VEILEDNING.name && merVeiledningVarselFinder.isBrukerYngre67Ar(pPlanlagtVarsel.fnr))
 
     private fun String.sendtUtenFeil(): Boolean {
         return this != UTSENDING_FEILET

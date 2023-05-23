@@ -123,6 +123,8 @@ object JobApiSpek : Spek({
         coEvery { brukernotifikasjonKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
         coEvery { dokarkivService.getJournalpostId(any(), any(), any()) } returns "1"
         coEvery { sykmeldingService.isPersonSykmeldtPaDato(any(), any()) } returns true
+        coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(any()) } returns true
+        coEvery { merVeiledningVarselFinder.isBrukerYngre67Ar(any()) } returns true
 
         justRun { mikrofrontendService.findAndCloseExpiredDialogmoteMikrofrontends() }
 

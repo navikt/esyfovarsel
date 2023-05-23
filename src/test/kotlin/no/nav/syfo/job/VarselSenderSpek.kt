@@ -11,8 +11,7 @@ import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
-import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
-import no.nav.syfo.db.domain.VarselType.MER_VEILEDNING
+import no.nav.syfo.db.domain.VarselType.*
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
 import no.nav.syfo.db.fetchUtsendtVarselByFnr
 import no.nav.syfo.db.storePlanlagtVarsel
@@ -50,6 +49,17 @@ object VarselSenderSpek : Spek({
         LocalDateTime.now(),
     )
 
+    val aktivitetskravVarsel = PPlanlagtVarsel(
+        UUID.randomUUID().toString(),
+        arbeidstakerFnr1,
+        orgnummer,
+        null,
+        AKTIVITETSKRAV.name,
+        LocalDate.now(),
+        LocalDateTime.now(),
+        LocalDateTime.now(),
+    )
+
     describe("VarselSenderSpek") {
         afterEachTest {
             embeddedDatabase.connection.dropData()
@@ -67,9 +77,14 @@ object VarselSenderSpek : Spek({
                 merVeiledningVarselFinder,
                 ToggleEnv(false, true, true, false, false, true),
             )
-            val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
+            val planlagtVarselToStore =
+                PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
 
-            coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(merVeiledningVarsel)
+            coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(
+                merVeiledningVarsel,
+            )
+            coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(any()) } returns true
+            coEvery { merVeiledningVarselFinder.isBrukerYngre67Ar(any()) } returns true
 
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
 
@@ -86,7 +101,14 @@ object VarselSenderSpek : Spek({
                 sendVarselService,
                 aktivitetskravVarselFinder,
                 merVeiledningVarselFinder,
-                ToggleEnv(false, false, true, false, false, true),
+                ToggleEnv(
+                    false,
+                    false,
+                    true,
+                    false,
+                    false,
+                    true,
+                ),
             )
             val planlagtVarselToStore =
                 PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, emptySet(), MER_VEILEDNING)
@@ -98,12 +120,17 @@ object VarselSenderSpek : Spek({
             coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(
                 merVeiledningVarsel,
             )
+            coEvery { aktivitetskravVarselFinder.findAktivitetskravVarslerToSendToday() } returns listOf(
+                aktivitetskravVarsel,
+            )
+            coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(any()) } returns true
+            coEvery { merVeiledningVarselFinder.isBrukerYngre67Ar(any()) } returns true
+
             sendVarselJobb.testSendVarsler()
             sendVarselService.testSendVarsel()
 
             embeddedDatabase.skalHaPlanlagtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
             embeddedDatabase.skalIkkeHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
-
             embeddedDatabase.skalIkkeHaPlanlagtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
             embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
         }
@@ -116,13 +143,19 @@ object VarselSenderSpek : Spek({
                 merVeiledningVarselFinder,
                 ToggleEnv(false, true, false, false, false, true),
             )
-            val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
-            val planlagtVarselToStore2 = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), AKTIVITETSKRAV)
+            val planlagtVarselToStore =
+                PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
+            val planlagtVarselToStore2 =
+                PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), AKTIVITETSKRAV)
 
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
 
-            coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(merVeiledningVarsel)
+            coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(
+                merVeiledningVarsel,
+            )
+            coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(any()) } returns true
+            coEvery { merVeiledningVarselFinder.isBrukerYngre67Ar(any()) } returns true
 
             sendVarselJobb.testSendVarsler()
             sendVarselService.testSendVarsel()
@@ -144,11 +177,16 @@ object VarselSenderSpek : Spek({
                 merVeiledningVarselFinder,
                 ToggleEnv(true, false, true, false, false, true),
             )
-            val planlagtVarselToStore = PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
+            val planlagtVarselToStore =
+                PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
 
-            coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(merVeiledningVarsel)
+            coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(
+                merVeiledningVarsel,
+            )
             coEvery { sendVarselService.sendVarsel(any()) } returns UTSENDING_FEILET
+            coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(any()) } returns true
+            coEvery { merVeiledningVarselFinder.isBrukerYngre67Ar(any()) } returns true
 
             sendVarselJobb.testSendVarsler()
             sendVarselService.testSendVarsel()
