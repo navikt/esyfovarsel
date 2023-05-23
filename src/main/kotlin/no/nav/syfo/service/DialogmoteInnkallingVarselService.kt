@@ -1,7 +1,6 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.*
-import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
@@ -24,7 +23,6 @@ class DialogmoteInnkallingVarselService(
     val EMAIL_TITLE_KEY = "emailTitle"
     val EMAIL_BODY_KEY = "emailBody"
     private val log = LoggerFactory.getLogger(DialogmoteInnkallingVarselService::class.qualifiedName)
-    private val objectMapper = createObjectMapper()
 
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}")
@@ -34,7 +32,7 @@ class DialogmoteInnkallingVarselService(
     }
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
-        val url = URL(dialogmoterUrl + BRUKERNOTIFIKASJONER_DIALOGMOTE_SYKMELDT_URL)
+        val url = URL("$dialogmoterUrl/sykmeldt/moteinnkalling")
         val text = getArbeidstakerVarselText(varselHendelse.type)
         val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
         val jounalpostData = dataToVarselDataJournalpost(varselHendelse.data)

@@ -155,6 +155,7 @@ class SendVarselService(
         merVeiledningVarselService.sendVarselTilArbeidstaker(
             ArbeidstakerHendelse(
                 HendelseType.SM_MER_VEILEDNING,
+                false,
                 null,
                 pPlanlagtVarsel.fnr,
                 null,

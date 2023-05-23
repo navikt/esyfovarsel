@@ -50,6 +50,7 @@ object MikrofrontendServiceSpek : Spek({
 
         val arbeidstakerHendelseDialogmoteInnkalt = ArbeidstakerHendelse(
             type = HendelseType.SM_DIALOGMOTE_INNKALT,
+            ferdigstill = false,
             data = dataTidspunktTomorrow,
             arbeidstakerFnr = arbeidstakerFnr1,
             orgnummer = orgnummer1

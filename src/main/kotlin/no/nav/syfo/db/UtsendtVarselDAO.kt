@@ -45,7 +45,8 @@ fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
         type,
         kanal,
         utsendt_tidspunkt,
-        ekstern_ref) VALUES (?, ?, ?, ?, ?, ?, ?,?)""".trimIndent()
+        ekstern_ref,
+        arbeidsgivernotifikasjon_merkelapp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""".trimIndent()
 
     connection.use { connection ->
         connection.prepareStatement(insertStatement).use {
@@ -57,6 +58,7 @@ fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
             it.setString(6, PUtsendtVarsel.kanal)
             it.setTimestamp(7, Timestamp.valueOf(PUtsendtVarsel.utsendtTidspunkt))
             it.setString(8, PUtsendtVarsel.eksternReferanse)
+            it.setString(9, PUtsendtVarsel.arbeidsgivernotifikasjonMerkelapp)
             it.executeUpdate()
         }
 
@@ -84,6 +86,28 @@ fun DatabaseInterface.fetchUtsendtVarsel(
             it.setString(2, orgnummer)
             it.setString(3, type.name)
             it.setString(4, kanal.name)
+            it.executeQuery().toList { toPUtsendtVarsel() }
+        }
+    }
+}
+
+fun DatabaseInterface.fetchUtsendtVarsel(
+    fnr: String,
+    type: HendelseType,
+    kanal: Kanal
+): List<PUtsendtVarsel> {
+    val queryStatement = """SELECT *
+                            FROM UTSENDT_VARSEL
+                            WHERE fnr = ?
+                            AND type = ?
+                            AND kanal = ?
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, fnr)
+            it.setString(2, type.name)
+            it.setString(3, kanal.name)
             it.executeQuery().toList { toPUtsendtVarsel() }
         }
     }

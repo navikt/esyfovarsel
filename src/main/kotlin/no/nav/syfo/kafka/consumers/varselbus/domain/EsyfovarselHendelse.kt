@@ -9,11 +9,13 @@ private val objectMapper = createObjectMapper()
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
 sealed interface EsyfovarselHendelse : Serializable {
     val type: HendelseType
+    val ferdigstill: Boolean?
     var data: Any?
 }
 
 data class NarmesteLederHendelse(
     override val type: HendelseType,
+    override val ferdigstill: Boolean?,
     override var data: Any?,
     val narmesteLederFnr: String,
     val arbeidstakerFnr: String,
@@ -22,6 +24,7 @@ data class NarmesteLederHendelse(
 
 data class ArbeidstakerHendelse(
     override val type: HendelseType,
+    override val ferdigstill: Boolean?,
     override var data: Any?,
     val arbeidstakerFnr: String,
     val orgnummer: String?
@@ -31,7 +34,7 @@ data class VarselData(
     val status: VarselDataStatus? = null,
     val journalpost: VarselDataJournalpost? = null,
     val narmesteLeder: VarselDataNarmesteLeder? = null,
-    val motetidspunkt: VarselDataMotetidspunkt? = null
+    val motetidspunkt: VarselDataMotetidspunkt? = null,
 )
 
 data class VarselDataStatus(

@@ -14,12 +14,7 @@ class FysiskBrevUtsendingService(
         journalpostId: String,
     ) {
         runBlocking {
-            val bestillingsId = journalpostdistribusjonConsumer.distribuerJournalpost(journalpostId)?.bestillingsId
-
-            if (bestillingsId == null) {
-                log.error("Forsøkte å sende til print, men noe gikk galt, bestillingsId er null, varsel med UUID: $uuid, journalpostId: $journalpostId")
-                throw RuntimeException("Bestillingsid er null")
-            }
+            val bestillingsId = journalpostdistribusjonConsumer.distribuerJournalpost(journalpostId, uuid).bestillingsId
             log.info("Sendte til print, bestillingsId er $bestillingsId, varsel med UUID: $uuid")
         }
     }
