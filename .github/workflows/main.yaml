@@ -9,6 +9,10 @@ jobs:
   build:
     name: Checkout code and create docker tag
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
     env:
       ORG_GRADLE_PROJECT_githubUser: x-access-token
       ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}    
@@ -38,17 +42,15 @@ jobs:
       - name: Build jar
         run: |
           ./gradlew shadowJar -x test
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+      - name: Build and push docker image
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and publish Docker image
-        run: |
-          docker build --tag ${IMAGE} .
-          docker push ${IMAGE}
-          echo ${IMAGE}
+          team: team-esyfo
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+    outputs:
+      image: ${{ steps.docker-build-push.outputs.image }}
 
   deploy-dev:
     if: github.ref == 'refs/heads/master'
@@ -64,6 +66,7 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: .nais/naiserator-dev.yaml
           VARS: .nais/dev.json
+          VAR: image=${{ needs.build.outputs.image }}
       - name: Deploy jobb
         uses: nais/deploy/actions/deploy@v1
         env:
@@ -71,6 +74,7 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: .nais/job-trigger-dev.yaml
           VARS: .nais/dev.json
+          VAR: image=${{ needs.build.outputs.image }}
 
       # Notify Slack
       - name: Unsuccessful deploy notification dev
@@ -86,7 +90,7 @@ jobs:
   deploy-prod:
     if: github.ref == 'refs/heads/master'
     name: Deploy to prod
-    needs: deploy-dev
+    needs: [deploy-dev, build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -97,6 +101,7 @@ jobs:
           CLUSTER: prod-gcp
           RESOURCE: .nais/naiserator-prod.yaml
           VARS: .nais/prod.json
+          VAR: image=${{ needs.build.outputs.image }}
       - name: Deploy jobb
         uses: nais/deploy/actions/deploy@v1
         env:
@@ -104,6 +109,7 @@ jobs:
           CLUSTER: prod-gcp
           RESOURCE: .nais/job-trigger-prod.yaml
           VARS: .nais/prod.json
+          VAR: image=${{ needs.build.outputs.image }}
       - name: Deploy alerts
         uses: nais/deploy/actions/deploy@v1
         env:
