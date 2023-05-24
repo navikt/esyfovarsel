@@ -95,10 +95,16 @@ class VarselBusService(
         if (ferdigstill == true) {
             true
         } else {
-            data?.let { data ->
-                val varseldata = data.toVarselData()
-                varseldata.status?.ferdigstilt
-            } ?: false
+            try {
+                data?.let { data ->
+                    val varseldata = data.toVarselData()
+                    varseldata.status?.ferdigstilt
+                } ?: false
+            } catch (e: Exception) {
+                log.error("Data er ikke på gyldig format " + data)
+                false
+            }
+
         }
 
 }
