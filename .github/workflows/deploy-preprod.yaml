@@ -38,17 +38,15 @@ jobs:
       - name: Build jar
         run: |
           ./gradlew shadowJar -x test
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+      - name: Build and push docker image
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and publish Docker image
-        run: |
-          docker build --tag ${IMAGE} .
-          docker push ${IMAGE}
-          echo ${IMAGE}
+          team: team-esyfo
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+    outputs:
+      image: ${{ steps.docker-build-push.outputs.image }}
 
   deploy-dev:
     name: Deploy to dev
@@ -63,6 +61,7 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: .nais/naiserator-dev.yaml
           VARS: .nais/dev.json
+          VAR: image=${{ needs.build.outputs.image }}
       - name: Deploy jobb
         uses: nais/deploy/actions/deploy@v1
         env:
@@ -70,6 +69,7 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: .nais/job-trigger-dev.yaml
           VARS: .nais/dev.json
+          VAR: image=${{ needs.build.outputs.image }}
 
 
       # Notify Slack
