@@ -4,7 +4,6 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -92,19 +91,5 @@ class VarselBusService(
     }
 
     private fun EsyfovarselHendelse.skalFerdigstilles() =
-        if (ferdigstill == true) {
-            true
-        } else {
-            try {
-                data?.let { data ->
-                    val varseldata = data.toVarselData()
-                    varseldata.status?.ferdigstilt
-                } ?: false
-            } catch (e: Exception) {
-                log.error("Data er ikke på gyldig format " + data)
-                false
-            }
-
-        }
-
+        ferdigstill ?: false
 }
