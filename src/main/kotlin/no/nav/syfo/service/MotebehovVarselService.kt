@@ -5,6 +5,7 @@ import no.nav.syfo.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
+import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -45,7 +46,8 @@ class MotebehovVarselService(
             varselHendelse.arbeidstakerFnr,
             BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
             url,
-            varselHendelse
+            varselHendelse,
+            OPPGAVE
         )
     }
 
