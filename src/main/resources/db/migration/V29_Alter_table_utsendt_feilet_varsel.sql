@@ -1,3 +1,0 @@
-ALTER TABLE UTSENDING_VARSEL_FEILET
-    ALTER COLUMN feilmelding
-        TYPE varchar(1000);
