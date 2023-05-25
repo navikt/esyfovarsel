@@ -84,7 +84,7 @@ object VarselSenderSpek : Spek({
                 merVeiledningVarsel,
             )
             coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(any()) } returns true
-            coEvery { merVeiledningVarselFinder.isBrukerYngre67Ar(any()) } returns true
+            coEvery { merVeiledningVarselFinder.isBrukerYngreEnn67Ar(any()) } returns true
 
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
 
@@ -124,7 +124,7 @@ object VarselSenderSpek : Spek({
                 aktivitetskravVarsel,
             )
             coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(any()) } returns true
-            coEvery { merVeiledningVarselFinder.isBrukerYngre67Ar(any()) } returns true
+            coEvery { merVeiledningVarselFinder.isBrukerYngreEnn67Ar(any()) } returns true
 
             sendVarselJobb.testSendVarsler()
             sendVarselService.testSendVarsel()
@@ -155,7 +155,7 @@ object VarselSenderSpek : Spek({
                 merVeiledningVarsel,
             )
             coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(any()) } returns true
-            coEvery { merVeiledningVarselFinder.isBrukerYngre67Ar(any()) } returns true
+            coEvery { merVeiledningVarselFinder.isBrukerYngreEnn67Ar(any()) } returns true
 
             sendVarselJobb.testSendVarsler()
             sendVarselService.testSendVarsel()
@@ -186,7 +186,7 @@ object VarselSenderSpek : Spek({
             )
             coEvery { sendVarselService.sendVarsel(any()) } returns UTSENDING_FEILET
             coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(any()) } returns true
-            coEvery { merVeiledningVarselFinder.isBrukerYngre67Ar(any()) } returns true
+            coEvery { merVeiledningVarselFinder.isBrukerYngreEnn67Ar(any()) } returns true
 
             sendVarselJobb.testSendVarsler()
             sendVarselService.testSendVarsel()

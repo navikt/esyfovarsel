@@ -46,7 +46,7 @@ class VarselSender(
         if (!toggles.sendMerVeiledningVarslerBasedOnSisteUtbtalingDate) log.info("Utsending av  Mer veiledning med utsending basert på siste utbetaling er ikke aktivert, og varsler av denne typen blir ikke sendt via denne pathen")
 
         varslerToSendToday.forEach {
-            if (skalSendeVarsel(it) && skalVarsleBrukerPgaAlder(it)) {
+            if (isVarselToggleAkivert(it) && skalVarsleBrukerPgaAlder(it)) {
                 log.info("Sender varsel med UUID ${it.uuid}")
                 val type = sendVarselService.sendVarsel(it)
                 if (type.sendtUtenFeil()) {
@@ -80,13 +80,13 @@ class VarselSender(
         map[type] = count
     }
 
-    private fun skalSendeVarsel(it: PPlanlagtVarsel) =
+    private fun isVarselToggleAkivert(it: PPlanlagtVarsel) =
         (it.type == VarselType.MER_VEILEDNING.name && (toggles.sendMerVeiledningVarsler || toggles.sendMerVeiledningVarslerBasedOnSisteUtbtalingDate)) ||
             (it.type == VarselType.AKTIVITETSKRAV.name && toggles.sendAktivitetskravVarsler)
 
     private fun skalVarsleBrukerPgaAlder(pPlanlagtVarsel: PPlanlagtVarsel) =
         (pPlanlagtVarsel.type == VarselType.AKTIVITETSKRAV.name && aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(pPlanlagtVarsel.fnr)) ||
-            (pPlanlagtVarsel.type == VarselType.MER_VEILEDNING.name && merVeiledningVarselFinder.isBrukerYngre67Ar(pPlanlagtVarsel.fnr))
+            (pPlanlagtVarsel.type == VarselType.MER_VEILEDNING.name && merVeiledningVarselFinder.isBrukerYngreEnn67Ar(pPlanlagtVarsel.fnr))
 
     private fun String.sendtUtenFeil(): Boolean {
         return this != UTSENDING_FEILET

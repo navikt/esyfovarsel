@@ -1,6 +1,11 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.*
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
+import no.nav.syfo.DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST
+import no.nav.syfo.UrlEnv
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
@@ -72,7 +77,7 @@ class SendVarselService(
                         }
 
                         MER_VEILEDNING.name -> {
-                            if (merVeiledningVarselFinder.isBrukerYngre67Ar(fnr)) {
+                            if (merVeiledningVarselFinder.isBrukerYngreEnn67Ar(fnr)) {
                                 sendMerVeiledningVarselTilArbeidstaker(pPlanlagtVarsel, userAccessStatus)
                             }
                             pPlanlagtVarsel.type
