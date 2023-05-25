@@ -4,9 +4,6 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
@@ -24,6 +21,9 @@ import no.nav.syfo.testutil.mocks.orgnummer
 import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 object MerVeiledningVarselFinderSpek : Spek({
 
@@ -64,8 +64,7 @@ object MerVeiledningVarselFinderSpek : Spek({
         korrelasjonsId = UUID.randomUUID().toString(),
     )
 
-
-    //The default timeout of 10 seconds is not sufficient to initialise the embedded database
+    // The default timeout of 10 seconds is not sufficient to initialise the embedded database
     defaultTimeout = 20000L
 
     describe("MerVeiledningVarselFinderSpek") {
@@ -79,7 +78,7 @@ object MerVeiledningVarselFinderSpek : Spek({
         }
 
         it("Should send MER_VEILEDNING when it was not sent during past 3 months") {
-            coEvery { pdlConsumerMockk.isBrukerYngreEnn67(any()) } returns true
+            coEvery { pdlConsumerMockk.isBrukerYngreEnnGittMaxAlder(any(), any()) } returns true
             coEvery { sykmeldingServiceMockk.isPersonSykmeldtPaDato(LocalDate.now(), arbeidstakerFnr1) } returns true
             embeddedDatabase.storeUtsendtVarsel(getUtsendtVarselToStore(LocalDateTime.now().minusMonths(5)))
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
@@ -92,7 +91,7 @@ object MerVeiledningVarselFinderSpek : Spek({
         }
 
         it("Should not send MER_VEILEDNING when it was sent during past 3 months") {
-            coEvery { pdlConsumerMockk.isBrukerYngreEnn67(any()) } returns true
+            coEvery { pdlConsumerMockk.isBrukerYngreEnnGittMaxAlder(any(), any()) } returns true
             coEvery { sykmeldingServiceMockk.isPersonSykmeldtPaDato(LocalDate.now(), arbeidstakerFnr1) } returns true
             embeddedDatabase.storeUtsendtVarsel(getUtsendtVarselToStore(LocalDateTime.now().minusMonths(1)))
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
@@ -105,7 +104,7 @@ object MerVeiledningVarselFinderSpek : Spek({
         }
 
         it("Should not send MER_VEILEDNING when it was not sent during past 3 months, but user is not active sykmeldt") {
-            coEvery { pdlConsumerMockk.isBrukerYngreEnn67(any()) } returns true
+            coEvery { pdlConsumerMockk.isBrukerYngreEnnGittMaxAlder(any(), any()) } returns true
             coEvery { sykmeldingServiceMockk.isPersonSykmeldtPaDato(LocalDate.now(), arbeidstakerFnr1) } returns false
             embeddedDatabase.storeUtsendtVarsel(getUtsendtVarselToStore(LocalDateTime.now().minusMonths(1)))
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
@@ -118,7 +117,7 @@ object MerVeiledningVarselFinderSpek : Spek({
         }
 
         it("Should send MER_VEILEDNING when user is under 67") {
-            coEvery { pdlConsumerMockk.isBrukerYngreEnn67(any()) } returns true
+            coEvery { pdlConsumerMockk.isBrukerYngreEnnGittMaxAlder(any(), any()) } returns true
             coEvery { sykmeldingServiceMockk.isPersonSykmeldtPaDato(LocalDate.now(), arbeidstakerFnr1) } returns true
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
 
@@ -130,7 +129,7 @@ object MerVeiledningVarselFinderSpek : Spek({
         }
 
         it("Should not send MER_VEILEDNING when user is over 67") {
-            coEvery { pdlConsumerMockk.isBrukerYngreEnn67(any()) } returns false
+            coEvery { pdlConsumerMockk.isBrukerYngreEnnGittMaxAlder(any(), any()) } returns false
             coEvery { sykmeldingServiceMockk.isPersonSykmeldtPaDato(LocalDate.now(), arbeidstakerFnr1) } returns true
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
 
@@ -150,7 +149,7 @@ object MerVeiledningVarselFinderSpek : Spek({
                 merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
             }
 
-            coVerify(exactly = 1) { pdlConsumerMockk.isBrukerYngreEnn67(arbeidstakerFnr1) }
+            coVerify(exactly = 1) { pdlConsumerMockk.isBrukerYngreEnnGittMaxAlder(arbeidstakerFnr1, 67) }
         }
 
         it("Should not call PDL if stored birthdate is not null") {
@@ -158,7 +157,7 @@ object MerVeiledningVarselFinderSpek : Spek({
             coEvery { sykmeldingServiceMockk.isPersonSykmeldtPaDato(LocalDate.now(), arbeidstakerFnr2) } returns true
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel2)
 
-            coVerify(exactly = 0) { pdlConsumerMockk.isBrukerYngreEnn67(arbeidstakerFnr1) }
+            coVerify(exactly = 0) { pdlConsumerMockk.isBrukerYngreEnnGittMaxAlder(arbeidstakerFnr1, 67) }
         }
     }
 })
@@ -179,4 +178,3 @@ private fun getUtsendtVarselToStore(utsendtTidspunkt: LocalDateTime): PUtsendtVa
         null
     )
 }
-

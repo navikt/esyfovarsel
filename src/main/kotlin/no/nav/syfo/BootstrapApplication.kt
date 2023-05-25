@@ -16,8 +16,6 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.engine.stop
 import io.ktor.server.netty.Netty
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -57,6 +55,8 @@ import no.nav.syfo.service.*
 import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.utils.LeaderElection
 import no.nav.syfo.utils.RunOnElection
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 data class ApplicationState(var running: Boolean = false, var initialized: Boolean = false)
 
@@ -88,7 +88,7 @@ fun main() {
                 val arbeidsgiverNotifikasjonService = ArbeidsgiverNotifikasjonService(
                     arbeidsgiverNotifikasjonProdusent,
                     narmesteLederService,
-                    env.urlEnv.baseUrlDineSykmeldte
+                    env.urlEnv.baseUrlDineSykmeldte,
                 )
                 val journalpostdistribusjonConsumer = JournalpostdistribusjonConsumer(env.urlEnv, azureAdTokenConsumer)
                 val dokarkivConsumer = DokarkivConsumer(env.urlEnv, azureAdTokenConsumer)
@@ -140,7 +140,7 @@ fun main() {
                     syketilfellebitService,
                     env.urlEnv,
                     pdfgenConsumer,
-                    dokarkivService
+                    dokarkivService,
                 )
                 val mikrofrontendService = MikrofrontendService(minSideMicrofrontendKafkaProducer, database)
 
@@ -150,7 +150,7 @@ fun main() {
                         motebehovVarselService,
                         oppfolgingsplanVarselService,
                         dialogmoteInnkallingVarselService,
-                        mikrofrontendService
+                        mikrofrontendService,
                     )
 
                 val veilederTilgangskontrollConsumer =
@@ -187,13 +187,13 @@ fun main() {
                         sykepengerMaxDateService,
                     )
                 }
-            }
+            },
         )
 
         Runtime.getRuntime().addShutdownHook(
             Thread {
                 server.stop(10, 10, TimeUnit.SECONDS)
-            }
+            },
         )
 
         server.start(wait = false)
@@ -228,6 +228,16 @@ fun Application.serverModule(
     pdlConsumer: PdlConsumer,
     veilederTilgangskontrollConsumer: VeilederTilgangskontrollConsumer,
 ) {
+    val merVeiledningVarselFinder = MerVeiledningVarselFinder(
+        database,
+        sykmeldingService,
+        pdlConsumer,
+    )
+
+    val aktivitetskravVarselFinder = AktivitetskravVarselFinder(
+        database,
+        pdlConsumer,
+    )
 
     val sendVarselService =
         SendVarselService(
@@ -238,17 +248,14 @@ fun Application.serverModule(
             arbeidsgiverNotifikasjonService,
             merVeiledningVarselService,
             sykmeldingService,
+            aktivitetskravVarselFinder,
+            merVeiledningVarselFinder,
         )
-
-    val merVeiledningVarselFinder = MerVeiledningVarselFinder(
-        database,
-        sykmeldingService,
-        pdlConsumer,
-    )
 
     val varselSender = VarselSender(
         database,
         sendVarselService,
+        aktivitetskravVarselFinder,
         merVeiledningVarselFinder,
         env.toggleEnv,
     )
@@ -279,7 +286,7 @@ fun Application.serverModule(
             replanleggingService,
             sykepengerMaxDateService,
             veilederTilgangskontrollConsumer,
-            env.authEnv
+            env.authEnv,
         )
     }
 
@@ -290,7 +297,7 @@ fun Application.serverModule(
             replanleggingService,
             sykepengerMaxDateService,
             veilederTilgangskontrollConsumer,
-            env.authEnv
+            env.authEnv,
         )
     }
 
@@ -316,7 +323,7 @@ fun Application.kafkaModule(
                 state,
                 SyketilfelleKafkaConsumer(env, accessControlService, database)
                     .addPlanner(merVeiledningVarselPlanner)
-                    .addPlanner(aktivitetskravVarselPlanner)
+                    .addPlanner(aktivitetskravVarselPlanner),
             )
         }
 
@@ -324,7 +331,7 @@ fun Application.kafkaModule(
             launch(backgroundTasksContext) {
                 launchKafkaListener(
                     state,
-                    InfotrygdKafkaConsumer(env, sykepengerMaxDateService)
+                    InfotrygdKafkaConsumer(env, sykepengerMaxDateService),
                 )
             }
         }
@@ -333,7 +340,7 @@ fun Application.kafkaModule(
             launch(backgroundTasksContext) {
                 launchKafkaListener(
                     state,
-                    UtbetalingKafkaConsumer(env, sykepengerMaxDateService)
+                    UtbetalingKafkaConsumer(env, sykepengerMaxDateService),
                 )
             }
         }
@@ -341,7 +348,7 @@ fun Application.kafkaModule(
         launch(backgroundTasksContext) {
             launchKafkaListener(
                 state,
-                VarselBusKafkaConsumer(env, varselbusService)
+                VarselBusKafkaConsumer(env, varselbusService),
             )
         }
     }

@@ -1,6 +1,9 @@
 package no.nav.syfo.utils
 
-import java.time.*
+import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.Period
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 private const val BREV_DATE_FORMAT_PATTERN = "dd. MMMM yyyy"
@@ -36,11 +39,10 @@ fun formatDateForLetter(date: LocalDate): String {
     return date.format(DateTimeFormatter.ofPattern(BREV_DATE_FORMAT_PATTERN))
 }
 
-fun isFodselsdatoMindreEnn67Ar(fodselsdato: String?): Boolean {
-    val parsedFodselsdato = fodselsdato?.let { parsePDLDate(it) }
-    val isFodselsdatoMindreEnn67Ar = parsedFodselsdato == null || (Period.between(parsedFodselsdato, LocalDate.now()).years < 67)
+fun isAlderMindreEnnGittAr(fodselsdato: String, maxAlder: Int): Boolean {
+    val parsedFodselsdato = fodselsdato.let { parsePDLDate(it) }
 
-    return isFodselsdatoMindreEnn67Ar
+    return Period.between(parsedFodselsdato, LocalDate.now()).years < maxAlder
 }
 
 fun norwegianOffsetDateTime() = OffsetDateTime.now(ZoneId.of("Europe/Oslo"))

@@ -1,10 +1,11 @@
 package no.nav.syfo.service
 
-import java.net.URL
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.util.*
-import no.nav.syfo.*
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
+import no.nav.syfo.DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST
+import no.nav.syfo.UrlEnv
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
@@ -17,6 +18,10 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProdu
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.URL
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.util.*
 
 class SendVarselService(
     val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,
@@ -26,6 +31,8 @@ class SendVarselService(
     val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
     val merVeiledningVarselService: MerVeiledningVarselService,
     val sykmeldingService: SykmeldingService,
+    val aktivitetskravVarselFinder: AktivitetskravVarselFinder,
+    val merVeiledningVarselFinder: MerVeiledningVarselFinder,
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.SendVarselService")
 
@@ -46,29 +53,33 @@ class SendVarselService(
                 if (userSkalVarsles(pPlanlagtVarsel.type, userAccessStatus)) {
                     when (pPlanlagtVarsel.type) {
                         AKTIVITETSKRAV.name -> {
-                            val sykmeldingStatus =
-                                sykmeldingService.checkSykmeldingStatusForVirksomhet(
-                                    pPlanlagtVarsel.utsendingsdato,
-                                    fnr,
-                                    orgnummer
-                                )
+                            if (aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(fnr)) {
+                                val sykmeldingStatus =
+                                    sykmeldingService.checkSykmeldingStatusForVirksomhet(
+                                        pPlanlagtVarsel.utsendingsdato,
+                                        fnr,
+                                        orgnummer,
+                                    )
 
-                            sendVarselTilSykmeldt(fnr, uuid, varselContent, varselUrl)
+                                sendVarselTilSykmeldt(fnr, uuid, varselContent, varselUrl)
 
-                            if (sykmeldingStatus.sendtArbeidsgiver) {
-                                sendAktivitetskravVarselTilArbeidsgiver(
-                                    uuid,
-                                    fnr,
-                                    orgnummer!!
-                                )
-                            } else {
-                                log.info("Sender ikke varsel om aktivitetskrav til AG da sykmelding ikke er sendt AG")
+                                if (sykmeldingStatus.sendtArbeidsgiver) {
+                                    sendAktivitetskravVarselTilArbeidsgiver(
+                                        uuid,
+                                        fnr,
+                                        orgnummer!!,
+                                    )
+                                } else {
+                                    log.info("Sender ikke varsel om aktivitetskrav til AG da sykmelding ikke er sendt AG")
+                                }
                             }
                             pPlanlagtVarsel.type
                         }
 
                         MER_VEILEDNING.name -> {
-                            sendMerVeiledningVarselTilArbeidstaker(pPlanlagtVarsel, userAccessStatus)
+                            if (merVeiledningVarselFinder.isBrukerYngreEnn67Ar(fnr)) {
+                                sendMerVeiledningVarselTilArbeidstaker(pPlanlagtVarsel, userAccessStatus)
+                            }
                             pPlanlagtVarsel.type
                         }
 
@@ -90,7 +101,7 @@ class SendVarselService(
     }
 
     private fun userSkalVarsles(varselType: String, userAccessStatus: UserAccessStatus): Boolean {
-        log.info("[${varselType}] - userAccessStatus.canUserBeDigitallyNotified: ${userAccessStatus.canUserBeDigitallyNotified} | userAccessStatus.canUserBePhysicallyNotified: ${userAccessStatus.canUserBePhysicallyNotified}")
+        log.info("[$varselType] - userAccessStatus.canUserBeDigitallyNotified: ${userAccessStatus.canUserBeDigitallyNotified} | userAccessStatus.canUserBePhysicallyNotified: ${userAccessStatus.canUserBePhysicallyNotified}")
         return when (varselType) {
             AKTIVITETSKRAV.name -> {
                 userAccessStatus.canUserBeDigitallyNotified
@@ -121,7 +132,7 @@ class SendVarselService(
             oppgavetype = DineSykmeldteHendelseType.AKTIVITETSKRAV.toString(),
             lenke = null,
             tekst = DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST,
-            utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE_AKTIVITETSKRAV)
+            utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE_AKTIVITETSKRAV),
         )
 
         dineSykmeldteHendelseKafkaProducer.sendVarsel(dineSykmeldteVarsel)
@@ -137,8 +148,8 @@ class SendVarselService(
                 ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT,
                 ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE,
                 ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY,
-                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE_AKTIVITETSKRAV)
-            )
+                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE_AKTIVITETSKRAV),
+            ),
         )
     }
 
@@ -152,10 +163,10 @@ class SendVarselService(
                 false,
                 null,
                 pPlanlagtVarsel.fnr,
-                null
+                null,
             ),
             pPlanlagtVarsel.uuid,
-            userAccessStatus
+            userAccessStatus,
         )
     }
 
