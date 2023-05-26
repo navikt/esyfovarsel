@@ -61,11 +61,15 @@ class VarselBusService(
     }
 
     fun processVarselHendelseAsMinSideMicrofrontendEvent(event: EsyfovarselHendelse) {
-        val arbeidstakerHendelse = event.toArbeidstakerHendelse()
-        log.info("Processing event ${arbeidstakerHendelse.arbeidstakerFnr}:${arbeidstakerHendelse.type}:${arbeidstakerHendelse.ferdigstill}.")
-        try {
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelse)
-        } catch (e: RuntimeException) { log.error("Fikk feil under oppdatering av mikrofrontend state: ${e.message}", e) }
+        if (event.isArbeidstakerHendelse()) {
+            val arbeidstakerHendelse = event.toArbeidstakerHendelse()
+            log.info("Processing event ${arbeidstakerHendelse.arbeidstakerFnr}:${arbeidstakerHendelse.type}:${arbeidstakerHendelse.ferdigstill}.")
+            try {
+                mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelse)
+            } catch (e: RuntimeException) {
+                log.error("Fikk feil under oppdatering av mikrofrontend state: ${e.message}", e)
+            }
+        }
     }
 
     private fun EsyfovarselHendelse.toNarmestelederHendelse(): NarmesteLederHendelse {
