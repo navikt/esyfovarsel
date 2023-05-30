@@ -18,7 +18,6 @@ class VarselBusService(
     fun processVarselHendelse(
         varselHendelse: EsyfovarselHendelse
     ) {
-        log.info("Behandler varsel av type ${varselHendelse.type}")
         if (varselHendelse.skalFerdigstilles()) {
             ferdigstillVarsel(varselHendelse)
         } else {
@@ -63,7 +62,7 @@ class VarselBusService(
     fun processVarselHendelseAsMinSideMicrofrontendEvent(event: EsyfovarselHendelse) {
         if (event.isArbeidstakerHendelse()) {
             val arbeidstakerHendelse = event.toArbeidstakerHendelse()
-            log.info("Processing event ${arbeidstakerHendelse.arbeidstakerFnr}:${arbeidstakerHendelse.type}:${arbeidstakerHendelse.ferdigstill}.")
+            log.info("Processing MF event ${arbeidstakerHendelse.arbeidstakerFnr}:${arbeidstakerHendelse.type}:${arbeidstakerHendelse.ferdigstill}.")
             try {
                 mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelse)
             } catch (e: RuntimeException) {
