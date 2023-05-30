@@ -80,7 +80,6 @@ class MikrofrontendDialogmoteService(
             if (userHasExistingMBEntries) {
                 setExpiryDateForMikrofrontendUser(hendelse)
             } else {
-                storeMikrofrontendSynlighetEntryInDb(hendelse)
                 return minSideRecordEnabled(hendelse.arbeidstakerFnr)
             }
         } else {
