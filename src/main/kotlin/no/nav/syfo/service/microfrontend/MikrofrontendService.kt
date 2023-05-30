@@ -79,6 +79,7 @@ class MikrofrontendService(
         when (this) {
             HendelseType.SM_DIALOGMOTE_INNKALT,
             HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
+            HendelseType.SM_DIALOGMOTE_LEST,
             HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
             HendelseType.SM_DIALOGMOTE_REFERAT,
             HendelseType.SM_DIALOGMOTE_AVLYST -> Tjeneste.DIALOGMOTE
