@@ -111,7 +111,7 @@ class MikrofrontendDialogmoteService(
         if (existingDM) {
             when (hendelseType) {
                 HendelseType.SM_DIALOGMOTE_INNKALT -> throw VeilederAlreadyBookedMeetingException()
-                HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV -> throw MotebehovAfterBookingException()
+                HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV -> if (!ferdigstill) throw MotebehovAfterBookingException() else return
                 else -> return
             }
         }
