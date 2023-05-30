@@ -25,7 +25,6 @@ class MikrofrontendDialogmoteService(
     }
 
     fun updateDialogmoteFrontendForUserByHendelse(hendelse: ArbeidstakerHendelse): MinSideRecord? {
-        log.info("PROCESSING: ${hendelse.type}:${hendelse.ferdigstill}:${hendelse.arbeidstakerFnr}")
         return when (hendelse.type) {
             HendelseType.SM_DIALOGMOTE_NYTT_TID_STED -> setNewDateForMikrofrontendUser(hendelse)
             HendelseType.SM_DIALOGMOTE_AVLYST,
@@ -62,7 +61,7 @@ class MikrofrontendDialogmoteService(
 
     private fun setMikrofrontendSynlighet(hendelse: ArbeidstakerHendelse): MinSideRecord? {
         if (hendelse.ferdigstill == null) {
-            log.warn("MF event has null value in 'ferdigstill'-field. Assuming 'false'-value")
+            log.warn("MF event ${hendelse.type} has null value in 'ferdigstill'-field. Assuming 'false'-value")
         }
         val ferdigstill = hendelse.ferdigstill ?: false
 
