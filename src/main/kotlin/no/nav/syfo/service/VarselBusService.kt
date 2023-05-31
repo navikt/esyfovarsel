@@ -48,7 +48,7 @@ class VarselBusService(
 
     fun ferdigstillVarsel(varselHendelse: EsyfovarselHendelse) {
         if (varselHendelse.isArbeidstakerHendelse()) {
-            senderFacade.ferdigstillBrukernotifkasjonVarsler(varselHendelse.toArbeidstakerHendelse())
+            senderFacade.ferdigstillArbeidstakerVarsler(varselHendelse.toArbeidstakerHendelse())
         } else {
             senderFacade.ferdigstillDineSykmeldteVarsler(
                 varselHendelse.toNarmestelederHendelse()

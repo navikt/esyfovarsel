@@ -16,6 +16,9 @@ const val BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST = "Dialogmøtet me
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST = "Du har mottatt et referat fra dialogmøte"
 const val BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT = "Du har en oppfølgingsplan som venter på godkjenning av deg"
 
+const val DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT = "Snart slutt på sykepengene"
+const val DITT_SYKEFRAVAER_DIALOGMOTE_SVAR_MOTEBEHOV_MESSAGE_TEXT = "Du har en ny forespørsel om behov for dialogmøte"
+
 const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP = "Oppfølging"
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP = "Dialogmøte"
 const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT = "En av dine medarbeidere har snart vært sykmeldt i åtte uker"
@@ -32,8 +35,6 @@ const val ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY = "<body>Hei.<br>\n
         "Har du spørsmål, kan du kontakte oss på 55 55 33 36.<br>\n" +
         "Vennlig hilsen NAV<br>\n" +
         "Du kan ikke svare på denne meldingen.</body>"
-
-const val DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT = "Snart slutt på sykepengene"
 
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_MESSAGE_TEXT = "Du er innkalt til dialogmøte - vi trenger svaret ditt"
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_TITLE = "Innkalling til dialogmøte med NAV"

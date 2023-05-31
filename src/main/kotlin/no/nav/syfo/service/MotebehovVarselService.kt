@@ -7,6 +7,10 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
+import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
+import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
+import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
+import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
@@ -15,13 +19,17 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
 
+const val DITT_SYKEFRAVAER_HENDELSE_TYPE_DIALOGMOTE_SVAR_MOTEBEHOV = "ESYFOVARSEL_DIALOGMOTE_SVAR_MOTEBEHOV"
+
 class MotebehovVarselService(
     val senderFacade: SenderFacade,
-    val dialogmoterUrl: String,
+    dialogmoterUrl: String,
     val sykmeldingService: SykmeldingService,
 ) {
     val WEEKS_BEFORE_DELETE = 4L
     private val log: Logger = LoggerFactory.getLogger(MotebehovVarselService::class.qualifiedName)
+    private val svarMotebehovUrl: String = "$dialogmoterUrl/sykmeldt/motebehov/svar"
+
 
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         runBlocking {
@@ -40,15 +48,8 @@ class MotebehovVarselService(
     }
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
-        val url = URL("$dialogmoterUrl/sykmeldt/motebehov/svar")
-        senderFacade.sendTilBrukernotifikasjoner(
-            UUID.randomUUID().toString(),
-            varselHendelse.arbeidstakerFnr,
-            BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
-            url,
-            varselHendelse,
-            OPPGAVE,
-        )
+        sendVarselTilBrukernotifikasjoner(varselHendelse)
+        sendOppgaveTilDittSykefravaer(varselHendelse)
     }
 
     private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
@@ -79,5 +80,41 @@ class MotebehovVarselService(
             utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
         )
         senderFacade.sendTilDineSykmeldte(varselHendelse, dineSykmeldteVarsel)
+    }
+
+    private fun sendVarselTilBrukernotifikasjoner(varselHendelse: ArbeidstakerHendelse) {
+        val url = URL(svarMotebehovUrl)
+        senderFacade.sendTilBrukernotifikasjoner(
+            UUID.randomUUID().toString(),
+            varselHendelse.arbeidstakerFnr,
+            BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
+            url,
+            varselHendelse,
+            OPPGAVE,
+        )
+    }
+
+    private fun sendOppgaveTilDittSykefravaer(
+        arbeidstakerHendelse: ArbeidstakerHendelse
+    ) {
+        val melding = DittSykefravaerMelding(
+            OpprettMelding(
+                DITT_SYKEFRAVAER_DIALOGMOTE_SVAR_MOTEBEHOV_MESSAGE_TEXT,
+                svarMotebehovUrl,
+                Variant.INFO,
+                true,
+                DITT_SYKEFRAVAER_HENDELSE_TYPE_DIALOGMOTE_SVAR_MOTEBEHOV,
+                OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE).toInstant(),
+            ),
+            null,
+            arbeidstakerHendelse.arbeidstakerFnr,
+        )
+        senderFacade.sendTilDittSykefravaer(
+            arbeidstakerHendelse,
+            DittSykefravaerVarsel(
+                UUID.randomUUID().toString(),
+                melding,
+            )
+        )
     }
 }

@@ -5,10 +5,12 @@ import no.nav.syfo.kafka.common.JacksonKafkaSerializer
 import no.nav.syfo.kafka.common.producerProperties
 import no.nav.syfo.kafka.common.topicDittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
+import no.nav.syfo.kafka.producers.dittsykefravaer.domain.LukkMelding
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
-import java.util.UUID
+import java.time.Instant
+import java.util.*
 
 class DittSykefravaerMeldingKafkaProducer(
     val env: Environment
@@ -29,5 +31,19 @@ class DittSykefravaerMeldingKafkaProducer(
             )
         ).get()
         return uuid
+    }
+
+    fun ferdigstillMelding(eksternReferanse: String, fnr: String) {
+        kafkaProducer.send(
+            ProducerRecord(
+                topicDittSykefravaerMelding,
+                eksternReferanse,
+                DittSykefravaerMelding(
+                    null,
+                    LukkMelding(Instant.now()),
+                    fnr
+                )
+            )
+        ).get()
     }
 }
