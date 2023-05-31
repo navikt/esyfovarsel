@@ -5,6 +5,7 @@ import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 import java.time.Month.DECEMBER
 import java.time.Month.NOVEMBER
+import java.util.Calendar.MAY
 import kotlin.test.assertEquals
 
 object GjenstaendeSykepengedagerSpek : Spek({
@@ -34,5 +35,10 @@ object GjenstaendeSykepengedagerSpek : Spek({
             assertEquals(0, ubetTomDate.gjenstaendeSykepengedager(maxDate))
         }
 
+        it("Should handle when other date is in the past") {
+            val maxDate = LocalDate.of(2023, MAY, 15)
+            val ubetTomDate = LocalDate.of(2023, MAY, 16)
+            assertEquals(0, ubetTomDate.gjenstaendeSykepengedager(maxDate))
+        }
     }
 })
