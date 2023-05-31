@@ -75,7 +75,7 @@ fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
             HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV
         )
     ) throw IllegalArgumentException(
-        "${eventType.name} er ikke gyldig hendelse for å hente ut" +
+        "${eventType.name} er ikke gyldig hendelse for å hente ut " +
             "'synligTom'-felt"
     )
     return if (eventType != HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV) this.motetidspunkt() else null
