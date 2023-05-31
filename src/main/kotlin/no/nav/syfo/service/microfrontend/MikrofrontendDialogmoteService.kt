@@ -41,22 +41,22 @@ class MikrofrontendDialogmoteService(
     }
 
     private fun setNewDateForMikrofrontendUser(hendelse: ArbeidstakerHendelse): MinSideRecord? {
-        database.fetchMikrofrontendSynlighetEntriesByFnr(hendelse.arbeidstakerFnr)
+        return database.fetchMikrofrontendSynlighetEntriesByFnr(hendelse.arbeidstakerFnr)
             .lastOrNull { entry -> entry.tjeneste == Tjeneste.DIALOGMOTE.name }
             ?.let {
                 database.updateMikrofrontendEntrySynligTomByExistingEntry(
                     it.toMikrofrontendSynlighet(),
                     hendelse.getSynligTom()!!.toLocalDate()
                 )
+                return null
             }
             ?: run {
                 log.warn(
                     "[MIKROFRONTEND_SERVICE]: Received ${hendelse.type} from VarselBus without corresponding entry " +
                         "in MIKROFRONTEND_SYNLIGHET DB-table. Creating new entry ..."
                 )
-                storeDialogmoteMikrofrontendSynlighetEntryInDb(hendelse)
+                minSideRecordEnabled(hendelse.arbeidstakerFnr)
             }
-        return null
     }
 
     private fun setMikrofrontendSynlighet(hendelse: ArbeidstakerHendelse): MinSideRecord? {
@@ -136,16 +136,6 @@ class MikrofrontendDialogmoteService(
     private fun existingMikrofrontendEntries(fnr: String, tjeneste: Tjeneste) =
         database.fetchMikrofrontendSynlighetEntriesByFnr(fnr)
             .filter { it.tjeneste == tjeneste.name }
-
-    private fun storeDialogmoteMikrofrontendSynlighetEntryInDb(hendelse: ArbeidstakerHendelse) {
-        database.storeMikrofrontendSynlighetEntry(
-            MikrofrontendSynlighet(
-                synligFor = hendelse.arbeidstakerFnr,
-                tjeneste = Tjeneste.DIALOGMOTE,
-                synligTom = hendelse.getSynligTom()?.toLocalDate()
-            )
-        )
-    }
 
     private fun minSideRecordEnabled(fnr: String) =
         MinSideRecord(
