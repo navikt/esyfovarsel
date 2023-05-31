@@ -35,7 +35,7 @@ object GjenstaendeSykepengedagerSpek : Spek({
             assertEquals(0, ubetTomDate.gjenstaendeSykepengedager(maxDate))
         }
 
-        it("Should handle when other date is in the past") {
+        it("Should handle when other date is before this") {
             val maxDate = LocalDate.of(2023, MAY, 15)
             val ubetTomDate = LocalDate.of(2023, MAY, 16)
             assertEquals(0, ubetTomDate.gjenstaendeSykepengedager(maxDate))
