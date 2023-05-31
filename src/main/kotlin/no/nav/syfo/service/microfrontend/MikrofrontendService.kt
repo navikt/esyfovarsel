@@ -52,7 +52,6 @@ class MikrofrontendService(
         minSideRecord: MinSideRecord,
         tjeneste: Tjeneste
     ) {
-        log.info("ACTIVATE FROM ${hendelse.arbeidstakerFnr}|${hendelse.type}|${hendelse.ferdigstill}")
         storeMikrofrontendSynlighetEntryInDb(hendelse, tjeneste)
         minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(minSideRecord)
     }
@@ -62,7 +61,6 @@ class MikrofrontendService(
         minSideRecord: MinSideRecord,
         tjeneste: Tjeneste
     ) {
-        log.info("DISABLE FOR $fnr")
         minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(minSideRecord)
         database.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste(fnr, tjeneste)
     }
