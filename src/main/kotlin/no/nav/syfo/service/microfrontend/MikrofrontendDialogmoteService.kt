@@ -51,10 +51,10 @@ class MikrofrontendDialogmoteService(
             }
             ?: run {
                 log.warn(
-                    "[MIKROFRONTEND_SERVICE]: Received ${hendelse.type} from VarselBus without corresponding entry" +
+                    "[MIKROFRONTEND_SERVICE]: Received ${hendelse.type} from VarselBus without corresponding entry " +
                         "in MIKROFRONTEND_SYNLIGHET DB-table. Creating new entry ..."
                 )
-                storeMikrofrontendSynlighetEntryInDb(hendelse)
+                storeDialogmoteMikrofrontendSynlighetEntryInDb(hendelse)
             }
         return null
     }
@@ -137,7 +137,7 @@ class MikrofrontendDialogmoteService(
         database.fetchMikrofrontendSynlighetEntriesByFnr(fnr)
             .filter { it.tjeneste == tjeneste.name }
 
-    private fun storeMikrofrontendSynlighetEntryInDb(hendelse: ArbeidstakerHendelse) {
+    private fun storeDialogmoteMikrofrontendSynlighetEntryInDb(hendelse: ArbeidstakerHendelse) {
         database.storeMikrofrontendSynlighetEntry(
             MikrofrontendSynlighet(
                 synligFor = hendelse.arbeidstakerFnr,
