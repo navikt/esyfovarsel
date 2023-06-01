@@ -7,7 +7,7 @@ on:
 jobs:
   deploy-topic-to-dev:
     if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/varselbus-')
-    name: Deploy topic to  dev
+    name: Deploy topic to dev
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
