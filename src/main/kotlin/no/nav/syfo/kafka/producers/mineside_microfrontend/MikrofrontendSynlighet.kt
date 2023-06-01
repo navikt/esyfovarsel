@@ -9,5 +9,6 @@ data class MikrofrontendSynlighet(
 )
 
 enum class Tjeneste {
-    DIALOGMOTE
+    DIALOGMOTE,
+    OPPFOLGINGSPLAN
 }

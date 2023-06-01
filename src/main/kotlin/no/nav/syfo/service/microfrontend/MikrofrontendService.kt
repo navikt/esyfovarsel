@@ -24,6 +24,7 @@ class MikrofrontendService(
             Tjeneste.DIALOGMOTE -> mikrofrontendDialogmoteService.updateDialogmoteFrontendForUserByHendelse(
                 hendelse
             )
+            Tjeneste.OPPFOLGINGSPLAN -> null
         }
 
         recordToSend?.let { record ->
@@ -83,6 +84,7 @@ class MikrofrontendService(
             HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
             HendelseType.SM_DIALOGMOTE_REFERAT,
             HendelseType.SM_DIALOGMOTE_AVLYST -> Tjeneste.DIALOGMOTE
+            HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> Tjeneste.OPPFOLGINGSPLAN
             else -> throw IllegalArgumentException("$this is not a valid type for updating MF state")
         }
 }
