@@ -20,6 +20,7 @@ import no.nav.syfo.job.VarselSender
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.service.*
+import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.*
 import no.nav.syfo.util.contentNegotationFeature
@@ -126,7 +127,7 @@ object JobApiSpek : Spek({
         coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(any()) } returns true
         coEvery { merVeiledningVarselFinder.isBrukerYngreEnn67Ar(any()) } returns true
 
-        justRun { mikrofrontendService.findAndCloseExpiredDialogmoteMikrofrontends() }
+        justRun { mikrofrontendService.findAndCloseExpiredMikrofrontends() }
 
         val sendVarselService =
             SendVarselService(

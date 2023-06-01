@@ -31,6 +31,7 @@ fun Connection.dropData() {
     val query4 = "DELETE FROM SYKETILFELLEBIT"
     val query5 = "DELETE FROM SYKEPENGER_MAX_DATE"
     val query6 = "DELETE FROM UTBETALING_SPLEIS"
+    val query7 = "DELETE FROM MIKROFRONTEND_SYNLIGHET"
 
     use { connection ->
         connection.prepareStatement(query1).executeUpdate()
@@ -39,6 +40,7 @@ fun Connection.dropData() {
         connection.prepareStatement(query4).executeUpdate()
         connection.prepareStatement(query5).executeUpdate()
         connection.prepareStatement(query6).executeUpdate()
+        connection.prepareStatement(query7).executeUpdate()
         connection.commit()
     }
 }

@@ -29,15 +29,12 @@ class VarselBusKafkaConsumer(
         log.info("Started listening to topic $topicVarselBus")
         while (applicationState.running) {
             kafkaListener.poll(zeroMillis).forEach {
-                log.info("VARSEL BUS: Mottatt melding ${it.key()} fra topic")
                 try {
                     val varselEvent: EsyfovarselHendelse = objectMapper.readValue(it.value())
                     varselEvent.data = objectMapper.readTree(it.value())["data"]
-                    log.info("VARSEL BUS: Melding med UUID ${it.key()} er av type: ${varselEvent.type}")
+                    log.info("VARSEL BUS: Mottatt melding med UUID ${it.key()} av type: ${varselEvent.type}")
                     varselBusService.processVarselHendelse(varselEvent)
-                    if (env.toggleEnv.toggleMicrofrontendEnabling) {
-                        varselBusService.processVarselHendelseAsMinSideMicrofrontendEvent(varselEvent)
-                    }
+                    varselBusService.processVarselHendelseAsMinSideMicrofrontendEvent(varselEvent)
                 } catch (e: IOException) {
                     log.error(
                         "Error in [$topicVarselBus]-listener: Could not parse message | ${e.message}",

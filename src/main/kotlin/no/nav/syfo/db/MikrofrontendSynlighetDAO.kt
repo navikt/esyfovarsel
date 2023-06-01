@@ -36,8 +36,14 @@ fun DatabaseInterface.storeMikrofrontendSynlighetEntry(mikrofrontendSynlighet: M
     }
 }
 
-fun DatabaseInterface.updateMikrofrontendEntrySynligTom(
+fun DatabaseInterface.updateMikrofrontendEntrySynligTomByExistingEntry(
     entry: MikrofrontendSynlighet,
+    newSynligTom: LocalDate
+) = updateMikrofrontendEntrySynligTomByFnrAndTjeneste(entry.synligFor, entry.tjeneste, newSynligTom)
+
+fun DatabaseInterface.updateMikrofrontendEntrySynligTomByFnrAndTjeneste(
+    fnr: String,
+    tjeneste: Tjeneste,
     newSynligTom: LocalDate
 ) {
     val now = LocalDateTime.now()
@@ -51,8 +57,8 @@ fun DatabaseInterface.updateMikrofrontendEntrySynligTom(
         connection.prepareStatement(updateStatement).use {
             it.setDate(1, Date.valueOf(newSynligTom))
             it.setTimestamp(2, Timestamp.valueOf(now))
-            it.setString(3, entry.synligFor)
-            it.setString(4, entry.tjeneste.name)
+            it.setString(3, fnr)
+            it.setString(4, tjeneste.name)
             it.executeUpdate()
         }
         connection.commit()

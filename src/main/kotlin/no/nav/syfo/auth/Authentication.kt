@@ -21,7 +21,7 @@ import no.nav.syfo.api.maxdate.registerSykepengerMaxDateAzureApiV2
 import no.nav.syfo.api.maxdate.registerSykepengerMaxDateRestApi
 import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
 import no.nav.syfo.job.VarselSender
-import no.nav.syfo.service.MikrofrontendService
+import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.service.ReplanleggingService
 import no.nav.syfo.service.SykepengerMaxDateService
 import org.slf4j.Logger

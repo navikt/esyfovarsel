@@ -52,6 +52,8 @@ import no.nav.syfo.planner.AktivitetskravVarselPlanner
 import no.nav.syfo.planner.MerVeiledningVarselPlanner
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.service.*
+import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
+import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.utils.LeaderElection
 import no.nav.syfo.utils.RunOnElection
@@ -142,7 +144,8 @@ fun main() {
                     pdfgenConsumer,
                     dokarkivService,
                 )
-                val mikrofrontendService = MikrofrontendService(minSideMicrofrontendKafkaProducer, database)
+                val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(database)
+                val mikrofrontendService = MikrofrontendService(minSideMicrofrontendKafkaProducer, mikrofrontendDialogmoteService, database)
 
                 val varselBusService =
                     VarselBusService(

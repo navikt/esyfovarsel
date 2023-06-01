@@ -1,9 +1,9 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
+import no.nav.syfo.service.microfrontend.MikrofrontendService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -18,7 +18,6 @@ class VarselBusService(
     fun processVarselHendelse(
         varselHendelse: EsyfovarselHendelse
     ) {
-        log.info("Behandler varsel av type ${varselHendelse.type}")
         if (varselHendelse.skalFerdigstilles()) {
             ferdigstillVarsel(varselHendelse)
         } else {
@@ -61,15 +60,12 @@ class VarselBusService(
     }
 
     fun processVarselHendelseAsMinSideMicrofrontendEvent(event: EsyfovarselHendelse) {
-        if (event is ArbeidstakerHendelse) {
-            log.info("Toggling min-side frontend")
-            when (event.type) {
-                SM_DIALOGMOTE_INNKALT -> mikrofrontendService.enableDialogmoteFrontendForUser(event)
-                SM_DIALOGMOTE_NYTT_TID_STED -> mikrofrontendService.updateDialogmoteFrontendForUser(event)
-                SM_DIALOGMOTE_AVLYST,
-                SM_DIALOGMOTE_REFERAT -> mikrofrontendService.disableDialogmoteFrontendForUser(event)
-
-                else -> return
+        if (event.isArbeidstakerHendelse()) {
+            val arbeidstakerHendelse = event.toArbeidstakerHendelse()
+            try {
+                mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelse)
+            } catch (e: RuntimeException) {
+                log.error("Fikk feil under oppdatering av mikrofrontend state: ${e.message}", e)
             }
         }
     }

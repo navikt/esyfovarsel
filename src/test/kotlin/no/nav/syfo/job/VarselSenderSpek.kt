@@ -75,7 +75,7 @@ object VarselSenderSpek : Spek({
                 sendVarselService,
                 aktivitetskravVarselFinder,
                 merVeiledningVarselFinder,
-                ToggleEnv(false, true, true, false, false, true),
+                ToggleEnv(false, true, true, false, false),
             )
             val planlagtVarselToStore =
                 PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
@@ -107,7 +107,6 @@ object VarselSenderSpek : Spek({
                     true,
                     false,
                     false,
-                    true,
                 ),
             )
             val planlagtVarselToStore =
@@ -141,7 +140,7 @@ object VarselSenderSpek : Spek({
                 sendVarselService,
                 aktivitetskravVarselFinder,
                 merVeiledningVarselFinder,
-                ToggleEnv(false, true, false, false, false, true),
+                ToggleEnv(false, true, false, false, false),
             )
             val planlagtVarselToStore =
                 PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
@@ -175,7 +174,7 @@ object VarselSenderSpek : Spek({
                 sendVarselService,
                 aktivitetskravVarselFinder,
                 merVeiledningVarselFinder,
-                ToggleEnv(true, false, true, false, false, true),
+                ToggleEnv(true, false, true, false, false),
             )
             val planlagtVarselToStore =
                 PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
