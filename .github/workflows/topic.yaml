@@ -17,8 +17,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: .nais/topics/varselbus-topic.yaml
-          VARS: .nais/topics/dev.json
+          RESOURCE: .nais/topics/varselbus-topic-dev.yaml
 
   deploy-topic-to-prod:
     if: github.ref == 'refs/heads/master'
@@ -32,5 +31,4 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: .nais/topics/varselbus-topic.yaml
-          VARS: .nais/topics/prod.json
+          RESOURCE: .nais/topics/varselbus-topic-prod.yaml

@@ -6,7 +6,7 @@ metadata:
   labels:
     team: team-esyfo
 spec:
-  pool: {{kafkaPool}}
+  pool: nav-dev
   config:
     cleanupPolicy: delete
     minimumInSyncReplicas: 1
@@ -26,4 +26,7 @@ spec:
       access: write
     - team: teamsykefravr
       application: isdialogmote
+      access: write
+    - team: teamsykefravr
+      application: isyfomock
       access: write
