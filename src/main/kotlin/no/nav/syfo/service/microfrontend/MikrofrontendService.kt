@@ -18,6 +18,9 @@ class MikrofrontendService(
     }
 
     fun updateMikrofrontendForUserByHendelse(hendelse: ArbeidstakerHendelse) {
+        if (isNotEligableForMFProcessing(hendelse.type)) {
+            return
+        }
         val tjeneste = hendelse.type.toMikrofrontendTjenesteType()
 
         val recordToSend = when (tjeneste) {
@@ -46,6 +49,17 @@ class MikrofrontendService(
             )
         }
     }
+
+    private fun isNotEligableForMFProcessing(type: HendelseType) =
+        when (type) {
+            HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
+            HendelseType.SM_DIALOGMOTE_INNKALT,
+            HendelseType.SM_DIALOGMOTE_AVLYST,
+            HendelseType.SM_DIALOGMOTE_REFERAT,
+            HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
+            HendelseType.SM_DIALOGMOTE_LEST -> false
+            else -> true
+        }
 
     private fun enableMikrofrontendForUser(
         hendelse: ArbeidstakerHendelse,
