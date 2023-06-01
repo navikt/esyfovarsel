@@ -23,8 +23,18 @@ object MotebehovVarselServiceSpek : Spek({
             ferdigstill = false,
             data = null,
             arbeidstakerFnr = arbeidstakerFnr1,
-            orgnummer = orgnummer1,
+            orgnummer = orgnummer1
         )
+
+        it("sendVarselTilArbeidstaker should send melding to Ditt sykefravær") {
+            motebehovVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelseSvarMotebehov)
+            verify(exactly = 1) {
+                senderFacade.sendTilDittSykefravaer(
+                    any(),
+                    any()
+                )
+            }
+        }
 
         it("sendVarselTilArbeidstaker should send oppgave to brukernotifikasjoner") {
             motebehovVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelseSvarMotebehov)
