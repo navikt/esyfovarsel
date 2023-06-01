@@ -81,10 +81,8 @@ class MikrofrontendDialogmoteService(
         } else {
             if (!ferdigstill) {
                 return minSideRecordEnabled(hendelse.arbeidstakerFnr)
-            } else {
-                if (userHasExistingMBEntries) {
-                    return minSideRecordDisabled(hendelse.arbeidstakerFnr)
-                }
+            } else if (userHasExistingMBEntries) {
+                return minSideRecordDisabled(hendelse.arbeidstakerFnr)
             }
         }
         return null
