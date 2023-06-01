@@ -60,9 +60,6 @@ class MikrofrontendDialogmoteService(
     }
 
     private fun setMikrofrontendSynlighet(hendelse: ArbeidstakerHendelse): MinSideRecord? {
-        if (hendelse.ferdigstill == null) {
-            log.warn("MF event ${hendelse.type} has null value in 'ferdigstill'-field. Assuming 'false'-value")
-        }
         val ferdigstill = hendelse.ferdigstill ?: false
 
         val (userHasExistingDMEntries, userHasExistingMBEntries) =
