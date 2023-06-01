@@ -70,8 +70,6 @@ class VarselBusService(
         }
     }
 
-
-
     private fun EsyfovarselHendelse.toNarmestelederHendelse(): NarmesteLederHendelse {
         return if (this is NarmesteLederHendelse) {
             this
