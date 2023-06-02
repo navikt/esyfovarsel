@@ -23,7 +23,7 @@ object MotebehovVarselServiceSpek : Spek({
             ferdigstill = false,
             data = null,
             arbeidstakerFnr = arbeidstakerFnr1,
-            orgnummer = orgnummer1
+            orgnummer = orgnummer1,
         )
 
         it("sendVarselTilArbeidstaker should send oppgave to brukernotifikasjoner") {
@@ -35,7 +35,7 @@ object MotebehovVarselServiceSpek : Spek({
                     BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
                     any(),
                     arbeidstakerHendelseSvarMotebehov,
-                    OPPGAVE
+                    OPPGAVE,
                 )
             }
         }

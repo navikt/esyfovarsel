@@ -47,7 +47,7 @@ class MotebehovVarselService(
             BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
             url,
             varselHendelse,
-            OPPGAVE
+            OPPGAVE,
         )
     }
 
@@ -63,8 +63,8 @@ class MotebehovVarselService(
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
-                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
-            )
+                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+            ),
         )
     }
 
@@ -76,7 +76,7 @@ class MotebehovVarselService(
             oppgavetype = varselHendelse.type.toDineSykmeldteHendelseType().toString(),
             lenke = null,
             tekst = varseltekst,
-            utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
+            utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
         )
         senderFacade.sendTilDineSykmeldte(varselHendelse, dineSykmeldteVarsel)
     }
