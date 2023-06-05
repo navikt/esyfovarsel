@@ -12,11 +12,11 @@ class VarselBusService(
     val motebehovVarselService: MotebehovVarselService,
     val oppfolgingsplanVarselService: OppfolgingsplanVarselService,
     val dialogmoteInnkallingVarselService: DialogmoteInnkallingVarselService,
-    val mikrofrontendService: MikrofrontendService
+    val mikrofrontendService: MikrofrontendService,
 ) {
     private val log: Logger = LoggerFactory.getLogger(VarselBusService::class.qualifiedName)
     fun processVarselHendelse(
-        varselHendelse: EsyfovarselHendelse
+        varselHendelse: EsyfovarselHendelse,
     ) {
         if (varselHendelse.skalFerdigstilles()) {
             ferdigstillVarsel(varselHendelse)
@@ -31,13 +31,15 @@ class VarselBusService(
                 NL_DIALOGMOTE_INNKALT,
                 NL_DIALOGMOTE_AVLYST,
                 NL_DIALOGMOTE_REFERAT,
-                NL_DIALOGMOTE_NYTT_TID_STED -> dialogmoteInnkallingVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+                NL_DIALOGMOTE_NYTT_TID_STED,
+                -> dialogmoteInnkallingVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
 
                 SM_DIALOGMOTE_INNKALT,
                 SM_DIALOGMOTE_AVLYST,
                 SM_DIALOGMOTE_REFERAT,
                 SM_DIALOGMOTE_NYTT_TID_STED,
-                SM_DIALOGMOTE_LEST -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+                SM_DIALOGMOTE_LEST,
+                -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
                 else -> {
                     log.warn("Klarte ikke mappe varsel av type ${varselHendelse.type} ved behandling forsøk")
@@ -51,10 +53,10 @@ class VarselBusService(
             senderFacade.ferdigstillArbeidstakerVarsler(varselHendelse.toArbeidstakerHendelse())
         } else {
             senderFacade.ferdigstillDineSykmeldteVarsler(
-                varselHendelse.toNarmestelederHendelse()
+                varselHendelse.toNarmestelederHendelse(),
             )
             senderFacade.ferdigstillArbeidsgiverNotifikasjoner(
-                varselHendelse.toNarmestelederHendelse()
+                varselHendelse.toNarmestelederHendelse(),
             )
         }
     }
@@ -73,13 +75,17 @@ class VarselBusService(
     private fun EsyfovarselHendelse.toNarmestelederHendelse(): NarmesteLederHendelse {
         return if (this is NarmesteLederHendelse) {
             this
-        } else throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type NarmesteLederHendelse")
+        } else {
+            throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type NarmesteLederHendelse")
+        }
     }
 
     private fun EsyfovarselHendelse.toArbeidstakerHendelse(): ArbeidstakerHendelse {
         return if (this is ArbeidstakerHendelse) {
             this
-        } else throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type ArbeidstakerHendelse")
+        } else {
+            throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type ArbeidstakerHendelse")
+        }
     }
 
     private fun EsyfovarselHendelse.isArbeidstakerHendelse(): Boolean {

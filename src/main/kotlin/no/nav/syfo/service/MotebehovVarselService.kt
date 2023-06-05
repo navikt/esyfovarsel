@@ -30,7 +30,6 @@ class MotebehovVarselService(
     private val log: Logger = LoggerFactory.getLogger(MotebehovVarselService::class.qualifiedName)
     private val svarMotebehovUrl: String = "$dialogmoterUrl/sykmeldt/motebehov/svar"
 
-
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         runBlocking {
             // Quickfix for å unngå å sende varsel til bedrifter der bruker ikke er sykmeldt. Det kan skje når den sykmeldte har vært sykmeldt fra flere arbeidsforhold,
@@ -95,7 +94,7 @@ class MotebehovVarselService(
     }
 
     private fun sendOppgaveTilDittSykefravaer(
-        arbeidstakerHendelse: ArbeidstakerHendelse
+        arbeidstakerHendelse: ArbeidstakerHendelse,
     ) {
         val melding = DittSykefravaerMelding(
             OpprettMelding(
@@ -114,7 +113,7 @@ class MotebehovVarselService(
             DittSykefravaerVarsel(
                 UUID.randomUUID().toString(),
                 melding,
-            )
+            ),
         )
     }
 }

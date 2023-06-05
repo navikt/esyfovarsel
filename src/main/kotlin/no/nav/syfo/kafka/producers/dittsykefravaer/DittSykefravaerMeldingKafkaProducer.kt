@@ -13,7 +13,7 @@ import java.time.Instant
 import java.util.*
 
 class DittSykefravaerMeldingKafkaProducer(
-    val env: Environment
+    val env: Environment,
 ) {
     private val kafkaConfig = producerProperties(env).apply {
         put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
@@ -27,8 +27,8 @@ class DittSykefravaerMeldingKafkaProducer(
             ProducerRecord(
                 topicDittSykefravaerMelding,
                 uuid,
-                melding
-            )
+                melding,
+            ),
         ).get()
         return uuid
     }
@@ -41,9 +41,9 @@ class DittSykefravaerMeldingKafkaProducer(
                 DittSykefravaerMelding(
                     null,
                     LukkMelding(Instant.now()),
-                    fnr
-                )
-            )
+                    fnr,
+                ),
+            ),
         ).get()
     }
 }
