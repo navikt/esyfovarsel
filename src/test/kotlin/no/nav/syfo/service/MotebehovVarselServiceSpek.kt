@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import io.mockk.clearAllMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
@@ -18,6 +19,10 @@ object MotebehovVarselServiceSpek : Spek({
     defaultTimeout = 20000L
 
     describe("MotebehovVarselServiceSpek") {
+        afterEachTest {
+            clearAllMocks()
+        }
+
         val arbeidstakerHendelseSvarMotebehov = ArbeidstakerHendelse(
             type = HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
             ferdigstill = false,
@@ -25,6 +30,16 @@ object MotebehovVarselServiceSpek : Spek({
             arbeidstakerFnr = arbeidstakerFnr1,
             orgnummer = orgnummer1,
         )
+
+        it("sendVarselTilArbeidstaker should send melding to Ditt sykefravær") {
+            motebehovVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelseSvarMotebehov)
+            verify(exactly = 1) {
+                senderFacade.sendTilDittSykefravaer(
+                    any(),
+                    any(),
+                )
+            }
+        }
 
         it("sendVarselTilArbeidstaker should send oppgave to brukernotifikasjoner") {
             motebehovVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelseSvarMotebehov)

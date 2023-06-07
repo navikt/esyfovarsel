@@ -1,8 +1,5 @@
 package no.nav.syfo.service
 
-import java.net.URL
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.syfo.db.*
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.Kanal.*
@@ -18,6 +15,9 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaPr
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.URL
+import java.time.LocalDateTime
+import java.util.*
 
 class SenderFacade(
     private val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
@@ -52,7 +52,7 @@ class SenderFacade(
         varsel: DittSykefravaerVarsel,
     ) {
         try {
-           val eksternUUID = dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding)
+            val eksternUUID = dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding)
             lagreUtsendtArbeidstakerVarsel(DITT_SYKEFRAVAER, varselHendelse, eksternUUID)
         } catch (e: Exception) {
             log.warn("Error while sending varsel to DITT_SYKEFRAVAER: ${e.message}")
@@ -96,32 +96,6 @@ class SenderFacade(
         }
     }
 
-    fun ferdigstillBrukernotifkasjonVarsler(varselHendelse: ArbeidstakerHendelse) {
-        val fetchUtsendtVarsel = if (varselHendelse.orgnummer != null) {
-            database.fetchUtsendtVarsel(
-                varselHendelse.arbeidstakerFnr,
-                varselHendelse.orgnummer,
-                varselHendelse.type,
-                BRUKERNOTIFIKASJON
-            )
-        } else {
-            database.fetchUtsendtVarsel(
-                varselHendelse.arbeidstakerFnr,
-                varselHendelse.type,
-                BRUKERNOTIFIKASJON
-            )
-        }
-
-        val uferdigstilteVarsler = fetchUtsendtVarsel.uferdigstilteVarsler(varselHendelse.type)
-
-        for (varsel in uferdigstilteVarsler) {
-            varsel.eksternReferanse?.let {
-                brukernotifikasjonerService.ferdigstillVarsel(it, varselHendelse.arbeidstakerFnr)
-                database.setUtsendtVarselToFerdigstilt(it)
-            }
-        }
-    }
-
     fun sendTilArbeidsgiverNotifikasjon(
         varselHendelse: NarmesteLederHendelse,
         varsel: ArbeidsgiverNotifikasjonInput,
@@ -137,7 +111,7 @@ class SenderFacade(
                 varselHendelse = varselHendelse,
                 eksternReferanse = varsel.uuid.toString(),
                 feilmelding = e.message,
-                merkelapp = varsel.merkelapp
+                merkelapp = varsel.merkelapp,
             )
         }
         if (isSendingSucceed) {
@@ -146,19 +120,19 @@ class SenderFacade(
     }
 
     fun ferdigstillArbeidsgiverNotifikasjoner(
-        varselHendelse: NarmesteLederHendelse
+        varselHendelse: NarmesteLederHendelse,
     ) {
         val uferdigstilteVarsler = database.fetchUtsendtVarsel(
             varselHendelse.arbeidstakerFnr,
             varselHendelse.orgnummer,
             varselHendelse.type,
-            ARBEIDSGIVERNOTIFIKASJON
+            ARBEIDSGIVERNOTIFIKASJON,
         ).uferdigstilteVarsler(varselHendelse.type)
         for (varsel in uferdigstilteVarsler) {
             if (varsel.eksternReferanse != null && varsel.arbeidsgivernotifikasjonMerkelapp != null) {
                 arbeidsgiverNotifikasjonService.deleteNotifikasjon(
                     varsel.arbeidsgivernotifikasjonMerkelapp,
-                    varsel.eksternReferanse
+                    varsel.eksternReferanse,
                 )
                 database.setUtsendtVarselToFerdigstilt(varsel.eksternReferanse)
             } else {
@@ -172,12 +146,54 @@ class SenderFacade(
             varselHendelse.arbeidstakerFnr,
             varselHendelse.orgnummer,
             varselHendelse.type,
-            DINE_SYKMELDTE
+            DINE_SYKMELDTE,
         ).uferdigstilteVarsler(varselHendelse.type)
         for (varsel in uferdigstilteVarsler) {
             dineSykmeldteHendelseKafkaProducer.ferdigstillVarsel(varsel.eksternReferanse!!)
             database.setUtsendtVarselToFerdigstilt(varsel.eksternReferanse)
         }
+    }
+
+    fun ferdigstillArbeidstakerVarsler(varselHendelse: ArbeidstakerHendelse) {
+        ferdigstillBrukernotifkasjonVarsler(varselHendelse)
+        ferdigstillDittSykefravaerVarsler(varselHendelse)
+    }
+
+    private fun ferdigstillBrukernotifkasjonVarsler(varselHendelse: ArbeidstakerHendelse) {
+        for (varsel in fetchUferdigstilteVarsler(varselHendelse, BRUKERNOTIFIKASJON)) {
+            varsel.eksternReferanse?.let {
+                brukernotifikasjonerService.ferdigstillVarsel(it, varselHendelse.arbeidstakerFnr)
+                database.setUtsendtVarselToFerdigstilt(it)
+            }
+        }
+    }
+
+    private fun ferdigstillDittSykefravaerVarsler(varselHendelse: ArbeidstakerHendelse) {
+        for (varsel in fetchUferdigstilteVarsler(varselHendelse, DITT_SYKEFRAVAER)) {
+            varsel.eksternReferanse?.let {
+                dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(it, varselHendelse.arbeidstakerFnr)
+                database.setUtsendtVarselToFerdigstilt(it)
+            }
+        }
+    }
+
+    private fun fetchUferdigstilteVarsler(varselHendelse: ArbeidstakerHendelse, kanal: Kanal): List<PUtsendtVarsel> {
+        val fetchUtsendtVarsel = if (varselHendelse.orgnummer != null) {
+            database.fetchUtsendtVarsel(
+                varselHendelse.arbeidstakerFnr,
+                varselHendelse.orgnummer,
+                varselHendelse.type,
+                kanal,
+            )
+        } else {
+            database.fetchUtsendtVarsel(
+                varselHendelse.arbeidstakerFnr,
+                varselHendelse.type,
+                kanal,
+            )
+        }
+
+        return fetchUtsendtVarsel.uferdigstilteVarsler(varselHendelse.type)
     }
 
     fun sendBrevTilFysiskPrint(
@@ -209,7 +225,7 @@ class SenderFacade(
         kanal: Kanal,
         varselHendelse: NarmesteLederHendelse,
         eksternReferanse: String,
-        arbeidsgivernotifikasjonMerkelapp: String? = null
+        arbeidsgivernotifikasjonMerkelapp: String? = null,
     ) {
         database.storeUtsendtVarsel(
             PUtsendtVarsel(
@@ -224,8 +240,8 @@ class SenderFacade(
                 null,
                 eksternReferanse,
                 null,
-                arbeidsgivernotifikasjonMerkelapp
-            )
+                arbeidsgivernotifikasjonMerkelapp,
+            ),
         )
     }
 
@@ -247,8 +263,8 @@ class SenderFacade(
                 null,
                 eksternReferanse,
                 null,
-                null
-            )
+                null,
+            ),
         )
     }
 
@@ -274,7 +290,7 @@ class SenderFacade(
                 kanal = kanal.name,
                 feilmelding = feilmelding,
                 utsendtForsokTidspunkt = LocalDateTime.now(),
-            )
+            ),
         )
     }
 
@@ -299,7 +315,7 @@ class SenderFacade(
                 kanal = kanal.name,
                 feilmelding = feilmelding,
                 utsendtForsokTidspunkt = LocalDateTime.now(),
-            )
+            ),
         )
     }
 }
@@ -309,6 +325,6 @@ fun List<PUtsendtVarsel>.uferdigstilteVarsler(hendelseType: HendelseType) =
         .sortedByDescending { it.utsendtTidspunkt }
         .filter {
             it.eksternReferanse != null &&
-                    it.type == hendelseType.toString() &&
-                    it.ferdigstiltTidspunkt == null
+                it.type == hendelseType.toString() &&
+                it.ferdigstiltTidspunkt == null
         }
