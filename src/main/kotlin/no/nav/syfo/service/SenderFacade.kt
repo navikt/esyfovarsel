@@ -1,8 +1,5 @@
 package no.nav.syfo.service
 
-import java.net.URL
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.syfo.db.*
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.Kanal.*
@@ -18,6 +15,9 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaPr
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.URL
+import java.time.LocalDateTime
+import java.util.*
 
 class SenderFacade(
     private val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
@@ -52,7 +52,7 @@ class SenderFacade(
         varsel: DittSykefravaerVarsel,
     ) {
         try {
-           val eksternUUID = dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding)
+            val eksternUUID = dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding)
             lagreUtsendtArbeidstakerVarsel(DITT_SYKEFRAVAER, varselHendelse, eksternUUID)
         } catch (e: Exception) {
             log.warn("Error while sending varsel to DITT_SYKEFRAVAER: ${e.message}")
@@ -309,6 +309,6 @@ fun List<PUtsendtVarsel>.uferdigstilteVarsler(hendelseType: HendelseType) =
         .sortedByDescending { it.utsendtTidspunkt }
         .filter {
             it.eksternReferanse != null &&
-                    it.type == hendelseType.toString() &&
-                    it.ferdigstiltTidspunkt == null
+                it.type == hendelseType.toString() &&
+                it.ferdigstiltTidspunkt == null
         }
