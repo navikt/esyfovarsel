@@ -144,7 +144,7 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
             try {
                 client.post<HttpResponse>(urlEnv.pdlUrl) {
                     headers {
-                        append(PDL_BEHANDLINGSNUMMER_HEADER, BEHANDLINGSNUMMER_SYKEFRAVAER)
+                        append(PDL_BEHANDLINGSNUMMER_HEADER, BEHANDLINGSNUMMER_VURDERE_RETT_TIL_SYKEPENGER)
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, bearerTokenString)
                     }
