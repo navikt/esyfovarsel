@@ -35,6 +35,7 @@ class AzureAdTokenConsumer(authEnv: AuthEnv) {
 
     val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
         install(ContentNegotiation) {
+            expectSuccess = false
             jackson {
                 registerKotlinModule()
                 registerModule(JavaTimeModule())
@@ -42,7 +43,6 @@ class AzureAdTokenConsumer(authEnv: AuthEnv) {
                 configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             }
         }
-        expectSuccess = false
     }
 
     val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
