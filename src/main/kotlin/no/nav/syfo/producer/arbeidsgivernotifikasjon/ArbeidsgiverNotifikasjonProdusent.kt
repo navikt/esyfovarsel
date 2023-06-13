@@ -1,8 +1,9 @@
 package no.nav.syfo.producer.arbeidsgivernotifikasjon
 
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -38,18 +39,19 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
                 arbeidsgiverNotifikasjon.emailTitle,
                 arbeidsgiverNotifikasjon.emailBody,
                 EpostSendevinduTypes.LOEPENDE,
-                arbeidsgiverNotifikasjon.hardDeleteDate.toString()
-            )
+                arbeidsgiverNotifikasjon.hardDeleteDate.toString(),
+            ),
         )
 
         if (response.status == HttpStatusCode.OK) {
-            val beskjed = runBlocking { response.receive<OpprettNyBeskjedArbeidsgiverNotifikasjonResponse>() }
+            val beskjed = runBlocking { response.body<OpprettNyBeskjedArbeidsgiverNotifikasjonResponse>() }
             if (beskjed.data !== null) {
                 if (beskjed.data.nyBeskjed.__typename?.let {
                         OpprettNyBeskjedArbeidsgiverNotifikasjonMutationStatus.NY_BESKJED_VELLYKKET.status.equals(
-                            it
+                            it,
                         )
-                    } == true) {
+                    } == true
+                ) {
                     log.info("Have send new notification with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api")
                     return beskjed.data.nyBeskjed.id
                 } else {
@@ -57,7 +59,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
                 }
             } else {
                 val errors =
-                    runBlocking { response.receive<OpprettNyBeskjedArbeidsgiverNotifikasjonErrorResponse>().errors }
+                    runBlocking { response.body<OpprettNyBeskjedArbeidsgiverNotifikasjonErrorResponse>().errors }
                 throw RuntimeException("Could not send send notification to arbeidsgiver. because of error: ${errors[0].message}, data was null: $beskjed")
             }
         } else {
@@ -71,8 +73,8 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
             DELETE_NOTIFICATION_AG_MUTATION,
             VariablesDelete(
                 arbeidsgiverDeleteNotifikasjon.merkelapp,
-                arbeidsgiverDeleteNotifikasjon.eksternReferanse
-            )
+                arbeidsgiverDeleteNotifikasjon.eksternReferanse,
+            ),
         )
     }
 
@@ -88,21 +90,21 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
             val requestBody = graphQuery?.let { NotificationAgRequest(it, variables) }
 
             try {
-                client.post<HttpResponse>(arbeidsgiverNotifikasjonProdusentBasepath) {
+                client.post(arbeidsgiverNotifikasjonProdusentBasepath) {
                     headers {
                         append(HttpHeaders.Accept, ContentType.Application.Json)
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, "Bearer $token")
                     }
                     if (requestBody != null) {
-                        body = requestBody
+                        setBody(requestBody)
                     }
                 }
             } catch (e: Exception) {
                 log.error("Error while calling ag-notifikasjon-produsent-api ($mutationPath): ${e.message}", e)
                 throw RuntimeException(
                     "Error while calling ag-notifikasjon-produsent-api ($mutationPath): ${e.message}",
-                    e
+                    e,
                 )
             }
         }

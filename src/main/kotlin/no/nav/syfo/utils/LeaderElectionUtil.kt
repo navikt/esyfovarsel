@@ -1,9 +1,11 @@
 package no.nav.syfo.utils
 
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.headers
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.append
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.syfo.getEnvVar
@@ -15,7 +17,7 @@ data class RunOnElection(
     val name: String,
     val runOnElection: () -> Unit,
     val oneShot: Boolean = true,
-    var ranOnce: Boolean = false
+    var ranOnce: Boolean = false,
 )
 
 class LeaderElection(private val blocksToRun: List<RunOnElection>) {
@@ -51,12 +53,12 @@ class LeaderElection(private val blocksToRun: List<RunOnElection>) {
     }
     private suspend fun callElectorPath(path: String): String {
         val client = httpClient()
-        val leaderResponse = client.get<HttpResponse>(path) {
+        val leaderResponse = client.get(path) {
             headers {
                 append(HttpHeaders.Accept, ContentType.Application.Json)
             }
         }
-        return leaderResponse.receive()
+        return leaderResponse.body()
     }
     private fun parseLeaderJson(leaderJsonString: String): String {
         val leaderJson = objectMapper.readTree(leaderJsonString)

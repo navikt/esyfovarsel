@@ -1,9 +1,12 @@
 package no.nav.syfo.consumer.narmesteLeder
 
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.headers
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.append
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.utils.httpClient
@@ -20,7 +23,7 @@ class NarmesteLederConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: Az
         val requestURL = "$basepath/sykmeldt/narmesteleder?orgnummer=$orgnummer"
         try {
             val token = azureAdTokenConsumer.getToken(scope)
-            val response = client.get<HttpResponse>(requestURL) {
+            val response = client.get(requestURL) {
                 headers {
                     append(HttpHeaders.Accept, ContentType.Application.Json)
                     append(HttpHeaders.ContentType, ContentType.Application.Json)
@@ -31,7 +34,7 @@ class NarmesteLederConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: Az
 
             return when (response.status) {
                 HttpStatusCode.OK -> {
-                    response.receive<NarmestelederResponse>()
+                    response.body<NarmestelederResponse>()
                 }
                 HttpStatusCode.Unauthorized -> {
                     log.error("Could not get nærmeste leder: Unable to authorize")

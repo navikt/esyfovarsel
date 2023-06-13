@@ -1,19 +1,19 @@
 package no.nav.syfo.api.maxdate
 
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.http.*
-import io.ktor.response.*
-import io.ktor.routing.*
-import java.io.Serializable
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.call
+import io.ktor.server.auth.authentication
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
 import no.nav.syfo.auth.BrukerPrincipal
 import no.nav.syfo.service.SykepengerMaxDateService
 import no.nav.syfo.utils.formatDateForLetter
 import org.slf4j.LoggerFactory
-
+import java.io.Serializable
 
 fun Route.registerSykepengerMaxDateRestApi(
-    sykepengerMaxDateService: SykepengerMaxDateService
+    sykepengerMaxDateService: SykepengerMaxDateService,
 ) {
     val log = LoggerFactory.getLogger("no.nav.syfo.api.maxdate.SykepengerMaxDateRest")
     get("/api/v1/sykepenger/maxdate") {

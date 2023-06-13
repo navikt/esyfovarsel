@@ -1,8 +1,9 @@
 package no.nav.syfo.consumer.pdl
 
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -26,7 +27,7 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
         return when (response?.status) {
             HttpStatusCode.OK -> {
                 runBlocking {
-                    val pdlResponse = response.receive<PdlIdentResponse>().data?.hentIdenter?.identer?.first()?.ident
+                    val pdlResponse = response.body<PdlIdentResponse>().data?.hentIdenter?.identer?.first()?.ident
                     pdlResponse
                 }
             }
@@ -53,7 +54,7 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
 
         return when (response?.status) {
             HttpStatusCode.OK -> {
-                runBlocking { response.receive<PdlPersonResponse>().data?.isKode6Eller7() }
+                runBlocking { response.body<PdlPersonResponse>().data?.isKode6Eller7() }
             }
 
             HttpStatusCode.NoContent -> {
@@ -78,7 +79,7 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
 
         return when (response?.status) {
             HttpStatusCode.OK -> {
-                val fodselsdato = runBlocking { response.receive<PdlPersonResponse>().data?.getFodselsdato() }
+                val fodselsdato = runBlocking { response.body<PdlPersonResponse>().data?.getFodselsdato() }
                 if (fodselsdato == null) {
                     log.warn("Returnert fødselsdato for en person fra PDL er null. Fortsetter som om bruker er yngre enn $maxAlder år da fødselsdato er ukjent.")
                     return true
@@ -110,7 +111,7 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
         return when (response?.status) {
             HttpStatusCode.OK -> {
                 runBlocking {
-                    val pdlResponse = response.receive<PdlPersonResponse>().data
+                    val pdlResponse = response.body<PdlPersonResponse>().data
                     pdlResponse
                 }
             }
@@ -142,13 +143,13 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
                     ?: throw FileNotFoundException("Could not found resource: $graphQueryResourcePath")
             val requestBody = PdlRequest(graphQuery, Variables(ident))
             try {
-                client.post<HttpResponse>(urlEnv.pdlUrl) {
+                client.post(urlEnv.pdlUrl) {
                     headers {
                         append(PDL_BEHANDLINGSNUMMER_HEADER, BEHANDLINGSNUMMER_VURDERE_RETT_TIL_SYKEPENGER)
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, bearerTokenString)
                     }
-                    body = requestBody
+                    setBody(requestBody)
                 }
             } catch (e: Exception) {
                 log.error("Error while calling PDL ($service): ${e.message}", e)

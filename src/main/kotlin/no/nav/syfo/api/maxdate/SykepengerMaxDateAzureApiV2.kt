@@ -1,15 +1,20 @@
 package no.nav.syfo.api.maxdate
 
-import io.ktor.application.*
-import io.ktor.http.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.call
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
 import no.nav.syfo.db.domain.PMaksDato
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.service.SykepengerMaxDateService
-import no.nav.syfo.utils.*
+import no.nav.syfo.utils.NAV_PERSONIDENT_HEADER
+import no.nav.syfo.utils.getBearerToken
+import no.nav.syfo.utils.getCallId
+import no.nav.syfo.utils.getPersonIdent
 import org.slf4j.LoggerFactory
 import java.io.Serializable
 
@@ -32,7 +37,7 @@ fun Route.registerSykepengerMaxDateAzureApiV2(
                 log.error("Encountered exception during fetching sykepengerMaxDate from database: ${e.message}")
                 call.respond(
                     HttpStatusCode.InternalServerError,
-                    "Encountered exception during fetching max date from database: ${e.message}"
+                    "Encountered exception during fetching max date from database: ${e.message}",
                 )
             }
         } else {

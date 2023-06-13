@@ -1,7 +1,7 @@
 package no.nav.syfo.utils
 
-import io.ktor.application.*
-import io.ktor.http.*
+import io.ktor.http.HttpHeaders
+import io.ktor.server.application.ApplicationCall
 import no.nav.syfo.domain.PersonIdent
 
 fun ApplicationCall.getPersonIdent(): PersonIdent? =

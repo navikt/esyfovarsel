@@ -2,17 +2,18 @@ package no.nav.syfo.auth
 
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
-import io.ktor.application.Application
-import io.ktor.application.install
-import io.ktor.auth.Authentication
-import io.ktor.auth.UserIdPrincipal
-import io.ktor.auth.authenticate
-import io.ktor.auth.basic
-import io.ktor.auth.jwt.*
 import io.ktor.http.auth.HttpAuthHeader
-import io.ktor.routing.routing
-import java.net.URL
-import java.util.concurrent.TimeUnit
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.AuthenticationConfig
+import io.ktor.server.auth.UserIdPrincipal
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.basic
+import io.ktor.server.auth.jwt.JWTCredential
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.jwt.jwt
+import io.ktor.server.routing.routing
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.api.admin.registerAdminApi
 import no.nav.syfo.api.job.registerJobTriggerApi
@@ -21,11 +22,13 @@ import no.nav.syfo.api.maxdate.registerSykepengerMaxDateAzureApiV2
 import no.nav.syfo.api.maxdate.registerSykepengerMaxDateRestApi
 import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
 import no.nav.syfo.job.VarselSender
-import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.service.ReplanleggingService
 import no.nav.syfo.service.SykepengerMaxDateService
+import no.nav.syfo.service.microfrontend.MikrofrontendService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.URL
+import java.util.concurrent.TimeUnit
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.JwtValidation")
 
@@ -59,7 +62,7 @@ fun Application.setupAuthentication(
                         BrukerPrincipal(
                             fnr = finnFnrFraToken(principal),
                             principal = principal,
-                            token = this.getToken()!!
+                            token = this.getToken()!!,
                         )
                     }
 
@@ -84,10 +87,9 @@ fun Application.setupAuthentication(
             )
         }
     }
-
 }
 
-private fun Authentication.Configuration.configureJwt(
+private fun AuthenticationConfig.configureJwt(
     jwtIssuer: JwtIssuer,
 ) {
     val jwkProvider = JwkProviderBuilder(URL(jwtIssuer.wellKnown.jwks_uri))
@@ -101,7 +103,7 @@ private fun Authentication.Configuration.configureJwt(
         )
         validate { credential ->
             val credentialsHasExpectedAudience = credential.inExpectedAudience(
-                expectedAudience = jwtIssuer.acceptedAudienceList
+                expectedAudience = jwtIssuer.acceptedAudienceList,
             )
             if (credentialsHasExpectedAudience) {
                 JWTPrincipal(credential.payload)

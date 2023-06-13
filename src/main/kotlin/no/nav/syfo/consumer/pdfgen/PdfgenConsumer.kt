@@ -1,14 +1,13 @@
 package no.nav.syfo.consumer.pdfgen
 
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
-import io.ktor.client.statement.HttpResponse
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.append
-import java.time.LocalDate
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.consumer.pdl.PdlConsumer
@@ -18,6 +17,7 @@ import no.nav.syfo.db.fetchMaksDatoByFnr
 import no.nav.syfo.utils.formatDateForLetter
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseInterface: DatabaseInterface) {
     private val client = httpClient()
@@ -33,17 +33,17 @@ class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseI
 
         return runBlocking {
             try {
-                val response = client.post<HttpResponse>(merVeiledningPdfUrl) {
+                val response = client.post(merVeiledningPdfUrl) {
                     headers {
                         append(HttpHeaders.Accept, ContentType.Application.Json)
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                     }
-                    body = request
+                    setBody(request)
                 }
 
                 when (response.status) {
                     HttpStatusCode.OK -> {
-                        response.receive<ByteArray>()
+                        response.body<ByteArray>()
                     }
 
                     else -> {

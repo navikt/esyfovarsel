@@ -3,19 +3,19 @@ package no.nav.syfo.testutil.mocks
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.features.ContentNegotiation
 import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.jackson
-import io.ktor.response.respond
-import io.ktor.routing.Route
-import io.ktor.routing.get
-import io.ktor.routing.post
-import io.ktor.routing.routing
+import io.ktor.serialization.jackson.jackson
+import io.ktor.server.application.call
+import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.netty.NettyApplicationEngine
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.routing
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.testutil.extractPortFromUrl
@@ -29,7 +29,7 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
                 if (call.request.headers[NAV_PERSONIDENT_HEADER]?.isValidHeader() == true) {
                     call.respond(
                         dkifResponseMap[call.request.headers[NAV_PERSONIDENT_HEADER]]
-                            ?: dkifResponseSuccessKanVarslesResponseJSON
+                            ?: dkifResponseSuccessKanVarslesResponseJSON,
                     )
                 } else {
                     call.response.status(HttpStatusCode(500, "Server error"))
@@ -48,7 +48,7 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
     fun mockServer(url: String, route: Route.() -> Unit): NettyApplicationEngine {
         return embeddedServer(
             factory = Netty,
-            port = url.extractPortFromUrl()
+            port = url.extractPortFromUrl(),
         ) {
             install(ContentNegotiation) {
                 jackson {

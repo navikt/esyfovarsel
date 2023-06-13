@@ -1,24 +1,29 @@
 package no.nav.syfo.auth
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.engine.apache.*
-import io.ktor.client.features.json.*
-import io.ktor.client.request.*
-import io.ktor.client.request.forms.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
+import io.ktor.client.call.body
+import io.ktor.client.engine.apache.Apache
+import io.ktor.client.engine.apache.ApacheEngineConfig
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.accept
+import io.ktor.client.request.forms.FormDataContent
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.Parameters
+import io.ktor.serialization.jackson.jackson
 import no.nav.syfo.AuthEnv
+import no.nav.syfo.utils.configure
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.ProxySelector
 import java.time.Instant
+import kotlin.collections.set
 
 class AzureAdTokenConsumer(authEnv: AuthEnv) {
     private val aadAccessTokenUrl = authEnv.aadAccessTokenUrl
@@ -27,15 +32,13 @@ class AzureAdTokenConsumer(authEnv: AuthEnv) {
     private val log: Logger = LoggerFactory.getLogger("AzureAdTokenConsumer")
 
     val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
-        install(JsonFeature) {
-            expectSuccess = false
-            serializer = JacksonSerializer {
+        install(ContentNegotiation) {
+            jackson {
                 registerKotlinModule()
-                registerModule(JavaTimeModule())
-                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                configure()
             }
         }
+        expectSuccess = false
     }
 
     val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
@@ -60,20 +63,22 @@ class AzureAdTokenConsumer(authEnv: AuthEnv) {
         if (token == null || token.issuedOn!!.plusSeconds(token.expires_in).isBefore(omToMinutter)) {
             log.info("Henter nytt token fra Azure AD for scope : $resource")
 
-            val response = httpClientWithProxy.post<HttpResponse>(aadAccessTokenUrl) {
+            val response = httpClientWithProxy.post(aadAccessTokenUrl) {
                 accept(ContentType.Application.Json)
 
-                body = FormDataContent(
-                    Parameters.build {
-                        append("client_id", clientId)
-                        append("scope", resource)
-                        append("grant_type", "client_credentials")
-                        append("client_secret", clientSecret)
-                    }
+                setBody(
+                    FormDataContent(
+                        Parameters.build {
+                            append("client_id", clientId)
+                            append("scope", resource)
+                            append("grant_type", "client_credentials")
+                            append("client_secret", clientSecret)
+                        },
+                    ),
                 )
             }
             if (response.status == HttpStatusCode.OK) {
-                tokenMap[resource] = response.receive()
+                tokenMap[resource] = response.body()
             } else {
                 log.error("Could not get token from Azure AD: $response")
             }
@@ -84,29 +89,30 @@ class AzureAdTokenConsumer(authEnv: AuthEnv) {
     suspend fun getOnBehalfOfToken(resource: String, token: String): String? {
         log.info("Henter nytt obo-token fra Azure AD for scope : $resource")
 
-        val response = httpClientWithProxy.post<HttpResponse>(aadAccessTokenUrl) {
+        val response = httpClientWithProxy.post(aadAccessTokenUrl) {
             accept(ContentType.Application.Json)
 
-            body = FormDataContent(
-                Parameters.build {
-                    append("client_id", clientId)
-                    append("scope", resource)
-                    append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
-                    append("client_secret", clientSecret)
-                    append("assertion", token)
-                    append("client_assertion_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
-                    append("requested_token_use", "on_behalf_of")
-                }
+            setBody(
+                FormDataContent(
+                    Parameters.build {
+                        append("client_id", clientId)
+                        append("scope", resource)
+                        append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
+                        append("client_secret", clientSecret)
+                        append("assertion", token)
+                        append("client_assertion_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
+                        append("requested_token_use", "on_behalf_of")
+                    },
+                ),
             )
         }
 
         return if (response.status == HttpStatusCode.OK) {
-            response.receive<AzureAdAccessToken>().access_token
+            response.body<AzureAdAccessToken>().access_token
         } else {
             log.error("Could not get obo-token from Azure AD: $response")
             null
         }
-
     }
 }
 
