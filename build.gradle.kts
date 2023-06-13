@@ -14,7 +14,7 @@ val slf4jVersion = "1.7.36"
 val logbackVersion = "1.2.11"
 val javaxVersion = "2.1.1"
 val logstashEncoderVersion = "7.0.1"
-val postgresVersion = "42.3.3"
+val postgresVersion = "42.6.0"
 val hikariVersion = "5.0.1"
 val flywayVersion = "7.5.2"
 val vaultJdbcVersion = "1.3.9"
@@ -141,5 +141,4 @@ tasks {
         }
         testLogging.showStandardStreams = true
     }
-
 }
