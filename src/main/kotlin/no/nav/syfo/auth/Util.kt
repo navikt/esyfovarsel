@@ -1,5 +1,9 @@
 package no.nav.syfo.auth
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
@@ -17,7 +21,6 @@ import io.ktor.server.request.header
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.syfo.AuthEnv
-import no.nav.syfo.utils.configure
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import java.net.ProxySelector
 
@@ -31,7 +34,12 @@ fun validBasicAuthCredentials(authEnv: AuthEnv, credentials: UserPasswordCredent
 
 val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
     install(ContentNegotiation) {
-        jackson { configure() }
+        jackson {
+            registerKotlinModule()
+            registerModule(JavaTimeModule())
+            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        }
     }
     engine {
         customizeClient {

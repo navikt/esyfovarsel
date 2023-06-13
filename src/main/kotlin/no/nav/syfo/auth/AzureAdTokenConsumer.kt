@@ -1,6 +1,9 @@
 package no.nav.syfo.auth
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -17,7 +20,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
 import io.ktor.serialization.jackson.jackson
 import no.nav.syfo.AuthEnv
-import no.nav.syfo.utils.configure
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -35,7 +37,9 @@ class AzureAdTokenConsumer(authEnv: AuthEnv) {
         install(ContentNegotiation) {
             jackson {
                 registerKotlinModule()
-                configure()
+                registerModule(JavaTimeModule())
+                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             }
         }
         expectSuccess = false
