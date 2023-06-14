@@ -41,6 +41,7 @@ val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         }
     }
+    expectSuccess = true
     engine {
         customizeClient {
             setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))

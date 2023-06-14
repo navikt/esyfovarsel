@@ -35,7 +35,6 @@ class AzureAdTokenConsumer(authEnv: AuthEnv) {
 
     val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
         install(ContentNegotiation) {
-            expectSuccess = false
             jackson {
                 registerKotlinModule()
                 registerModule(JavaTimeModule())

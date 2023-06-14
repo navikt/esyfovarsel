@@ -10,7 +10,6 @@ import io.ktor.serialization.jackson.jackson
 
 fun httpClient(): HttpClient {
     return HttpClient(CIO) {
-        expectSuccess = false
         install(ContentNegotiation) {
             jackson {
                 registerKotlinModule()
