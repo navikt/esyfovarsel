@@ -22,7 +22,7 @@ val jacksonVersion = "2.15.2"
 val postgresEmbeddedVersion = "0.13.3"
 val kafkaVersion = "2.7.0"
 val avroVersion = "1.11.0"
-val confluentVersion = "6.2.1"
+val confluentVersion = "7.4.0"
 val brukernotifikasjonerSchemaVersion = "2.5.1"
 
 val githubUser: String by project
