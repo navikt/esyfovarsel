@@ -1,11 +1,11 @@
 package no.nav.syfo.consumer.dokarkiv
 
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
-import io.ktor.client.statement.HttpResponse
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -32,17 +32,17 @@ class DokarkivConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAd
     suspend fun postDocumentToDokarkiv(request: DokarkivRequest): DokarkivResponse? {
         try {
             val token = azureAdTokenConsumer.getToken(dokarkivScope)
-            val response = client.post<HttpResponse>(requestURL) {
+            val response = client.post(requestURL) {
                 parameter(JOURNALPOST_PARAM_STRING, JOURNALPOST_PARAM_VALUE)
                 header(HttpHeaders.Authorization, "Bearer $token")
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
-                body = request
+                setBody(request)
             }
             return when (response.status) {
                 HttpStatusCode.Created -> {
                     log.info("Sending to dokarkiv successful, journalpost created")
-                    response.receive<DokarkivResponse>()
+                    response.body<DokarkivResponse>()
                 }
 
                 HttpStatusCode.Unauthorized -> {

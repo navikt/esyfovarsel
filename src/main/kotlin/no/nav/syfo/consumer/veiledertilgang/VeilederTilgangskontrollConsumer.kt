@@ -1,14 +1,18 @@
 package no.nav.syfo.consumer.veiledertilgang
 
-import io.ktor.client.call.*
-import io.ktor.client.features.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.HttpResponse
-import io.ktor.http.*
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.domain.PersonIdent
-import no.nav.syfo.utils.*
+import no.nav.syfo.utils.NAV_CALL_ID_HEADER
+import no.nav.syfo.utils.NAV_PERSONIDENT_HEADER
+import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 
 class VeilederTilgangskontrollConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
@@ -26,14 +30,14 @@ class VeilederTilgangskontrollConsumer(urlEnv: UrlEnv, private val azureAdTokenC
                 token = token,
             ) ?: throw RuntimeException("Failed to request access to Person: Failed to get OBO token")
 
-            val response = client.get<HttpResponse>(requestURL) {
+            val response = client.get(requestURL) {
                 header(HttpHeaders.Authorization, "Bearer $onBehalfOfToken")
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
                 header(NAV_PERSONIDENT_HEADER, personIdent.value)
                 header(NAV_CALL_ID_HEADER, callId)
             }
 
-            return response.receive<Tilgang>().harTilgang
+            return response.body<Tilgang>().harTilgang
         } catch (e: ClientRequestException) {
             if (e.response.status == HttpStatusCode.Forbidden) {
                 log.warn("Denied veileder access to person: ${e.message}")

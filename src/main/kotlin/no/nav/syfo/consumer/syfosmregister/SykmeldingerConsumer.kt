@@ -1,9 +1,16 @@
 package no.nav.syfo.consumer.syfosmregister
 
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.call.body
+import io.ktor.client.request.accept
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.headers
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.utils.httpClient
@@ -20,7 +27,7 @@ class SykmeldingerConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: Azu
         val requestURL = "$basepath/api/v2/sykmelding/sykmeldinger"
         val token = azureAdTokenConsumer.getToken(scope)
 
-        val response = client.get<HttpResponse>(requestURL) {
+        val response = client.get(requestURL) {
             headers {
                 append(HttpHeaders.Accept, "application/json")
                 append(HttpHeaders.ContentType, "application/json")
@@ -35,7 +42,7 @@ class SykmeldingerConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: Azu
 
         return when (response.status) {
             HttpStatusCode.OK -> {
-                response.receive<List<SykmeldingDTO>>()
+                response.body<List<SykmeldingDTO>>()
             }
 
             HttpStatusCode.Unauthorized -> {
@@ -54,16 +61,16 @@ class SykmeldingerConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: Azu
         val requestURL = "$basepath/api/v2/sykmelding/sykmeldtStatus"
         val token = azureAdTokenConsumer.getToken(scope)
 
-        val response = client.post<HttpResponse>(requestURL) {
+        val response = client.post(requestURL) {
             header(HttpHeaders.Authorization, "Bearer $token")
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
-            body = SykmeldtStatusRequest(fnr, dato)
+            setBody(SykmeldtStatusRequest(fnr, dato))
         }
 
         return when (response.status) {
             HttpStatusCode.OK -> {
-                response.receive<SykmeldtStatus>()
+                response.body<SykmeldtStatus>()
             }
 
             HttpStatusCode.Unauthorized -> {

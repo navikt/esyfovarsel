@@ -1,9 +1,11 @@
 package no.nav.syfo.api.admin
 
-import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.routing.*
-import io.ktor.util.pipeline.*
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.call
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.util.pipeline.PipelineContext
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.service.ReplanleggingService
 import java.time.LocalDate
@@ -13,7 +15,7 @@ const val merVeiledningPath = "replanleggMerVeiledningVarsler"
 const val aktivetskravPath = "replanleggAktivitetskravVarsler"
 
 fun Route.registerAdminApi(
-    replanleggingService: ReplanleggingService
+    replanleggingService: ReplanleggingService,
 ) {
     val fromParam = "from"
     val toParam = "to"

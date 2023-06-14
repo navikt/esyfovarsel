@@ -1,9 +1,9 @@
 package no.nav.syfo.consumer.distribuerjournalpost
 
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
-import io.ktor.client.statement.HttpResponse
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -22,7 +22,7 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.JournalpostdistribusjonConsumer")
 
     suspend fun distribuerJournalpost(journalpostId: String, uuid: String): JournalpostdistribusjonResponse {
-        val requestURL = "${dokdistfordelingUrl}/rest/v1/distribuerjournalpost"
+        val requestURL = "$dokdistfordelingUrl/rest/v1/distribuerjournalpost"
         val token = azureAdTokenConsumer.getToken(dokdistfordelingScope)
         val request = JournalpostdistribusjonRequest(
             journalpostId = journalpostId,
@@ -30,26 +30,25 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
 
         return runBlocking {
             try {
-                val response = client.post<HttpResponse>(requestURL) {
+                val response = client.post(requestURL) {
                     headers {
                         append(HttpHeaders.Accept, ContentType.Application.Json)
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, "Bearer $token")
                     }
-                    body = request
+                    setBody(request)
                 }
 
-                if (response.status == HttpStatusCode.OK){
+                if (response.status == HttpStatusCode.OK) {
                     log.info("Sent document to print")
-                    response.receive()
+                    response.body()
                 } else {
                     throw RuntimeException("Failed to send document with uuid $uuid to print. journalpostId: $journalpostId. Response status: ${response.status}. Response: $response")
                 }
-
             } catch (e: Exception) {
                 throw RuntimeException(
                     "Exception while calling distribuerjournalpost with uuid $uuid and journalpostId: $journalpostId. Error message: ${e.message}",
-                    e
+                    e,
                 )
             }
         }

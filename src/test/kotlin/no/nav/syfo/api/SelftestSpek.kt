@@ -1,8 +1,11 @@
 package no.nav.syfo.api
 
-import io.ktor.http.*
-import io.ktor.routing.*
-import io.ktor.server.testing.*
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.isSuccess
+import io.ktor.server.routing.routing
+import io.ktor.server.testing.TestApplicationEngine
+import io.ktor.server.testing.handleRequest
 import no.nav.syfo.ApplicationState
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
@@ -87,4 +90,3 @@ object SelftestSpek : Spek({
         }
     }
 })
-

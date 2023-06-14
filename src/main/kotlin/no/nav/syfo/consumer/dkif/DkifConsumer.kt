@@ -1,15 +1,21 @@
 package no.nav.syfo.consumer.dkif
 
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.headers
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.append
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.consumer.domain.Kontaktinfo
 import no.nav.syfo.consumer.domain.KontaktinfoMapper
-import no.nav.syfo.utils.*
+import no.nav.syfo.utils.NAV_CALL_ID_HEADER
+import no.nav.syfo.utils.NAV_PERSONIDENT_HEADER
+import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -20,7 +26,7 @@ class DkifConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer:
         return runBlocking {
             val accessToken = "Bearer ${azureAdTokenConsumer.getToken(urlEnv.dkifScope)}"
             val response: HttpResponse? = try {
-                client.get<HttpResponse>(urlEnv.dkifUrl) {
+                client.get(urlEnv.dkifUrl) {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, accessToken)
@@ -34,7 +40,7 @@ class DkifConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer:
             }
             when (response?.status) {
                 HttpStatusCode.OK -> {
-                    val rawJson: String = response.receive()
+                    val rawJson: String = response.body()
                     KontaktinfoMapper.mapPerson(rawJson)
                 }
                 HttpStatusCode.Unauthorized -> {
