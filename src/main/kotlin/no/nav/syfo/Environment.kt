@@ -170,8 +170,7 @@ data class DbEnv(
     var dbPort: String,
     var dbName: String,
     val dbUsername: String = "",
-    val dbPassword: String = "",
-    val dbCredMounthPath: String = ""
+    val dbPassword: String = ""
 )
 
 data class ToggleEnv(
