@@ -34,6 +34,8 @@ class BrukernotifikasjonerService(
                 BrukernotifikasjonKafkaProducer.MeldingType.DONE -> {
                     ferdigstillVarsel(uuid, mottakerFnr)
                 }
+
+                else -> { throw RuntimeException("Ukjent typestreng") }
             }
         } else {
             throw RuntimeException("Kan ikke sende melding til bruker for melding med uuid $uuid: bruker er reservert for digital kommunikasjon")
@@ -42,7 +44,7 @@ class BrukernotifikasjonerService(
 
     fun ferdigstillVarsel(
         uuid: String,
-        mottakerFnr: String
+        mottakerFnr: String,
     ) {
         brukernotifikasjonKafkaProducer.sendDone(uuid, mottakerFnr)
         log.info("Har sendt done med uuid $uuid til brukernotifikasjoner")

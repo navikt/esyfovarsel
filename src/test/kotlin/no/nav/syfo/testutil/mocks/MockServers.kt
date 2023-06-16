@@ -45,6 +45,7 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
             }
         }
     }
+
     fun mockServer(url: String, route: Route.() -> Unit): NettyApplicationEngine {
         return embeddedServer(
             factory = Netty,

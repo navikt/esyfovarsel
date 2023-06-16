@@ -51,6 +51,7 @@ class LeaderElection(private val blocksToRun: List<RunOnElection>) {
         val leaderJsonString = callElectorPath(path)
         return parseLeaderJson(leaderJsonString)
     }
+
     private suspend fun callElectorPath(path: String): String {
         val client = httpClient()
         val leaderResponse = client.get(path) {
@@ -60,6 +61,7 @@ class LeaderElection(private val blocksToRun: List<RunOnElection>) {
         }
         return leaderResponse.body()
     }
+
     private fun parseLeaderJson(leaderJsonString: String): String {
         val leaderJson = objectMapper.readTree(leaderJsonString)
         return leaderJson["name"].toString().replace("\"", "")
