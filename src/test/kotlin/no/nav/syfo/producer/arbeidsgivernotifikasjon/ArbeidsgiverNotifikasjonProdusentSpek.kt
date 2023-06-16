@@ -18,6 +18,7 @@ object ArbeidsgiverNotifikasjonProdusentSpek : Spek({
     val mockServers = MockServers(testEnv.urlEnv, testEnv.authEnv)
     val azureAdMockServer = mockServers.mockAADServer()
     val azureAdConsumer = AzureAdTokenConsumer(testEnv.authEnv)
+    val arbeidsgiverNotifikasjonMockServer = mockServers.mockArbeidsgiverNotifikasjonServer()
     val arbeidsgiverNotifikasjonProdusent = ArbeidsgiverNotifikasjonProdusent(testEnv.urlEnv, azureAdConsumer)
 
     val arbeidsgiverNotifikasjon = ArbeidsgiverNotifikasjon(
@@ -28,16 +29,21 @@ object ArbeidsgiverNotifikasjonProdusentSpek : Spek({
 
     beforeGroup {
         azureAdMockServer.start()
+        arbeidsgiverNotifikasjonMockServer.start()
     }
 
     afterGroup {
         azureAdMockServer.stop(1L, 10L)
+        arbeidsgiverNotifikasjonMockServer.stop(1L, 10L)
     }
 
     describe("ArbeidsgiverNotifikasjonProdusentSpek") {
-
         it("Should send oppgave") {
             runBlocking { arbeidsgiverNotifikasjonProdusent.createNewTaskForArbeidsgiver(arbeidsgiverNotifikasjon) }
+        }
+
+        it("Should send beskjed") {
+            runBlocking { arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjon) }
         }
     }
 })
