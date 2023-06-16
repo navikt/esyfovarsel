@@ -129,6 +129,7 @@ tasks {
     }
 
     withType<ShadowJar> {
+        setProperty("zip64", true)
         manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapApplicationKt"
     }
 
