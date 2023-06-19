@@ -49,7 +49,8 @@ val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
     }
 }
 
-fun getWellKnown(wellKnownUrl: String) = runBlocking { HttpClient(Apache, proxyConfig).get(wellKnownUrl).body<WellKnown>() }
+fun getWellKnown(wellKnownUrl: String) =
+    runBlocking { HttpClient(Apache, proxyConfig).get(wellKnownUrl).body<WellKnown>() }
 
 fun isNiva4(credentials: JWTCredential): Boolean {
     return "Level4" == credentials.payload.getClaim("acr").asString()
@@ -76,7 +77,9 @@ fun hasClientIdAudience(credentials: JWTCredential, clientId: String): Boolean {
 }
 
 fun finnFnrFraToken(principal: JWTPrincipal): String {
-    return if (principal.payload.getClaim("pid") != null && !principal.payload.getClaim("pid").asString().isNullOrEmpty()) {
+    return if (principal.payload.getClaim("pid") != null && !principal.payload.getClaim("pid").asString()
+            .isNullOrEmpty()
+    ) {
         log.debug("Bruker fnr fra pid-claim")
         principal.payload.getClaim("pid").asString()
     } else {

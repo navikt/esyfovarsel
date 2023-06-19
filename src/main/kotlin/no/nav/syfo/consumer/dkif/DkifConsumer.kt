@@ -43,10 +43,12 @@ class DkifConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer:
                     val rawJson: String = response.body()
                     KontaktinfoMapper.mapPerson(rawJson)
                 }
+
                 HttpStatusCode.Unauthorized -> {
                     log.error("Could not get kontaktinfo from DKIF: Unable to authorize")
                     null
                 }
+
                 else -> {
                     log.error("Could not get kontaktinfo from DKIF: $response")
                     null

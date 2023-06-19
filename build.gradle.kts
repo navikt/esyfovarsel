@@ -5,7 +5,7 @@ group = "no.nav.syfo"
 version = "1.0"
 
 val kluentVersion = "1.68"
-val ktorVersion = "2.0.0"
+val ktorVersion = "2.3.1"
 val prometheusVersion = "0.15.0"
 val micrometerVersion = "1.8.4"
 val spekVersion = "2.0.18"
@@ -29,7 +29,7 @@ val githubUser: String by project
 val githubPassword: String by project
 
 plugins {
-    kotlin("jvm") version "1.5.31"
+    kotlin("jvm") version "1.7.10"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.5.31"
     id("com.diffplug.gradle.spotless") version "3.18.0"
     id("com.github.johnrengelman.shadow") version "7.1.0"
@@ -59,18 +59,18 @@ configurations.all {
 dependencies {
 
     // Ktor server
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
-    implementation("io.ktor:ktor-client-apache:$ktorVersion")
-    implementation("io.ktor:ktor-client-core:$ktorVersion")
-    implementation("io.ktor:ktor-client-cio:$ktorVersion")
-    implementation("io.ktor:ktor-client-jackson:$ktorVersion")
-    implementation("io.ktor:ktor-client-logging:$ktorVersion")
-    implementation("io.ktor:ktor-serialization:$ktorVersion")
     implementation("io.ktor:ktor-server-auth:$ktorVersion")
     implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")
+    implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-apache-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-jackson-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
 
     // API
     implementation("javax.ws.rs:javax.ws.rs-api:$javaxVersion")
@@ -110,11 +110,9 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
-    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion") {
-        exclude(group = "ch.qos.logback", module = "logback-classic")
-    }
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
+    testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
     testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spekVersion")
     testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spekVersion")
 }
@@ -129,6 +127,7 @@ tasks {
     }
 
     withType<ShadowJar> {
+        setProperty("zip64", true)
         manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapApplicationKt"
     }
 

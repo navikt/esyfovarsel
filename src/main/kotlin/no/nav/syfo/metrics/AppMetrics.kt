@@ -21,7 +21,8 @@ const val AKTIVITETSKRAV_NOTICE_SENT = "${METRICS_NS}_aktivitetskrav_notice_sent
 const val SVAR_MOTEBEHOV_NOTICE_SENT = "${METRICS_NS}_svar_motebehov_notice_sent"
 const val NOTICE_SENT = "${METRICS_NS}_notice_sent"
 
-val METRICS_REGISTRY = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, CollectorRegistry.defaultRegistry, Clock.SYSTEM)
+val METRICS_REGISTRY =
+    PrometheusMeterRegistry(PrometheusConfig.DEFAULT, CollectorRegistry.defaultRegistry, Clock.SYSTEM)
 
 val COUNT_MER_VEILEDNING_PLANNED: Counter = Counter
     .builder(MER_VEILEDNING_PLANNED)
@@ -75,6 +76,7 @@ fun tellMerVeiledningPlanlagt() {
 fun tellAktivitetskravPlanlagt() {
     COUNT_AKTIVITETSKRAV_PLANNED.increment()
 }
+
 fun Routing.registerPrometheusApi() {
     DefaultExports.initialize()
 

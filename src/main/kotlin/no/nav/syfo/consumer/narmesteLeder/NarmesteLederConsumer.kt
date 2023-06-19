@@ -36,10 +36,12 @@ class NarmesteLederConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: Az
                 HttpStatusCode.OK -> {
                     response.body<NarmestelederResponse>()
                 }
+
                 HttpStatusCode.Unauthorized -> {
                     log.error("Could not get nærmeste leder: Unable to authorize")
                     null
                 }
+
                 else -> {
                     log.error("Could not get nærmeste leder: $response")
                     null
