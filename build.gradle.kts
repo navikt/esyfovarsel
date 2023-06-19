@@ -72,8 +72,6 @@ dependencies {
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
 
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10")
-
     // API
     implementation("javax.ws.rs:javax.ws.rs-api:$javaxVersion")
 
