@@ -61,7 +61,7 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
                     }
                   }
                 }
-            """.trimIndent()
+            """
             val responseNyOppgave = """
                 {
                   "data": {
@@ -71,7 +71,7 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
                     }
                   }
                 }
-            """.trimIndent()
+            """
             post("/") {
                 val body = call.receiveText()
                 if (body.contains("OpprettNyOppgave")) {

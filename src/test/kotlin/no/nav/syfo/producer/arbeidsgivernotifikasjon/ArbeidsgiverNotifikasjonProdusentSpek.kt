@@ -23,8 +23,16 @@ object ArbeidsgiverNotifikasjonProdusentSpek : Spek({
 
     val arbeidsgiverNotifikasjon = ArbeidsgiverNotifikasjon(
         UUID.randomUUID().toString(),
-        orgnummer, "", fnr1, fnr2, "hei", "test@test.no",
-        "Oppfølging", "Hei du", "Body", LocalDateTime.now().plusDays(1),
+        orgnummer,
+        "",
+        fnr1,
+        fnr2,
+        "hei",
+        "test@test.no",
+        "Oppfølging",
+        "Hei du",
+        "Body",
+        LocalDateTime.now().plusDays(1),
     )
 
     beforeGroup {
