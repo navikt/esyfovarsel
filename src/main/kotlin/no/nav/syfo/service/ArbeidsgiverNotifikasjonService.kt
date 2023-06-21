@@ -18,7 +18,7 @@ class ArbeidsgiverNotifikasjonService(
     val dineSykmeldteUrl: String,
 ) {
 
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.ArbeidsgiverNotifikasjonService")
+    private val log: Logger = LoggerFactory.getLogger(ArbeidsgiverNotifikasjonService::class.qualifiedName)
 
     fun sendNotifikasjon(
         arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonInput,
