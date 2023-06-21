@@ -30,7 +30,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
     private val scope = urlEnv.arbeidsgiverNotifikasjonProdusentApiScope
 
     suspend fun createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? {
-        log.info("About to send new task with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api")
+        log.info("About to send new notification with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api")
         val response: HttpResponse = callArbeidsgiverNotifikasjonProdusent(
             CREATE_NOTIFICATION_AG_MUTATION,
             arbeidsgiverNotifikasjon.createVariables(),
