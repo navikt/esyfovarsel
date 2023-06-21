@@ -1,22 +1,22 @@
-package no.nav.syfo.producer.arbeidsgivernotifikasjon
+package no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nybeskjed
 
 import java.io.Serializable
 
-data class OpprettNyBeskjedArbeidsgiverNotifikasjonResponse(
-    val data: Data?
+data class NyBeskjedResponse(
+    val data: Data?,
 )
 
 data class NyBeskjed(
     val id: String?,
     val feilmelding: String?,
-    val __typename: String?
+    val __typename: String?,
 ) : Serializable
 
 data class Data(
     val nyBeskjed: NyBeskjed,
 )
 
-enum class OpprettNyBeskjedArbeidsgiverNotifikasjonMutationStatus(val status: String) {
+enum class NyBeskjedMutationStatus(val status: String) {
     NY_BESKJED_VELLYKKET("NyBeskjedVellykket"),
     UGYLDIG_MERKELAPP("UgyldigMerkelapp"),
     UGYLDIG_MOTTAKER("UgyldigMottaker"),

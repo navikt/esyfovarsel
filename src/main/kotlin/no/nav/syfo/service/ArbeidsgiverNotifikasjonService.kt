@@ -5,6 +5,8 @@ import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
+import no.nav.syfo.service.Meldingstype.BESKJED
+import no.nav.syfo.service.Meldingstype.OPPGAVE
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -16,10 +18,10 @@ class ArbeidsgiverNotifikasjonService(
     val dineSykmeldteUrl: String,
 ) {
 
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.ArbeidsgiverNotifikasjonService")
+    private val log: Logger = LoggerFactory.getLogger(ArbeidsgiverNotifikasjonService::class.qualifiedName)
 
     fun sendNotifikasjon(
-        arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonInput
+        arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonInput,
     ) {
         runBlocking {
             val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(arbeidsgiverNotifikasjon.ansattFnr, arbeidsgiverNotifikasjon.virksomhetsnummer)
@@ -48,7 +50,11 @@ class ArbeidsgiverNotifikasjonService(
                 arbeidsgiverNotifikasjon.emailBody,
                 arbeidsgiverNotifikasjon.hardDeleteDate,
             )
-            arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjonen)
+
+            when (arbeidsgiverNotifikasjon.meldingstype) {
+                BESKJED -> arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjonen)
+                OPPGAVE -> arbeidsgiverNotifikasjonProdusent.createNewTaskForArbeidsgiver(arbeidsgiverNotifikasjonen)
+            }
         }
     }
 
@@ -56,8 +62,8 @@ class ArbeidsgiverNotifikasjonService(
         arbeidsgiverNotifikasjonProdusent.deleteNotifikasjonForArbeidsgiver(
             ArbeidsgiverDeleteNotifikasjon(
                 merkelapp,
-                eksternReferanse
-            )
+                eksternReferanse,
+            ),
         )
 }
 
@@ -71,5 +77,10 @@ data class ArbeidsgiverNotifikasjonInput(
     val emailTitle: String,
     val emailBody: String,
     val hardDeleteDate: LocalDateTime,
+    val meldingstype: Meldingstype = BESKJED,
 )
 
+enum class Meldingstype {
+    OPPGAVE,
+    BESKJED,
+}

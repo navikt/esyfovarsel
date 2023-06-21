@@ -1,7 +1,13 @@
 package no.nav.syfo.service
 
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.*
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT
+import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
+import no.nav.syfo.DINE_SYKMELDTE_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
+import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_SVAR_MOTEBEHOV_MESSAGE_TEXT
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
@@ -64,6 +70,7 @@ class MotebehovVarselService(
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
                 LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+                Meldingstype.OPPGAVE,
             ),
         )
     }

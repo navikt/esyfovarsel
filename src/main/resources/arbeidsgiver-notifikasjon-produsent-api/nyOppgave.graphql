@@ -1,0 +1,61 @@
+mutation OpprettNyOppgave(
+    $eksternId: String!
+    $virksomhetsnummer: String!
+    $lenke: String!
+    $naermesteLederFnr: String!
+    $ansattFnr: String!
+    $merkelapp: String!
+    $tekst: String!
+    $epostadresse: String!
+    $epostTittel: String!
+    $epostHtmlBody: String!
+    $sendevindu: Sendevindu = LOEPENDE
+    $hardDeleteDate: ISO8601LocalDateTime
+) {
+    nyOppgave(nyOppgave: {
+        metadata: {
+            eksternId: $eksternId
+            virksomhetsnummer: $virksomhetsnummer
+            hardDelete: {
+                den: $hardDeleteDate
+            }
+        }
+        mottakere: [
+            {
+                naermesteLeder: {
+                    naermesteLederFnr: $naermesteLederFnr
+                    ansattFnr: $ansattFnr
+                }
+            }
+        ]
+        notifikasjon: {
+            merkelapp: $merkelapp
+            tekst: $tekst
+            lenke: $lenke
+        }
+        eksterneVarsler: [
+            {
+                epost: {
+                    mottaker: {
+                        kontaktinfo: {
+                            epostadresse: $epostadresse
+                        }
+                    }
+                    epostTittel: $epostTittel
+                    epostHtmlBody: $epostHtmlBody
+                    sendetidspunkt: {
+                        sendevindu: $sendevindu
+                    }
+                }
+            }
+        ]
+    }) {
+        __typename
+        ... on NyOppgaveVellykket {
+            id
+        }
+        ... on Error {
+            feilmelding
+        }
+    }
+}
