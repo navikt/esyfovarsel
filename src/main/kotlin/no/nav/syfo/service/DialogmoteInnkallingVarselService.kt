@@ -32,29 +32,21 @@ class DialogmoteInnkallingVarselService(
     }
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
-        val text = getArbeidstakerVarselText(varselHendelse.type)
-        val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
         val jounalpostData = dataToVarselDataJournalpost(varselHendelse.data)
         val varselUuid = jounalpostData.uuid
-        val url = getVarselUrl(varselHendelse, varselUuid)
         val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerFnr)
+        val tekst = getArbeidstakerVarselText(varselHendelse.type)
 
         if (userAccessStatus.canUserBeDigitallyNotified) {
-            senderFacade.sendTilBrukernotifikasjoner(
-                varselUuid,
-                arbeidstakerFnr,
-                text,
-                url,
-                varselHendelse,
-                meldingType,
-            )
-        } else {
+            varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid, tekst, true)
+        } else if (userAccessStatus.canUserBePhysicallyNotified) {
             val journalpostId = jounalpostData.id
-            if (userAccessStatus.canUserBePhysicallyNotified && journalpostId !== null) {
-                sendFysiskBrevlTilArbeidstaker(varselUuid, varselHendelse, journalpostId)
-            }
-            log.info("Received journalpostId is null for user reserved from digital communication and with no addressebeskyttelse")
+            journalpostId?.let {
+                sendFysiskBrevTilArbeidstaker(varselUuid, varselHendelse, journalpostId)
+            } ?: log.info("Received journalpostId is null for user reserved from digital communication and with no addressebeskyttelse")
+        } else {
+            varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid, tekst, false)
         }
     }
 
@@ -65,7 +57,21 @@ class DialogmoteInnkallingVarselService(
         return URL("$dialogmoterUrl/sykmeldt/moteinnkalling")
     }
 
-    private fun sendFysiskBrevlTilArbeidstaker(
+    private fun varsleArbeidstakerViaBrukernotifkasjoner(
+        varselHendelse: ArbeidstakerHendelse,
+        varselUuid: String,
+        tekst: String,
+        eksternVarsling: Boolean,
+    ) {
+        val url = getVarselUrl(varselHendelse, varselUuid)
+        val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
+        val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
+        senderFacade.sendTilBrukernotifikasjoner(
+            varselUuid, arbeidstakerFnr, tekst, url, varselHendelse, meldingType, eksternVarsling
+        )
+    }
+
+    private fun sendFysiskBrevTilArbeidstaker(
         uuid: String,
         arbeidstakerHendelse: ArbeidstakerHendelse,
         journalpostId: String,

@@ -16,6 +16,9 @@ class AccessControlService(val pdlConsumer: PdlConsumer, val dkifConsumer: DkifC
         )
     }
 
+    fun canUserBeNotifiedByEmailOrSMS(fnr: String) =
+        getUserAccessStatus(fnr).canUserBeDigitallyNotified
+
     private fun canUserBeDigitallyNotified(isKode6Eller7: Boolean?, isKanVarsles: Boolean?): Boolean {
         return false == isKode6Eller7 && true == isKanVarsles
     }

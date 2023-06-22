@@ -54,7 +54,7 @@ object SendVarselServiceTestSpek : Spek({
     val aktivitetskravVarselFinder = mockk<AktivitetskravVarselFinder>(relaxed = true)
     val sykmeldingServiceMockk = SykmeldingService(sykmeldingerConsumerMock)
     val brukernotifikasjonerServiceMockk =
-        BrukernotifikasjonerService(brukernotifikasjonKafkaProducerMockk, accessControlServiceMockk)
+        BrukernotifikasjonerService(brukernotifikasjonKafkaProducerMockk)
     val pdfgenConsumerMockk: PdfgenConsumer = mockk(relaxed = true)
 
     val senderFacade =
@@ -127,7 +127,7 @@ object SendVarselServiceTestSpek : Spek({
                 )
             }
 
-            verify(exactly = 1) { brukernotifikasjonKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
+            verify(exactly = 1) { brukernotifikasjonKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any(), any()) }
             verify(exactly = 1) { dineSykmeldteHendelseKafkaProducerMockk.sendVarsel(any()) }
             verify(exactly = 1) { arbeidsgiverNotifikasjonServiceMockk.sendNotifikasjon(any()) }
         }
@@ -158,7 +158,7 @@ object SendVarselServiceTestSpek : Spek({
                 )
             }
 
-            verify(exactly = 1) { brukernotifikasjonKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
+            verify(exactly = 1) { brukernotifikasjonKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any(), any()) }
             verify(exactly = 0) { dineSykmeldteHendelseKafkaProducerMockk.sendVarsel(any()) }
             verify(exactly = 0) { arbeidsgiverNotifikasjonServiceMockk.sendNotifikasjon(any()) }
         }
@@ -190,7 +190,7 @@ object SendVarselServiceTestSpek : Spek({
                 )
             }
 
-            verify(exactly = 1) { brukernotifikasjonKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any()) }
+            verify(exactly = 1) { brukernotifikasjonKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any(), any()) }
         }
     }
 })
