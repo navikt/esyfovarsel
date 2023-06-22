@@ -20,7 +20,7 @@ val flywayVersion = "7.5.2"
 val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.15.2"
 val postgresEmbeddedVersion = "0.13.3"
-val kafkaVersion = "2.7.0"
+val kafkaVersion = "2.8.2"
 val avroVersion = "1.11.0"
 val confluentVersion = "7.4.0"
 val brukernotifikasjonerSchemaVersion = "2.5.1"
@@ -52,6 +52,14 @@ configurations.all {
         if (requested.group == "org.scala-lang" && requested.name == "scala-library" && (requested.version == "2.13.3")) {
             useVersion("2.13.9")
             because("fixes critical bug CVE-2022-36944 in 2.13.6")
+        }
+        if (requested.group == "io.netty" && requested.name == "netty-handler" && requested.version == "4.1.92.Final") {
+            useVersion("4.1.94.Final")
+            because("fixes bug CVE-2023-34462")
+        }
+        if (requested.group == "com.google.guava" && requested.name == "guava" && requested.version == "30.1.1-jre") {
+            useVersion("32.0.0-jre")
+            because("fixes bug CVE-2023-2976")
         }
     }
 }
