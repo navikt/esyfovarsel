@@ -3,6 +3,7 @@ package no.nav.syfo.testutil.mocks
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.call
@@ -11,7 +12,9 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.netty.NettyApplicationEngine
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -42,6 +45,42 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
         return mockServer(authEnv.aadAccessTokenUrl) {
             post {
                 call.respond(tokenFromAzureServer)
+            }
+        }
+    }
+
+
+    fun mockArbeidsgiverNotifikasjonServer(): NettyApplicationEngine {
+        return mockServer(urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl) {
+            val responseNyBeskjed = """
+                {
+                  "data": {
+                    "nyBeskjed": {
+                      "__typename": "NyBeskjedVellykket",
+                      "id": "d69f8c4f-8d34-47b0-9539-d3c2e54115da"
+                    }
+                  }
+                }
+            """
+            val responseNyOppgave = """
+                {
+                  "data": {
+                    "nyOppgave": {
+                      "__typename": "NyOppgaveVellykket",
+                      "id": "d69f8c4f-8d34-47b0-9539-d3c2e54115da"
+                    }
+                  }
+                }
+            """
+            post("/") {
+                val body = call.receiveText()
+                if (body.contains("OpprettNyOppgave")) {
+                    call.respondText(responseNyOppgave, ContentType.Application.Json)
+                } else if (body.contains("OpprettNyBeskjed")) {
+                    call.respondText(responseNyBeskjed, ContentType.Application.Json)
+                } else {
+                    call.respond(HttpStatusCode.InternalServerError)
+                }
             }
         }
     }
