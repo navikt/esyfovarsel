@@ -15,7 +15,7 @@ import java.util.*
 
 class UtbetalingKafkaConsumer(
     val env: Environment,
-    private val sykepengerMaxDateService: SykepengerMaxDateService
+    private val sykepengerMaxDateService: SykepengerMaxDateService,
 ) : KafkaListener {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.UtbetalingKafkaConsumer")
     private val kafkaListener: KafkaConsumer<String, String>
@@ -31,7 +31,6 @@ class UtbetalingKafkaConsumer(
         log.info("Started listening to topic $topicUtbetaling")
         while (applicationState.running) {
             kafkaListener.poll(zeroMillis).forEach {
-                log.info("Received message ${it.key()} from topic $topicUtbetaling")
                 try {
                     val utbetaling: UtbetalingUtbetalt = objectMapper.readValue(it.value())
                     if (utbetaling.event == "utbetaling_utbetalt") {
@@ -39,12 +38,12 @@ class UtbetalingKafkaConsumer(
                     }
                 } catch (e: IOException) {
                     log.error(
-                        "Error in [$topicUtbetaling]-listener: Could not parse message. Check topic Schema"
+                        "Error in [$topicUtbetaling]-listener: Could not parse message. Check topic Schema",
                     )
                 } catch (e: Exception) {
                     log.error(
                         "Exception in [$topicUtbetaling]-listener: $e",
-                        e
+                        e,
                     )
                 }
                 kafkaListener.commitSync()
