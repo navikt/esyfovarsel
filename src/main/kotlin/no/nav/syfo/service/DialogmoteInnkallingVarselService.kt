@@ -39,8 +39,9 @@ class DialogmoteInnkallingVarselService(
         val varselUuid = jounalpostData.uuid
         val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerFnr)
-
+        log.info("[Checking 123] varselHendelse.type: ${varselHendelse.type}")
         if (userAccessStatus.canUserBeDigitallyNotified) {
+            log.info("[Checking 1234] varselHendelse.type: ${varselHendelse.type}")
             senderFacade.sendTilBrukernotifikasjoner(
                 varselUuid,
                 arbeidstakerFnr,
@@ -49,8 +50,8 @@ class DialogmoteInnkallingVarselService(
                 varselHendelse,
                 meldingType,
             )
-
             if (varselHendelse.type == SM_DIALOGMOTE_REFERAT) {
+                log.info("[Checking 12345] varselHendelse.type: ${varselHendelse.type}")
                 senderFacade.sendTilBrukernotifikasjoner(
                     varselUuid,
                     arbeidstakerFnr,

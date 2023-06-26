@@ -19,8 +19,10 @@ class VarselBusService(
         varselHendelse: EsyfovarselHendelse,
     ) {
         if (varselHendelse.skalFerdigstilles()) {
+            log.info("[Checking 123456] varselHendelse.type: ${varselHendelse.type}")
             ferdigstillVarsel(varselHendelse)
         } else {
+            log.info("[Checking 1234567] varselHendelse.type: ${varselHendelse.type}")
             when (varselHendelse.type) {
                 NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
                 SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
