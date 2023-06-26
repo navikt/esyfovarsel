@@ -17,7 +17,7 @@ class UtbetalingKafkaConsumer(
     val env: Environment,
     private val sykepengerMaxDateService: SykepengerMaxDateService,
 ) : KafkaListener {
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.UtbetalingKafkaConsumer")
+    private val log: Logger = LoggerFactory.getLogger(UtbetalingKafkaConsumer::class.java)
     private val kafkaListener: KafkaConsumer<String, String>
     private val objectMapper = createObjectMapper()
 
@@ -31,6 +31,7 @@ class UtbetalingKafkaConsumer(
         log.info("Started listening to topic $topicUtbetaling")
         while (applicationState.running) {
             kafkaListener.poll(zeroMillis).forEach {
+                log.info("Received record from topic $topicUtbetaling")
                 try {
                     val utbetaling: UtbetalingUtbetalt = objectMapper.readValue(it.value())
                     if (utbetaling.event == "utbetaling_utbetalt") {
