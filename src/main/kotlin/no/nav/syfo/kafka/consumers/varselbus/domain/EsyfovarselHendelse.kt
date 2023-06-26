@@ -7,6 +7,7 @@ import java.io.Serializable
 import java.time.LocalDateTime
 
 private val objectMapper = createObjectMapper()
+
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
 sealed interface EsyfovarselHendelse : Serializable {
     val type: HendelseType
@@ -20,7 +21,7 @@ data class NarmesteLederHendelse(
     override var data: Any?,
     val narmesteLederFnr: String,
     val arbeidstakerFnr: String,
-    val orgnummer: String
+    val orgnummer: String,
 ) : EsyfovarselHendelse
 
 data class ArbeidstakerHendelse(
@@ -28,7 +29,7 @@ data class ArbeidstakerHendelse(
     override val ferdigstill: Boolean?,
     override var data: Any?,
     val arbeidstakerFnr: String,
-    val orgnummer: String?
+    val orgnummer: String?,
 ) : EsyfovarselHendelse
 
 data class VarselData(
@@ -39,15 +40,15 @@ data class VarselData(
 
 data class VarselDataJournalpost(
     val uuid: String,
-    val id: String?
+    val id: String?,
 )
 
 data class VarselDataNarmesteLeder(
-    val navn: String?
+    val navn: String?,
 )
 
 data class VarselDataMotetidspunkt(
-    val tidspunkt: LocalDateTime
+    val tidspunkt: LocalDateTime,
 )
 
 enum class HendelseType {
@@ -72,12 +73,14 @@ fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
     if (eventType !in listOf(
             HendelseType.SM_DIALOGMOTE_INNKALT,
             HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
-            HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV
+            HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
         )
-    ) throw IllegalArgumentException(
-        "${eventType.name} er ikke gyldig hendelse for å hente ut " +
-            "'synligTom'-felt"
-    )
+    ) {
+        throw IllegalArgumentException(
+            "${eventType.name} er ikke gyldig hendelse for å hente ut " +
+                "'synligTom'-felt",
+        )
+    }
     return if (eventType != HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV) this.motetidspunkt() else null
 }
 
@@ -92,5 +95,5 @@ private fun ArbeidstakerHendelse.motetidspunkt(): LocalDateTime {
 fun Any.toVarselData(): VarselData =
     objectMapper.readValue(
         this.toString(),
-        VarselData::class.java
+        VarselData::class.java,
     )

@@ -42,8 +42,24 @@ class DialogmoteInnkallingVarselService(
 
         if (userAccessStatus.canUserBeDigitallyNotified) {
             senderFacade.sendTilBrukernotifikasjoner(
-                varselUuid, arbeidstakerFnr, text, url, varselHendelse, meldingType
+                varselUuid,
+                arbeidstakerFnr,
+                text,
+                url,
+                varselHendelse,
+                meldingType,
             )
+
+            if (varselHendelse.type == SM_DIALOGMOTE_REFERAT) {
+                senderFacade.sendTilBrukernotifikasjoner(
+                    varselUuid,
+                    arbeidstakerFnr,
+                    text,
+                    url,
+                    varselHendelse,
+                    BrukernotifikasjonKafkaProducer.MeldingType.DONE,
+                )
+            }
         } else {
             val journalpostId = jounalpostData.id
             if (userAccessStatus.canUserBePhysicallyNotified && journalpostId !== null) {
@@ -86,12 +102,12 @@ class DialogmoteInnkallingVarselService(
                 sms,
                 emailTitle,
                 emailBody,
-                hardDeleteDate
+                hardDeleteDate,
             )
 
             senderFacade.sendTilArbeidsgiverNotifikasjon(
                 varselHendelse,
-                input
+                input,
             )
         } else {
             log.warn("Kunne ikke mappe tekstene til arbeidsgiver-tekst for dialogmote varsel av type: ${varselHendelse.type.name}")
@@ -107,7 +123,7 @@ class DialogmoteInnkallingVarselService(
                 oppgavetype = varselHendelse.type.toDineSykmeldteHendelseType().toString(),
                 lenke = null,
                 tekst = varselText,
-                utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
+                utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
             )
             senderFacade.sendTilDineSykmeldte(varselHendelse, dineSykmeldteVarsel)
         }
