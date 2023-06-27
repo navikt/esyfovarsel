@@ -50,17 +50,6 @@ class DialogmoteInnkallingVarselService(
                 varselHendelse,
                 meldingType,
             )
-            if (varselHendelse.type == SM_DIALOGMOTE_REFERAT) {
-                log.info("[Checking 12345] varselHendelse.type: ${varselHendelse.type} | uuid: $varselUuid")
-                senderFacade.sendTilBrukernotifikasjoner(
-                    varselUuid,
-                    arbeidstakerFnr,
-                    text,
-                    url,
-                    varselHendelse,
-                    BrukernotifikasjonKafkaProducer.MeldingType.DONE,
-                )
-            }
         } else {
             val journalpostId = jounalpostData.id
             if (userAccessStatus.canUserBePhysicallyNotified && journalpostId !== null) {
