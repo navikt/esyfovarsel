@@ -39,14 +39,11 @@ class DialogmoteInnkallingVarselService(
         val varselUuid = jounalpostData.uuid
         val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerFnr)
-        log.info("[Checking 123] varselHendelse.type: ${varselHendelse.type}")
+
         if (userAccessStatus.canUserBeDigitallyNotified) {
-            log.info("[Checking 1234] varselHendelse.type: ${varselHendelse.type} | uuid: $varselUuid")
-            log.info("[Checking 1234-1] varselHendelse.type: ${varselHendelse.type} | url: $url")
             if (varselHendelse.type === SM_DIALOGMOTE_REFERAT) {
                 url = URL("$dialogmoterUrl/sykmeldt/referat/$varselUuid")
             }
-            log.info("[Checking 1234-2] varselHendelse.type: ${varselHendelse.type} | url: $url")
             senderFacade.sendTilBrukernotifikasjoner(
                 varselUuid,
                 arbeidstakerFnr,

@@ -24,13 +24,10 @@ class BrukernotifikasjonerService(
                 BrukernotifikasjonKafkaProducer.MeldingType.BESKJED,
                 -> {
                     brukernotifikasjonKafkaProducer.sendBeskjed(mottakerFnr, content, uuid, url)
-                    log.info("[Checking 12345678] skal sende beskjed nå! UUID: $uuid")
                     log.info("Har sendt beskjed med uuid $uuid til brukernotifikasjoner: $content")
                 }
                 BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE -> {
                     brukernotifikasjonKafkaProducer.sendOppgave(mottakerFnr, content, uuid, url)
-                    log.info("[Checking 12345678] skal sende oppgave nå! UUID: $uuid")
-
                     log.info("Har sendt oppgave med uuid $uuid til brukernotifikasjoner: $content")
                 }
 
