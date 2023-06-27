@@ -51,7 +51,7 @@ class DialogmoteInnkallingVarselService(
                 meldingType,
             )
             if (varselHendelse.type == SM_DIALOGMOTE_REFERAT) {
-                log.info("[Checking 12345] varselHendelse.type: ${varselHendelse.type} | uuid: $uuid")
+                log.info("[Checking 12345] varselHendelse.type: ${varselHendelse.type} | uuid: $varselUuid")
                 senderFacade.sendTilBrukernotifikasjoner(
                     varselUuid,
                     arbeidstakerFnr,
