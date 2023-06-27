@@ -46,9 +46,6 @@ class BrukernotifikasjonerService(
         uuid: String,
         mottakerFnr: String,
     ) {
-        log.info(
-            "[Checking 12345678] skal ferdigslle vrsel nå! UUID: $uuid",
-        )
         brukernotifikasjonKafkaProducer.sendDone(uuid, mottakerFnr)
         log.info("Har sendt done med uuid $uuid til brukernotifikasjoner")
     }
