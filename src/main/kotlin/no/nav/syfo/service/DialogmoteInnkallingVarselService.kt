@@ -32,7 +32,7 @@ class DialogmoteInnkallingVarselService(
     }
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
-        val url = URL("$dialogmoterUrl/sykmeldt/moteinnkalling")
+        var url = URL("$dialogmoterUrl/sykmeldt/moteinnkalling")
         val text = getArbeidstakerVarselText(varselHendelse.type)
         val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
         val jounalpostData = dataToVarselDataJournalpost(varselHendelse.data)
@@ -42,6 +42,11 @@ class DialogmoteInnkallingVarselService(
         log.info("[Checking 123] varselHendelse.type: ${varselHendelse.type}")
         if (userAccessStatus.canUserBeDigitallyNotified) {
             log.info("[Checking 1234] varselHendelse.type: ${varselHendelse.type} | uuid: $varselUuid")
+            log.info("[Checking 1234-1] varselHendelse.type: ${varselHendelse.type} | url: $url")
+            if (varselHendelse.type === SM_DIALOGMOTE_REFERAT) {
+                url = URL("$dialogmoterUrl/sykmeldt/referat$varselUuid")
+            }
+            log.info("[Checking 1234-2] varselHendelse.type: ${varselHendelse.type} | url: $url")
             senderFacade.sendTilBrukernotifikasjoner(
                 varselUuid,
                 arbeidstakerFnr,
