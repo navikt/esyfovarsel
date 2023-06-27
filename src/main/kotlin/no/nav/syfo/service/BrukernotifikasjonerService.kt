@@ -21,12 +21,15 @@ class BrukernotifikasjonerService(
         // Recheck if user can be notified in case of recent 'Addressesperre'
         if (accessControlService.getUserAccessStatus(mottakerFnr).canUserBeDigitallyNotified) {
             when (meldingType) {
-                BrukernotifikasjonKafkaProducer.MeldingType.BESKJED -> {
+                "[Checking 12345678] skal sende beskjed nå! UUID: $uuid"
+                BrukernotifikasjonKafkaProducer.MeldingType.BESKJED,
+                -> {
                     brukernotifikasjonKafkaProducer.sendBeskjed(mottakerFnr, content, uuid, url)
                     log.info("Har sendt beskjed med uuid $uuid til brukernotifikasjoner: $content")
                 }
 
                 BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE -> {
+                    "[Checking 12345678] skal sende oppgave nå! UUID: $uuid"
                     brukernotifikasjonKafkaProducer.sendOppgave(mottakerFnr, content, uuid, url)
                     log.info("Har sendt oppgave med uuid $uuid til brukernotifikasjoner: $content")
                 }
@@ -46,7 +49,9 @@ class BrukernotifikasjonerService(
         uuid: String,
         mottakerFnr: String,
     ) {
-        log.info("[Checking 12345678] skal ferdigslle vrsel nå!")
+        log.info(
+            "[Checking 12345678] skal ferdigslle vrsel nå! UUID: $uuid",
+        )
         brukernotifikasjonKafkaProducer.sendDone(uuid, mottakerFnr)
         log.info("Har sendt done med uuid $uuid til brukernotifikasjoner")
     }
