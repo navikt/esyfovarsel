@@ -32,18 +32,15 @@ class DialogmoteInnkallingVarselService(
     }
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
-        var url = URL("$dialogmoterUrl/sykmeldt/moteinnkalling")
         val text = getArbeidstakerVarselText(varselHendelse.type)
         val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
         val jounalpostData = dataToVarselDataJournalpost(varselHendelse.data)
         val varselUuid = jounalpostData.uuid
+        val url = getVarselUrl(varselHendelse, varselUuid)
         val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerFnr)
 
         if (userAccessStatus.canUserBeDigitallyNotified) {
-            if (varselHendelse.type === SM_DIALOGMOTE_REFERAT) {
-                url = URL("$dialogmoterUrl/sykmeldt/referat/$varselUuid")
-            }
             senderFacade.sendTilBrukernotifikasjoner(
                 varselUuid,
                 arbeidstakerFnr,
@@ -59,6 +56,13 @@ class DialogmoteInnkallingVarselService(
             }
             log.info("Received journalpostId is null for user reserved from digital communication and with no addressebeskyttelse")
         }
+    }
+
+    private fun getVarselUrl(varselHendelse: ArbeidstakerHendelse, varselUuid: String): URL {
+        if (SM_DIALOGMOTE_REFERAT === varselHendelse.type) {
+            return URL("$dialogmoterUrl/sykmeldt/referat/$varselUuid")
+        }
+        return URL("$dialogmoterUrl/sykmeldt/moteinnkalling")
     }
 
     private fun sendFysiskBrevlTilArbeidstaker(
