@@ -44,7 +44,7 @@ class DialogmoteInnkallingVarselService(
             log.info("[Checking 1234] varselHendelse.type: ${varselHendelse.type} | uuid: $varselUuid")
             log.info("[Checking 1234-1] varselHendelse.type: ${varselHendelse.type} | url: $url")
             if (varselHendelse.type === SM_DIALOGMOTE_REFERAT) {
-                url = URL("$dialogmoterUrl/sykmeldt/referat$varselUuid")
+                url = URL("$dialogmoterUrl/sykmeldt/referat/$varselUuid")
             }
             log.info("[Checking 1234-2] varselHendelse.type: ${varselHendelse.type} | url: $url")
             senderFacade.sendTilBrukernotifikasjoner(
