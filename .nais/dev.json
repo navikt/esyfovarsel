@@ -14,7 +14,7 @@
     "TOGGLE_INFOTRYGD_KAFKA_CONSUMER": "true",
     "TOGGLE_UTBETALING_KAFKA_CONSUMER": "true",
     "BASE_URL_SYK_INFO": "https://www-gcp.dev.nav.no/syk/info",
-    "BASE_URL_DIALOGMOTER": "https://www-gcp.dev.nav.no/syk/dialogmoter",
+    "BASE_URL_DIALOGMOTER": "https://www.ekstern.dev.nav.no/syk/dialogmoter",
     "BASE_URL_OPPFOLGINGSPLANER": "https://www-gcp.dev.nav.no/syk/oppfolgingsplaner",
     "AG_NOTIFIKASJON_PRODUSENT_API_URL": "http://notifikasjon-produsent-api.fager/api/graphql",
     "AG_NOTIFIKASJON_PRODUSENT_API_SCOPE": "api://dev-gcp.fager.notifikasjon-produsent-api/.default",
