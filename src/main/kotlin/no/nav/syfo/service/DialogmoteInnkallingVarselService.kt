@@ -50,7 +50,7 @@ class DialogmoteInnkallingVarselService(
         }
     }
 
-    private fun getVarselUrl(varselHendelse: ArbeidstakerHendelse, varselUuid: String): URL {
+    fun getVarselUrl(varselHendelse: ArbeidstakerHendelse, varselUuid: String): URL {
         if (SM_DIALOGMOTE_REFERAT === varselHendelse.type) {
             return URL("$dialogmoterUrl/sykmeldt/referat/$varselUuid")
         }
@@ -211,7 +211,7 @@ class DialogmoteInnkallingVarselService(
         } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
 
-    private fun getMeldingTypeForSykmeldtVarsling(hendelseType: HendelseType): BrukernotifikasjonKafkaProducer.MeldingType {
+    fun getMeldingTypeForSykmeldtVarsling(hendelseType: HendelseType): BrukernotifikasjonKafkaProducer.MeldingType {
         return when (hendelseType) {
             SM_DIALOGMOTE_INNKALT -> BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
             SM_DIALOGMOTE_AVLYST -> BrukernotifikasjonKafkaProducer.MeldingType.BESKJED
