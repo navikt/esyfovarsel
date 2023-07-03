@@ -39,14 +39,14 @@ class DialogmoteInnkallingVarselService(
         val tekst = getArbeidstakerVarselText(varselHendelse.type)
 
         if (userAccessStatus.canUserBeDigitallyNotified) {
-            varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid, tekst, true)
+            varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid, tekst, eksternVarsling = true)
         } else if (userAccessStatus.canUserBePhysicallyNotified) {
             val journalpostId = jounalpostData.id
             journalpostId?.let {
                 sendFysiskBrevTilArbeidstaker(varselUuid, varselHendelse, journalpostId)
             } ?: log.info("Received journalpostId is null for user reserved from digital communication and with no addressebeskyttelse")
         } else {
-            varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid, tekst, false)
+            varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid, tekst, eksternVarsling = false)
         }
     }
 

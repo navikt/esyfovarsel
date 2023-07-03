@@ -25,9 +25,9 @@ class OppfolgingsplanVarselService(
         varselHendelse: ArbeidstakerHendelse
     ) {
         if (accessControlService.canUserBeNotifiedByEmailOrSMS(varselHendelse.arbeidstakerFnr)) {
-            varsleArbeidstakerViaBrukernotifikasjoner(varselHendelse, true)
+            varsleArbeidstakerViaBrukernotifikasjoner(varselHendelse,eksternVarsling = true)
         } else {
-            varsleArbeidstakerViaBrukernotifikasjoner(varselHendelse, false)
+            varsleArbeidstakerViaBrukernotifikasjoner(varselHendelse, eksternVarsling = false)
         }
     }
 

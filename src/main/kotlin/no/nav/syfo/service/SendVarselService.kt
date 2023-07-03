@@ -177,7 +177,7 @@ class SendVarselService(
         varselUrl: URL,
     ) {
         log.info("Sender varsel til Brukernotifikasjoner for uuid $uuid")
-        brukernotifikasjonKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl, true)
+        brukernotifikasjonKafkaProducer.sendBeskjed(fnr, varselContent, uuid, varselUrl, eksternVarsling = true)
         log.info("Har sendt varsel til Brukernotifikasjoner for uuid $uuid")
     }
 
