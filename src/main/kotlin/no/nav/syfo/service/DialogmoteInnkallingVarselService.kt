@@ -36,17 +36,16 @@ class DialogmoteInnkallingVarselService(
         val varselUuid = jounalpostData.uuid
         val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerFnr)
-        val tekst = getArbeidstakerVarselText(varselHendelse.type)
 
         if (userAccessStatus.canUserBeDigitallyNotified) {
-            varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid, tekst, eksternVarsling = true)
+            varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid, eksternVarsling = true)
         } else if (userAccessStatus.canUserBePhysicallyNotified) {
             val journalpostId = jounalpostData.id
             journalpostId?.let {
                 sendFysiskBrevTilArbeidstaker(varselUuid, varselHendelse, journalpostId)
             } ?: log.info("Received journalpostId is null for user reserved from digital communication and with no addressebeskyttelse")
         } else {
-            varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid, tekst, eksternVarsling = false)
+            varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid, eksternVarsling = false)
         }
     }
 
@@ -60,9 +59,9 @@ class DialogmoteInnkallingVarselService(
     private fun varsleArbeidstakerViaBrukernotifkasjoner(
         varselHendelse: ArbeidstakerHendelse,
         varselUuid: String,
-        tekst: String,
         eksternVarsling: Boolean,
     ) {
+        val tekst = getArbeidstakerVarselText(varselHendelse.type)
         val url = getVarselUrl(varselHendelse, varselUuid)
         val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
         val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
