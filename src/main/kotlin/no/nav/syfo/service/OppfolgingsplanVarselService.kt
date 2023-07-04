@@ -5,6 +5,10 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
+import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
+import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
+import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
+import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -14,19 +18,17 @@ const val WEEKS_BEFORE_DELETE = 4L
 
 class OppfolgingsplanVarselService(
     val senderFacade: SenderFacade,
+    val accessControlService: AccessControlService,
     val oppfolgingsplanerUrl: String
 ) {
-
     fun sendVarselTilArbeidstaker(
         varselHendelse: ArbeidstakerHendelse
     ) {
-        senderFacade.sendTilBrukernotifikasjoner(
-            UUID.randomUUID().toString(),
-            varselHendelse.arbeidstakerFnr,
-            BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT,
-            URL(oppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL),
-            varselHendelse
-        )
+        if (accessControlService.canUserBeNotifiedByEmailOrSMS(varselHendelse.arbeidstakerFnr)) {
+            varsleArbeidstakerViaBrukernotifikasjoner(varselHendelse,eksternVarsling = true)
+        } else {
+            varsleArbeidstakerViaBrukernotifikasjoner(varselHendelse, eksternVarsling = false)
+        }
     }
 
     fun sendVarselTilNarmesteLeder(
@@ -56,6 +58,20 @@ class OppfolgingsplanVarselService(
                 ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_BODY,
                 LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
             )
+        )
+    }
+
+    private fun varsleArbeidstakerViaBrukernotifikasjoner(
+        varselHendelse: ArbeidstakerHendelse,
+        eksternVarsling: Boolean,
+    ) {
+        senderFacade.sendTilBrukernotifikasjoner(
+            UUID.randomUUID().toString(),
+            varselHendelse.arbeidstakerFnr,
+            BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT,
+            URL(oppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL),
+            varselHendelse,
+            eksternVarsling = eksternVarsling
         )
     }
 }
