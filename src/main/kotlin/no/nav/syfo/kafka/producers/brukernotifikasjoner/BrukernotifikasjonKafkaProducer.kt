@@ -32,9 +32,15 @@ class BrukernotifikasjonKafkaProducer(
     private val namespace = "team-esyfo"
     private val groupingId = "ESYFOVARSEL"
 
-    fun sendBeskjed(fnr: String, content: String, uuid: String, varselUrl: URL) {
+    fun sendBeskjed(
+        fnr: String,
+        content: String,
+        uuid: String,
+        varselUrl: URL,
+        eksternVarsling: Boolean
+    ) {
         val nokkelInput = buildNewNokkelInput(uuid, fnr)
-        val beskjedInput = buildNewBeskjed(content, varselUrl)
+        val beskjedInput = buildNewBeskjed(content, varselUrl, eksternVarsling)
 
         val record = ProducerRecord(
             topicBrukernotifikasjonBeskjed,
@@ -95,16 +101,21 @@ class BrukernotifikasjonKafkaProducer(
             .build()
     }
 
-    private fun buildNewBeskjed(content: String, varselUrl: URL): BeskjedInput {
-        return BeskjedInputBuilder()
+    private fun buildNewBeskjed(
+        content: String,
+        varselUrl: URL,
+        eksternVarsling: Boolean,
+    ): BeskjedInput {
+        val builder = BeskjedInputBuilder()
             .withTidspunkt(LocalDateTime.now(UTCPlus1))
             .withTekst(content)
             .withLink(varselUrl)
             .withSikkerhetsnivaa(sikkerhetsNiva)
             .withSynligFremTil(null)
-            .withEksternVarsling(true)
-            .withPrefererteKanaler(PreferertKanal.SMS)
-            .build()
+            .withEksternVarsling(eksternVarsling)
+        if (eksternVarsling)
+            builder.withPrefererteKanaler(PreferertKanal.SMS)
+        return builder.build()
     }
 
     fun buildNewOppgave(content: String, varselUrl: URL): OppgaveInput = OppgaveInputBuilder()

@@ -131,7 +131,7 @@ fun main() {
                 val replanleggingService =
                     ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
                 val brukernotifikasjonerService =
-                    BrukernotifikasjonerService(brukernotifikasjonKafkaProducer, accessControlService)
+                    BrukernotifikasjonerService(brukernotifikasjonKafkaProducer)
                 val senderFacade = SenderFacade(
                     dineSykmeldteHendelseKafkaProducer,
                     dittSykefravaerMeldingKafkaProducer,
@@ -151,7 +151,7 @@ fun main() {
                     accessControlService,
                 )
                 val oppfolgingsplanVarselService =
-                    OppfolgingsplanVarselService(senderFacade, env.urlEnv.oppfolgingsplanerUrl)
+                    OppfolgingsplanVarselService(senderFacade, accessControlService, env.urlEnv.oppfolgingsplanerUrl)
                 val sykepengerMaxDateService = SykepengerMaxDateService(database, pdlConsumer)
                 val pdfgenConsumer = PdfgenConsumer(env.urlEnv, pdlConsumer, database)
                 val merVeiledningVarselService = MerVeiledningVarselService(

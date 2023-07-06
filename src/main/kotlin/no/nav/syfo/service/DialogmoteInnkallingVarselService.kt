@@ -32,40 +32,45 @@ class DialogmoteInnkallingVarselService(
     }
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
-        val text = getArbeidstakerVarselText(varselHendelse.type)
-        val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
         val jounalpostData = dataToVarselDataJournalpost(varselHendelse.data)
         val varselUuid = jounalpostData.uuid
-        val url = getVarselUrl(varselHendelse, varselUuid)
         val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerFnr)
 
         if (userAccessStatus.canUserBeDigitallyNotified) {
-            senderFacade.sendTilBrukernotifikasjoner(
-                varselUuid,
-                arbeidstakerFnr,
-                text,
-                url,
-                varselHendelse,
-                meldingType,
-            )
-        } else {
+            varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid, eksternVarsling = true)
+        } else if (userAccessStatus.canUserBePhysicallyNotified) {
             val journalpostId = jounalpostData.id
-            if (userAccessStatus.canUserBePhysicallyNotified && journalpostId !== null) {
-                sendFysiskBrevlTilArbeidstaker(varselUuid, varselHendelse, journalpostId)
-            }
-            log.info("Received journalpostId is null for user reserved from digital communication and with no addressebeskyttelse")
+            journalpostId?.let {
+                sendFysiskBrevTilArbeidstaker(varselUuid, varselHendelse, journalpostId)
+            } ?: log.info("Received journalpostId is null for user reserved from digital communication and with no addressebeskyttelse")
+        } else {
+            varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid, eksternVarsling = false)
         }
     }
 
-    private fun getVarselUrl(varselHendelse: ArbeidstakerHendelse, varselUuid: String): URL {
+    fun getVarselUrl(varselHendelse: ArbeidstakerHendelse, varselUuid: String): URL {
         if (SM_DIALOGMOTE_REFERAT === varselHendelse.type) {
             return URL("$dialogmoterUrl/sykmeldt/referat/$varselUuid")
         }
         return URL("$dialogmoterUrl/sykmeldt/moteinnkalling")
     }
 
-    private fun sendFysiskBrevlTilArbeidstaker(
+    private fun varsleArbeidstakerViaBrukernotifkasjoner(
+        varselHendelse: ArbeidstakerHendelse,
+        varselUuid: String,
+        eksternVarsling: Boolean,
+    ) {
+        val tekst = getArbeidstakerVarselText(varselHendelse.type)
+        val url = getVarselUrl(varselHendelse, varselUuid)
+        val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
+        val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
+        senderFacade.sendTilBrukernotifikasjoner(
+            varselUuid, arbeidstakerFnr, tekst, url, varselHendelse, meldingType, eksternVarsling
+        )
+    }
+
+    private fun sendFysiskBrevTilArbeidstaker(
         uuid: String,
         arbeidstakerHendelse: ArbeidstakerHendelse,
         journalpostId: String,
@@ -205,7 +210,7 @@ class DialogmoteInnkallingVarselService(
         } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
 
-    private fun getMeldingTypeForSykmeldtVarsling(hendelseType: HendelseType): BrukernotifikasjonKafkaProducer.MeldingType {
+    fun getMeldingTypeForSykmeldtVarsling(hendelseType: HendelseType): BrukernotifikasjonKafkaProducer.MeldingType {
         return when (hendelseType) {
             SM_DIALOGMOTE_INNKALT -> BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
             SM_DIALOGMOTE_AVLYST -> BrukernotifikasjonKafkaProducer.MeldingType.BESKJED

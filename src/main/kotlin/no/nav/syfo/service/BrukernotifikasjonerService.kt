@@ -6,8 +6,7 @@ import org.slf4j.LoggerFactory
 import java.net.URL
 
 class BrukernotifikasjonerService(
-    val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,
-    val accessControlService: AccessControlService,
+    val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer
 ) {
     private val log: Logger = LoggerFactory.getLogger(BrukernotifikasjonerService::class.qualifiedName)
 
@@ -17,28 +16,24 @@ class BrukernotifikasjonerService(
         content: String,
         url: URL,
         meldingType: BrukernotifikasjonKafkaProducer.MeldingType?,
+        eksternVarsling: Boolean,
     ) {
-        // Recheck if user can be notified in case of recent 'Addressesperre'
-        if (accessControlService.getUserAccessStatus(mottakerFnr).canUserBeDigitallyNotified) {
-            when (meldingType) {
-                BrukernotifikasjonKafkaProducer.MeldingType.BESKJED,
-                -> {
-                    brukernotifikasjonKafkaProducer.sendBeskjed(mottakerFnr, content, uuid, url)
-                    log.info("Har sendt beskjed med uuid $uuid til brukernotifikasjoner: $content")
-                }
-                BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE -> {
-                    brukernotifikasjonKafkaProducer.sendOppgave(mottakerFnr, content, uuid, url)
-                    log.info("Har sendt oppgave med uuid $uuid til brukernotifikasjoner: $content")
-                }
-
-                BrukernotifikasjonKafkaProducer.MeldingType.DONE -> {
-                    ferdigstillVarsel(uuid, mottakerFnr)
-                }
-
-                else -> { throw RuntimeException("Ukjent typestreng") }
+        when (meldingType) {
+            BrukernotifikasjonKafkaProducer.MeldingType.BESKJED, -> {
+                brukernotifikasjonKafkaProducer.sendBeskjed(mottakerFnr, content, uuid, url, eksternVarsling)
+                log.info("Har sendt beskjed med uuid $uuid til brukernotifikasjoner: $content")
             }
-        } else {
-            throw RuntimeException("Kan ikke sende melding til bruker for melding med uuid $uuid: bruker er reservert for digital kommunikasjon")
+
+            BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE -> {
+                brukernotifikasjonKafkaProducer.sendOppgave(mottakerFnr, content, uuid, url)
+                log.info("Har sendt oppgave med uuid $uuid til brukernotifikasjoner: $content")
+            }
+
+            BrukernotifikasjonKafkaProducer.MeldingType.DONE -> {
+                ferdigstillVarsel(uuid, mottakerFnr)
+            }
+
+            else -> { throw RuntimeException("Ukjent typestreng") }
         }
     }
 

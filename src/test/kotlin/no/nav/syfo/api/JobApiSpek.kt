@@ -139,7 +139,7 @@ object JobApiSpek : Spek({
                 any(),
             )
         } returns SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = true)
-        coEvery { brukernotifikasjonKafkaProducer.sendBeskjed(any(), any(), any(), any()) } returns Unit
+        coEvery { brukernotifikasjonKafkaProducer.sendBeskjed(any(), any(), any(), any(), any()) } returns Unit
         coEvery { dokarkivService.getJournalpostId(any(), any(), any()) } returns "1"
         coEvery { sykmeldingService.isPersonSykmeldtPaDato(any(), any()) } returns true
         coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(any()) } returns true
