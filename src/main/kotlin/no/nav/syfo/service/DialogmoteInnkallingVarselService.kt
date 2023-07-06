@@ -66,7 +66,13 @@ class DialogmoteInnkallingVarselService(
         val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
         val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
         senderFacade.sendTilBrukernotifikasjoner(
-            varselUuid, arbeidstakerFnr, tekst, url, varselHendelse, meldingType, eksternVarsling
+            varselUuid,
+            arbeidstakerFnr,
+            tekst,
+            url,
+            varselHendelse,
+            meldingType,
+            eksternVarsling,
         )
     }
 
@@ -95,15 +101,16 @@ class DialogmoteInnkallingVarselService(
 
         if (!sms.isNullOrBlank() && !emailTitle.isNullOrBlank() && !emailBody.isNullOrBlank()) {
             val input = ArbeidsgiverNotifikasjonInput(
-                uuid,
-                orgnummer,
-                narmesteLederFnr,
-                arbeidstakerFnr,
-                ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
-                sms,
-                emailTitle,
-                emailBody,
-                hardDeleteDate,
+                uuid = uuid,
+                virksomhetsnummer = orgnummer,
+                narmesteLederFnr = narmesteLederFnr,
+                ansattFnr = arbeidstakerFnr,
+                merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
+                messageText = sms,
+                emailTitle = emailTitle,
+                emailBody = emailBody,
+                hardDeleteDate = hardDeleteDate,
+                meldingstype = Meldingstype.OPPGAVE,
             )
 
             senderFacade.sendTilArbeidsgiverNotifikasjon(
