@@ -5,10 +5,6 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
-import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
-import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
-import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
-import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -24,11 +20,8 @@ class OppfolgingsplanVarselService(
     fun sendVarselTilArbeidstaker(
         varselHendelse: ArbeidstakerHendelse
     ) {
-        if (accessControlService.canUserBeNotifiedByEmailOrSMS(varselHendelse.arbeidstakerFnr)) {
-            varsleArbeidstakerViaBrukernotifikasjoner(varselHendelse,eksternVarsling = true)
-        } else {
-            varsleArbeidstakerViaBrukernotifikasjoner(varselHendelse, eksternVarsling = false)
-        }
+        val eksternVarsling = accessControlService.canUserBeNotifiedByEmailOrSMS(varselHendelse.arbeidstakerFnr)
+        varsleArbeidstakerViaBrukernotifikasjoner(varselHendelse, eksternVarsling)
     }
 
     fun sendVarselTilNarmesteLeder(
