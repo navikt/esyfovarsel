@@ -35,7 +35,7 @@ class SyketilfelleKafkaConsumer(
     override suspend fun listen(applicationState: ApplicationState) {
         log.info("Started listening to topic $topicFlexSyketilfellebiter")
         while (applicationState.running) {
-            kafkaListener.poll(zeroMillis).forEach {
+            kafkaListener.poll(pollDurationInMillis).forEach {
                 try {
                     val kSyketilfellebit: KSyketilfellebit? = objectMapper.readValue(it.value())
                     if (kSyketilfellebit == null) {
