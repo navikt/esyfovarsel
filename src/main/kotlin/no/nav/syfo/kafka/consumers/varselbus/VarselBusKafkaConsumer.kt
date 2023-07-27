@@ -28,7 +28,7 @@ class VarselBusKafkaConsumer(
     override suspend fun listen(applicationState: ApplicationState) {
         log.info("Started listening to topic $topicVarselBus")
         while (applicationState.running) {
-            kafkaListener.poll(zeroMillis).forEach {
+            kafkaListener.poll(pollDurationInMillis).forEach {
                 try {
                     val varselEvent: EsyfovarselHendelse = objectMapper.readValue(it.value())
                     varselEvent.data = objectMapper.readTree(it.value())["data"]
