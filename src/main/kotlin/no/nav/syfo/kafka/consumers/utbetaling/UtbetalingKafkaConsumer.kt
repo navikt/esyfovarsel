@@ -30,7 +30,7 @@ class UtbetalingKafkaConsumer(
     override suspend fun listen(applicationState: ApplicationState) {
         log.info("Started listening to topic $topicUtbetaling")
         while (applicationState.running) {
-            kafkaListener.poll(zeroMillis).forEach {
+            kafkaListener.poll(pollDurationInMillis).forEach {
                 log.info("Received record from topic $topicUtbetaling")
                 try {
                     val utbetaling: UtbetalingUtbetalt = objectMapper.readValue(it.value())

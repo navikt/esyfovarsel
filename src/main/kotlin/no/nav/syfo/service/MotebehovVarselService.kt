@@ -29,8 +29,9 @@ const val DITT_SYKEFRAVAER_HENDELSE_TYPE_DIALOGMOTE_SVAR_MOTEBEHOV = "ESYFOVARSE
 
 class MotebehovVarselService(
     val senderFacade: SenderFacade,
-    dialogmoterUrl: String,
+    val accessControlService: AccessControlService,
     val sykmeldingService: SykmeldingService,
+    dialogmoterUrl: String,
 ) {
     val WEEKS_BEFORE_DELETE = 4L
     private val log: Logger = LoggerFactory.getLogger(MotebehovVarselService::class.qualifiedName)
@@ -89,6 +90,8 @@ class MotebehovVarselService(
     }
 
     private fun sendVarselTilBrukernotifikasjoner(varselHendelse: ArbeidstakerHendelse) {
+        val fnr = varselHendelse.arbeidstakerFnr
+        val eksternVarsling = accessControlService.canUserBeNotifiedByEmailOrSMS(fnr)
         val url = URL(svarMotebehovUrl)
         senderFacade.sendTilBrukernotifikasjoner(
             UUID.randomUUID().toString(),
@@ -97,6 +100,7 @@ class MotebehovVarselService(
             url,
             varselHendelse,
             OPPGAVE,
+            eksternVarsling
         )
     }
 

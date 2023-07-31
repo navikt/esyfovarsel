@@ -32,7 +32,7 @@ class InfotrygdKafkaConsumer(
     override suspend fun listen(applicationState: ApplicationState) {
         log.info("Started listening to topic $topicSykepengedagerInfotrygd")
         while (applicationState.running) {
-            kafkaListener.poll(zeroMillis).forEach {
+            kafkaListener.poll(pollDurationInMillis).forEach {
                 log.info("Received record from topic $topicSykepengedagerInfotrygd")
                 try {
                     val kInfotrygdSykepengedager: KInfotrygdSykepengedager = objectMapper.readValue(it.value())

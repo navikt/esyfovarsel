@@ -142,8 +142,9 @@ fun main() {
                 )
                 val motebehovVarselService = MotebehovVarselService(
                     senderFacade,
-                    env.urlEnv.dialogmoterUrl,
+                    accessControlService,
                     sykmeldingService,
+                    env.urlEnv.dialogmoterUrl,
                 )
                 val dialogmoteInnkallingVarselService = DialogmoteInnkallingVarselService(
                     senderFacade,
