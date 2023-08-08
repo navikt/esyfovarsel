@@ -1,10 +1,9 @@
+import io.kotest.core.spec.style.DescribeSpec
 import no.nav.syfo.utils.isAlderMindreEnnGittAr
 import org.amshove.kluent.shouldBe
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 
-object DateUtilSpek : Spek({
+class DateUtilSpek : DescribeSpec({
     describe("DateUtilSpek") {
         val maxAlder = 67
         it("Should return true if birthdate is under 67") {

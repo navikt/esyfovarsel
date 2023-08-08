@@ -1,6 +1,10 @@
 package no.nav.syfo.service
 
-import io.mockk.*
+import io.kotest.core.spec.style.DescribeSpec
+import io.mockk.clearAllMocks
+import io.mockk.justRun
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.syfo.db.arbeidstakerFnr1
 import no.nav.syfo.db.arbeidstakerFnr2
 import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
@@ -15,13 +19,11 @@ import no.nav.syfo.testutil.*
 import no.nav.syfo.utils.DuplicateMotebehovException
 import no.nav.syfo.utils.MotebehovAfterBookingException
 import no.nav.syfo.utils.VeilederAlreadyBookedMeetingException
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-object MikrofrontendServiceSpek : Spek({
+class MikrofrontendServiceSpek : DescribeSpec({
     val embeddedDatabase by lazy { EmbeddedDatabase() }
     val minSideMicrofrontendKafkaProducer: MinSideMicrofrontendKafkaProducer = mockk(relaxed = true)
     val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(embeddedDatabase)
@@ -31,14 +33,12 @@ object MikrofrontendServiceSpek : Spek({
         embeddedDatabase
     )
 
-    defaultTimeout = 20000L
-
-    afterEachTest {
+    afterTest {
         clearAllMocks()
         embeddedDatabase.connection.dropData()
     }
 
-    afterGroup {
+    afterSpec {
         embeddedDatabase.stop()
     }
 
@@ -49,15 +49,15 @@ object MikrofrontendServiceSpek : Spek({
         val tomorrow = today.plusDays(1L)
 
         val dataTidspunktToday: String = "{" +
-            "\"journalpost\":null," +
-            "\"narmesteLeder\":null," +
-            "\"motetidspunkt\":{\"tidspunkt\":\"$today\"}" +
-            "}"
+                "\"journalpost\":null," +
+                "\"narmesteLeder\":null," +
+                "\"motetidspunkt\":{\"tidspunkt\":\"$today\"}" +
+                "}"
         val dataTidspunktTomorrow: String = "{" +
-            "\"journalpost\":null," +
-            "\"narmesteLeder\":null," +
-            "\"motetidspunkt\":{\"tidspunkt\":\"$tomorrow\"}" +
-            "}"
+                "\"journalpost\":null," +
+                "\"narmesteLeder\":null," +
+                "\"motetidspunkt\":{\"tidspunkt\":\"$tomorrow\"}" +
+                "}"
 
         val arbeidstakerHendelseDialogmoteInnkalt = ArbeidstakerHendelse(
             type = HendelseType.SM_DIALOGMOTE_INNKALT,

@@ -7,7 +7,7 @@ Bruker også til å planlegge 39-ukers varsel for sykmeldt.
 * Kotlin
 * Ktor
 * Gradle
-* Spek
+* Kotest
 * Postgres
 * Kafka
 

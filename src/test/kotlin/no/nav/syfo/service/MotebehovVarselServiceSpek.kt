@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -12,18 +13,16 @@ import no.nav.syfo.db.orgnummer1
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 
-object MotebehovVarselServiceSpek : Spek({
+class MotebehovVarselServiceSpek : DescribeSpec({
     val senderFacade: SenderFacade = mockk(relaxed = true)
     val sykmeldingService: SykmeldingService = mockk(relaxed = true)
     val accessControlService = mockk<AccessControlService>()
-    val motebehovVarselService = MotebehovVarselService(senderFacade, accessControlService, sykmeldingService, "http://localhost")
-    defaultTimeout = 20000L
+    val motebehovVarselService =
+        MotebehovVarselService(senderFacade, accessControlService, sykmeldingService, "http://localhost")
 
     describe("MotebehovVarselServiceSpek") {
-        afterEachTest {
+        afterTest {
             clearAllMocks()
         }
 

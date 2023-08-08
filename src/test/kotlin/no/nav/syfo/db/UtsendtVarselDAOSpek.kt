@@ -1,6 +1,7 @@
 package no.nav.syfo.db
 
 
+import io.kotest.core.spec.style.DescribeSpec
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.VarselType
@@ -12,27 +13,21 @@ import no.nav.syfo.testutil.mocks.orgnummer
 import org.amshove.kluent.should
 import org.amshove.kluent.shouldMatchAllWith
 import org.amshove.kluent.shouldMatchAtLeastOneOf
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.util.*
 
-object UtsendtVarselDAOSpek : Spek({
-
-    // The default timeout of 10 seconds is not sufficient to initialise the embedded database
-    defaultTimeout = 20000L
-
+class UtsendtVarselDAOSpek : DescribeSpec({
     describe("UtsendtVarselDAOSpek") {
 
         val embeddedDatabase by lazy { EmbeddedDatabase() }
 
-        afterEachTest {
+        afterTest {
             embeddedDatabase.connection.dropData()
         }
 
-        afterGroup {
+        afterSpec {
             embeddedDatabase.stop()
         }
 
@@ -50,7 +45,8 @@ object UtsendtVarselDAOSpek : Spek({
             embeddedDatabase.storeUtsendtVarsel(merVeiledningVarselSentWithin3Months)
             embeddedDatabase.storeUtsendtVarsel(merVeiledningVarselSentOutside3Months)
 
-            val utsendteMerVeiledningVarslerSiste3Maneder = embeddedDatabase.fetchUtsendteMerVeiledningVarslerSiste3Maneder()
+            val utsendteMerVeiledningVarslerSiste3Maneder =
+                embeddedDatabase.fetchUtsendteMerVeiledningVarslerSiste3Maneder()
             utsendteMerVeiledningVarslerSiste3Maneder.skalInneholde(merVeiledningVarselSentWithin3Months.uuid)
             utsendteMerVeiledningVarslerSiste3Maneder.skalIkkeInneholde(merVeiledningVarselSentOutside3Months.uuid)
             utsendteMerVeiledningVarslerSiste3Maneder.skalIkkeInneholde(aktivitetskravVarsel.uuid)

@@ -1,10 +1,8 @@
 package no.nav.syfo.planner
 
+import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coEvery
 import io.mockk.mockk
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
-import java.util.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
@@ -16,24 +14,26 @@ import no.nav.syfo.kafka.consumers.syketilfelle.domain.Oppfolgingstilfelle39Uker
 import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.testutil.*
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+import java.util.*
 import kotlin.test.assertFailsWith
 
-object MerVeiledningVarselPlannerSyketilfellebitSpek : Spek({
+class MerVeiledningVarselPlannerSyketilfellebitSpek : DescribeSpec({
 
     describe("MerVeiledningVarselPlannerSyketilfellebitSpek") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
         val syketilfellebitService = mockk<SyketilfellebitService>()
         val varselSendtService = VarselSendtService(embeddedDatabase)
 
-        val merVeiledningVarselPlanner = MerVeiledningVarselPlanner(embeddedDatabase, syketilfellebitService, varselSendtService)
+        val merVeiledningVarselPlanner =
+            MerVeiledningVarselPlanner(embeddedDatabase, syketilfellebitService, varselSendtService)
 
-        afterEachTest {
+        afterTest {
             embeddedDatabase.connection.dropData()
         }
 
-        afterGroup {
+        afterSpec {
             embeddedDatabase.stop()
         }
 

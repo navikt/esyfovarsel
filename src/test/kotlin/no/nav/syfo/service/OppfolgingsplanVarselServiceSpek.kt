@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coEvery
 import io.mockk.justRun
 import io.mockk.mockk
@@ -14,11 +15,9 @@ import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.fnr1
 import no.nav.syfo.testutil.mocks.fnr2
 import no.nav.syfo.testutil.mocks.orgnummer
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.net.URL
 
-object OppfolgingsplanVarselServiceSpek : Spek({
+class OppfolgingsplanVarselServiceSpek : DescribeSpec({
     val accessControlService = mockk<AccessControlService>()
     val dineSykmeldteHendelseKafkaProducer = mockk<DineSykmeldteHendelseKafkaProducer>()
     val dittSykefravaerMeldingKafkaProducer = mockk<DittSykefravaerMeldingKafkaProducer>()
@@ -27,7 +26,7 @@ object OppfolgingsplanVarselServiceSpek : Spek({
     val fysiskBrevUtsendingService = mockk<FysiskBrevUtsendingService>()
     val embeddedDatabase by lazy { EmbeddedDatabase() }
     val fakeOppfolgingsplanerUrl = "http://localhost/oppfolgingsplaner"
-    
+
     val senderFacade = SenderFacade(
         dineSykmeldteHendelseKafkaProducer,
         dittSykefravaerMeldingKafkaProducer,
@@ -41,9 +40,6 @@ object OppfolgingsplanVarselServiceSpek : Spek({
         accessControlService,
         fakeOppfolgingsplanerUrl
     )
-
-    // The default timeout of 10 seconds is not sufficient to initialise the embedded database
-    defaultTimeout = 20000L
 
     describe("OppfolgingsplanVarselServiceSpek") {
         justRun { brukernotifikasjonerService.sendVarsel(any(), any(), any(), any(), any(), any()) }

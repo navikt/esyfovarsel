@@ -1,5 +1,6 @@
 package no.nav.syfo.db
 
+import io.kotest.core.spec.style.DescribeSpec
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import no.nav.syfo.testutil.EmbeddedDatabase
@@ -8,21 +9,17 @@ import no.nav.syfo.testutil.shouldContainMikrofrontendEntry
 import no.nav.syfo.testutil.shouldNotContainMikrofrontendEntryForUser
 import org.amshove.kluent.should
 import org.amshove.kluent.shouldBeEqualTo
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 
-object MikrofrontendSynlighetDAOSpek : Spek({
-    defaultTimeout = 20000L
-
+class MikrofrontendSynlighetDAOSpek : DescribeSpec({
     describe("MikrofrontendSynlighetDAOSpek") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
 
-        afterEachTest {
+        afterTest {
             embeddedDatabase.connection.dropData()
         }
 
-        afterGroup {
+        afterSpec {
             embeddedDatabase.stop()
         }
 

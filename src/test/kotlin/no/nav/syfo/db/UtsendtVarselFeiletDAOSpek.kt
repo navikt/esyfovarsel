@@ -1,7 +1,6 @@
 package no.nav.syfo.db
 
-import java.time.LocalDateTime
-import java.util.*
+import io.kotest.core.spec.style.DescribeSpec
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
@@ -9,21 +8,18 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import org.amshove.kluent.should
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
+import java.time.LocalDateTime
+import java.util.*
 
-object UtsendtVarselFeiletDAOSpek : Spek({
-    // The default timeout of 10 seconds is not sufficient to initialise the embedded database
-    defaultTimeout = 20000L
-
+class UtsendtVarselFeiletDAOSpek : DescribeSpec({
     describe("UtsendtVarselFeiletDAOSpek") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
 
-        afterEachTest {
+        afterTest {
             embeddedDatabase.connection.dropData()
         }
 
-        afterGroup {
+        afterSpec {
             embeddedDatabase.stop()
         }
 
