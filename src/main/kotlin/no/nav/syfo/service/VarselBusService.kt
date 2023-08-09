@@ -27,7 +27,7 @@ class VarselBusService(
 
                 NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
                 SM_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
-                SM_DIALOGMOTE_MOTEBEHOV_VURDERING -> motebehovVarselService.sendMotebehovBeskjedTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+                SM_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING -> motebehovVarselService.sendMotebehovBeskjedTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
                 NL_DIALOGMOTE_INNKALT,
                 NL_DIALOGMOTE_AVLYST,

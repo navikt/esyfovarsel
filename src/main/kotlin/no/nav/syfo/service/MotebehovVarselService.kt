@@ -11,7 +11,7 @@ import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_SVAR_MOTEBEHOV_MESSAGE_TEXT
 import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataMotebehovVurdering
+import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataMotebehovTilbakemelding
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
@@ -135,21 +135,21 @@ class MotebehovVarselService(
     fun sendMotebehovBeskjedTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         val fnr = varselHendelse.arbeidstakerFnr
         val eksternVarsling = accessControlService.canUserBeNotifiedByEmailOrSMS(fnr)
-        val data = dataToVarselDataMotebehovVurdering(varselHendelse.data)
+        val data = dataToVarselDataMotebehovTilbakemelding(varselHendelse.data)
         senderFacade.sendTilBrukernotifikasjoner(
             uuid = UUID.randomUUID().toString(),
             mottakerFnr = varselHendelse.arbeidstakerFnr,
-            content = data.vurdering,
+            content = data.tilbakemelding,
             varselHendelse = varselHendelse,
             eksternVarsling = eksternVarsling
         )
     }
 
-    fun dataToVarselDataMotebehovVurdering(data: Any?): VarselDataMotebehovVurdering {
+    fun dataToVarselDataMotebehovTilbakemelding(data: Any?): VarselDataMotebehovTilbakemelding {
         return data?.let {
             val varselData = createObjectMapper().readValue(
                 this.toString(),
-                VarselDataMotebehovVurdering::class.java,
+                VarselDataMotebehovTilbakemelding::class.java,
             )
             varselData
                 ?: throw IOException("VarselDataMotebehovBeskjed har feil format")

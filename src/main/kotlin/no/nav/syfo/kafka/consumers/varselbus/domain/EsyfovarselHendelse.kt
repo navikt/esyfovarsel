@@ -51,8 +51,8 @@ data class VarselDataMotetidspunkt(
     val tidspunkt: LocalDateTime,
 )
 
-data class VarselDataMotebehovVurdering(
-    val vurdering: String,
+data class VarselDataMotebehovTilbakemelding(
+    val tilbakemelding: String,
 )
 
 enum class HendelseType {
@@ -60,8 +60,8 @@ enum class HendelseType {
     SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
     NL_DIALOGMOTE_SVAR_MOTEBEHOV,
     SM_DIALOGMOTE_SVAR_MOTEBEHOV,
-    NL_DIALOGMOTE_MOTEBEHOV_VURDERING,
-    SM_DIALOGMOTE_MOTEBEHOV_VURDERING,
+    NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING,
+    SM_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING,
     SM_MER_VEILEDNING,
     NL_DIALOGMOTE_INNKALT,
     SM_DIALOGMOTE_INNKALT,
