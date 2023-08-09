@@ -8,8 +8,10 @@ import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT
 import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
 import no.nav.syfo.DINE_SYKMELDTE_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
 import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_SVAR_MOTEBEHOV_MESSAGE_TEXT
+import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataMotebehovVurdering
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
@@ -17,8 +19,10 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
+import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.IOException
 import java.net.URL
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -126,5 +130,29 @@ class MotebehovVarselService(
                 melding,
             ),
         )
+    }
+
+    fun sendMotebehovBeskjedTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
+        val fnr = varselHendelse.arbeidstakerFnr
+        val eksternVarsling = accessControlService.canUserBeNotifiedByEmailOrSMS(fnr)
+        val data = dataToVarselDataMotebehovVurdering(varselHendelse.data)
+        senderFacade.sendTilBrukernotifikasjoner(
+            uuid = UUID.randomUUID().toString(),
+            mottakerFnr = varselHendelse.arbeidstakerFnr,
+            content = data.vurdering,
+            varselHendelse = varselHendelse,
+            eksternVarsling = eksternVarsling
+        )
+    }
+
+    fun dataToVarselDataMotebehovVurdering(data: Any?): VarselDataMotebehovVurdering {
+        return data?.let {
+            val varselData = createObjectMapper().readValue(
+                this.toString(),
+                VarselDataMotebehovVurdering::class.java,
+            )
+            varselData
+                ?: throw IOException("VarselDataMotebehovBeskjed har feil format")
+        } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
 }

@@ -36,7 +36,7 @@ class BrukernotifikasjonKafkaProducer(
         fnr: String,
         content: String,
         uuid: String,
-        varselUrl: URL,
+        varselUrl: URL?,
         eksternVarsling: Boolean
     ) {
         val nokkelInput = buildNewNokkelInput(uuid, fnr)
@@ -103,7 +103,7 @@ class BrukernotifikasjonKafkaProducer(
 
     private fun buildNewBeskjed(
         content: String,
-        varselUrl: URL,
+        varselUrl: URL?,
         eksternVarsling: Boolean,
     ): BeskjedInput {
         val builder = BeskjedInputBuilder()

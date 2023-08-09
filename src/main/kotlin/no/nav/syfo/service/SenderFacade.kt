@@ -71,7 +71,7 @@ class SenderFacade(
         uuid: String,
         mottakerFnr: String,
         content: String,
-        url: URL,
+        url: URL? = null,
         varselHendelse: ArbeidstakerHendelse,
         meldingType: BrukernotifikasjonKafkaProducer.MeldingType? = BrukernotifikasjonKafkaProducer.MeldingType.BESKJED,
         eksternVarsling: Boolean = true
