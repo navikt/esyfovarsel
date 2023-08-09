@@ -146,6 +146,7 @@ class MotebehovVarselService(
     }
 
     fun dataToVarselDataMotebehovTilbakemelding(data: Any?): VarselDataMotebehovTilbakemelding {
+        log.info("Data: " + data)
         return data?.let {
             val varselData = createObjectMapper().readValue(
                 this.toString(),
