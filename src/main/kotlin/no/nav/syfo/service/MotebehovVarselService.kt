@@ -1,6 +1,7 @@
 package no.nav.syfo.service
 
 import kotlinx.coroutines.runBlocking
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_TITLE
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE
@@ -132,16 +133,33 @@ class MotebehovVarselService(
         )
     }
 
-    fun sendMotebehovBeskjedTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
-        val fnr = varselHendelse.arbeidstakerFnr
-        val eksternVarsling = accessControlService.canUserBeNotifiedByEmailOrSMS(fnr)
+    fun sendMotebehovTilbakemeldingTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         val data = dataToVarselDataMotebehovTilbakemelding(varselHendelse.data)
         senderFacade.sendTilBrukernotifikasjoner(
             uuid = UUID.randomUUID().toString(),
             mottakerFnr = varselHendelse.arbeidstakerFnr,
             content = data.tilbakemelding,
             varselHendelse = varselHendelse,
-            eksternVarsling = eksternVarsling
+            eksternVarsling = false
+        )
+    }
+
+    fun sendMotebehovTilbakemeldingTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
+        val data = dataToVarselDataMotebehovTilbakemelding(varselHendelse.data)
+        senderFacade.sendTilArbeidsgiverNotifikasjon(
+            varselHendelse,
+            ArbeidsgiverNotifikasjonInput(
+                UUID.randomUUID(),
+                varselHendelse.orgnummer,
+                varselHendelse.narmesteLederFnr,
+                varselHendelse.arbeidstakerFnr,
+                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                data.tilbakemelding,
+                ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_TITLE,
+                data.tilbakemelding,
+                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+                Meldingstype.BESKJED,
+            ),
         )
     }
 
