@@ -168,7 +168,7 @@ class MotebehovVarselService(
         log.info("Data: " + data)
         return data?.let {
             val varselData = createObjectMapper().readValue(
-                this.toString(),
+                it.toString(),
                 VarselDataMotebehovTilbakemelding::class.java,
             )
             varselData
