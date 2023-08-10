@@ -12,12 +12,10 @@ import io.ktor.client.engine.apache.ApacheEngineConfig
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.Principal
 import io.ktor.server.auth.UserPasswordCredential
 import io.ktor.server.auth.jwt.JWTCredential
 import io.ktor.server.auth.jwt.JWTPrincipal
-import io.ktor.server.request.header
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.syfo.AuthEnv
@@ -53,14 +51,7 @@ fun getWellKnown(wellKnownUrl: String) =
     runBlocking { HttpClient(Apache, proxyConfig).get(wellKnownUrl).body<WellKnown>() }
 
 fun isNiva4(credentials: JWTCredential): Boolean {
-    return "Level4" == credentials.payload.getClaim("acr").asString()
-}
-
-fun ApplicationCall.getToken(): String? {
-    if (request.header("Authorization") != null) {
-        return request.header("Authorization")!!.removePrefix("Bearer ")
-    }
-    return request.cookies.get(name = "selvbetjening-idtoken")
+    return "Level4" == credentials.payload.getClaim("acr").asString() || "idporten-loa-high" == credentials.payload.getClaim("acr").asString()
 }
 
 fun unauthorized(credentials: JWTCredential): Principal? {
@@ -91,5 +82,4 @@ fun finnFnrFraToken(principal: JWTPrincipal): String {
 data class BrukerPrincipal(
     val fnr: String,
     val principal: JWTPrincipal,
-    val token: String,
 ) : Principal

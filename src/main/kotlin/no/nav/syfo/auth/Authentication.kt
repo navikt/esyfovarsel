@@ -2,7 +2,6 @@ package no.nav.syfo.auth
 
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
-import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
@@ -48,12 +47,6 @@ fun Application.setupAuthentication(
             }
         }
         jwt(name = "tokenx") {
-            authHeader {
-                if (it.getToken() == null) {
-                    return@authHeader null
-                }
-                return@authHeader HttpAuthHeader.Single("Bearer", it.getToken()!!)
-            }
             verifier(jwkProviderTokenX, tokenXIssuer)
             validate { credentials ->
                 when {
@@ -62,7 +55,6 @@ fun Application.setupAuthentication(
                         BrukerPrincipal(
                             fnr = finnFnrFraToken(principal),
                             principal = principal,
-                            token = this.getToken()!!,
                         )
                     }
 
