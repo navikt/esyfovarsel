@@ -1,6 +1,7 @@
 package no.nav.syfo.service
 
 import kotlinx.coroutines.runBlocking
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_TITLE
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY
@@ -149,16 +150,16 @@ class MotebehovVarselService(
         senderFacade.sendTilArbeidsgiverNotifikasjon(
             varselHendelse,
             ArbeidsgiverNotifikasjonInput(
-                UUID.randomUUID(),
-                varselHendelse.orgnummer,
-                varselHendelse.narmesteLederFnr,
-                varselHendelse.arbeidstakerFnr,
-                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
-                data.tilbakemelding,
-                ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_TITLE,
-                data.tilbakemelding,
-                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
-                Meldingstype.BESKJED,
+                uuid = UUID.randomUUID(),
+                virksomhetsnummer = varselHendelse.orgnummer,
+                narmesteLederFnr = varselHendelse.narmesteLederFnr,
+                ansattFnr = varselHendelse.arbeidstakerFnr,
+                merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                messageText = data.tilbakemelding,
+                emailTitle = ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_TITLE,
+                emailBody = ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_BODY,
+                hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+                meldingstype = Meldingstype.BESKJED,
             ),
         )
     }
