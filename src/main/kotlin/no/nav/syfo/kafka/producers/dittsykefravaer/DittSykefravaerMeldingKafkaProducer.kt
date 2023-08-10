@@ -9,6 +9,8 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.LukkMelding
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
 
@@ -20,6 +22,7 @@ class DittSykefravaerMeldingKafkaProducer(
         put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JacksonKafkaSerializer::class.java)
     }
     private val kafkaProducer = KafkaProducer<String, DittSykefravaerMelding>(kafkaConfig)
+    val log: Logger = LoggerFactory.getLogger(DittSykefravaerMeldingKafkaProducer::class.java)
 
     fun sendMelding(melding: DittSykefravaerMelding): String {
         val uuid = "esyfovarsel-${UUID.randomUUID()}"

@@ -1,10 +1,16 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.db.*
+import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.Kanal.*
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
+import no.nav.syfo.db.fetchAlleUtsendteVarslerTilKanal
+import no.nav.syfo.db.fetchAlleUtsendteVarslerTilKanalByType
+import no.nav.syfo.db.fetchUtsendteVarsler
+import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
+import no.nav.syfo.db.storeUtsendtVarsel
+import no.nav.syfo.db.storeUtsendtVarselFeilet
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
@@ -51,11 +57,14 @@ class SenderFacade(
         varselHendelse: ArbeidstakerHendelse,
         varsel: DittSykefravaerVarsel,
     ) {
+        var isSendingSucceed = true
+        var eksternUUID: String? = null
+
         try {
-            val eksternUUID = dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding)
-            lagreUtsendtArbeidstakerVarsel(DITT_SYKEFRAVAER, varselHendelse, eksternUUID)
+            eksternUUID = dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding)
         } catch (e: Exception) {
             log.warn("Error while sending varsel to DITT_SYKEFRAVAER: ${e.message}")
+            isSendingSucceed = false
             lagreIkkeUtsendtArbeidstakerVarsel(
                 kanal = DITT_SYKEFRAVAER,
                 varselHendelse = varselHendelse,
@@ -64,6 +73,9 @@ class SenderFacade(
                 journalpostId = null,
                 brukernotifikasjonerMeldingType = null,
             )
+        }
+        if (isSendingSucceed && eksternUUID != null) {
+            lagreUtsendtArbeidstakerVarsel(DITT_SYKEFRAVAER, varselHendelse, eksternUUID)
         }
     }
 
@@ -74,7 +86,7 @@ class SenderFacade(
         url: URL,
         varselHendelse: ArbeidstakerHendelse,
         meldingType: BrukernotifikasjonKafkaProducer.MeldingType? = BrukernotifikasjonKafkaProducer.MeldingType.BESKJED,
-        eksternVarsling: Boolean = true
+        eksternVarsling: Boolean = true,
     ) {
         var isSendingSucceed = true
         try {
@@ -116,19 +128,24 @@ class SenderFacade(
             )
         }
         if (isSendingSucceed) {
-            lagreUtsendtNarmesteLederVarsel(ARBEIDSGIVERNOTIFIKASJON, varselHendelse, varsel.uuid.toString(), varsel.merkelapp)
+            lagreUtsendtNarmesteLederVarsel(
+                ARBEIDSGIVERNOTIFIKASJON,
+                varselHendelse,
+                varsel.uuid.toString(),
+                varsel.merkelapp,
+            )
         }
     }
 
     fun ferdigstillArbeidsgiverNotifikasjoner(
         varselHendelse: NarmesteLederHendelse,
     ) {
-        val uferdigstilteVarsler = database.fetchUtsendtVarsel(
+        val uferdigstilteVarsler = database.fetchUtsendteVarsler(
             varselHendelse.arbeidstakerFnr,
             varselHendelse.orgnummer,
             varselHendelse.type,
             ARBEIDSGIVERNOTIFIKASJON,
-        ).uferdigstilteVarsler(varselHendelse.type)
+        ).uferdigstilteVarslerByType(varselHendelse.type)
         for (varsel in uferdigstilteVarsler) {
             if (varsel.eksternReferanse != null && varsel.arbeidsgivernotifikasjonMerkelapp != null) {
                 arbeidsgiverNotifikasjonService.deleteNotifikasjon(
@@ -143,12 +160,12 @@ class SenderFacade(
     }
 
     fun ferdigstillDineSykmeldteVarsler(varselHendelse: NarmesteLederHendelse) {
-        val uferdigstilteVarsler = database.fetchUtsendtVarsel(
+        val uferdigstilteVarsler = database.fetchUtsendteVarsler(
             varselHendelse.arbeidstakerFnr,
             varselHendelse.orgnummer,
             varselHendelse.type,
             DINE_SYKMELDTE,
-        ).uferdigstilteVarsler(varselHendelse.type)
+        ).uferdigstilteVarslerByType(varselHendelse.type)
         for (varsel in uferdigstilteVarsler) {
             dineSykmeldteHendelseKafkaProducer.ferdigstillVarsel(varsel.eksternReferanse!!)
             database.setUtsendtVarselToFerdigstilt(varsel.eksternReferanse)
@@ -169,7 +186,7 @@ class SenderFacade(
         }
     }
 
-    private fun ferdigstillDittSykefravaerVarsler(varselHendelse: ArbeidstakerHendelse) {
+    fun ferdigstillDittSykefravaerVarsler(varselHendelse: ArbeidstakerHendelse) {
         for (varsel in fetchUferdigstilteVarsler(varselHendelse, DITT_SYKEFRAVAER)) {
             varsel.eksternReferanse?.let {
                 dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(it, varselHendelse.arbeidstakerFnr)
@@ -178,23 +195,47 @@ class SenderFacade(
         }
     }
 
-    private fun fetchUferdigstilteVarsler(varselHendelse: ArbeidstakerHendelse, kanal: Kanal): List<PUtsendtVarsel> {
+    fun fetchUferdigstilteVarsler(varselHendelse: ArbeidstakerHendelse, kanal: Kanal): List<PUtsendtVarsel> {
         val fetchUtsendtVarsel = if (varselHendelse.orgnummer != null) {
-            database.fetchUtsendtVarsel(
+            database.fetchUtsendteVarsler(
                 varselHendelse.arbeidstakerFnr,
                 varselHendelse.orgnummer,
                 varselHendelse.type,
                 kanal,
             )
         } else {
-            database.fetchUtsendtVarsel(
+            database.fetchAlleUtsendteVarslerTilKanalByType(
                 varselHendelse.arbeidstakerFnr,
                 varselHendelse.type,
                 kanal,
             )
         }
 
-        return fetchUtsendtVarsel.uferdigstilteVarsler(varselHendelse.type)
+        return fetchUtsendtVarsel.uferdigstilteVarslerByType(varselHendelse.type)
+    }
+
+    fun fetchAlleUferdigstilteVarslerTilKanal(
+        arbeidstakerFnr: String,
+        kanal: Kanal,
+    ): List<PUtsendtVarsel> {
+        val fetchUtsendtVarsel =
+            database.fetchAlleUtsendteVarslerTilKanal(
+                arbeidstakerFnr,
+                kanal,
+            )
+        return fetchUtsendtVarsel.uferdigstilteVarsler()
+    }
+
+    fun ferdigstillDittSykefravaerVarslerAvTyper(arbeidstakerHendelse: ArbeidstakerHendelse, varselTyper: Set<String>) {
+        val fnr = arbeidstakerHendelse.arbeidstakerFnr
+        for (varsel in fetchAlleUferdigstilteVarslerTilKanal(fnr, DITT_SYKEFRAVAER)) {
+            varsel.eksternReferanse?.let {
+                if (varselTyper.contains(varsel.type)) {
+                    dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(it, fnr)
+                    database.setUtsendtVarselToFerdigstilt(it)
+                }
+            }
+        }
     }
 
     fun sendBrevTilFysiskPrint(
@@ -246,7 +287,7 @@ class SenderFacade(
         )
     }
 
-    private fun lagreUtsendtArbeidstakerVarsel(
+    fun lagreUtsendtArbeidstakerVarsel(
         kanal: Kanal,
         varselHendelse: ArbeidstakerHendelse,
         eksternReferanse: String,
@@ -321,11 +362,19 @@ class SenderFacade(
     }
 }
 
-fun List<PUtsendtVarsel>.uferdigstilteVarsler(hendelseType: HendelseType) =
+fun List<PUtsendtVarsel>.uferdigstilteVarslerByType(hendelseType: HendelseType) =
     this
         .sortedByDescending { it.utsendtTidspunkt }
         .filter {
             it.eksternReferanse != null &&
                 it.type == hendelseType.toString() &&
+                it.ferdigstiltTidspunkt == null
+        }
+
+fun List<PUtsendtVarsel>.uferdigstilteVarsler() =
+    this
+        .sortedByDescending { it.utsendtTidspunkt }
+        .filter {
+            it.eksternReferanse != null &&
                 it.ferdigstiltTidspunkt == null
         }
