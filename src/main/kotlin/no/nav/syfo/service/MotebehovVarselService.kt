@@ -1,6 +1,8 @@
 package no.nav.syfo.service
 
 import kotlinx.coroutines.runBlocking
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_BODY
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_TITLE
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE
@@ -8,8 +10,10 @@ import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT
 import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
 import no.nav.syfo.DINE_SYKMELDTE_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
 import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_SVAR_MOTEBEHOV_MESSAGE_TEXT
+import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataMotebehovTilbakemelding
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
@@ -17,8 +21,10 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
+import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.IOException
 import java.net.URL
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -126,5 +132,46 @@ class MotebehovVarselService(
                 melding,
             ),
         )
+    }
+
+    fun sendMotebehovTilbakemeldingTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
+        val data = dataToVarselDataMotebehovTilbakemelding(varselHendelse.data)
+        senderFacade.sendTilBrukernotifikasjoner(
+            uuid = UUID.randomUUID().toString(),
+            mottakerFnr = varselHendelse.arbeidstakerFnr,
+            content = data.tilbakemelding,
+            varselHendelse = varselHendelse,
+            eksternVarsling = false
+        )
+    }
+
+    fun sendMotebehovTilbakemeldingTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
+        val data = dataToVarselDataMotebehovTilbakemelding(varselHendelse.data)
+        senderFacade.sendTilArbeidsgiverNotifikasjon(
+            varselHendelse,
+            ArbeidsgiverNotifikasjonInput(
+                uuid = UUID.randomUUID(),
+                virksomhetsnummer = varselHendelse.orgnummer,
+                narmesteLederFnr = varselHendelse.narmesteLederFnr,
+                ansattFnr = varselHendelse.arbeidstakerFnr,
+                merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                messageText = data.tilbakemelding,
+                emailTitle = ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_TITLE,
+                emailBody = ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_BODY,
+                hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+                meldingstype = Meldingstype.BESKJED,
+            ),
+        )
+    }
+
+    fun dataToVarselDataMotebehovTilbakemelding(data: Any?): VarselDataMotebehovTilbakemelding {
+        return data?.let {
+            val varselData = createObjectMapper().readValue(
+                it.toString(),
+                VarselDataMotebehovTilbakemelding::class.java,
+            )
+            varselData
+                ?: throw IOException("VarselDataMotebehovBeskjed har feil format")
+        } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
 }
