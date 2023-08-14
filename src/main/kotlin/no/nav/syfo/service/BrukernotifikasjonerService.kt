@@ -3,6 +3,7 @@ package no.nav.syfo.service
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.lang.IllegalArgumentException
 import java.net.URL
 
 class BrukernotifikasjonerService(
@@ -14,17 +15,20 @@ class BrukernotifikasjonerService(
         uuid: String,
         mottakerFnr: String,
         content: String,
-        url: URL,
+        url: URL?,
         meldingType: BrukernotifikasjonKafkaProducer.MeldingType?,
         eksternVarsling: Boolean,
     ) {
         when (meldingType) {
-            BrukernotifikasjonKafkaProducer.MeldingType.BESKJED, -> {
+            BrukernotifikasjonKafkaProducer.MeldingType.BESKJED -> {
                 brukernotifikasjonKafkaProducer.sendBeskjed(mottakerFnr, content, uuid, url, eksternVarsling)
                 log.info("Har sendt beskjed med uuid $uuid til brukernotifikasjoner: $content")
             }
 
             BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE -> {
+                if (url == null) {
+                    throw IllegalArgumentException("Url must be set")
+                }
                 brukernotifikasjonKafkaProducer.sendOppgave(mottakerFnr, content, uuid, url)
                 log.info("Har sendt oppgave med uuid $uuid til brukernotifikasjoner: $content")
             }
@@ -33,7 +37,9 @@ class BrukernotifikasjonerService(
                 ferdigstillVarsel(uuid, mottakerFnr)
             }
 
-            else -> { throw RuntimeException("Ukjent typestreng") }
+            else -> {
+                throw RuntimeException("Ukjent typestreng")
+            }
         }
     }
 
