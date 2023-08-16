@@ -9,8 +9,6 @@ import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig.*
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import java.time.Duration
 import java.util.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import org.apache.kafka.clients.CommonClientConfigs.GROUP_ID_CONFIG
@@ -136,12 +134,10 @@ fun createObjectMapper() = ObjectMapper().apply {
     configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 }
 
-suspend fun CoroutineScope.launchKafkaListener(applicationState: ApplicationState, kafkaListener: KafkaListener) {
-    launch {
-        try {
-            kafkaListener.listen(applicationState)
-        } finally {
-            applicationState.running = false
-        }
+suspend fun launchKafkaListener(applicationState: ApplicationState, kafkaListener: KafkaListener) {
+    try {
+        kafkaListener.listen(applicationState)
+    } finally {
+        applicationState.running = false
     }
 }
