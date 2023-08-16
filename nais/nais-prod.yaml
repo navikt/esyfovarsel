@@ -106,7 +106,57 @@ spec:
   filesFrom:
     - secret: esyfovarsel-serviceuser
   env:
-  {{#each app}}
-    - name: {{@key}}
-      value: "{{this}}"
-  {{/each}}
+    - name: KTOR_ENV
+      value: remote
+    - name: KAFKA_BOOTSTRAP_SERVERS_URL
+      value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
+    - name: PDL_URL
+      value: https://pdl-api.prod-fss-pub.nais.io/graphql
+    - name: DKIF_URL
+      value: http://digdir-krr-proxy.team-rocket/rest/v1/person
+    - name: SYFOSMREGISTER_URL
+      value: http://syfosmregister.teamsykmelding
+    - name: SYFOSMREGISTER_SCOPE
+      value: api://prod-gcp.teamsykmelding.syfosmregister/.default
+    - name: DKIF_SCOPE
+      value: api://prod-gcp.team-rocket.digdir-krr-proxy/.default
+    - name: PDL_SCOPE
+      value: api://prod-fss.pdl.pdl-api/.default
+    - name: TOGGLE_SEND_MERVEILEDNING_VARSLER
+      value: "false"
+    - name: TOGGLE_SEND_MERVEILEDNING_VARSLER_BASED_ON_SISTE_UTBETALING_DATE
+      value: "true"
+    - name: TOGGLE_SEND_AKTIVITETSKRAV_VARSLER
+      value: "true"
+    - name: TOGGLE_UTBETALING_KAFKA_CONSUMER
+      value: "true"
+    - name: BASE_URL_SYK_INFO
+      value: https://www.nav.no/syk/info
+    - name: BASE_URL_DIALOGMOTER
+      value: https://www.nav.no/syk/dialogmoter
+    - name: BASE_URL_OPPFOLGINGSPLANER
+      value: https://www.nav.no/syk/oppfolgingsplaner
+    - name: AG_NOTIFIKASJON_PRODUSENT_API_URL
+      value: http://notifikasjon-produsent-api.fager/api/graphql
+    - name: AG_NOTIFIKASJON_PRODUSENT_API_SCOPE
+      value: api://prod-gcp.fager.notifikasjon-produsent-api/.default
+    - name: NARMESTELEDER_URL
+      value: http://narmesteleder.teamsykmelding
+    - name: NARMESTELEDER_SCOPE
+      value: api://prod-gcp.teamsykmelding.narmesteleder/.default
+    - name: BASE_URL_DINE_SYKMELDTE
+      value: https://www.nav.no/arbeidsgiver/sykmeldte
+    - name: DOKDIST_FORDELING_URL
+      value: https://dokdistfordeling.prod-fss-pub.nais.io
+    - name: DOKDIST_FORDELING_SCOPE
+      value: api://prod-fss.teamdokumenthandtering.saf/.default
+    - name: DOKARKIV_URL
+      value: https://dokarkiv.prod-fss-pub.nais.io
+    - name: DOKARKIV_SCOPE
+      value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
+    - name: SYFOOPPDFGEN_URL
+      value: https://syfooppdfgen.intern.nav.no
+    - name: SYFOTILGANGSKONTROLL_URL
+      value: http://syfo-tilgangskontroll.teamsykefravr
+    - name: SYFOTILGANGSKONTROLL_SCOPE
+      value: api://prod-gcp.teamsykefravr.syfo-tilgangskontroll/.default

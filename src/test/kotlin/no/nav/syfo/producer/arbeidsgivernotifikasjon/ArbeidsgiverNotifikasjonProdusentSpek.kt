@@ -1,5 +1,6 @@
 package no.nav.syfo.producer.arbeidsgivernotifikasjon
 
+import io.kotest.core.spec.style.DescribeSpec
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.getTestEnv
@@ -8,12 +9,10 @@ import no.nav.syfo.testutil.mocks.MockServers
 import no.nav.syfo.testutil.mocks.fnr1
 import no.nav.syfo.testutil.mocks.fnr2
 import no.nav.syfo.testutil.mocks.orgnummer
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDateTime
 import java.util.*
 
-object ArbeidsgiverNotifikasjonProdusentSpek : Spek({
+class ArbeidsgiverNotifikasjonProdusentSpek : DescribeSpec({
     val testEnv = getTestEnv()
     val mockServers = MockServers(testEnv.urlEnv, testEnv.authEnv)
     val azureAdMockServer = mockServers.mockAADServer()
@@ -35,12 +34,12 @@ object ArbeidsgiverNotifikasjonProdusentSpek : Spek({
         LocalDateTime.now().plusDays(1),
     )
 
-    beforeGroup {
+    beforeSpec {
         azureAdMockServer.start()
         arbeidsgiverNotifikasjonMockServer.start()
     }
 
-    afterGroup {
+    afterSpec {
         azureAdMockServer.stop(1L, 10L)
         arbeidsgiverNotifikasjonMockServer.stop(1L, 10L)
     }
@@ -51,7 +50,11 @@ object ArbeidsgiverNotifikasjonProdusentSpek : Spek({
         }
 
         it("Should send beskjed") {
-            runBlocking { arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjon) }
+            runBlocking {
+                arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(
+                    arbeidsgiverNotifikasjon
+                )
+            }
         }
     }
 })

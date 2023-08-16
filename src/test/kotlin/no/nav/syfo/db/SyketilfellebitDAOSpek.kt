@@ -1,29 +1,24 @@
 package no.nav.syfo.db
 
+import io.kotest.core.spec.style.DescribeSpec
 import no.nav.syfo.kafka.consumers.syketilfelle.domain.KSyketilfellebit
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.mocks.fnr1
 import org.amshove.kluent.shouldBeEqualTo
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
-object SyketilfellebitDAOSpek : Spek({
-
-    // The default timeout of 10 seconds is not sufficient to initialise the embedded database
-    defaultTimeout = 20000L
-
+class SyketilfellebitDAOSpek : DescribeSpec({
     describe("SyketilfellebitDAOSpek") {
 
         val embeddedDatabase by lazy { EmbeddedDatabase() }
 
-        afterEachTest {
+        afterTest {
             embeddedDatabase.connection.dropData()
         }
 
-        afterGroup {
+        afterSpec {
             embeddedDatabase.stop()
         }
 

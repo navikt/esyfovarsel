@@ -1,5 +1,6 @@
 package no.nav.syfo.db
 
+import io.kotest.core.spec.style.DescribeSpec
 import no.nav.syfo.db.domain.PUtbetaling
 import no.nav.syfo.kafka.consumers.infotrygd.domain.InfotrygdSource.AAP_KAFKA_TOPIC
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
@@ -9,17 +10,11 @@ import org.amshove.kluent.should
 import org.amshove.kluent.shouldBeEmpty
 import org.amshove.kluent.shouldHaveSingleItem
 import org.amshove.kluent.shouldMatchAtLeastOneOf
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 import java.time.LocalDate.now
 import java.util.*
 
-object UtbetalingerDAOSpek : Spek({
-
-    //The default timeout of 10 seconds is not sufficient to initialise the embedded database
-    defaultTimeout = 20000L
-
+class UtbetalingerDAOSpek : DescribeSpec({
     describe("UtbetalingerDAOSpek") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
         val nowPlus1Day = now().plusDays(1)
@@ -27,16 +22,17 @@ object UtbetalingerDAOSpek : Spek({
         val nowMinus1Day = now().minusDays(1)
         val nowMinus2Days = now().minusDays(2)
 
-        afterEachTest {
+        afterTest {
             embeddedDatabase.connection.dropData()
         }
 
-        afterGroup {
+        afterSpec {
             embeddedDatabase.stop()
         }
 
         it("Should include utbetaling with max date 14 days in the future, and gjenstående sykedager < 80") {
-            val spleisUtbetaling = spleisUtbetaling(forelopigBeregnetSluttPaSykepenger = now().plusDays(14), gjenstaendeSykedager = 79)
+            val spleisUtbetaling =
+                spleisUtbetaling(forelopigBeregnetSluttPaSykepenger = now().plusDays(14), gjenstaendeSykedager = 79)
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling)
 
             val merVeiledningVarslerToSend = embeddedDatabase.fetchMerVeiledningVarslerToSend()
@@ -63,7 +59,13 @@ object UtbetalingerDAOSpek : Spek({
         it("Should fetch utbetaling with latest utbetalt tom") {
             val spleisUtbetaling = spleisUtbetaling()
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling)
-            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, now().plusMonths(3), now().minusMonths(1), 60, AAP_KAFKA_TOPIC)
+            embeddedDatabase.storeInfotrygdUtbetaling(
+                arbeidstakerFnr1,
+                now().plusMonths(3),
+                now().minusMonths(1),
+                60,
+                AAP_KAFKA_TOPIC
+            )
 
             val merVeiledningVarslerToSend = embeddedDatabase.fetchMerVeiledningVarslerToSend()
             merVeiledningVarslerToSend.shouldHaveSingleItem()
@@ -71,8 +73,10 @@ object UtbetalingerDAOSpek : Spek({
         }
 
         it("Should fetch newest utbetaling with same utbetalt tom") {
-            val spleisUtbetaling1 = spleisUtbetaling(forelopigBeregnetSluttPaSykepenger = now().plusDays(15), gjenstaendeSykedager = 59)
-            val spleisUtbetaling2 = spleisUtbetaling(forelopigBeregnetSluttPaSykepenger = now().plusDays(16), gjenstaendeSykedager = 60)
+            val spleisUtbetaling1 =
+                spleisUtbetaling(forelopigBeregnetSluttPaSykepenger = now().plusDays(15), gjenstaendeSykedager = 59)
+            val spleisUtbetaling2 =
+                spleisUtbetaling(forelopigBeregnetSluttPaSykepenger = now().plusDays(16), gjenstaendeSykedager = 60)
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling2)
 
@@ -93,8 +97,16 @@ object UtbetalingerDAOSpek : Spek({
         }
 
         it("Should fetch maxdate from latest utbetaling") {
-            val spleisUtbetaling1 = spleisUtbetaling(fnr = arbeidstakerFnr1, tom = nowMinus1Day, forelopigBeregnetSluttPaSykepenger = nowPlus1Day)
-            val spleisUtbetaling2 = spleisUtbetaling(fnr = arbeidstakerFnr1, tom = nowMinus2Days, forelopigBeregnetSluttPaSykepenger = nowPlus2Days)
+            val spleisUtbetaling1 = spleisUtbetaling(
+                fnr = arbeidstakerFnr1,
+                tom = nowMinus1Day,
+                forelopigBeregnetSluttPaSykepenger = nowPlus1Day
+            )
+            val spleisUtbetaling2 = spleisUtbetaling(
+                fnr = arbeidstakerFnr1,
+                tom = nowMinus2Days,
+                forelopigBeregnetSluttPaSykepenger = nowPlus2Days
+            )
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling2)
 
@@ -102,15 +114,29 @@ object UtbetalingerDAOSpek : Spek({
         }
 
         it("Should fetch maxdate from spleis when latest utbetaling from spleis") {
-            val spleisUtbetaling1 = spleisUtbetaling(fnr = arbeidstakerFnr1, tom = nowMinus1Day, forelopigBeregnetSluttPaSykepenger = nowPlus1Day)
+            val spleisUtbetaling1 = spleisUtbetaling(
+                fnr = arbeidstakerFnr1,
+                tom = nowMinus1Day,
+                forelopigBeregnetSluttPaSykepenger = nowPlus1Day
+            )
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
-            embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, nowPlus2Days, nowMinus2Days, 60, AAP_KAFKA_TOPIC)
+            embeddedDatabase.storeInfotrygdUtbetaling(
+                arbeidstakerFnr1,
+                nowPlus2Days,
+                nowMinus2Days,
+                60,
+                AAP_KAFKA_TOPIC
+            )
 
             embeddedDatabase.shouldContainForelopigBeregnetSlutt(arbeidstakerFnr1, nowPlus1Day)
         }
 
         it("Should fetch maxdate from infotrygd when latest utbetaling from infotrygd") {
-            val spleisUtbetaling1 = spleisUtbetaling(fnr = arbeidstakerFnr1, tom = nowMinus2Days, forelopigBeregnetSluttPaSykepenger = nowPlus2Days)
+            val spleisUtbetaling1 = spleisUtbetaling(
+                fnr = arbeidstakerFnr1,
+                tom = nowMinus2Days,
+                forelopigBeregnetSluttPaSykepenger = nowPlus2Days
+            )
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
             embeddedDatabase.storeInfotrygdUtbetaling(arbeidstakerFnr1, nowPlus1Day, nowMinus1Day, 60, AAP_KAFKA_TOPIC)
 
@@ -118,8 +144,16 @@ object UtbetalingerDAOSpek : Spek({
         }
 
         it("Should fetch maxdate for correct fnr") {
-            val spleisUtbetaling1 = spleisUtbetaling(fnr = arbeidstakerFnr1, tom = nowMinus1Day, forelopigBeregnetSluttPaSykepenger = nowPlus1Day)
-            val spleisUtbetaling2 = spleisUtbetaling(fnr = arbeidstakerFnr2, tom = nowMinus2Days, forelopigBeregnetSluttPaSykepenger = nowPlus2Days)
+            val spleisUtbetaling1 = spleisUtbetaling(
+                fnr = arbeidstakerFnr1,
+                tom = nowMinus1Day,
+                forelopigBeregnetSluttPaSykepenger = nowPlus1Day
+            )
+            val spleisUtbetaling2 = spleisUtbetaling(
+                fnr = arbeidstakerFnr2,
+                tom = nowMinus2Days,
+                forelopigBeregnetSluttPaSykepenger = nowPlus2Days
+            )
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling2)
 

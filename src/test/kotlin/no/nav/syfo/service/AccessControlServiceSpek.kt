@@ -1,23 +1,22 @@
-import io.mockk.coEvery
+import io.kotest.core.spec.style.DescribeSpec
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.service.AccessControlService
 import no.nav.syfo.testutil.mocks.fnr1
 import org.amshove.kluent.shouldBeEqualTo
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 
-object AccessControlServiceSpek : Spek({
-    val pdlConsumer = mockk<PdlConsumer>()
-    val dkifConsumer = mockk<DkifConsumer>()
+class AccessControlServiceSpek : DescribeSpec({
+    val pdlConsumer = mockk<PdlConsumer>(relaxed = true)
+    val dkifConsumer = mockk<DkifConsumer>(relaxed = true)
 
     val accessControlService = AccessControlService(pdlConsumer, dkifConsumer)
 
     describe("AccessControlServiceSpek") {
         it("User should be only digitally notified if there is no address protection AND non-reserved in DKIF") {
-            coEvery { pdlConsumer.isBrukerGradertForInformasjon(fnr1) } returns false
-            coEvery { dkifConsumer.person(fnr1)?.kanVarsles } returns true
+            every { pdlConsumer.isBrukerGradertForInformasjon(fnr1) } returns false
+            every { dkifConsumer.person(fnr1)?.kanVarsles } returns true
 
             val userAccessStatus = accessControlService.getUserAccessStatus(fnr1)
             userAccessStatus.canUserBeDigitallyNotified shouldBeEqualTo true
@@ -25,8 +24,8 @@ object AccessControlServiceSpek : Spek({
         }
 
         it("User should be only physically notified if there is no address protection AND reserved in DKIF") {
-            coEvery { pdlConsumer.isBrukerGradertForInformasjon(fnr1) } returns false
-            coEvery { dkifConsumer.person(fnr1)?.kanVarsles } returns false
+            every { pdlConsumer.isBrukerGradertForInformasjon(fnr1) } returns false
+            every { dkifConsumer.person(fnr1)?.kanVarsles } returns false
 
             val userAccessStatus = accessControlService.getUserAccessStatus(fnr1)
             userAccessStatus.canUserBeDigitallyNotified shouldBeEqualTo false
@@ -34,8 +33,8 @@ object AccessControlServiceSpek : Spek({
         }
 
         it("User should not be notified if there is address protection AND reserved in DKIF") {
-            coEvery { pdlConsumer.isBrukerGradertForInformasjon(fnr1) } returns true
-            coEvery { dkifConsumer.person(fnr1)?.kanVarsles } returns false
+            every { pdlConsumer.isBrukerGradertForInformasjon(fnr1) } returns true
+            every { dkifConsumer.person(fnr1)?.kanVarsles } returns false
 
             val userAccessStatus = accessControlService.getUserAccessStatus(fnr1)
             userAccessStatus.canUserBeDigitallyNotified shouldBeEqualTo false
@@ -43,8 +42,8 @@ object AccessControlServiceSpek : Spek({
         }
 
         it("User should not be notified if there is address protection AND non-reserved in DKIF") {
-            coEvery { pdlConsumer.isBrukerGradertForInformasjon(fnr1) } returns true
-            coEvery { dkifConsumer.person(fnr1)?.kanVarsles } returns true
+            every { pdlConsumer.isBrukerGradertForInformasjon(fnr1) } returns true
+            every { dkifConsumer.person(fnr1)?.kanVarsles } returns true
 
             val userAccessStatus = accessControlService.getUserAccessStatus(fnr1)
             userAccessStatus.canUserBeDigitallyNotified shouldBeEqualTo false

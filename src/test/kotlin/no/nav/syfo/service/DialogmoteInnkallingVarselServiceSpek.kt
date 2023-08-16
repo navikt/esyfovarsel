@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coEvery
 import io.mockk.justRun
 import io.mockk.mockk
@@ -14,11 +15,8 @@ import no.nav.syfo.testutil.mocks.fnr1
 import no.nav.syfo.testutil.mocks.fnr2
 import no.nav.syfo.testutil.mocks.fnr3
 import no.nav.syfo.testutil.mocks.orgnummer
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
-import java.net.URL
 
-object DialogmoteInnkallingVarselServiceSpek : Spek({
+class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
     val accessControlService = mockk<AccessControlService>()
     val dineSykmeldteHendelseKafkaProducer = mockk<DineSykmeldteHendelseKafkaProducer>()
     val dittSykefravaerMeldingKafkaProducer = mockk<DittSykefravaerMeldingKafkaProducer>()
@@ -46,9 +44,6 @@ object DialogmoteInnkallingVarselServiceSpek : Spek({
         accessControlService
     )
     val hendelseType = HendelseType.SM_DIALOGMOTE_INNKALT
-
-    // The default timeout of 10 seconds is not sufficient to initialise the embedded database
-    defaultTimeout = 20000L
 
     describe("DialogmoteInnkallingVarselServiceSpek") {
         justRun { brukernotifikasjonerService.sendVarsel(any(), any(), any(), any(), any(), any()) }
@@ -140,8 +135,7 @@ object DialogmoteInnkallingVarselServiceSpek : Spek({
     }
 })
 
-fun varselData(journalpostUuid: String, journalpostId: String)
-    = """{
+fun varselData(journalpostUuid: String, journalpostId: String) = """{
         "journalpost": {
             "uuid": "$journalpostUuid",
             "id": "$journalpostId"

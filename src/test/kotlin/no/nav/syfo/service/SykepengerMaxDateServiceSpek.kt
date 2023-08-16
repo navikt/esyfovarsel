@@ -1,9 +1,8 @@
 package no.nav.syfo.service
 
+import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coEvery
 import io.mockk.mockk
-import java.time.LocalDate
-import java.util.*
 import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.pdl.PdlFoedsel
 import no.nav.syfo.consumer.pdl.PdlHentPerson
@@ -13,21 +12,27 @@ import no.nav.syfo.db.fetchSykepengerMaxDateByFnr
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
+import java.time.LocalDate
+import java.util.*
 import kotlin.test.assertEquals
 
-object SykepengerMaxDateServiceSpek : Spek({
+class SykepengerMaxDateServiceSpek : DescribeSpec({
     describe("SykepengerMaxDateService") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
         val pdlConsumer = mockk<PdlConsumer>(relaxed = true)
         val sykepengerMaxDateService = SykepengerMaxDateService(embeddedDatabase, pdlConsumer)
-        coEvery { pdlConsumer.hentPerson(any()) } returns PdlHentPerson(hentPerson = PdlPerson(adressebeskyttelse = null, navn = null, foedsel = listOf(PdlFoedsel("1986-01-01"))))
-        afterEachTest {
+        coEvery { pdlConsumer.hentPerson(any()) } returns PdlHentPerson(
+            hentPerson = PdlPerson(
+                adressebeskyttelse = null,
+                navn = null,
+                foedsel = listOf(PdlFoedsel("1986-01-01"))
+            )
+        )
+        afterTest {
             embeddedDatabase.connection.dropData()
         }
 
-        afterGroup {
+        afterSpec {
             embeddedDatabase.stop()
         }
 

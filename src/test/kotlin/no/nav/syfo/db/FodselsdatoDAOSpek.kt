@@ -1,21 +1,17 @@
 package no.nav.syfo.db
 
+import io.kotest.core.spec.style.DescribeSpec
 import no.nav.syfo.testutil.*
 import org.amshove.kluent.*
-import org.spekframework.spek2.*
-import org.spekframework.spek2.style.specification.*
 
-object FodselsdatoDAOSpek : Spek({
-    //The default timeout of 10 seconds is not sufficient to initialise the embedded database
-    defaultTimeout = 20000L
-
+class FodselsdatoDAOSpek : DescribeSpec({
     describe("FodselsdatoDAOSpek") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
-        afterEachTest {
+        beforeTest {
             embeddedDatabase.connection.dropData()
         }
 
-        afterGroup {
+        afterTest {
             embeddedDatabase.stop()
         }
 

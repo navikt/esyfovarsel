@@ -1,5 +1,6 @@
 package no.nav.syfo.api
 
+import io.kotest.core.spec.style.DescribeSpec
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
@@ -9,10 +10,8 @@ import io.ktor.server.testing.handleRequest
 import no.nav.syfo.ApplicationState
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 
-object SelftestSpek : Spek({
+class SelftestSpek : DescribeSpec({
 
     val applicationState = ApplicationState()
 

@@ -1,20 +1,18 @@
 package no.nav.syfo.job
 
+import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.ToggleEnv
-import no.nav.syfo.db.DatabaseInterface
-import no.nav.syfo.db.arbeidstakerAktorId1
+import no.nav.syfo.db.*
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
-import no.nav.syfo.db.domain.VarselType.*
-import no.nav.syfo.db.fetchPlanlagtVarselByFnr
-import no.nav.syfo.db.fetchUtsendtVarselByFnr
-import no.nav.syfo.db.storePlanlagtVarsel
+import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
+import no.nav.syfo.db.domain.VarselType.MER_VEILEDNING
 import no.nav.syfo.planner.arbeidstakerFnr1
 import no.nav.syfo.service.AktivitetskravVarselFinder
 import no.nav.syfo.service.MerVeiledningVarselFinder
@@ -23,15 +21,11 @@ import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.mocks.orgnummer
 import org.amshove.kluent.should
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-object VarselSenderSpek : Spek({
-
-    defaultTimeout = 20000L
+class VarselSenderSpek : DescribeSpec({
 
     val embeddedDatabase by lazy { EmbeddedDatabase() }
 
@@ -61,11 +55,11 @@ object VarselSenderSpek : Spek({
     )
 
     describe("VarselSenderSpek") {
-        afterEachTest {
+        afterTest {
             embeddedDatabase.connection.dropData()
         }
 
-        afterGroup {
+        afterSpec {
             embeddedDatabase.stop()
         }
 

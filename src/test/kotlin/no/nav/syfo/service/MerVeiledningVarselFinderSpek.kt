@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -19,19 +20,18 @@ import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.mocks.orgnummer
 import org.amshove.kluent.shouldBeEqualTo
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-object MerVeiledningVarselFinderSpek : Spek({
+class MerVeiledningVarselFinderSpek : DescribeSpec({
 
     val embeddedDatabase by lazy { EmbeddedDatabase() }
     val sykmeldingerConsumerMock: SykmeldingerConsumer = mockk(relaxed = true)
     val sykmeldingServiceMockk = SykmeldingService(sykmeldingerConsumerMock)
     val pdlConsumerMockk: PdlConsumer = mockk(relaxed = true)
-    val merVeiledningVarselFinder = MerVeiledningVarselFinder(embeddedDatabase, sykmeldingServiceMockk, pdlConsumerMockk)
+    val merVeiledningVarselFinder =
+        MerVeiledningVarselFinder(embeddedDatabase, sykmeldingServiceMockk, pdlConsumerMockk)
 
     val spleisUtbetalingWhichResultsToVarsel = UtbetalingUtbetalt(
         fødselsnummer = arbeidstakerFnr1,
@@ -64,16 +64,13 @@ object MerVeiledningVarselFinderSpek : Spek({
         korrelasjonsId = UUID.randomUUID().toString(),
     )
 
-    // The default timeout of 10 seconds is not sufficient to initialise the embedded database
-    defaultTimeout = 20000L
-
     describe("MerVeiledningVarselFinderSpek") {
-        afterEachTest {
+        afterTest {
             clearAllMocks()
             embeddedDatabase.connection.dropData()
         }
 
-        afterGroup {
+        afterSpec {
             embeddedDatabase.stop()
         }
 
