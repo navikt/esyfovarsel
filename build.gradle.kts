@@ -1,5 +1,4 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "no.nav.syfo"
 version = "1.0"
@@ -8,8 +7,9 @@ val kluentVersion = "1.68"
 val ktorVersion = "2.3.1"
 val prometheusVersion = "0.15.0"
 val micrometerVersion = "1.8.4"
-val spekVersion = "2.0.18"
-val mockkVersion = "1.12.3"
+val kotestVersion = "5.6.2"
+val kotestExtensionsVersion = "2.0.0"
+val mockkVersion = "1.13.5"
 val slf4jVersion = "1.7.36"
 val logbackVersion = "1.2.11"
 val javaxVersion = "2.1.1"
@@ -24,12 +24,13 @@ val kafkaVersion = "2.8.2"
 val avroVersion = "1.11.0"
 val confluentVersion = "7.4.0"
 val brukernotifikasjonerSchemaVersion = "2.5.1"
+val kotlinVersion = "1.8.22"
 
 val githubUser: String by project
 val githubPassword: String by project
 
 plugins {
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "1.8.22"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.5.31"
     id("com.diffplug.gradle.spotless") version "3.18.0"
     id("com.github.johnrengelman.shadow") version "7.1.0"
@@ -117,16 +118,23 @@ dependencies {
     // Test
     testImplementation(kotlin("test"))
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
-    testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
-    testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spekVersion")
-    testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spekVersion")
+    testImplementation("io.kotest:kotest-runner-junit5-jvm:$kotestVersion")
+    testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
+    testImplementation("io.kotest:kotest-property:$kotestVersion")
+    testImplementation("io.kotest.extensions:kotest-assertions-ktor:$kotestExtensionsVersion")
+
 }
 
 configurations.implementation {
     exclude(group = "com.fasterxml.jackson.module", module = "jackson-module-scala_2.13")
+}
+
+java.toolchain {
+    languageVersion.set(JavaLanguageVersion.of(19))
 }
 
 tasks {
@@ -139,14 +147,7 @@ tasks {
         manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapApplicationKt"
     }
 
-    withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "14"
-    }
-
     withType<Test> {
-        useJUnitPlatform {
-            includeEngines("spek2")
-        }
-        testLogging.showStandardStreams = true
+        useJUnitPlatform()
     }
 }

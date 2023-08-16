@@ -11,11 +11,15 @@ spec:
     outbound:
       rules:
         - application: esyfovarsel
-  schedule: "05 09,18 * * *"
+  schedule: "*/5 * * * *"
   filesFrom:
     - secret: esyfovarsel-serviceuser
   env:
-  {{#each job}}
-    - name: {{@key}}
-      value: "{{this}}"
-  {{/each}}
+    - name: KTOR_ENV
+      value: remote
+    - name: JOB
+      value: "true"
+    - name: SEND_VARSLER
+      value: "true"
+    - name: ESYFOVARSEL_JOB_TRIGGER_URL
+      value: http://esyfovarsel/job/trigger

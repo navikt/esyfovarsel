@@ -2,33 +2,33 @@ name: "Deploy topic"
 on:
   push:
     paths:
-      - .nais/topics/**
+      - nais/topics/**
       - .github/workflows/topic.yaml
 jobs:
   deploy-topic-to-dev:
-    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/varselbus-')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/varselbus-')
     name: Deploy topic to dev
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Deploy topic varselbus to dev
-        uses: nais/deploy/actions/deploy@master
+        uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: .nais/topics/varselbus-topic-dev.yaml
+          RESOURCE: nais/topics/varselbus-topic-dev.yaml
 
   deploy-topic-to-prod:
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     name: Deploy topic to prod
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Deploy topic varselbus to prod
-        uses: nais/deploy/actions/deploy@master
+        uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: .nais/topics/varselbus-topic-prod.yaml
+          RESOURCE: nais/topics/varselbus-topic-prod.yaml

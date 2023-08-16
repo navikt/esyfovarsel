@@ -1,14 +1,13 @@
 package no.nav.syfo.kafka.consumers.infotrygd
 
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
+import io.kotest.core.spec.style.DescribeSpec
 import java.time.LocalDate
 import java.time.Month.DECEMBER
 import java.time.Month.NOVEMBER
 import java.util.Calendar.MAY
 import kotlin.test.assertEquals
 
-object GjenstaendeSykepengedagerSpek : Spek({
+class GjenstaendeSykepengedagerSpek : DescribeSpec({
     describe("GjenstaendeSykepengedagerSpek") {
 
         it("Should calculate only ukedager") {

@@ -1,28 +1,25 @@
 package no.nav.syfo.utils
 
+import io.kotest.core.spec.style.DescribeSpec
 import no.nav.syfo.kafka.consumers.syketilfelle.domain.Oppfolgingstilfelle39Uker
+import no.nav.syfo.planner.arbeidstakerAktorId1
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
-import no.nav.syfo.planner.arbeidstakerAktorId1
 import org.amshove.kluent.shouldBeEqualTo
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 import kotlin.math.min
 
-object VarselUtilSpek: Spek( {
-
-    defaultTimeout = 20000L
+class VarselUtilSpek : DescribeSpec({
 
     val embeddedDatabase by lazy { EmbeddedDatabase() }
 
 
     describe("VarselUtilSpek") {
-        afterEachTest {
+        afterTest {
             embeddedDatabase.connection.dropData()
         }
 
-        afterGroup {
+        afterSpec {
             embeddedDatabase.stop()
         }
 
@@ -39,21 +36,21 @@ object VarselUtilSpek: Spek( {
             val antallDagerSykmeldtPeriode5 = 100
 
             val antallDagerSykmeldtTotalt = antallDagerSykmeldtPeriode1 +
-                                            antallDagerSykmeldtPeriode3 +
-                                            antallDagerSykmeldtPeriode5
+                    antallDagerSykmeldtPeriode3 +
+                    antallDagerSykmeldtPeriode5
 
             val antallDagerSykmeldtForVarsel = min(antallDagerSykmeldtTotalt, antallDager39UkersVarsel.toInt())
 
             val antallDagerIArbeidTotalt = antallDagerArbeidPeriode2 +
-                                           antallDagerArbeidPeriode4
+                    antallDagerArbeidPeriode4
 
             val antallDagerFraFomTilVarselDato = antallDagerSykmeldtForVarsel + antallDagerIArbeidTotalt
 
             val antallDagerITilfelleTotalt = antallDagerSykmeldtPeriode1 +
-                                             antallDagerArbeidPeriode2 +
-                                             antallDagerSykmeldtPeriode3 +
-                                             antallDagerArbeidPeriode4 +
-                                             antallDagerSykmeldtPeriode5
+                    antallDagerArbeidPeriode2 +
+                    antallDagerSykmeldtPeriode3 +
+                    antallDagerArbeidPeriode4 +
+                    antallDagerSykmeldtPeriode5
 
             val tom = fom.plusDays(antallDagerITilfelleTotalt.toLong())
 

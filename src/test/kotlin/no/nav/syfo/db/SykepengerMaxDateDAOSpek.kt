@@ -1,28 +1,24 @@
 package no.nav.syfo.db
 
 
+import io.kotest.core.spec.style.DescribeSpec
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.utils.REMAINING_DAYS_UNTIL_39_UKERS_VARSEL
 import org.amshove.kluent.should
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 
-object SykepengerMaxDateDAOSpek : Spek({
-
-    //The default timeout of 10 seconds is not sufficient to initialise the embedded database
-    defaultTimeout = 20000L
+class SykepengerMaxDateDAOSpek : DescribeSpec({
     val sykepengerMaxDate = LocalDate.now().plusDays(1)
 
     describe("SykepengerMaxDateDAOSpek") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
 
-        afterEachTest {
+        afterTest {
             embeddedDatabase.connection.dropData()
         }
 
-        afterGroup {
+        afterSpec {
             embeddedDatabase.stop()
         }
 

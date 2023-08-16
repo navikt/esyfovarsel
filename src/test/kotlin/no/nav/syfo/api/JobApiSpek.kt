@@ -1,5 +1,6 @@
 package no.nav.syfo.api
 
+import io.kotest.core.spec.style.DescribeSpec
 import io.ktor.http.HttpMethod
 import io.ktor.http.isSuccess
 import io.ktor.server.application.install
@@ -43,17 +44,14 @@ import no.nav.syfo.testutil.mocks.userAccessStatus4
 import no.nav.syfo.testutil.mocks.userAccessStatus5
 import no.nav.syfo.util.contentNegotationFeature
 import org.amshove.kluent.shouldBeEqualTo
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-object JobApiSpek : Spek({
-
-    defaultTimeout = 20000L
-
+class JobApiSpek : DescribeSpec({
     val testEnv = getTestEnv()
+
+    timeout = 20000L
 
     describe("JobTriggerApi test") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }

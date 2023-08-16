@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -14,26 +15,21 @@ import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.mocks.orgnummer
 import org.amshove.kluent.shouldBeEqualTo
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 
-object AktivitetskravVarselFinderSpek : Spek({
+class AktivitetskravVarselFinderSpek : DescribeSpec({
 
     val embeddedDatabase by lazy { EmbeddedDatabase() }
     val pdlConsumerMockk: PdlConsumer = mockk(relaxed = true)
     val aktivitetskravVarselFinder =
         AktivitetskravVarselFinder(embeddedDatabase, pdlConsumerMockk)
 
-    // The default timeout of 10 seconds is not sufficient to initialise the embedded database
-    defaultTimeout = 20000L
-
     describe("MerVeiledningVarselFinderSpek") {
-        afterEachTest {
+        afterTest {
             clearAllMocks()
             embeddedDatabase.connection.dropData()
         }
 
-        afterGroup {
+        afterSpec {
             embeddedDatabase.stop()
         }
 

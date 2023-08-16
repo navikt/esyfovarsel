@@ -1,10 +1,7 @@
 package no.nav.syfo.service
 
-import io.mockk.clearAllMocks
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import io.kotest.core.spec.style.DescribeSpec
+import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.access.domain.UserAccessStatus
@@ -12,16 +9,7 @@ import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingDTO
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldtStatus
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.AdresseDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.ArbeidsgiverStatusDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.BehandlerDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.BehandlingsutfallDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.GradertDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.KontaktMedPasientDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.PeriodetypeDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.RegelStatusDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.SykmeldingStatusDTO
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.SykmeldingsperiodeDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.*
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
@@ -29,16 +17,10 @@ import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaP
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.syketilfelle.SyketilfellebitService
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
-import java.time.Clock
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
+import java.time.*
 import java.util.*
 
-object SendVarselServiceTestSpek : Spek({
+class SendVarselServiceTestSpek : DescribeSpec({
     val brukernotifikasjonKafkaProducerMockk: BrukernotifikasjonKafkaProducer = mockk(relaxed = true)
     val dineSykmeldteHendelseKafkaProducerMockk: DineSykmeldteHendelseKafkaProducer = mockk(relaxed = true)
     val dittSykefravaerMeldingKafkaProducerMockk: DittSykefravaerMeldingKafkaProducer = mockk(relaxed = true)
@@ -87,7 +69,7 @@ object SendVarselServiceTestSpek : Spek({
     val orgnummer = "999988877"
 
     describe("SendVarselServiceSpek") {
-        beforeEachTest {
+        beforeTest {
             every { accessControlServiceMockk.getUserAccessStatus(sykmeldtFnr) } returns UserAccessStatus(
                 sykmeldtFnr,
                 canUserBeDigitallyNotified = true,
@@ -97,7 +79,7 @@ object SendVarselServiceTestSpek : Spek({
             every { urlEnvMockk.baseUrlSykInfo } returns "https://www-gcp.dev.nav.no/syk/info"
         }
 
-        afterEachTest {
+        afterTest {
             clearAllMocks()
         }
 
@@ -127,7 +109,15 @@ object SendVarselServiceTestSpek : Spek({
                 )
             }
 
-            verify(exactly = 1) { brukernotifikasjonKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any(), any()) }
+            verify(exactly = 1) {
+                brukernotifikasjonKafkaProducerMockk.sendBeskjed(
+                    sykmeldtFnr,
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            }
             verify(exactly = 1) { dineSykmeldteHendelseKafkaProducerMockk.sendVarsel(any()) }
             verify(exactly = 1) { arbeidsgiverNotifikasjonServiceMockk.sendNotifikasjon(any()) }
         }
@@ -158,19 +148,27 @@ object SendVarselServiceTestSpek : Spek({
                 )
             }
 
-            verify(exactly = 1) { brukernotifikasjonKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any(), any()) }
+            verify(exactly = 1) {
+                brukernotifikasjonKafkaProducerMockk.sendBeskjed(
+                    sykmeldtFnr,
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            }
             verify(exactly = 0) { dineSykmeldteHendelseKafkaProducerMockk.sendVarsel(any()) }
             verify(exactly = 0) { arbeidsgiverNotifikasjonServiceMockk.sendNotifikasjon(any()) }
         }
 
         it("Should send mer-veiledning-varsel to SM if sykmelding is sendt AG") {
             coEvery { sykmeldingerConsumerMock.getSykmeldtStatusPaDato(any(), sykmeldtFnr) } returns
-                SykmeldtStatus(
-                    true,
-                    true,
-                    LocalDate.now(),
-                    LocalDate.now(),
-                )
+                    SykmeldtStatus(
+                        true,
+                        true,
+                        LocalDate.now(),
+                        LocalDate.now(),
+                    )
 
             coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(sykmeldtFnr) } returns true
             coEvery { merVeiledningVarselFinder.isBrukerYngreEnn67Ar(sykmeldtFnr) } returns true
@@ -190,7 +188,15 @@ object SendVarselServiceTestSpek : Spek({
                 )
             }
 
-            verify(exactly = 1) { brukernotifikasjonKafkaProducerMockk.sendBeskjed(sykmeldtFnr, any(), any(), any(), any()) }
+            verify(exactly = 1) {
+                brukernotifikasjonKafkaProducerMockk.sendBeskjed(
+                    sykmeldtFnr,
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            }
         }
     }
 })

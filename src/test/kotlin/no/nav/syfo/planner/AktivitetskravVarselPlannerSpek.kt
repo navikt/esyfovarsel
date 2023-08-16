@@ -1,5 +1,6 @@
 package no.nav.syfo.planner
 
+import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -19,17 +20,13 @@ import no.nav.syfo.testutil.dropData
 import no.nav.syfo.utils.VarselUtil
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 
-object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
-    // The default timeout of 10 seconds is not sufficient to initialise the embedded database
-    defaultTimeout = 20000L
+class AktivitetskravVarselPlannerSyketilfellebitSpek : DescribeSpec({
 
     val embeddedDatabase by lazy { EmbeddedDatabase() }
     val syketilfellebitService = mockk<SyketilfellebitService>()
@@ -45,14 +42,11 @@ object AktivitetskravVarselPlannerSyketilfellebitSpek : Spek({
         val planlagtVarselToStore3 =
             PlanlagtVarsel(arbeidstakerFnr2, arbeidstakerAktorId2, orgnummer, setOf("2"), VarselType.AKTIVITETSKRAV)
 
-        beforeGroup {
-        }
-
-        afterEachTest {
+        afterTest {
             embeddedDatabase.connection.dropData()
         }
 
-        afterGroup {
+        afterSpec {
             embeddedDatabase.stop()
         }
 
