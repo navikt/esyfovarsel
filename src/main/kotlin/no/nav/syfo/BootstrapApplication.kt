@@ -77,7 +77,6 @@ import no.nav.syfo.utils.RunOnElection
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-data class ApplicationState(var running: Boolean = false, var initialized: Boolean = false)
 
 val state: ApplicationState = ApplicationState()
 val backgroundTasksContext = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
