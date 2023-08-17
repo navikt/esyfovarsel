@@ -61,18 +61,14 @@ class DialogmoteInnkallingVarselService(
         varselUuid: String,
         eksternVarsling: Boolean,
     ) {
-        val tekst = getArbeidstakerVarselText(varselHendelse.type)
-        val url = getVarselUrl(varselHendelse, varselUuid)
-        val meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type)
-        val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
         senderFacade.sendTilBrukernotifikasjoner(
-            varselUuid,
-            arbeidstakerFnr,
-            tekst,
-            url,
-            varselHendelse,
-            meldingType,
-            eksternVarsling,
+            uuid = varselUuid,
+            mottakerFnr = varselHendelse.arbeidstakerFnr,
+            content = getArbeidstakerVarselText(varselHendelse.type),
+            url = getVarselUrl(varselHendelse, varselUuid),
+            varselHendelse = varselHendelse,
+            meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type),
+            eksternVarsling = eksternVarsling,
         )
     }
 
@@ -89,27 +85,22 @@ class DialogmoteInnkallingVarselService(
     }
 
     private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
-        val uuid = UUID.randomUUID()
-        val orgnummer = varselHendelse.orgnummer
-        val narmesteLederFnr = varselHendelse.narmesteLederFnr
-        val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
         val texts = getArbeisgiverTexts(varselHendelse)
         val sms = texts[SMS_KEY]
         val emailTitle = texts[EMAIL_TITLE_KEY]
         val emailBody = texts[EMAIL_BODY_KEY]
-        val hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
 
         if (!sms.isNullOrBlank() && !emailTitle.isNullOrBlank() && !emailBody.isNullOrBlank()) {
             val input = ArbeidsgiverNotifikasjonInput(
-                uuid = uuid,
-                virksomhetsnummer = orgnummer,
-                narmesteLederFnr = narmesteLederFnr,
-                ansattFnr = arbeidstakerFnr,
+                uuid = UUID.randomUUID(),
+                virksomhetsnummer = varselHendelse.orgnummer,
+                narmesteLederFnr = varselHendelse.narmesteLederFnr,
+                ansattFnr = varselHendelse.arbeidstakerFnr,
                 merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
                 messageText = sms,
                 emailTitle = emailTitle,
                 emailBody = emailBody,
-                hardDeleteDate = hardDeleteDate,
+                hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
                 meldingstype = Meldingstype.OPPGAVE,
             )
 
