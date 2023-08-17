@@ -44,18 +44,21 @@ class MotebehovVarselService(
     private val svarMotebehovUrl: String = "$dialogmoterUrl/sykmeldt/motebehov/svar"
 
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
-        runBlocking {
-            // Quickfix for å unngå å sende varsel til bedrifter der bruker ikke er sykmeldt. Det kan skje når den sykmeldte har vært sykmeldt fra flere arbeidsforhold,
-            // men bare er sykmeldt ved én av dem nå
-            val sykmeldingStatusForVirksomhet =
-                sykmeldingService.checkSykmeldingStatusForVirksomhet(LocalDate.now(), varselHendelse.arbeidstakerFnr, varselHendelse.orgnummer)
+        // Quickfix for å unngå å sende varsel til bedrifter der bruker ikke er sykmeldt. Det kan skje når den sykmeldte har vært sykmeldt fra flere arbeidsforhold,
+        // men bare er sykmeldt ved én av dem nå
+        val sykmeldingStatusForVirksomhet = runBlocking {
+            sykmeldingService.checkSykmeldingStatusForVirksomhet(
+                LocalDate.now(),
+                varselHendelse.arbeidstakerFnr,
+                varselHendelse.orgnummer
+            )
+        }
 
-            if (sykmeldingStatusForVirksomhet.sendtArbeidsgiver) {
-                sendVarselTilDineSykmeldte(varselHendelse)
-                sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
-            } else {
-                log.info("[MotebehovVarselService]: Sender ikke Svar møtebehov-varsel til NL fordi arbeidstaker ikke er sykmeldt fra bedriften")
-            }
+        if (sykmeldingStatusForVirksomhet.sendtArbeidsgiver) {
+            sendVarselTilDineSykmeldte(varselHendelse)
+            sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
+        } else {
+            log.info("[MotebehovVarselService]: Sender ikke Svar møtebehov-varsel til NL fordi arbeidstaker ikke er sykmeldt fra bedriften")
         }
     }
 
@@ -98,12 +101,11 @@ class MotebehovVarselService(
     private fun sendVarselTilBrukernotifikasjoner(varselHendelse: ArbeidstakerHendelse) {
         val fnr = varselHendelse.arbeidstakerFnr
         val eksternVarsling = accessControlService.canUserBeNotifiedByEmailOrSMS(fnr)
-        val url = URL(svarMotebehovUrl)
         senderFacade.sendTilBrukernotifikasjoner(
             UUID.randomUUID().toString(),
-            varselHendelse.arbeidstakerFnr,
+            fnr,
             BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
-            url,
+            URL(svarMotebehovUrl),
             varselHendelse,
             OPPGAVE,
             eksternVarsling
