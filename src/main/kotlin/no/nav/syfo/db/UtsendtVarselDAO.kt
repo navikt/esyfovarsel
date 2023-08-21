@@ -1,13 +1,13 @@
 package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.Kanal
+import no.nav.syfo.db.domain.PPlanlagtVarsel
+import no.nav.syfo.db.domain.PUtsendtVarsel
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.syfo.db.domain.PPlanlagtVarsel
-import no.nav.syfo.db.domain.PUtsendtVarsel
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 
 fun DatabaseInterface.storeUtsendtVarsel(planlagtVarsel: PPlanlagtVarsel) {
     val insertStatement = """INSERT INTO UTSENDT_VARSEL (
@@ -16,7 +16,8 @@ fun DatabaseInterface.storeUtsendtVarsel(planlagtVarsel: PPlanlagtVarsel) {
         aktor_id,
         type,
         utsendt_tidspunkt,
-        planlagt_varsel_id) VALUES (?, ?, ?, ?, ?, ?)""".trimIndent()
+        planlagt_varsel_id) VALUES (?, ?, ?, ?, ?, ?)
+    """.trimIndent()
 
     val now = Timestamp.valueOf(LocalDateTime.now())
     val varselUUID = UUID.randomUUID()
@@ -46,7 +47,8 @@ fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
         kanal,
         utsendt_tidspunkt,
         ekstern_ref,
-        arbeidsgivernotifikasjon_merkelapp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""".trimIndent()
+        arbeidsgivernotifikasjon_merkelapp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """.trimIndent()
 
     connection.use { connection ->
         connection.prepareStatement(insertStatement).use {
@@ -66,11 +68,11 @@ fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
     }
 }
 
-fun DatabaseInterface.fetchUtsendtVarsel(
+fun DatabaseInterface.fetchUtsendteVarsler(
     fnr: String,
     orgnummer: String,
     type: HendelseType,
-    kanal: Kanal
+    kanal: Kanal,
 ): List<PUtsendtVarsel> {
     val queryStatement = """SELECT *
                             FROM UTSENDT_VARSEL
@@ -91,10 +93,10 @@ fun DatabaseInterface.fetchUtsendtVarsel(
     }
 }
 
-fun DatabaseInterface.fetchUtsendtVarsel(
+fun DatabaseInterface.fetchAlleUtsendteVarslerTilKanalByType(
     fnr: String,
     type: HendelseType,
-    kanal: Kanal
+    kanal: Kanal,
 ): List<PUtsendtVarsel> {
     val queryStatement = """SELECT *
                             FROM UTSENDT_VARSEL
@@ -108,6 +110,25 @@ fun DatabaseInterface.fetchUtsendtVarsel(
             it.setString(1, fnr)
             it.setString(2, type.name)
             it.setString(3, kanal.name)
+            it.executeQuery().toList { toPUtsendtVarsel() }
+        }
+    }
+}
+
+fun DatabaseInterface.fetchAlleUtsendteVarslerTilKanal(
+    fnr: String,
+    kanal: Kanal,
+): List<PUtsendtVarsel> {
+    val queryStatement = """SELECT *
+                            FROM UTSENDT_VARSEL
+                            WHERE fnr = ?
+                            AND kanal = ?
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, fnr)
+            it.setString(2, kanal.name)
             it.executeQuery().toList { toPUtsendtVarsel() }
         }
     }
