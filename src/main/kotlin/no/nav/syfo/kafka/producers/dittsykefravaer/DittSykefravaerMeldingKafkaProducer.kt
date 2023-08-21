@@ -10,7 +10,6 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import java.time.Instant
-import java.util.*
 
 class DittSykefravaerMeldingKafkaProducer(
     val env: Environment,
@@ -21,16 +20,16 @@ class DittSykefravaerMeldingKafkaProducer(
     }
     private val kafkaProducer = KafkaProducer<String, DittSykefravaerMelding>(kafkaConfig)
 
-    fun sendMelding(melding: DittSykefravaerMelding): String {
-        val uuid = "esyfovarsel-${UUID.randomUUID()}"
+    fun sendMelding(melding: DittSykefravaerMelding, uuid: String): String {
+        val uuidEkstern = "esyfovarsel-$uuid"
         kafkaProducer.send(
             ProducerRecord(
                 topicDittSykefravaerMelding,
-                uuid,
+                uuidEkstern,
                 melding,
             ),
         ).get()
-        return uuid
+        return uuidEkstern
     }
 
     fun ferdigstillMelding(eksternReferanse: String, fnr: String) {

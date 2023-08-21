@@ -1,17 +1,31 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.*
+import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.kafka.consumers.varselbus.domain.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
+import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
+import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
+import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
+import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.LoggerFactory
 import java.io.IOException
+import java.io.Serializable
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
+
+enum class DittSykefravaerHendelsetypeDialogmoteInnkalling : Serializable {
+    ESYFOVARSEL_DIALOGMOTE_INNKALT,
+    ESYFOVARSEL_DIALOGMOTE_AVLYST,
+    ESYFOVARSEL_DIALOGMOTE_REFERAT,
+    ESYFOVARSEL_DIALOGMOTE_NYTT_TID_STED,
+    ESYFOVARSEL_DIALOGMOTE_LEST,
+}
 
 class DialogmoteInnkallingVarselService(
     val senderFacade: SenderFacade,
@@ -47,6 +61,7 @@ class DialogmoteInnkallingVarselService(
         } else {
             varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid, eksternVarsling = false)
         }
+        sendOppgaveTilDittSykefravaerOgFerdigstillTidligereMeldinger(varselHendelse, varselUuid)
     }
 
     fun getVarselUrl(varselHendelse: ArbeidstakerHendelse, varselUuid: String): URL {
@@ -241,5 +256,92 @@ class DialogmoteInnkallingVarselService(
                 throw IOException("ArbeidstakerHendelse har feil format")
             }
         } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
+    }
+
+    fun getMessageText(arbeidstakerHendelse: ArbeidstakerHendelse): String? {
+        return when (arbeidstakerHendelse.type) {
+            SM_DIALOGMOTE_INNKALT -> DITT_SYKEFRAVAER_DIALOGMOTE_INNKALLING_MESSAGE_TEXT
+            SM_DIALOGMOTE_AVLYST -> DITT_SYKEFRAVAER_DIALOGMOTE_AVLYSNING_MESSAGE_TEXT
+            SM_DIALOGMOTE_REFERAT -> DITT_SYKEFRAVAER_DIALOGMOTE_REFERAT_MESSAGE_TEXT
+            SM_DIALOGMOTE_NYTT_TID_STED -> DITT_SYKEFRAVAER_DIALOGMOTE_ENDRING_MESSAGE_TEXT
+            SM_DIALOGMOTE_LEST -> ""
+            else -> {
+                log.error("Klarte ikke mappe varsel av type ${arbeidstakerHendelse.type} ved mapping hendelsetype til ditt sykefravar melding tekst")
+                null
+            }
+        }
+    }
+
+    fun getDittSykefravarHendelseType(arbeidstakerHendelse: ArbeidstakerHendelse): String? {
+        return when (arbeidstakerHendelse.type) {
+            SM_DIALOGMOTE_INNKALT -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_INNKALT.toString()
+            SM_DIALOGMOTE_AVLYST -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_AVLYST.toString()
+            SM_DIALOGMOTE_REFERAT -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_REFERAT.toString()
+            SM_DIALOGMOTE_NYTT_TID_STED -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_NYTT_TID_STED.toString()
+            SM_DIALOGMOTE_LEST -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_LEST.toString()
+            else -> {
+                log.error("Klarte ikke mappe varsel av type ${arbeidstakerHendelse.type} ved mapping hendelsetype til ditt sykefravar hendelsetype")
+                null
+            }
+        }
+    }
+
+    private fun sendOppgaveTilDittSykefravaerOgFerdigstillTidligereMeldinger(
+        arbeidstakerHendelse: ArbeidstakerHendelse,
+        varselUuid: String,
+    ) {
+        val utsendteVarsler = senderFacade.fetchAlleUferdigstilteVarslerTilKanal(
+            arbeidstakerHendelse.arbeidstakerFnr,
+            Kanal.DITT_SYKEFRAVAER,
+        )
+        val melding = opprettDittSykefravaerMelding(arbeidstakerHendelse, varselUuid)
+
+        if (utsendteVarsler.isNotEmpty() &&
+            listOf(SM_DIALOGMOTE_INNKALT, SM_DIALOGMOTE_NYTT_TID_STED, SM_DIALOGMOTE_AVLYST, SM_DIALOGMOTE_REFERAT)
+                .contains(arbeidstakerHendelse.type)
+        ) {
+            senderFacade.ferdigstillDittSykefravaerVarsler(arbeidstakerHendelse) // ferdigstille seg selv
+            senderFacade.ferdigstillDittSykefravaerVarslerAvTyper(
+                arbeidstakerHendelse,
+                setOf<String>(SM_DIALOGMOTE_INNKALT.name, SM_DIALOGMOTE_NYTT_TID_STED.name),
+            )
+        }
+        if (melding != null) {
+            senderFacade.sendTilDittSykefravaer(
+                arbeidstakerHendelse,
+                DittSykefravaerVarsel(
+                    varselUuid,
+                    melding,
+                ),
+            )
+        }
+        if (arbeidstakerHendelse.type == SM_DIALOGMOTE_LEST) {
+            senderFacade.ferdigstillDittSykefravaerVarsler(arbeidstakerHendelse)
+        }
+    }
+
+    fun opprettDittSykefravaerMelding(
+        arbeidstakerHendelse: ArbeidstakerHendelse,
+        varselUuid: String,
+    ): DittSykefravaerMelding? {
+        val messageText = getMessageText(arbeidstakerHendelse)
+        val hendelseType = getDittSykefravarHendelseType(arbeidstakerHendelse)
+
+        if (messageText != null && hendelseType != null && hendelseType != SM_DIALOGMOTE_LEST.name) {
+            return DittSykefravaerMelding(
+                OpprettMelding(
+                    messageText,
+                    getVarselUrl(arbeidstakerHendelse, varselUuid).toString(),
+                    Variant.INFO,
+                    true,
+                    hendelseType,
+                    OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE).toInstant(),
+                ),
+                null,
+                arbeidstakerHendelse.arbeidstakerFnr,
+            )
+        } else {
+            return null
+        }
     }
 }
