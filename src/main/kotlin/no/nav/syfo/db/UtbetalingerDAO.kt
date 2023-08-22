@@ -5,7 +5,7 @@ import no.nav.syfo.db.domain.PUtbetaling
 
 
 fun DatabaseInterface.fetchMerVeiledningVarslerToSend(): List<PUtbetaling> {
-    val gjenstaendeSykedagerLimit = 90
+    val gjenstaendeSykedagerLimit = 91
     val nyttVarselLimit = 106
     val maxDateLimit = 14
     val queryStatement = """SELECT ID, FNR, UTBETALT_TOM, FORELOPIG_BEREGNET_SLUTT, GJENSTAENDE_SYKEDAGER, OPPRETTET
