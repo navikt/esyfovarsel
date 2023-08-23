@@ -59,3 +59,17 @@ private fun DatabaseInterface.skalHaLagretIkkeUtsendtVarsel(
         this.fetchUtsendtVarselFeiletByFnr(fnr)
             .filter { it.hendelsetypeNavn == type.name }.any { it.kanal.equals(kanal.name) }
     }
+
+fun DatabaseInterface.fetchUtsendtVarselFeiletByFnr(fnr: String): List<PUtsendtVarselFeilet> {
+    val queryStatement = """SELECT *
+                            FROM UTSENDING_VARSEL_FEILET
+                            WHERE arbeidstaker_fnr = ?
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, fnr)
+            it.executeQuery().toList { toPUtsendtVarselFeilet() }
+        }
+    }
+}

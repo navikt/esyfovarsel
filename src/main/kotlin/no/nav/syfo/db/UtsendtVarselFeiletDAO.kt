@@ -41,19 +41,6 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
     }
 }
 
-fun DatabaseInterface.fetchUtsendtVarselFeiletByFnr(fnr: String): List<PUtsendtVarselFeilet> {
-    val queryStatement = """SELECT *
-                            FROM UTSENDING_VARSEL_FEILET
-                            WHERE arbeidstaker_fnr = ?
-    """.trimIndent()
-
-    return connection.use { connection ->
-        connection.prepareStatement(queryStatement).use {
-            it.setString(1, fnr)
-            it.executeQuery().toList { toPUtsendtVarselFeilet() }
-        }
-    }
-}
 
 fun ResultSet.toPUtsendtVarselFeilet() = PUtsendtVarselFeilet(
     uuid = getString("uuid"),
