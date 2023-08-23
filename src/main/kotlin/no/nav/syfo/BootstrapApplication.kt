@@ -49,7 +49,6 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaPr
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.planner.AktivitetskravVarselPlanner
-import no.nav.syfo.planner.MerVeiledningVarselPlanner
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.service.AccessControlService
 import no.nav.syfo.service.AktivitetskravVarselFinder
@@ -68,7 +67,6 @@ import no.nav.syfo.service.SenderFacade
 import no.nav.syfo.service.SykepengerMaxDateService
 import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.service.VarselBusService
-import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.syketilfelle.SyketilfellebitService
@@ -121,14 +119,11 @@ fun main() {
                 val fysiskBrevUtsendingService = FysiskBrevUtsendingService(journalpostdistribusjonConsumer)
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
                 val syketilfellebitService = SyketilfellebitService(database)
-                val varselSendtService = VarselSendtService(database)
 
-                val merVeiledningVarselPlanner =
-                    MerVeiledningVarselPlanner(database, syketilfellebitService, varselSendtService)
                 val aktivitetskravVarselPlanner =
                     AktivitetskravVarselPlanner(database, syketilfellebitService, sykmeldingService)
                 val replanleggingService =
-                    ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
+                    ReplanleggingService(database, aktivitetskravVarselPlanner)
                 val brukernotifikasjonerService =
                     BrukernotifikasjonerService(brukernotifikasjonKafkaProducer)
                 val senderFacade = SenderFacade(
@@ -204,7 +199,6 @@ fun main() {
                         accessControlService,
                         varselBusService,
                         aktivitetskravVarselPlanner,
-                        merVeiledningVarselPlanner,
                         sykepengerMaxDateService,
                     )
                 }
@@ -335,16 +329,13 @@ fun Application.kafkaModule(
     accessControlService: AccessControlService,
     varselbusService: VarselBusService,
     aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
-    merVeiledningVarselPlanner: MerVeiledningVarselPlanner,
     sykepengerMaxDateService: SykepengerMaxDateService,
 ) {
     runningRemotely {
         launch(backgroundTasksContext) {
             launchKafkaListener(
                 state,
-                SyketilfelleKafkaConsumer(env, accessControlService, database)
-                    .addPlanner(merVeiledningVarselPlanner)
-                    .addPlanner(aktivitetskravVarselPlanner),
+                SyketilfelleKafkaConsumer(env, aktivitetskravVarselPlanner, accessControlService, database)
             )
         }
 

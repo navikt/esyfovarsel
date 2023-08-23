@@ -10,27 +10,17 @@ import java.time.LocalDate
 
 class ReplanleggingService(
     val databaseAccess: DatabaseInterface,
-    val merVeiledningVarselPlanner: MerVeiledningVarselPlanner,
     val aktivitetskravVarselPlanner: AktivitetskravVarselPlanner
 ) {
-
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.ReplanleggingService")
 
-    suspend fun planleggMerVeiledningVarslerPaNytt(fromDate: LocalDate, toDate: LocalDate): Int {
-        return planleggVarslerPaNytt(VarselType.MER_VEILEDNING, merVeiledningVarselPlanner, fromDate, toDate)
-    }
-
     suspend fun planleggAktivitetskravVarslerPaNytt(fromDate: LocalDate, toDate: LocalDate): Int {
-        return planleggVarslerPaNytt(VarselType.AKTIVITETSKRAV, aktivitetskravVarselPlanner, fromDate, toDate)
-    }
-
-    suspend fun planleggVarslerPaNytt(varselType: VarselType, planlegger: VarselPlanner, fromDate: LocalDate, toDate: LocalDate): Int {
-        log.info("[ReplanleggingService]: Går gjennom alle planlagte $varselType-varsler mellom $fromDate og $toDate og planlegger dem på nytt")
-        val planlagteVarsler = databaseAccess.fetchPlanlagtVarselByTypeAndUtsendingsdato(varselType, fromDate, toDate)
+        log.info("[ReplanleggingService]: Går gjennom alle planlagte ${VarselType.AKTIVITETSKRAV}-varsler mellom $fromDate og $toDate og planlegger dem på nytt")
+        val planlagteVarsler = databaseAccess.fetchPlanlagtVarselByTypeAndUtsendingsdato(VarselType.AKTIVITETSKRAV, fromDate, toDate)
         val size = planlagteVarsler.size
-        log.info("[ReplanleggingService]: Replanlegger $size varsler av type $varselType")
-        planlagteVarsler.forEach { planlegger.processSyketilfelle(it.fnr, it.orgnummer) }
-        log.info("[ReplanleggingService]: Planla $size varsler av type $varselType")
+        log.info("[ReplanleggingService]: Replanlegger $size varsler av type ${VarselType.AKTIVITETSKRAV}")
+        planlagteVarsler.forEach { aktivitetskravVarselPlanner.processSyketilfelle(it.fnr, it.orgnummer) }
+        log.info("[ReplanleggingService]: Planla $size varsler av type ${VarselType.AKTIVITETSKRAV}")
         return size
     }
 }
