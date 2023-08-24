@@ -23,7 +23,7 @@ fun Route.registerSykepengerMaxDateRestApi(
         try {
             val sykepengerMaxDate = sykepengerMaxDateService.getSykepengerMaxDate(sykmeldtFnr)
             val maxDate = sykepengerMaxDate?.let { formatDateForLetter(it.forelopig_beregnet_slutt) }
-            val createdAt = sykepengerMaxDate?.let { formatDateForLetter(it.opprettet.toLocalDate()) }
+            val createdAt = sykepengerMaxDate?.let { formatDateForLetter(it.utbetalt_tom) }
             log.info("Fetched sykepengerMaxDate from database: $sykepengerMaxDate")
             call.respond(SykepengerMaxDateResponse(maxDate, createdAt))
         } catch (e: Exception) {
