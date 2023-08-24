@@ -23,9 +23,9 @@ fun Route.registerSykepengerMaxDateRestApi(
         try {
             val sykepengerMaxDate = sykepengerMaxDateService.getSykepengerMaxDate(sykmeldtFnr)
             val maxDate = sykepengerMaxDate?.let { formatDateForLetter(it.forelopig_beregnet_slutt) }
-            val createdAt = sykepengerMaxDate?.let { formatDateForLetter(it.utbetalt_tom) }
+            val utbetaltTom = sykepengerMaxDate?.let { formatDateForLetter(it.utbetalt_tom) }
             log.info("Fetched sykepengerMaxDate from database: $sykepengerMaxDate")
-            call.respond(SykepengerMaxDateResponse(maxDate, createdAt))
+            call.respond(SykepengerMaxDateResponse(maxDate, utbetaltTom))
         } catch (e: Exception) {
             log.error("Encountered exception during fetching sykepengerMaxDate from database: ${e.message}")
             call.respond(
@@ -38,5 +38,5 @@ fun Route.registerSykepengerMaxDateRestApi(
 
 data class SykepengerMaxDateResponse(
     val maxDate: String?,
-    val createdAt: String?,
+    val utbetaltTom: String?,
 ) : Serializable
