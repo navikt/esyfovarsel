@@ -22,7 +22,7 @@ class SyketilfelleKafkaConsumer(
     val accessControlService: AccessControlService,
     val databaseInterface: DatabaseInterface,
 ) : KafkaListener {
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.SyketilfelleKafkaConsumer")
+    private val log: Logger = LoggerFactory.getLogger(SyketilfelleKafkaConsumer::class.qualifiedName)
     private val kafkaListener: KafkaConsumer<String, String>
     private val objectMapper = createObjectMapper()
 

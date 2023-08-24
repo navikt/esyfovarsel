@@ -12,7 +12,7 @@ class ReplanleggingService(
     val databaseAccess: DatabaseInterface,
     val aktivitetskravVarselPlanner: AktivitetskravVarselPlanner
 ) {
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.service.ReplanleggingService")
+    private val log: Logger = LoggerFactory.getLogger(ReplanleggingService::class.qualifiedName)
 
     suspend fun planleggAktivitetskravVarslerPaNytt(fromDate: LocalDate, toDate: LocalDate): Int {
         log.info("[ReplanleggingService]: Går gjennom alle planlagte ${VarselType.AKTIVITETSKRAV}-varsler mellom $fromDate og $toDate og planlegger dem på nytt")

@@ -58,8 +58,6 @@
     "dbPassword": "password"
   },
   "toggleEnv": {
-    "sendMerVeiledningVarsler": "false",
-    "sendMerVeiledningVarslerBasedOnSisteUtbtalingDate": "true",
     "sendAktivitetskravVarsler": "true",
     "toggleInfotrygdKafkaConsumer": "true",
     "toggleUtbetalingKafkaConsumer": "true"

@@ -84,8 +84,6 @@ fun getEnv(): Environment {
                 dbPassword = getEnvVar("GCP_DB_PASSWORD")
             ),
             ToggleEnv(
-                sendMerVeiledningVarsler = getBooleanEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER"),
-                sendMerVeiledningVarslerBasedOnSisteUtbtalingDate = getBooleanEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER_BASED_ON_SISTE_UTBETALING_DATE"),
                 sendAktivitetskravVarsler = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER"),
                 toggleInfotrygdKafkaConsumer = getBooleanEnvVar("TOGGLE_INFOTRYGD_KAFKA_CONSUMER"),
                 toggleUtbetalingKafkaConsumer = getBooleanEnvVar("TOGGLE_UTBETALING_KAFKA_CONSUMER")
@@ -174,8 +172,6 @@ data class DbEnv(
 )
 
 data class ToggleEnv(
-    val sendMerVeiledningVarsler: Boolean,
-    val sendMerVeiledningVarslerBasedOnSisteUtbtalingDate: Boolean,
     val sendAktivitetskravVarsler: Boolean,
     val toggleInfotrygdKafkaConsumer: Boolean,
     val toggleUtbetalingKafkaConsumer: Boolean
