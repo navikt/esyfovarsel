@@ -29,7 +29,11 @@ class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseI
         val mottakerNavn = pdlConsumer.hentPerson(fnr)?.getFullNameAsString()
         val sykepengerMaxDate = databaseInterface.fetchMaksDatoByFnr(fnr)
         val merVeiledningPdfUrl = syfooppdfgenUrl + "/api/v1/genpdf/oppfolging/mer_veiledning"
-        val request = getPdfgenRequest(mottakerNavn, sykepengerMaxDate?.utbetalt_tom, sykepengerMaxDate?.forelopig_beregnet_slutt)
+        val request = getPdfgenRequest(
+            mottakerNavn,
+            sykepengerMaxDate?.utbetalt_tom,
+            sykepengerMaxDate?.forelopig_beregnet_slutt,
+        )
 
         return runBlocking {
             try {
