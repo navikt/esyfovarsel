@@ -5,7 +5,6 @@ import no.nav.syfo.db.domain.toMikrofrontendSynlighet
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.getSynligTom
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideRecord
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import no.nav.syfo.service.microfrontend.MikrofrontendService.Companion.actionDisabled
@@ -139,7 +138,7 @@ class MikrofrontendDialogmoteService(
             microfrontendId = dialogmoteMikrofrontendId
         )
 
-    private fun minSideRecordDisabled(fnr: String) =
+    fun minSideRecordDisabled(fnr: String) =
         MinSideRecord(
             eventType = actionDisabled,
             fnr = fnr,

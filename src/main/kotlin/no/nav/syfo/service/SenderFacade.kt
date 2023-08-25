@@ -7,10 +7,12 @@ import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.db.fetchAlleUtsendteVarslerTilKanal
 import no.nav.syfo.db.fetchAlleUtsendteVarslerTilKanalByType
+import no.nav.syfo.db.fetchUtsendtVarselByFnr
 import no.nav.syfo.db.fetchUtsendteVarsler
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
+import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
@@ -128,6 +130,36 @@ class SenderFacade(
                 varsel.uuid.toString(),
                 varsel.merkelapp,
             )
+        }
+    }
+
+    fun ferdigstillVarslerForFnr(fnr: PersonIdent) {
+        val utsendteVarsler = database.fetchUtsendtVarselByFnr(fnr.value)
+        utsendteVarsler.forEach {
+            if (it.eksternReferanse != null && it.ferdigstiltTidspunkt == null) {
+                when (it.kanal) {
+                    BRUKERNOTIFIKASJON.name -> {
+                        brukernotifikasjonerService.ferdigstillVarsel(it.eksternReferanse, it.fnr)
+                    }
+
+                    DITT_SYKEFRAVAER.name -> {
+                        dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(it.eksternReferanse, it.fnr)
+                    }
+
+                    DINE_SYKMELDTE.name -> {
+                        dineSykmeldteHendelseKafkaProducer.ferdigstillVarsel(it.eksternReferanse)
+                    }
+
+                    ARBEIDSGIVERNOTIFIKASJON.name -> {
+                        if (it.arbeidsgivernotifikasjonMerkelapp != null) {
+                            arbeidsgiverNotifikasjonService.deleteNotifikasjon(
+                                it.arbeidsgivernotifikasjonMerkelapp,
+                                it.eksternReferanse,
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 

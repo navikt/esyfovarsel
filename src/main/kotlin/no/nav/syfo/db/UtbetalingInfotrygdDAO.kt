@@ -1,5 +1,6 @@
 package no.nav.syfo.db
 
+import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.infotrygd.domain.InfotrygdSource
 import org.postgresql.util.PSQLException
 import java.sql.Date
@@ -40,5 +41,34 @@ fun DatabaseInterface.storeInfotrygdUtbetaling(
         } catch (e: PSQLException) {
             log.debug("Ignoring duplicate message from Infotrygd with max date $sykepengerMaxDate and utbet tom $utbetaltTilDate")
         }
+    }
+}
+
+//TODO: Currently only  used for testing, delete if not needed later on
+fun DatabaseInterface.fetchInfotrygdUtbetalingByFnr(fnr: String): MutableList<Int> {
+    val fetchStatement = """SELECT *  FROM UTBETALING_SPLEIS  WHERE FNR = ?""".trimIndent()
+
+    val gjenstaaendeDagerAsList = connection.use { connection ->
+        connection.prepareStatement(fetchStatement).use {
+            it.setString(1, fnr)
+            it.executeQuery().toList { getInt("GJENSTAENDE_SYKEDAGER") }
+        }
+    }
+
+    return gjenstaaendeDagerAsList
+}
+
+
+fun DatabaseInterface.deleteUtbetalingInfotrygdByFnr(fnr: PersonIdent) {
+    val updateStatement = """DELETE FROM UTBETALING_INFOTRYGD
+                   WHERE fnr = ?
+    """.trimMargin()
+
+    return connection.use { connection ->
+        connection.prepareStatement(updateStatement).use {
+            it.setString(1, fnr.value)
+            it.executeUpdate()
+        }
+        connection.commit()
     }
 }
