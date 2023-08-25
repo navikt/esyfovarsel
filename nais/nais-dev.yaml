@@ -119,10 +119,6 @@ spec:
       value: api://dev-gcp.team-rocket.digdir-krr-proxy/.default
     - name: PDL_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
-    - name: TOGGLE_SEND_MERVEILEDNING_VARSLER
-      value: "false"
-    - name: TOGGLE_SEND_MERVEILEDNING_VARSLER_BASED_ON_SISTE_UTBETALING_DATE
-      value: "true"
     - name: TOGGLE_SEND_AKTIVITETSKRAV_VARSLER
       value: "true"
     - name: TOGGLE_UTBETALING_KAFKA_CONSUMER

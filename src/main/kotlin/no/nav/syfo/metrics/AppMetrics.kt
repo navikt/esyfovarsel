@@ -13,7 +13,6 @@ import io.prometheus.client.hotspot.DefaultExports
 
 const val METRICS_NS = "esyfovarsel"
 
-const val MER_VEILEDNING_PLANNED = "${METRICS_NS}_mer_veiledning_planned"
 const val AKTIVITETSKRAV_PLANNED = "${METRICS_NS}_aktivitetskrav_planned"
 
 const val MER_VEILEDNING_NOTICE_SENT = "${METRICS_NS}_mer_veiledning_notice_sent"
@@ -23,11 +22,6 @@ const val NOTICE_SENT = "${METRICS_NS}_notice_sent"
 
 val METRICS_REGISTRY =
     PrometheusMeterRegistry(PrometheusConfig.DEFAULT, CollectorRegistry.defaultRegistry, Clock.SYSTEM)
-
-val COUNT_MER_VEILEDNING_PLANNED: Counter = Counter
-    .builder(MER_VEILEDNING_PLANNED)
-    .description("Counts the number of planned notice of type Mer veiledning")
-    .register(METRICS_REGISTRY)
 
 val COUNT_AKTIVITETSKRAV_PLANNED: Counter = Counter
     .builder(AKTIVITETSKRAV_PLANNED)
@@ -67,10 +61,6 @@ fun tellAktivitetskravVarselSendt(varslerSendt: Int) {
 fun tellSvarMotebehovVarselSendt(varslerSendt: Int) {
     COUNT_ALL_NOTICE_SENT.increment(varslerSendt.toDouble())
     COUNT_SVAR_MOTEBEHOV_NOTICE_SENT.increment(varslerSendt.toDouble())
-}
-
-fun tellMerVeiledningPlanlagt() {
-    COUNT_MER_VEILEDNING_PLANNED.increment()
 }
 
 fun tellAktivitetskravPlanlagt() {

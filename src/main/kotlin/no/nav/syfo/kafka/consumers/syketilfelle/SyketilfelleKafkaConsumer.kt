@@ -9,7 +9,7 @@ import no.nav.syfo.db.storeSyketilfellebit
 import no.nav.syfo.db.toPSyketilfellebit
 import no.nav.syfo.kafka.common.*
 import no.nav.syfo.kafka.consumers.syketilfelle.domain.KSyketilfellebit
-import no.nav.syfo.planner.VarselPlanner
+import no.nav.syfo.planner.AktivitetskravVarselPlanner
 import no.nav.syfo.service.AccessControlService
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
@@ -18,12 +18,12 @@ import java.io.IOException
 
 class SyketilfelleKafkaConsumer(
     val env: Environment,
+    val aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
     val accessControlService: AccessControlService,
-    val databaseInterface: DatabaseInterface
+    val databaseInterface: DatabaseInterface,
 ) : KafkaListener {
-    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.SyketilfelleKafkaConsumer")
+    private val log: Logger = LoggerFactory.getLogger(SyketilfelleKafkaConsumer::class.qualifiedName)
     private val kafkaListener: KafkaConsumer<String, String>
-    private val varselPlanners: ArrayList<VarselPlanner> = arrayListOf()
     private val objectMapper = createObjectMapper()
 
     init {
@@ -46,12 +46,11 @@ class SyketilfelleKafkaConsumer(
                         val sykmeldtFnr = kSyketilfellebit.fnr
                         val userAccessStatus = accessControlService.getUserAccessStatus(sykmeldtFnr)
 
-                        varselPlanners.forEach { planner ->
-                            if (planner.varselSkalLagres(userAccessStatus)) {
-                                planner.processSyketilfelle(sykmeldtFnr, kSyketilfellebit.orgnummer)
-                            } else {
-                                log.info("Prosesserer ikke record fra $topicFlexSyketilfellebiter pga bruker med forespurt fnr er reservert og/eller gradert")
-                            }
+                        if (userAccessStatus.canUserBeDigitallyNotified) {
+                            aktivitetskravVarselPlanner.processSyketilfelle(sykmeldtFnr, kSyketilfellebit.orgnummer)
+                        } else {
+                            log.info("Prosesserer ikke record fra $topicFlexSyketilfellebiter pga bruker med" +
+                                     "forespurt fnr er reservert og/eller gradert")
                         }
                     }
                 } catch (e: IOException) {
@@ -68,10 +67,5 @@ class SyketilfelleKafkaConsumer(
                 kafkaListener.commitSync()
             }
         }
-    }
-
-    fun addPlanner(varselPlanner: VarselPlanner): SyketilfelleKafkaConsumer {
-        varselPlanners.add(varselPlanner)
-        return this
     }
 }
