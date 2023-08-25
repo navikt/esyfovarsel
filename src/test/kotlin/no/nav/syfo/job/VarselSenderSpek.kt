@@ -43,17 +43,6 @@ class VarselSenderSpek : DescribeSpec({
         LocalDateTime.now(),
     )
 
-    val aktivitetskravVarsel = PPlanlagtVarsel(
-        UUID.randomUUID().toString(),
-        arbeidstakerFnr1,
-        orgnummer,
-        null,
-        AKTIVITETSKRAV.name,
-        LocalDate.now(),
-        LocalDateTime.now(),
-        LocalDateTime.now(),
-    )
-
     describe("VarselSenderSpek") {
         afterTest {
             embeddedDatabase.connection.dropData()
