@@ -159,7 +159,7 @@ class SenderFacade(
             .forEach { ferdigstillVarsel(it) }
     }
 
-    private fun fetchUferdigstilteVarsler(
+    fun fetchUferdigstilteVarsler(
         arbeidstakerFnr: PersonIdent,
         orgnummer: String? = null,
         types: Set<HendelseType> = emptySet(),
@@ -198,13 +198,6 @@ class SenderFacade(
             database.setUtsendtVarselToFerdigstilt(utsendtVarsel.eksternReferanse)
         }
 
-    }
-
-    fun fetchAlleUferdigstilteVarslerTilKanal(
-        arbeidstakerFnr: String,
-        kanal: Kanal,
-    ): List<PUtsendtVarsel> {
-        return fetchUferdigstilteVarsler(PersonIdent(arbeidstakerFnr), null, emptySet(), kanal)
     }
 
     fun sendBrevTilFysiskPrint(
