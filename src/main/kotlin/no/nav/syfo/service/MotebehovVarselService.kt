@@ -21,6 +21,7 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
+import no.nav.syfo.metrics.tellSvarMotebehovVarselSendt
 import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -44,8 +45,8 @@ class MotebehovVarselService(
     private val svarMotebehovUrl: String = "$dialogmoterUrl/sykmeldt/motebehov/svar"
 
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
-        // Quickfix for å unngå å sende varsel til bedrifter der bruker ikke er sykmeldt. Det kan skje når den sykmeldte har vært sykmeldt fra flere arbeidsforhold,
-        // men bare er sykmeldt ved én av dem nå
+        // Quickfix for å unngå å sende varsel til bedrifter der bruker ikke er sykmeldt. Det kan skje når den
+        // sykmeldte har vært sykmeldt fra flere arbeidsforhold, men bare er sykmeldt ved én av dem nå
         val sykmeldingStatusForVirksomhet = runBlocking {
             sykmeldingService.checkSykmeldingStatusForVirksomhet(
                 LocalDate.now(),
@@ -57,6 +58,7 @@ class MotebehovVarselService(
         if (sykmeldingStatusForVirksomhet.sendtArbeidsgiver) {
             sendVarselTilDineSykmeldte(varselHendelse)
             sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
+            tellSvarMotebehovVarselSendt(1)
         } else {
             log.info("[MotebehovVarselService]: Sender ikke Svar møtebehov-varsel til NL fordi arbeidstaker ikke er sykmeldt fra bedriften")
         }
@@ -65,6 +67,7 @@ class MotebehovVarselService(
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         sendVarselTilBrukernotifikasjoner(varselHendelse)
         sendOppgaveTilDittSykefravaer(varselHendelse)
+        tellSvarMotebehovVarselSendt(1)
     }
 
     private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
