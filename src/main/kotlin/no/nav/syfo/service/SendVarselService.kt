@@ -111,10 +111,6 @@ class SendVarselService(
                 userAccessStatus.canUserBeDigitallyNotified || userAccessStatus.canUserBePhysicallyNotified
             }
 
-            SVAR_MOTEBEHOV.name -> {
-                userAccessStatus.canUserBeDigitallyNotified
-            }
-
             else -> {
                 false
             }
@@ -185,7 +181,6 @@ class SendVarselService(
         return when (type) {
             AKTIVITETSKRAV.name -> "NAV skal vurdere aktivitetsplikten din"
             MER_VEILEDNING.name -> "Det nærmer seg datoen da du ikke lenger kan få sykepenger."
-            SVAR_MOTEBEHOV.name -> "Ikke i bruk"
             else -> null
         }
     }
@@ -194,12 +189,10 @@ class SendVarselService(
         val baseUrlSykInfo = urlEnv.baseUrlSykInfo
         val aktivitetskravUrl = URL(baseUrlSykInfo + "/aktivitetsplikt")
         val merVeiledningUrl = URL(baseUrlSykInfo + "/snart-slutt-pa-sykepengene")
-        val svarMotebehovUrl = URL(baseUrlSykInfo + "/ikke-i-bruk")
 
         return when (type) {
             AKTIVITETSKRAV.name -> aktivitetskravUrl
             MER_VEILEDNING.name -> merVeiledningUrl
-            SVAR_MOTEBEHOV.name -> svarMotebehovUrl
             else -> null
         }
     }

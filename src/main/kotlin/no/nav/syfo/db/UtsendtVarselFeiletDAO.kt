@@ -4,6 +4,7 @@ import java.sql.ResultSet
 import java.sql.Timestamp
 import java.util.*
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
+import no.nav.syfo.domain.PersonIdent
 
 fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
     val insertStatement = """INSERT INTO UTSENDING_VARSEL_FEILET (
@@ -41,19 +42,21 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
     }
 }
 
-fun DatabaseInterface.fetchUtsendtVarselFeiletByFnr(fnr: String): List<PUtsendtVarselFeilet> {
-    val queryStatement = """SELECT *
-                            FROM UTSENDING_VARSEL_FEILET
-                            WHERE arbeidstaker_fnr = ?
-    """.trimIndent()
+
+fun DatabaseInterface.deleteUtsendtVarselFeiletByFnr(fnr: PersonIdent) {
+    val updateStatement = """DELETE FROM UTSENDING_VARSEL_FEILET
+                   WHERE arbeidstaker_fnr = ?
+    """.trimMargin()
 
     return connection.use { connection ->
-        connection.prepareStatement(queryStatement).use {
-            it.setString(1, fnr)
-            it.executeQuery().toList { toPUtsendtVarselFeilet() }
+        connection.prepareStatement(updateStatement).use {
+            it.setString(1, fnr.value)
+            it.executeUpdate()
         }
+        connection.commit()
     }
 }
+
 
 fun ResultSet.toPUtsendtVarselFeilet() = PUtsendtVarselFeilet(
     uuid = getString("uuid"),

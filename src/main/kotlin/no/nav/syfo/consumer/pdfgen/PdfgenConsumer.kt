@@ -29,7 +29,11 @@ class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseI
         val mottakerNavn = pdlConsumer.hentPerson(fnr)?.getFullNameAsString()
         val sykepengerMaxDate = databaseInterface.fetchMaksDatoByFnr(fnr)
         val merVeiledningPdfUrl = syfooppdfgenUrl + "/api/v1/genpdf/oppfolging/mer_veiledning"
-        val request = getPdfgenRequest(mottakerNavn, sykepengerMaxDate?.forelopig_beregnet_slutt)
+        val request = getPdfgenRequest(
+            mottakerNavn,
+            sykepengerMaxDate?.utbetalt_tom,
+            sykepengerMaxDate?.forelopig_beregnet_slutt,
+        )
 
         return runBlocking {
             try {
@@ -58,10 +62,18 @@ class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseI
         }
     }
 
-    private fun getPdfgenRequest(navn: String?, maxDate: LocalDate?): PdfgenRequest {
+    private fun getPdfgenRequest(navn: String?, utbetaltTom: LocalDate?, maxDate: LocalDate?): PdfgenRequest {
         val sentDateFormatted = formatDateForLetter(LocalDate.now())
+        val utbetaltTomFormatted = utbetaltTom?.let { formatDateForLetter(it) }
         val maxDateFormatted = maxDate?.let { formatDateForLetter(it) }
 
-        return PdfgenRequest(Brevdata(navn = navn, sendtdato = sentDateFormatted, maxdato = maxDateFormatted))
+        return PdfgenRequest(
+            Brevdata(
+                navn = navn,
+                sendtdato = sentDateFormatted,
+                utbetaltTom = utbetaltTomFormatted,
+                maxdato = maxDateFormatted
+            )
+        )
     }
 }

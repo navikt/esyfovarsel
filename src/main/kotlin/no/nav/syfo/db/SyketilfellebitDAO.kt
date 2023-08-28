@@ -1,6 +1,7 @@
 package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PSyketilfellebit
+import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.syketilfelle.domain.Syketilfellebit
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -76,6 +77,20 @@ fun DatabaseInterface.deleteSyketilfellebitById(id: String) {
             it.executeUpdate()
         }
 
+        connection.commit()
+    }
+}
+
+fun DatabaseInterface.deleteSyketilfellebitByFnr(fnr: PersonIdent) {
+    val updateStatement = """DELETE FROM SYKETILFELLEBIT
+                   WHERE fnr = ?
+    """.trimMargin()
+
+    return connection.use { connection ->
+        connection.prepareStatement(updateStatement).use {
+            it.setString(1, fnr.value)
+            it.executeUpdate()
+        }
         connection.commit()
     }
 }

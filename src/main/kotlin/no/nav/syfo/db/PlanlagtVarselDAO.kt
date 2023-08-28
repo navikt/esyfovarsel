@@ -147,25 +147,6 @@ fun DatabaseInterface.fetchAllSykmeldingIdsAndCount(): Int {
     }
 }
 
-fun DatabaseInterface.updateUtsendingsdatoByVarselId(uuid: String, utsendingsdato: LocalDate) {
-    val now = LocalDateTime.now()
-    val updateStatement = """UPDATE PLANLAGT_VARSEL
-                             SET UTSENDINGSDATO = ?,
-                                 SIST_ENDRET = ?
-                             WHERE UUID = ?
-    """.trimIndent()
-
-    connection.use { connection ->
-        connection.prepareStatement(updateStatement).use {
-            it.setDate(1, Date.valueOf(utsendingsdato))
-            it.setTimestamp(2, Timestamp.valueOf(now))
-            it.setObject(3, UUID.fromString(uuid))
-            it.executeUpdate()
-        }
-        connection.commit()
-    }
-}
-
 fun DatabaseInterface.deletePlanlagtVarselByVarselId(uuid: String) {
     val queryStatement1 = """DELETE
                             FROM PLANLAGT_VARSEL

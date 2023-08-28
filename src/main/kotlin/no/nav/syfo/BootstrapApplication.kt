@@ -41,6 +41,7 @@ import no.nav.syfo.job.sendNotificationsJob
 import no.nav.syfo.kafka.common.launchKafkaListener
 import no.nav.syfo.kafka.consumers.infotrygd.InfotrygdKafkaConsumer
 import no.nav.syfo.kafka.consumers.syketilfelle.SyketilfelleKafkaConsumer
+import no.nav.syfo.kafka.consumers.testdata.reset.TestdataResetConsumer
 import no.nav.syfo.kafka.consumers.utbetaling.UtbetalingKafkaConsumer
 import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
@@ -49,7 +50,6 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaPr
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.planner.AktivitetskravVarselPlanner
-import no.nav.syfo.planner.MerVeiledningVarselPlanner
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.service.AccessControlService
 import no.nav.syfo.service.AktivitetskravVarselFinder
@@ -67,8 +67,8 @@ import no.nav.syfo.service.SendVarselService
 import no.nav.syfo.service.SenderFacade
 import no.nav.syfo.service.SykepengerMaxDateService
 import no.nav.syfo.service.SykmeldingService
+import no.nav.syfo.service.TestdataResetService
 import no.nav.syfo.service.VarselBusService
-import no.nav.syfo.service.VarselSendtService
 import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.syketilfelle.SyketilfellebitService
@@ -121,14 +121,11 @@ fun main() {
                 val fysiskBrevUtsendingService = FysiskBrevUtsendingService(journalpostdistribusjonConsumer)
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
                 val syketilfellebitService = SyketilfellebitService(database)
-                val varselSendtService = VarselSendtService(database)
 
-                val merVeiledningVarselPlanner =
-                    MerVeiledningVarselPlanner(database, syketilfellebitService, varselSendtService)
                 val aktivitetskravVarselPlanner =
                     AktivitetskravVarselPlanner(database, syketilfellebitService, sykmeldingService)
                 val replanleggingService =
-                    ReplanleggingService(database, merVeiledningVarselPlanner, aktivitetskravVarselPlanner)
+                    ReplanleggingService(database, aktivitetskravVarselPlanner)
                 val brukernotifikasjonerService =
                     BrukernotifikasjonerService(brukernotifikasjonKafkaProducer)
                 val senderFacade = SenderFacade(
@@ -177,6 +174,8 @@ fun main() {
                 val veilederTilgangskontrollConsumer =
                     VeilederTilgangskontrollConsumer(env.urlEnv, azureAdTokenConsumer)
 
+                val testdataResetService = TestdataResetService(database)
+
                 connector {
                     port = env.appEnv.applicationPort
                 }
@@ -204,8 +203,8 @@ fun main() {
                         accessControlService,
                         varselBusService,
                         aktivitetskravVarselPlanner,
-                        merVeiledningVarselPlanner,
                         sykepengerMaxDateService,
+                        testdataResetService,
                     )
                 }
             },
@@ -335,16 +334,14 @@ fun Application.kafkaModule(
     accessControlService: AccessControlService,
     varselbusService: VarselBusService,
     aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
-    merVeiledningVarselPlanner: MerVeiledningVarselPlanner,
     sykepengerMaxDateService: SykepengerMaxDateService,
+    testdataResetService: TestdataResetService,
 ) {
     runningRemotely {
         launch(backgroundTasksContext) {
             launchKafkaListener(
                 state,
-                SyketilfelleKafkaConsumer(env, accessControlService, database)
-                    .addPlanner(merVeiledningVarselPlanner)
-                    .addPlanner(aktivitetskravVarselPlanner),
+                SyketilfelleKafkaConsumer(env, aktivitetskravVarselPlanner, accessControlService, database)
             )
         }
 
@@ -371,6 +368,15 @@ fun Application.kafkaModule(
                 state,
                 VarselBusKafkaConsumer(env, varselbusService),
             )
+        }
+
+        if (env.isDevGcp()) {
+            launch(backgroundTasksContext) {
+                launchKafkaListener(
+                    state,
+                    TestdataResetConsumer(env, testdataResetService)
+                )
+            }
         }
     }
 }

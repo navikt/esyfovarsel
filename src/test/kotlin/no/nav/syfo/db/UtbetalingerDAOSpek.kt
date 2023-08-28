@@ -30,9 +30,9 @@ class UtbetalingerDAOSpek : DescribeSpec({
             embeddedDatabase.stop()
         }
 
-        it("Should include utbetaling with max date 14 days in the future, and gjenstående sykedager < 80") {
+        it("Should include utbetaling with max date 14 days in the future, and gjenstående sykedager < 91") {
             val spleisUtbetaling =
-                spleisUtbetaling(forelopigBeregnetSluttPaSykepenger = now().plusDays(14), gjenstaendeSykedager = 79)
+                spleisUtbetaling(forelopigBeregnetSluttPaSykepenger = now().plusDays(14), gjenstaendeSykedager = 90)
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling)
 
             val merVeiledningVarslerToSend = embeddedDatabase.fetchMerVeiledningVarslerToSend()
@@ -48,8 +48,8 @@ class UtbetalingerDAOSpek : DescribeSpec({
             merVeiledningVarslerToSend.shouldBeEmpty()
         }
 
-        it("Should not include utbetaling with gjenstaende sykepenger >= 80") {
-            val spleisUtbetaling1 = spleisUtbetaling(gjenstaendeSykedager = 80)
+        it("Should not include utbetaling with gjenstaende sykepenger >= 91") {
+            val spleisUtbetaling1 = spleisUtbetaling(gjenstaendeSykedager = 91)
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
 
             val merVeiledningVarslerToSend = embeddedDatabase.fetchMerVeiledningVarslerToSend()
@@ -86,8 +86,8 @@ class UtbetalingerDAOSpek : DescribeSpec({
         }
 
         it("Should fetch correct fnr") {
-            val spleisUtbetaling1 = spleisUtbetaling(fnr = arbeidstakerFnr1, gjenstaendeSykedager = 80)
-            val spleisUtbetaling2 = spleisUtbetaling(fnr = arbeidstakerFnr2, gjenstaendeSykedager = 79)
+            val spleisUtbetaling1 = spleisUtbetaling(fnr = arbeidstakerFnr1, gjenstaendeSykedager = 91)
+            val spleisUtbetaling2 = spleisUtbetaling(fnr = arbeidstakerFnr2, gjenstaendeSykedager = 90)
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling1)
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetaling2)
 
@@ -166,14 +166,14 @@ private fun spleisUtbetaling(
     fnr: String = arbeidstakerFnr1,
     tom: LocalDate = now().minusDays(1),
     forelopigBeregnetSluttPaSykepenger: LocalDate = now().plusDays(14),
-    gjenstaendeSykedager: Int = 79
+    gjenstaendeSykedager: Int = 90
 ) = UtbetalingUtbetalt(
     fødselsnummer = fnr,
     organisasjonsnummer = "234",
     event = "ubetaling_utbetalt",
     type = "UTBETALING",
     foreløpigBeregnetSluttPåSykepenger = forelopigBeregnetSluttPaSykepenger,
-    forbrukteSykedager = 100,
+    forbrukteSykedager = 89,
     gjenståendeSykedager = gjenstaendeSykedager,
     stønadsdager = 10,
     antallVedtak = 4,

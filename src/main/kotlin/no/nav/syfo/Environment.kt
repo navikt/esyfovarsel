@@ -27,7 +27,8 @@ fun getEnv(): Environment {
             AppEnv(
                 applicationPort = getEnvVar("APPLICATION_PORT", "8080").toInt(),
                 applicationThreads = getEnvVar("APPLICATION_THREADS", "4").toInt(),
-                remote = true
+                remote = true,
+                cluster = getEnvVar("NAIS_CLUSTER_NAME"),
             ),
             AuthEnv(
                 serviceuserUsername = File("$serviceuserMounthPath/username").readText(),
@@ -84,8 +85,6 @@ fun getEnv(): Environment {
                 dbPassword = getEnvVar("GCP_DB_PASSWORD")
             ),
             ToggleEnv(
-                sendMerVeiledningVarsler = getBooleanEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER"),
-                sendMerVeiledningVarslerBasedOnSisteUtbtalingDate = getBooleanEnvVar("TOGGLE_SEND_MERVEILEDNING_VARSLER_BASED_ON_SISTE_UTBETALING_DATE"),
                 sendAktivitetskravVarsler = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER"),
                 toggleInfotrygdKafkaConsumer = getBooleanEnvVar("TOGGLE_INFOTRYGD_KAFKA_CONSUMER"),
                 toggleUtbetalingKafkaConsumer = getBooleanEnvVar("TOGGLE_UTBETALING_KAFKA_CONSUMER")
@@ -109,6 +108,7 @@ data class AppEnv(
     val applicationPort: Int,
     val applicationThreads: Int,
     val remote: Boolean = false,
+    val cluster: String,
 )
 
 data class AuthEnv(
@@ -170,13 +170,10 @@ data class DbEnv(
     var dbPort: String,
     var dbName: String,
     val dbUsername: String = "",
-    val dbPassword: String = "",
-    val dbCredMounthPath: String = ""
+    val dbPassword: String = ""
 )
 
 data class ToggleEnv(
-    val sendMerVeiledningVarsler: Boolean,
-    val sendMerVeiledningVarslerBasedOnSisteUtbtalingDate: Boolean,
     val sendAktivitetskravVarsler: Boolean,
     val toggleInfotrygdKafkaConsumer: Boolean,
     val toggleUtbetalingKafkaConsumer: Boolean
@@ -197,3 +194,7 @@ fun isLocal(): Boolean = getEnvVar("KTOR_ENV", "local") == "local"
 fun isJob(): Boolean = getBooleanEnvVar("JOB")
 
 fun getBooleanEnvVar(varName: String) = System.getenv(varName).toBoolean()
+
+val DEV_GCP = "dev-gcp"
+
+fun Environment.isDevGcp() = DEV_GCP == appEnv.cluster

@@ -43,17 +43,6 @@ class VarselSenderSpek : DescribeSpec({
         LocalDateTime.now(),
     )
 
-    val aktivitetskravVarsel = PPlanlagtVarsel(
-        UUID.randomUUID().toString(),
-        arbeidstakerFnr1,
-        orgnummer,
-        null,
-        AKTIVITETSKRAV.name,
-        LocalDate.now(),
-        LocalDateTime.now(),
-        LocalDateTime.now(),
-    )
-
     describe("VarselSenderSpek") {
         afterTest {
             embeddedDatabase.connection.dropData()
@@ -69,7 +58,7 @@ class VarselSenderSpek : DescribeSpec({
                 sendVarselService,
                 aktivitetskravVarselFinder,
                 merVeiledningVarselFinder,
-                ToggleEnv(false, true, true, false, false),
+                ToggleEnv(true, false, false),
             )
             val planlagtVarselToStore =
                 PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
@@ -89,52 +78,13 @@ class VarselSenderSpek : DescribeSpec({
             embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
         }
 
-        it("Skal ikke sende mer veiledning-varsel hvis toggle er false") {
-            val sendVarselJobb = VarselSender(
-                embeddedDatabase,
-                sendVarselService,
-                aktivitetskravVarselFinder,
-                merVeiledningVarselFinder,
-                ToggleEnv(
-                    false,
-                    false,
-                    true,
-                    false,
-                    false,
-                ),
-            )
-            val planlagtVarselToStore =
-                PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, emptySet(), MER_VEILEDNING)
-            val planlagtVarselToStore2 =
-                PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), AKTIVITETSKRAV)
-            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
-            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
-
-            coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(
-                merVeiledningVarsel,
-            )
-            coEvery { aktivitetskravVarselFinder.findAktivitetskravVarslerToSendToday() } returns listOf(
-                aktivitetskravVarsel,
-            )
-            coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(any()) } returns true
-            coEvery { merVeiledningVarselFinder.isBrukerYngreEnn67Ar(any()) } returns true
-
-            sendVarselJobb.testSendVarsler()
-            sendVarselService.testSendVarsel()
-
-            embeddedDatabase.skalHaPlanlagtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
-            embeddedDatabase.skalIkkeHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
-            embeddedDatabase.skalIkkeHaPlanlagtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
-            embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
-        }
-
         it("Skal ikke sende aktivitetskrav-varsel hvis toggle er false") {
             val sendVarselJobb = VarselSender(
                 embeddedDatabase,
                 sendVarselService,
                 aktivitetskravVarselFinder,
                 merVeiledningVarselFinder,
-                ToggleEnv(false, true, false, false, false),
+                ToggleEnv(false, false, false),
             )
             val planlagtVarselToStore =
                 PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
@@ -168,7 +118,7 @@ class VarselSenderSpek : DescribeSpec({
                 sendVarselService,
                 aktivitetskravVarselFinder,
                 merVeiledningVarselFinder,
-                ToggleEnv(true, false, true, false, false),
+                ToggleEnv(true, false, false),
             )
             val planlagtVarselToStore =
                 PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
@@ -207,11 +157,6 @@ private fun SendVarselService.testSendVarsel() {
 private fun DatabaseInterface.skalHaPlanlagtVarsel(fnr: String, type: VarselType) =
     this.should("Skal ha planlagt varsel av type $type") {
         this.fetchPlanlagtVarselByFnr(fnr).filter { it.type.equals(type.name) }.isNotEmpty()
-    }
-
-private fun DatabaseInterface.skalIkkeHaPlanlagtVarsel(fnr: String, type: VarselType) =
-    this.should("Skal ikke ha planlagt varsel av type $type") {
-        this.fetchPlanlagtVarselByFnr(fnr).filter { it.type.equals(type.name) }.isEmpty()
     }
 
 private fun DatabaseInterface.skalHaUtsendtVarsel(fnr: String, type: VarselType) =

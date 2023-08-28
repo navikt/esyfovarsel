@@ -99,7 +99,6 @@ dependencies {
     implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("org.flywaydb:flyway-core:$flywayVersion")
-    implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
 
     // JSON parsing
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")

@@ -6,16 +6,13 @@ import no.nav.syfo.db.deletePlanlagtVarselByVarselId
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
-import no.nav.syfo.db.fetchPlanlagtVarselByUtsendingsdato
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.metrics.tellAktivitetskravVarselSendt
 import no.nav.syfo.metrics.tellMerVeiledningVarselSendt
-import no.nav.syfo.metrics.tellSvarMotebehovVarselSendt
 import no.nav.syfo.service.AktivitetskravVarselFinder
 import no.nav.syfo.service.MerVeiledningVarselFinder
 import no.nav.syfo.service.SendVarselService
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 class VarselSender(
     private val databaseAccess: DatabaseInterface,
@@ -30,28 +27,21 @@ class VarselSender(
         log.info("Starter SendVarslerJobb")
 
         val varslerSendt = HashMap<String, Int>()
-        val varslerToSendToday: List<PPlanlagtVarsel>
 
-        if (toggles.sendMerVeiledningVarslerBasedOnSisteUtbtalingDate) {
-            varslerToSendToday = aktivitetskravVarselFinder.findAktivitetskravVarslerToSendToday()
-                .plus(merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday())
-        } else {
-            varslerToSendToday = databaseAccess.fetchPlanlagtVarselByUtsendingsdato(LocalDate.now())
-        }
+        val varslerToSendToday = aktivitetskravVarselFinder.findAktivitetskravVarslerToSendToday()
+            .plus(merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday())
 
         log.info("Planlegger å sende ${varslerToSendToday.size} varsler totalt")
 
-        if (!toggles.sendAktivitetskravVarsler) log.info("Utsending av Aktivitetskrav er ikke aktivert, og varsler av denne typen blir ikke sendt")
-        if (!toggles.sendMerVeiledningVarsler) log.info("Utsending av Mer veiledning er ikke aktivert, og varsler av denne typen blir ikke sendt")
-        if (!toggles.sendMerVeiledningVarslerBasedOnSisteUtbtalingDate) log.info("Utsending av  Mer veiledning med utsending basert på siste utbetaling er ikke aktivert, og varsler av denne typen blir ikke sendt via denne pathen")
+        if (!toggles.sendAktivitetskravVarsler) log.info("Utsending av Aktivitetskrav er ikke aktivert, og varsler av" +
+                "denne typen blir ikke sendt")
 
         varslerToSendToday.forEach {
             if (isVarselToggleAkivert(it) && skalVarsleBrukerPgaAlder(it)) {
-                log.info("Sender varsel med UUID ${it.uuid}")
                 val type = sendVarselService.sendVarsel(it)
                 if (type.sendtUtenFeil()) {
                     incrementVarselCountMap(varslerSendt, type)
-                    log.info("Markerer varsel med UUID ${it.uuid} som sendt")
+                    log.info("Sendt varsel med UUID ${it.uuid}")
                     databaseAccess.storeUtsendtVarsel(it)
                     databaseAccess.deletePlanlagtVarselByVarselId(it.uuid)
                 }
@@ -64,11 +54,9 @@ class VarselSender(
 
         val antallMerVeiledningSendt = varslerSendt[VarselType.MER_VEILEDNING.name] ?: 0
         val antallAktivitetskravSendt = varslerSendt[VarselType.AKTIVITETSKRAV.name] ?: 0
-        val antallSvarMotebehovSendt = varslerSendt[VarselType.SVAR_MOTEBEHOV.name] ?: 0
 
         tellMerVeiledningVarselSendt(antallMerVeiledningSendt)
         tellAktivitetskravVarselSendt(antallAktivitetskravSendt)
-        tellSvarMotebehovVarselSendt(antallSvarMotebehovSendt)
 
         log.info("Avslutter SendVarslerJobb")
 
@@ -81,7 +69,7 @@ class VarselSender(
     }
 
     private fun isVarselToggleAkivert(it: PPlanlagtVarsel) =
-        (it.type == VarselType.MER_VEILEDNING.name && (toggles.sendMerVeiledningVarsler || toggles.sendMerVeiledningVarslerBasedOnSisteUtbtalingDate)) ||
+        (it.type == VarselType.MER_VEILEDNING.name) ||
             (it.type == VarselType.AKTIVITETSKRAV.name && toggles.sendAktivitetskravVarsler)
 
     private fun skalVarsleBrukerPgaAlder(pPlanlagtVarsel: PPlanlagtVarsel) =

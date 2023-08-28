@@ -21,6 +21,7 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
+import no.nav.syfo.metrics.tellSvarMotebehovVarselSendt
 import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -44,24 +45,29 @@ class MotebehovVarselService(
     private val svarMotebehovUrl: String = "$dialogmoterUrl/sykmeldt/motebehov/svar"
 
     fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
-        runBlocking {
-            // Quickfix for å unngå å sende varsel til bedrifter der bruker ikke er sykmeldt. Det kan skje når den sykmeldte har vært sykmeldt fra flere arbeidsforhold,
-            // men bare er sykmeldt ved én av dem nå
-            val sykmeldingStatusForVirksomhet =
-                sykmeldingService.checkSykmeldingStatusForVirksomhet(LocalDate.now(), varselHendelse.arbeidstakerFnr, varselHendelse.orgnummer)
+        // Quickfix for å unngå å sende varsel til bedrifter der bruker ikke er sykmeldt. Det kan skje når den
+        // sykmeldte har vært sykmeldt fra flere arbeidsforhold, men bare er sykmeldt ved én av dem nå
+        val sykmeldingStatusForVirksomhet = runBlocking {
+            sykmeldingService.checkSykmeldingStatusForVirksomhet(
+                LocalDate.now(),
+                varselHendelse.arbeidstakerFnr,
+                varselHendelse.orgnummer
+            )
+        }
 
-            if (sykmeldingStatusForVirksomhet.sendtArbeidsgiver) {
-                sendVarselTilDineSykmeldte(varselHendelse)
-                sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
-            } else {
-                log.info("[MotebehovVarselService]: Sender ikke Svar møtebehov-varsel til NL fordi arbeidstaker ikke er sykmeldt fra bedriften")
-            }
+        if (sykmeldingStatusForVirksomhet.sendtArbeidsgiver) {
+            sendVarselTilDineSykmeldte(varselHendelse)
+            sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
+            tellSvarMotebehovVarselSendt(1)
+        } else {
+            log.info("[MotebehovVarselService]: Sender ikke Svar møtebehov-varsel til NL fordi arbeidstaker ikke er sykmeldt fra bedriften")
         }
     }
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         sendVarselTilBrukernotifikasjoner(varselHendelse)
         sendOppgaveTilDittSykefravaer(varselHendelse)
+        tellSvarMotebehovVarselSendt(1)
     }
 
     private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
@@ -98,12 +104,11 @@ class MotebehovVarselService(
     private fun sendVarselTilBrukernotifikasjoner(varselHendelse: ArbeidstakerHendelse) {
         val fnr = varselHendelse.arbeidstakerFnr
         val eksternVarsling = accessControlService.canUserBeNotifiedByEmailOrSMS(fnr)
-        val url = URL(svarMotebehovUrl)
         senderFacade.sendTilBrukernotifikasjoner(
             UUID.randomUUID().toString(),
-            varselHendelse.arbeidstakerFnr,
+            fnr,
             BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
-            url,
+            URL(svarMotebehovUrl),
             varselHendelse,
             OPPGAVE,
             eksternVarsling
