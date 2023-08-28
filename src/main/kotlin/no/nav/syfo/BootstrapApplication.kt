@@ -41,6 +41,7 @@ import no.nav.syfo.job.sendNotificationsJob
 import no.nav.syfo.kafka.common.launchKafkaListener
 import no.nav.syfo.kafka.consumers.infotrygd.InfotrygdKafkaConsumer
 import no.nav.syfo.kafka.consumers.syketilfelle.SyketilfelleKafkaConsumer
+import no.nav.syfo.kafka.consumers.testdata.reset.TestdataResetConsumer
 import no.nav.syfo.kafka.consumers.utbetaling.UtbetalingKafkaConsumer
 import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
@@ -66,6 +67,7 @@ import no.nav.syfo.service.SendVarselService
 import no.nav.syfo.service.SenderFacade
 import no.nav.syfo.service.SykepengerMaxDateService
 import no.nav.syfo.service.SykmeldingService
+import no.nav.syfo.service.TestdataResetService
 import no.nav.syfo.service.VarselBusService
 import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
 import no.nav.syfo.service.microfrontend.MikrofrontendService
@@ -172,6 +174,8 @@ fun main() {
                 val veilederTilgangskontrollConsumer =
                     VeilederTilgangskontrollConsumer(env.urlEnv, azureAdTokenConsumer)
 
+                val testdataResetService = TestdataResetService(database)
+
                 connector {
                     port = env.appEnv.applicationPort
                 }
@@ -200,6 +204,7 @@ fun main() {
                         varselBusService,
                         aktivitetskravVarselPlanner,
                         sykepengerMaxDateService,
+                        testdataResetService,
                     )
                 }
             },
@@ -330,6 +335,7 @@ fun Application.kafkaModule(
     varselbusService: VarselBusService,
     aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
     sykepengerMaxDateService: SykepengerMaxDateService,
+    testdataResetService: TestdataResetService,
 ) {
     runningRemotely {
         launch(backgroundTasksContext) {
@@ -362,6 +368,15 @@ fun Application.kafkaModule(
                 state,
                 VarselBusKafkaConsumer(env, varselbusService),
             )
+        }
+
+        if (env.isDevGcp()) {
+            launch(backgroundTasksContext) {
+                launchKafkaListener(
+                    state,
+                    TestdataResetConsumer(env, testdataResetService)
+                )
+            }
         }
     }
 }

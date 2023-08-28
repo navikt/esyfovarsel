@@ -1,6 +1,7 @@
 package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PMikrofrontendSynlighet
+import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import java.sql.Date
@@ -108,5 +109,20 @@ fun DatabaseInterface.fetchFnrsWithExpiredMicrofrontendEntries(tjeneste: Tjenest
             it.setDate(2, Date.valueOf(today))
             it.executeQuery().toList { getString("synlig_for") }
         }
+    }
+}
+
+fun DatabaseInterface.deleteMikrofrontendSynlighetByFnr(fnr: PersonIdent) {
+    val updateStatement = """DELETE 
+        FROM MIKROFRONTEND_SYNLIGHET
+                   WHERE synlig_for = ?
+    """.trimMargin()
+
+    return connection.use { connection ->
+        connection.prepareStatement(updateStatement).use {
+            it.setString(1, fnr.value)
+            it.executeUpdate()
+        }
+        connection.commit()
     }
 }
