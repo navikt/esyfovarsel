@@ -1,6 +1,8 @@
 package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.syfo.db.arbeidstakerAktorId1
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PSyketilfellebit
@@ -30,6 +32,7 @@ import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import no.nav.syfo.planner.arbeidstakerFnr1
 import no.nav.syfo.planner.narmesteLederFnr1
+import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.syketilfelle.domain.Tag
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
@@ -45,7 +48,8 @@ import java.util.*
 class TestdataResetServiceSpek : DescribeSpec({
     describe("TestdataResetServiceSpek") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
-        val testdataResetService = TestdataResetService(embeddedDatabase)
+        val mikrofrontendService: MikrofrontendService = mockk(relaxed = true)
+        val testdataResetService = TestdataResetService(embeddedDatabase, mikrofrontendService)
         val planlagtVarsel =
             PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), VarselType.AKTIVITETSKRAV)
 
@@ -150,6 +154,9 @@ class TestdataResetServiceSpek : DescribeSpec({
             embeddedDatabase.fetchUtsendtVarselFeiletByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
             embeddedDatabase.fetchSyketilfellebiterByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
             embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
+            verify(exactly = 1) {
+                mikrofrontendService.closeAllMikrofrontendForUser(PersonIdent(arbeidstakerFnr1))
+            }
         }
     }
 })

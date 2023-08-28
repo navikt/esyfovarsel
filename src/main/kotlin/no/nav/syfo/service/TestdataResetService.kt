@@ -10,11 +10,13 @@ import no.nav.syfo.db.deleteUtsendtVarselByFnr
 import no.nav.syfo.db.deleteUtsendtVarselFeiletByFnr
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
 import no.nav.syfo.domain.PersonIdent
+import no.nav.syfo.service.microfrontend.MikrofrontendService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class TestdataResetService(
     private val database: DatabaseInterface,
+    private val mikrofrontendService: MikrofrontendService,
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(TestdataResetService::class.qualifiedName)
@@ -35,6 +37,7 @@ class TestdataResetService(
         database.deleteSyketilfellebitByFnr(fnr)
 
         // Slette/skjule mikrofrontend
+        mikrofrontendService.closeAllMikrofrontendForUser(fnr)
         database.deleteMikrofrontendSynlighetByFnr(fnr)
 
         // Slette utsendt varsel feilet

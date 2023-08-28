@@ -9,6 +9,7 @@ import no.nav.syfo.db.arbeidstakerFnr1
 import no.nav.syfo.db.arbeidstakerFnr2
 import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
 import no.nav.syfo.db.orgnummer1
+import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
@@ -185,6 +186,18 @@ class MikrofrontendServiceSpek : DescribeSpec({
                 mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
                 mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
             }
+        }
+
+        it("Closing entries for user should not close other users entries") {
+            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkaltIdag)
+            mikrofrontendService.closeAllMikrofrontendForUser(PersonIdent(arbeidstakerHendelseDialogmoteInnkaltIdag.arbeidstakerFnr))
+            embeddedDatabase.shouldNotContainMikrofrontendEntryForUser(
+                arbeidstakerHendelseDialogmoteInnkaltIdag.arbeidstakerFnr
+            )
+            embeddedDatabase.shouldContainMikrofrontendEntry(
+                arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr, Tjeneste.DIALOGMOTE
+            )
         }
     }
 })
