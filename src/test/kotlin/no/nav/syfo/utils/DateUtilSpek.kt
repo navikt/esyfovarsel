@@ -1,5 +1,6 @@
+package no.nav.syfo.utils
+
 import io.kotest.core.spec.style.DescribeSpec
-import no.nav.syfo.utils.isAlderMindreEnnGittAr
 import org.amshove.kluent.shouldBe
 import java.time.LocalDate
 
