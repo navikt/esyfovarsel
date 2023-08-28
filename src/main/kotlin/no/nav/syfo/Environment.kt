@@ -27,7 +27,8 @@ fun getEnv(): Environment {
             AppEnv(
                 applicationPort = getEnvVar("APPLICATION_PORT", "8080").toInt(),
                 applicationThreads = getEnvVar("APPLICATION_THREADS", "4").toInt(),
-                remote = true
+                remote = true,
+                cluster = getEnvVar("NAIS_CLUSTER_NAME"),
             ),
             AuthEnv(
                 serviceuserUsername = File("$serviceuserMounthPath/username").readText(),
@@ -107,6 +108,7 @@ data class AppEnv(
     val applicationPort: Int,
     val applicationThreads: Int,
     val remote: Boolean = false,
+    val cluster: String,
 )
 
 data class AuthEnv(
@@ -192,3 +194,7 @@ fun isLocal(): Boolean = getEnvVar("KTOR_ENV", "local") == "local"
 fun isJob(): Boolean = getBooleanEnvVar("JOB")
 
 fun getBooleanEnvVar(varName: String) = System.getenv(varName).toBoolean()
+
+val DEV_GCP = "dev-gcp"
+
+fun Environment.isDevGcp() = DEV_GCP == appEnv.cluster

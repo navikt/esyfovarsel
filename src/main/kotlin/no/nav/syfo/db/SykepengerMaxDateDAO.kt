@@ -6,6 +6,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.syfo.db.domain.PPlanlagtVarsel
+import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
 import no.nav.syfo.utils.REMAINING_DAYS_UNTIL_39_UKERS_VARSEL
 import org.postgresql.util.PSQLException
@@ -153,4 +154,19 @@ fun DatabaseInterface.fetchSpleisUtbetalingByFnr(fnr: String): MutableList<Int> 
     }
 
     return gjenstaaendeDagerAsList
+}
+
+
+fun DatabaseInterface.deleteUtbetalingSpleisByFnr(fnr: PersonIdent) {
+    val updateStatement = """DELETE FROM UTBETALING_SPLEIS
+                   WHERE fnr = ?
+    """.trimMargin()
+
+    return connection.use { connection ->
+        connection.prepareStatement(updateStatement).use {
+            it.setString(1, fnr.value)
+            it.executeUpdate()
+        }
+        connection.commit()
+    }
 }

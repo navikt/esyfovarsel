@@ -3,6 +3,7 @@ package no.nav.syfo.db
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarsel
+import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import java.sql.Timestamp
 import java.time.LocalDate
@@ -183,3 +184,18 @@ fun DatabaseInterface.setUtsendtVarselToFerdigstilt(eksternRef: String): Int {
         rowsUpdated
     }
 }
+
+fun DatabaseInterface.deleteUtsendtVarselByFnr(fnr: PersonIdent) {
+    val updateStatement = """DELETE FROM UTSENDT_VARSEL
+                   WHERE fnr = ?
+    """.trimMargin()
+
+    return connection.use { connection ->
+        connection.prepareStatement(updateStatement).use {
+            it.setString(1, fnr.value)
+            it.executeUpdate()
+        }
+        connection.commit()
+    }
+}
+
