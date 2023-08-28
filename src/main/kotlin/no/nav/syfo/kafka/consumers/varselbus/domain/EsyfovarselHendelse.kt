@@ -98,8 +98,32 @@ private fun ArbeidstakerHendelse.motetidspunkt(): LocalDateTime {
             ?: throw NullPointerException("'tidspunkt'-felt er null i VarselDataMotetidspunkt-objekt")
     } ?: throw MissingArgumentException("Mangler datafelt i ArbeidstakerHendelse til MicrofrontendService")
 }
+
 fun Any.toVarselData(): VarselData =
     objectMapper.readValue(
         this.toString(),
         VarselData::class.java,
     )
+
+fun EsyfovarselHendelse.isArbeidstakerHendelse(): Boolean {
+    return this is ArbeidstakerHendelse
+}
+
+fun EsyfovarselHendelse.toNarmestelederHendelse(): NarmesteLederHendelse {
+    return if (this is NarmesteLederHendelse) {
+        this
+    } else {
+        throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type NarmesteLederHendelse")
+    }
+}
+
+fun EsyfovarselHendelse.toArbeidstakerHendelse(): ArbeidstakerHendelse {
+    return if (this is ArbeidstakerHendelse) {
+        this
+    } else {
+        throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type ArbeidstakerHendelse")
+    }
+}
+
+fun EsyfovarselHendelse.skalFerdigstilles() =
+    ferdigstill ?: false

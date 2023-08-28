@@ -174,7 +174,7 @@ fun main() {
                 val veilederTilgangskontrollConsumer =
                     VeilederTilgangskontrollConsumer(env.urlEnv, azureAdTokenConsumer)
 
-                val testdataResetService = TestdataResetService(database, mikrofrontendService)
+                val testdataResetService = TestdataResetService(database, mikrofrontendService, senderFacade)
 
                 connector {
                     port = env.appEnv.applicationPort

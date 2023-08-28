@@ -16,6 +16,7 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaPr
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
+import no.nav.syfo.planner.arbeidstakerFnr1
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.mocks.fnr1
@@ -174,8 +175,8 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
         }
 
         it("Users should not be notified when lest hendelse is sent") {
-            coEvery { accessControlService.getUserAccessStatus("fnr1") } returns
-                UserAccessStatus("fnr1", true, true)
+            coEvery { accessControlService.getUserAccessStatus(arbeidstakerFnr1) } returns
+                    UserAccessStatus(arbeidstakerFnr1, true, true)
 
             every { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(any(), any()) } returns Unit
             every { brukernotifikasjonerService.ferdigstillVarsel(any(), any()) } returns Unit
@@ -184,7 +185,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 type = HendelseType.SM_DIALOGMOTE_LEST,
                 false,
                 varselData(journalpostUuid, journalpostId),
-                "fnr1",
+                arbeidstakerFnr1,
                 orgnummer,
             )
             dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse)

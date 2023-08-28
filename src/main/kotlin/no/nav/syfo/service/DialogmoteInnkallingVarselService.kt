@@ -295,18 +295,18 @@ class DialogmoteInnkallingVarselService(
             if (arbeidstakerHendelse.type == SM_DIALOGMOTE_INNKALT) {
                 senderFacade.ferdigstillDittSykefravaerVarslerAvTyper(
                     arbeidstakerHendelse,
-                    setOf<String>(SM_DIALOGMOTE_NYTT_TID_STED.name),
+                    setOf(SM_DIALOGMOTE_NYTT_TID_STED),
                 )
             }
             if (arbeidstakerHendelse.type == SM_DIALOGMOTE_NYTT_TID_STED) {
                 senderFacade.ferdigstillDittSykefravaerVarslerAvTyper(
                     arbeidstakerHendelse,
-                    setOf<String>(SM_DIALOGMOTE_INNKALT.name),
+                    setOf(SM_DIALOGMOTE_INNKALT),
                 )
             } else {
                 senderFacade.ferdigstillDittSykefravaerVarslerAvTyper(
                     arbeidstakerHendelse,
-                    setOf<String>(SM_DIALOGMOTE_INNKALT.name, SM_DIALOGMOTE_NYTT_TID_STED.name),
+                    setOf(SM_DIALOGMOTE_INNKALT, SM_DIALOGMOTE_NYTT_TID_STED),
                 )
             }
         }

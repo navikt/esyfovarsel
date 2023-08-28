@@ -1,8 +1,25 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.kafka.consumers.varselbus.domain.*
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
-import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_AVLYST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_INNKALT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_NYTT_TID_STED
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_REFERAT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_SVAR_MOTEBEHOV
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_AVLYST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_INNKALT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_LEST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_NYTT_TID_STED
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
+import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.skalFerdigstilles
+import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.toNarmestelederHendelse
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -54,12 +71,7 @@ class VarselBusService(
         if (varselHendelse.isArbeidstakerHendelse()) {
             senderFacade.ferdigstillArbeidstakerVarsler(varselHendelse.toArbeidstakerHendelse())
         } else {
-            senderFacade.ferdigstillDineSykmeldteVarsler(
-                varselHendelse.toNarmestelederHendelse(),
-            )
-            senderFacade.ferdigstillArbeidsgiverNotifikasjoner(
-                varselHendelse.toNarmestelederHendelse(),
-            )
+            senderFacade.ferdigstillNarmesteLederVarsler(varselHendelse.toNarmestelederHendelse())
         }
     }
 
@@ -73,27 +85,4 @@ class VarselBusService(
             }
         }
     }
-
-    private fun EsyfovarselHendelse.toNarmestelederHendelse(): NarmesteLederHendelse {
-        return if (this is NarmesteLederHendelse) {
-            this
-        } else {
-            throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type NarmesteLederHendelse")
-        }
-    }
-
-    private fun EsyfovarselHendelse.toArbeidstakerHendelse(): ArbeidstakerHendelse {
-        return if (this is ArbeidstakerHendelse) {
-            this
-        } else {
-            throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type ArbeidstakerHendelse")
-        }
-    }
-
-    private fun EsyfovarselHendelse.isArbeidstakerHendelse(): Boolean {
-        return this is ArbeidstakerHendelse
-    }
-
-    private fun EsyfovarselHendelse.skalFerdigstilles() =
-        ferdigstill ?: false
 }

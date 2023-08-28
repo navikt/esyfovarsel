@@ -49,7 +49,8 @@ class TestdataResetServiceSpek : DescribeSpec({
     describe("TestdataResetServiceSpek") {
         val embeddedDatabase by lazy { EmbeddedDatabase() }
         val mikrofrontendService: MikrofrontendService = mockk(relaxed = true)
-        val testdataResetService = TestdataResetService(embeddedDatabase, mikrofrontendService)
+        val senderFacade: SenderFacade = mockk(relaxed = true)
+        val testdataResetService = TestdataResetService(embeddedDatabase, mikrofrontendService, senderFacade)
         val planlagtVarsel =
             PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), VarselType.AKTIVITETSKRAV)
 
@@ -156,6 +157,9 @@ class TestdataResetServiceSpek : DescribeSpec({
             embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
             verify(exactly = 1) {
                 mikrofrontendService.closeAllMikrofrontendForUser(PersonIdent(arbeidstakerFnr1))
+            }
+            verify(exactly = 1) {
+                senderFacade.ferdigstillVarslerForFnr(PersonIdent(arbeidstakerFnr1))
             }
         }
     }
