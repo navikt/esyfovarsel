@@ -292,11 +292,25 @@ class DialogmoteInnkallingVarselService(
                 .contains(arbeidstakerHendelse.type)
         ) {
             senderFacade.ferdigstillDittSykefravaerVarsler(arbeidstakerHendelse) // ferdigstille seg selv
-            senderFacade.ferdigstillDittSykefravaerVarslerAvTyper(
-                arbeidstakerHendelse,
-                setOf<String>(SM_DIALOGMOTE_INNKALT.name, SM_DIALOGMOTE_NYTT_TID_STED.name),
-            )
+            if (arbeidstakerHendelse.type == SM_DIALOGMOTE_INNKALT) {
+                senderFacade.ferdigstillDittSykefravaerVarslerAvTyper(
+                    arbeidstakerHendelse,
+                    setOf<String>(SM_DIALOGMOTE_NYTT_TID_STED.name),
+                )
+            }
+            if (arbeidstakerHendelse.type == SM_DIALOGMOTE_NYTT_TID_STED) {
+                senderFacade.ferdigstillDittSykefravaerVarslerAvTyper(
+                    arbeidstakerHendelse,
+                    setOf<String>(SM_DIALOGMOTE_INNKALT.name),
+                )
+            } else {
+                senderFacade.ferdigstillDittSykefravaerVarslerAvTyper(
+                    arbeidstakerHendelse,
+                    setOf<String>(SM_DIALOGMOTE_INNKALT.name, SM_DIALOGMOTE_NYTT_TID_STED.name),
+                )
+            }
         }
+
         if (melding != null) {
             senderFacade.sendTilDittSykefravaer(
                 arbeidstakerHendelse,
