@@ -12,6 +12,7 @@ data class DokarkivRequest(
     val tema: String,
     val kanal: String,
     val sak: Sak,
+    val overstyrInnsynsregler: String,
 ) {
     companion object {
         fun create(
@@ -27,6 +28,8 @@ data class DokarkivRequest(
             tema = "OPP", // Oppfolging
             kanal = "S",
             sak = Sak("GENERELL_SAK"),
+            // By default, user can not see documents created by others. Following enables viewing on Mine Saker:
+            overstyrInnsynsregler = "VISES_MASKINELT_GODKJENT",
         )
     }
 }
