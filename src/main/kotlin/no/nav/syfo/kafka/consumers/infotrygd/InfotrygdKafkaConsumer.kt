@@ -33,7 +33,7 @@ class InfotrygdKafkaConsumer(
         log.info("Started listening to topic $topicSykepengedagerInfotrygd")
         while (applicationState.running) {
             kafkaListener.poll(pollDurationInMillis).forEach {
-                log.info("Received record from topic $topicSykepengedagerInfotrygd")
+                log.info("Received record from topic $topicSykepengedagerInfotrygd. Opprettet ${it.timestamp()}")
                 try {
                     val kInfotrygdSykepengedager: KInfotrygdSykepengedager = objectMapper.readValue(it.value())
 
