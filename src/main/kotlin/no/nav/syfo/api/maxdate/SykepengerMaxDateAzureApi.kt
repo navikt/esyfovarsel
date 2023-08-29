@@ -28,7 +28,7 @@ fun Route.registerSykepengerMaxDateAzureApi(
         if (veilederTilgangskontrollConsumer.hasAccess(personIdent, token, callId)) {
             try {
                 val sykepengerMaxDate = sykepengerMaxDateService.getSykepengerMaxDate(personIdent.value)
-                log.info("Fetched sykepengerMaxDate from database: $sykepengerMaxDate")
+                log.info("Fetched sykepengerMaxDate from database: ${sykepengerMaxDate?.forelopig_beregnet_slutt}")
                 call.respond(SykepengerMaxDateAzureResponse(sykepengerMaxDate?.forelopig_beregnet_slutt))
             } catch (e: Exception) {
                 log.error("Encountered exception during fetching sykepengerMaxDate from database: ${e.message}")
