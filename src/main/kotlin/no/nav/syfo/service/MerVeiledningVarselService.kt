@@ -37,7 +37,7 @@ class MerVeiledningVarselService(
                 it,
             )
         }
-        log.info("Har journalført SSPS i dokarkiv, journalpostId er $journalpostId")
+        log.info("Forsøkte å journalføre SSPS i dokarkiv, journalpostId er $journalpostId")
         if (userAccessStatus.canUserBeDigitallyNotified) {
             sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
         } else {
