@@ -124,10 +124,6 @@ spec:
       value: api://prod-fss.pdl.pdl-api/.default
     - name: TOGGLE_SEND_AKTIVITETSKRAV_VARSLER
       value: "true"
-    - name: TOGGLE_INFOTRYGD_KAFKA_CONSUMER
-      value: "true"
-    - name: TOGGLE_UTBETALING_KAFKA_CONSUMER
-      value: "true"
     - name: BASE_URL_SYK_INFO
       value: https://www.nav.no/syk/info
     - name: BASE_URL_DIALOGMOTER

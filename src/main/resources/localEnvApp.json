@@ -59,8 +59,6 @@
     "dbPassword": "password"
   },
   "toggleEnv": {
-    "sendAktivitetskravVarsler": "true",
-    "toggleInfotrygdKafkaConsumer": "true",
-    "toggleUtbetalingKafkaConsumer": "true"
+    "sendAktivitetskravVarsler": "true"
   }
 }
