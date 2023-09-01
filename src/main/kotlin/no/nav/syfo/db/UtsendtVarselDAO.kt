@@ -1,10 +1,8 @@
 package no.nav.syfo.db
 
-import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.domain.PersonIdent
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -69,67 +67,18 @@ fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
     }
 }
 
-fun DatabaseInterface.fetchUtsendteVarsler(
-    fnr: String,
-    orgnummer: String,
-    type: HendelseType,
-    kanal: Kanal,
+fun DatabaseInterface.fetchUferdigstilteVarsler(
+    fnr: PersonIdent,
 ): List<PUtsendtVarsel> {
     val queryStatement = """SELECT *
                             FROM UTSENDT_VARSEL
                             WHERE fnr = ?
-                            AND orgnummer = ?
-                            AND type = ?
-                            AND kanal = ?
+                            AND ferdigstilt_tidspunkt is null
     """.trimIndent()
 
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
-            it.setString(1, fnr)
-            it.setString(2, orgnummer)
-            it.setString(3, type.name)
-            it.setString(4, kanal.name)
-            it.executeQuery().toList { toPUtsendtVarsel() }
-        }
-    }
-}
-
-fun DatabaseInterface.fetchAlleUtsendteVarslerTilKanalByType(
-    fnr: String,
-    type: HendelseType,
-    kanal: Kanal,
-): List<PUtsendtVarsel> {
-    val queryStatement = """SELECT *
-                            FROM UTSENDT_VARSEL
-                            WHERE fnr = ?
-                            AND type = ?
-                            AND kanal = ?
-    """.trimIndent()
-
-    return connection.use { connection ->
-        connection.prepareStatement(queryStatement).use {
-            it.setString(1, fnr)
-            it.setString(2, type.name)
-            it.setString(3, kanal.name)
-            it.executeQuery().toList { toPUtsendtVarsel() }
-        }
-    }
-}
-
-fun DatabaseInterface.fetchAlleUtsendteVarslerTilKanal(
-    fnr: String,
-    kanal: Kanal,
-): List<PUtsendtVarsel> {
-    val queryStatement = """SELECT *
-                            FROM UTSENDT_VARSEL
-                            WHERE fnr = ?
-                            AND kanal = ?
-    """.trimIndent()
-
-    return connection.use { connection ->
-        connection.prepareStatement(queryStatement).use {
-            it.setString(1, fnr)
-            it.setString(2, kanal.name)
+            it.setString(1, fnr.value)
             it.executeQuery().toList { toPUtsendtVarsel() }
         }
     }
