@@ -8,6 +8,8 @@ jobs:
       actions: read
       contents: read
       security-events: write
+      packages: write
+      id-token: write
     secrets: inherit
     with:
       app: esyfovarsel
