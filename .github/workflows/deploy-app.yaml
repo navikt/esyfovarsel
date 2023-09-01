@@ -4,6 +4,10 @@ on: push
 jobs:
   jar-app:
     uses: navikt/teamesyfo-github-actions-workflows/.github/workflows/jar-app.yaml@main
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     secrets: inherit
     with:
       app: esyfovarsel
