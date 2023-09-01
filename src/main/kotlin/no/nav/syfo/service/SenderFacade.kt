@@ -22,6 +22,7 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProdu
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
+import no.nav.syfo.utils.enumValueOfOrNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
@@ -167,7 +168,7 @@ class SenderFacade(
     ): List<PUtsendtVarsel> {
         return database.fetchUferdigstilteVarsler(arbeidstakerFnr)
             .filter { orgnummer == null || it.orgnummer == orgnummer }
-            .filter { types.isEmpty() || types.contains(HendelseType.valueOf(it.type)) }
+            .filter { types.isEmpty() || types.contains(enumValueOfOrNull<HendelseType>(it.type)) }
             .filter { kanal == null || it.kanal == kanal.name }
     }
 
