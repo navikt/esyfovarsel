@@ -177,14 +177,17 @@ class SenderFacade(
             when (utsendtVarsel.kanal) {
                 BRUKERNOTIFIKASJON.name -> {
                     brukernotifikasjonerService.ferdigstillVarsel(utsendtVarsel.eksternReferanse, utsendtVarsel.fnr)
+                    database.setUtsendtVarselToFerdigstilt(utsendtVarsel.eksternReferanse)
                 }
 
                 DITT_SYKEFRAVAER.name -> {
                     dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(utsendtVarsel.eksternReferanse, utsendtVarsel.fnr)
+                    database.setUtsendtVarselToFerdigstilt(utsendtVarsel.eksternReferanse)
                 }
 
                 DINE_SYKMELDTE.name -> {
                     dineSykmeldteHendelseKafkaProducer.ferdigstillVarsel(utsendtVarsel.eksternReferanse)
+                    database.setUtsendtVarselToFerdigstilt(utsendtVarsel.eksternReferanse)
                 }
 
                 ARBEIDSGIVERNOTIFIKASJON.name -> {
@@ -193,12 +196,11 @@ class SenderFacade(
                             utsendtVarsel.arbeidsgivernotifikasjonMerkelapp,
                             utsendtVarsel.eksternReferanse,
                         )
+                        database.setUtsendtVarselToFerdigstilt(utsendtVarsel.eksternReferanse)
                     }
                 }
             }
-            database.setUtsendtVarselToFerdigstilt(utsendtVarsel.eksternReferanse)
         }
-
     }
 
     fun sendBrevTilFysiskPrint(
