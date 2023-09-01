@@ -38,7 +38,7 @@ class VarselBusKafkaConsumer(
                     "Exception in [$topicVarselBus]-listener: ${e.message}",
                     e
                 )
-                kafkaListener.commitSync()
+                applicationState.shutdownApplication()
             }
         }
     }
