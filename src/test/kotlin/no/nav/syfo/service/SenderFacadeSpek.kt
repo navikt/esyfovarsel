@@ -42,6 +42,7 @@ class SenderFacadeSpek : DescribeSpec({
         val eksternRefDineSykmeldte = "dine_sykmeldte"
         val eksternRefBrukernotifikasjoner = "brukernotifikasjoner"
         val eksternRefDittSykefravaer = "ditt_sykefravær"
+        val eksternRefBrev = "brev"
         val merkelapp = "merkelapp"
 
         val utsendtVarsel =
@@ -85,6 +86,12 @@ class SenderFacadeSpek : DescribeSpec({
             eksternReferanse = eksternRefDittSykefravaer,
         )
 
+        val brevUtsendtVarsel = utsendtVarsel.copy(
+            uuid = UUID.randomUUID().toString(),
+            kanal = Kanal.BREV.name,
+            eksternReferanse = eksternRefDittSykefravaer,
+        )
+
         afterTest {
             clearAllMocks()
             embeddedDatabase.connection.dropData()
@@ -101,6 +108,7 @@ class SenderFacadeSpek : DescribeSpec({
             embeddedDatabase.storeUtsendtVarsel(dineSykmeldteUtsendtVarsel)
             embeddedDatabase.storeUtsendtVarsel(brukernotifikasjonUtsendtVarsel)
             embeddedDatabase.storeUtsendtVarsel(dittSykefravaerUtsendtVarsel)
+            embeddedDatabase.storeUtsendtVarsel(brevUtsendtVarsel)
 
             senderFacade.ferdigstillVarslerForFnr(PersonIdent(arbeidstakerFnr1))
 
