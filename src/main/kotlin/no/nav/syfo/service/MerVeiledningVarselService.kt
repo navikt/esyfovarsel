@@ -1,5 +1,8 @@
 package no.nav.syfo.service
 
+import java.net.URL
+import java.time.ZoneOffset
+import java.util.*
 import no.nav.syfo.*
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
@@ -10,9 +13,6 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import no.nav.syfo.syketilfelle.SyketilfellebitService
 import org.slf4j.LoggerFactory
-import java.net.URL
-import java.time.ZoneOffset
-import java.util.*
 
 const val DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING = "ESYFOVARSEL_MER_VEILEDNING"
 
@@ -29,18 +29,12 @@ class MerVeiledningVarselService(
         planlagtVarselUuid: String,
         userAccessStatus: UserAccessStatus,
     ) {
-        val pdf = pdfgenConsumer.getMerVeiledningPDF(arbeidstakerHendelse.arbeidstakerFnr)
-        val journalpostId = pdf?.let {
-            dokarkivService.getJournalpostId(
-                arbeidstakerHendelse.arbeidstakerFnr,
-                planlagtVarselUuid,
-                it,
-            )
-        }
-        log.info("Forsøkte å journalføre SSPS i dokarkiv, journalpostId er $journalpostId")
         if (userAccessStatus.canUserBeDigitallyNotified) {
             sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
         } else {
+            val pdf = pdfgenConsumer.getMerVeiledningPDF(arbeidstakerHendelse.arbeidstakerFnr)
+            val journalpostId = pdf?.let { dokarkivService.getJournalpostId(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, it) }
+            log.info("Forsøkte å sende data til dokarkiv, journalpostId er $journalpostId")
             sendBrevVarselTilArbeidstaker(planlagtVarselUuid, arbeidstakerHendelse, journalpostId!!)
         }
         sendOppgaveTilDittSykefravaer(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, arbeidstakerHendelse)
@@ -56,7 +50,7 @@ class MerVeiledningVarselService(
             fnr,
             BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT,
             url,
-            arbeidstakerHendelse,
+            arbeidstakerHendelse
         )
     }
 
@@ -75,7 +69,7 @@ class MerVeiledningVarselService(
     private fun sendOppgaveTilDittSykefravaer(
         fnr: String,
         uuid: String,
-        arbeidstakerHendelse: ArbeidstakerHendelse,
+        arbeidstakerHendelse: ArbeidstakerHendelse
     ) {
         val syketilfelleEndDate = syketilfellebitService.sisteDagISyketilfelle(fnr)
         if (syketilfelleEndDate == null) {
@@ -89,17 +83,17 @@ class MerVeiledningVarselService(
                 Variant.INFO,
                 true,
                 DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING,
-                syketilfelleEndDate.atStartOfDay().toInstant(ZoneOffset.UTC),
+                syketilfelleEndDate.atStartOfDay().toInstant(ZoneOffset.UTC)
             ),
             null,
-            fnr,
+            fnr
         )
         senderFacade.sendTilDittSykefravaer(
             arbeidstakerHendelse,
             DittSykefravaerVarsel(
                 uuid,
-                melding,
-            ),
+                melding
+            )
         )
     }
 }
