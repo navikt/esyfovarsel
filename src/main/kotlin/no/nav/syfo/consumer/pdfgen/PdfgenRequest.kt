@@ -1,7 +1,7 @@
 package no.nav.syfo.consumer.pdfgen
 
 data class PdfgenRequest(
-    val brevdata: Brevdata
+    val brevdata: Brevdata,
 )
 
 class Brevdata(
@@ -9,4 +9,5 @@ class Brevdata(
     val sendtdato: String,
     val utbetaltTom: String?,
     val maxdato: String?,
+    val isBrukerReservert: Boolean?,
 )

@@ -29,19 +29,36 @@ class MerVeiledningVarselService(
         planlagtVarselUuid: String,
         userAccessStatus: UserAccessStatus,
     ) {
-        val pdf = pdfgenConsumer.getMerVeiledningPDF(arbeidstakerHendelse.arbeidstakerFnr)
-        val journalpostId = pdf?.let {
-            dokarkivService.getJournalpostId(
-                arbeidstakerHendelse.arbeidstakerFnr,
-                planlagtVarselUuid,
-                it,
-            )
-        }
-        log.info("Forsøkte å journalføre SSPS i dokarkiv, journalpostId er $journalpostId")
-        if (userAccessStatus.canUserBeDigitallyNotified) {
-            sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
-        } else {
+        val isBrukerReservert = !userAccessStatus.canUserBeDigitallyNotified
+
+        if (isBrukerReservert) {
+            val pdf = pdfgenConsumer.getMerVeiledningPDF(arbeidstakerHendelse.arbeidstakerFnr, isBrukerReservert = true)
+
+            val journalpostId = pdf?.let {
+                dokarkivService.getJournalpostId(
+                    arbeidstakerHendelse.arbeidstakerFnr,
+                    planlagtVarselUuid,
+                    it,
+                )
+            }
+
+            log.info("Forsøkte å journalføre SSPS til reservert bruker i dokarkiv, journalpostId er $journalpostId")
+
             sendBrevVarselTilArbeidstaker(planlagtVarselUuid, arbeidstakerHendelse, journalpostId!!)
+        } else {
+            val pdf = pdfgenConsumer.getMerVeiledningPDF(arbeidstakerHendelse.arbeidstakerFnr, isBrukerReservert = false)
+
+            val journalpostId = pdf?.let {
+                dokarkivService.getJournalpostId(
+                    arbeidstakerHendelse.arbeidstakerFnr,
+                    planlagtVarselUuid,
+                    it,
+                )
+            }
+
+            log.info("Forsøkte å journalføre SSPS til bruker som ikke er reservert i dokarkiv, journalpostId er $journalpostId")
+
+            sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
         }
         sendOppgaveTilDittSykefravaer(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, arbeidstakerHendelse)
     }
