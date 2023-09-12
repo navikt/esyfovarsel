@@ -2,6 +2,7 @@ package no.nav.syfo.service
 
 import no.nav.syfo.*
 import no.nav.syfo.db.domain.Kanal
+import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
@@ -281,9 +282,9 @@ class DialogmoteInnkallingVarselService(
         arbeidstakerHendelse: ArbeidstakerHendelse,
         varselUuid: String,
     ) {
-        val utsendteVarsler = senderFacade.fetchAlleUferdigstilteVarslerTilKanal(
-            arbeidstakerHendelse.arbeidstakerFnr,
-            Kanal.DITT_SYKEFRAVAER,
+        val utsendteVarsler = senderFacade.fetchUferdigstilteVarsler(
+            arbeidstakerFnr = PersonIdent(arbeidstakerHendelse.arbeidstakerFnr),
+            kanal = Kanal.DITT_SYKEFRAVAER,
         )
         val melding = opprettDittSykefravaerMelding(arbeidstakerHendelse, varselUuid)
 
@@ -292,11 +293,25 @@ class DialogmoteInnkallingVarselService(
                 .contains(arbeidstakerHendelse.type)
         ) {
             senderFacade.ferdigstillDittSykefravaerVarsler(arbeidstakerHendelse) // ferdigstille seg selv
-            senderFacade.ferdigstillDittSykefravaerVarslerAvTyper(
-                arbeidstakerHendelse,
-                setOf<String>(SM_DIALOGMOTE_INNKALT.name, SM_DIALOGMOTE_NYTT_TID_STED.name),
-            )
+            if (arbeidstakerHendelse.type == SM_DIALOGMOTE_INNKALT) {
+                senderFacade.ferdigstillDittSykefravaerVarslerAvTyper(
+                    arbeidstakerHendelse,
+                    setOf(SM_DIALOGMOTE_NYTT_TID_STED),
+                )
+            }
+            if (arbeidstakerHendelse.type == SM_DIALOGMOTE_NYTT_TID_STED) {
+                senderFacade.ferdigstillDittSykefravaerVarslerAvTyper(
+                    arbeidstakerHendelse,
+                    setOf(SM_DIALOGMOTE_INNKALT),
+                )
+            } else {
+                senderFacade.ferdigstillDittSykefravaerVarslerAvTyper(
+                    arbeidstakerHendelse,
+                    setOf(SM_DIALOGMOTE_INNKALT, SM_DIALOGMOTE_NYTT_TID_STED),
+                )
+            }
         }
+
         if (melding != null) {
             senderFacade.sendTilDittSykefravaer(
                 arbeidstakerHendelse,

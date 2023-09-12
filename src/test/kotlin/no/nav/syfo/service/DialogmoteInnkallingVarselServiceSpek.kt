@@ -9,6 +9,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.db.domain.Kanal
+import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
@@ -16,6 +17,7 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaPr
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
+import no.nav.syfo.planner.arbeidstakerFnr1
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.mocks.fnr1
@@ -174,8 +176,8 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
         }
 
         it("Users should not be notified when lest hendelse is sent") {
-            coEvery { accessControlService.getUserAccessStatus("fnr1") } returns
-                UserAccessStatus("fnr1", true, true)
+            coEvery { accessControlService.getUserAccessStatus(arbeidstakerFnr1) } returns
+                    UserAccessStatus(arbeidstakerFnr1, true, true)
 
             every { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(any(), any()) } returns Unit
             every { brukernotifikasjonerService.ferdigstillVarsel(any(), any()) } returns Unit
@@ -184,7 +186,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 type = HendelseType.SM_DIALOGMOTE_LEST,
                 false,
                 varselData(journalpostUuid, journalpostId),
-                "fnr1",
+                arbeidstakerFnr1,
                 orgnummer,
             )
             dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse)
@@ -232,9 +234,9 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 )
             }
 
-            val utsendte = senderFacade.fetchAlleUferdigstilteVarslerTilKanal(
-                "66666666666",
-                Kanal.DITT_SYKEFRAVAER,
+            val utsendte = senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent("66666666666"),
+                kanal = Kanal.DITT_SYKEFRAVAER,
             )
 
             val innkallinger = utsendte.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
@@ -253,9 +255,9 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
             dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)
 
-            val utsendte2 = senderFacade.fetchAlleUferdigstilteVarslerTilKanal(
-                "66666666666",
-                Kanal.DITT_SYKEFRAVAER,
+            val utsendte2 = senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent("66666666666"),
+                kanal = Kanal.DITT_SYKEFRAVAER,
             )
             val innkallinger2 = utsendte2.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
             val endringer2 = utsendte2.find { it.type == HendelseType.SM_DIALOGMOTE_NYTT_TID_STED.name && it.fnr == "66666666666" }
@@ -265,9 +267,9 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
             dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)
 
-            val utsendte3 = senderFacade.fetchAlleUferdigstilteVarslerTilKanal(
-                "66666666666",
-                Kanal.DITT_SYKEFRAVAER,
+            val utsendte3 = senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent("66666666666"),
+                kanal = Kanal.DITT_SYKEFRAVAER,
             )
             val innkallinger3 = utsendte3.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
             val endringer3 = utsendte3.find { it.type == HendelseType.SM_DIALOGMOTE_NYTT_TID_STED.name && it.fnr == "66666666666" }
@@ -300,9 +302,9 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 )
             }
 
-            val utsendte = senderFacade.fetchAlleUferdigstilteVarslerTilKanal(
-                "66666666666",
-                Kanal.DITT_SYKEFRAVAER,
+            val utsendte = senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent("66666666666"),
+                kanal = Kanal.DITT_SYKEFRAVAER,
             )
 
             val innkallinger = utsendte.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
@@ -321,9 +323,9 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
             dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelseAvlyst)
 
-            val utsendte2 = senderFacade.fetchAlleUferdigstilteVarslerTilKanal(
-                "66666666666",
-                Kanal.DITT_SYKEFRAVAER,
+            val utsendte2 = senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent("66666666666"),
+                kanal = Kanal.DITT_SYKEFRAVAER,
             )
             val innkallinger2 = utsendte2.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
             val avlysninger2 = utsendte2.find { it.type == HendelseType.SM_DIALOGMOTE_AVLYST.name && it.fnr == "66666666666" }
@@ -333,9 +335,9 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
             dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelseAvlyst)
 
-            val utsendte3 = senderFacade.fetchAlleUferdigstilteVarslerTilKanal(
-                "66666666666",
-                Kanal.DITT_SYKEFRAVAER,
+            val utsendte3 = senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent("66666666666"),
+                kanal = Kanal.DITT_SYKEFRAVAER,
             )
             val innkallinger3 = utsendte3.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
             val avlysninger3 = utsendte3.find { it.type == HendelseType.SM_DIALOGMOTE_AVLYST.name && it.fnr == "66666666666" }
@@ -368,9 +370,9 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 )
             }
 
-            val utsendte = senderFacade.fetchAlleUferdigstilteVarslerTilKanal(
-                "66666666666",
-                Kanal.DITT_SYKEFRAVAER,
+            val utsendte = senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent("66666666666"),
+                kanal = Kanal.DITT_SYKEFRAVAER,
             )
 
             val innkallinger = utsendte.filter { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
@@ -387,9 +389,9 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
             dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)
 
-            val utsendte2 = senderFacade.fetchAlleUferdigstilteVarslerTilKanal(
-                "66666666666",
-                Kanal.DITT_SYKEFRAVAER,
+            val utsendte2 = senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent("66666666666"),
+                kanal = Kanal.DITT_SYKEFRAVAER,
             )
             val innkallinger2 = utsendte2.filter { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
 

@@ -1,16 +1,15 @@
 package no.nav.syfo.service.microfrontend
 
 import no.nav.syfo.db.*
+import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.*
 import no.nav.syfo.kafka.producers.mineside_microfrontend.*
-import org.slf4j.LoggerFactory
 
 class MikrofrontendService(
     val minSideMicrofrontendKafkaProducer: MinSideMicrofrontendKafkaProducer,
     val mikrofrontendDialogmoteService: MikrofrontendDialogmoteService,
     val database: DatabaseInterface
 ) {
-    private val log = LoggerFactory.getLogger(MikrofrontendService::class.java)
 
     companion object {
         val actionEnabled = MinSideEvent.enable.toString()
@@ -50,6 +49,14 @@ class MikrofrontendService(
         }
     }
 
+    fun closeAllMikrofrontendForUser(fnr: PersonIdent) {
+        disableMikrofrontendForUser(
+            fnr.value,
+            mikrofrontendDialogmoteService.minSideRecordDisabled(fnr.value),
+            Tjeneste.DIALOGMOTE
+        )
+    }
+
     private fun isNotEligableForMFProcessing(type: HendelseType) =
         when (type) {
             HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
@@ -58,6 +65,7 @@ class MikrofrontendService(
             HendelseType.SM_DIALOGMOTE_REFERAT,
             HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
             HendelseType.SM_DIALOGMOTE_LEST -> false
+
             else -> true
         }
 

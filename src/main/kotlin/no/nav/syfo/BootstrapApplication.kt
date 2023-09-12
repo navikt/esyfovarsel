@@ -174,7 +174,7 @@ fun main() {
                 val veilederTilgangskontrollConsumer =
                     VeilederTilgangskontrollConsumer(env.urlEnv, azureAdTokenConsumer)
 
-                val testdataResetService = TestdataResetService(database)
+                val testdataResetService = TestdataResetService(database, mikrofrontendService, senderFacade)
 
                 connector {
                     port = env.appEnv.applicationPort
@@ -345,22 +345,18 @@ fun Application.kafkaModule(
             )
         }
 
-        if (env.toggleEnv.toggleInfotrygdKafkaConsumer) {
-            launch(backgroundTasksContext) {
-                launchKafkaListener(
-                    state,
-                    InfotrygdKafkaConsumer(env, sykepengerMaxDateService),
-                )
-            }
+        launch(backgroundTasksContext) {
+            launchKafkaListener(
+                state,
+                InfotrygdKafkaConsumer(env, sykepengerMaxDateService),
+            )
         }
 
-        if (env.toggleEnv.toggleUtbetalingKafkaConsumer) {
-            launch(backgroundTasksContext) {
-                launchKafkaListener(
-                    state,
-                    UtbetalingKafkaConsumer(env, sykepengerMaxDateService),
-                )
-            }
+        launch(backgroundTasksContext) {
+            launchKafkaListener(
+                state,
+                UtbetalingKafkaConsumer(env, sykepengerMaxDateService),
+            )
         }
 
         launch(backgroundTasksContext) {
