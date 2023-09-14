@@ -72,7 +72,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
         it("Non-reserved users should be notified externally") {
             coEvery { accessControlService.getUserAccessStatus(fnr1) } returns
-                UserAccessStatus(fnr1, true, true)
+                UserAccessStatus(fnr1, true)
 
             val varselHendelse = ArbeidstakerHendelse(
                 hendelseType,
@@ -104,7 +104,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
         it("Reserved users should be notified physically") {
             coEvery { accessControlService.getUserAccessStatus(fnr2) } returns
-                UserAccessStatus(fnr2, canUserBeDigitallyNotified = false, canUserBePhysicallyNotified = true)
+                UserAccessStatus(fnr2, canUserBeDigitallyNotified = false)
             val varselHendelse = ArbeidstakerHendelse(
                 hendelseType,
                 false,
@@ -139,9 +139,9 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 )
             }
         }
-        it("Reserved users with address-protection should only be on 'Min-side'") {
+        it("Reserved users should get brevpost") {
             coEvery { accessControlService.getUserAccessStatus(fnr3) } returns
-                UserAccessStatus(fnr3, canUserBeDigitallyNotified = false, canUserBePhysicallyNotified = false)
+                UserAccessStatus(fnr3, canUserBeDigitallyNotified = false)
 
             val varselHendelse = ArbeidstakerHendelse(
                 hendelseType,
@@ -151,17 +151,17 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 orgnummer,
             )
             dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse)
-            verify(exactly = 1) {
+            verify(exactly = 0) {
                 brukernotifikasjonerService.sendVarsel(
                     any(),
                     fnr3,
                     any(),
                     dialogmoteInnkallingVarselService.getVarselUrl(varselHendelse, journalpostUuid),
                     dialogmoteInnkallingVarselService.getMeldingTypeForSykmeldtVarsling(hendelseType),
-                    false,
+                    true,
                 )
             }
-            verify(exactly = 0) {
+            verify(exactly = 1) {
                 fysiskBrevUtsendingService.sendBrev(
                     journalpostUuidAddressProtection,
                     journalpostIdAddressProtection,
@@ -177,7 +177,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
         it("Users should not be notified when lest hendelse is sent") {
             coEvery { accessControlService.getUserAccessStatus(arbeidstakerFnr1) } returns
-                    UserAccessStatus(arbeidstakerFnr1, true, true)
+                    UserAccessStatus(arbeidstakerFnr1, true)
 
             every { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(any(), any()) } returns Unit
             every { brukernotifikasjonerService.ferdigstillVarsel(any(), any()) } returns Unit
@@ -214,7 +214,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
         it("Endring hendelse skal ferdigstille tidligere innkalling") {
             coEvery { accessControlService.getUserAccessStatus("66666666666") } returns
-                UserAccessStatus("66666666666", true, true)
+                UserAccessStatus("66666666666", true)
             coEvery { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) } returns "123"
 
             val varselHendelseInnkalling = ArbeidstakerHendelse(
@@ -282,7 +282,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
         it("Avlysning hendelse skal ferdigstille tidligere innkalling") {
             coEvery { accessControlService.getUserAccessStatus("66666666666") } returns
-                UserAccessStatus("66666666666", true, true)
+                UserAccessStatus("66666666666", true)
             coEvery { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) } returns "456"
 
             val varselHendelseInnkalling = ArbeidstakerHendelse(
@@ -350,7 +350,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
         it("Ny innkalling hendelse skal ferdigstille tidligere innkalling") {
             coEvery { accessControlService.getUserAccessStatus("66666666666") } returns
-                UserAccessStatus("66666666666", true, true)
+                UserAccessStatus("66666666666", true)
             coEvery { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) } returns "789"
 
             val varselHendelseInnkalling = ArbeidstakerHendelse(

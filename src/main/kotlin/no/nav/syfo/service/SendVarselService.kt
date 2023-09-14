@@ -39,7 +39,6 @@ class SendVarselService(
     val WEEKS_BEFORE_DELETE_AKTIVITETSKRAV = 2L
 
     suspend fun sendVarsel(pPlanlagtVarsel: PPlanlagtVarsel): String {
-        // Recheck if user can be notified in case of recent 'Addressesperre'
         return try {
             val userAccessStatus = accessControlService.getUserAccessStatus(pPlanlagtVarsel.fnr)
             val fnr = userAccessStatus.fnr!!
@@ -50,7 +49,7 @@ class SendVarselService(
             val orgnummer = pPlanlagtVarsel.orgnummer
 
             if (varselUrl !== null && varselContent !== null) {
-                if (userSkalVarsles(pPlanlagtVarsel.type, userAccessStatus)) {
+                if (userSkalVarsles(pPlanlagtVarsel.type)) {
                     when (pPlanlagtVarsel.type) {
                         AKTIVITETSKRAV.name -> {
                             if (aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(fnr)) {
@@ -100,21 +99,8 @@ class SendVarselService(
         }
     }
 
-    private fun userSkalVarsles(varselType: String, userAccessStatus: UserAccessStatus): Boolean {
-        log.info("[$varselType] - userAccessStatus.canUserBeDigitallyNotified: ${userAccessStatus.canUserBeDigitallyNotified} | userAccessStatus.canUserBePhysicallyNotified: ${userAccessStatus.canUserBePhysicallyNotified}")
-        return when (varselType) {
-            AKTIVITETSKRAV.name -> {
-                userAccessStatus.canUserBeDigitallyNotified
-            }
-
-            MER_VEILEDNING.name -> {
-                userAccessStatus.canUserBeDigitallyNotified || userAccessStatus.canUserBePhysicallyNotified
-            }
-
-            else -> {
-                false
-            }
-        }
+    private fun userSkalVarsles(varselType: String): Boolean {
+        return varselType == AKTIVITETSKRAV.name || varselType == MER_VEILEDNING.name
     }
 
     private fun sendAktivitetskravVarselTilArbeidsgiver(

@@ -100,7 +100,7 @@ fun main() {
                 val dittSykefravaerMeldingKafkaProducer = DittSykefravaerMeldingKafkaProducer(env)
                 val minSideMicrofrontendKafkaProducer = MinSideMicrofrontendKafkaProducer(env)
 
-                val accessControlService = AccessControlService(pdlConsumer, dkifConsumer)
+                val accessControlService = AccessControlService(dkifConsumer)
                 val fysiskBrevUtsendingService = FysiskBrevUtsendingService(journalpostdistribusjonConsumer)
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
                 val syketilfellebitService = SyketilfellebitService(database)

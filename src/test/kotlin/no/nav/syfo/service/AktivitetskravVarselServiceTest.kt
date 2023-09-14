@@ -25,49 +25,28 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
     }
 
     describe("Forhåndsvarsel om stans av sykepenger") {
-        it("Sender fysisk brev til bruker dersom forhåndsvarsel om stans og ingen adressesperre") {
+        it("Sender alltid fysisk brev for forhåndsvarsel") {
             val forhandsvarselEvent = createForhandsvarselHendelse()
 
             every { accessControlService.getUserAccessStatus(SM_FNR) } returns UserAccessStatus(
                 SM_FNR,
                 canUserBeDigitallyNotified = true,
-                canUserBePhysicallyNotified = true
             )
 
             aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
 
             verify(exactly = 1) { senderFacade.sendBrevTilFysiskPrint(any(), forhandsvarselEvent, JOURNALPOST_ID) }
-        }
-
-        it("Sender ikke brev til bruker dersom adressesperre") {
-            val forhandsvarselEvent = createForhandsvarselHendelse()
-
-            every { accessControlService.getUserAccessStatus(SM_FNR) } returns UserAccessStatus(
-                SM_FNR,
-                canUserBeDigitallyNotified = true,
-                canUserBePhysicallyNotified = false
-            )
-
-            aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
-
-            verify(exactly = 0) { senderFacade.sendBrevTilFysiskPrint(any(), forhandsvarselEvent, JOURNALPOST_ID) }
-        }
-
-        it("Sender ikke brev til bruker dersom manglende journalpost") {
-            val forhandsvarselEvent = createForhandsvarselHendelse()
-            forhandsvarselEvent.data = null
-
-            every { accessControlService.getUserAccessStatus(SM_FNR) } returns UserAccessStatus(
-                SM_FNR,
-                canUserBeDigitallyNotified = true,
-                canUserBePhysicallyNotified = true
-            )
-
-            shouldThrow<MissingArgumentException> {
-                aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
+            verify(exactly = 0) {
+                senderFacade.sendTilBrukernotifikasjoner(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    true
+                )
             }
-
-            verify(exactly = 0) { senderFacade.sendBrevTilFysiskPrint(any(), forhandsvarselEvent, any()) }
         }
     }
 })

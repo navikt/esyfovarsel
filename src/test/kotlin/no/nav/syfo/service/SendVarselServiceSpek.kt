@@ -73,7 +73,6 @@ class SendVarselServiceTestSpek : DescribeSpec({
             every { accessControlServiceMockk.getUserAccessStatus(sykmeldtFnr) } returns UserAccessStatus(
                 sykmeldtFnr,
                 canUserBeDigitallyNotified = true,
-                canUserBePhysicallyNotified = false,
             )
 
             every { urlEnvMockk.baseUrlSykInfo } returns "https://www-gcp.dev.nav.no/syk/info"

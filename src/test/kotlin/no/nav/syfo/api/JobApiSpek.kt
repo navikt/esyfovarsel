@@ -72,12 +72,6 @@ class JobApiSpek : DescribeSpec({
         coEvery { accessControlService.getUserAccessStatus(fnr4) } returns userAccessStatus4
         coEvery { accessControlService.getUserAccessStatus(fnr5) } returns userAccessStatus5
 
-        coEvery { accessControlService.getUserAccessStatus(fnr1) } returns userAccessStatus1
-        coEvery { accessControlService.getUserAccessStatus(fnr2) } returns userAccessStatus2
-        coEvery { accessControlService.getUserAccessStatus(fnr3) } returns userAccessStatus3
-        coEvery { accessControlService.getUserAccessStatus(fnr4) } returns userAccessStatus4
-        coEvery { accessControlService.getUserAccessStatus(fnr5) } returns userAccessStatus5
-
         coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(
             PPlanlagtVarsel(
                 UUID.randomUUID().toString(),
@@ -121,7 +115,7 @@ class JobApiSpek : DescribeSpec({
             ),
             PPlanlagtVarsel(
                 UUID.randomUUID().toString(),
-                fnr5, // Blir ikke sendt, mottaker er reservert mot digital kommunikasjon og har kode 6 eller 7
+                fnr5, // Blir sendt, mottaker kan varsles fysisk
                 orgnummer,
                 null,
                 VarselType.MER_VEILEDNING.name,
@@ -173,10 +167,10 @@ class JobApiSpek : DescribeSpec({
                 registerJobTriggerApi(varselSender, mikrofrontendService)
             }
 
-            it("esyfovarsel-job trigger utsending av 2 varsler digitalt og 2 varsler som brev") {
+            it("esyfovarsel-job trigger utsending av 2 varsler digitalt og 3 varsler som brev") {
                 with(handleRequest(HttpMethod.Post, urlPathJobTrigger)) {
                     response.status()?.isSuccess() shouldBeEqualTo true
-                    coVerify(exactly = 4) { merVeiledningVarselService.sendVarselTilArbeidstaker(any(), any(), any()) }
+                    coVerify(exactly = 5) { merVeiledningVarselService.sendVarselTilArbeidstaker(any(), any(), any()) }
                 }
             }
         }

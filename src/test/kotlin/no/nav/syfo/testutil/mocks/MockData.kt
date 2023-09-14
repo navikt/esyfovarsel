@@ -9,11 +9,11 @@ const val fnr4 = "45678901234"
 const val fnr5 = "45678901230"
 const val orgnummer = "999888777"
 
-val userAccessStatus1 = UserAccessStatus(fnr1, true, false) // Kan varsles digitalt
-val userAccessStatus2 = UserAccessStatus(fnr2, true, false) // Kan varsles digitalt
-val userAccessStatus3 = UserAccessStatus(fnr3, false, true) // Kan varsles fysisk
-val userAccessStatus4 = UserAccessStatus(fnr4, false, true) // Kan varsles fysisk
-val userAccessStatus5 = UserAccessStatus(fnr5, false, false) // Kan ikke varsles
+val userAccessStatus1 = UserAccessStatus(fnr1, true)
+val userAccessStatus2 = UserAccessStatus(fnr2, true)
+val userAccessStatus3 = UserAccessStatus(fnr3, false)
+val userAccessStatus4 = UserAccessStatus(fnr4, false)
+val userAccessStatus5 = UserAccessStatus(fnr5, false)
 
 val dkifResponseSuccessKanVarslesResponseJSON = """
     {
