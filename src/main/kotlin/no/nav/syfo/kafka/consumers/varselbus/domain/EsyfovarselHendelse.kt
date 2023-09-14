@@ -72,6 +72,7 @@ enum class HendelseType {
     NL_DIALOGMOTE_NYTT_TID_STED,
     SM_DIALOGMOTE_NYTT_TID_STED,
     SM_DIALOGMOTE_LEST,
+    SM_FORHANDSVARSEL_STANS
 }
 
 fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
@@ -103,6 +104,12 @@ fun Any.toVarselData(): VarselData =
     objectMapper.readValue(
         this.toString(),
         VarselData::class.java,
+    )
+
+fun Any.toVarselDataJournalpost(): VarselDataJournalpost =
+    objectMapper.readValue(
+        this.toString(),
+        VarselDataJournalpost::class.java,
     )
 
 fun EsyfovarselHendelse.isArbeidstakerHendelse(): Boolean {

@@ -30,3 +30,6 @@ spec:
     - team: teamsykefravr
       application: isyfomock
       access: write
+    - team: teamsykefravr
+      application: isaktivitetskrav
+      access: write

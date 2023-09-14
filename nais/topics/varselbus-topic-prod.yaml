@@ -27,3 +27,6 @@ spec:
     - team: teamsykefravr
       application: isdialogmote
       access: write
+    - team: teamsykefravr
+      application: isaktivitetskrav
+      access: write
