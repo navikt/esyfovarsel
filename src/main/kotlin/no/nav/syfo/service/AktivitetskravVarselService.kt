@@ -17,10 +17,8 @@ class AktivitetskravVarselService(
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         val jounalpostData = dataToVarselDataJournalpost(varselHendelse.data)
         val varselUuid = jounalpostData.uuid
-        val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
-        val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerFnr)
 
-        if (userAccessStatus.canUserBePhysicallyNotified && varselHendelse.type == SM_FORHANDSVARSEL_STANS) {
+        if (varselHendelse.type == SM_FORHANDSVARSEL_STANS) {
             val journalpostId = jounalpostData.id
             journalpostId?.let {
                 sendFysiskBrevTilArbeidstaker(varselUuid, varselHendelse, journalpostId)

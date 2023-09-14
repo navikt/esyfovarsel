@@ -53,14 +53,13 @@ class DialogmoteInnkallingVarselService(
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerFnr)
 
         if (userAccessStatus.canUserBeDigitallyNotified) {
-            varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid, eksternVarsling = true)
-        } else if (userAccessStatus.canUserBePhysicallyNotified) {
+            varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid)
+        } else {
             val journalpostId = jounalpostData.id
             journalpostId?.let {
                 sendFysiskBrevTilArbeidstaker(varselUuid, varselHendelse, journalpostId)
-            } ?: log.info("Received journalpostId is null for user reserved from digital communication and with no addressebeskyttelse")
-        } else {
-            varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid, eksternVarsling = false)
+            }
+                ?: log.info("Skip sending fysisk brev to arbeidstaker: Jornalpostid is null")
         }
         sendOppgaveTilDittSykefravaerOgFerdigstillTidligereMeldinger(varselHendelse, varselUuid)
     }
@@ -75,7 +74,6 @@ class DialogmoteInnkallingVarselService(
     private fun varsleArbeidstakerViaBrukernotifkasjoner(
         varselHendelse: ArbeidstakerHendelse,
         varselUuid: String,
-        eksternVarsling: Boolean,
     ) {
         senderFacade.sendTilBrukernotifikasjoner(
             uuid = varselUuid,
@@ -84,7 +82,7 @@ class DialogmoteInnkallingVarselService(
             url = getVarselUrl(varselHendelse, varselUuid),
             varselHendelse = varselHendelse,
             meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type),
-            eksternVarsling = eksternVarsling,
+            eksternVarsling = true,
         )
     }
 
