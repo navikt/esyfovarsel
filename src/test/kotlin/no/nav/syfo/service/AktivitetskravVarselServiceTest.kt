@@ -9,9 +9,9 @@ import io.mockk.verify
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import no.nav.syfo.kafka.consumers.varselbus.domain.VarselData
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
 import org.amshove.kluent.shouldBeEqualTo
-import java.lang.IllegalArgumentException
 
 const val SM_FNR = "123456789"
 
@@ -62,7 +62,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
                 aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
             }
 
-            exception.message shouldBeEqualTo "Wrong data type, should be of type VarselDataJournalpost"
+            exception.message shouldBeEqualTo "Wrong data type, should be of type VarselData"
         }
     }
 })
@@ -71,7 +71,7 @@ private fun createForhandsvarselHendelse(): ArbeidstakerHendelse {
     return ArbeidstakerHendelse(
         HendelseType.SM_FORHANDSVARSEL_STANS,
         false,
-        VarselDataJournalpost(uuid = "97b886fe-6beb-40df-af2b-04e504bc340c", id = "1"),
+        VarselData(journalpost = VarselDataJournalpost(uuid = "97b886fe-6beb-40df-af2b-04e504bc340c", id = "1")),
         SM_FNR,
         null,
     )

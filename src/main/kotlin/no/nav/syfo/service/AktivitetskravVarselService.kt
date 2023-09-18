@@ -2,6 +2,7 @@ package no.nav.syfo.service
 
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_FORHANDSVARSEL_STANS
+import no.nav.syfo.kafka.consumers.varselbus.domain.VarselData
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
 import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselDataJournalpost
 import org.apache.commons.cli.MissingArgumentException
@@ -16,13 +17,16 @@ class AktivitetskravVarselService(
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         if (varselHendelse.type == SM_FORHANDSVARSEL_STANS) {
-            require(varselHendelse.data is VarselDataJournalpost) {
-                "Wrong data type, should be of type VarselDataJournalpost"
+            require(varselHendelse.data is VarselData) {
+                "Wrong data type, should be of type VarselData"
             }
-            val journalpostData = varselHendelse.data as VarselDataJournalpost
-            journalpostData.id?.let {
-                sendFysiskBrevTilArbeidstaker(journalpostData.uuid, varselHendelse, journalpostData.id)
-            } ?: log.error("Forhåndsvarsel: JournalpostId is null")
+            val varselData = varselHendelse.data as VarselData
+
+            requireNotNull(varselData.journalpost?.id)
+
+            val journalpost = varselData.journalpost
+
+            sendFysiskBrevTilArbeidstaker(journalpost!!.uuid, varselHendelse, journalpost.id!!)
         }
     }
 
