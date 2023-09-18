@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -9,6 +10,8 @@ import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
+import org.amshove.kluent.shouldBeEqualTo
+import java.lang.IllegalArgumentException
 
 const val SM_FNR = "123456789"
 
@@ -44,6 +47,22 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
                     true
                 )
             }
+        }
+
+        it("Får IllegalArgumentException dersom feil datatype") {
+            val forhandsvarselEvent = createForhandsvarselHendelse()
+            forhandsvarselEvent.data = "hei"
+
+            every { accessControlService.getUserAccessStatus(SM_FNR) } returns UserAccessStatus(
+                SM_FNR,
+                canUserBeDigitallyNotified = true,
+            )
+
+            val exception = shouldThrow<IllegalArgumentException> {
+                aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
+            }
+
+            exception.message shouldBeEqualTo "Wrong data type, should be of type VarselDataJournalpost"
         }
     }
 })

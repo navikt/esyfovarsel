@@ -16,6 +16,9 @@ class AktivitetskravVarselService(
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         if (varselHendelse.type == SM_FORHANDSVARSEL_STANS) {
+            require(varselHendelse.data is VarselDataJournalpost) {
+                "Wrong data type, should be of type VarselDataJournalpost"
+            }
             val journalpostData = varselHendelse.data as VarselDataJournalpost
             journalpostData.id?.let {
                 sendFysiskBrevTilArbeidstaker(journalpostData.uuid, varselHendelse, journalpostData.id)
