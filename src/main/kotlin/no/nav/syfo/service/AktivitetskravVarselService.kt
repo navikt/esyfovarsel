@@ -15,13 +15,10 @@ class AktivitetskravVarselService(
     private val log = LoggerFactory.getLogger(AktivitetskravVarselService::class.qualifiedName)
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
-        val jounalpostData = dataToVarselDataJournalpost(varselHendelse.data)
-        val varselUuid = jounalpostData.uuid
-
         if (varselHendelse.type == SM_FORHANDSVARSEL_STANS) {
-            val journalpostId = jounalpostData.id
-            journalpostId?.let {
-                sendFysiskBrevTilArbeidstaker(varselUuid, varselHendelse, journalpostId)
+            val journalpostData = varselHendelse.data as VarselDataJournalpost
+            journalpostData.id?.let {
+                sendFysiskBrevTilArbeidstaker(journalpostData.uuid, varselHendelse, journalpostData.id)
             } ?: log.error("Forhåndsvarsel: JournalpostId is null")
         }
     }

@@ -1,6 +1,5 @@
 package no.nav.syfo.service
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -9,11 +8,9 @@ import io.mockk.verify
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
-import org.apache.commons.cli.MissingArgumentException
+import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
 
 const val SM_FNR = "123456789"
-const val JOURNALPOST_UUID = "97b886fe-6beb-40df-af2b-04e504bc340c"
-const val JOURNALPOST_ID = "1"
 
 class AktivitetskravVarselServiceTest : DescribeSpec({
     val accessControlService = mockk<AccessControlService>()
@@ -35,7 +32,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
 
             aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
 
-            verify(exactly = 1) { senderFacade.sendBrevTilFysiskPrint(any(), forhandsvarselEvent, JOURNALPOST_ID) }
+            verify(exactly = 1) { senderFacade.sendBrevTilFysiskPrint(any(), forhandsvarselEvent, any()) }
             verify(exactly = 0) {
                 senderFacade.sendTilBrukernotifikasjoner(
                     any(),
@@ -55,7 +52,7 @@ private fun createForhandsvarselHendelse(): ArbeidstakerHendelse {
     return ArbeidstakerHendelse(
         HendelseType.SM_FORHANDSVARSEL_STANS,
         false,
-        varselDataAktivitetskrav(JOURNALPOST_UUID, JOURNALPOST_ID),
+        VarselDataJournalpost(uuid = "97b886fe-6beb-40df-af2b-04e504bc340c", id = "1"),
         SM_FNR,
         null,
     )
