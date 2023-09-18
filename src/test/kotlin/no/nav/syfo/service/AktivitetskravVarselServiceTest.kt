@@ -58,10 +58,3 @@ private fun createForhandsvarselHendelse(): ArbeidstakerHendelse {
     )
 }
 
-private fun varselDataAktivitetskrav(journalpostUuid: String, journalpostId: String) =
-    """
-        {
-            "uuid": "$journalpostUuid",
-            "id": "$journalpostId"
-        }
-""".trimIndent()
