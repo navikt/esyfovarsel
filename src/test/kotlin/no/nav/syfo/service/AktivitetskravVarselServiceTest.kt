@@ -64,6 +64,22 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
 
             exception.message shouldBeEqualTo "Wrong data type, should be of type VarselData"
         }
+
+        it("Får IllegalArgumentException dersom mangende journalpostid") {
+            val forhandsvarselEvent = createForhandsvarselHendelse()
+            forhandsvarselEvent.data = VarselData(journalpost = VarselDataJournalpost(uuid = "something", id = null))
+
+            every { accessControlService.getUserAccessStatus(SM_FNR) } returns UserAccessStatus(
+                SM_FNR,
+                canUserBeDigitallyNotified = true,
+            )
+
+            val exception = shouldThrow<IllegalArgumentException> {
+                aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
+            }
+
+            exception.message shouldBeEqualTo "Required value was null."
+        }
     }
 })
 
