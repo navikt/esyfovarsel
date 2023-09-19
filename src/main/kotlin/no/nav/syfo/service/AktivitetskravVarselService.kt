@@ -3,8 +3,7 @@ package no.nav.syfo.service
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_FORHANDSVARSEL_STANS
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselData
-import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
-import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselDataJournalpost
+import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
 import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -17,16 +16,11 @@ class AktivitetskravVarselService(
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         if (varselHendelse.type == SM_FORHANDSVARSEL_STANS) {
-            require(varselHendelse.data is VarselData) {
-                "Wrong data type, should be of type VarselData"
-            }
-            val varselData = varselHendelse.data as VarselData
+            val varselData = dataToVarselData(varselHendelse.data)
 
             requireNotNull(varselData.journalpost?.id)
 
-            val journalpost = varselData.journalpost
-
-            sendFysiskBrevTilArbeidstaker(journalpost!!.uuid, varselHendelse, journalpost.id!!)
+            sendFysiskBrevTilArbeidstaker(varselData.journalpost!!.uuid, varselHendelse, varselData.journalpost.id!!)
         }
     }
 
@@ -42,10 +36,10 @@ class AktivitetskravVarselService(
         }
     }
 
-    private fun dataToVarselDataJournalpost(data: Any?): VarselDataJournalpost {
+    private fun dataToVarselData(data: Any?): VarselData {
         return data?.let {
             try {
-                return data.toVarselDataJournalpost()
+                return data.toVarselData()
             } catch (e: IOException) {
                 throw IOException("ArbeidstakerHendelse har feil format")
             }

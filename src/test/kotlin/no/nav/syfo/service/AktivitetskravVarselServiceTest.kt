@@ -7,11 +7,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.access.domain.UserAccessStatus
+import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselData
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
 import org.amshove.kluent.shouldBeEqualTo
+import java.io.IOException
 
 const val SM_FNR = "123456789"
 
@@ -49,7 +51,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
             }
         }
 
-        it("Får IllegalArgumentException dersom feil datatype") {
+        it("Får IOException dersom feil datatype") {
             val forhandsvarselEvent = createForhandsvarselHendelse()
             forhandsvarselEvent.data = "hei"
 
@@ -58,14 +60,14 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
                 canUserBeDigitallyNotified = true,
             )
 
-            val exception = shouldThrow<IllegalArgumentException> {
+            val exception = shouldThrow<IOException> {
                 aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
             }
 
-            exception.message shouldBeEqualTo "Wrong data type, should be of type VarselData"
+            exception.message shouldBeEqualTo "ArbeidstakerHendelse har feil format"
         }
 
-        it("Får IllegalArgumentException dersom mangende journalpostid") {
+        it("Får IOException dersom mangende journalpostid") {
             val forhandsvarselEvent = createForhandsvarselHendelse()
             forhandsvarselEvent.data = VarselData(journalpost = VarselDataJournalpost(uuid = "something", id = null))
 
@@ -74,11 +76,37 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
                 canUserBeDigitallyNotified = true,
             )
 
-            val exception = shouldThrow<IllegalArgumentException> {
+            val exception = shouldThrow<IOException> {
                 aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
             }
 
-            exception.message shouldBeEqualTo "Required value was null."
+            exception.message shouldBeEqualTo "ArbeidstakerHendelse har feil format"
+        }
+
+        it("Tester deserialisering av varseldata") {
+            val objectMapper = createObjectMapper()
+
+            val jsondata: String = """
+                {
+                	"@type": "ArbeidstakerHendelse",
+                	"type": "SM_FORHANDSVARSEL_STANS",
+                	"data": {
+                		"journalpost": {
+                			"uuid": "bda0b55a-df72-4888-a5a5-6bfa74cacafe",
+                			"id": "620049753"
+                		}
+                	},
+                	"arbeidstakerFnr": "***********",
+                	"orgnummer": null
+                }
+            """
+
+            val arbeidstakerHendelse = objectMapper.readValue(jsondata, ArbeidstakerHendelse::class.java)
+            arbeidstakerHendelse.data = objectMapper.readTree(jsondata)["data"];
+
+            aktivitetskravVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelse)
+
+            verify(exactly = 1) { senderFacade.sendBrevTilFysiskPrint(any(), arbeidstakerHendelse, any()) }
         }
     }
 })
@@ -87,7 +115,7 @@ private fun createForhandsvarselHendelse(): ArbeidstakerHendelse {
     return ArbeidstakerHendelse(
         HendelseType.SM_FORHANDSVARSEL_STANS,
         false,
-        VarselData(journalpost = VarselDataJournalpost(uuid = "97b886fe-6beb-40df-af2b-04e504bc340c", id = "1")),
+        varselData(journalpostId = "620049753", journalpostUuid = "bda0b55a-df72-4888-a5a5-6bfa74cacafe"),
         SM_FNR,
         null,
     )
