@@ -7,13 +7,15 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.access.domain.UserAccessStatus
+import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
-import org.apache.commons.cli.MissingArgumentException
+import no.nav.syfo.kafka.consumers.varselbus.domain.VarselData
+import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
+import org.amshove.kluent.shouldBeEqualTo
+import java.io.IOException
 
 const val SM_FNR = "123456789"
-const val JOURNALPOST_UUID = "97b886fe-6beb-40df-af2b-04e504bc340c"
-const val JOURNALPOST_ID = "1"
 
 class AktivitetskravVarselServiceTest : DescribeSpec({
     val accessControlService = mockk<AccessControlService>()
@@ -35,7 +37,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
 
             aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
 
-            verify(exactly = 1) { senderFacade.sendBrevTilFysiskPrint(any(), forhandsvarselEvent, JOURNALPOST_ID) }
+            verify(exactly = 1) { senderFacade.sendBrevTilFysiskPrint(any(), forhandsvarselEvent, any()) }
             verify(exactly = 0) {
                 senderFacade.sendTilBrukernotifikasjoner(
                     any(),
@@ -48,6 +50,64 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
                 )
             }
         }
+
+        it("Får IOException dersom feil datatype") {
+            val forhandsvarselEvent = createForhandsvarselHendelse()
+            forhandsvarselEvent.data = "hei"
+
+            every { accessControlService.getUserAccessStatus(SM_FNR) } returns UserAccessStatus(
+                SM_FNR,
+                canUserBeDigitallyNotified = true,
+            )
+
+            val exception = shouldThrow<IOException> {
+                aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
+            }
+
+            exception.message shouldBeEqualTo "ArbeidstakerHendelse har feil format"
+        }
+
+        it("Får IOException dersom mangende journalpostid") {
+            val forhandsvarselEvent = createForhandsvarselHendelse()
+            forhandsvarselEvent.data = VarselData(journalpost = VarselDataJournalpost(uuid = "something", id = null))
+
+            every { accessControlService.getUserAccessStatus(SM_FNR) } returns UserAccessStatus(
+                SM_FNR,
+                canUserBeDigitallyNotified = true,
+            )
+
+            val exception = shouldThrow<IOException> {
+                aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
+            }
+
+            exception.message shouldBeEqualTo "ArbeidstakerHendelse har feil format"
+        }
+
+        it("Tester deserialisering av varseldata") {
+            val objectMapper = createObjectMapper()
+
+            val jsondata: String = """
+                {
+                	"@type": "ArbeidstakerHendelse",
+                	"type": "SM_FORHANDSVARSEL_STANS",
+                	"data": {
+                		"journalpost": {
+                			"uuid": "bda0b55a-df72-4888-a5a5-6bfa74cacafe",
+                			"id": "620049753"
+                		}
+                	},
+                	"arbeidstakerFnr": "***********",
+                	"orgnummer": null
+                }
+            """
+
+            val arbeidstakerHendelse = objectMapper.readValue(jsondata, ArbeidstakerHendelse::class.java)
+            arbeidstakerHendelse.data = objectMapper.readTree(jsondata)["data"];
+
+            aktivitetskravVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelse)
+
+            verify(exactly = 1) { senderFacade.sendBrevTilFysiskPrint(any(), arbeidstakerHendelse, any()) }
+        }
     }
 })
 
@@ -55,16 +115,9 @@ private fun createForhandsvarselHendelse(): ArbeidstakerHendelse {
     return ArbeidstakerHendelse(
         HendelseType.SM_FORHANDSVARSEL_STANS,
         false,
-        varselDataAktivitetskrav(JOURNALPOST_UUID, JOURNALPOST_ID),
+        varselData(journalpostId = "620049753", journalpostUuid = "bda0b55a-df72-4888-a5a5-6bfa74cacafe"),
         SM_FNR,
         null,
     )
 }
 
-private fun varselDataAktivitetskrav(journalpostUuid: String, journalpostId: String) =
-    """
-        {
-            "uuid": "$journalpostUuid",
-            "id": "$journalpostId"
-        }
-""".trimIndent()

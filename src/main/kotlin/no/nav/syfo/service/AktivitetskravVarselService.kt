@@ -2,8 +2,8 @@ package no.nav.syfo.service
 
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_FORHANDSVARSEL_STANS
-import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
-import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselDataJournalpost
+import no.nav.syfo.kafka.consumers.varselbus.domain.VarselData
+import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
 import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -15,14 +15,12 @@ class AktivitetskravVarselService(
     private val log = LoggerFactory.getLogger(AktivitetskravVarselService::class.qualifiedName)
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
-        val jounalpostData = dataToVarselDataJournalpost(varselHendelse.data)
-        val varselUuid = jounalpostData.uuid
-
         if (varselHendelse.type == SM_FORHANDSVARSEL_STANS) {
-            val journalpostId = jounalpostData.id
-            journalpostId?.let {
-                sendFysiskBrevTilArbeidstaker(varselUuid, varselHendelse, journalpostId)
-            } ?: log.error("Forhåndsvarsel: JournalpostId is null")
+            val varselData = dataToVarselData(varselHendelse.data)
+
+            requireNotNull(varselData.journalpost?.id)
+
+            sendFysiskBrevTilArbeidstaker(varselData.journalpost!!.uuid, varselHendelse, varselData.journalpost.id!!)
         }
     }
 
@@ -38,10 +36,10 @@ class AktivitetskravVarselService(
         }
     }
 
-    private fun dataToVarselDataJournalpost(data: Any?): VarselDataJournalpost {
+    private fun dataToVarselData(data: Any?): VarselData {
         return data?.let {
             try {
-                return data.toVarselDataJournalpost()
+                return data.toVarselData()
             } catch (e: IOException) {
                 throw IOException("ArbeidstakerHendelse har feil format")
             }

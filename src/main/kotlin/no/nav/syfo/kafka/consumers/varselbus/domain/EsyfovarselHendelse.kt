@@ -85,7 +85,7 @@ fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
     ) {
         throw IllegalArgumentException(
             "${eventType.name} er ikke gyldig hendelse for å hente ut " +
-                "'synligTom'-felt",
+                    "'synligTom'-felt",
         )
     }
     return if (eventType != HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV) this.motetidspunkt() else null
@@ -104,12 +104,6 @@ fun Any.toVarselData(): VarselData =
     objectMapper.readValue(
         this.toString(),
         VarselData::class.java,
-    )
-
-fun Any.toVarselDataJournalpost(): VarselDataJournalpost =
-    objectMapper.readValue(
-        this.toString(),
-        VarselDataJournalpost::class.java,
     )
 
 fun EsyfovarselHendelse.isArbeidstakerHendelse(): Boolean {
