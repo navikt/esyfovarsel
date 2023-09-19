@@ -4,18 +4,23 @@ import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 
 class VeilederAlreadyBookedMeetingException : IllegalStateException(
     "Veileder har allerede aktivert mikrofrontend for tjenesten: " +
-        "${Tjeneste.DIALOGMOTE}. Dette er uforventet da veilederen allerede skal ha kalt inn " +
-        "til dialogmote."
+            "${Tjeneste.DIALOGMOTE}. Dette er uforventet da veilederen allerede skal ha kalt inn " +
+            "til dialogmote."
 )
 
 class MotebehovAfterBookingException : IllegalStateException(
     "Veileder har allerede aktivert mikrofrontend for tjenesten: " +
-        "${Tjeneste.DIALOGMOTE}. Dette er uforventet da syfomotebehov ikke skal sende varsel event " +
-        "dersom veilder allerede har innkalt til dialogmøte."
+            "${Tjeneste.DIALOGMOTE}. Dette er uforventet da syfomotebehov ikke skal sende varsel event " +
+            "dersom veilder allerede har innkalt til dialogmøte."
 )
 
 class DuplicateMotebehovException : IllegalStateException(
     "Møtebehov har allerede aktivert mikrofrontend for tjenesten: " +
-        "${Tjeneste.DIALOGMOTE}. Dette er uforventet da syfomotebehov ikke skal sende varsel event " +
-        "flere ganger i samme sykefravær."
+            "${Tjeneste.DIALOGMOTE}. Dette er uforventet da syfomotebehov ikke skal sende varsel event " +
+            "flere ganger i samme sykefravær."
+)
+
+class DuplicateAktivitetskravException : IllegalStateException(
+    "Forhåndsvarsel stans har allerede aktivert mikrofrontend for tjenesten: " +
+            "${Tjeneste.AKTIVITETSKRAV}. Dette er uforventet da det ikke skal komme flere ganger før forrige er skrudd av"
 )

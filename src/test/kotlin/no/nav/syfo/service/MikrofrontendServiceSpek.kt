@@ -14,6 +14,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.service.microfrontend.MikrofrontendAktivitetskravService
 import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.testutil.*
@@ -28,9 +29,11 @@ class MikrofrontendServiceSpek : DescribeSpec({
     val embeddedDatabase by lazy { EmbeddedDatabase() }
     val minSideMicrofrontendKafkaProducer: MinSideMicrofrontendKafkaProducer = mockk(relaxed = true)
     val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(embeddedDatabase)
+    val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(embeddedDatabase)
     val mikrofrontendService = MikrofrontendService(
         minSideMicrofrontendKafkaProducer,
         mikrofrontendDialogmoteService,
+        mikrofrontendAktivitetskravService,
         embeddedDatabase
     )
 

@@ -8,6 +8,7 @@ import no.nav.syfo.kafka.producers.mineside_microfrontend.*
 class MikrofrontendService(
     val minSideMicrofrontendKafkaProducer: MinSideMicrofrontendKafkaProducer,
     val mikrofrontendDialogmoteService: MikrofrontendDialogmoteService,
+    val mikrofrontendAktivitetskravService: MikrofrontendAktivitetskravService,
     val database: DatabaseInterface
 ) {
 
@@ -23,9 +24,11 @@ class MikrofrontendService(
         val tjeneste = hendelse.type.toMikrofrontendTjenesteType()
 
         val recordToSend = when (tjeneste) {
-            Tjeneste.DIALOGMOTE -> mikrofrontendDialogmoteService.updateDialogmoteFrontendForUserByHendelse(
-                hendelse
-            )
+            Tjeneste.DIALOGMOTE
+            -> mikrofrontendDialogmoteService.updateDialogmoteFrontendForUserByHendelse(hendelse)
+
+            Tjeneste.AKTIVITETSKRAV ->
+                mikrofrontendAktivitetskravService.updateAktivitetskravMikrofrontendForUserByHendelse(hendelse)
         }
 
         recordToSend?.let { record ->
@@ -59,6 +62,7 @@ class MikrofrontendService(
 
     private fun isNotEligableForMFProcessing(type: HendelseType) =
         when (type) {
+            HendelseType.SM_FORHANDSVARSEL_STANS,
             HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
             HendelseType.SM_DIALOGMOTE_INNKALT,
             HendelseType.SM_DIALOGMOTE_AVLYST,
@@ -105,6 +109,8 @@ class MikrofrontendService(
             HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
             HendelseType.SM_DIALOGMOTE_REFERAT,
             HendelseType.SM_DIALOGMOTE_AVLYST -> Tjeneste.DIALOGMOTE
+
+            HendelseType.SM_FORHANDSVARSEL_STANS -> Tjeneste.AKTIVITETSKRAV
             else -> throw IllegalArgumentException("$this is not a valid type for updating MF state")
         }
 }
