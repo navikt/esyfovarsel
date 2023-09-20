@@ -76,20 +76,15 @@ enum class HendelseType {
 }
 
 fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
-    val eventType = this.type
-    if (eventType !in listOf(
-            HendelseType.SM_DIALOGMOTE_INNKALT,
-            HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
-            HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
-            HendelseType.SM_FORHANDSVARSEL_STANS
-        )
-    ) {
-        throw IllegalArgumentException(
-            "${eventType.name} er ikke gyldig hendelse for å hente ut " +
-                    "'synligTom'-felt",
+    return when (this.type) {
+        HendelseType.SM_FORHANDSVARSEL_STANS -> null
+        HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV -> null
+        HendelseType.SM_DIALOGMOTE_INNKALT -> this.motetidspunkt()
+        HendelseType.SM_DIALOGMOTE_NYTT_TID_STED -> this.motetidspunkt()
+        else -> throw IllegalArgumentException(
+            "${this.type.name} er ikke gyldig hendelse for å hente ut 'synligTom'-felt"
         )
     }
-    return if (eventType != HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV) this.motetidspunkt() else null
 }
 
 private fun ArbeidstakerHendelse.motetidspunkt(): LocalDateTime {
