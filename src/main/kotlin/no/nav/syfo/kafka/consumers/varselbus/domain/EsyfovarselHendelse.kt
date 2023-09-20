@@ -81,6 +81,7 @@ fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
             HendelseType.SM_DIALOGMOTE_INNKALT,
             HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
             HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
+            HendelseType.SM_FORHANDSVARSEL_STANS
         )
     ) {
         throw IllegalArgumentException(
