@@ -63,6 +63,7 @@ class MikrofrontendService(
     private fun isNotEligableForMFProcessing(type: HendelseType) =
         when (type) {
             HendelseType.SM_FORHANDSVARSEL_STANS,
+            HendelseType.SM_AKTIVITETSKRAV,
             HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
             HendelseType.SM_DIALOGMOTE_INNKALT,
             HendelseType.SM_DIALOGMOTE_AVLYST,
@@ -110,7 +111,8 @@ class MikrofrontendService(
             HendelseType.SM_DIALOGMOTE_REFERAT,
             HendelseType.SM_DIALOGMOTE_AVLYST -> Tjeneste.DIALOGMOTE
 
-            HendelseType.SM_FORHANDSVARSEL_STANS -> Tjeneste.AKTIVITETSKRAV
+            HendelseType.SM_FORHANDSVARSEL_STANS,
+            HendelseType.SM_AKTIVITETSKRAV -> Tjeneste.AKTIVITETSKRAV
             else -> throw IllegalArgumentException("$this is not a valid type for updating MF state")
         }
 }

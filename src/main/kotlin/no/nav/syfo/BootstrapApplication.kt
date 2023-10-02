@@ -134,6 +134,8 @@ fun main() {
                 val aktivitetskravVarselService = AktivitetskravVarselService(
                     senderFacade,
                     accessControlService,
+                    env.isDevGcp(),
+                    env.urlEnv.journalpostPageUrl
                 )
                 val oppfolgingsplanVarselService =
                     OppfolgingsplanVarselService(senderFacade, accessControlService, env.urlEnv.oppfolgingsplanerUrl)

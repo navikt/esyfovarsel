@@ -72,12 +72,14 @@ enum class HendelseType {
     NL_DIALOGMOTE_NYTT_TID_STED,
     SM_DIALOGMOTE_NYTT_TID_STED,
     SM_DIALOGMOTE_LEST,
-    SM_FORHANDSVARSEL_STANS
+    SM_FORHANDSVARSEL_STANS,
+    SM_AKTIVITETSKRAV
 }
 
 fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
     return when (this.type) {
         HendelseType.SM_FORHANDSVARSEL_STANS -> null
+        HendelseType.SM_AKTIVITETSKRAV -> null
         HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV -> null
         HendelseType.SM_DIALOGMOTE_INNKALT -> this.motetidspunkt()
         HendelseType.SM_DIALOGMOTE_NYTT_TID_STED -> this.motetidspunkt()

@@ -24,6 +24,7 @@ class MikrofrontendAktivitetskravService(
     fun updateAktivitetskravMikrofrontendForUserByHendelse(hendelse: ArbeidstakerHendelse): MinSideRecord? {
         return when (hendelse.type) {
             HendelseType.SM_FORHANDSVARSEL_STANS -> setMikrofrontendSynlighet(hendelse)
+            HendelseType.SM_AKTIVITETSKRAV -> setMikrofrontendSynlighet(hendelse)
             else -> null
         }
     }
