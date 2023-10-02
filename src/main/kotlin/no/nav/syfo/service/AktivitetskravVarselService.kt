@@ -42,7 +42,11 @@ class AktivitetskravVarselService(
         requireNotNull(varselData.journalpost?.id)
 
         if (userAccessStatus.canUserBeDigitallyNotified) {
-            varsleArbeidstakerViaBrukernotifikasjoner(varselHendelse, varselData.journalpost!!.uuid)
+            varsleArbeidstakerViaBrukernotifikasjoner(
+                varselHendelse,
+                varselData.journalpost!!.uuid,
+                varselData.journalpost.id!!
+            )
         } else {
             sendFysiskBrevTilArbeidstaker(varselData.journalpost!!.uuid, varselHendelse, varselData.journalpost.id!!)
         }
@@ -79,9 +83,9 @@ class AktivitetskravVarselService(
         }
     }
 
-    fun getVarselUrl(varselHendelse: ArbeidstakerHendelse, varselUuid: String): URL {
+    fun getVarselUrl(varselHendelse: ArbeidstakerHendelse, journalpostId: String): URL {
         if (SM_FORHANDSVARSEL_STANS === varselHendelse.type) {
-            return URL("$journalpostPageUrl/$varselUuid")
+            return URL("$journalpostPageUrl/$journalpostId")
         }
         throw IllegalArgumentException("Kan ikke mappe ${varselHendelse.type} til arbeidstaker varsel text")
     }
@@ -89,12 +93,13 @@ class AktivitetskravVarselService(
     private fun varsleArbeidstakerViaBrukernotifikasjoner(
         varselHendelse: ArbeidstakerHendelse,
         journalpostUuid: String,
+        journalpostId: String
     ) {
         senderFacade.sendTilBrukernotifikasjoner(
             uuid = journalpostUuid,
             mottakerFnr = varselHendelse.arbeidstakerFnr,
             content = getVarselText(varselHendelse.type),
-            url = getVarselUrl(varselHendelse, journalpostUuid),
+            url = getVarselUrl(varselHendelse, journalpostId),
             varselHendelse = varselHendelse,
             meldingType = BrukernotifikasjonKafkaProducer.MeldingType.BESKJED,
             eksternVarsling = true,
