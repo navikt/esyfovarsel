@@ -29,7 +29,7 @@ const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP = "Dialogmøte"
 const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT = "En av dine medarbeidere har snart vært sykmeldt i åtte uker"
 const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE = "Varsel om nytt aktivitetskrav"
 const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY =
-    "<body>En av dine medarbeidere har snart vært sykmeldt i åtte uker. Logg inn på Din side arbeidsgiver på nav.no for å se hvem det gjelder.</body>"
+    "<body>En av dine medarbeidere har snart vært sykmeldt i åtte uker. Logg inn på Min side – arbeidsgiver hos NAV for å se hvem det gjelder.</body>"
 
 const val ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT = "Vi trenger din vurdering av behovet for dialogmøte."
 const val ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE = "Behov for dialogmøte?"
@@ -43,11 +43,11 @@ const val ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY = "<body>Hei.<br>\n
 
 const val ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_TITLE = "Vurdering av ditt behov for dialogmøte"
 const val ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_BODY = "<body>Hei.<br>\n" +
-        "Vi har mottatt ditt ønske om dialogmøte med NAV. Vi vurderer at det på nåværende tidspunkt ikke er aktuelt at NAV kaller inn til et dialogmøte. " +
-        "For å se hvem beskjeden gjelder, kan du logge deg inn på Min side – Arbeidsgiver.<br>\n" +
-        "Har du spørsmål, kan du kontakte oss på 55 55 33 36.<br>\n" +
-        "Vennlig hilsen NAV<br>\n" +
-        "Du kan ikke svare på denne meldingen.</body>"
+    "Vi har mottatt ditt ønske om dialogmøte med NAV. Vi vurderer at det på nåværende tidspunkt ikke er aktuelt at NAV kaller inn til et dialogmøte. " +
+    "For å se hvem beskjeden gjelder, kan du logge deg inn på Min side – Arbeidsgiver.<br>\n" +
+    "Har du spørsmål, kan du kontakte oss på 55 55 33 36.<br>\n" +
+    "Vennlig hilsen NAV<br>\n" +
+    "Du kan ikke svare på denne meldingen.</body>"
 
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_MESSAGE_TEXT = "Du er innkalt til dialogmøte - vi trenger svaret ditt"
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_TITLE = "Innkalling til dialogmøte med NAV"

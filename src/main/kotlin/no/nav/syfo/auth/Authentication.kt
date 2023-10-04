@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory
 import java.net.URL
 import java.util.concurrent.TimeUnit
 
-val log: Logger = LoggerFactory.getLogger("no.nav.syfo.varsel.JwtValidation")
+val log: Logger = LoggerFactory.getLogger(Authentication::class.qualifiedName)
 
 fun Application.setupAuthentication(
     authEnv: AuthEnv,
