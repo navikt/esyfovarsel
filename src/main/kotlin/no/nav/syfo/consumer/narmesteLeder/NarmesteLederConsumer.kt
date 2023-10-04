@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 class NarmesteLederConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client = httpClient()
     private val basepath = urlEnv.narmestelederUrl
-    private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.NarmesteLederConsumer")
+    private val log = LoggerFactory.getLogger(NarmesteLederConsumer::class.qualifiedName)
     private val scope = urlEnv.narmestelederScope
 
     suspend fun getNarmesteLeder(ansattFnr: String, orgnummer: String): NarmestelederResponse? {
