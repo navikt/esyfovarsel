@@ -21,11 +21,16 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
 
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.JournalpostdistribusjonConsumer")
 
-    suspend fun distribuerJournalpost(journalpostId: String, uuid: String): JournalpostdistribusjonResponse {
+    suspend fun distribuerJournalpost(
+        journalpostId: String,
+        uuid: String,
+        distribusjonstype: DistibusjonsType
+    ): JournalpostdistribusjonResponse {
         val requestURL = "$dokdistfordelingUrl/rest/v1/distribuerjournalpost"
         val token = azureAdTokenConsumer.getToken(dokdistfordelingScope)
         val request = JournalpostdistribusjonRequest(
             journalpostId = journalpostId,
+            distribusjonstype = distribusjonstype.name
         )
 
         return runBlocking {

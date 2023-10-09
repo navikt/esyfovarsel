@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_FORHANDSVARSEL_STANS
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselData
@@ -30,7 +31,7 @@ class AktivitetskravVarselService(
         journalpostId: String,
     ) {
         try {
-            senderFacade.sendBrevTilFysiskPrint(uuid, arbeidstakerHendelse, journalpostId)
+            senderFacade.sendBrevTilFysiskPrint(uuid, arbeidstakerHendelse, journalpostId, DistibusjonsType.VIKTIG)
         } catch (e: RuntimeException) {
             log.info("Feil i sending av fysisk brev om dialogmote: ${e.message} for hendelsetype: ${arbeidstakerHendelse.type.name}")
         }

@@ -2,6 +2,7 @@ package no.nav.syfo.service
 
 import no.nav.syfo.*
 import no.nav.syfo.access.domain.UserAccessStatus
+import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
@@ -83,7 +84,7 @@ class MerVeiledningVarselService(
         journalpostId: String,
     ) {
         try {
-            senderFacade.sendBrevTilFysiskPrint(uuid, arbeidstakerHendelse, journalpostId)
+            senderFacade.sendBrevTilFysiskPrint(uuid, arbeidstakerHendelse, journalpostId, DistibusjonsType.ANNET)
         } catch (e: RuntimeException) {
             log.info("Feil i sending av fysisk brev om mer veildning: ${e.message}")
         }

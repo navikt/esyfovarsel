@@ -1,6 +1,7 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.*
+import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.*
@@ -92,7 +93,7 @@ class DialogmoteInnkallingVarselService(
         journalpostId: String,
     ) {
         try {
-            senderFacade.sendBrevTilFysiskPrint(uuid, arbeidstakerHendelse, journalpostId)
+            senderFacade.sendBrevTilFysiskPrint(uuid, arbeidstakerHendelse, journalpostId, DistibusjonsType.ANNET)
         } catch (e: RuntimeException) {
             log.info("Feil i sending av fysisk brev om dialogmote: ${e.message} for hendelsetype: ${arbeidstakerHendelse.type.name}")
         }
