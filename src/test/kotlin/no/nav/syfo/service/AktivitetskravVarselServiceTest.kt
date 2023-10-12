@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.access.domain.UserAccessStatus
+import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
@@ -37,7 +38,14 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
 
             aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
 
-            verify(exactly = 1) { senderFacade.sendBrevTilFysiskPrint(any(), forhandsvarselEvent, any()) }
+            verify(exactly = 1) {
+                senderFacade.sendBrevTilFysiskPrint(
+                    any(),
+                    forhandsvarselEvent,
+                    any(),
+                    DistibusjonsType.VIKTIG
+                )
+            }
             verify(exactly = 0) {
                 senderFacade.sendTilBrukernotifikasjoner(
                     any(),
@@ -106,7 +114,14 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
 
             aktivitetskravVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelse)
 
-            verify(exactly = 1) { senderFacade.sendBrevTilFysiskPrint(any(), arbeidstakerHendelse, any()) }
+            verify(exactly = 1) {
+                senderFacade.sendBrevTilFysiskPrint(
+                    any(),
+                    arbeidstakerHendelse,
+                    any(),
+                    DistibusjonsType.VIKTIG
+                )
+            }
         }
     }
 })

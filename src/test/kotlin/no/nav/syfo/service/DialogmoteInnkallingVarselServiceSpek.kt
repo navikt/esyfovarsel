@@ -8,6 +8,7 @@ import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.access.domain.UserAccessStatus
+import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
@@ -60,7 +61,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
         justRun { brukernotifikasjonerService.sendVarsel(any(), any(), any(), any(), any(), any()) }
         justRun { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) }
         justRun { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(any(), any()) }
-        justRun { fysiskBrevUtsendingService.sendBrev(any(), any()) }
+        justRun { fysiskBrevUtsendingService.sendBrev(any(), any(), DistibusjonsType.ANNET) }
 
         afterTest {
             embeddedDatabase.connection.dropData()
@@ -118,6 +119,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 fysiskBrevUtsendingService.sendBrev(
                     journalpostUuid,
                     journalpostId,
+                    DistibusjonsType.ANNET,
                 )
             }
 
@@ -165,6 +167,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 fysiskBrevUtsendingService.sendBrev(
                     journalpostUuidAddressProtection,
                     journalpostIdAddressProtection,
+                    DistibusjonsType.ANNET
                 )
             }
             verify(atLeast = 1) {

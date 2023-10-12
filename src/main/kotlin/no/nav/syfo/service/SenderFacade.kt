@@ -1,18 +1,11 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
+import no.nav.syfo.db.*
 import no.nav.syfo.db.domain.Kanal
-import no.nav.syfo.db.domain.Kanal.ARBEIDSGIVERNOTIFIKASJON
-import no.nav.syfo.db.domain.Kanal.BREV
-import no.nav.syfo.db.domain.Kanal.BRUKERNOTIFIKASJON
-import no.nav.syfo.db.domain.Kanal.DINE_SYKMELDTE
-import no.nav.syfo.db.domain.Kanal.DITT_SYKEFRAVAER
+import no.nav.syfo.db.domain.Kanal.*
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
-import no.nav.syfo.db.fetchUferdigstilteVarsler
-import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
-import no.nav.syfo.db.storeUtsendtVarsel
-import no.nav.syfo.db.storeUtsendtVarselFeilet
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
@@ -141,22 +134,40 @@ class SenderFacade(
     }
 
     fun ferdigstillArbeidstakerVarsler(varselHendelse: ArbeidstakerHendelse) {
-        fetchUferdigstilteVarsler(PersonIdent(varselHendelse.arbeidstakerFnr), varselHendelse.orgnummer, setOf(varselHendelse.type))
+        fetchUferdigstilteVarsler(
+            PersonIdent(varselHendelse.arbeidstakerFnr),
+            varselHendelse.orgnummer,
+            setOf(varselHendelse.type)
+        )
             .forEach { ferdigstillVarsel(it) }
     }
 
     fun ferdigstillNarmesteLederVarsler(varselHendelse: NarmesteLederHendelse) {
-        fetchUferdigstilteVarsler(PersonIdent(varselHendelse.arbeidstakerFnr), varselHendelse.orgnummer, setOf(varselHendelse.type))
+        fetchUferdigstilteVarsler(
+            PersonIdent(varselHendelse.arbeidstakerFnr),
+            varselHendelse.orgnummer,
+            setOf(varselHendelse.type)
+        )
             .forEach { ferdigstillVarsel(it) }
     }
 
     fun ferdigstillDittSykefravaerVarsler(varselHendelse: ArbeidstakerHendelse) {
-        fetchUferdigstilteVarsler(PersonIdent(varselHendelse.arbeidstakerFnr), varselHendelse.orgnummer, setOf(varselHendelse.type), DITT_SYKEFRAVAER)
+        fetchUferdigstilteVarsler(
+            PersonIdent(varselHendelse.arbeidstakerFnr),
+            varselHendelse.orgnummer,
+            setOf(varselHendelse.type),
+            DITT_SYKEFRAVAER
+        )
             .forEach { ferdigstillVarsel(it) }
     }
 
     fun ferdigstillDittSykefravaerVarslerAvTyper(varselHendelse: ArbeidstakerHendelse, varselTyper: Set<HendelseType>) {
-        fetchUferdigstilteVarsler(PersonIdent(varselHendelse.arbeidstakerFnr), varselHendelse.orgnummer, varselTyper, DITT_SYKEFRAVAER)
+        fetchUferdigstilteVarsler(
+            PersonIdent(varselHendelse.arbeidstakerFnr),
+            varselHendelse.orgnummer,
+            varselTyper,
+            DITT_SYKEFRAVAER
+        )
             .forEach { ferdigstillVarsel(it) }
     }
 
@@ -180,7 +191,10 @@ class SenderFacade(
                 }
 
                 DITT_SYKEFRAVAER.name -> {
-                    dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(utsendtVarsel.eksternReferanse, utsendtVarsel.fnr)
+                    dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(
+                        utsendtVarsel.eksternReferanse,
+                        utsendtVarsel.fnr
+                    )
                 }
 
                 DINE_SYKMELDTE.name -> {
@@ -205,10 +219,11 @@ class SenderFacade(
         uuid: String,
         varselHendelse: ArbeidstakerHendelse,
         journalpostId: String,
+        distribusjonsType: DistibusjonsType = DistibusjonsType.ANNET
     ) {
         var isSendingSucceed = true
         try {
-            fysiskBrevUtsendingService.sendBrev(uuid, journalpostId)
+            fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType)
         } catch (e: Exception) {
             isSendingSucceed = false
             log.warn("Error while sending brev til fysisk print: ${e.message}")

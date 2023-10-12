@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonResponse
 
@@ -26,13 +27,20 @@ class FysiskBrevUtsendingServiceSpek : DescribeSpec({
             coEvery {
                 journalpostdistribusjonConsumer.distribuerJournalpost(
                     journalpostId,
-                    uuid
+                    uuid,
+                    DistibusjonsType.ANNET
                 )
             } returns JournalpostdistribusjonResponse(
                 bestillingsId,
             )
-            runBlocking { fysiskBrevUtsendingService.sendBrev(uuid, journalpostId) }
-            coVerify(exactly = 1) { journalpostdistribusjonConsumer.distribuerJournalpost(journalpostId, uuid) }
+            runBlocking { fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, DistibusjonsType.ANNET) }
+            coVerify(exactly = 1) {
+                journalpostdistribusjonConsumer.distribuerJournalpost(
+                    journalpostId,
+                    uuid,
+                    DistibusjonsType.ANNET
+                )
+            }
         }
     }
 })
