@@ -219,7 +219,7 @@ class SenderFacade(
         uuid: String,
         varselHendelse: ArbeidstakerHendelse,
         journalpostId: String,
-        distribusjonsType: DistibusjonsType
+        distribusjonsType: DistibusjonsType = DistibusjonsType.ANNET
     ) {
         var isSendingSucceed = true
         try {

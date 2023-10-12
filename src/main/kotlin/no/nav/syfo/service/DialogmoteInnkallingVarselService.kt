@@ -93,7 +93,11 @@ class DialogmoteInnkallingVarselService(
         journalpostId: String,
     ) {
         try {
-            senderFacade.sendBrevTilFysiskPrint(uuid, arbeidstakerHendelse, journalpostId, DistibusjonsType.ANNET)
+            senderFacade.sendBrevTilFysiskPrint(
+                uuid = uuid,
+                varselHendelse = arbeidstakerHendelse,
+                journalpostId = journalpostId
+            )
         } catch (e: RuntimeException) {
             log.info("Feil i sending av fysisk brev om dialogmote: ${e.message} for hendelsetype: ${arbeidstakerHendelse.type.name}")
         }

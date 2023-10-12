@@ -84,7 +84,7 @@ class MerVeiledningVarselService(
         journalpostId: String,
     ) {
         try {
-            senderFacade.sendBrevTilFysiskPrint(uuid, arbeidstakerHendelse, journalpostId, DistibusjonsType.ANNET)
+            senderFacade.sendBrevTilFysiskPrint(uuid, arbeidstakerHendelse, journalpostId)
         } catch (e: RuntimeException) {
             log.info("Feil i sending av fysisk brev om mer veildning: ${e.message}")
         }
