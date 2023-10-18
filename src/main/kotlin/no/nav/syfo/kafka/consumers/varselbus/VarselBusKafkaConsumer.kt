@@ -1,10 +1,13 @@
 package no.nav.syfo.kafka.consumers.varselbus
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.io.IOException
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
-import no.nav.syfo.kafka.common.*
+import no.nav.syfo.kafka.common.KafkaListener
+import no.nav.syfo.kafka.common.aivenConsumerProperties
+import no.nav.syfo.kafka.common.createObjectMapper
+import no.nav.syfo.kafka.common.pollDurationInMillis
+import no.nav.syfo.kafka.common.topicVarselBus
 import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
 import no.nav.syfo.service.VarselBusService
 import no.nav.syfo.shutdownApplication
@@ -15,7 +18,7 @@ import org.slf4j.LoggerFactory
 
 class VarselBusKafkaConsumer(
     val env: Environment,
-    val varselBusService: VarselBusService
+    val varselBusService: VarselBusService,
 ) : KafkaListener {
     private val log: Logger = LoggerFactory.getLogger(VarselBusKafkaConsumer::class.qualifiedName)
     private val kafkaListener: KafkaConsumer<String, String>
@@ -36,7 +39,7 @@ class VarselBusKafkaConsumer(
             } catch (e: Exception) {
                 log.error(
                     "Exception in [$topicVarselBus]-listener: ${e.message}",
-                    e
+                    e,
                 )
                 applicationState.shutdownApplication()
             }

@@ -15,8 +15,8 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_M
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_NYTT_TID_STED
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_FORHANDSVARSEL_STANS
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.skalFerdigstilles
 import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidstakerHendelse
@@ -30,7 +30,7 @@ class VarselBusService(
     val motebehovVarselService: MotebehovVarselService,
     val oppfolgingsplanVarselService: OppfolgingsplanVarselService,
     val dialogmoteInnkallingVarselService: DialogmoteInnkallingVarselService,
-    val aktivitetskravVarselService: AktivitetskravVarselService,
+    val aktivitetspliktForhandsvarselVarselService: AktivitetspliktForhandsvarselVarselService,
     val mikrofrontendService: MikrofrontendService,
 ) {
     private val log: Logger = LoggerFactory.getLogger(VarselBusService::class.qualifiedName)
@@ -62,7 +62,7 @@ class VarselBusService(
                 SM_DIALOGMOTE_LEST,
                 -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
-                SM_FORHANDSVARSEL_STANS -> aktivitetskravVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+                SM_FORHANDSVARSEL_STANS -> aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
                 else -> {
                     log.warn("Klarte ikke mappe varsel av type ${varselHendelse.type} ved behandling forsøk")
@@ -83,7 +83,7 @@ class VarselBusService(
         if (event.isArbeidstakerHendelse()) {
             val arbeidstakerHendelse = event.toArbeidstakerHendelse()
             try {
-                mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelse)
+                mikrofrontendService.updateArbeidstakerMicrofrontendByHendelse(arbeidstakerHendelse)
             } catch (e: RuntimeException) {
                 log.error("Fikk feil under oppdatering av mikrofrontend state: ${e.message}", e)
             }

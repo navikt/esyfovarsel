@@ -60,7 +60,6 @@ import no.nav.syfo.utils.RunOnElection
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-
 val state: ApplicationState = ApplicationState()
 val backgroundTasksContext = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
 lateinit var database: DatabaseInterface
@@ -130,9 +129,11 @@ fun main() {
                     env.urlEnv.dialogmoterUrl,
                     accessControlService,
                 )
-                val aktivitetskravVarselService = AktivitetskravVarselService(
+                val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(
                     senderFacade,
                     accessControlService,
+                    env.urlEnv.dokumentarkivOppfolgingDocumetntsPageUrl,
+                    env.toggleEnv.sendAktivitetspliktForhandsvarsel,
                 )
                 val oppfolgingsplanVarselService =
                     OppfolgingsplanVarselService(senderFacade, accessControlService, env.urlEnv.oppfolgingsplanerUrl)
@@ -155,7 +156,7 @@ fun main() {
                         motebehovVarselService,
                         oppfolgingsplanVarselService,
                         dialogmoteInnkallingVarselService,
-                        aktivitetskravVarselService,
+                        aktivitetspliktForhandsvarselVarselService,
                         mikrofrontendService,
                     )
 
@@ -329,7 +330,7 @@ fun Application.kafkaModule(
         launch(backgroundTasksContext) {
             launchKafkaListener(
                 state,
-                SyketilfelleKafkaConsumer(env, aktivitetskravVarselPlanner, accessControlService, database)
+                SyketilfelleKafkaConsumer(env, aktivitetskravVarselPlanner, accessControlService, database),
             )
         }
 
@@ -358,7 +359,7 @@ fun Application.kafkaModule(
             launch(backgroundTasksContext) {
                 launchKafkaListener(
                     state,
-                    TestdataResetConsumer(env, testdataResetService)
+                    TestdataResetConsumer(env, testdataResetService),
                 )
             }
         }

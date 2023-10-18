@@ -15,10 +15,10 @@ const val BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST = "Dialogmøtet med NAV e
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST = "Dialogmøtet med NAV er flyttet"
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST = "Du har mottatt et referat fra dialogmøte"
 const val BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT = "Du har en oppfølgingsplan som venter på godkjenning av deg"
+const val BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_TEXT = "Mulig stans av sykepenger"
 
 const val DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT = "Snart slutt på sykepengene"
 const val DITT_SYKEFRAVAER_DIALOGMOTE_SVAR_MOTEBEHOV_MESSAGE_TEXT = "Du har en ny forespørsel om behov for dialogmøte"
-const val DITT_SYKEFRAVAER_AKTIVITETSKRAV_MESSAGE_TEXT = "Bekreft at du kjenner aktivitetsplikten"
 const val DITT_SYKEFRAVAER_DIALOGMOTE_INNKALLING_MESSAGE_TEXT = "Du er innkalt til dialogmøte - vi trenger svaret ditt"
 const val DITT_SYKEFRAVAER_DIALOGMOTE_ENDRING_MESSAGE_TEXT = "Du har mottatt et brev om endret dialogmøte"
 const val DITT_SYKEFRAVAER_DIALOGMOTE_REFERAT_MESSAGE_TEXT = "Du har mottatt et referat fra dialogmøte"

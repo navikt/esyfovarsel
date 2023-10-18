@@ -21,7 +21,7 @@ const val SM_FNR = "123456789"
 class AktivitetskravVarselServiceTest : DescribeSpec({
     val accessControlService = mockk<AccessControlService>()
     val senderFacade = mockk<SenderFacade>(relaxed = true)
-    val aktivitetskravVarselService = AktivitetskravVarselService(senderFacade, accessControlService)
+    val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(senderFacade, accessControlService, "journalpostPageUrl", true)
 
     beforeTest {
         clearAllMocks()
@@ -36,14 +36,14 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
                 canUserBeDigitallyNotified = true,
             )
 
-            aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
+            aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
 
             verify(exactly = 1) {
                 senderFacade.sendBrevTilFysiskPrint(
                     any(),
                     forhandsvarselEvent,
                     any(),
-                    DistibusjonsType.VIKTIG
+                    DistibusjonsType.VIKTIG,
                 )
             }
             verify(exactly = 0) {
@@ -54,7 +54,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
                     any(),
                     any(),
                     any(),
-                    true
+                    true,
                 )
             }
         }
@@ -69,7 +69,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
             )
 
             val exception = shouldThrow<IOException> {
-                aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
+                aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
             }
 
             exception.message shouldBeEqualTo "ArbeidstakerHendelse har feil format"
@@ -85,7 +85,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
             )
 
             val exception = shouldThrow<IOException> {
-                aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
+                aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
             }
 
             exception.message shouldBeEqualTo "ArbeidstakerHendelse har feil format"
@@ -110,16 +110,16 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
             """
 
             val arbeidstakerHendelse = objectMapper.readValue(jsondata, ArbeidstakerHendelse::class.java)
-            arbeidstakerHendelse.data = objectMapper.readTree(jsondata)["data"];
+            arbeidstakerHendelse.data = objectMapper.readTree(jsondata)["data"]
 
-            aktivitetskravVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelse)
+            aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelse)
 
             verify(exactly = 1) {
                 senderFacade.sendBrevTilFysiskPrint(
                     any(),
                     arbeidstakerHendelse,
                     any(),
-                    DistibusjonsType.VIKTIG
+                    DistibusjonsType.VIKTIG,
                 )
             }
         }
@@ -135,4 +135,3 @@ private fun createForhandsvarselHendelse(): ArbeidstakerHendelse {
         null,
     )
 }
-
