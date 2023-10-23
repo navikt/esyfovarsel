@@ -11,7 +11,7 @@ data class MinSideRecord(
     @JsonProperty("@action") val eventType: String,
     @JsonProperty("ident") val fnr: String,
     @JsonProperty("microfrontend_id") val microfrontendId: String,
-    @JsonProperty("sikkerhetsnivå") val acr: Int = 4,
-    @JsonProperty("initiated_by") val initiatedBy: String = "team-esyfo"
+    @JsonProperty("sensitivitet") val sensitivitet: String = "high",
+    @JsonProperty("@initiated_by") val initiatedBy: String = "team-esyfo"
 )
 
