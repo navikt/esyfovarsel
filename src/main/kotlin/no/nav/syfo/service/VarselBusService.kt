@@ -8,6 +8,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_N
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_REFERAT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_SVAR_MOTEBEHOV
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_AVLYST
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_INNKALT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_LEST
@@ -15,13 +16,12 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_M
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_NYTT_TID_STED
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_FORHANDSVARSEL_STANS
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.skalFerdigstilles
 import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toNarmestelederHendelse
-import no.nav.syfo.service.microfrontend.MikrofrontendService
+import no.nav.syfo.service.mikrofrontend.MikrofrontendService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -62,7 +62,7 @@ class VarselBusService(
                 SM_DIALOGMOTE_LEST,
                 -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
-                SM_FORHANDSVARSEL_STANS -> aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+                SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL -> aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
                 else -> {
                     log.warn("Klarte ikke mappe varsel av type ${varselHendelse.type} ved behandling forsøk")
@@ -83,7 +83,7 @@ class VarselBusService(
         if (event.isArbeidstakerHendelse()) {
             val arbeidstakerHendelse = event.toArbeidstakerHendelse()
             try {
-                mikrofrontendService.updateArbeidstakerMicrofrontendByHendelse(arbeidstakerHendelse)
+                mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelse)
             } catch (e: RuntimeException) {
                 log.error("Fikk feil under oppdatering av mikrofrontend state: ${e.message}", e)
             }

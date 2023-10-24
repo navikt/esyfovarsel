@@ -12,11 +12,17 @@ import no.nav.syfo.db.orgnummer1
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
-import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
-import no.nav.syfo.service.microfrontend.MikrofrontendService
-import no.nav.syfo.testutil.*
+import no.nav.syfo.kafka.producers.minsideMikrofrontend.MinSideMicrofrontendKafkaProducer
+import no.nav.syfo.kafka.producers.minsideMikrofrontend.Tjeneste
+import no.nav.syfo.service.mikrofrontend.MikrofrontendAktivitetskravService
+import no.nav.syfo.service.mikrofrontend.MikrofrontendDialogmoteService
+import no.nav.syfo.service.mikrofrontend.MikrofrontendService
+import no.nav.syfo.testutil.EmbeddedDatabase
+import no.nav.syfo.testutil.dropData
+import no.nav.syfo.testutil.shouldContainMikrofrontendEntry
+import no.nav.syfo.testutil.shouldContainMikrofrontendEntryWithMotetidspunkt
+import no.nav.syfo.testutil.shouldContainMikrofrontendEntryWithoutMotetidspunkt
+import no.nav.syfo.testutil.shouldNotContainMikrofrontendEntryForUser
 import no.nav.syfo.utils.DuplicateMotebehovException
 import no.nav.syfo.utils.MotebehovAfterBookingException
 import no.nav.syfo.utils.VeilederAlreadyBookedMeetingException
@@ -28,10 +34,12 @@ class MikrofrontendServiceSpek : DescribeSpec({
     val embeddedDatabase by lazy { EmbeddedDatabase() }
     val minSideMicrofrontendKafkaProducer: MinSideMicrofrontendKafkaProducer = mockk(relaxed = true)
     val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(embeddedDatabase)
+    val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(embeddedDatabase)
     val mikrofrontendService = MikrofrontendService(
         minSideMicrofrontendKafkaProducer,
         mikrofrontendDialogmoteService,
-        embeddedDatabase
+        mikrofrontendAktivitetskravService,
+        embeddedDatabase,
     )
 
     afterTest {
@@ -50,36 +58,36 @@ class MikrofrontendServiceSpek : DescribeSpec({
         val tomorrow = today.plusDays(1L)
 
         val dataTidspunktToday: String = "{" +
-                "\"journalpost\":null," +
-                "\"narmesteLeder\":null," +
-                "\"motetidspunkt\":{\"tidspunkt\":\"$today\"}" +
-                "}"
+            "\"journalpost\":null," +
+            "\"narmesteLeder\":null," +
+            "\"motetidspunkt\":{\"tidspunkt\":\"$today\"}" +
+            "}"
         val dataTidspunktTomorrow: String = "{" +
-                "\"journalpost\":null," +
-                "\"narmesteLeder\":null," +
-                "\"motetidspunkt\":{\"tidspunkt\":\"$tomorrow\"}" +
-                "}"
+            "\"journalpost\":null," +
+            "\"narmesteLeder\":null," +
+            "\"motetidspunkt\":{\"tidspunkt\":\"$tomorrow\"}" +
+            "}"
 
         val arbeidstakerHendelseDialogmoteInnkalt = ArbeidstakerHendelse(
             type = HendelseType.SM_DIALOGMOTE_INNKALT,
             ferdigstill = false,
             data = dataTidspunktTomorrow,
             arbeidstakerFnr = arbeidstakerFnr1,
-            orgnummer = orgnummer1
+            orgnummer = orgnummer1,
         )
 
         val arbeidstakerHendelseDialogmoteNyttTidSted = arbeidstakerHendelseDialogmoteInnkalt.copy(
             type = HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
-            data = dataTidspunktToday
+            data = dataTidspunktToday,
         )
 
         val arbeidstakerHendelseDialogmoteAvlyst = arbeidstakerHendelseDialogmoteInnkalt.copy(
-            type = HendelseType.SM_DIALOGMOTE_AVLYST
+            type = HendelseType.SM_DIALOGMOTE_AVLYST,
         )
 
         val arbeidstakerHendelseDialogmoteInnkaltIdag = arbeidstakerHendelseDialogmoteInnkalt.copy(
             data = dataTidspunktToday,
-            arbeidstakerFnr = arbeidstakerFnr2
+            arbeidstakerFnr = arbeidstakerFnr2,
         )
 
         val arbeidstakerHendelseSvarMotebehov = ArbeidstakerHendelse(
@@ -87,18 +95,18 @@ class MikrofrontendServiceSpek : DescribeSpec({
             ferdigstill = false,
             data = null,
             arbeidstakerFnr = arbeidstakerFnr1,
-            orgnummer = orgnummer1
+            orgnummer = orgnummer1,
         )
 
         val arbeidstakerHendelseSvarMotebehovFerdigstill = arbeidstakerHendelseSvarMotebehov.copy(
-            ferdigstill = true
+            ferdigstill = true,
         )
 
         it("Enabling MF with a dialogmote event should result in motetidspunkt storage in DB and publication on min-side topic") {
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+            mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
             embeddedDatabase.shouldContainMikrofrontendEntry(
                 arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr,
-                Tjeneste.DIALOGMOTE
+                Tjeneste.DIALOGMOTE,
             )
             verify(exactly = 1) {
                 minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(any())
@@ -106,10 +114,10 @@ class MikrofrontendServiceSpek : DescribeSpec({
         }
 
         it("Enabling MF with a syfomotebehov event should result entry without synligTom in DB and publication on min-side topic") {
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
+            mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseSvarMotebehov)
             embeddedDatabase.shouldContainMikrofrontendEntryWithoutMotetidspunkt(
                 arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr,
-                Tjeneste.DIALOGMOTE
+                Tjeneste.DIALOGMOTE,
             )
             verify(exactly = 1) {
                 minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(any())
@@ -117,10 +125,10 @@ class MikrofrontendServiceSpek : DescribeSpec({
         }
 
         it("Disabling MF should result in removal of entry from DB and publication on min-side topic") {
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteAvlyst)
+            mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+            mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseDialogmoteAvlyst)
             embeddedDatabase.shouldNotContainMikrofrontendEntryForUser(
-                arbeidstakerHendelseDialogmoteAvlyst.arbeidstakerFnr
+                arbeidstakerHendelseDialogmoteAvlyst.arbeidstakerFnr,
             )
             verify(exactly = 2) {
                 minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(any())
@@ -128,8 +136,8 @@ class MikrofrontendServiceSpek : DescribeSpec({
         }
 
         it("DM-NyttTidSted event should update 'synligTom' for MF entry") {
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteNyttTidSted)
+            mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+            mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseDialogmoteNyttTidSted)
             val entrySynligTom = embeddedDatabase
                 .fetchMikrofrontendSynlighetEntriesByFnr(arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr)
                 .first()
@@ -138,65 +146,66 @@ class MikrofrontendServiceSpek : DescribeSpec({
         }
 
         it("Expired entries should not be persisted") {
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkaltIdag)
+            mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+            mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseDialogmoteInnkaltIdag)
             mikrofrontendService.findAndCloseExpiredMikrofrontends()
             embeddedDatabase.shouldNotContainMikrofrontendEntryForUser(
-                arbeidstakerHendelseDialogmoteInnkaltIdag.arbeidstakerFnr
+                arbeidstakerHendelseDialogmoteInnkaltIdag.arbeidstakerFnr,
             )
         }
 
         it("In absence of an DM-innkalling, MF-entry should be deleted upon receiving MB-competion event") {
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehovFerdigstill)
+            mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseSvarMotebehov)
+            mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseSvarMotebehovFerdigstill)
             embeddedDatabase.shouldNotContainMikrofrontendEntryForUser(
-                arbeidstakerHendelseDialogmoteInnkaltIdag.arbeidstakerFnr
+                arbeidstakerHendelseDialogmoteInnkaltIdag.arbeidstakerFnr,
             )
         }
 
         it("Receving DM-innkalling event after MB-event, should result in 'synligTom' being set") {
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
+            mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseSvarMotebehov)
             embeddedDatabase.shouldContainMikrofrontendEntryWithoutMotetidspunkt(
                 arbeidstakerHendelseSvarMotebehov.arbeidstakerFnr,
-                Tjeneste.DIALOGMOTE
+                Tjeneste.DIALOGMOTE,
             )
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+            mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
             embeddedDatabase.shouldContainMikrofrontendEntryWithMotetidspunkt(
                 arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr,
-                Tjeneste.DIALOGMOTE
+                Tjeneste.DIALOGMOTE,
             )
         }
 
         it("Duplicate veileder booking events should lead to an exception") {
             assertFailsWith(VeilederAlreadyBookedMeetingException::class) {
-                mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
-                mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+                mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+                mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
             }
         }
 
         it("Motebehov event received after veileder booking event should lead to an exception") {
             assertFailsWith(MotebehovAfterBookingException::class) {
-                mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
-                mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
+                mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+                mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseSvarMotebehov)
             }
         }
 
         it("Two consecutive motebehov events should raise an exception") {
             assertFailsWith(DuplicateMotebehovException::class) {
-                mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
-                mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
+                mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseSvarMotebehov)
+                mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseSvarMotebehov)
             }
         }
 
         it("Closing entries for user should not close other users entries") {
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkaltIdag)
+            mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+            mikrofrontendService.updateArbeidstakerMikrofrontendByHendelse(arbeidstakerHendelseDialogmoteInnkaltIdag)
             mikrofrontendService.closeAllMikrofrontendForUser(PersonIdent(arbeidstakerHendelseDialogmoteInnkaltIdag.arbeidstakerFnr))
             embeddedDatabase.shouldNotContainMikrofrontendEntryForUser(
-                arbeidstakerHendelseDialogmoteInnkaltIdag.arbeidstakerFnr
+                arbeidstakerHendelseDialogmoteInnkaltIdag.arbeidstakerFnr,
             )
             embeddedDatabase.shouldContainMikrofrontendEntry(
-                arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr, Tjeneste.DIALOGMOTE
+                arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr,
+                Tjeneste.DIALOGMOTE,
             )
         }
     }

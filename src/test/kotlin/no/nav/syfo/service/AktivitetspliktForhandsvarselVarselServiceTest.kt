@@ -21,14 +21,14 @@ const val SM_FNR = "123456789"
 class AktivitetskravVarselServiceTest : DescribeSpec({
     val accessControlService = mockk<AccessControlService>()
     val senderFacade = mockk<SenderFacade>(relaxed = true)
-    val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(senderFacade, accessControlService, "journalpostPageUrl", true)
+    val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(senderFacade, accessControlService, "http://dokumentarkivOppfolgingDocumetntsPageUrl", true)
 
     beforeTest {
         clearAllMocks()
     }
 
     describe("Forhåndsvarsel om stans av sykepenger") {
-        it("Sender alltid fysisk brev for forhåndsvarsel") {
+        it("Sender digital forhåndsvarsel til bruker hvis hen kan bli varslet digitalt") {
             val forhandsvarselEvent = createForhandsvarselHendelse()
 
             every { accessControlService.getUserAccessStatus(SM_FNR) } returns UserAccessStatus(
@@ -38,7 +38,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
 
             aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
 
-            verify(exactly = 1) {
+            verify(exactly = 0) {
                 senderFacade.sendBrevTilFysiskPrint(
                     any(),
                     forhandsvarselEvent,
@@ -46,7 +46,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
                     DistibusjonsType.VIKTIG,
                 )
             }
-            verify(exactly = 0) {
+            verify(exactly = 1) {
                 senderFacade.sendTilBrukernotifikasjoner(
                     any(),
                     any(),
@@ -94,10 +94,15 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
         it("Tester deserialisering av varseldata") {
             val objectMapper = createObjectMapper()
 
+            every { accessControlService.getUserAccessStatus(any()) } returns UserAccessStatus(
+                SM_FNR,
+                canUserBeDigitallyNotified = false,
+            )
+
             val jsondata: String = """
                 {
                 	"@type": "ArbeidstakerHendelse",
-                	"type": "SM_FORHANDSVARSEL_STANS",
+                	"type": "SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL",
                 	"data": {
                 		"journalpost": {
                 			"uuid": "bda0b55a-df72-4888-a5a5-6bfa74cacafe",
@@ -128,7 +133,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
 
 private fun createForhandsvarselHendelse(): ArbeidstakerHendelse {
     return ArbeidstakerHendelse(
-        HendelseType.SM_FORHANDSVARSEL_STANS,
+        type = HendelseType.SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL,
         false,
         varselData(journalpostId = "620049753", journalpostUuid = "bda0b55a-df72-4888-a5a5-6bfa74cacafe"),
         SM_FNR,

@@ -33,13 +33,14 @@ class AktivitetspliktForhandsvarselVarselService(
                     meldingType = BrukernotifikasjonKafkaProducer.MeldingType.BESKJED,
                     eksternVarsling = true,
                 )
+            } else {
+                senderFacade.sendBrevTilFysiskPrint(
+                    varselData.journalpost.uuid,
+                    varselHendelse,
+                    varselData.journalpost.id,
+                    DistibusjonsType.VIKTIG,
+                )
             }
-            senderFacade.sendBrevTilFysiskPrint(
-                varselData.journalpost.uuid,
-                varselHendelse,
-                varselData.journalpost.id,
-                DistibusjonsType.VIKTIG,
-            )
         }
     }
 

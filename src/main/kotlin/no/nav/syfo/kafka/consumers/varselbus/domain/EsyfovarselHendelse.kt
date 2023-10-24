@@ -72,7 +72,12 @@ enum class HendelseType {
     NL_DIALOGMOTE_NYTT_TID_STED,
     SM_DIALOGMOTE_NYTT_TID_STED,
     SM_DIALOGMOTE_LEST,
-    SM_FORHANDSVARSEL_STANS
+    SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL,
+    SM_AKTIVITETSPLIKT_STATUS_NY,
+    SM_AKTIVITETSPLIKT_STATUS_UNNTAK,
+    SM_AKTIVITETSPLIKT_STATUS_OPPFYLT,
+    SM_AKTIVITETSPLIKT_STATUS_IKKE_OPPFYLT,
+    SM_AKTIVITETSPLIKT_STATUS_IKKE_AKTUELL,
 }
 
 fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
@@ -85,7 +90,7 @@ fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
     ) {
         throw IllegalArgumentException(
             "${eventType.name} er ikke gyldig hendelse for å hente ut " +
-                    "'synligTom'-felt",
+                "'synligTom'-felt",
         )
     }
     return if (eventType != HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV) this.motetidspunkt() else null

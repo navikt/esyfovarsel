@@ -47,13 +47,14 @@ import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
+import no.nav.syfo.kafka.producers.minsideMikrofrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.planner.AktivitetskravVarselPlanner
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.service.*
-import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
-import no.nav.syfo.service.microfrontend.MikrofrontendService
+import no.nav.syfo.service.mikrofrontend.MikrofrontendAktivitetskravService
+import no.nav.syfo.service.mikrofrontend.MikrofrontendDialogmoteService
+import no.nav.syfo.service.mikrofrontend.MikrofrontendService
 import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.utils.LeaderElection
 import no.nav.syfo.utils.RunOnElection
@@ -147,8 +148,9 @@ fun main() {
                     dokarkivService,
                 )
                 val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(database)
+                val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(database)
                 val mikrofrontendService =
-                    MikrofrontendService(minSideMicrofrontendKafkaProducer, mikrofrontendDialogmoteService, database)
+                    MikrofrontendService(minSideMicrofrontendKafkaProducer, mikrofrontendDialogmoteService, mikrofrontendAktivitetskravService, database)
 
                 val varselBusService =
                     VarselBusService(
