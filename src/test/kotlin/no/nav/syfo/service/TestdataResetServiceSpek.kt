@@ -28,11 +28,11 @@ import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.infotrygd.domain.InfotrygdSource
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.kafka.producers.minsideMikrofrontend.MikrofrontendSynlighet
+import no.nav.syfo.kafka.producers.minsideMikrofrontend.Tjeneste
 import no.nav.syfo.planner.arbeidstakerFnr1
 import no.nav.syfo.planner.narmesteLederFnr1
-import no.nav.syfo.service.microfrontend.MikrofrontendService
+import no.nav.syfo.service.mikrofrontend.MikrofrontendService
 import no.nav.syfo.syketilfelle.domain.Tag
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
@@ -43,7 +43,6 @@ import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-
 
 class TestdataResetServiceSpek : DescribeSpec({
     describe("TestdataResetServiceSpek") {
@@ -83,7 +82,7 @@ class TestdataResetServiceSpek : DescribeSpec({
             LocalDate.now(),
             LocalDate.now(),
             "1",
-            "1"
+            "1",
         )
 
         val pUtsendtVarselFeilet = PUtsendtVarselFeilet(
@@ -98,7 +97,7 @@ class TestdataResetServiceSpek : DescribeSpec({
             null,
             Kanal.BRUKERNOTIFIKASJON.name,
             null,
-            LocalDateTime.now()
+            LocalDateTime.now(),
         )
 
         val pSyketilfellebit = PSyketilfellebit(
@@ -113,7 +112,7 @@ class TestdataResetServiceSpek : DescribeSpec({
             "hei",
             Date.valueOf(LocalDate.now().toString()),
             Date.valueOf(LocalDate.now().toString()),
-            null
+            null,
         )
 
         val mikrofrontendSynlighet = MikrofrontendSynlighet(arbeidstakerFnr1, Tjeneste.DIALOGMOTE, LocalDate.now().plusWeeks(1))
@@ -126,7 +125,6 @@ class TestdataResetServiceSpek : DescribeSpec({
             embeddedDatabase.stop()
         }
 
-
         it("Reset all testdata") {
             embeddedDatabase.storePlanlagtVarsel(planlagtVarsel)
             embeddedDatabase.storeUtsendtVarsel(utsendtVarsel)
@@ -136,7 +134,7 @@ class TestdataResetServiceSpek : DescribeSpec({
             embeddedDatabase.storeSyketilfellebit(pSyketilfellebit)
             embeddedDatabase.storeMikrofrontendSynlighetEntry(mikrofrontendSynlighet)
 
-            //Verify that testdata exists
+            // Verify that testdata exists
             embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1).size shouldBeEqualTo 1
             embeddedDatabase.fetchUtsendtVarselByFnr(arbeidstakerFnr1).size shouldBeEqualTo 1
             embeddedDatabase.fetchSpleisUtbetalingByFnr(arbeidstakerFnr1).size shouldBeEqualTo 1
@@ -147,7 +145,7 @@ class TestdataResetServiceSpek : DescribeSpec({
 
             testdataResetService.resetTestdata(PersonIdent(arbeidstakerFnr1))
 
-            //Check that testdata is deleted
+            // Check that testdata is deleted
             embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
             embeddedDatabase.fetchUtsendtVarselByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
             embeddedDatabase.fetchSpleisUtbetalingByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0

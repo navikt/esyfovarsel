@@ -9,7 +9,7 @@ import io.ktor.server.routing.accept
 import io.ktor.server.routing.post
 import kotlinx.coroutines.launch
 import no.nav.syfo.job.VarselSender
-import no.nav.syfo.service.microfrontend.MikrofrontendService
+import no.nav.syfo.service.mikrofrontend.MikrofrontendService
 
 const val urlPathJobTrigger = "/job/trigger"
 

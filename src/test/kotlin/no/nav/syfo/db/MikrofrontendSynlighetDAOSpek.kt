@@ -1,8 +1,8 @@
 package no.nav.syfo.db
 
 import io.kotest.core.spec.style.DescribeSpec
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.kafka.producers.minsideMikrofrontend.MikrofrontendSynlighet
+import no.nav.syfo.kafka.producers.minsideMikrofrontend.Tjeneste
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.shouldContainMikrofrontendEntry
@@ -26,13 +26,13 @@ class MikrofrontendSynlighetDAOSpek : DescribeSpec({
         val mikrofrontendSynlighet1 = MikrofrontendSynlighet(
             arbeidstakerFnr1,
             Tjeneste.DIALOGMOTE,
-            null
+            null,
         )
 
         val mikrofrontendSynlighet2 = MikrofrontendSynlighet(
             arbeidstakerFnr2,
             Tjeneste.DIALOGMOTE,
-            LocalDate.now().plusDays(1L)
+            LocalDate.now().plusDays(1L),
         )
 
         it("Store mikrofrontend entry") {
@@ -61,7 +61,7 @@ class MikrofrontendSynlighetDAOSpek : DescribeSpec({
 
 private fun DatabaseInterface.entryShouldHaveCorrectSynligTom(
     entry: MikrofrontendSynlighet,
-    mostRecentSynligTom: LocalDate
+    mostRecentSynligTom: LocalDate,
 ) {
     this.should("Entry should have correct synligTom field") {
         this.fetchMikrofrontendSynlighetEntriesByFnr(entry.synligFor)

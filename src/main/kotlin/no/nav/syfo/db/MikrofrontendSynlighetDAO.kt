@@ -2,8 +2,8 @@ package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PMikrofrontendSynlighet
 import no.nav.syfo.domain.PersonIdent
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.kafka.producers.minsideMikrofrontend.MikrofrontendSynlighet
+import no.nav.syfo.kafka.producers.minsideMikrofrontend.Tjeneste
 import java.sql.Date
 import java.sql.Timestamp
 import java.time.LocalDate
@@ -39,13 +39,13 @@ fun DatabaseInterface.storeMikrofrontendSynlighetEntry(mikrofrontendSynlighet: M
 
 fun DatabaseInterface.updateMikrofrontendEntrySynligTomByExistingEntry(
     entry: MikrofrontendSynlighet,
-    newSynligTom: LocalDate
+    newSynligTom: LocalDate,
 ) = updateMikrofrontendEntrySynligTomByFnrAndTjeneste(entry.synligFor, entry.tjeneste, newSynligTom)
 
 fun DatabaseInterface.updateMikrofrontendEntrySynligTomByFnrAndTjeneste(
     fnr: String,
     tjeneste: Tjeneste,
-    newSynligTom: LocalDate
+    newSynligTom: LocalDate,
 ) {
     val now = LocalDateTime.now()
     val updateStatement = """UPDATE MIKROFRONTEND_SYNLIGHET

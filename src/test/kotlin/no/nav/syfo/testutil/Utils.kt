@@ -4,7 +4,7 @@ import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.kafka.producers.minsideMikrofrontend.Tjeneste
 import org.amshove.kluent.should
 import java.time.LocalDate
 
@@ -12,10 +12,11 @@ fun String.extractPortFromUrl(): Int {
     val portIndexStart = lastIndexOf(':') + 1
     val urlLastPortion = subSequence(portIndexStart, length)
     var portIndexEnd = urlLastPortion.indexOf('/')
-    if (portIndexEnd == -1)
+    if (portIndexEnd == -1) {
         portIndexEnd = portIndexStart + urlLastPortion.length
-    else
+    } else {
         portIndexEnd += portIndexStart
+    }
     return subSequence(portIndexStart, portIndexEnd).toString().toInt()
 }
 fun List<PPlanlagtVarsel>.skalHaEt39UkersVarsel() = this.should("Skal ha 39-ukersvarsel") {

@@ -1,4 +1,4 @@
-package no.nav.syfo.kafka.producers.mineside_microfrontend
+package no.nav.syfo.kafka.producers.minsideMikrofrontend
 
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.JacksonKafkaSerializer
@@ -9,7 +9,7 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 
 class MinSideMicrofrontendKafkaProducer(
-    val env: Environment
+    val env: Environment,
 ) {
     private val kafkaConfig = producerProperties(env).apply {
         put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
@@ -23,8 +23,8 @@ class MinSideMicrofrontendKafkaProducer(
             ProducerRecord(
                 topicMinSideMicrofrontend,
                 minSideRecord.fnr,
-                minSideRecord
-            )
+                minSideRecord,
+            ),
         )
     }
 }

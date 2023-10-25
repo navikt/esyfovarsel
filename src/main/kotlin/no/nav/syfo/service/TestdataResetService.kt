@@ -10,7 +10,7 @@ import no.nav.syfo.db.deleteUtsendtVarselByFnr
 import no.nav.syfo.db.deleteUtsendtVarselFeiletByFnr
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
 import no.nav.syfo.domain.PersonIdent
-import no.nav.syfo.service.microfrontend.MikrofrontendService
+import no.nav.syfo.service.mikrofrontend.MikrofrontendService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -24,9 +24,9 @@ class TestdataResetService(
     fun resetTestdata(fnr: PersonIdent) {
         log.info(
             "Nullstiller testdata for arbeidstaker ${fnr.value}. Ferdigstiller varsler " +
-                    "som er sendt til Min side - arbeidsgiver, Dine sykmeldte, Min side (personbruker), " +
-                    "Ditt sykefravær. Fjerner mikrofrontend på Min side. " +
-                    "Sletter planlagte og utsendte varsler, feilede varsler, syketilfellebiter og utbetalinger."
+                "som er sendt til Min side - arbeidsgiver, Dine sykmeldte, Min side (personbruker), " +
+                "Ditt sykefravær. Fjerner mikrofrontend på Min side. " +
+                "Sletter planlagte og utsendte varsler, feilede varsler, syketilfellebiter og utbetalinger.",
         )
 
         // Ferdigstille varsler

@@ -1,21 +1,21 @@
-package no.nav.syfo.service.microfrontend
+package no.nav.syfo.service.mikrofrontend
 
 import no.nav.syfo.db.*
 import no.nav.syfo.db.domain.toMikrofrontendSynlighet
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.getSynligTom
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideRecord
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
-import no.nav.syfo.service.microfrontend.MikrofrontendService.Companion.actionDisabled
-import no.nav.syfo.service.microfrontend.MikrofrontendService.Companion.actionEnabled
+import no.nav.syfo.kafka.producers.minsideMikrofrontend.MinSideRecord
+import no.nav.syfo.kafka.producers.minsideMikrofrontend.Tjeneste
+import no.nav.syfo.service.mikrofrontend.MikrofrontendService.Companion.actionDisabled
+import no.nav.syfo.service.mikrofrontend.MikrofrontendService.Companion.actionEnabled
 import no.nav.syfo.utils.DuplicateMotebehovException
 import no.nav.syfo.utils.MotebehovAfterBookingException
 import no.nav.syfo.utils.VeilederAlreadyBookedMeetingException
 import org.slf4j.LoggerFactory
 
 class MikrofrontendDialogmoteService(
-    val database: DatabaseInterface
+    val database: DatabaseInterface,
 ) {
     private val log = LoggerFactory.getLogger(MikrofrontendService::class.java)
 
@@ -27,9 +27,11 @@ class MikrofrontendDialogmoteService(
         return when (hendelse.type) {
             HendelseType.SM_DIALOGMOTE_NYTT_TID_STED -> setNewDateForMikrofrontendUser(hendelse)
             HendelseType.SM_DIALOGMOTE_AVLYST,
-            HendelseType.SM_DIALOGMOTE_REFERAT -> minSideRecordDisabled(hendelse.arbeidstakerFnr)
+            HendelseType.SM_DIALOGMOTE_REFERAT,
+            -> minSideRecordDisabled(hendelse.arbeidstakerFnr)
             HendelseType.SM_DIALOGMOTE_INNKALT,
-            HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV -> setMikrofrontendSynlighet(hendelse)
+            HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
+            -> setMikrofrontendSynlighet(hendelse)
             else -> null
         }
     }
@@ -45,14 +47,14 @@ class MikrofrontendDialogmoteService(
             ?.let {
                 database.updateMikrofrontendEntrySynligTomByExistingEntry(
                     it.toMikrofrontendSynlighet(),
-                    hendelse.getSynligTom()!!.toLocalDate()
+                    hendelse.getSynligTom()!!.toLocalDate(),
                 )
                 return null
             }
             ?: run {
                 log.warn(
                     "[MIKROFRONTEND_SERVICE]: Received ${hendelse.type} from VarselBus without corresponding entry " +
-                        "in MIKROFRONTEND_SYNLIGHET DB-table. Creating new entry ..."
+                        "in MIKROFRONTEND_SYNLIGHET DB-table. Creating new entry ...",
                 )
                 minSideRecordEnabled(hendelse.arbeidstakerFnr)
             }
@@ -68,7 +70,7 @@ class MikrofrontendDialogmoteService(
             userHasExistingDMEntries,
             userHasExistingMBEntries,
             ferdigstill,
-            hendelse.type
+            hendelse.type,
         )
 
         if (hendelse.type == HendelseType.SM_DIALOGMOTE_INNKALT) {
@@ -91,7 +93,7 @@ class MikrofrontendDialogmoteService(
         database.updateMikrofrontendEntrySynligTomByFnrAndTjeneste(
             hendelse.arbeidstakerFnr,
             Tjeneste.DIALOGMOTE,
-            hendelse.getSynligTom()!!.toLocalDate()
+            hendelse.getSynligTom()!!.toLocalDate(),
         )
     }
 
@@ -99,7 +101,7 @@ class MikrofrontendDialogmoteService(
         existingDM: Boolean,
         existingMB: Boolean,
         ferdigstill: Boolean,
-        hendelseType: HendelseType
+        hendelseType: HendelseType,
     ) {
         if (existingDM) {
             when (hendelseType) {
@@ -135,13 +137,13 @@ class MikrofrontendDialogmoteService(
         MinSideRecord(
             eventType = actionEnabled,
             fnr = fnr,
-            microfrontendId = dialogmoteMikrofrontendId
+            microfrontendId = dialogmoteMikrofrontendId,
         )
 
     fun minSideRecordDisabled(fnr: String) =
         MinSideRecord(
             eventType = actionDisabled,
             fnr = fnr,
-            microfrontendId = dialogmoteMikrofrontendId
+            microfrontendId = dialogmoteMikrofrontendId,
         )
 }

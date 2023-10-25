@@ -58,7 +58,7 @@ class VarselSenderSpek : DescribeSpec({
                 sendVarselService,
                 aktivitetskravVarselFinder,
                 merVeiledningVarselFinder,
-                ToggleEnv(true),
+                ToggleEnv(true, false),
             )
             val planlagtVarselToStore =
                 PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
@@ -84,7 +84,7 @@ class VarselSenderSpek : DescribeSpec({
                 sendVarselService,
                 aktivitetskravVarselFinder,
                 merVeiledningVarselFinder,
-                ToggleEnv(false),
+                ToggleEnv(false, false),
             )
             val planlagtVarselToStore =
                 PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
@@ -118,7 +118,7 @@ class VarselSenderSpek : DescribeSpec({
                 sendVarselService,
                 aktivitetskravVarselFinder,
                 merVeiledningVarselFinder,
-                ToggleEnv(true),
+                ToggleEnv(true, false),
             )
             val planlagtVarselToStore =
                 PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)

@@ -29,7 +29,7 @@ import no.nav.syfo.service.MerVeiledningVarselService
 import no.nav.syfo.service.SendVarselService
 import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.service.SykmeldingStatus
-import no.nav.syfo.service.microfrontend.MikrofrontendService
+import no.nav.syfo.service.mikrofrontend.MikrofrontendService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.fnr1
 import no.nav.syfo.testutil.mocks.fnr2
