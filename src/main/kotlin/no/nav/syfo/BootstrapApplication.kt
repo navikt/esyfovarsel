@@ -133,7 +133,7 @@ fun main() {
                 val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(
                     senderFacade,
                     accessControlService,
-                    env.urlEnv.dokumentarkivOppfolgingDocumetntsPageUrl,
+                    env.urlEnv.dokumentarkivOppfolgingDocumentsPageUrl,
                     env.toggleEnv.sendAktivitetspliktForhandsvarsel,
                 )
                 val oppfolgingsplanVarselService =

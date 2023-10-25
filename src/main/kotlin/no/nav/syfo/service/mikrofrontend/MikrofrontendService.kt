@@ -11,14 +11,13 @@ class MikrofrontendService(
     val mikrofrontendAktivitetskravService: MikrofrontendAktivitetskravService,
     val database: DatabaseInterface,
 ) {
-
     companion object {
-        val actionEnabled = MinSideEvent.enable.toString()
-        val actionDisabled = MinSideEvent.disable.toString()
+        val actionEnabled = MinSideEvent.ENABLE.toString().lowercase()
+        val actionDisabled = MinSideEvent.DISABLE.toString().lowercase()
     }
 
     fun updateArbeidstakerMikrofrontendByHendelse(hendelse: ArbeidstakerHendelse) {
-        if (isNotEligableForMikrofrontendProcessing(hendelse.type)) {
+        if (hendelse.isNotEligibleForMikrofrontendProcessing()) {
             return
         }
         val tjeneste = hendelse.type.toMikrofrontendTjenesteType()
@@ -41,6 +40,7 @@ class MikrofrontendService(
     fun findAndCloseExpiredMikrofrontends() {
         val mikrofrontendsToClose = mutableListOf<Triple<String, String, Tjeneste>>()
         mikrofrontendsToClose.addAll(mikrofrontendDialogmoteService.findExpiredDialogmoteMikrofrontends())
+        mikrofrontendsToClose.addAll(mikrofrontendAktivitetskravService.findExpiredAktivitetskravMikrofrontends())
         mikrofrontendsToClose.forEach {
             val (fnr, mikrofrontendId, tjeneste) = it
             disableMikrofrontendForUser(
@@ -58,21 +58,6 @@ class MikrofrontendService(
             Tjeneste.DIALOGMOTE,
         )
     }
-
-    private fun isNotEligableForMikrofrontendProcessing(type: HendelseType) =
-        when (type) {
-            HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
-            HendelseType.SM_DIALOGMOTE_INNKALT,
-            HendelseType.SM_DIALOGMOTE_AVLYST,
-            HendelseType.SM_DIALOGMOTE_REFERAT,
-            HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
-            HendelseType.SM_DIALOGMOTE_LEST,
-            HendelseType.SM_AKTIVITETSPLIKT_STATUS_NY,
-            HendelseType.SM_AKTIVITETSPLIKT_STATUS_IKKE_OPPFYLT,
-            -> false
-
-            else -> true
-        }
 
     private fun enableMikrofrontendForUser(
         hendelse: ArbeidstakerHendelse,
@@ -110,9 +95,15 @@ class MikrofrontendService(
             HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
             HendelseType.SM_DIALOGMOTE_REFERAT,
             HendelseType.SM_DIALOGMOTE_AVLYST,
-            -> Tjeneste.DIALOGMOTE
+                -> Tjeneste.DIALOGMOTE
             HendelseType.SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL,
-            -> Tjeneste.AKTIVITETSKRAV
+            HendelseType.SM_AKTIVITETSPLIKT_STATUS_NY,
+            HendelseType.SM_AKTIVITETSPLIKT_STATUS_UNNTAK,
+            HendelseType.SM_AKTIVITETSPLIKT_STATUS_OPPFYLT,
+            HendelseType.SM_AKTIVITETSPLIKT_STATUS_AUTOMATISK_OPPFYLT,
+            HendelseType.SM_AKTIVITETSPLIKT_STATUS_IKKE_OPPFYLT,
+            HendelseType.SM_AKTIVITETSPLIKT_STATUS_IKKE_AKTUELL,
+                -> Tjeneste.AKTIVITETSKRAV
             else -> throw IllegalArgumentException("$this is not a valid type for updating MF state")
         }
 }

@@ -4,9 +4,11 @@ import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.JacksonKafkaSerializer
 import no.nav.syfo.kafka.common.producerProperties
 import no.nav.syfo.kafka.common.topicMinSideMicrofrontend
+import no.nav.syfo.service.mikrofrontend.MikrofrontendService
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.slf4j.LoggerFactory
 
 class MinSideMicrofrontendKafkaProducer(
     val env: Environment,

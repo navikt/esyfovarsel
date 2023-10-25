@@ -156,5 +156,5 @@ spec:
       value: http://syfo-tilgangskontroll.teamsykefravr
     - name: SYFOTILGANGSKONTROLL_SCOPE
       value: api://prod-gcp.teamsykefravr.syfo-tilgangskontroll/.default
-    - name: BASE_URL_DOKUMENTARKIV_OPPFOLGING_DOCUMETNTS_PAGE
+    - name: BASE_URL_DOKUMENTARKIV_OPPFOLGING_DOCUMENTS_PAGE
       value: https://www.nav.no/dokumentarkiv/tema/OPP

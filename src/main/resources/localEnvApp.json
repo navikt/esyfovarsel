@@ -36,7 +36,7 @@
     "syfooppdfgenUrl": "http://localhost:4545",
     "syfoTilgangskontrollUrl": "http://syfotilgangskontrollUrl:9099",
     "syfoTilgangskontrollScope": "syfotilgangskontrollScope",
-    "dokumentarkivOppfolgingDocumetntsPageUrl": "http://dokumentarkivOppfolgingDocumetntsPageUrl:9099"
+    "dokumentarkivOppfolgingDocumentsPageUrl": "http://dokumentarkivOppfolgingDocumentsPageUrl:9099"
   },
   "kafkaEnv": {
     "bootstrapServersUrl": "http://localhost:9092",

@@ -9,6 +9,7 @@ import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.common.pollDurationInMillis
 import no.nav.syfo.kafka.common.topicVarselBus
 import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.service.VarselBusService
 import no.nav.syfo.shutdownApplication
 import org.apache.kafka.clients.consumer.ConsumerRecord
