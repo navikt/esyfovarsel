@@ -29,7 +29,7 @@ fun Connection.dropData() {
     val query2 = "DELETE FROM SYKMELDING_IDS"
     val query3 = "DELETE FROM UTSENDT_VARSEL"
     val query4 = "DELETE FROM SYKETILFELLEBIT"
-    val query5 = "DELETE FROM SYKEPENGER_MAX_DATE"
+    val query5 = "DELETE FROM UTBETALING_INFOTRYGD"
     val query6 = "DELETE FROM UTBETALING_SPLEIS"
     val query7 = "DELETE FROM MIKROFRONTEND_SYNLIGHET"
 

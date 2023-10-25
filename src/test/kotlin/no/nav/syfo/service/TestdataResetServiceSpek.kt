@@ -13,7 +13,6 @@ import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchInfotrygdUtbetalingByFnr
 import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
 import no.nav.syfo.db.fetchPlanlagtVarselByFnr
-import no.nav.syfo.db.fetchSpleisUtbetalingByFnr
 import no.nav.syfo.db.fetchSyketilfellebiterByFnr
 import no.nav.syfo.db.fetchUtsendtVarselByFnr
 import no.nav.syfo.db.fetchUtsendtVarselFeiletByFnr
