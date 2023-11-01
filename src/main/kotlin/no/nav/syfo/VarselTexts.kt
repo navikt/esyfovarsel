@@ -2,7 +2,6 @@ package no.nav.syfo
 
 const val DINE_SYKMELDTE_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST = "1 oppfølgingsplan til godkjenning"
 const val DINE_SYKMELDTE_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST = "1 ny forespørsel om behov for dialogmøte"
-const val DINE_SYKMELDTE_AKTIVITETSKRAV_TEKST = "Påminnelse om aktivitetsplikten"
 const val DINE_SYKMELDTE_DIALOGMOTE_INNKALT_TEKST = "Innkalling til dialogmøte"
 const val DINE_SYKMELDTE_DIALOGMOTE_AVLYST_TEKST = "Avlysning av dialogmøte"
 const val DINE_SYKMELDTE_DIALOGMOTE_NYTT_TID_STED_TEKST = "Endring av dialogmøte"
@@ -18,7 +17,6 @@ const val BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT = "Du har 
 
 const val DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT = "Snart slutt på sykepengene"
 const val DITT_SYKEFRAVAER_DIALOGMOTE_SVAR_MOTEBEHOV_MESSAGE_TEXT = "Du har en ny forespørsel om behov for dialogmøte"
-const val DITT_SYKEFRAVAER_AKTIVITETSKRAV_MESSAGE_TEXT = "Bekreft at du kjenner aktivitetsplikten"
 const val DITT_SYKEFRAVAER_DIALOGMOTE_INNKALLING_MESSAGE_TEXT = "Du er innkalt til dialogmøte - vi trenger svaret ditt"
 const val DITT_SYKEFRAVAER_DIALOGMOTE_ENDRING_MESSAGE_TEXT = "Du har mottatt et brev om endret dialogmøte"
 const val DITT_SYKEFRAVAER_DIALOGMOTE_REFERAT_MESSAGE_TEXT = "Du har mottatt et referat fra dialogmøte"
@@ -26,10 +24,6 @@ const val DITT_SYKEFRAVAER_DIALOGMOTE_AVLYSNING_MESSAGE_TEXT = "Du har mottatt e
 
 const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP = "Oppfølging"
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP = "Dialogmøte"
-const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_MESSAGE_TEXT = "En av dine medarbeidere har snart vært sykmeldt i åtte uker"
-const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_TITLE = "Varsel om nytt aktivitetskrav"
-const val ARBEIDSGIVERNOTIFIKASJON_AKTIVITETSKRAV_EMAIL_BODY =
-    "<body>En av dine medarbeidere har snart vært sykmeldt i åtte uker. Logg inn på Min side – arbeidsgiver hos NAV for å se hvem det gjelder.</body>"
 
 const val ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT = "Vi trenger din vurdering av behovet for dialogmøte."
 const val ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE = "Behov for dialogmøte?"

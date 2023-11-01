@@ -1,6 +1,5 @@
 package no.nav.syfo.planner
 
-const val AKTIVITETSKRAV_DAGER = 42L
 const val FULL_AG_PERIODE = 16
 const val arbeidstakerFnr1 = "07088621268"
 const val arbeidstakerFnr2 = "23456789012"

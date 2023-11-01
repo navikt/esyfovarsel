@@ -84,9 +84,6 @@ fun getEnv(): Environment {
                 dbUsername = getEnvVar("GCP_DB_USERNAME"),
                 dbPassword = getEnvVar("GCP_DB_PASSWORD")
             ),
-            ToggleEnv(
-                sendAktivitetskravVarsler = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSKRAV_VARSLER"),
-            )
         )
 }
 
@@ -99,7 +96,6 @@ data class Environment(
     val urlEnv: UrlEnv,
     val kafkaEnv: KafkaEnv,
     val dbEnv: DbEnv,
-    val toggleEnv: ToggleEnv
 )
 
 data class AppEnv(
@@ -169,10 +165,6 @@ data class DbEnv(
     var dbName: String,
     val dbUsername: String = "",
     val dbPassword: String = ""
-)
-
-data class ToggleEnv(
-    val sendAktivitetskravVarsler: Boolean,
 )
 
 data class JobEnv(

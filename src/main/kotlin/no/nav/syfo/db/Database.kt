@@ -4,13 +4,15 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.syfo.DbEnv
 import org.flywaydb.core.Flyway
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.sql.Connection
 
 const val postgresJdbcPrefix = "jdbc:postgresql"
-const val errorCodeUniqueViolation = "23505"
 
 interface DatabaseInterface {
     val connection: Connection
+    val log: Logger
 }
 
 class Database(val env: DbEnv) : DatabaseInterface {
@@ -34,6 +36,8 @@ class Database(val env: DbEnv) : DatabaseInterface {
 
     override val connection: Connection
         get() = hikariDataSource.connection
+
+    override val log: Logger = LoggerFactory.getLogger(Database::class.qualifiedName)
 
     private fun runFlywayMigrations(hikariDataSource: HikariDataSource) =
         Flyway.configure().run {

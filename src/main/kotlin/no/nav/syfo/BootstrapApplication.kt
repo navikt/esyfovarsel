@@ -5,17 +5,13 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.typesafe.config.ConfigFactory
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.Application
-import io.ktor.server.application.install
-import io.ktor.server.config.HoconApplicationConfig
-import io.ktor.server.engine.applicationEngineEnvironment
-import io.ktor.server.engine.connector
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.engine.stop
-import io.ktor.server.netty.Netty
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.routing.routing
+import io.ktor.serialization.jackson.*
+import io.ktor.server.application.*
+import io.ktor.server.config.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.routing.*
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -40,7 +36,6 @@ import no.nav.syfo.job.VarselSender
 import no.nav.syfo.job.sendNotificationsJob
 import no.nav.syfo.kafka.common.launchKafkaListener
 import no.nav.syfo.kafka.consumers.infotrygd.InfotrygdKafkaConsumer
-import no.nav.syfo.kafka.consumers.syketilfelle.SyketilfelleKafkaConsumer
 import no.nav.syfo.kafka.consumers.testdata.reset.TestdataResetConsumer
 import no.nav.syfo.kafka.consumers.utbetaling.UtbetalingKafkaConsumer
 import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
@@ -49,12 +44,10 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProdu
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
-import no.nav.syfo.planner.AktivitetskravVarselPlanner
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.service.*
 import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
 import no.nav.syfo.service.microfrontend.MikrofrontendService
-import no.nav.syfo.syketilfelle.SyketilfellebitService
 import no.nav.syfo.utils.LeaderElection
 import no.nav.syfo.utils.RunOnElection
 import java.util.concurrent.Executors
@@ -103,12 +96,6 @@ fun main() {
                 val accessControlService = AccessControlService(dkifConsumer)
                 val fysiskBrevUtsendingService = FysiskBrevUtsendingService(journalpostdistribusjonConsumer)
                 val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
-                val syketilfellebitService = SyketilfellebitService(database)
-
-                val aktivitetskravVarselPlanner =
-                    AktivitetskravVarselPlanner(database, syketilfellebitService, sykmeldingService)
-                val replanleggingService =
-                    ReplanleggingService(database, aktivitetskravVarselPlanner)
                 val brukernotifikasjonerService =
                     BrukernotifikasjonerService(brukernotifikasjonKafkaProducer)
                 val senderFacade = SenderFacade(
@@ -140,7 +127,6 @@ fun main() {
                 val pdfgenConsumer = PdfgenConsumer(env.urlEnv, pdlConsumer, database)
                 val merVeiledningVarselService = MerVeiledningVarselService(
                     senderFacade,
-                    syketilfellebitService,
                     env.urlEnv,
                     pdfgenConsumer,
                     dokarkivService,
@@ -174,10 +160,6 @@ fun main() {
                     serverModule(
                         env,
                         accessControlService,
-                        replanleggingService,
-                        brukernotifikasjonKafkaProducer,
-                        dineSykmeldteHendelseKafkaProducer,
-                        arbeidsgiverNotifikasjonService,
                         merVeiledningVarselService,
                         sykepengerMaxDateService,
                         sykmeldingService,
@@ -188,9 +170,7 @@ fun main() {
 
                     kafkaModule(
                         env,
-                        accessControlService,
                         varselBusService,
-                        aktivitetskravVarselPlanner,
                         sykepengerMaxDateService,
                         testdataResetService,
                     )
@@ -225,10 +205,6 @@ private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsume
 fun Application.serverModule(
     env: Environment,
     accessControlService: AccessControlService,
-    replanleggingService: ReplanleggingService,
-    brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,
-    dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
-    arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
     merVeiledningVarselService: MerVeiledningVarselService,
     sykepengerMaxDateService: SykepengerMaxDateService,
     sykmeldingService: SykmeldingService,
@@ -242,30 +218,18 @@ fun Application.serverModule(
         pdlConsumer,
     )
 
-    val aktivitetskravVarselFinder = AktivitetskravVarselFinder(
-        database,
-        pdlConsumer,
-    )
-
     val sendVarselService =
         SendVarselService(
-            brukernotifikasjonKafkaProducer,
-            dineSykmeldteHendelseKafkaProducer,
             accessControlService,
             env.urlEnv,
-            arbeidsgiverNotifikasjonService,
             merVeiledningVarselService,
-            sykmeldingService,
-            aktivitetskravVarselFinder,
             merVeiledningVarselFinder,
         )
 
     val varselSender = VarselSender(
         database,
         sendVarselService,
-        aktivitetskravVarselFinder,
         merVeiledningVarselFinder,
-        env.toggleEnv,
     )
 
     install(ContentNegotiation) {
@@ -291,7 +255,6 @@ fun Application.serverModule(
         setupRoutesWithAuthentication(
             varselSender,
             mikrofrontendService,
-            replanleggingService,
             sykepengerMaxDateService,
             veilederTilgangskontrollConsumer,
             env.authEnv,
@@ -302,7 +265,6 @@ fun Application.serverModule(
         setupLocalRoutesWithAuthentication(
             varselSender,
             mikrofrontendService,
-            replanleggingService,
             sykepengerMaxDateService,
             veilederTilgangskontrollConsumer,
             env.authEnv,
@@ -319,20 +281,11 @@ fun Application.serverModule(
 
 fun Application.kafkaModule(
     env: Environment,
-    accessControlService: AccessControlService,
     varselbusService: VarselBusService,
-    aktivitetskravVarselPlanner: AktivitetskravVarselPlanner,
     sykepengerMaxDateService: SykepengerMaxDateService,
     testdataResetService: TestdataResetService,
 ) {
     runningRemotely {
-        launch(backgroundTasksContext) {
-            launchKafkaListener(
-                state,
-                SyketilfelleKafkaConsumer(env, aktivitetskravVarselPlanner, accessControlService, database)
-            )
-        }
-
         launch(backgroundTasksContext) {
             launchKafkaListener(
                 state,

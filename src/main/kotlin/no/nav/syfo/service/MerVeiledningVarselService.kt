@@ -2,16 +2,15 @@ package no.nav.syfo.service
 
 import no.nav.syfo.*
 import no.nav.syfo.access.domain.UserAccessStatus
-import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
-import no.nav.syfo.syketilfelle.SyketilfellebitService
 import org.slf4j.LoggerFactory
 import java.net.URL
+import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
@@ -19,7 +18,6 @@ const val DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING = "ESYFOVARSEL_MER_VEILE
 
 class MerVeiledningVarselService(
     val senderFacade: SenderFacade,
-    val syketilfellebitService: SyketilfellebitService,
     val urlEnv: UrlEnv,
     val pdfgenConsumer: PdfgenConsumer,
     val dokarkivService: DokarkivService,
@@ -95,11 +93,6 @@ class MerVeiledningVarselService(
         uuid: String,
         arbeidstakerHendelse: ArbeidstakerHendelse,
     ) {
-        val syketilfelleEndDate = syketilfellebitService.sisteDagISyketilfelle(fnr)
-        if (syketilfelleEndDate == null) {
-            log.error("Syketilfelle finnes ikke for varsel med UUID: $uuid. Sender ikke oppgave")
-            throw RuntimeException("Uventet null-verdi ved henting av syketilfelle")
-        }
         val melding = DittSykefravaerMelding(
             OpprettMelding(
                 DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT,
@@ -107,7 +100,7 @@ class MerVeiledningVarselService(
                 Variant.INFO,
                 true,
                 DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING,
-                syketilfelleEndDate.atStartOfDay().toInstant(ZoneOffset.UTC),
+                LocalDateTime.now().plusWeeks(13).toInstant(ZoneOffset.UTC),
             ),
             null,
             fnr,

@@ -1,14 +1,7 @@
 package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.*
-import no.nav.syfo.kafka.consumers.syketilfelle.domain.KSyketilfellebit
-import no.nav.syfo.syketilfelle.domain.Syketilfellebit
-import no.nav.syfo.syketilfelle.domain.tagsFromString
-import java.sql.Date
 import java.sql.ResultSet
-import java.sql.Timestamp
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 
@@ -25,17 +18,6 @@ fun ResultSet.toPPlanlagtVarsel() = PPlanlagtVarsel(
     orgnummer = getString("orgnummer"),
     type = getString("type"),
     utsendingsdato = getDate("utsendingsdato").toLocalDate(),
-    opprettet = getTimestamp("opprettet").toLocalDateTime(),
-    sistEndret = getTimestamp("sist_endret").toLocalDateTime()
-)
-
-fun ResultSet.toPPlanlagtVarselMerVeiledning(sendingDate: LocalDate) = PPlanlagtVarsel(
-    uuid = getString("uuid"),
-    fnr = getString("fnr"),
-    orgnummer = null,
-    aktorId = null,
-    type = VarselType.MER_VEILEDNING.name,
-    utsendingsdato = sendingDate,
     opprettet = getTimestamp("opprettet").toLocalDateTime(),
     sistEndret = getTimestamp("sist_endret").toLocalDateTime()
 )
@@ -64,18 +46,6 @@ fun ResultSet.toPUtsendtVarsel() = PUtsendtVarsel(
     arbeidsgivernotifikasjonMerkelapp = getString("arbeidsgivernotifikasjon_merkelapp")
 )
 
-fun ResultSet.toSyketilfellebit() = Syketilfellebit(
-    id = getString("id"),
-    fnr = getString("fnr"),
-    orgnummer = getString("orgnummer"),
-    opprettet = getTimestamp("opprettet").toLocalDateTime(),
-    inntruffet = getTimestamp("inntruffet").toLocalDateTime(),
-    tags = getString("tags").tagsFromString(),
-    ressursId = getString("ressurs_id"),
-    fom = getDate("fom").toLocalDate(),
-    tom = getDate("tom").toLocalDate()
-)
-
 fun ResultSet.toVarslingIdsListe(): List<String> {
     val rader = ArrayList<String>()
     while (this.next()) {
@@ -87,23 +57,6 @@ fun ResultSet.toVarslingIdsListe(): List<String> {
 fun ResultSet.toVarslingIdsListeCount(): Int {
     this.last()
     return this.row
-}
-
-fun KSyketilfellebit.toPSyketilfellebit(): PSyketilfellebit {
-    return PSyketilfellebit(
-        UUID.randomUUID(),
-        this.id,
-        this.fnr,
-        this.orgnummer,
-        Timestamp.valueOf(LocalDateTime.now()),
-        Timestamp.valueOf(this.opprettet.toLocalDateTime()),
-        Timestamp.valueOf(this.inntruffet.toLocalDateTime()),
-        this.tags.reduce { acc, tag -> "$acc,$tag" },
-        this.ressursId,
-        Date.valueOf(this.fom),
-        Date.valueOf(this.tom),
-        this.korrigererSendtSoknad
-    )
 }
 
 fun ResultSet.toPMaksDato() = PMaksDato(
