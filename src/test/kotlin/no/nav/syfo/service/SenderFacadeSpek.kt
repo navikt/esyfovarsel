@@ -50,7 +50,7 @@ class SenderFacadeSpek : DescribeSpec({
                 fnr = arbeidstakerFnr1,
                 aktorId = arbeidstakerAktorId1,
                 utsendtTidspunkt = LocalDateTime.now(),
-                type = VarselType.AKTIVITETSKRAV.name,
+                type = VarselType.MER_VEILEDNING.name,
                 narmesteLederFnr = null,
                 orgnummer = null,
                 kanal = null,

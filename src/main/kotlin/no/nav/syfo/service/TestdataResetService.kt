@@ -3,7 +3,6 @@ package no.nav.syfo.service
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deleteMikrofrontendSynlighetByFnr
 import no.nav.syfo.db.deletePlanlagtVarselByVarselId
-import no.nav.syfo.db.deleteSyketilfellebitByFnr
 import no.nav.syfo.db.deleteUtbetalingInfotrygdByFnr
 import no.nav.syfo.db.deleteUtbetalingSpleisByFnr
 import no.nav.syfo.db.deleteUtsendtVarselByFnr
@@ -26,7 +25,7 @@ class TestdataResetService(
             "Nullstiller testdata for arbeidstaker ${fnr.value}. Ferdigstiller varsler " +
                     "som er sendt til Min side - arbeidsgiver, Dine sykmeldte, Min side (personbruker), " +
                     "Ditt sykefravær. Fjerner mikrofrontend på Min side. " +
-                    "Sletter planlagte og utsendte varsler, feilede varsler, syketilfellebiter og utbetalinger."
+                    "Sletter planlagte og utsendte varsler, feilede varsler og utbetalinger."
         )
 
         // Ferdigstille varsler
@@ -38,9 +37,6 @@ class TestdataResetService(
         // Slette planlagte varsler
         val planlagteVarsler = database.fetchPlanlagtVarselByFnr(fnr.value)
         planlagteVarsler.forEach { database.deletePlanlagtVarselByVarselId(it.uuid) }
-
-        // Slette syketilfellebiter
-        database.deleteSyketilfellebitByFnr(fnr)
 
         // Slette/skjule mikrofrontend
         mikrofrontendService.closeAllMikrofrontendForUser(fnr)

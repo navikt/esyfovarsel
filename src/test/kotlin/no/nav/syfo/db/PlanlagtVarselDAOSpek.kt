@@ -33,21 +33,21 @@ class PlanlagtVarselDAOSpek : DescribeSpec({
                 arbeidstakerAktorId1,
                 orgnummer,
                 setOf("1", "2"),
-                VarselType.AKTIVITETSKRAV
+                VarselType.MER_VEILEDNING
             )
             val planlagtVarselToStore2 = PlanlagtVarsel(
                 arbeidstakerFnr2,
                 arbeidstakerAktorId2,
                 orgnummer,
                 setOf("3"),
-                VarselType.AKTIVITETSKRAV
+                VarselType.MER_VEILEDNING
             )
             val planlagtVarselToStore3 = PlanlagtVarsel(
                 arbeidstakerFnr2,
                 arbeidstakerAktorId2,
                 orgnummer,
                 setOf("4"),
-                VarselType.AKTIVITETSKRAV
+                VarselType.MER_VEILEDNING
             )
 
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)
@@ -74,14 +74,14 @@ class PlanlagtVarselDAOSpek : DescribeSpec({
                 arbeidstakerAktorId1,
                 orgnummer,
                 setOf("1", "2"),
-                VarselType.AKTIVITETSKRAV
+                VarselType.MER_VEILEDNING
             )
             val planlagtVarselToStore2 = PlanlagtVarsel(
                 arbeidstakerFnr1,
                 arbeidstakerAktorId1,
                 orgnummer,
                 setOf("3"),
-                VarselType.AKTIVITETSKRAV
+                VarselType.MER_VEILEDNING
             )
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
@@ -89,24 +89,24 @@ class PlanlagtVarselDAOSpek : DescribeSpec({
             //Før delete
             val planlagtVarselFetchedList1 = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
 
-            val aktivitetskravPlanlagtVarselUuid =
-                planlagtVarselFetchedList1.find { it.type == VarselType.AKTIVITETSKRAV.name }!!.uuid
+            val planlagtVarselUuid =
+                planlagtVarselFetchedList1.find { it.type == VarselType.MER_VEILEDNING.name }!!.uuid
 
 
-            planlagtVarselFetchedList1.filter { it.uuid == aktivitetskravPlanlagtVarselUuid }.size shouldBeEqualTo 1
+            planlagtVarselFetchedList1.filter { it.uuid == planlagtVarselUuid }.size shouldBeEqualTo 1
 
             embeddedDatabase.fetchAllSykmeldingIdsAndCount() shouldBeEqualTo 3
-            embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(aktivitetskravPlanlagtVarselUuid).size shouldNotBe 0
+            embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(planlagtVarselUuid).size shouldNotBe 0
 
             //Delete
-            embeddedDatabase.deletePlanlagtVarselByVarselId(aktivitetskravPlanlagtVarselUuid)
+            embeddedDatabase.deletePlanlagtVarselByVarselId(planlagtVarselUuid)
 
             //Etter delete
             val planlagtVarselFetchedList1EtterDelete = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
-            planlagtVarselFetchedList1EtterDelete.filter { it.uuid == aktivitetskravPlanlagtVarselUuid }.size shouldBeEqualTo 0
+            planlagtVarselFetchedList1EtterDelete.filter { it.uuid == planlagtVarselUuid }.size shouldBeEqualTo 0
 
             embeddedDatabase.fetchAllSykmeldingIdsAndCount() shouldBeEqualTo 1
-            embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(aktivitetskravPlanlagtVarselUuid).size shouldBeEqualTo 0
+            embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(planlagtVarselUuid).size shouldBeEqualTo 0
         }
 
         it("Delete PlanlagtVarsel by sykmelding ids") {
@@ -115,14 +115,14 @@ class PlanlagtVarselDAOSpek : DescribeSpec({
                 arbeidstakerAktorId1,
                 orgnummer,
                 setOf("1", "2"),
-                VarselType.AKTIVITETSKRAV
+                VarselType.MER_VEILEDNING
             )
             val planlagtVarselToStore2 = PlanlagtVarsel(
                 arbeidstakerFnr1,
                 arbeidstakerAktorId1,
                 orgnummer,
                 setOf("3"),
-                VarselType.AKTIVITETSKRAV
+                VarselType.MER_VEILEDNING
             )
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
@@ -130,24 +130,24 @@ class PlanlagtVarselDAOSpek : DescribeSpec({
             //Før delete
             val planlagtVarselFetchedList1 = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
 
-            val aktivitetskravPlanlagtVarselUuid =
-                planlagtVarselFetchedList1.find { it.type == VarselType.AKTIVITETSKRAV.name }!!.uuid
+            val merVeiledningPlanlagtVarselUuid =
+                planlagtVarselFetchedList1.find { it.type == VarselType.MER_VEILEDNING.name }!!.uuid
 
 
-            planlagtVarselFetchedList1.filter { it.uuid == aktivitetskravPlanlagtVarselUuid }.size shouldBeEqualTo 1
+            planlagtVarselFetchedList1.filter { it.uuid == merVeiledningPlanlagtVarselUuid }.size shouldBeEqualTo 1
 
             embeddedDatabase.fetchAllSykmeldingIdsAndCount() shouldBeEqualTo 3
-            embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(aktivitetskravPlanlagtVarselUuid).size shouldNotBe 0
+            embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(merVeiledningPlanlagtVarselUuid).size shouldNotBe 0
 
             //Delete
-            embeddedDatabase.deletePlanlagtVarselBySykmeldingerId(setOf("1", "2"), VarselType.AKTIVITETSKRAV)
+            embeddedDatabase.deletePlanlagtVarselBySykmeldingerId(setOf("1", "2"), VarselType.MER_VEILEDNING)
 
             //Etter delete
             val planlagtVarselFetchedList1EtterDelete = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
-            planlagtVarselFetchedList1EtterDelete.filter { it.uuid == aktivitetskravPlanlagtVarselUuid }.size shouldBeEqualTo 0
+            planlagtVarselFetchedList1EtterDelete.filter { it.uuid == merVeiledningPlanlagtVarselUuid }.size shouldBeEqualTo 0
 
             embeddedDatabase.fetchAllSykmeldingIdsAndCount() shouldBeEqualTo 1
-            embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(aktivitetskravPlanlagtVarselUuid).size shouldBeEqualTo 0
+            embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(merVeiledningPlanlagtVarselUuid).size shouldBeEqualTo 0
         }
 
         it("Finn PlanlagtVarsel som skal sendes") {
@@ -156,7 +156,7 @@ class PlanlagtVarselDAOSpek : DescribeSpec({
                 arbeidstakerAktorId1,
                 orgnummer,
                 setOf("1", "2"),
-                VarselType.AKTIVITETSKRAV,
+                VarselType.MER_VEILEDNING,
                 LocalDate.now()
             )
             val planlagtVarselToStore2 = PlanlagtVarsel(
@@ -164,7 +164,7 @@ class PlanlagtVarselDAOSpek : DescribeSpec({
                 arbeidstakerAktorId2,
                 orgnummer,
                 setOf("3"),
-                VarselType.AKTIVITETSKRAV,
+                VarselType.MER_VEILEDNING,
                 LocalDate.now().plusDays(1)
             )
             val planlagtVarselToStore3 = PlanlagtVarsel(
@@ -172,7 +172,7 @@ class PlanlagtVarselDAOSpek : DescribeSpec({
                 arbeidstakerAktorId2,
                 orgnummer,
                 setOf("4"),
-                VarselType.AKTIVITETSKRAV,
+                VarselType.MER_VEILEDNING,
                 LocalDate.now().minusDays(1)
             )
 

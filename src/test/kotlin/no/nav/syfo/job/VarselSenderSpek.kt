@@ -5,16 +5,13 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.ToggleEnv
 import no.nav.syfo.db.*
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.UTSENDING_FEILET
 import no.nav.syfo.db.domain.VarselType
-import no.nav.syfo.db.domain.VarselType.AKTIVITETSKRAV
 import no.nav.syfo.db.domain.VarselType.MER_VEILEDNING
 import no.nav.syfo.planner.arbeidstakerFnr1
-import no.nav.syfo.service.AktivitetskravVarselFinder
 import no.nav.syfo.service.MerVeiledningVarselFinder
 import no.nav.syfo.service.SendVarselService
 import no.nav.syfo.testutil.EmbeddedDatabase
@@ -31,7 +28,6 @@ class VarselSenderSpek : DescribeSpec({
 
     val sendVarselService = mockk<SendVarselService>(relaxed = true)
     val merVeiledningVarselFinder = mockk<MerVeiledningVarselFinder>(relaxed = true)
-    val aktivitetskravVarselFinder = mockk<AktivitetskravVarselFinder>(relaxed = true)
     val merVeiledningVarsel = PPlanlagtVarsel(
         UUID.randomUUID().toString(),
         arbeidstakerFnr1,
@@ -56,9 +52,7 @@ class VarselSenderSpek : DescribeSpec({
             val sendVarselJobb = VarselSender(
                 embeddedDatabase,
                 sendVarselService,
-                aktivitetskravVarselFinder,
                 merVeiledningVarselFinder,
-                ToggleEnv(true),
             )
             val planlagtVarselToStore =
                 PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
@@ -66,7 +60,6 @@ class VarselSenderSpek : DescribeSpec({
             coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(
                 merVeiledningVarsel,
             )
-            coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(any()) } returns true
             coEvery { merVeiledningVarselFinder.isBrukerYngreEnn67Ar(any()) } returns true
 
             embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
@@ -78,47 +71,12 @@ class VarselSenderSpek : DescribeSpec({
             embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
         }
 
-        it("Skal ikke sende aktivitetskrav-varsel hvis toggle er false") {
-            val sendVarselJobb = VarselSender(
-                embeddedDatabase,
-                sendVarselService,
-                aktivitetskravVarselFinder,
-                merVeiledningVarselFinder,
-                ToggleEnv(false),
-            )
-            val planlagtVarselToStore =
-                PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
-            val planlagtVarselToStore2 =
-                PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), AKTIVITETSKRAV)
-
-            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore)
-            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
-
-            coEvery { merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday() } returns listOf(
-                merVeiledningVarsel,
-            )
-            coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(any()) } returns true
-            coEvery { merVeiledningVarselFinder.isBrukerYngreEnn67Ar(any()) } returns true
-
-            sendVarselJobb.testSendVarsler()
-            sendVarselService.testSendVarsel()
-
-            embeddedDatabase.skalHaPlanlagtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
-            embeddedDatabase.skalHaUtsendtVarsel(arbeidstakerFnr1, MER_VEILEDNING)
-
-            embeddedDatabase.skalHaPlanlagtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
-            embeddedDatabase.skalIkkeHaUtsendtVarsel(arbeidstakerFnr1, AKTIVITETSKRAV)
-
-            sendVarselService.testSendVarsel()
-        }
 
         it("Skal ikke markere varsel som sendt dersom utsending feiler") {
             val sendVarselJobb = VarselSender(
                 embeddedDatabase,
                 sendVarselService,
-                aktivitetskravVarselFinder,
                 merVeiledningVarselFinder,
-                ToggleEnv(true),
             )
             val planlagtVarselToStore =
                 PlanlagtVarsel(arbeidstakerFnr1, arbeidstakerAktorId1, orgnummer, setOf("1"), MER_VEILEDNING)
@@ -128,7 +86,6 @@ class VarselSenderSpek : DescribeSpec({
                 merVeiledningVarsel,
             )
             coEvery { sendVarselService.sendVarsel(any()) } returns UTSENDING_FEILET
-            coEvery { aktivitetskravVarselFinder.isBrukerYngreEnn70Ar(any()) } returns true
             coEvery { merVeiledningVarselFinder.isBrukerYngreEnn67Ar(any()) } returns true
 
             sendVarselJobb.testSendVarsler()
