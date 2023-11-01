@@ -68,6 +68,47 @@ class PlanlagtVarselDAOSpek : DescribeSpec({
             embeddedDatabase.fetchAllSykmeldingIdsAndCount() shouldBeEqualTo 4
         }
 
+        it("Delete PlanlagtVarsel by varsel uuid") {
+            val planlagtVarselToStore1 = PlanlagtVarsel(
+                arbeidstakerFnr1,
+                arbeidstakerAktorId1,
+                orgnummer,
+                setOf("1", "2"),
+                VarselType.MER_VEILEDNING
+            )
+            val planlagtVarselToStore2 = PlanlagtVarsel(
+                arbeidstakerFnr1,
+                arbeidstakerAktorId1,
+                orgnummer,
+                setOf("3"),
+                VarselType.MER_VEILEDNING
+            )
+            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore1)
+            embeddedDatabase.storePlanlagtVarsel(planlagtVarselToStore2)
+
+            //Før delete
+            val planlagtVarselFetchedList1 = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
+
+            val planlagtVarselUuid =
+                planlagtVarselFetchedList1.find { it.type == VarselType.MER_VEILEDNING.name }!!.uuid
+
+
+            planlagtVarselFetchedList1.filter { it.uuid == planlagtVarselUuid }.size shouldBeEqualTo 1
+
+            embeddedDatabase.fetchAllSykmeldingIdsAndCount() shouldBeEqualTo 3
+            embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(planlagtVarselUuid).size shouldNotBe 0
+
+            //Delete
+            embeddedDatabase.deletePlanlagtVarselByVarselId(planlagtVarselUuid)
+
+            //Etter delete
+            val planlagtVarselFetchedList1EtterDelete = embeddedDatabase.fetchPlanlagtVarselByFnr(arbeidstakerFnr1)
+            planlagtVarselFetchedList1EtterDelete.filter { it.uuid == planlagtVarselUuid }.size shouldBeEqualTo 0
+
+            embeddedDatabase.fetchAllSykmeldingIdsAndCount() shouldBeEqualTo 1
+            embeddedDatabase.fetchSykmeldingerIdByPlanlagtVarselsUUID(planlagtVarselUuid).size shouldBeEqualTo 0
+        }
+
         it("Delete PlanlagtVarsel by sykmelding ids") {
             val planlagtVarselToStore1 = PlanlagtVarsel(
                 arbeidstakerFnr1,
