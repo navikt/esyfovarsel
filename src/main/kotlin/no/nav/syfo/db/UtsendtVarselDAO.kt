@@ -4,7 +4,6 @@ import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.domain.PersonIdent
 import java.sql.Timestamp
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -93,24 +92,6 @@ fun DatabaseInterface.fetchUtsendtVarselByFnr(fnr: String): List<PUtsendtVarsel>
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
             it.setString(1, fnr)
-            it.executeQuery().toList { toPUtsendtVarsel() }
-        }
-    }
-}
-
-fun DatabaseInterface.fetchUtsendteMerVeiledningVarslerSiste3Maneder(): List<PUtsendtVarsel> {
-    val threeMonthsAgo = LocalDate.now().minusMonths(3).atStartOfDay()
-
-    val queryStatement = """SELECT *
-                            FROM UTSENDT_VARSEL
-                            WHERE TYPE = 'MER_VEILEDNING'
-                            AND UTSENDT_TIDSPUNKT  >= ?
-                            
-    """.trimIndent()
-
-    return connection.use { connection ->
-        connection.prepareStatement(queryStatement).use {
-            it.setTimestamp(1, Timestamp.valueOf(threeMonthsAgo))
             it.executeQuery().toList { toPUtsendtVarsel() }
         }
     }
