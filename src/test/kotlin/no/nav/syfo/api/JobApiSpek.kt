@@ -18,13 +18,9 @@ import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.getTestEnv
 import no.nav.syfo.job.SendMerVeiledningVarslerJobb
-import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.service.AccessControlService
-import no.nav.syfo.service.DokarkivService
 import no.nav.syfo.service.MerVeiledningVarselFinder
 import no.nav.syfo.service.MerVeiledningVarselService
-import no.nav.syfo.service.SykmeldingService
-import no.nav.syfo.service.SykmeldingStatus
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.testutil.mocks.fnr1
 import no.nav.syfo.testutil.mocks.fnr2
@@ -50,11 +46,8 @@ class JobApiSpek : DescribeSpec({
 
     describe("JobTriggerApi test") {
         val accessControlService = mockk<AccessControlService>()
-        val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProducer>()
         val merVeiledningVarselFinder = mockk<MerVeiledningVarselFinder>(relaxed = true)
-        val dokarkivService = mockk<DokarkivService>()
         val merVeiledningVarselService = mockk<MerVeiledningVarselService>()
-        val sykmeldingService = mockk<SykmeldingService>()
         val mikrofrontendService = mockk<MikrofrontendService>()
 
         coEvery { accessControlService.getUserAccessStatus(fnr1) } returns userAccessStatus1
@@ -115,17 +108,6 @@ class JobApiSpek : DescribeSpec({
                 LocalDateTime.now(),
             ),
         )
-        coEvery {
-            sykmeldingService.checkSykmeldingStatusForVirksomhet(
-                any(),
-                any(),
-                any(),
-            )
-        } returns SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = true)
-        coEvery { brukernotifikasjonKafkaProducer.sendBeskjed(any(), any(), any(), any(), any()) } returns Unit
-        coEvery { dokarkivService.getJournalpostId(any(), any(), any()) } returns "1"
-        coEvery { sykmeldingService.isPersonSykmeldtPaDato(any(), any()) } returns true
-        coEvery { merVeiledningVarselFinder.isBrukerYngreEnn67Ar(any()) } returns true
 
         justRun { mikrofrontendService.findAndCloseExpiredMikrofrontends() }
 
