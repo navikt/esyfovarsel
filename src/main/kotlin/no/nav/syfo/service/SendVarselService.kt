@@ -31,7 +31,6 @@ class SendVarselService(
                         null,
                     ),
                     pPlanlagtVarsel.uuid,
-                    userAccessStatus,
                 )
             }
             pPlanlagtVarsel.type

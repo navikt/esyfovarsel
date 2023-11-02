@@ -16,7 +16,6 @@ import no.nav.syfo.api.job.registerJobTriggerApi
 import no.nav.syfo.api.job.urlPathJobTrigger
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
-import no.nav.syfo.getTestEnv
 import no.nav.syfo.job.SendMerVeiledningVarslerJobb
 import no.nav.syfo.service.AccessControlService
 import no.nav.syfo.service.MerVeiledningVarselFinder
@@ -40,7 +39,6 @@ import java.time.LocalDateTime
 import java.util.*
 
 class JobApiSpek : DescribeSpec({
-    val testEnv = getTestEnv()
 
     timeout = 20000L
 
@@ -114,8 +112,6 @@ class JobApiSpek : DescribeSpec({
         val sendMerVeiledningVarslerJobb =
             SendMerVeiledningVarslerJobb(
                 merVeiledningVarselFinder,
-                accessControlService,
-                testEnv.urlEnv,
                 merVeiledningVarselService
             )
 
@@ -129,7 +125,7 @@ class JobApiSpek : DescribeSpec({
             it("esyfovarsel-job trigger utsending av 2 varsler digitalt og 3 varsler som brev") {
                 with(handleRequest(HttpMethod.Post, urlPathJobTrigger)) {
                     response.status()?.isSuccess() shouldBeEqualTo true
-                    coVerify(exactly = 5) { merVeiledningVarselService.sendVarselTilArbeidstaker(any(), any(), any()) }
+                    coVerify(exactly = 5) { merVeiledningVarselService.sendVarselTilArbeidstaker(any(), any()) }
                 }
             }
         }

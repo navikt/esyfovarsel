@@ -130,6 +130,7 @@ fun main() {
                     env.urlEnv,
                     pdfgenConsumer,
                     dokarkivService,
+                    accessControlService
                 )
                 val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(database)
                 val mikrofrontendService =
@@ -159,7 +160,6 @@ fun main() {
 
                     serverModule(
                         env,
-                        accessControlService,
                         merVeiledningVarselService,
                         sykepengerMaxDateService,
                         sykmeldingService,
@@ -204,7 +204,6 @@ private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsume
 
 fun Application.serverModule(
     env: Environment,
-    accessControlService: AccessControlService,
     merVeiledningVarselService: MerVeiledningVarselService,
     sykepengerMaxDateService: SykepengerMaxDateService,
     sykmeldingService: SykmeldingService,
@@ -220,8 +219,6 @@ fun Application.serverModule(
 
     val sendMerVeiledningVarslerJobb = SendMerVeiledningVarslerJobb(
         merVeiledningVarselFinder,
-        accessControlService,
-        env.urlEnv,
         merVeiledningVarselService
     )
 

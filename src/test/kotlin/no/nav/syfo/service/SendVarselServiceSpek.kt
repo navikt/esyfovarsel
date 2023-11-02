@@ -47,6 +47,7 @@ class SendVarselServiceTestSpek : DescribeSpec({
         urlEnvMockk,
         pdfgenConsumerMockk,
         dokarkivServiceMockk,
+        accessControlServiceMockk
     )
     val sendVarselService = SendVarselService(
         accessControlServiceMockk,
