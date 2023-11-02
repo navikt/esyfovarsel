@@ -10,11 +10,11 @@ import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.arbeidstakerFnr2
 import no.nav.syfo.db.domain.PUtsendtVarsel
-import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.storeFodselsdato
 import no.nav.syfo.db.storeSpleisUtbetaling
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.planner.arbeidstakerFnr1
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
@@ -166,7 +166,7 @@ private fun getUtsendtVarselToStore(utsendtTidspunkt: LocalDateTime): PUtsendtVa
         null,
         "",
         orgnummer,
-        VarselType.MER_VEILEDNING.name,
+        HendelseType.SM_MER_VEILEDNING.name,
         null,
         utsendtTidspunkt,
         null,
