@@ -1,11 +1,13 @@
 package no.nav.syfo.api
 
 import io.kotest.core.spec.style.DescribeSpec
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.routing.*
-import io.ktor.server.testing.*
+import io.ktor.http.HttpMethod
+import io.ktor.http.isSuccess
+import io.ktor.server.application.install
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.routing.routing
+import io.ktor.server.testing.TestApplicationEngine
+import io.ktor.server.testing.handleRequest
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.justRun
@@ -15,12 +17,26 @@ import no.nav.syfo.api.job.urlPathJobTrigger
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.getTestEnv
-import no.nav.syfo.job.VarselSender
+import no.nav.syfo.job.SendMerVeiledningVarslerJobb
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
-import no.nav.syfo.service.*
+import no.nav.syfo.service.AccessControlService
+import no.nav.syfo.service.DokarkivService
+import no.nav.syfo.service.MerVeiledningVarselFinder
+import no.nav.syfo.service.MerVeiledningVarselService
+import no.nav.syfo.service.SykmeldingService
+import no.nav.syfo.service.SykmeldingStatus
 import no.nav.syfo.service.microfrontend.MikrofrontendService
-import no.nav.syfo.testutil.EmbeddedDatabase
-import no.nav.syfo.testutil.mocks.*
+import no.nav.syfo.testutil.mocks.fnr1
+import no.nav.syfo.testutil.mocks.fnr2
+import no.nav.syfo.testutil.mocks.fnr3
+import no.nav.syfo.testutil.mocks.fnr4
+import no.nav.syfo.testutil.mocks.fnr5
+import no.nav.syfo.testutil.mocks.orgnummer
+import no.nav.syfo.testutil.mocks.userAccessStatus1
+import no.nav.syfo.testutil.mocks.userAccessStatus2
+import no.nav.syfo.testutil.mocks.userAccessStatus3
+import no.nav.syfo.testutil.mocks.userAccessStatus4
+import no.nav.syfo.testutil.mocks.userAccessStatus5
 import no.nav.syfo.util.contentNegotationFeature
 import org.amshove.kluent.shouldBeEqualTo
 import java.time.LocalDate
@@ -33,7 +49,6 @@ class JobApiSpek : DescribeSpec({
     timeout = 20000L
 
     describe("JobTriggerApi test") {
-        val embeddedDatabase by lazy { EmbeddedDatabase() }
         val accessControlService = mockk<AccessControlService>()
         val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProducer>()
         val merVeiledningVarselFinder = mockk<MerVeiledningVarselFinder>(relaxed = true)
@@ -114,25 +129,19 @@ class JobApiSpek : DescribeSpec({
 
         justRun { mikrofrontendService.findAndCloseExpiredMikrofrontends() }
 
-        val sendVarselService =
-            SendVarselService(
+        val sendMerVeiledningVarslerJobb =
+            SendMerVeiledningVarslerJobb(
+                merVeiledningVarselFinder,
                 accessControlService,
                 testEnv.urlEnv,
-                merVeiledningVarselService,
-                merVeiledningVarselFinder,
-            )
-        val varselSender =
-            VarselSender(
-                embeddedDatabase,
-                sendVarselService,
-                merVeiledningVarselFinder,
+                merVeiledningVarselService
             )
 
         with(TestApplicationEngine()) {
             start()
             application.install(ContentNegotiation, contentNegotationFeature())
             application.routing {
-                registerJobTriggerApi(varselSender, mikrofrontendService)
+                registerJobTriggerApi(sendMerVeiledningVarslerJobb, mikrofrontendService)
             }
 
             it("esyfovarsel-job trigger utsending av 2 varsler digitalt og 3 varsler som brev") {

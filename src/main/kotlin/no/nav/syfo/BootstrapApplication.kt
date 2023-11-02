@@ -32,7 +32,7 @@ import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.grantAccessToIAMUsers
-import no.nav.syfo.job.VarselSender
+import no.nav.syfo.job.SendMerVeiledningVarslerJobb
 import no.nav.syfo.job.sendNotificationsJob
 import no.nav.syfo.kafka.common.launchKafkaListener
 import no.nav.syfo.kafka.consumers.infotrygd.InfotrygdKafkaConsumer
@@ -218,18 +218,11 @@ fun Application.serverModule(
         pdlConsumer,
     )
 
-    val sendVarselService =
-        SendVarselService(
-            accessControlService,
-            env.urlEnv,
-            merVeiledningVarselService,
-            merVeiledningVarselFinder,
-        )
-
-    val varselSender = VarselSender(
-        database,
-        sendVarselService,
+    val sendMerVeiledningVarslerJobb = SendMerVeiledningVarslerJobb(
         merVeiledningVarselFinder,
+        accessControlService,
+        env.urlEnv,
+        merVeiledningVarselService
     )
 
     install(ContentNegotiation) {
@@ -253,7 +246,7 @@ fun Application.serverModule(
 
     runningRemotely {
         setupRoutesWithAuthentication(
-            varselSender,
+            sendMerVeiledningVarslerJobb,
             mikrofrontendService,
             sykepengerMaxDateService,
             veilederTilgangskontrollConsumer,
@@ -263,7 +256,7 @@ fun Application.serverModule(
 
     runningLocally {
         setupLocalRoutesWithAuthentication(
-            varselSender,
+            sendMerVeiledningVarslerJobb,
             mikrofrontendService,
             sykepengerMaxDateService,
             veilederTilgangskontrollConsumer,
