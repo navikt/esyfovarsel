@@ -18,18 +18,6 @@ fun String.extractPortFromUrl(): Int {
         portIndexEnd += portIndexStart
     return subSequence(portIndexStart, portIndexEnd).toString().toInt()
 }
-fun List<PPlanlagtVarsel>.skalHaEt39UkersVarsel() = this.should("Skal ha 39-ukersvarsel") {
-    size == 1 && filter { it.type == VarselType.MER_VEILEDNING.name }.size == 1
-}
-
-fun List<PPlanlagtVarsel>.skalIkkeHa39UkersVarsel() = this.should("Skal IKKE ha 39-ukersvarsel") {
-    size == 0
-}
-
-fun List<PPlanlagtVarsel>.skalHaUtsendingPaDato(utsendingsdato: LocalDate) =
-    this.should("Skal ha 39-ukersvarsel med utsendingsdato: $utsendingsdato") {
-        filter { it.utsendingsdato == utsendingsdato }.size == 1
-    }
 
 fun DatabaseInterface.shouldContainMikrofrontendEntry(fnr: String, tjeneste: Tjeneste) =
     this.should("Should contain at least one row with specified fnr and 'tjeneste'") {
