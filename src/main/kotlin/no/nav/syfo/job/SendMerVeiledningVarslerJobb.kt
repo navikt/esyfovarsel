@@ -7,14 +7,14 @@ import no.nav.syfo.service.MerVeiledningVarselFinder
 import no.nav.syfo.service.MerVeiledningVarselService
 import org.slf4j.LoggerFactory
 
-class VarselSender(
+class SendMerVeiledningVarslerJobb(
     private val merVeiledningVarselFinder: MerVeiledningVarselFinder,
     private val merVeiledningVarselService: MerVeiledningVarselService,
 ) {
-    private val log = LoggerFactory.getLogger(VarselSender::class.java)
+    private val log = LoggerFactory.getLogger(SendMerVeiledningVarslerJobb::class.java)
 
     suspend fun sendVarsler(): Int {
-        log.info("Starter SendVarslerJobb")
+        log.info("Starter SendMerVeiledningVarslerJobb")
 
         var antallVarslerSendt = 0
 
@@ -46,7 +46,7 @@ class VarselSender(
         log.info("Sendte $antallVarslerSendt varsler")
         tellMerVeiledningVarselSendt(antallVarslerSendt)
 
-        log.info("Avslutter SendVarslerJobb")
+        log.info("Avslutter SendMerVeiledningVarslerJobb")
 
         return antallVarslerSendt
     }
