@@ -58,5 +58,8 @@
     "dbName": "esyfovarsel",
     "dbUsername": "esyfovarsel-admin",
     "dbPassword": "password"
+  },
+  "toggleEnv": {
+    "sendAktivitetspliktForhandsvarsel": false
   }
 }
