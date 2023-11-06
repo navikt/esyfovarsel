@@ -21,7 +21,7 @@ fun DatabaseInterface.fetchMerVeiledningVarslerToSend(): List<PUtbetaling> {
                             AND FNR NOT IN 
                                 (SELECT FNR 
                                 FROM UTSENDT_VARSEL 
-                                WHERE TYPE = 'MER_VEILEDNING' 
+                                WHERE TYPE = 'SM_MER_VEILEDNING' 
                                 AND UTSENDT_TIDSPUNKT > NOW() - INTERVAL '$nyttVarselLimit' DAY)
                                 """
         .trimIndent()
