@@ -33,3 +33,6 @@ spec:
     - team: teamsykefravr
       application: isaktivitetskrav
       access: write
+    - team: team-esyfo
+      application: aktivitetskrav-backend
+      access: write

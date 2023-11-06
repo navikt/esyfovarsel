@@ -1,5 +1,4 @@
 package no.nav.syfo.service
-
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.clearAllMocks
@@ -15,13 +14,11 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.VarselData
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
 import org.amshove.kluent.shouldBeEqualTo
 import java.io.IOException
-
 const val SM_FNR = "123456789"
-
 class AktivitetskravVarselServiceTest : DescribeSpec({
     val accessControlService = mockk<AccessControlService>()
     val senderFacade = mockk<SenderFacade>(relaxed = true)
-    val aktivitetskravVarselService = AktivitetskravVarselService(senderFacade, accessControlService)
+    val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(senderFacade, accessControlService, "http://dokumentarkivOppfolgingDocumentsPageUrl", true)
 
     beforeTest {
         clearAllMocks()
@@ -33,12 +30,12 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
 
             every { accessControlService.getUserAccessStatus(SM_FNR) } returns UserAccessStatus(
                 SM_FNR,
-                canUserBeDigitallyNotified = true,
+                canUserBeDigitallyNotified = true
             )
 
-            aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
+            aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
 
-            verify(exactly = 1) {
+            verify(exactly = 0) {
                 senderFacade.sendBrevTilFysiskPrint(
                     any(),
                     forhandsvarselEvent,
@@ -46,7 +43,8 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
                     DistibusjonsType.VIKTIG
                 )
             }
-            verify(exactly = 0) {
+
+            verify(exactly = 1) {
                 senderFacade.sendTilBrukernotifikasjoner(
                     any(),
                     any(),
@@ -62,14 +60,14 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
         it("Får IOException dersom feil datatype") {
             val forhandsvarselEvent = createForhandsvarselHendelse()
             forhandsvarselEvent.data = "hei"
-
-            every { accessControlService.getUserAccessStatus(SM_FNR) } returns UserAccessStatus(
-                SM_FNR,
-                canUserBeDigitallyNotified = true,
-            )
+            every { accessControlService.getUserAccessStatus(SM_FNR) } returns
+                    UserAccessStatus(
+                        SM_FNR,
+                        canUserBeDigitallyNotified = true,
+                    )
 
             val exception = shouldThrow<IOException> {
-                aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
+                aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
             }
 
             exception.message shouldBeEqualTo "ArbeidstakerHendelse har feil format"
@@ -78,14 +76,14 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
         it("Får IOException dersom mangende journalpostid") {
             val forhandsvarselEvent = createForhandsvarselHendelse()
             forhandsvarselEvent.data = VarselData(journalpost = VarselDataJournalpost(uuid = "something", id = null))
-
-            every { accessControlService.getUserAccessStatus(SM_FNR) } returns UserAccessStatus(
-                SM_FNR,
-                canUserBeDigitallyNotified = true,
-            )
+            every { accessControlService.getUserAccessStatus(SM_FNR) } returns
+                    UserAccessStatus(
+                        SM_FNR,
+                        canUserBeDigitallyNotified = true,
+                    )
 
             val exception = shouldThrow<IOException> {
-                aktivitetskravVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
+                aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
             }
 
             exception.message shouldBeEqualTo "ArbeidstakerHendelse har feil format"
@@ -94,25 +92,29 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
         it("Tester deserialisering av varseldata") {
             val objectMapper = createObjectMapper()
 
-            val jsondata: String = """
-                {
-                	"@type": "ArbeidstakerHendelse",
-                	"type": "SM_FORHANDSVARSEL_STANS",
-                	"data": {
-                		"journalpost": {
-                			"uuid": "bda0b55a-df72-4888-a5a5-6bfa74cacafe",
-                			"id": "620049753"
-                		}
-                	},
-                	"arbeidstakerFnr": "***********",
-                	"orgnummer": null
-                }
-            """
+            every { accessControlService.getUserAccessStatus(any()) } returns
+                    UserAccessStatus(
+                        SM_FNR,
+                        canUserBeDigitallyNotified = false
+                    )
+
+            val jsondata: String = """{
+                "@type": "ArbeidstakerHendelse",
+                "type": "SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL",
+                "data": {
+                    "journalpost": {
+                	    "uuid": "bda0b55a-df72-4888-a5a5-6bfa74cacafe",
+                		"id": "620049753"
+                    }
+                },
+                "arbeidstakerFnr": "***********",
+                "orgnummer": null
+            }"""
 
             val arbeidstakerHendelse = objectMapper.readValue(jsondata, ArbeidstakerHendelse::class.java)
-            arbeidstakerHendelse.data = objectMapper.readTree(jsondata)["data"];
+            arbeidstakerHendelse.data = objectMapper.readTree(jsondata)["data"]
 
-            aktivitetskravVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelse)
+            aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelse)
 
             verify(exactly = 1) {
                 senderFacade.sendBrevTilFysiskPrint(
@@ -128,11 +130,10 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
 
 private fun createForhandsvarselHendelse(): ArbeidstakerHendelse {
     return ArbeidstakerHendelse(
-        HendelseType.SM_FORHANDSVARSEL_STANS,
+        type = HendelseType.SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL,
         false,
         varselData(journalpostId = "620049753", journalpostUuid = "bda0b55a-df72-4888-a5a5-6bfa74cacafe"),
         SM_FNR,
-        null,
+        null
     )
 }
-

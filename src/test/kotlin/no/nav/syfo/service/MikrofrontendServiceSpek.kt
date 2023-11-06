@@ -16,6 +16,7 @@ import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKa
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
 import no.nav.syfo.service.microfrontend.MikrofrontendService
+import no.nav.syfo.service.mikrofrontend.MikrofrontendAktivitetskravService
 import no.nav.syfo.testutil.*
 import no.nav.syfo.utils.DuplicateMotebehovException
 import no.nav.syfo.utils.MotebehovAfterBookingException
@@ -28,9 +29,11 @@ class MikrofrontendServiceSpek : DescribeSpec({
     val embeddedDatabase by lazy { EmbeddedDatabase() }
     val minSideMicrofrontendKafkaProducer: MinSideMicrofrontendKafkaProducer = mockk(relaxed = true)
     val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(embeddedDatabase)
+    val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(embeddedDatabase)
     val mikrofrontendService = MikrofrontendService(
         minSideMicrofrontendKafkaProducer,
         mikrofrontendDialogmoteService,
+        mikrofrontendAktivitetskravService,
         embeddedDatabase
     )
 
