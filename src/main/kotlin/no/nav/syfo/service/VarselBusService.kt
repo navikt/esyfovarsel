@@ -27,6 +27,7 @@ class VarselBusService(
     val oppfolgingsplanVarselService: OppfolgingsplanVarselService,
     val dialogmoteInnkallingVarselService: DialogmoteInnkallingVarselService,
     val aktivitetspliktForhandsvarselVarselService: AktivitetspliktForhandsvarselVarselService,
+    val aktivitetskravVarselService: AktivitetskravVarselService,
     val mikrofrontendService: MikrofrontendService,
 ) {
     private val log: Logger = LoggerFactory.getLogger(VarselBusService::class.qualifiedName)
@@ -57,6 +58,8 @@ class VarselBusService(
                 SM_DIALOGMOTE_NYTT_TID_STED,
                 SM_DIALOGMOTE_LEST
                     -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+
+                SM_FORHANDSVARSEL_STANS -> aktivitetskravVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
                 // TODO: Må håndtere at denne kan komme inn flere ganger før
                 //  man skrur på ekstern varsling (e.g. sjekk mikrofrontend
