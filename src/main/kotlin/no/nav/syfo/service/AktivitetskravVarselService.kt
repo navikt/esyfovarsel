@@ -6,6 +6,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_FORHANDSVARSEL_STANS
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselData
 import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
+import no.nav.syfo.metrics.tellAktivitetskravFraIsAktivitetskrav
 import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -19,6 +20,7 @@ class AktivitetskravVarselService(
 
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         if (!isNewSendingEnabled) {
+            tellAktivitetskravFraIsAktivitetskrav()
             if (varselHendelse.type == SM_FORHANDSVARSEL_STANS) {
                 val varselData = dataToVarselData(varselHendelse.data)
 
