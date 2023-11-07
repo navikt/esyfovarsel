@@ -48,6 +48,7 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonPro
 import no.nav.syfo.service.*
 import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
 import no.nav.syfo.service.microfrontend.MikrofrontendService
+import no.nav.syfo.service.mikrofrontend.MikrofrontendAktivitetskravService
 import no.nav.syfo.utils.LeaderElection
 import no.nav.syfo.utils.RunOnElection
 import java.util.concurrent.Executors
@@ -117,9 +118,19 @@ fun main() {
                     env.urlEnv.dialogmoterUrl,
                     accessControlService,
                 )
+
+
                 val aktivitetskravVarselService = AktivitetskravVarselService(
                     senderFacade,
                     accessControlService,
+                    !(env.toggleEnv.sendAktivitetspliktForhandsvarsel)
+                )
+
+                val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(
+                    senderFacade,
+                    accessControlService,
+                    env.urlEnv.dokumentarkivOppfolgingDocumentsPageUrl,
+                    env.toggleEnv.sendAktivitetspliktForhandsvarsel,
                 )
                 val oppfolgingsplanVarselService =
                     OppfolgingsplanVarselService(senderFacade, accessControlService, env.urlEnv.oppfolgingsplanerUrl)
@@ -132,8 +143,14 @@ fun main() {
                     dokarkivService,
                 )
                 val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(database)
+                val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(database)
                 val mikrofrontendService =
-                    MikrofrontendService(minSideMicrofrontendKafkaProducer, mikrofrontendDialogmoteService, database)
+                    MikrofrontendService(
+                        minSideMicrofrontendKafkaProducer,
+                        mikrofrontendDialogmoteService,
+                        mikrofrontendAktivitetskravService,
+                        database
+                    )
 
                 val varselBusService =
                     VarselBusService(
@@ -141,6 +158,7 @@ fun main() {
                         motebehovVarselService,
                         oppfolgingsplanVarselService,
                         dialogmoteInnkallingVarselService,
+                        aktivitetspliktForhandsvarselVarselService,
                         aktivitetskravVarselService,
                         mikrofrontendService,
                     )

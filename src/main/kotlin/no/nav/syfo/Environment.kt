@@ -62,6 +62,7 @@ fun getEnv(): Environment {
                 syfooppdfgenUrl = getEnvVar("SYFOOPPDFGEN_URL"),
                 syfoTilgangskontrollUrl = getEnvVar("SYFOTILGANGSKONTROLL_URL"),
                 syfoTilgangskontrollScope = getEnvVar("SYFOTILGANGSKONTROLL_SCOPE"),
+                dokumentarkivOppfolgingDocumentsPageUrl = getEnvVar("BASE_URL_DOKUMENTARKIV_OPPFOLGING_DOCUMENTS_PAGE")
             ),
             KafkaEnv(
                 bootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
@@ -84,6 +85,9 @@ fun getEnv(): Environment {
                 dbUsername = getEnvVar("GCP_DB_USERNAME"),
                 dbPassword = getEnvVar("GCP_DB_PASSWORD")
             ),
+            ToggleEnv(
+                sendAktivitetspliktForhandsvarsel = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSPLIKT_FORHANDSVARSEL")
+            )
         )
 }
 
@@ -96,6 +100,7 @@ data class Environment(
     val urlEnv: UrlEnv,
     val kafkaEnv: KafkaEnv,
     val dbEnv: DbEnv,
+    val toggleEnv: ToggleEnv
 )
 
 data class AppEnv(
@@ -138,6 +143,7 @@ data class UrlEnv(
     val syfooppdfgenUrl: String,
     val syfoTilgangskontrollUrl: String,
     val syfoTilgangskontrollScope: String,
+    val dokumentarkivOppfolgingDocumentsPageUrl: String
 )
 
 data class KafkaEnv(
@@ -165,6 +171,10 @@ data class DbEnv(
     var dbName: String,
     val dbUsername: String = "",
     val dbPassword: String = ""
+)
+
+data class ToggleEnv(
+    val sendAktivitetspliktForhandsvarsel: Boolean
 )
 
 data class JobEnv(

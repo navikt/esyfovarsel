@@ -3,8 +3,8 @@ package no.nav.syfo.kafka.producers.mineside_microfrontend
 import com.fasterxml.jackson.annotation.JsonProperty
 
 enum class MinSideEvent {
-    enable,
-    disable
+    ENABLE,
+    DISABLE
 }
 
 data class MinSideRecord(

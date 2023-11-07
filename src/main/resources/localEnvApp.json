@@ -35,7 +35,8 @@
     "dokarkivScope": "dokarkivScope",
     "syfooppdfgenUrl": "http://localhost:4545",
     "syfoTilgangskontrollUrl": "http://syfotilgangskontrollUrl:9099",
-    "syfoTilgangskontrollScope": "syfotilgangskontrollScope"
+    "syfoTilgangskontrollScope": "syfotilgangskontrollScope",
+    "dokumentarkivOppfolgingDocumentsPageUrl": "http://dokumentarkivOppfolgingDocumentsPageUrl:9099"
   },
   "kafkaEnv": {
     "bootstrapServersUrl": "http://localhost:9092",
@@ -57,5 +58,8 @@
     "dbName": "esyfovarsel",
     "dbUsername": "esyfovarsel-admin",
     "dbPassword": "password"
+  },
+  "toggleEnv": {
+    "sendAktivitetspliktForhandsvarsel": false
   }
 }
