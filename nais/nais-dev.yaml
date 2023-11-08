@@ -122,7 +122,7 @@ spec:
     - name: TOGGLE_SEND_AKTIVITETSKRAV_VARSLER
       value: "true"
     - name: TOGGLE_SEND_AKTIVITETSPLIKT_FORHANDSVARSEL
-      value: "true"
+      value: "false"
     - name: BASE_URL_SYK_INFO
       value: https://www-gcp.dev.nav.no/syk/info
     - name: BASE_URL_DIALOGMOTER
