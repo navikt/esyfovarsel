@@ -1,7 +1,10 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.*
-import no.nav.syfo.access.domain.UserAccessStatus
+import no.nav.syfo.BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT
+import no.nav.syfo.BRUKERNOTIFIKASJONER_MER_VEILEDNING_URL
+import no.nav.syfo.DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT
+import no.nav.syfo.DITT_SYKEFRAVAER_MER_VEILEDNING_URL
+import no.nav.syfo.UrlEnv
 import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
@@ -21,13 +24,14 @@ class MerVeiledningVarselService(
     val urlEnv: UrlEnv,
     val pdfgenConsumer: PdfgenConsumer,
     val dokarkivService: DokarkivService,
+    val accessControlService: AccessControlService,
 ) {
     private val log = LoggerFactory.getLogger(MerVeiledningVarselService::class.qualifiedName)
     suspend fun sendVarselTilArbeidstaker(
         arbeidstakerHendelse: ArbeidstakerHendelse,
         planlagtVarselUuid: String,
-        userAccessStatus: UserAccessStatus,
     ) {
+        val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerHendelse.arbeidstakerFnr)
         val isBrukerReservert = !userAccessStatus.canUserBeDigitallyNotified
 
         if (isBrukerReservert) {

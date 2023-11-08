@@ -141,6 +141,7 @@ fun main() {
                     env.urlEnv,
                     pdfgenConsumer,
                     dokarkivService,
+                    accessControlService
                 )
                 val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(database)
                 val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(database)
@@ -177,7 +178,6 @@ fun main() {
 
                     serverModule(
                         env,
-                        accessControlService,
                         merVeiledningVarselService,
                         sykepengerMaxDateService,
                         sykmeldingService,
@@ -222,7 +222,6 @@ private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsume
 
 fun Application.serverModule(
     env: Environment,
-    accessControlService: AccessControlService,
     merVeiledningVarselService: MerVeiledningVarselService,
     sykepengerMaxDateService: SykepengerMaxDateService,
     sykmeldingService: SykmeldingService,
@@ -236,18 +235,9 @@ fun Application.serverModule(
         pdlConsumer,
     )
 
-    val sendVarselService =
-        SendVarselService(
-            accessControlService,
-            env.urlEnv,
-            merVeiledningVarselService,
-            merVeiledningVarselFinder,
-        )
-
     val varselSender = VarselSender(
-        database,
-        sendVarselService,
         merVeiledningVarselFinder,
+        merVeiledningVarselService
     )
 
     install(ContentNegotiation) {
