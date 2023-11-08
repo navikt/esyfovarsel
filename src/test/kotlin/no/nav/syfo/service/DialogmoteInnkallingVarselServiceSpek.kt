@@ -411,8 +411,11 @@ fun varselData(journalpostUuid: String, journalpostId: String) = """{
             "uuid": "$journalpostUuid",
             "id": "$journalpostId"
         },
-        "narmesteLeder": null,
-        "motetidspunkt": null
+        "aktivitetskrav": {
+            "sendForhandsvarsel": true,
+            "enableMicrofrontend": true,
+            "extendMicrofrontendDuration": false
+        }
     }
 """.trimIndent()
 

@@ -1,7 +1,6 @@
 package no.nav.syfo.kafka.consumers.varselbus
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.io.IOException
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.*

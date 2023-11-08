@@ -98,10 +98,15 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
                         canUserBeDigitallyNotified = false
                     )
 
-            val jsondata: String = """{
+            val jsondata = """{
                 "@type": "ArbeidstakerHendelse",
-                "type": "SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL",
+                "type": "SM_AKTIVITETSPLIKT",
                 "data": {
+                    "aktivitetskrav": {
+                        "sendForhandsvarsel": true,
+                        "enableMicrofrontend": true,
+                        "extendMicrofrontendDuration": false
+                    },
                     "journalpost": {
                 	    "uuid": "bda0b55a-df72-4888-a5a5-6bfa74cacafe",
                 		"id": "620049753"
@@ -130,7 +135,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
 
 private fun createForhandsvarselHendelse(): ArbeidstakerHendelse {
     return ArbeidstakerHendelse(
-        type = HendelseType.SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL,
+        type = HendelseType.SM_AKTIVITETSPLIKT,
         false,
         varselData(journalpostId = "620049753", journalpostUuid = "bda0b55a-df72-4888-a5a5-6bfa74cacafe"),
         SM_FNR,

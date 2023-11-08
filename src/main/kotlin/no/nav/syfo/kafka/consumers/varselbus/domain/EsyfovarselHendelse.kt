@@ -36,6 +36,7 @@ data class VarselData(
     val journalpost: VarselDataJournalpost? = null,
     val narmesteLeder: VarselDataNarmesteLeder? = null,
     val motetidspunkt: VarselDataMotetidspunkt? = null,
+    val aktivitetskrav: VarselDataAktivitetskrav? = null
 )
 
 data class VarselDataJournalpost(
@@ -49,6 +50,12 @@ data class VarselDataNarmesteLeder(
 
 data class VarselDataMotetidspunkt(
     val tidspunkt: LocalDateTime,
+)
+
+data class VarselDataAktivitetskrav(
+    val sendForhandsvarsel: Boolean,
+    val enableMicrofrontend: Boolean,
+    val extendMicrofrontendDuration: Boolean
 )
 
 data class VarselDataMotebehovTilbakemelding(
@@ -72,14 +79,7 @@ enum class HendelseType {
     NL_DIALOGMOTE_NYTT_TID_STED,
     SM_DIALOGMOTE_NYTT_TID_STED,
     SM_DIALOGMOTE_LEST,
-    SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL,
-    SM_AKTIVITETSPLIKT_STATUS_NY,
-    SM_AKTIVITETSPLIKT_STATUS_UNNTAK,
-    SM_AKTIVITETSPLIKT_STATUS_OPPFYLT,
-    SM_AKTIVITETSPLIKT_STATUS_AUTOMATISK_OPPFYLT,
-    SM_AKTIVITETSPLIKT_STATUS_IKKE_OPPFYLT,
-    SM_AKTIVITETSPLIKT_STATUS_IKKE_AKTUELL,
-    SM_AKTIVITETSPLIKT_STATUS_AVVENT,
+    SM_AKTIVITETSPLIKT,
     SM_FORHANDSVARSEL_STANS, // TODO: Slett denne når vi tar over aktivitetskrav-varselløypa fra iSYFO
 }
 
@@ -134,38 +134,21 @@ fun EsyfovarselHendelse.toArbeidstakerHendelse(): ArbeidstakerHendelse {
 fun EsyfovarselHendelse.skalFerdigstilles() =
     ferdigstill ?: false
 
-fun HendelseType.isAktivitetspliktType() = this in listOf(
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_NY,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_UNNTAK,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_OPPFYLT,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_AUTOMATISK_OPPFYLT,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_IKKE_OPPFYLT,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_IKKE_AKTUELL,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_AVVENT
-)
+fun HendelseType.isAktivitetspliktType() = this == HendelseType.SM_AKTIVITETSPLIKT
 
-fun HendelseType.isDialogmoteType() = this in listOf(
+fun HendelseType.isDialogmoteInnkallingType() = this in listOf(
     HendelseType.SM_DIALOGMOTE_INNKALT,
     HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
     HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV
 )
 
-fun ArbeidstakerHendelse.isNotEligibleForMikrofrontendProcessing() = this.type !in listOf(
-    HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
-    HendelseType.SM_DIALOGMOTE_INNKALT,
+fun HendelseType.isDialogmoteType() = this.isDialogmoteInnkallingType() or (this in listOf(
     HendelseType.SM_DIALOGMOTE_AVLYST,
     HendelseType.SM_DIALOGMOTE_REFERAT,
-    HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
     HendelseType.SM_DIALOGMOTE_LEST,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_UNNTAK,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_OPPFYLT,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_AUTOMATISK_OPPFYLT,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_IKKE_OPPFYLT,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_IKKE_AKTUELL,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_AVVENT,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_NY,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL
-)
+))
 
-fun HendelseType.isNotValidHendelseType() = !this.isAktivitetspliktType() && !this.isDialogmoteType()
+fun ArbeidstakerHendelse.isNotEligibleForMikrofrontendProcessing() =
+    !(this.type.isDialogmoteType() or this.type.isAktivitetspliktType())
+
+fun HendelseType.isNotValidHendelseType() = !this.isAktivitetspliktType() && !this.isDialogmoteInnkallingType()
