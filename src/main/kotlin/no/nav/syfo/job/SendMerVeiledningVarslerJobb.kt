@@ -12,15 +12,16 @@ class SendMerVeiledningVarslerJobb(
     private val merVeiledningVarselService: MerVeiledningVarselService,
 ) {
     private val log = LoggerFactory.getLogger(SendMerVeiledningVarslerJobb::class.java)
+    private val logName = "[${SendMerVeiledningVarslerJobb::class.java}]"
 
     suspend fun sendVarsler(): Int {
-        log.info("Starter SendMerVeiledningVarslerJobb")
+        log.info("$logName Starter SendMerVeiledningVarslerJobb")
 
         var antallVarslerSendt = 0
 
         val varslerToSendToday = merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
 
-        log.info("Planlegger å sende ${varslerToSendToday.size} varsler totalt")
+        log.info("$logName Planlegger å sende ${varslerToSendToday.size} varsler totalt")
 
         varslerToSendToday.forEach {
             try {
@@ -36,17 +37,17 @@ class SendMerVeiledningVarslerJobb(
                 )
 
                 antallVarslerSendt++
-                log.info("Sendt varsel med UUID ${it.uuid}")
+                log.info("$logName Sendt varsel med UUID ${it.uuid}")
             } catch (e: RuntimeException) {
-                log.error("Feil i utsending av varsel med UUID: ${it.uuid} | ${e.message}", e)
+                log.error("$logName Feil i utsending av varsel med UUID: ${it.uuid} | ${e.message}", e)
             }
 
         }
 
-        log.info("Sendte $antallVarslerSendt varsler")
+        log.info("$logName Sendte $antallVarslerSendt varsler")
         tellMerVeiledningVarselSendt(antallVarslerSendt)
 
-        log.info("Avslutter SendMerVeiledningVarslerJobb")
+        log.info("$logName Avslutter SendMerVeiledningVarslerJobb")
 
         return antallVarslerSendt
     }
