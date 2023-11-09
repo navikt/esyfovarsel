@@ -16,7 +16,7 @@ import no.nav.syfo.api.job.registerJobTriggerApi
 import no.nav.syfo.api.job.urlPathJobTrigger
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
-import no.nav.syfo.job.VarselSender
+import no.nav.syfo.job.SendMerVeiledningVarslerJobb
 import no.nav.syfo.service.AccessControlService
 import no.nav.syfo.service.MerVeiledningVarselFinder
 import no.nav.syfo.service.MerVeiledningVarselService
@@ -109,8 +109,8 @@ class JobApiSpek : DescribeSpec({
 
         justRun { mikrofrontendService.findAndCloseExpiredMikrofrontends() }
 
-        val varselSender =
-            VarselSender(
+        val sendMerVeiledningVarslerJobb =
+            SendMerVeiledningVarslerJobb(
                 merVeiledningVarselFinder,
                 merVeiledningVarselService
             )
@@ -119,7 +119,7 @@ class JobApiSpek : DescribeSpec({
             start()
             application.install(ContentNegotiation, contentNegotationFeature())
             application.routing {
-                registerJobTriggerApi(varselSender, mikrofrontendService)
+                registerJobTriggerApi(sendMerVeiledningVarslerJobb, mikrofrontendService)
             }
 
             it("esyfovarsel-job trigger utsending av 2 varsler digitalt og 3 varsler som brev") {

@@ -1,39 +1,10 @@
 package no.nav.syfo.db
 
-import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.domain.PersonIdent
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.*
-
-fun DatabaseInterface.storeUtsendtVarsel(planlagtVarsel: PPlanlagtVarsel) {
-    val insertStatement = """INSERT INTO UTSENDT_VARSEL (
-        uuid,
-        fnr,
-        aktor_id,
-        type,
-        utsendt_tidspunkt,
-        planlagt_varsel_id) VALUES (?, ?, ?, ?, ?, ?)
-    """.trimIndent()
-
-    val now = Timestamp.valueOf(LocalDateTime.now())
-    val varselUUID = UUID.randomUUID()
-
-    connection.use { connection ->
-        connection.prepareStatement(insertStatement).use {
-            it.setObject(1, varselUUID)
-            it.setString(2, planlagtVarsel.fnr)
-            it.setString(3, planlagtVarsel.aktorId)
-            it.setString(4, planlagtVarsel.type)
-            it.setTimestamp(5, now)
-            it.setObject(6, UUID.fromString(planlagtVarsel.uuid))
-            it.executeUpdate()
-        }
-
-        connection.commit()
-    }
-}
 
 fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
     val insertStatement = """INSERT INTO UTSENDT_VARSEL (

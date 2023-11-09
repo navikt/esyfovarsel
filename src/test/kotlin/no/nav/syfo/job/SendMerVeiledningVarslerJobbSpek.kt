@@ -16,7 +16,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class VarselSenderSpek : DescribeSpec({
+class SendMerVeiledningVarslerJobbSpek : DescribeSpec({
 
     val merVeiledningVarselFinder = mockk<MerVeiledningVarselFinder>(relaxed = true)
     val merVeiledningVarselService = mockk<MerVeiledningVarselService>(relaxed = true)
@@ -31,13 +31,13 @@ class VarselSenderSpek : DescribeSpec({
         LocalDateTime.now(),
     )
 
-    describe("VarselSenderSpek") {
+    describe("SendMerVeiledningVarslerJobbSpek") {
         afterTest {
             clearAllMocks()
         }
 
         it("Sender varsler") {
-            val sendVarselJobb = VarselSender(
+            val sendVarselJobb = SendMerVeiledningVarslerJobb(
                 merVeiledningVarselFinder,
                 merVeiledningVarselService
             )
