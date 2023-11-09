@@ -80,7 +80,6 @@ enum class HendelseType {
     SM_AKTIVITETSPLIKT_STATUS_IKKE_OPPFYLT,
     SM_AKTIVITETSPLIKT_STATUS_IKKE_AKTUELL,
     SM_AKTIVITETSPLIKT_STATUS_AVVENT,
-    SM_FORHANDSVARSEL_STANS, // TODO: Slett denne når vi tar over aktivitetskrav-varselløypa fra iSYFO
 }
 
 fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
@@ -88,11 +87,12 @@ fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
     if (eventType.isNotValidHendelseType()) {
         throw IllegalArgumentException(
             "${eventType.name} er ikke gyldig hendelse for å hente ut " +
-                    "'synligTom'-felt",
+                "'synligTom'-felt",
         )
     }
-    if (eventType.isAktivitetspliktType())
+    if (eventType.isAktivitetspliktType()) {
         return LocalDateTime.now().plusDays(30L)
+    }
     return if (eventType != HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV) this.motetidspunkt() else null
 }
 
@@ -142,13 +142,13 @@ fun HendelseType.isAktivitetspliktType() = this in listOf(
     HendelseType.SM_AKTIVITETSPLIKT_STATUS_AUTOMATISK_OPPFYLT,
     HendelseType.SM_AKTIVITETSPLIKT_STATUS_IKKE_OPPFYLT,
     HendelseType.SM_AKTIVITETSPLIKT_STATUS_IKKE_AKTUELL,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_AVVENT
+    HendelseType.SM_AKTIVITETSPLIKT_STATUS_AVVENT,
 )
 
 fun HendelseType.isDialogmoteType() = this in listOf(
     HendelseType.SM_DIALOGMOTE_INNKALT,
     HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
-    HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV
+    HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
 )
 
 fun ArbeidstakerHendelse.isNotEligibleForMikrofrontendProcessing() = this.type !in listOf(
@@ -165,7 +165,7 @@ fun ArbeidstakerHendelse.isNotEligibleForMikrofrontendProcessing() = this.type !
     HendelseType.SM_AKTIVITETSPLIKT_STATUS_IKKE_AKTUELL,
     HendelseType.SM_AKTIVITETSPLIKT_STATUS_AVVENT,
     HendelseType.SM_AKTIVITETSPLIKT_STATUS_NY,
-    HendelseType.SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL
+    HendelseType.SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL,
 )
 
 fun HendelseType.isNotValidHendelseType() = !this.isAktivitetspliktType() && !this.isDialogmoteType()
