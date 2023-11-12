@@ -98,13 +98,7 @@ class MikrofrontendService(
             HendelseType.SM_DIALOGMOTE_REFERAT,
             HendelseType.SM_DIALOGMOTE_AVLYST
                 -> Tjeneste.DIALOGMOTE
-            HendelseType.SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL,
-            HendelseType.SM_AKTIVITETSPLIKT_STATUS_NY,
-            HendelseType.SM_AKTIVITETSPLIKT_STATUS_UNNTAK,
-            HendelseType.SM_AKTIVITETSPLIKT_STATUS_OPPFYLT,
-            HendelseType.SM_AKTIVITETSPLIKT_STATUS_AUTOMATISK_OPPFYLT,
-            HendelseType.SM_AKTIVITETSPLIKT_STATUS_IKKE_OPPFYLT,
-            HendelseType.SM_AKTIVITETSPLIKT_STATUS_IKKE_AKTUELL,
+            HendelseType.SM_AKTIVITETSPLIKT
                 -> Tjeneste.AKTIVITETSKRAV
             else -> throw IllegalArgumentException("$this is not a valid type for updating MF state")
         }

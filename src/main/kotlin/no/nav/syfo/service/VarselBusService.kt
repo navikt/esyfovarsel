@@ -64,7 +64,7 @@ class VarselBusService(
                 // TODO: Må håndtere at denne kan komme inn flere ganger før
                 //  man skrur på ekstern varsling (e.g. sjekk mikrofrontend
                 //  state i database før utsending)
-                HendelseType.SM_AKTIVITETSPLIKT_STATUS_FORHANDSVARSEL -> aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+                HendelseType.SM_AKTIVITETSPLIKT -> aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
                 else -> {
                     log.warn("Klarte ikke mappe varsel av type ${varselHendelse.type} ved behandling forsøk")
