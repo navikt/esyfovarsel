@@ -17,12 +17,12 @@ import org.slf4j.LoggerFactory
 
 class VeilederTilgangskontrollConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client = httpClient()
-    private val basepath = urlEnv.syfoTilgangskontrollUrl
+    private val basepath = urlEnv.istilgangskontrollUrl
     private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.veileder.VeilederTilgangskontrollConsumer")
-    private val scope = urlEnv.syfoTilgangskontrollScope
+    private val scope = urlEnv.istilgangskontrollScope
 
     suspend fun hasAccess(personIdent: PersonIdent, token: String, callId: String): Boolean {
-        val requestURL = "$basepath/syfo-tilgangskontroll/api/tilgang/navident/person"
+        val requestURL = "$basepath/api/tilgang/navident/person"
 
         try {
             val onBehalfOfToken = azureAdTokenConsumer.getOnBehalfOfToken(
@@ -37,7 +37,7 @@ class VeilederTilgangskontrollConsumer(urlEnv: UrlEnv, private val azureAdTokenC
                 header(NAV_CALL_ID_HEADER, callId)
             }
 
-            return response.body<Tilgang>().harTilgang
+            return response.body<Tilgang>().erGodkjent
         } catch (e: ClientRequestException) {
             if (e.response.status == HttpStatusCode.Forbidden) {
                 log.warn("Denied veileder access to person: ${e.message}")

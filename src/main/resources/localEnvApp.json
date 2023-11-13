@@ -34,8 +34,8 @@
     "dokarkivUrl": "http://dokarkivUrl:9099",
     "dokarkivScope": "dokarkivScope",
     "syfooppdfgenUrl": "http://localhost:4545",
-    "syfoTilgangskontrollUrl": "http://syfotilgangskontrollUrl:9099",
-    "syfoTilgangskontrollScope": "syfotilgangskontrollScope",
+    "istilgangskontrollUrl": "http://istilgangskontrollUrl:9099",
+    "istilgangskontrollScope": "istilgangskontrollScope",
     "dokumentarkivOppfolgingDocumentsPageUrl": "http://dokumentarkivOppfolgingDocumentsPageUrl:9099"
   },
   "kafkaEnv": {
