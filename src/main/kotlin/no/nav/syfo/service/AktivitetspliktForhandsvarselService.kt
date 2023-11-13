@@ -3,13 +3,9 @@ package no.nav.syfo.service
 import no.nav.syfo.BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_TEXT
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.VarselData
-import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.utils.dataToVarselData
-import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.LoggerFactory
-import java.io.IOException
 import java.net.URL
 
 class AktivitetspliktForhandsvarselVarselService(
@@ -19,11 +15,6 @@ class AktivitetspliktForhandsvarselVarselService(
     private val isSendingEnabled: Boolean,
 ) {
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
-        // TODO:  OBS, VIKTIG!
-        // TODO:  Vi har ikke lov til å sende aktivtetskrav-varsel som en beskjed.
-        // TODO:  Det må implementeres som en oppgave utsending før vi kan skru
-        // TODO:  på denne funksjonaliteten. Da må vi også finne ut hvordan vi
-        // TODO:  lukker oppgaven når bruker har utført/lest den
         if (isSendingEnabled) {
             log.info("[FORHAANDSVARSEL] sending enabled")
             val data = dataToVarselData(varselHendelse.data)
@@ -43,7 +34,7 @@ class AktivitetspliktForhandsvarselVarselService(
                     content = BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_TEXT,
                     url = URL("$journalpostPageUrl/${data.journalpost.id}"),
                     varselHendelse = varselHendelse,
-                    meldingType = BrukernotifikasjonKafkaProducer.MeldingType.BESKJED,
+                    meldingType = BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE,
                     eksternVarsling = true,
                 )
             } else {
