@@ -158,3 +158,5 @@ spec:
       value: api://prod-gcp.teamsykefravr.syfo-tilgangskontroll/.default
     - name: BASE_URL_DOKUMENTARKIV_OPPFOLGING_DOCUMENTS_PAGE
       value: https://www.nav.no/dokumentarkiv/tema/OPP
+    - name: URL_AKTIVITETSKRAV_INFO_PAGE
+      value: https://www.nav.no/syk/aktivitetskrav

@@ -54,7 +54,6 @@ import no.nav.syfo.utils.RunOnElection
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-
 val state: ApplicationState = ApplicationState()
 val backgroundTasksContext = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
 lateinit var database: DatabaseInterface
@@ -119,17 +118,16 @@ fun main() {
                     accessControlService,
                 )
 
-
                 val aktivitetskravVarselService = AktivitetskravVarselService(
                     senderFacade,
                     accessControlService,
-                    !(env.toggleEnv.sendAktivitetspliktForhandsvarsel)
+                    !(env.toggleEnv.sendAktivitetspliktForhandsvarsel),
                 )
 
                 val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(
                     senderFacade,
                     accessControlService,
-                    env.urlEnv.dokumentarkivOppfolgingDocumentsPageUrl,
+                    env.urlEnv.urlAktivitetskravInfoPage,
                     env.toggleEnv.sendAktivitetspliktForhandsvarsel,
                 )
                 val oppfolgingsplanVarselService =
@@ -141,7 +139,7 @@ fun main() {
                     env.urlEnv,
                     pdfgenConsumer,
                     dokarkivService,
-                    accessControlService
+                    accessControlService,
                 )
                 val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(database)
                 val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(database)
@@ -150,7 +148,7 @@ fun main() {
                         minSideMicrofrontendKafkaProducer,
                         mikrofrontendDialogmoteService,
                         mikrofrontendAktivitetskravService,
-                        database
+                        database,
                     )
 
                 val varselBusService =
@@ -237,7 +235,7 @@ fun Application.serverModule(
 
     val sendMerVeiledningVarslerJobb = SendMerVeiledningVarslerJobb(
         merVeiledningVarselFinder,
-        merVeiledningVarselService
+        merVeiledningVarselService,
     )
 
     install(ContentNegotiation) {
@@ -319,7 +317,7 @@ fun Application.kafkaModule(
             launch(backgroundTasksContext) {
                 launchKafkaListener(
                     state,
-                    TestdataResetConsumer(env, testdataResetService)
+                    TestdataResetConsumer(env, testdataResetService),
                 )
             }
         }

@@ -11,7 +11,7 @@ import java.net.URL
 class AktivitetspliktForhandsvarselVarselService(
     val senderFacade: SenderFacade,
     val accessControlService: AccessControlService,
-    val journalpostPageUrl: String,
+    val urlAktivitetskravInfoPage: String,
     private val isSendingEnabled: Boolean,
 ) {
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
@@ -32,7 +32,7 @@ class AktivitetspliktForhandsvarselVarselService(
                     uuid = data.journalpost.uuid,
                     mottakerFnr = varselHendelse.arbeidstakerFnr,
                     content = BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_TEXT,
-                    url = URL("$journalpostPageUrl/${data.journalpost.id}"),
+                    url = URL(urlAktivitetskravInfoPage),
                     varselHendelse = varselHendelse,
                     meldingType = BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE,
                     eksternVarsling = true,

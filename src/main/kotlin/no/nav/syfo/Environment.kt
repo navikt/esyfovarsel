@@ -9,20 +9,21 @@ const val localJobPropertiesPath = "./src/main/resources/localEnvJob.json"
 const val serviceuserMounthPath = "/var/run/secrets"
 val objectMapper = ObjectMapper().registerKotlinModule()
 fun getJobEnv() =
-    if (isLocal())
+    if (isLocal()) {
         objectMapper.readValue(File(localJobPropertiesPath), JobEnv::class.java)
-    else
+    } else {
         JobEnv(
             sendVarsler = getBooleanEnvVar("SEND_VARSLER"),
             jobTriggerUrl = getEnvVar("ESYFOVARSEL_JOB_TRIGGER_URL"),
             serviceuserUsername = File("$serviceuserMounthPath/username").readText(),
-            serviceuserPassword = File("$serviceuserMounthPath/password").readText()
+            serviceuserPassword = File("$serviceuserMounthPath/password").readText(),
         )
+    }
 
 fun getEnv(): Environment {
-    return if (isLocal())
+    return if (isLocal()) {
         getTestEnv()
-    else
+    } else {
         Environment(
             AppEnv(
                 applicationPort = getEnvVar("APPLICATION_PORT", "8080").toInt(),
@@ -62,7 +63,8 @@ fun getEnv(): Environment {
                 syfooppdfgenUrl = getEnvVar("SYFOOPPDFGEN_URL"),
                 syfoTilgangskontrollUrl = getEnvVar("SYFOTILGANGSKONTROLL_URL"),
                 syfoTilgangskontrollScope = getEnvVar("SYFOTILGANGSKONTROLL_SCOPE"),
-                dokumentarkivOppfolgingDocumentsPageUrl = getEnvVar("BASE_URL_DOKUMENTARKIV_OPPFOLGING_DOCUMENTS_PAGE")
+                dokumentarkivOppfolgingDocumentsPageUrl = getEnvVar("BASE_URL_DOKUMENTARKIV_OPPFOLGING_DOCUMENTS_PAGE"),
+                urlAktivitetskravInfoPage = getEnvVar("URL_AKTIVITETSKRAV_INFO_PAGE"),
             ),
             KafkaEnv(
                 bootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
@@ -75,20 +77,21 @@ fun getEnv(): Environment {
                 KafkaSslEnv(
                     truststoreLocation = getEnvVar("KAFKA_TRUSTSTORE_PATH"),
                     keystoreLocation = getEnvVar("KAFKA_KEYSTORE_PATH"),
-                    credstorePassword = getEnvVar("KAFKA_CREDSTORE_PASSWORD")
-                )
+                    credstorePassword = getEnvVar("KAFKA_CREDSTORE_PASSWORD"),
+                ),
             ),
             DbEnv(
                 dbHost = getEnvVar("GCP_DB_HOST", "127.0.0.1"),
                 dbPort = getEnvVar("GCP_DB_PORT", "5432"),
                 dbName = getEnvVar("GCP_DB_DATABASE"),
                 dbUsername = getEnvVar("GCP_DB_USERNAME"),
-                dbPassword = getEnvVar("GCP_DB_PASSWORD")
+                dbPassword = getEnvVar("GCP_DB_PASSWORD"),
             ),
             ToggleEnv(
-                sendAktivitetspliktForhandsvarsel = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSPLIKT_FORHANDSVARSEL")
-            )
+                sendAktivitetspliktForhandsvarsel = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSPLIKT_FORHANDSVARSEL"),
+            ),
         )
+    }
 }
 
 fun getTestEnv() =
@@ -100,7 +103,7 @@ data class Environment(
     val urlEnv: UrlEnv,
     val kafkaEnv: KafkaEnv,
     val dbEnv: DbEnv,
-    val toggleEnv: ToggleEnv
+    val toggleEnv: ToggleEnv,
 )
 
 data class AppEnv(
@@ -143,26 +146,27 @@ data class UrlEnv(
     val syfooppdfgenUrl: String,
     val syfoTilgangskontrollUrl: String,
     val syfoTilgangskontrollScope: String,
-    val dokumentarkivOppfolgingDocumentsPageUrl: String
+    val dokumentarkivOppfolgingDocumentsPageUrl: String,
+    val urlAktivitetskravInfoPage: String,
 )
 
 data class KafkaEnv(
     var bootstrapServersUrl: String,
     val schemaRegistry: KafkaSchemaRegistryEnv,
     val aivenBroker: String,
-    val sslConfig: KafkaSslEnv
+    val sslConfig: KafkaSslEnv,
 )
 
 data class KafkaSchemaRegistryEnv(
     val url: String,
     val username: String,
-    val password: String
+    val password: String,
 )
 
 data class KafkaSslEnv(
     val truststoreLocation: String,
     val keystoreLocation: String,
-    val credstorePassword: String
+    val credstorePassword: String,
 )
 
 data class DbEnv(
@@ -170,18 +174,18 @@ data class DbEnv(
     var dbPort: String,
     var dbName: String,
     val dbUsername: String = "",
-    val dbPassword: String = ""
+    val dbPassword: String = "",
 )
 
 data class ToggleEnv(
-    val sendAktivitetspliktForhandsvarsel: Boolean
+    val sendAktivitetspliktForhandsvarsel: Boolean,
 )
 
 data class JobEnv(
     val sendVarsler: Boolean,
     val jobTriggerUrl: String,
     val serviceuserUsername: String,
-    val serviceuserPassword: String
+    val serviceuserPassword: String,
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =
