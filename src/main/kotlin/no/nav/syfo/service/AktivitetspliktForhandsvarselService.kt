@@ -14,6 +14,7 @@ class AktivitetspliktForhandsvarselVarselService(
     val urlAktivitetskravInfoPage: String,
     private val isSendingEnabled: Boolean,
 ) {
+    // TODO
     fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         if (isSendingEnabled) {
             log.info("[FORHAANDSVARSEL] sending enabled")
