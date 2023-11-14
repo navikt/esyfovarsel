@@ -137,7 +137,7 @@ class SenderFacade(
         fetchUferdigstilteVarsler(
             PersonIdent(varselHendelse.arbeidstakerFnr),
             varselHendelse.orgnummer,
-            setOf(varselHendelse.type)
+            setOf(varselHendelse.type),
         )
             .forEach { ferdigstillVarsel(it) }
     }
@@ -146,7 +146,7 @@ class SenderFacade(
         fetchUferdigstilteVarsler(
             PersonIdent(varselHendelse.arbeidstakerFnr),
             varselHendelse.orgnummer,
-            setOf(varselHendelse.type)
+            setOf(varselHendelse.type),
         )
             .forEach { ferdigstillVarsel(it) }
     }
@@ -156,7 +156,7 @@ class SenderFacade(
             PersonIdent(varselHendelse.arbeidstakerFnr),
             varselHendelse.orgnummer,
             setOf(varselHendelse.type),
-            DITT_SYKEFRAVAER
+            DITT_SYKEFRAVAER,
         )
             .forEach { ferdigstillVarsel(it) }
     }
@@ -166,7 +166,7 @@ class SenderFacade(
             PersonIdent(varselHendelse.arbeidstakerFnr),
             varselHendelse.orgnummer,
             varselTyper,
-            DITT_SYKEFRAVAER
+            DITT_SYKEFRAVAER,
         )
             .forEach { ferdigstillVarsel(it) }
     }
@@ -175,7 +175,7 @@ class SenderFacade(
         arbeidstakerFnr: PersonIdent,
         orgnummer: String? = null,
         types: Set<HendelseType> = emptySet(),
-        kanal: Kanal? = null
+        kanal: Kanal? = null,
     ): List<PUtsendtVarsel> {
         return database.fetchUferdigstilteVarsler(arbeidstakerFnr)
             .filter { orgnummer == null || it.orgnummer == orgnummer }
@@ -184,6 +184,7 @@ class SenderFacade(
     }
 
     private fun ferdigstillVarsel(utsendtVarsel: PUtsendtVarsel) {
+        log.info("[FORHAANDSVARSEL] Fetched utsendt varsel from DB. About to ferdigstill. fnr:${utsendtVarsel.fnr}, uuid: ${utsendtVarsel.uuid}, eksternReferanse: ${utsendtVarsel.eksternReferanse}")
         if (utsendtVarsel.eksternReferanse != null && utsendtVarsel.ferdigstiltTidspunkt == null) {
             when (utsendtVarsel.kanal) {
                 BRUKERNOTIFIKASJON.name -> {
@@ -193,7 +194,7 @@ class SenderFacade(
                 DITT_SYKEFRAVAER.name -> {
                     dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(
                         utsendtVarsel.eksternReferanse,
-                        utsendtVarsel.fnr
+                        utsendtVarsel.fnr,
                     )
                 }
 
@@ -212,14 +213,13 @@ class SenderFacade(
             }
             database.setUtsendtVarselToFerdigstilt(utsendtVarsel.eksternReferanse)
         }
-
     }
 
     fun sendBrevTilFysiskPrint(
         uuid: String,
         varselHendelse: ArbeidstakerHendelse,
         journalpostId: String,
-        distribusjonsType: DistibusjonsType = DistibusjonsType.ANNET
+        distribusjonsType: DistibusjonsType = DistibusjonsType.ANNET,
     ) {
         var isSendingSucceed = true
         try {

@@ -10,11 +10,12 @@ import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideRecord
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import no.nav.syfo.service.microfrontend.MikrofrontendService.Companion.actionEnabled
 import no.nav.syfo.utils.dataToVarselData
-import org.apache.commons.cli.MissingArgumentException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class MikrofrontendAktivitetskravService(val database: DatabaseInterface) {
     val mikrofrontendId = "syfo-aktivitetskrav"
-
+    private val log: Logger = LoggerFactory.getLogger(MikrofrontendAktivitetskravService::class.qualifiedName)
     fun createOrUpdateAktivitetskravMicrofrontendByHendelse(hendelse: ArbeidstakerHendelse): MinSideRecord? {
         return createOrUpdateMinSideRecord(hendelse)
     }
@@ -22,12 +23,13 @@ class MikrofrontendAktivitetskravService(val database: DatabaseInterface) {
     private fun createOrUpdateMinSideRecord(hendelse: ArbeidstakerHendelse): MinSideRecord? {
         val isMikrofrontendActiveForUser =
             existingMikrofrontendEntries(hendelse.arbeidstakerFnr, Tjeneste.AKTIVITETSKRAV).isNotEmpty()
+        log.warn("[FORHAANDSVARSEL] hendelse data: ${hendelse.data} || ${hendelse.data}")
         val actions = dataToVarselData(hendelse.data).aktivitetskrav
         requireNotNull(actions)
 
         if (!isMikrofrontendActiveForUser && actions.enableMicrofrontend) {
             return minSideRecordEnabled(hendelse.arbeidstakerFnr)
-        } else if (isMikrofrontendActiveForUser && actions.extendMicrofrontendDuration){
+        } else if (isMikrofrontendActiveForUser && actions.extendMicrofrontendDuration) {
             setExpiryDateForMikrofrontendUser(hendelse)
         }
         return null
