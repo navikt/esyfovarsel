@@ -17,7 +17,7 @@ class EmbeddedDatabase : DatabaseInterface {
     init {
         pg = EmbeddedPostgres.start()
 
-        Flyway.configure().run {
+        Flyway.configure().connectRetries(3).run {
             dataSource(pg.postgresDatabase).load().migrate()
         }
     }

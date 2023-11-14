@@ -68,7 +68,7 @@ spec:
           namespace: teamsykmelding
         - application: narmesteleder
           namespace: teamsykmelding
-        - application: syfo-tilgangskontroll
+        - application: istilgangskontroll
           namespace: teamsykefravr
   gcp:
     sqlInstances:
@@ -152,10 +152,10 @@ spec:
       value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
     - name: SYFOOPPDFGEN_URL
       value: https://syfooppdfgen.intern.nav.no
-    - name: SYFOTILGANGSKONTROLL_URL
-      value: http://syfo-tilgangskontroll.teamsykefravr
-    - name: SYFOTILGANGSKONTROLL_SCOPE
-      value: api://prod-gcp.teamsykefravr.syfo-tilgangskontroll/.default
+    - name: ISTILGANGSKONTROLL_URL
+      value: http://istilgangskontroll.teamsykefravr
+    - name: ISTILGANGSKONTROLL_SCOPE
+      value: api://prod-gcp.teamsykefravr.istilgangskontroll/.default
     - name: BASE_URL_DOKUMENTARKIV_OPPFOLGING_DOCUMENTS_PAGE
       value: https://www.nav.no/dokumentarkiv/tema/OPP
     - name: URL_AKTIVITETSKRAV_INFO_PAGE
