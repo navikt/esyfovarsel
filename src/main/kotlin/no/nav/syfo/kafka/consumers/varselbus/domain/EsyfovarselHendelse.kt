@@ -80,7 +80,6 @@ enum class HendelseType {
     SM_DIALOGMOTE_NYTT_TID_STED,
     SM_DIALOGMOTE_LEST,
     SM_AKTIVITETSPLIKT,
-    SM_FORHANDSVARSEL_STANS, // TODO: Slett denne når vi tar over aktivitetskrav-varselløypa fra iSYFO
 }
 
 fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
@@ -88,11 +87,12 @@ fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
     if (eventType.isNotValidHendelseType()) {
         throw IllegalArgumentException(
             "${eventType.name} er ikke gyldig hendelse for å hente ut " +
-                    "'synligTom'-felt",
+                "'synligTom'-felt",
         )
     }
-    if (eventType.isAktivitetspliktType())
+    if (eventType.isAktivitetspliktType()) {
         return LocalDateTime.now().plusDays(30L)
+    }
     return if (eventType != HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV) this.motetidspunkt() else null
 }
 
@@ -139,7 +139,7 @@ fun HendelseType.isAktivitetspliktType() = this == HendelseType.SM_AKTIVITETSPLI
 fun HendelseType.isDialogmoteInnkallingType() = this in listOf(
     HendelseType.SM_DIALOGMOTE_INNKALT,
     HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
-    HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV
+    HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
 )
 
 fun HendelseType.isDialogmoteType() = this.isDialogmoteInnkallingType() or (this in listOf(

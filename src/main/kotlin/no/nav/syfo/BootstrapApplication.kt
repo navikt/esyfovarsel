@@ -118,12 +118,6 @@ fun main() {
                     accessControlService,
                 )
 
-                val aktivitetskravVarselService = AktivitetskravVarselService(
-                    senderFacade,
-                    accessControlService,
-                    !(env.toggleEnv.sendAktivitetspliktForhandsvarsel),
-                )
-
                 val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(
                     senderFacade,
                     accessControlService,
@@ -158,7 +152,6 @@ fun main() {
                         oppfolgingsplanVarselService,
                         dialogmoteInnkallingVarselService,
                         aktivitetspliktForhandsvarselVarselService,
-                        aktivitetskravVarselService,
                         mikrofrontendService,
                     )
 
