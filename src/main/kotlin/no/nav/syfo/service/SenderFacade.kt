@@ -184,7 +184,6 @@ class SenderFacade(
     }
 
     private fun ferdigstillVarsel(utsendtVarsel: PUtsendtVarsel) {
-        log.info("[FORHAANDSVARSEL] Fetched utsendt varsel from DB. About to ferdigstill. fnr:${utsendtVarsel.fnr}, uuid: ${utsendtVarsel.uuid}, eksternReferanse: ${utsendtVarsel.eksternReferanse}")
         if (utsendtVarsel.eksternReferanse != null && utsendtVarsel.ferdigstiltTidspunkt == null) {
             when (utsendtVarsel.kanal) {
                 BRUKERNOTIFIKASJON.name -> {

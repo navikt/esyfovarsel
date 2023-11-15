@@ -73,9 +73,6 @@ class VarselBusService(
 
     fun ferdigstillVarsel(varselHendelse: EsyfovarselHendelse) {
         if (varselHendelse.isArbeidstakerHendelse()) {
-            if (varselHendelse.type == SM_AKTIVITETSPLIKT) {
-                log.info("[FORHAANDSVARSEL] skal ferdigstille varsel av type ${varselHendelse.type}")
-            }
             senderFacade.ferdigstillArbeidstakerVarsler(varselHendelse.toArbeidstakerHendelse())
         } else {
             senderFacade.ferdigstillNarmesteLederVarsler(varselHendelse.toNarmestelederHendelse())
