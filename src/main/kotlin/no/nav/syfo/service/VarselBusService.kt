@@ -1,6 +1,6 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.kafka.consumers.varselbus.domain.*
+import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_AVLYST
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_INNKALT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING
@@ -8,6 +8,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_N
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_REFERAT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_SVAR_MOTEBEHOV
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_AKTIVITETSPLIKT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_AVLYST
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_INNKALT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_LEST
@@ -16,7 +17,10 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_N
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_FORHANDSVARSEL_STANS
+import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.skalFerdigstilles
+import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.toNarmestelederHendelse
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -27,7 +31,6 @@ class VarselBusService(
     val oppfolgingsplanVarselService: OppfolgingsplanVarselService,
     val dialogmoteInnkallingVarselService: DialogmoteInnkallingVarselService,
     val aktivitetspliktForhandsvarselVarselService: AktivitetspliktForhandsvarselVarselService,
-    val aktivitetskravVarselService: AktivitetskravVarselService,
     val mikrofrontendService: MikrofrontendService,
 ) {
     private val log: Logger = LoggerFactory.getLogger(VarselBusService::class.qualifiedName)
@@ -50,21 +53,16 @@ class VarselBusService(
                 NL_DIALOGMOTE_AVLYST,
                 NL_DIALOGMOTE_REFERAT,
                 NL_DIALOGMOTE_NYTT_TID_STED,
-                    -> dialogmoteInnkallingVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+                -> dialogmoteInnkallingVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
 
                 SM_DIALOGMOTE_INNKALT,
                 SM_DIALOGMOTE_AVLYST,
                 SM_DIALOGMOTE_REFERAT,
                 SM_DIALOGMOTE_NYTT_TID_STED,
-                SM_DIALOGMOTE_LEST
-                    -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+                SM_DIALOGMOTE_LEST,
+                -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
-                SM_FORHANDSVARSEL_STANS -> aktivitetskravVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
-
-                // TODO: Må håndtere at denne kan komme inn flere ganger før
-                //  man skrur på ekstern varsling (e.g. sjekk mikrofrontend
-                //  state i database før utsending)
-                HendelseType.SM_AKTIVITETSPLIKT -> aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+                SM_AKTIVITETSPLIKT -> aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
                 else -> {
                     log.warn("Klarte ikke mappe varsel av type ${varselHendelse.type} ved behandling forsøk")

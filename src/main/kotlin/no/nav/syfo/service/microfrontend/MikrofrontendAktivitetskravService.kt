@@ -5,12 +5,12 @@ import no.nav.syfo.db.domain.PMikrofrontendSynlighet
 import no.nav.syfo.db.fetchFnrsWithExpiredMicrofrontendEntries
 import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
 import no.nav.syfo.db.updateMikrofrontendEntrySynligTomByFnrAndTjeneste
-import no.nav.syfo.kafka.consumers.varselbus.domain.*
+import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.getSynligTom
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideRecord
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import no.nav.syfo.service.microfrontend.MikrofrontendService.Companion.actionEnabled
 import no.nav.syfo.utils.dataToVarselData
-import org.apache.commons.cli.MissingArgumentException
 
 class MikrofrontendAktivitetskravService(val database: DatabaseInterface) {
     val mikrofrontendId = "syfo-aktivitetskrav"
@@ -21,13 +21,13 @@ class MikrofrontendAktivitetskravService(val database: DatabaseInterface) {
 
     private fun createOrUpdateMinSideRecord(hendelse: ArbeidstakerHendelse): MinSideRecord? {
         val isMikrofrontendActiveForUser =
-            existingMikrofrontendEntries(hendelse.arbeidstakerFnr, Tjeneste.AKTIVITETSKRAV).isNotEmpty()
+            existingMikrofrontendEntries(hendelse.arbeidstakerFnr).isNotEmpty()
         val actions = dataToVarselData(hendelse.data).aktivitetskrav
         requireNotNull(actions)
 
         if (!isMikrofrontendActiveForUser && actions.enableMicrofrontend) {
             return minSideRecordEnabled(hendelse.arbeidstakerFnr)
-        } else if (isMikrofrontendActiveForUser && actions.extendMicrofrontendDuration){
+        } else if (isMikrofrontendActiveForUser && actions.extendMicrofrontendDuration) {
             setExpiryDateForMikrofrontendUser(hendelse)
         }
         return null
@@ -53,8 +53,8 @@ class MikrofrontendAktivitetskravService(val database: DatabaseInterface) {
             .map { Triple(it, mikrofrontendId, Tjeneste.AKTIVITETSKRAV) }
     }
 
-    private fun existingMikrofrontendEntries(fnr: String, tjeneste: Tjeneste): List<PMikrofrontendSynlighet> {
+    private fun existingMikrofrontendEntries(fnr: String): List<PMikrofrontendSynlighet> {
         return database.fetchMikrofrontendSynlighetEntriesByFnr(fnr)
-            .filter { it.tjeneste == tjeneste.name }
+            .filter { it.tjeneste == Tjeneste.AKTIVITETSKRAV.name }
     }
 }
