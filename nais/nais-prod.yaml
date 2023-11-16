@@ -123,9 +123,9 @@ spec:
     - name: PDL_SCOPE
       value: api://prod-fss.pdl.pdl-api/.default
     - name: TOGGLE_SEND_AKTIVITETSKRAV_VARSLER
-      value: "true"
-    - name: TOGGLE_SEND_AKTIVITETSPLIKT_FORHANDSVARSEL
       value: "false"
+    - name: TOGGLE_SEND_AKTIVITETSPLIKT_FORHANDSVARSEL
+      value: "true"
     - name: BASE_URL_SYK_INFO
       value: https://www.nav.no/syk/info
     - name: BASE_URL_DIALOGMOTER
