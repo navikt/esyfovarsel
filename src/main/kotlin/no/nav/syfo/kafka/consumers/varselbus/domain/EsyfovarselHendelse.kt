@@ -36,7 +36,7 @@ data class VarselData(
     val journalpost: VarselDataJournalpost? = null,
     val narmesteLeder: VarselDataNarmesteLeder? = null,
     val motetidspunkt: VarselDataMotetidspunkt? = null,
-    val aktivitetskrav: VarselDataAktivitetskrav? = null
+    val aktivitetskrav: VarselDataAktivitetskrav? = null,
 )
 
 data class VarselDataJournalpost(
@@ -55,7 +55,7 @@ data class VarselDataMotetidspunkt(
 data class VarselDataAktivitetskrav(
     val sendForhandsvarsel: Boolean,
     val enableMicrofrontend: Boolean,
-    val extendMicrofrontendDuration: Boolean
+    val extendMicrofrontendDuration: Boolean,
 )
 
 data class VarselDataMotebehovTilbakemelding(
@@ -80,6 +80,7 @@ enum class HendelseType {
     SM_DIALOGMOTE_NYTT_TID_STED,
     SM_DIALOGMOTE_LEST,
     SM_AKTIVITETSPLIKT,
+    SM_FORHANDSVARSEL_STANS, // TODO: Slett denne når vi tar over aktivitetskrav-varselløypa fra iSYFO
 }
 
 fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
@@ -142,11 +143,13 @@ fun HendelseType.isDialogmoteInnkallingType() = this in listOf(
     HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
 )
 
-fun HendelseType.isDialogmoteType() = this.isDialogmoteInnkallingType() or (this in listOf(
-    HendelseType.SM_DIALOGMOTE_AVLYST,
-    HendelseType.SM_DIALOGMOTE_REFERAT,
-    HendelseType.SM_DIALOGMOTE_LEST,
-))
+fun HendelseType.isDialogmoteType() = this.isDialogmoteInnkallingType() or (
+    this in listOf(
+        HendelseType.SM_DIALOGMOTE_AVLYST,
+        HendelseType.SM_DIALOGMOTE_REFERAT,
+        HendelseType.SM_DIALOGMOTE_LEST,
+    )
+    )
 
 fun ArbeidstakerHendelse.isNotEligibleForMikrofrontendProcessing() =
     !(this.type.isDialogmoteType() or this.type.isAktivitetspliktType())
