@@ -80,7 +80,6 @@ enum class HendelseType {
     SM_DIALOGMOTE_NYTT_TID_STED,
     SM_DIALOGMOTE_LEST,
     SM_AKTIVITETSPLIKT,
-    SM_FORHANDSVARSEL_STANS, // TODO: Slett denne når vi tar over aktivitetskrav-varselløypa fra iSYFO
 }
 
 fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
