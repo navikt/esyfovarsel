@@ -12,10 +12,10 @@ class SendMerVeiledningVarslerJobb(
     private val merVeiledningVarselService: MerVeiledningVarselService,
 ) {
     private val log = LoggerFactory.getLogger(SendMerVeiledningVarslerJobb::class.java)
-    private val logName = "[${SendMerVeiledningVarslerJobb::class.java}]"
+    private val logName = "[${SendMerVeiledningVarslerJobb::class.simpleName}]"
 
     suspend fun sendVarsler(): Int {
-        log.info("$logName Starter SendMerVeiledningVarslerJobb")
+        log.info("$logName Starter jobb")
 
         var antallVarslerSendt = 0
 
@@ -47,7 +47,7 @@ class SendMerVeiledningVarslerJobb(
         log.info("$logName Sendte $antallVarslerSendt varsler")
         tellMerVeiledningVarselSendt(antallVarslerSendt)
 
-        log.info("$logName Avslutter SendMerVeiledningVarslerJobb")
+        log.info("$logName Avslutter jobb")
 
         return antallVarslerSendt
     }
