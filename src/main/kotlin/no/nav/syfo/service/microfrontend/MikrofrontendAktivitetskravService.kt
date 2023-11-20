@@ -22,6 +22,7 @@ class MikrofrontendAktivitetskravService(val database: DatabaseInterface) {
     private fun createOrUpdateMinSideRecord(hendelse: ArbeidstakerHendelse): MinSideRecord? {
         val isMikrofrontendActiveForUser =
             existingMikrofrontendEntries(hendelse.arbeidstakerFnr).isNotEmpty()
+
         val actions = dataToVarselData(hendelse.data).aktivitetskrav
         requireNotNull(actions)
 
