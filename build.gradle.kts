@@ -126,6 +126,14 @@ dependencies {
     testImplementation("io.kotest:kotest-property:$kotestVersion")
     testImplementation("io.kotest.extensions:kotest-assertions-ktor:$kotestExtensionsVersion")
 
+    constraints {
+        implementation("org.apache.zookeeper:zookeeper") {
+            because("CVE-2023-44981")
+            version {
+                require("3.8.3")
+            }
+        }
+    }
 }
 
 configurations.implementation {
