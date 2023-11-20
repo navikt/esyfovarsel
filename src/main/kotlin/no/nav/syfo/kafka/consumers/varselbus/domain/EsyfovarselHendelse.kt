@@ -152,11 +152,11 @@ fun HendelseType.isDialogmoteType() = this.isDialogmoteInnkallingType() or (
 fun ArbeidstakerHendelse.notCorrectMikrofrontendType() =
     !(this.type.isDialogmoteType() or this.type.isAktivitetspliktType())
 
-fun ArbeidstakerHendelse.isAktivtetspliktWithFerdigstilling() =
+fun ArbeidstakerHendelse.isAktivitetspliktWithFerdigstilling() =
     (this.type.isAktivitetspliktType() and (this.ferdigstill == true))
 
 fun ArbeidstakerHendelse.isNotEligibleForMikrofrontendProcessing(): Boolean {
-    return this.notCorrectMikrofrontendType() or isAktivtetspliktWithFerdigstilling()
+    return this.notCorrectMikrofrontendType() or isAktivitetspliktWithFerdigstilling()
 }
 
 fun HendelseType.isNotValidHendelseType() = !this.isAktivitetspliktType() && !this.isDialogmoteInnkallingType()
