@@ -22,7 +22,6 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import no.nav.syfo.metrics.tellSvarMotebehovVarselSendt
-import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -177,6 +176,6 @@ class MotebehovVarselService(
             )
             varselData
                 ?: throw IOException("VarselDataMotebehovBeskjed har feil format")
-        } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
+        } ?: throw IllegalArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
 }

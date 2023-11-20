@@ -1,18 +1,54 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.*
-import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_BODY
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_TITLE
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_MESSAGE_TEXT
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_BODY
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_TITLE
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_MESSAGE_TEXT
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_BODY
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_TITLE
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_MESSAGE_TEXT
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_BODY
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_TITLE
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_MESSAGE_TEXT
+import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST
+import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST
+import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST
+import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST
+import no.nav.syfo.DINE_SYKMELDTE_DIALOGMOTE_AVLYST_TEKST
+import no.nav.syfo.DINE_SYKMELDTE_DIALOGMOTE_INNKALT_TEKST
+import no.nav.syfo.DINE_SYKMELDTE_DIALOGMOTE_NYTT_TID_STED_TEKST
+import no.nav.syfo.DINE_SYKMELDTE_DIALOGMOTE_REFERAT_TEKST
+import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_AVLYSNING_MESSAGE_TEXT
+import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_ENDRING_MESSAGE_TEXT
+import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_INNKALLING_MESSAGE_TEXT
+import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_REFERAT_MESSAGE_TEXT
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.domain.PersonIdent
-import no.nav.syfo.kafka.consumers.varselbus.domain.*
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
+import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_AVLYST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_INNKALT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_NYTT_TID_STED
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_REFERAT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_AVLYST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_INNKALT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_LEST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_NYTT_TID_STED
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT
+import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
+import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataNarmesteLeder
+import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
+import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
-import org.apache.commons.cli.MissingArgumentException
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.Serializable
@@ -224,7 +260,7 @@ class DialogmoteInnkallingVarselService(
             val varselData = data.toVarselData()
             varselData.narmesteLeder
                 ?: throw IOException("VarselDataNarmesteLeder har feil format")
-        } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
+        } ?: throw IllegalArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
 
     fun getMeldingTypeForSykmeldtVarsling(hendelseType: HendelseType): BrukernotifikasjonKafkaProducer.MeldingType {
@@ -246,11 +282,11 @@ class DialogmoteInnkallingVarselService(
                 val varselData = data.toVarselData()
                 val journalpostdata = varselData.journalpost
                 return journalpostdata?.uuid?.let { journalpostdata }
-                    ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'varselUuid'-felt")
+                    ?: throw IllegalArgumentException("EsyfovarselHendelse mangler 'varselUuid'-felt")
             } catch (e: IOException) {
                 throw IOException("ArbeidstakerHendelse har feil format")
             }
-        } ?: throw MissingArgumentException("EsyfovarselHendelse mangler 'data'-felt")
+        } ?: throw IllegalArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
 
     fun getMessageText(arbeidstakerHendelse: ArbeidstakerHendelse): String? {

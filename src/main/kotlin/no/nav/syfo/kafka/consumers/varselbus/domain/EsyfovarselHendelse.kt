@@ -2,7 +2,6 @@ package no.nav.syfo.kafka.consumers.varselbus.domain
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.syfo.kafka.common.createObjectMapper
-import org.apache.commons.cli.MissingArgumentException
 import java.io.Serializable
 import java.time.LocalDateTime
 
@@ -102,7 +101,7 @@ private fun ArbeidstakerHendelse.motetidspunkt(): LocalDateTime {
         val varselMotetidspunkt = varseldata.motetidspunkt
         return varselMotetidspunkt?.tidspunkt
             ?: throw NullPointerException("'tidspunkt'-felt er null i VarselDataMotetidspunkt-objekt")
-    } ?: throw MissingArgumentException("Mangler datafelt i ArbeidstakerHendelse til MicrofrontendService")
+    } ?: throw IllegalArgumentException("Mangler datafelt i ArbeidstakerHendelse til MicrofrontendService")
 }
 
 fun Any.toVarselData(): VarselData =
