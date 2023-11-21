@@ -30,10 +30,17 @@ val githubUser: String by project
 val githubPassword: String by project
 
 plugins {
-    kotlin("jvm") version "1.8.22"
+    kotlin("jvm") version "1.9.20"
+    id("java")
     id("org.jetbrains.kotlin.plugin.allopen") version "1.5.31"
-    id("com.diffplug.gradle.spotless") version "3.18.0"
-    id("com.github.johnrengelman.shadow") version "7.1.0"
+    id("com.diffplug.spotless") version "6.22.0"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(19))
+    }
 }
 
 allOpen {
@@ -134,10 +141,6 @@ dependencies {
 
 configurations.implementation {
     exclude(group = "com.fasterxml.jackson.module", module = "jackson-module-scala_2.13")
-}
-
-java.toolchain {
-    languageVersion.set(JavaLanguageVersion.of(19))
 }
 
 tasks {
