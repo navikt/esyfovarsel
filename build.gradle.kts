@@ -4,7 +4,7 @@ group = "no.nav.syfo"
 version = "1.0"
 
 val kluentVersion = "1.68"
-val ktorVersion = "2.3.6"
+val ktorVersion = "2.3.1"
 val prometheusVersion = "0.15.0"
 val micrometerVersion = "1.8.4"
 val kotestVersion = "5.6.2"
@@ -60,6 +60,10 @@ configurations.all {
         if (requested.group == "org.scala-lang" && requested.name == "scala-library" && (requested.version == "2.13.3")) {
             useVersion("2.13.9")
             because("fixes critical bug CVE-2022-36944 in 2.13.6")
+        }
+        if (requested.group == "io.netty" && requested.name == "netty-handler" && requested.version == "4.1.92.Final") {
+            useVersion("4.1.94.Final")
+            because("fixes bug CVE-2023-34462")
         }
         if (requested.group == "com.google.guava" && requested.name == "guava" && requested.version == "30.1.1-jre") {
             useVersion("32.0.0-jre")
