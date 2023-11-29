@@ -8,7 +8,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.append
-import kotlinx.coroutines.runBlocking
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.pdl.getFullNameAsString
@@ -25,7 +24,7 @@ class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseI
 
     private val log = LoggerFactory.getLogger(PdfgenConsumer::class.qualifiedName)
 
-    fun getMerVeiledningPDF(fnr: String, isBrukerReservert: Boolean): ByteArray? {
+    suspend fun getMerVeiledningPDF(fnr: String, isBrukerReservert: Boolean): ByteArray? {
         val mottakerNavn = pdlConsumer.hentPerson(fnr)?.getFullNameAsString()
         val sykepengerMaxDate = databaseInterface.fetchMaksDatoByFnr(fnr)
         val merVeiledningPdfUrl = syfooppdfgenUrl + "/api/v1/genpdf/oppfolging/mer_veiledning"
@@ -36,31 +35,30 @@ class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseI
             isBrukerReservert,
         )
 
-        return runBlocking {
-            try {
-                val response = client.post(merVeiledningPdfUrl) {
-                    headers {
-                        append(HttpHeaders.Accept, ContentType.Application.Json)
-                        append(HttpHeaders.ContentType, ContentType.Application.Json)
-                    }
-                    setBody(request)
+        return try {
+            val response = client.post(merVeiledningPdfUrl) {
+                headers {
+                    append(HttpHeaders.Accept, ContentType.Application.Json)
+                    append(HttpHeaders.ContentType, ContentType.Application.Json)
                 }
-
-                when (response.status) {
-                    HttpStatusCode.OK -> {
-                        response.body<ByteArray>()
-                    }
-
-                    else -> {
-                        log.error("Could not get PDF byte array from syfooppdfgen: $response")
-                        null
-                    }
-                }
-            } catch (e: Exception) {
-                log.error("Exception while calling syfooppdfgen: ${e.message}", e)
-                null
+                setBody(request)
             }
+
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    response.body<ByteArray>()
+                }
+
+                else -> {
+                    log.error("Could not get PDF byte array from syfooppdfgen: $response")
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            log.error("Exception while calling syfooppdfgen: ${e.message}", e)
+            null
         }
+
     }
 
     private fun getPdfgenRequest(navn: String?, utbetaltTom: LocalDate?, maxDate: LocalDate?, isBrukerReservert: Boolean): PdfgenRequest {
