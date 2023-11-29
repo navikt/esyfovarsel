@@ -1,10 +1,7 @@
 package no.nav.syfo.service
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
-import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.kafka.common.createObjectMapper
@@ -28,14 +25,14 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
         it("Sender alltid fysisk brev for forhåndsvarsel") {
             val forhandsvarselEvent = createForhandsvarselHendelse()
 
-            every { accessControlService.getUserAccessStatus(SM_FNR) } returns UserAccessStatus(
+            coEvery { accessControlService.getUserAccessStatus(SM_FNR) } returns UserAccessStatus(
                 SM_FNR,
                 canUserBeDigitallyNotified = true
             )
 
             aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
 
-            verify(exactly = 0) {
+            coVerify (exactly = 0) {
                 senderFacade.sendBrevTilFysiskPrint(
                     any(),
                     forhandsvarselEvent,
@@ -60,7 +57,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
         it("Får IOException dersom feil datatype") {
             val forhandsvarselEvent = createForhandsvarselHendelse()
             forhandsvarselEvent.data = "hei"
-            every { accessControlService.getUserAccessStatus(SM_FNR) } returns
+            coEvery { accessControlService.getUserAccessStatus(SM_FNR) } returns
                     UserAccessStatus(
                         SM_FNR,
                         canUserBeDigitallyNotified = true,
@@ -76,7 +73,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
         it("Får IOException dersom mangende journalpostid") {
             val forhandsvarselEvent = createForhandsvarselHendelse()
             forhandsvarselEvent.data = VarselData(journalpost = VarselDataJournalpost(uuid = "something", id = null))
-            every { accessControlService.getUserAccessStatus(SM_FNR) } returns
+            coEvery { accessControlService.getUserAccessStatus(SM_FNR) } returns
                     UserAccessStatus(
                         SM_FNR,
                         canUserBeDigitallyNotified = true,
@@ -92,7 +89,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
         it("Tester deserialisering av varseldata") {
             val objectMapper = createObjectMapper()
 
-            every { accessControlService.getUserAccessStatus(any()) } returns
+            coEvery { accessControlService.getUserAccessStatus(any()) } returns
                     UserAccessStatus(
                         SM_FNR,
                         canUserBeDigitallyNotified = false
@@ -121,7 +118,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
 
             aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelse)
 
-            verify(exactly = 1) {
+            coVerify(exactly = 1) {
                 senderFacade.sendBrevTilFysiskPrint(
                     any(),
                     arbeidstakerHendelse,

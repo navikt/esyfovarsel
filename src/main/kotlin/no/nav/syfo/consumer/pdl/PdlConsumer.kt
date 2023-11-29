@@ -1,15 +1,9 @@
 package no.nav.syfo.consumer.pdl
 
-import io.ktor.client.call.body
-import io.ktor.client.request.headers
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.HttpResponse
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.append
-import kotlinx.coroutines.runBlocking
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.utils.httpClient
@@ -19,17 +13,15 @@ import java.io.FileNotFoundException
 
 open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client = httpClient()
-    private val log = LoggerFactory.getLogger(PdlConsumer::class.java)
+    private val log = LoggerFactory.getLogger(PdlConsumer::class.java.canonicalName)
 
-    open fun getFnr(aktorId: String): String? {
+    open suspend fun getFnr(aktorId: String): String? {
         val response = callPdl(IDENTER_QUERY, aktorId)
 
         return when (response?.status) {
             HttpStatusCode.OK -> {
-                runBlocking {
-                    val pdlResponse = response.body<PdlIdentResponse>().data?.hentIdenter?.identer?.first()?.ident
-                    pdlResponse
-                }
+                val pdlResponse = response.body<PdlIdentResponse>().data?.hentIdenter?.identer?.first()?.ident
+                pdlResponse
             }
 
             HttpStatusCode.NoContent -> {
@@ -49,37 +41,12 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
         }
     }
 
-    fun isBrukerGradertForInformasjon(ident: String): Boolean? {
+    suspend fun isBrukerYngreEnnGittMaxAlder(ident: String, maxAlder: Int): Boolean {
         val response = callPdl(PERSON_QUERY, ident)
 
         return when (response?.status) {
             HttpStatusCode.OK -> {
-                runBlocking { response.body<PdlPersonResponse>().data?.isKode6Eller7() }
-            }
-
-            HttpStatusCode.NoContent -> {
-                log.error("Could not get adressesperre from PDL: No content found in the response body")
-                null
-            }
-
-            HttpStatusCode.Unauthorized -> {
-                log.error("Could not get adressesperre from PDL: Unable to authorize")
-                null
-            }
-
-            else -> {
-                log.error("Could not get adressesperre from PDL: $response")
-                null
-            }
-        }
-    }
-
-    fun isBrukerYngreEnnGittMaxAlder(ident: String, maxAlder: Int): Boolean {
-        val response = callPdl(PERSON_QUERY, ident)
-
-        return when (response?.status) {
-            HttpStatusCode.OK -> {
-                val fodselsdato = runBlocking { response.body<PdlPersonResponse>().data?.getFodselsdato() }
+                val fodselsdato = response.body<PdlPersonResponse>().data?.getFodselsdato()
                 if (fodselsdato == null) {
                     log.warn("Returnert fødselsdato for en person fra PDL er null. Fortsetter som om bruker er yngre enn $maxAlder år da fødselsdato er ukjent.")
                     return true
@@ -105,15 +72,13 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
         }
     }
 
-    open fun hentPerson(fnr: String): PdlHentPerson? {
+    open suspend fun hentPerson(fnr: String): PdlHentPerson? {
         val response = callPdl(PERSON_QUERY, fnr)
 
         return when (response?.status) {
             HttpStatusCode.OK -> {
-                runBlocking {
-                    val pdlResponse = response.body<PdlPersonResponse>().data
-                    pdlResponse
-                }
+                val pdlResponse = response.body<PdlPersonResponse>().data
+                pdlResponse
             }
 
             HttpStatusCode.NoContent -> {
@@ -133,35 +98,33 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
         }
     }
 
-    private fun callPdl(service: String, ident: String): HttpResponse? {
-        return runBlocking {
-            val token = azureAdTokenConsumer.getToken(urlEnv.pdlScope)
-            val bearerTokenString = "Bearer $token"
-            val graphQueryResourcePath = "$QUERY_PATH_PREFIX/$service"
-            val graphQuery =
-                this::class.java.getResource(graphQueryResourcePath)?.readText()?.replace("[\n\r]", "")
-                    ?: throw FileNotFoundException("Could not found resource: $graphQueryResourcePath")
-            val requestBody = PdlRequest(graphQuery, Variables(ident))
-            try {
-                client.post(urlEnv.pdlUrl) {
-                    headers {
-                        append(PDL_BEHANDLINGSNUMMER_HEADER, BEHANDLINGSNUMMER_VURDERE_RETT_TIL_SYKEPENGER)
-                        append(HttpHeaders.ContentType, ContentType.Application.Json)
-                        append(HttpHeaders.Authorization, bearerTokenString)
-                    }
-                    setBody(requestBody)
+    private suspend fun callPdl(service: String, ident: String): HttpResponse? {
+        val token = azureAdTokenConsumer.getToken(urlEnv.pdlScope)
+        val bearerTokenString = "Bearer $token"
+        val graphQueryResourcePath = "$QUERY_PATH_PREFIX/$service"
+        val graphQuery =
+            this::class.java.getResource(graphQueryResourcePath)?.readText()?.replace("[\n\r]", "")
+                ?: throw FileNotFoundException("Could not found resource: $graphQueryResourcePath")
+        val requestBody = PdlRequest(graphQuery, Variables(ident))
+        return try {
+            client.post(urlEnv.pdlUrl) {
+                headers {
+                    append(PDL_BEHANDLINGSNUMMER_HEADER, BEHANDLINGSNUMMER_VURDERE_RETT_TIL_SYKEPENGER)
+                    append(HttpHeaders.ContentType, ContentType.Application.Json)
+                    append(HttpHeaders.Authorization, bearerTokenString)
                 }
-            } catch (e: Exception) {
-                log.error("Error while calling PDL ($service): ${e.message}", e)
-                null
+                setBody(requestBody)
             }
+        } catch (e: Exception) {
+            log.error("Error while calling PDL ($service): ${e.message}", e)
+            null
         }
     }
-}
 
-class LocalPdlConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer) :
-    PdlConsumer(urlEnv, azureAdTokenConsumer) {
-    override fun getFnr(aktorId: String): String {
-        return aktorId.substring(0, 11)
+    class LocalPdlConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer) :
+        PdlConsumer(urlEnv, azureAdTokenConsumer) {
+        override suspend fun getFnr(aktorId: String): String {
+            return aktorId.substring(0, 11)
+        }
     }
 }

@@ -1,6 +1,7 @@
 package no.nav.syfo.kafka.consumers.varselbus
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.runBlocking
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.*
@@ -42,11 +43,14 @@ class VarselBusKafkaConsumer(
         }
     }
 
-    private fun processVarselBusRecord(record: ConsumerRecord<String, String>) {
+    private suspend fun processVarselBusRecord(record: ConsumerRecord<String, String>) {
         val varselEvent: EsyfovarselHendelse = objectMapper.readValue(record.value())
         varselEvent.data = objectMapper.readTree(record.value())["data"]
         log.info("VARSEL BUS: Mottatt melding med UUID ${record.key()} av type: ${varselEvent.type}")
-        varselBusService.processVarselHendelse(varselEvent)
+        runBlocking {
+            varselBusService.processVarselHendelse(varselEvent)
+        }
+
         varselBusService.processVarselHendelseAsMinSideMicrofrontendEvent(varselEvent)
     }
 }

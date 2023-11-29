@@ -80,7 +80,7 @@ class MerVeiledningVarselService(
         )
     }
 
-    private fun sendBrevVarselTilArbeidstaker(
+    private suspend fun sendBrevVarselTilArbeidstaker(
         uuid: String,
         arbeidstakerHendelse: ArbeidstakerHendelse,
         journalpostId: String,

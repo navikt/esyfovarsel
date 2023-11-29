@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 class MikrofrontendDialogmoteService(
     val database: DatabaseInterface
 ) {
-    private val log = LoggerFactory.getLogger(MikrofrontendService::class.java)
+    private val log = LoggerFactory.getLogger(MikrofrontendDialogmoteService::class.java.canonicalName)
 
     companion object {
         const val dialogmoteMikrofrontendId = "syfo-dialog"

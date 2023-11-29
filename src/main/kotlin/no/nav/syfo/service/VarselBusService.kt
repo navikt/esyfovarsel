@@ -1,26 +1,7 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_AVLYST
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_INNKALT
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_NYTT_TID_STED
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_REFERAT
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_SVAR_MOTEBEHOV
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_AKTIVITETSPLIKT
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_AVLYST
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_INNKALT
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_LEST
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_NYTT_TID_STED
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
-import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidstakerHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.skalFerdigstilles
-import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidstakerHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.toNarmestelederHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.*
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -34,44 +15,56 @@ class VarselBusService(
     val mikrofrontendService: MikrofrontendService,
 ) {
     private val log: Logger = LoggerFactory.getLogger(VarselBusService::class.qualifiedName)
-    fun processVarselHendelse(
+    suspend fun processVarselHendelse(
         varselHendelse: EsyfovarselHendelse,
     ) {
-        if (varselHendelse.skalFerdigstilles()) {
-            ferdigstillVarsel(varselHendelse)
-        } else {
-            when (varselHendelse.type) {
-                NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
-                SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+            if (varselHendelse.skalFerdigstilles()) {
+                ferdigstillVarsel(varselHendelse)
+            } else {
+                when (varselHendelse.type) {
+                    NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilNarmesteLeder(
+                        varselHendelse.toNarmestelederHendelse()
+                    )
 
-                NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
-                SM_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
-                NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING -> motebehovVarselService.sendMotebehovTilbakemeldingTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
-                SM_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING -> motebehovVarselService.sendMotebehovTilbakemeldingTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+                    SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilArbeidstaker(
+                        varselHendelse.toArbeidstakerHendelse()
+                    )
 
-                NL_DIALOGMOTE_INNKALT,
-                NL_DIALOGMOTE_AVLYST,
-                NL_DIALOGMOTE_REFERAT,
-                NL_DIALOGMOTE_NYTT_TID_STED,
-                -> dialogmoteInnkallingVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+                    NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+                    SM_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+                    NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING -> motebehovVarselService.sendMotebehovTilbakemeldingTilNarmesteLeder(
+                        varselHendelse.toNarmestelederHendelse()
+                    )
 
-                SM_DIALOGMOTE_INNKALT,
-                SM_DIALOGMOTE_AVLYST,
-                SM_DIALOGMOTE_REFERAT,
-                SM_DIALOGMOTE_NYTT_TID_STED,
-                SM_DIALOGMOTE_LEST,
-                -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+                    SM_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING -> motebehovVarselService.sendMotebehovTilbakemeldingTilArbeidstaker(
+                        varselHendelse.toArbeidstakerHendelse()
+                    )
 
-                SM_AKTIVITETSPLIKT -> aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+                    NL_DIALOGMOTE_INNKALT,
+                    NL_DIALOGMOTE_AVLYST,
+                    NL_DIALOGMOTE_REFERAT,
+                    NL_DIALOGMOTE_NYTT_TID_STED,
+                    -> dialogmoteInnkallingVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
 
-                else -> {
-                    log.warn("Klarte ikke mappe varsel av type ${varselHendelse.type} ved behandling forsøk")
-                }
+                    SM_DIALOGMOTE_INNKALT,
+                    SM_DIALOGMOTE_AVLYST,
+                    SM_DIALOGMOTE_REFERAT,
+                    SM_DIALOGMOTE_NYTT_TID_STED,
+                    SM_DIALOGMOTE_LEST,
+                    -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+
+                    SM_AKTIVITETSPLIKT -> aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(
+                        varselHendelse.toArbeidstakerHendelse()
+                    )
+
+                    else -> {
+                        log.warn("Klarte ikke mappe varsel av type ${varselHendelse.type} ved behandling forsøk")
+                    }
             }
         }
     }
 
-    fun ferdigstillVarsel(varselHendelse: EsyfovarselHendelse) {
+    suspend fun ferdigstillVarsel(varselHendelse: EsyfovarselHendelse) {
         if (varselHendelse.isArbeidstakerHendelse()) {
             senderFacade.ferdigstillArbeidstakerVarsler(varselHendelse.toArbeidstakerHendelse())
         } else {

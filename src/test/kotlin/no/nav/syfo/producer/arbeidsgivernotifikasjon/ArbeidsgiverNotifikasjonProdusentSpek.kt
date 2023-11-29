@@ -1,7 +1,7 @@
 package no.nav.syfo.producer.arbeidsgivernotifikasjon
 
 import io.kotest.core.spec.style.DescribeSpec
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.getTestEnv
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
@@ -46,11 +46,11 @@ class ArbeidsgiverNotifikasjonProdusentSpek : DescribeSpec({
 
     describe("ArbeidsgiverNotifikasjonProdusentSpek") {
         it("Should send oppgave") {
-            runBlocking { arbeidsgiverNotifikasjonProdusent.createNewTaskForArbeidsgiver(arbeidsgiverNotifikasjon) }
+            launch { arbeidsgiverNotifikasjonProdusent.createNewTaskForArbeidsgiver(arbeidsgiverNotifikasjon) }
         }
 
         it("Should send beskjed") {
-            runBlocking {
+            launch {
                 arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(
                     arbeidsgiverNotifikasjon
                 )

@@ -1,14 +1,8 @@
 package no.nav.syfo.consumer.distribuerjournalpost
 
-import io.ktor.client.call.body
-import io.ktor.client.request.headers
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.append
-import kotlinx.coroutines.runBlocking
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.http.*
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.utils.httpClient
@@ -33,29 +27,27 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
             distribusjonstype = distribusjonstype.name
         )
 
-        return runBlocking {
-            try {
-                val response = client.post(requestURL) {
-                    headers {
-                        append(HttpHeaders.Accept, ContentType.Application.Json)
-                        append(HttpHeaders.ContentType, ContentType.Application.Json)
-                        append(HttpHeaders.Authorization, "Bearer $token")
-                    }
-                    setBody(request)
+        return try {
+            val response = client.post(requestURL) {
+                headers {
+                    append(HttpHeaders.Accept, ContentType.Application.Json)
+                    append(HttpHeaders.ContentType, ContentType.Application.Json)
+                    append(HttpHeaders.Authorization, "Bearer $token")
                 }
-
-                if (response.status == HttpStatusCode.OK) {
-                    log.info("Sent document to print")
-                    response.body()
-                } else {
-                    throw RuntimeException("Failed to send document with uuid $uuid to print. journalpostId: $journalpostId. Response status: ${response.status}. Response: $response")
-                }
-            } catch (e: Exception) {
-                throw RuntimeException(
-                    "Exception while calling distribuerjournalpost with uuid $uuid and journalpostId: $journalpostId. Error message: ${e.message}",
-                    e,
-                )
+                setBody(request)
             }
+
+            if (response.status == HttpStatusCode.OK) {
+                log.info("Sent document to print")
+                response.body()
+            } else {
+                throw RuntimeException("Failed to send document with uuid $uuid to print. journalpostId: $journalpostId. Response status: ${response.status}. Response: $response")
+            }
+        } catch (e: Exception) {
+            throw RuntimeException(
+                "Exception while calling distribuerjournalpost with uuid $uuid and journalpostId: $journalpostId. Error message: ${e.message}",
+                e,
+            )
         }
     }
 }

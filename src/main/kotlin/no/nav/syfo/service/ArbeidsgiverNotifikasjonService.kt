@@ -1,6 +1,5 @@
 package no.nav.syfo.service
 
-import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
@@ -13,58 +12,64 @@ import java.time.LocalDateTime
 import java.util.*
 
 class ArbeidsgiverNotifikasjonService(
-    val arbeidsgiverNotifikasjonProdusent: ArbeidsgiverNotifikasjonProdusent,
-    val narmesteLederService: NarmesteLederService,
-    val dineSykmeldteUrl: String,
+    private val arbeidsgiverNotifikasjonProdusent: ArbeidsgiverNotifikasjonProdusent,
+    private val narmesteLederService: NarmesteLederService,
+    private val dineSykmeldteUrl: String,
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(ArbeidsgiverNotifikasjonService::class.qualifiedName)
 
-    fun sendNotifikasjon(
+    suspend fun sendNotifikasjon(
         arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonInput,
     ) {
-        runBlocking {
-            val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(arbeidsgiverNotifikasjon.ansattFnr, arbeidsgiverNotifikasjon.virksomhetsnummer)
+        val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(
+            arbeidsgiverNotifikasjon.ansattFnr,
+            arbeidsgiverNotifikasjon.virksomhetsnummer
+        )
 
-            if (narmesteLederRelasjon == null || !narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
-                log.warn("Sender ikke varsel til ag-notifikasjon: narmesteLederRelasjon er null eller har ikke kontaktinfo")
-                return@runBlocking
-            }
+        if (narmesteLederRelasjon == null || !narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
+            log.warn("Sender ikke varsel til ag-notifikasjon: narmesteLederRelasjon er null eller har ikke kontaktinfo")
+            return
+        }
 
-            if (arbeidsgiverNotifikasjon.narmesteLederFnr !== null && !arbeidsgiverNotifikasjon.narmesteLederFnr.equals(narmesteLederRelasjon.narmesteLederFnr)) {
-                log.warn("Sender ikke varsel til ag-notifikasjon: den ansatte har nærmeste leder med annet fnr enn mottaker i varselHendelse")
-                return@runBlocking
-            }
-
-            val url = dineSykmeldteUrl + "/${narmesteLederRelasjon.narmesteLederId}"
-            val arbeidsgiverNotifikasjonen = ArbeidsgiverNotifikasjon(
-                arbeidsgiverNotifikasjon.uuid.toString(),
-                arbeidsgiverNotifikasjon.virksomhetsnummer,
-                url,
-                narmesteLederRelasjon.narmesteLederFnr!!,
-                arbeidsgiverNotifikasjon.ansattFnr,
-                arbeidsgiverNotifikasjon.messageText,
-                narmesteLederRelasjon.narmesteLederEpost!!,
-                arbeidsgiverNotifikasjon.merkelapp,
-                arbeidsgiverNotifikasjon.emailTitle,
-                arbeidsgiverNotifikasjon.emailBody,
-                arbeidsgiverNotifikasjon.hardDeleteDate,
+        if (arbeidsgiverNotifikasjon.narmesteLederFnr !== null && !arbeidsgiverNotifikasjon.narmesteLederFnr.equals(
+                narmesteLederRelasjon.narmesteLederFnr
             )
+        ) {
+            log.warn("Sender ikke varsel til ag-notifikasjon: den ansatte har nærmeste leder med annet fnr enn mottaker i varselHendelse")
+            return
+        }
 
-            when (arbeidsgiverNotifikasjon.meldingstype) {
-                BESKJED -> arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjonen)
-                OPPGAVE -> arbeidsgiverNotifikasjonProdusent.createNewTaskForArbeidsgiver(arbeidsgiverNotifikasjonen)
-            }
+        val url = dineSykmeldteUrl + "/${narmesteLederRelasjon.narmesteLederId}"
+        val arbeidsgiverNotifikasjonen = ArbeidsgiverNotifikasjon(
+            arbeidsgiverNotifikasjon.uuid.toString(),
+            arbeidsgiverNotifikasjon.virksomhetsnummer,
+            url,
+            narmesteLederRelasjon.narmesteLederFnr!!,
+            arbeidsgiverNotifikasjon.ansattFnr,
+            arbeidsgiverNotifikasjon.messageText,
+            narmesteLederRelasjon.narmesteLederEpost!!,
+            arbeidsgiverNotifikasjon.merkelapp,
+            arbeidsgiverNotifikasjon.emailTitle,
+            arbeidsgiverNotifikasjon.emailBody,
+            arbeidsgiverNotifikasjon.hardDeleteDate,
+        )
+
+        when (arbeidsgiverNotifikasjon.meldingstype) {
+            BESKJED -> arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjonen)
+            OPPGAVE -> arbeidsgiverNotifikasjonProdusent.createNewTaskForArbeidsgiver(arbeidsgiverNotifikasjonen)
         }
     }
 
-    fun deleteNotifikasjon(merkelapp: String, eksternReferanse: String) =
+
+    suspend fun deleteNotifikasjon(merkelapp: String, eksternReferanse: String) {
         arbeidsgiverNotifikasjonProdusent.deleteNotifikasjonForArbeidsgiver(
             ArbeidsgiverDeleteNotifikasjon(
                 merkelapp,
                 eksternReferanse,
             ),
         )
+    }
 }
 
 data class ArbeidsgiverNotifikasjonInput(

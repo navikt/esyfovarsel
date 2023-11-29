@@ -15,6 +15,7 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.auth.setupLocalRoutesWithAuthentication
@@ -25,7 +26,6 @@ import no.nav.syfo.consumer.dokarkiv.DokarkivConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
-import no.nav.syfo.consumer.pdl.LocalPdlConsumer
 import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
@@ -199,7 +199,7 @@ fun main() {
 
 private fun getPdlConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsumer): PdlConsumer {
     return when {
-        isLocal() -> LocalPdlConsumer(urlEnv, azureADConsumer)
+        isLocal() -> PdlConsumer.LocalPdlConsumer(urlEnv, azureADConsumer)
         else -> PdlConsumer(urlEnv, azureADConsumer)
     }
 }
@@ -251,13 +251,15 @@ fun Application.serverModule(
     }
 
     runningRemotely {
-        setupRoutesWithAuthentication(
-            sendMerVeiledningVarslerJobb,
-            mikrofrontendService,
-            sykepengerMaxDateService,
-            veilederTilgangskontrollConsumer,
-            env.authEnv,
-        )
+        runBlocking {
+            setupRoutesWithAuthentication(
+                sendMerVeiledningVarslerJobb,
+                mikrofrontendService,
+                sykepengerMaxDateService,
+                veilederTilgangskontrollConsumer,
+                env.authEnv,
+            )
+        }
     }
 
     runningLocally {

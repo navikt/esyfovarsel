@@ -14,7 +14,7 @@ class AktivitetspliktForhandsvarselVarselService(
     val urlAktivitetskravInfoPage: String,
     private val isSendingEnabled: Boolean,
 ) {
-    fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
+    suspend fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         if (isSendingEnabled) {
             log.info("[FORHAANDSVARSEL] sending enabled")
             val data = dataToVarselData(varselHendelse.data)
@@ -50,6 +50,6 @@ class AktivitetspliktForhandsvarselVarselService(
     }
 
     companion object {
-        private val log = LoggerFactory.getLogger(AktivitetspliktForhandsvarselVarselService::class.java)
+        private val log = LoggerFactory.getLogger(AktivitetspliktForhandsvarselVarselService::class.java.canonicalName)
     }
 }

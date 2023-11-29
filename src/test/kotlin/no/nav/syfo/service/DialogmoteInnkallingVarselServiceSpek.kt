@@ -2,11 +2,7 @@ package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.justRun
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.db.domain.Kanal
@@ -61,7 +57,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
         justRun { brukernotifikasjonerService.sendVarsel(any(), any(), any(), any(), any(), any()) }
         justRun { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) }
         justRun { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(any(), any()) }
-        justRun { fysiskBrevUtsendingService.sendBrev(any(), any(), DistibusjonsType.ANNET) }
+        coJustRun { fysiskBrevUtsendingService.sendBrev(any(), any(), DistibusjonsType.ANNET) }
 
         afterTest {
             embeddedDatabase.connection.dropData()
@@ -106,6 +102,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
         it("Reserved users should be notified physically") {
             coEvery { accessControlService.getUserAccessStatus(fnr2) } returns
                 UserAccessStatus(fnr2, canUserBeDigitallyNotified = false)
+
             val varselHendelse = ArbeidstakerHendelse(
                 hendelseType,
                 false,
@@ -115,7 +112,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
             )
             dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse)
 
-            verify(exactly = 1) {
+            coVerify(exactly = 1) {
                 fysiskBrevUtsendingService.sendBrev(
                     journalpostUuid,
                     journalpostId,
@@ -163,7 +160,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                     true,
                 )
             }
-            verify(exactly = 1) {
+            coVerify(exactly = 1) {
                 fysiskBrevUtsendingService.sendBrev(
                     journalpostUuidAddressProtection,
                     journalpostIdAddressProtection,
