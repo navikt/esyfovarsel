@@ -70,6 +70,7 @@ spec:
           namespace: teamsykmelding
         - application: istilgangskontroll
           namespace: teamsykefravr
+        - application: syfooppdfgen
   gcp:
     sqlInstances:
       - autoBackupHour: 1
@@ -151,7 +152,7 @@ spec:
     - name: DOKARKIV_SCOPE
       value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
     - name: SYFOOPPDFGEN_URL
-      value: https://syfooppdfgen.intern.nav.no
+      value: http://syfooppdfgen
     - name: ISTILGANGSKONTROLL_URL
       value: http://istilgangskontroll.teamsykefravr
     - name: ISTILGANGSKONTROLL_SCOPE
