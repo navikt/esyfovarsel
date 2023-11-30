@@ -1,7 +1,6 @@
 package no.nav.syfo.producer.arbeidsgivernotifikasjon
 
 import io.kotest.core.spec.style.DescribeSpec
-import kotlinx.coroutines.launch
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.getTestEnv
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
@@ -46,15 +45,13 @@ class ArbeidsgiverNotifikasjonProdusentSpek : DescribeSpec({
 
     describe("ArbeidsgiverNotifikasjonProdusentSpek") {
         it("Should send oppgave") {
-            launch { arbeidsgiverNotifikasjonProdusent.createNewTaskForArbeidsgiver(arbeidsgiverNotifikasjon) }
+            arbeidsgiverNotifikasjonProdusent.createNewTaskForArbeidsgiver(arbeidsgiverNotifikasjon)
         }
 
         it("Should send beskjed") {
-            launch {
-                arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(
-                    arbeidsgiverNotifikasjon
-                )
-            }
+            arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(
+                arbeidsgiverNotifikasjon
+            )
         }
     }
 })
