@@ -1,6 +1,7 @@
 package no.nav.syfo.kafka.consumers.varselbus
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
@@ -29,16 +30,19 @@ class VarselBusKafkaConsumer(
 
     override suspend fun listen(applicationState: ApplicationState) {
         log.info("Started listening to topic $topicVarselBus")
+
         while (applicationState.running) {
-            try {
-                kafkaListener.poll(pollDurationInMillis).forEach { processVarselBusRecord(it) }
-                kafkaListener.commitSync()
-            } catch (e: Exception) {
-                log.error(
-                    "Exception in [$topicVarselBus]-listener: ${e.message}",
-                    e
-                )
-                applicationState.shutdownApplication()
+            runBlocking {
+                try {
+                    kafkaListener.poll(pollDurationInMillis).forEach { launch { processVarselBusRecord(it) } }
+                    kafkaListener.commitSync()
+                } catch (e: Exception) {
+                    log.error(
+                        "Exception in [$topicVarselBus]-listener: ${e.message}",
+                        e
+                    )
+                    applicationState.shutdownApplication()
+                }
             }
         }
     }
@@ -47,9 +51,8 @@ class VarselBusKafkaConsumer(
         val varselEvent: EsyfovarselHendelse = objectMapper.readValue(record.value())
         varselEvent.data = objectMapper.readTree(record.value())["data"]
         log.info("VARSEL BUS: Mottatt melding med UUID ${record.key()} av type: ${varselEvent.type}")
-        runBlocking {
-            varselBusService.processVarselHendelse(varselEvent)
-        }
+
+        varselBusService.processVarselHendelse(varselEvent)
 
         varselBusService.processVarselHendelseAsMinSideMicrofrontendEvent(varselEvent)
     }
