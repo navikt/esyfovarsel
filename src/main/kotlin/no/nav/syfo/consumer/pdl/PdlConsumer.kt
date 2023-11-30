@@ -13,7 +13,7 @@ import java.io.FileNotFoundException
 
 open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client = httpClient()
-    private val log = LoggerFactory.getLogger(PdlConsumer::class.java.canonicalName)
+    private val log = LoggerFactory.getLogger(PdlConsumer::class.qualifiedName)
 
     open suspend fun getFnr(aktorId: String): String? {
         val response = callPdl(IDENTER_QUERY, aktorId)

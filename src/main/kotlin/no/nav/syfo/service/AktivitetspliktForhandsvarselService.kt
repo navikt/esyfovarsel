@@ -50,6 +50,6 @@ class AktivitetspliktForhandsvarselVarselService(
     }
 
     companion object {
-        private val log = LoggerFactory.getLogger(AktivitetspliktForhandsvarselVarselService::class.java.canonicalName)
+        private val log = LoggerFactory.getLogger(AktivitetspliktForhandsvarselVarselService::class.qualifiedName)
     }
 }
