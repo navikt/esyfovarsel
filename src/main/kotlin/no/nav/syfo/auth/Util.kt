@@ -16,6 +16,7 @@ import io.ktor.server.auth.Principal
 import io.ktor.server.auth.UserPasswordCredential
 import io.ktor.server.auth.jwt.JWTCredential
 import io.ktor.server.auth.jwt.JWTPrincipal
+import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.syfo.AuthEnv
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
@@ -46,8 +47,8 @@ val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
     }
 }
 
-suspend fun getWellKnown(wellKnownUrl: String) =
-    HttpClient(Apache, proxyConfig).get(wellKnownUrl).body<WellKnown>()
+fun getWellKnown(wellKnownUrl: String) =
+    runBlocking { HttpClient(Apache, proxyConfig).get(wellKnownUrl).body<WellKnown>()  }
 
 fun isNiva4(credentials: JWTCredential): Boolean {
     return "Level4" == credentials.payload.getClaim("acr").asString() || "idporten-loa-high" == credentials.payload.getClaim("acr").asString()

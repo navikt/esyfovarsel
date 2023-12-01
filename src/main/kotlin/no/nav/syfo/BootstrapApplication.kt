@@ -257,15 +257,13 @@ fun Application.serverModule(
     }
 
     runningRemotely {
-        launch {
-            setupRoutesWithAuthentication(
-                sendMerVeiledningVarslerJobb,
-                mikrofrontendService,
-                sykepengerMaxDateService,
-                veilederTilgangskontrollConsumer,
-                env.authEnv,
-            )
-        }
+        setupRoutesWithAuthentication(
+            sendMerVeiledningVarslerJobb,
+            mikrofrontendService,
+            sykepengerMaxDateService,
+            veilederTilgangskontrollConsumer,
+            env.authEnv,
+        )
     }
 
     runningLocally {

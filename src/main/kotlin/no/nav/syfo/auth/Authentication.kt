@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
 
 val log: Logger = LoggerFactory.getLogger(Authentication::class.qualifiedName)
 
-suspend fun Application.setupAuthentication(
+fun Application.setupAuthentication(
     authEnv: AuthEnv,
     jwkProviderTokenX: JwkProvider,
     tokenXIssuer: String,
@@ -134,7 +134,7 @@ fun Application.setupLocalRoutesWithAuthentication(
     }
 }
 
-suspend fun Application.setupRoutesWithAuthentication(
+fun Application.setupRoutesWithAuthentication(
     sendMerVeiledningVarslerJobb: SendMerVeiledningVarslerJobb,
     mikrofrontendService: MikrofrontendService,
     sykepengerMaxDateService: SykepengerMaxDateService,
