@@ -11,7 +11,7 @@ class SendMerVeiledningVarslerJobb(
     private val merVeiledningVarselFinder: MerVeiledningVarselFinder,
     private val merVeiledningVarselService: MerVeiledningVarselService,
 ) {
-    private val log = LoggerFactory.getLogger(SendMerVeiledningVarslerJobb::class.java)
+    private val log = LoggerFactory.getLogger(SendMerVeiledningVarslerJobb::class.qualifiedName)
     private val logName = "[${SendMerVeiledningVarslerJobb::class.simpleName}]"
 
     suspend fun sendVarsler(): Int {

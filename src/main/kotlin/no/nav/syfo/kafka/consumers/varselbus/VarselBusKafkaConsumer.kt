@@ -1,8 +1,6 @@
 package no.nav.syfo.kafka.consumers.varselbus
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.*
@@ -32,17 +30,15 @@ class VarselBusKafkaConsumer(
         log.info("Started listening to topic $topicVarselBus")
 
         while (applicationState.running) {
-            runBlocking {
-                try {
-                    kafkaListener.poll(pollDurationInMillis).forEach { launch { processVarselBusRecord(it) } }
-                    kafkaListener.commitSync()
-                } catch (e: Exception) {
-                    log.error(
-                        "Exception in [$topicVarselBus]-listener: ${e.message}",
-                        e
-                    )
-                    applicationState.shutdownApplication()
-                }
+            try {
+                kafkaListener.poll(pollDurationInMillis).forEach { processVarselBusRecord(it) }
+                kafkaListener.commitSync()
+            } catch (e: Exception) {
+                log.error(
+                    "Exception in [$topicVarselBus]-listener: ${e.message}",
+                    e
+                )
+                applicationState.shutdownApplication()
             }
         }
     }

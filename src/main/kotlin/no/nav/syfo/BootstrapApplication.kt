@@ -15,7 +15,6 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.auth.setupLocalRoutesWithAuthentication
@@ -65,7 +64,7 @@ fun main() {
     } else {
         val server = embeddedServer(
             factory = Netty,
-            environment  = engineEnvironment,
+            environment = engineEnvironment,
             configure = {
                 connectionGroupSize = 8
                 workerGroupSize = 8
@@ -258,7 +257,7 @@ fun Application.serverModule(
     }
 
     runningRemotely {
-        runBlocking {
+        launch {
             setupRoutesWithAuthentication(
                 sendMerVeiledningVarslerJobb,
                 mikrofrontendService,
