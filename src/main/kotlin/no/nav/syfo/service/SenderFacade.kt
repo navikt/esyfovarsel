@@ -100,7 +100,7 @@ class SenderFacade(
         }
     }
 
-    fun sendTilArbeidsgiverNotifikasjon(
+    suspend fun sendTilArbeidsgiverNotifikasjon(
         varselHendelse: NarmesteLederHendelse,
         varsel: ArbeidsgiverNotifikasjonInput,
     ) {
@@ -128,12 +128,12 @@ class SenderFacade(
         }
     }
 
-    fun ferdigstillVarslerForFnr(fnr: PersonIdent) {
+    suspend fun ferdigstillVarslerForFnr(fnr: PersonIdent) {
         fetchUferdigstilteVarsler(fnr)
             .forEach { ferdigstillVarsel(it) }
     }
 
-    fun ferdigstillArbeidstakerVarsler(varselHendelse: ArbeidstakerHendelse) {
+    suspend fun ferdigstillArbeidstakerVarsler(varselHendelse: ArbeidstakerHendelse) {
         fetchUferdigstilteVarsler(
             PersonIdent(varselHendelse.arbeidstakerFnr),
             varselHendelse.orgnummer,
@@ -142,7 +142,7 @@ class SenderFacade(
             .forEach { ferdigstillVarsel(it) }
     }
 
-    fun ferdigstillNarmesteLederVarsler(varselHendelse: NarmesteLederHendelse) {
+    suspend fun ferdigstillNarmesteLederVarsler(varselHendelse: NarmesteLederHendelse) {
         fetchUferdigstilteVarsler(
             PersonIdent(varselHendelse.arbeidstakerFnr),
             varselHendelse.orgnummer,
@@ -151,7 +151,7 @@ class SenderFacade(
             .forEach { ferdigstillVarsel(it) }
     }
 
-    fun ferdigstillDittSykefravaerVarsler(varselHendelse: ArbeidstakerHendelse) {
+    suspend fun ferdigstillDittSykefravaerVarsler(varselHendelse: ArbeidstakerHendelse) {
         fetchUferdigstilteVarsler(
             PersonIdent(varselHendelse.arbeidstakerFnr),
             varselHendelse.orgnummer,
@@ -161,7 +161,7 @@ class SenderFacade(
             .forEach { ferdigstillVarsel(it) }
     }
 
-    fun ferdigstillDittSykefravaerVarslerAvTyper(varselHendelse: ArbeidstakerHendelse, varselTyper: Set<HendelseType>) {
+    suspend fun ferdigstillDittSykefravaerVarslerAvTyper(varselHendelse: ArbeidstakerHendelse, varselTyper: Set<HendelseType>) {
         fetchUferdigstilteVarsler(
             PersonIdent(varselHendelse.arbeidstakerFnr),
             varselHendelse.orgnummer,
@@ -183,7 +183,7 @@ class SenderFacade(
             .filter { kanal == null || it.kanal == kanal.name }
     }
 
-    private fun ferdigstillVarsel(utsendtVarsel: PUtsendtVarsel) {
+    private suspend fun ferdigstillVarsel(utsendtVarsel: PUtsendtVarsel) {
         if (utsendtVarsel.eksternReferanse != null && utsendtVarsel.ferdigstiltTidspunkt == null) {
             when (utsendtVarsel.kanal) {
                 BRUKERNOTIFIKASJON.name -> {
@@ -214,7 +214,7 @@ class SenderFacade(
         }
     }
 
-    fun sendBrevTilFysiskPrint(
+    suspend fun sendBrevTilFysiskPrint(
         uuid: String,
         varselHendelse: ArbeidstakerHendelse,
         journalpostId: String,

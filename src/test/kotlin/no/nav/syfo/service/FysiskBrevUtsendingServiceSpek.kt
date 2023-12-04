@@ -4,7 +4,6 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonResponse
@@ -33,7 +32,7 @@ class FysiskBrevUtsendingServiceSpek : DescribeSpec({
             } returns JournalpostdistribusjonResponse(
                 bestillingsId,
             )
-            runBlocking { fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, DistibusjonsType.ANNET) }
+            fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, DistibusjonsType.ANNET)
             coVerify(exactly = 1) {
                 journalpostdistribusjonConsumer.distribuerJournalpost(
                     journalpostId,

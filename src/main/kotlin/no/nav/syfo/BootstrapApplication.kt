@@ -25,7 +25,6 @@ import no.nav.syfo.consumer.dokarkiv.DokarkivConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
-import no.nav.syfo.consumer.pdl.LocalPdlConsumer
 import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
@@ -63,128 +62,14 @@ fun main() {
         val env = getJobEnv()
         sendNotificationsJob(env)
     } else {
-        val env = getEnv()
         val server = embeddedServer(
-            Netty,
-            applicationEngineEnvironment {
-                config = HoconApplicationConfig(ConfigFactory.load())
-                database = Database(env.dbEnv)
-                database.grantAccessToIAMUsers()
-
-                val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
-                val pdlConsumer = getPdlConsumer(env.urlEnv, azureAdTokenConsumer)
-                val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer)
-                val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
-                val narmesteLederConsumer = NarmesteLederConsumer(env.urlEnv, azureAdTokenConsumer)
-                val narmesteLederService = NarmesteLederService(narmesteLederConsumer)
-                val arbeidsgiverNotifikasjonProdusent =
-                    ArbeidsgiverNotifikasjonProdusent(env.urlEnv, azureAdTokenConsumer)
-                val arbeidsgiverNotifikasjonService = ArbeidsgiverNotifikasjonService(
-                    arbeidsgiverNotifikasjonProdusent,
-                    narmesteLederService,
-                    env.urlEnv.baseUrlDineSykmeldte,
-                )
-                val journalpostdistribusjonConsumer = JournalpostdistribusjonConsumer(env.urlEnv, azureAdTokenConsumer)
-                val dokarkivConsumer = DokarkivConsumer(env.urlEnv, azureAdTokenConsumer)
-                val dokarkivService = DokarkivService(dokarkivConsumer)
-
-                val brukernotifikasjonKafkaProducer = BrukernotifikasjonKafkaProducer(env)
-                val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
-                val dittSykefravaerMeldingKafkaProducer = DittSykefravaerMeldingKafkaProducer(env)
-                val minSideMicrofrontendKafkaProducer = MinSideMicrofrontendKafkaProducer(env)
-
-                val accessControlService = AccessControlService(dkifConsumer)
-                val fysiskBrevUtsendingService = FysiskBrevUtsendingService(journalpostdistribusjonConsumer)
-                val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
-                val brukernotifikasjonerService =
-                    BrukernotifikasjonerService(brukernotifikasjonKafkaProducer)
-                val senderFacade = SenderFacade(
-                    dineSykmeldteHendelseKafkaProducer,
-                    dittSykefravaerMeldingKafkaProducer,
-                    brukernotifikasjonerService,
-                    arbeidsgiverNotifikasjonService,
-                    fysiskBrevUtsendingService,
-                    database,
-                )
-                val motebehovVarselService = MotebehovVarselService(
-                    senderFacade,
-                    accessControlService,
-                    sykmeldingService,
-                    env.urlEnv.dialogmoterUrl,
-                )
-                val dialogmoteInnkallingVarselService = DialogmoteInnkallingVarselService(
-                    senderFacade,
-                    env.urlEnv.dialogmoterUrl,
-                    accessControlService,
-                )
-
-                val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(
-                    senderFacade,
-                    accessControlService,
-                    env.urlEnv.urlAktivitetskravInfoPage,
-                    env.toggleEnv.sendAktivitetspliktForhandsvarsel,
-                )
-                val oppfolgingsplanVarselService =
-                    OppfolgingsplanVarselService(senderFacade, accessControlService, env.urlEnv.oppfolgingsplanerUrl)
-                val sykepengerMaxDateService = SykepengerMaxDateService(database, pdlConsumer)
-                val pdfgenConsumer = PdfgenConsumer(env.urlEnv, pdlConsumer, database)
-                val merVeiledningVarselService = MerVeiledningVarselService(
-                    senderFacade,
-                    env.urlEnv,
-                    pdfgenConsumer,
-                    dokarkivService,
-                    accessControlService,
-                )
-                val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(database)
-                val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(database)
-                val mikrofrontendService =
-                    MikrofrontendService(
-                        minSideMicrofrontendKafkaProducer,
-                        mikrofrontendDialogmoteService,
-                        mikrofrontendAktivitetskravService,
-                        database,
-                    )
-
-                val varselBusService =
-                    VarselBusService(
-                        senderFacade,
-                        motebehovVarselService,
-                        oppfolgingsplanVarselService,
-                        dialogmoteInnkallingVarselService,
-                        aktivitetspliktForhandsvarselVarselService,
-                        mikrofrontendService,
-                    )
-
-                val veilederTilgangskontrollConsumer =
-                    VeilederTilgangskontrollConsumer(env.urlEnv, azureAdTokenConsumer)
-
-                val testdataResetService = TestdataResetService(database, mikrofrontendService, senderFacade)
-
-                connector {
-                    port = env.appEnv.applicationPort
-                }
-
-                module {
-                    state.running = true
-
-                    serverModule(
-                        env,
-                        merVeiledningVarselService,
-                        sykepengerMaxDateService,
-                        sykmeldingService,
-                        mikrofrontendService,
-                        pdlConsumer,
-                        veilederTilgangskontrollConsumer,
-                    )
-
-                    kafkaModule(
-                        env,
-                        varselBusService,
-                        sykepengerMaxDateService,
-                        testdataResetService,
-                    )
-                }
-            },
+            factory = Netty,
+            environment = engineEnvironment,
+            configure = {
+                connectionGroupSize = 8
+                workerGroupSize = 8
+                callGroupSize = 16
+            }
         )
 
         Runtime.getRuntime().addShutdownHook(
@@ -197,9 +82,130 @@ fun main() {
     }
 }
 
+val engineEnvironment: ApplicationEngineEnvironment = applicationEngineEnvironment {
+    val env = getEnv()
+    config = HoconApplicationConfig(ConfigFactory.load())
+    database = Database(env.dbEnv)
+    database.grantAccessToIAMUsers()
+
+    val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
+    val pdlConsumer = getPdlConsumer(env.urlEnv, azureAdTokenConsumer)
+    val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer)
+    val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
+    val narmesteLederConsumer = NarmesteLederConsumer(env.urlEnv, azureAdTokenConsumer)
+    val narmesteLederService = NarmesteLederService(narmesteLederConsumer)
+    val arbeidsgiverNotifikasjonProdusent =
+        ArbeidsgiverNotifikasjonProdusent(env.urlEnv, azureAdTokenConsumer)
+    val arbeidsgiverNotifikasjonService = ArbeidsgiverNotifikasjonService(
+        arbeidsgiverNotifikasjonProdusent,
+        narmesteLederService,
+        env.urlEnv.baseUrlDineSykmeldte,
+    )
+    val journalpostdistribusjonConsumer = JournalpostdistribusjonConsumer(env.urlEnv, azureAdTokenConsumer)
+    val dokarkivConsumer = DokarkivConsumer(env.urlEnv, azureAdTokenConsumer)
+    val dokarkivService = DokarkivService(dokarkivConsumer)
+
+    val brukernotifikasjonKafkaProducer = BrukernotifikasjonKafkaProducer(env)
+    val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
+    val dittSykefravaerMeldingKafkaProducer = DittSykefravaerMeldingKafkaProducer(env)
+    val minSideMicrofrontendKafkaProducer = MinSideMicrofrontendKafkaProducer(env)
+
+    val accessControlService = AccessControlService(dkifConsumer)
+    val fysiskBrevUtsendingService = FysiskBrevUtsendingService(journalpostdistribusjonConsumer)
+    val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
+    val brukernotifikasjonerService =
+        BrukernotifikasjonerService(brukernotifikasjonKafkaProducer)
+    val senderFacade = SenderFacade(
+        dineSykmeldteHendelseKafkaProducer,
+        dittSykefravaerMeldingKafkaProducer,
+        brukernotifikasjonerService,
+        arbeidsgiverNotifikasjonService,
+        fysiskBrevUtsendingService,
+        database,
+    )
+    val motebehovVarselService = MotebehovVarselService(
+        senderFacade,
+        accessControlService,
+        sykmeldingService,
+        env.urlEnv.dialogmoterUrl,
+    )
+    val dialogmoteInnkallingVarselService = DialogmoteInnkallingVarselService(
+        senderFacade,
+        env.urlEnv.dialogmoterUrl,
+        accessControlService,
+    )
+
+    val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(
+        senderFacade,
+        accessControlService,
+        env.urlEnv.urlAktivitetskravInfoPage,
+        env.toggleEnv.sendAktivitetspliktForhandsvarsel,
+    )
+    val oppfolgingsplanVarselService =
+        OppfolgingsplanVarselService(senderFacade, accessControlService, env.urlEnv.oppfolgingsplanerUrl)
+    val sykepengerMaxDateService = SykepengerMaxDateService(database, pdlConsumer)
+    val pdfgenConsumer = PdfgenConsumer(env.urlEnv, pdlConsumer, database)
+    val merVeiledningVarselService = MerVeiledningVarselService(
+        senderFacade,
+        env.urlEnv,
+        pdfgenConsumer,
+        dokarkivService,
+        accessControlService,
+    )
+    val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(database)
+    val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(database)
+    val mikrofrontendService =
+        MikrofrontendService(
+            minSideMicrofrontendKafkaProducer,
+            mikrofrontendDialogmoteService,
+            mikrofrontendAktivitetskravService,
+            database,
+        )
+
+    val varselBusService =
+        VarselBusService(
+            senderFacade,
+            motebehovVarselService,
+            oppfolgingsplanVarselService,
+            dialogmoteInnkallingVarselService,
+            aktivitetspliktForhandsvarselVarselService,
+            mikrofrontendService,
+        )
+
+    val veilederTilgangskontrollConsumer =
+        VeilederTilgangskontrollConsumer(env.urlEnv, azureAdTokenConsumer)
+
+    val testdataResetService = TestdataResetService(database, mikrofrontendService, senderFacade)
+
+    connector {
+        port = env.appEnv.applicationPort
+    }
+
+    module {
+        state.running = true
+
+        serverModule(
+            env,
+            merVeiledningVarselService,
+            sykepengerMaxDateService,
+            sykmeldingService,
+            mikrofrontendService,
+            pdlConsumer,
+            veilederTilgangskontrollConsumer,
+        )
+
+        kafkaModule(
+            env,
+            varselBusService,
+            sykepengerMaxDateService,
+            testdataResetService,
+        )
+    }
+}
+
 private fun getPdlConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsumer): PdlConsumer {
     return when {
-        isLocal() -> LocalPdlConsumer(urlEnv, azureADConsumer)
+        isLocal() -> PdlConsumer.LocalPdlConsumer(urlEnv, azureADConsumer)
         else -> PdlConsumer(urlEnv, azureADConsumer)
     }
 }

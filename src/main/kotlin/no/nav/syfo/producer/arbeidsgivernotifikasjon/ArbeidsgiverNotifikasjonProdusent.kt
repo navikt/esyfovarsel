@@ -1,15 +1,9 @@
 package no.nav.syfo.producer.arbeidsgivernotifikasjon
 
-import io.ktor.client.call.body
-import io.ktor.client.request.headers
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.HttpResponse
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.append
-import kotlinx.coroutines.runBlocking
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
@@ -84,7 +78,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
         hardDeleteDate.toString(),
     )
 
-    fun deleteNotifikasjonForArbeidsgiver(arbeidsgiverDeleteNotifikasjon: ArbeidsgiverDeleteNotifikasjon) {
+    suspend fun deleteNotifikasjonForArbeidsgiver(arbeidsgiverDeleteNotifikasjon: ArbeidsgiverDeleteNotifikasjon) {
         log.info("About to delete notification with uuid ${arbeidsgiverDeleteNotifikasjon.eksternReferanse} and merkelapp ${arbeidsgiverDeleteNotifikasjon.merkelapp} from ag-notifikasjon-produsent-api")
         callArbeidsgiverNotifikasjonProdusent(
             DELETE_NOTIFICATION_AG_MUTATION,
@@ -95,39 +89,37 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
         )
     }
 
-    private fun callArbeidsgiverNotifikasjonProdusent(
+    private suspend fun callArbeidsgiverNotifikasjonProdusent(
         mutationPath: String,
         variables: Variables,
     ): HttpResponse {
-        return runBlocking {
-            val token = azureAdTokenConsumer.getToken(scope)
-            val graphQuery =
-                this::class.java.getResource("$MUTATION_PATH_PREFIX/$mutationPath")?.readText()?.replace("[\n\r]", "")
+        val token = azureAdTokenConsumer.getToken(scope)
+        val graphQuery =
+            this::class.java.getResource("$MUTATION_PATH_PREFIX/$mutationPath")?.readText()?.replace("[\n\r]", "")
 
-            val requestBody = graphQuery?.let { NotificationAgRequest(it, variables) }
+        val requestBody = graphQuery?.let { NotificationAgRequest(it, variables) }
 
-            try {
-                val response = client.post(arbeidsgiverNotifikasjonProdusentBasepath) {
-                    headers {
-                        append(HttpHeaders.Accept, ContentType.Application.Json)
-                        append(HttpHeaders.ContentType, ContentType.Application.Json)
-                        append(HttpHeaders.Authorization, "Bearer $token")
-                    }
-                    if (requestBody != null) {
-                        setBody(requestBody)
-                    }
+        try {
+            val response = client.post(arbeidsgiverNotifikasjonProdusentBasepath) {
+                headers {
+                    append(HttpHeaders.Accept, ContentType.Application.Json)
+                    append(HttpHeaders.ContentType, ContentType.Application.Json)
+                    append(HttpHeaders.Authorization, "Bearer $token")
                 }
-                if (response.status != HttpStatusCode.OK) {
-                    throw RuntimeException("Could not send to arbeidsgiver. Status code: ${response.status.value}. Response: $response")
+                if (requestBody != null) {
+                    setBody(requestBody)
                 }
-                response
-            } catch (e: Exception) {
-                log.error("Error while calling ag-notifikasjon-produsent-api ($mutationPath): ${e.message}", e)
-                throw RuntimeException(
-                    "Error while calling ag-notifikasjon-produsent-api ($mutationPath): ${e.message}",
-                    e,
-                )
             }
+            if (response.status != HttpStatusCode.OK) {
+                throw RuntimeException("Could not send to arbeidsgiver. Status code: ${response.status.value}. Response: $response")
+            }
+            return response
+        } catch (e: Exception) {
+            log.error("Error while calling ag-notifikasjon-produsent-api ($mutationPath): ${e.message}", e)
+            throw RuntimeException(
+                "Error while calling ag-notifikasjon-produsent-api ($mutationPath): ${e.message}",
+                e,
+            )
         }
     }
 }

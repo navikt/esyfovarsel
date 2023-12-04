@@ -27,6 +27,16 @@ fun Application.setupAuthentication(
     jwkProviderTokenX: JwkProvider,
     tokenXIssuer: String,
 ) {
+    val jwtIssuerList = listOf(
+        JwtIssuer(
+            acceptedAudienceList = listOf(authEnv.clientId),
+            jwtIssuerType = JwtIssuerType.INTERNAL_AZUREAD,
+            wellKnown = getWellKnown(
+                wellKnownUrl = authEnv.aadAppWellKnownUrl,
+            ),
+        ),
+    )
+
     install(Authentication) {
         basic("auth-basic") {
             realm = "Access to the '/admin/' path"
@@ -53,16 +63,6 @@ fun Application.setupAuthentication(
                 }
             }
         }
-
-        val jwtIssuerList = listOf(
-            JwtIssuer(
-                acceptedAudienceList = listOf(authEnv.clientId),
-                jwtIssuerType = JwtIssuerType.INTERNAL_AZUREAD,
-                wellKnown = getWellKnown(
-                    wellKnownUrl = authEnv.aadAppWellKnownUrl,
-                ),
-            ),
-        )
 
         jwtIssuerList.forEach {
             configureJwt(

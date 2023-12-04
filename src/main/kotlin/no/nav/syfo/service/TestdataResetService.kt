@@ -20,7 +20,7 @@ class TestdataResetService(
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(TestdataResetService::class.qualifiedName)
-    fun resetTestdata(fnr: PersonIdent) {
+    suspend fun resetTestdata(fnr: PersonIdent) {
         log.info(
             "Nullstiller testdata for arbeidstaker ${fnr.value}. Ferdigstiller varsler " +
                     "som er sendt til Min side - arbeidsgiver, Dine sykmeldte, Min side (personbruker), " +

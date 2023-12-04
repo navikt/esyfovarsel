@@ -5,7 +5,6 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.arbeidstakerFnr2
@@ -80,9 +79,7 @@ class MerVeiledningVarselFinderSpek : DescribeSpec({
             embeddedDatabase.storeUtsendtVarsel(getUtsendtVarselToStore(LocalDateTime.now().minusMonths(5)))
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
 
-            val varslerToSendToday = runBlocking {
-                merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
-            }
+            val varslerToSendToday = merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
 
             varslerToSendToday.size shouldBeEqualTo 1
         }
@@ -93,9 +90,7 @@ class MerVeiledningVarselFinderSpek : DescribeSpec({
             embeddedDatabase.storeUtsendtVarsel(getUtsendtVarselToStore(LocalDateTime.now().minusMonths(1)))
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
 
-            val varslerToSendToday = runBlocking {
-                merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
-            }
+            val varslerToSendToday = merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
 
             varslerToSendToday.size shouldBeEqualTo 0
         }
@@ -106,9 +101,8 @@ class MerVeiledningVarselFinderSpek : DescribeSpec({
             embeddedDatabase.storeUtsendtVarsel(getUtsendtVarselToStore(LocalDateTime.now().minusMonths(1)))
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
 
-            val varslerToSendToday = runBlocking {
-                merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
-            }
+            val varslerToSendToday = merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
+
 
             varslerToSendToday.size shouldBeEqualTo 0
         }
@@ -118,9 +112,7 @@ class MerVeiledningVarselFinderSpek : DescribeSpec({
             coEvery { sykmeldingServiceMockk.isPersonSykmeldtPaDato(LocalDate.now(), arbeidstakerFnr1) } returns true
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
 
-            val varslerToSendToday = runBlocking {
-                merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
-            }
+            val varslerToSendToday = merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
 
             varslerToSendToday.size shouldBeEqualTo 1
         }
@@ -130,9 +122,7 @@ class MerVeiledningVarselFinderSpek : DescribeSpec({
             coEvery { sykmeldingServiceMockk.isPersonSykmeldtPaDato(LocalDate.now(), arbeidstakerFnr1) } returns true
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
 
-            val varslerToSendToday = runBlocking {
-                merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
-            }
+            val varslerToSendToday = merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
 
             varslerToSendToday.size shouldBeEqualTo 0
         }
@@ -142,9 +132,7 @@ class MerVeiledningVarselFinderSpek : DescribeSpec({
             coEvery { sykmeldingServiceMockk.isPersonSykmeldtPaDato(LocalDate.now(), arbeidstakerFnr1) } returns true
             embeddedDatabase.storeSpleisUtbetaling(spleisUtbetalingWhichResultsToVarsel)
 
-            runBlocking {
-                merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
-            }
+            merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
 
             coVerify(exactly = 1) { pdlConsumerMockk.isBrukerYngreEnnGittMaxAlder(arbeidstakerFnr1, 67) }
         }

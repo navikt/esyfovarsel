@@ -1,6 +1,7 @@
 package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
+import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.db.*
@@ -125,7 +126,7 @@ class TestdataResetServiceSpek : DescribeSpec({
             verify(exactly = 1) {
                 mikrofrontendService.closeAllMikrofrontendForUser(PersonIdent(arbeidstakerFnr1))
             }
-            verify(exactly = 1) {
+            coVerify(exactly = 1) {
                 senderFacade.ferdigstillVarslerForFnr(PersonIdent(arbeidstakerFnr1))
             }
         }

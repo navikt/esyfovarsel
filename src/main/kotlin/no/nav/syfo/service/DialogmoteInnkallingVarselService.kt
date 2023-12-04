@@ -76,14 +76,14 @@ class DialogmoteInnkallingVarselService(
     val EMAIL_BODY_KEY = "emailBody"
     private val log = LoggerFactory.getLogger(DialogmoteInnkallingVarselService::class.qualifiedName)
 
-    fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
+    suspend fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}")
         varselHendelse.data = dataToVarselDataNarmesteLeder(varselHendelse.data)
         sendVarselTilDineSykmeldte(varselHendelse)
         sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
     }
 
-    fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
+    suspend fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         val jounalpostData = dataToVarselDataJournalpost(varselHendelse.data)
         val varselUuid = jounalpostData.uuid
         val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
@@ -123,7 +123,7 @@ class DialogmoteInnkallingVarselService(
         )
     }
 
-    private fun sendFysiskBrevTilArbeidstaker(
+    private suspend fun sendFysiskBrevTilArbeidstaker(
         uuid: String,
         arbeidstakerHendelse: ArbeidstakerHendelse,
         journalpostId: String,
@@ -139,7 +139,7 @@ class DialogmoteInnkallingVarselService(
         }
     }
 
-    private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
+    private suspend fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
         val texts = getArbeisgiverTexts(varselHendelse)
         val sms = texts[SMS_KEY]
         val emailTitle = texts[EMAIL_TITLE_KEY]
@@ -317,7 +317,7 @@ class DialogmoteInnkallingVarselService(
         }
     }
 
-    private fun sendOppgaveTilDittSykefravaerOgFerdigstillTidligereMeldinger(
+    private suspend fun sendOppgaveTilDittSykefravaerOgFerdigstillTidligereMeldinger(
         arbeidstakerHendelse: ArbeidstakerHendelse,
         varselUuid: String,
     ) {

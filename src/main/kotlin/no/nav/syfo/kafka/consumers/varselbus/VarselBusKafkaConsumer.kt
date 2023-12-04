@@ -28,6 +28,7 @@ class VarselBusKafkaConsumer(
 
     override suspend fun listen(applicationState: ApplicationState) {
         log.info("Started listening to topic $topicVarselBus")
+
         while (applicationState.running) {
             try {
                 kafkaListener.poll(pollDurationInMillis).forEach { processVarselBusRecord(it) }
@@ -42,11 +43,13 @@ class VarselBusKafkaConsumer(
         }
     }
 
-    private fun processVarselBusRecord(record: ConsumerRecord<String, String>) {
+    private suspend fun processVarselBusRecord(record: ConsumerRecord<String, String>) {
         val varselEvent: EsyfovarselHendelse = objectMapper.readValue(record.value())
         varselEvent.data = objectMapper.readTree(record.value())["data"]
         log.info("VARSEL BUS: Mottatt melding med UUID ${record.key()} av type: ${varselEvent.type}")
+
         varselBusService.processVarselHendelse(varselEvent)
+
         varselBusService.processVarselHendelseAsMinSideMicrofrontendEvent(varselEvent)
     }
 }

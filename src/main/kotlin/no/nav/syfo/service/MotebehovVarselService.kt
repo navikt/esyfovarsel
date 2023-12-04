@@ -1,6 +1,5 @@
 package no.nav.syfo.service
 
-import kotlinx.coroutines.runBlocking
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_TITLE
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
@@ -43,16 +42,14 @@ class MotebehovVarselService(
     private val log: Logger = LoggerFactory.getLogger(MotebehovVarselService::class.qualifiedName)
     private val svarMotebehovUrl: String = "$dialogmoterUrl/sykmeldt/motebehov/svar"
 
-    fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
+    suspend fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         // Quickfix for å unngå å sende varsel til bedrifter der bruker ikke er sykmeldt. Det kan skje når den
         // sykmeldte har vært sykmeldt fra flere arbeidsforhold, men bare er sykmeldt ved én av dem nå
-        val sykmeldingStatusForVirksomhet = runBlocking {
-            sykmeldingService.checkSykmeldingStatusForVirksomhet(
-                LocalDate.now(),
-                varselHendelse.arbeidstakerFnr,
-                varselHendelse.orgnummer
-            )
-        }
+        val sykmeldingStatusForVirksomhet = sykmeldingService.checkSykmeldingStatusForVirksomhet(
+            LocalDate.now(),
+            varselHendelse.arbeidstakerFnr,
+            varselHendelse.orgnummer
+        )
 
         if (sykmeldingStatusForVirksomhet.sendtArbeidsgiver) {
             sendVarselTilDineSykmeldte(varselHendelse)
@@ -63,13 +60,13 @@ class MotebehovVarselService(
         }
     }
 
-    fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
+    suspend fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         sendVarselTilBrukernotifikasjoner(varselHendelse)
         sendOppgaveTilDittSykefravaer(varselHendelse)
         tellSvarMotebehovVarselSendt(1)
     }
 
-    private fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
+    private suspend fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
         senderFacade.sendTilArbeidsgiverNotifikasjon(
             varselHendelse,
             ArbeidsgiverNotifikasjonInput(
@@ -100,7 +97,7 @@ class MotebehovVarselService(
         senderFacade.sendTilDineSykmeldte(varselHendelse, dineSykmeldteVarsel)
     }
 
-    private fun sendVarselTilBrukernotifikasjoner(varselHendelse: ArbeidstakerHendelse) {
+    private suspend fun sendVarselTilBrukernotifikasjoner(varselHendelse: ArbeidstakerHendelse) {
         val fnr = varselHendelse.arbeidstakerFnr
         val eksternVarsling = accessControlService.canUserBeNotifiedByEmailOrSMS(fnr)
         senderFacade.sendTilBrukernotifikasjoner(
@@ -149,7 +146,7 @@ class MotebehovVarselService(
         )
     }
 
-    fun sendMotebehovTilbakemeldingTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
+    suspend fun sendMotebehovTilbakemeldingTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         val data = dataToVarselDataMotebehovTilbakemelding(varselHendelse.data)
         senderFacade.sendTilArbeidsgiverNotifikasjon(
             varselHendelse,

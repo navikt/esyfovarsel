@@ -1,7 +1,6 @@
 package no.nav.syfo.consumer
 
 import io.kotest.core.spec.style.DescribeSpec
-import kotlinx.coroutines.runBlocking
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.getTestEnv
@@ -37,19 +36,20 @@ class DkifConsumerSpek : DescribeSpec({
 
     describe("DkifConsumerSpek") {
         it("Call DKIF for non-reserved user") {
-            val dkifResponse = runBlocking { dkifConsumer.person(fnrNonReservedUser) }
+            val dkifResponse = dkifConsumer.person(fnrNonReservedUser)
             dkifResponse shouldNotBe null
             dkifResponse!!.kanVarsles shouldBeEqualTo true
         }
 
         it("Call DKIF for reserved user") {
-            val dkifResponse = runBlocking { dkifConsumer.person(fnrReservedUser) }
+            val dkifResponse = dkifConsumer.person(fnrReservedUser)
             dkifResponse shouldNotBe null
             dkifResponse!!.kanVarsles shouldBeEqualTo false
+
         }
 
         it("DKIF consumer should return null on invalid aktorid") {
-            val dkifResponse = runBlocking { dkifConsumer.person(fnrInvalid) }
+            val dkifResponse = dkifConsumer.person(fnrInvalid)
             dkifResponse shouldBeEqualTo null
         }
     }

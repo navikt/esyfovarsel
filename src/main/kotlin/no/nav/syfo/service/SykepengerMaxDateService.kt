@@ -9,7 +9,7 @@ import no.nav.syfo.kafka.consumers.utbetaling.domain.*
 
 class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface, private val pdlConsumer: PdlConsumer) {
 
-    fun processUtbetalingSpleisEvent(utbetaling: UtbetalingUtbetalt) {
+    suspend fun processUtbetalingSpleisEvent(utbetaling: UtbetalingUtbetalt) {
         val fnr = utbetaling.fødselsnummer
         processFodselsdato(fnr)
         databaseInterface.storeSpleisUtbetaling(utbetaling)
@@ -19,22 +19,17 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface,
         return databaseInterface.fetchMaksDatoByFnr(fnr)
     }
 
-    fun processInfotrygdEvent(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int, source: InfotrygdSource) {
+    suspend fun processInfotrygdEvent(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int, source: InfotrygdSource) {
         processFodselsdato(fnr)
         databaseInterface.storeInfotrygdUtbetaling(fnr, sykepengerMaxDate, utbetaltTilDate, gjenstaendeSykepengedager, source)
     }
 
-    private fun processFodselsdato(fnr: String) {
+    private suspend fun processFodselsdato(fnr: String) {
         val lagretFodselsdato = databaseInterface.fetchFodselsdatoByFnr(fnr)
-        if (lagretFodselsdato.isNullOrEmpty()){
+        if (lagretFodselsdato.isEmpty()){
             val pdlFodsel = pdlConsumer.hentPerson(fnr)?.hentPerson?.foedsel
             val fodselsdato = if (!pdlFodsel.isNullOrEmpty()) pdlFodsel.first().foedselsdato else null
             databaseInterface.storeFodselsdato(fnr, fodselsdato)
         }
     }
-}
-
-enum class SykepengerMaxDateSource {
-    INFOTRYGD,
-    SPLEIS
 }

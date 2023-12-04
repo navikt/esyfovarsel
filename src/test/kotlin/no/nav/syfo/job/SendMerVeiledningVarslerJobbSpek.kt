@@ -5,7 +5,6 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType.MER_VEILEDNING
 import no.nav.syfo.planner.arbeidstakerFnr1
@@ -45,9 +44,7 @@ class SendMerVeiledningVarslerJobbSpek : DescribeSpec({
                 merVeiledningVarsel,
             )
 
-            runBlocking {
-                sendVarselJobb.sendVarsler()
-            }
+            sendVarselJobb.sendVarsler()
 
             coVerify { merVeiledningVarselService.sendVarselTilArbeidstaker(any(), merVeiledningVarsel.uuid) }
         }

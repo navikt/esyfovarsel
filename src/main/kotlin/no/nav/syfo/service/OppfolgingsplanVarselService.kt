@@ -17,14 +17,14 @@ class OppfolgingsplanVarselService(
     val accessControlService: AccessControlService,
     val oppfolgingsplanerUrl: String
 ) {
-    fun sendVarselTilArbeidstaker(
+    suspend fun sendVarselTilArbeidstaker(
         varselHendelse: ArbeidstakerHendelse
     ) {
         val eksternVarsling = accessControlService.canUserBeNotifiedByEmailOrSMS(varselHendelse.arbeidstakerFnr)
         varsleArbeidstakerViaBrukernotifikasjoner(varselHendelse, eksternVarsling)
     }
 
-    fun sendVarselTilNarmesteLeder(
+    suspend fun sendVarselTilNarmesteLeder(
         varselHendelse: NarmesteLederHendelse
     ) {
         senderFacade.sendTilDineSykmeldte(
