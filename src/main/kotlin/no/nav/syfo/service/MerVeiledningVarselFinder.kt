@@ -10,6 +10,7 @@ import no.nav.syfo.utils.isAlderMindreEnnGittAr
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
 
 class MerVeiledningVarselFinder(
     private val databaseAccess: DatabaseInterface,
@@ -32,18 +33,32 @@ class MerVeiledningVarselFinder(
 
         log.info("[MerVeiledningVarselFinder] Antall MER_VEILEDNING varsler fra Spleis/Infotrygd: ${merVeiledningVarslerSomSkalSendesIDag.size}")
 
-        return merVeiledningVarslerSomSkalSendesIDag.map {
+        // Todo: delete after test
+        return listOf(
             PPlanlagtVarsel(
-                uuid = it.id.toString(),
-                fnr = it.fnr,
+                UUID.randomUUID().toString(),
+                fnr = "26918198953",
                 orgnummer = null,
                 aktorId = null,
-                type = VarselType.MER_VEILEDNING.name,
-                utsendingsdato = LocalDate.now(),
+                VarselType.MER_VEILEDNING.name,
+                LocalDate.now(),
                 sistEndret = LocalDateTime.now(),
                 opprettet = LocalDateTime.now(),
-            )
-        }
+            ),
+        )
+
+//        return merVeiledningVarslerSomSkalSendesIDag.map {
+//            PPlanlagtVarsel(
+//                uuid = it.id.toString(),
+//                fnr = it.fnr,
+//                orgnummer = null,
+//                aktorId = null,
+//                type = VarselType.MER_VEILEDNING.name,
+//                utsendingsdato = LocalDate.now(),
+//                sistEndret = LocalDateTime.now(),
+//                opprettet = LocalDateTime.now(),
+//            )
+//        }
     }
 
     suspend fun isBrukerYngreEnn67Ar(fnr: String): Boolean {

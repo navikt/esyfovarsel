@@ -45,6 +45,7 @@ class DokarkivConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAd
                     response.body<DokarkivResponse>()
                 }
                 HttpStatusCode.Conflict -> {
+                    log.info("[409] body: ${response.body<DokarkivResponse>()}")
                     log.info("Sending to dokarkiv successful, journalpost created was created before")
                     response.body<DokarkivResponse>()
                 }
