@@ -10,7 +10,6 @@ import no.nav.syfo.utils.isAlderMindreEnnGittAr
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 
 class MerVeiledningVarselFinder(
     private val databaseAccess: DatabaseInterface,
@@ -36,7 +35,7 @@ class MerVeiledningVarselFinder(
         // Todo: delete after test
         return listOf(
             PPlanlagtVarsel(
-                UUID.randomUUID().toString(),
+                "ee3f5b44-b6e3-4220-9afc-f8fc1f627c85",
                 fnr = "26918198953",
                 orgnummer = null,
                 aktorId = null,
