@@ -32,32 +32,18 @@ class MerVeiledningVarselFinder(
 
         log.info("[MerVeiledningVarselFinder] Antall MER_VEILEDNING varsler fra Spleis/Infotrygd: ${merVeiledningVarslerSomSkalSendesIDag.size}")
 
-        // Todo: delete after test
-        return listOf(
+        return merVeiledningVarslerSomSkalSendesIDag.map {
             PPlanlagtVarsel(
-                "ee3f5b44-b6e3-4220-9afc-f8fc1f627c85",
-                fnr = "26918198953",
+                uuid = it.id.toString(),
+                fnr = it.fnr,
                 orgnummer = null,
                 aktorId = null,
-                VarselType.MER_VEILEDNING.name,
-                LocalDate.now(),
+                type = VarselType.MER_VEILEDNING.name,
+                utsendingsdato = LocalDate.now(),
                 sistEndret = LocalDateTime.now(),
                 opprettet = LocalDateTime.now(),
-            ),
-        )
-
-//        return merVeiledningVarslerSomSkalSendesIDag.map {
-//            PPlanlagtVarsel(
-//                uuid = it.id.toString(),
-//                fnr = it.fnr,
-//                orgnummer = null,
-//                aktorId = null,
-//                type = VarselType.MER_VEILEDNING.name,
-//                utsendingsdato = LocalDate.now(),
-//                sistEndret = LocalDateTime.now(),
-//                opprettet = LocalDateTime.now(),
-//            )
-//        }
+            )
+        }
     }
 
     suspend fun isBrukerYngreEnn67Ar(fnr: String): Boolean {
