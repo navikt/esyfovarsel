@@ -44,7 +44,10 @@ class DokarkivConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAd
                     log.info("Sending to dokarkiv successful, journalpost created")
                     response.body<DokarkivResponse>()
                 }
-
+                HttpStatusCode.Conflict -> {
+                    log.info("Sending to dokarkiv successful, journalpost created was created before")
+                    response.body<DokarkivResponse>()
+                }
                 HttpStatusCode.Unauthorized -> {
                     log.error("Failed to post document to Dokarkiv: Unable to authorize")
                     null

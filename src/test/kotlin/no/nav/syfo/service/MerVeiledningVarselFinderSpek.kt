@@ -103,7 +103,6 @@ class MerVeiledningVarselFinderSpek : DescribeSpec({
 
             val varslerToSendToday = merVeiledningVarselFinder.findMerVeiledningVarslerToSendToday()
 
-
             varslerToSendToday.size shouldBeEqualTo 0
         }
 
@@ -160,6 +159,6 @@ private fun getUtsendtVarselToStore(utsendtTidspunkt: LocalDateTime): PUtsendtVa
         null,
         null,
         null,
-        null
+        null,
     )
 }

@@ -13,11 +13,13 @@ data class DokarkivRequest(
     val kanal: String,
     val sak: Sak,
     val overstyrInnsynsregler: String,
+    val eksternReferanseId: String,
 ) {
     companion object {
         fun create(
             avsenderMottaker: AvsenderMottaker,
             dokumenter: List<Dokument>,
+            uuid: String,
         ) = DokarkivRequest(
             avsenderMottaker = avsenderMottaker,
             tittel = "Brev om snart slutt på sykepenger",
@@ -30,6 +32,7 @@ data class DokarkivRequest(
             sak = Sak("GENERELL_SAK"),
             // By default, user can not see documents created by others. Following enables viewing on Mine Saker:
             overstyrInnsynsregler = "VISES_MASKINELT_GODKJENT",
+            eksternReferanseId = uuid,
         )
     }
 }
