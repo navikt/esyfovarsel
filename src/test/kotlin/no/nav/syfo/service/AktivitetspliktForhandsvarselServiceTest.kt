@@ -12,7 +12,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
 import org.amshove.kluent.shouldBeEqualTo
 import java.io.IOException
 
-const val SM_FNR = "26918198953"
+const val SM_FNR = "123456789"
 class AktivitetskravVarselServiceTest : DescribeSpec({
     val accessControlService = mockk<AccessControlService>()
     val senderFacade = mockk<SenderFacade>(relaxed = true)

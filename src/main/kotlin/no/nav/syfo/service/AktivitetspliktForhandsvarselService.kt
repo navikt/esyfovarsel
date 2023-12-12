@@ -27,8 +27,7 @@ class AktivitetspliktForhandsvarselVarselService(
             requireNotNull(data.journalpost.id)
 
             val userAccessStatus = accessControlService.getUserAccessStatus(varselHendelse.arbeidstakerFnr)
-            if (varselHendelse.arbeidstakerFnr == "26918198953") { // TODO: delete
-//            if (userAccessStatus.canUserBeDigitallyNotified) {
+            if (userAccessStatus.canUserBeDigitallyNotified) {
                 log.info("Sending [FORHAANDSVARSEL] to brukernotifikasjoner")
                 senderFacade.sendTilBrukernotifikasjoner(
                     uuid = data.journalpost.uuid,
