@@ -51,6 +51,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
                     any(),
                     any(),
                     true,
+                    any(),
                 )
             }
         }
