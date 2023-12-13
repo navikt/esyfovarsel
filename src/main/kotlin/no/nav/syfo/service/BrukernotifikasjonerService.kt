@@ -7,7 +7,7 @@ import java.lang.IllegalArgumentException
 import java.net.URL
 
 class BrukernotifikasjonerService(
-    val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer
+    val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,
 ) {
     private val log: Logger = LoggerFactory.getLogger(BrukernotifikasjonerService::class.qualifiedName)
 
@@ -18,6 +18,7 @@ class BrukernotifikasjonerService(
         url: URL?,
         meldingType: BrukernotifikasjonKafkaProducer.MeldingType?,
         eksternVarsling: Boolean,
+        smsContent: String? = null,
     ) {
         when (meldingType) {
             BrukernotifikasjonKafkaProducer.MeldingType.BESKJED -> {
@@ -29,7 +30,7 @@ class BrukernotifikasjonerService(
                 if (url == null) {
                     throw IllegalArgumentException("Url must be set")
                 }
-                brukernotifikasjonKafkaProducer.sendOppgave(mottakerFnr, content, uuid, url)
+                brukernotifikasjonKafkaProducer.sendOppgave(mottakerFnr, content, uuid, url, smsContent)
                 log.info("Har sendt oppgave med uuid $uuid til brukernotifikasjoner: $content")
             }
 

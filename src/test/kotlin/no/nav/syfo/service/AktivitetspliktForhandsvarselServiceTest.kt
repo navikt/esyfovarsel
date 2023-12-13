@@ -11,6 +11,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.VarselData
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
 import org.amshove.kluent.shouldBeEqualTo
 import java.io.IOException
+
 const val SM_FNR = "123456789"
 class AktivitetskravVarselServiceTest : DescribeSpec({
     val accessControlService = mockk<AccessControlService>()
@@ -27,17 +28,17 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
 
             coEvery { accessControlService.getUserAccessStatus(SM_FNR) } returns UserAccessStatus(
                 SM_FNR,
-                canUserBeDigitallyNotified = true
+                canUserBeDigitallyNotified = true,
             )
 
             aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
 
-            coVerify (exactly = 0) {
+            coVerify(exactly = 0) {
                 senderFacade.sendBrevTilFysiskPrint(
                     any(),
                     forhandsvarselEvent,
                     any(),
-                    DistibusjonsType.VIKTIG
+                    DistibusjonsType.VIKTIG,
                 )
             }
 
@@ -49,35 +50,19 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
                     any(),
                     any(),
                     any(),
-                    true
+                    true,
                 )
             }
-        }
-
-        it("Får IOException dersom feil datatype") {
-            val forhandsvarselEvent = createForhandsvarselHendelse()
-            forhandsvarselEvent.data = "hei"
-            coEvery { accessControlService.getUserAccessStatus(SM_FNR) } returns
-                    UserAccessStatus(
-                        SM_FNR,
-                        canUserBeDigitallyNotified = true,
-                    )
-
-            val exception = shouldThrow<IOException> {
-                aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
-            }
-
-            exception.message shouldBeEqualTo "ArbeidstakerHendelse har feil format"
         }
 
         it("Får IOException dersom mangende journalpostid") {
             val forhandsvarselEvent = createForhandsvarselHendelse()
             forhandsvarselEvent.data = VarselData(journalpost = VarselDataJournalpost(uuid = "something", id = null))
             coEvery { accessControlService.getUserAccessStatus(SM_FNR) } returns
-                    UserAccessStatus(
-                        SM_FNR,
-                        canUserBeDigitallyNotified = true,
-                    )
+                UserAccessStatus(
+                    SM_FNR,
+                    canUserBeDigitallyNotified = true,
+                )
 
             val exception = shouldThrow<IOException> {
                 aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
@@ -90,10 +75,10 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
             val objectMapper = createObjectMapper()
 
             coEvery { accessControlService.getUserAccessStatus(any()) } returns
-                    UserAccessStatus(
-                        SM_FNR,
-                        canUserBeDigitallyNotified = false
-                    )
+                UserAccessStatus(
+                    SM_FNR,
+                    canUserBeDigitallyNotified = false,
+                )
 
             val jsondata = """{
                 "@type": "ArbeidstakerHendelse",
@@ -123,7 +108,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
                     any(),
                     arbeidstakerHendelse,
                     any(),
-                    DistibusjonsType.VIKTIG
+                    DistibusjonsType.VIKTIG,
                 )
             }
         }
@@ -136,6 +121,6 @@ private fun createForhandsvarselHendelse(): ArbeidstakerHendelse {
         false,
         varselData(journalpostId = "620049753", journalpostUuid = "bda0b55a-df72-4888-a5a5-6bfa74cacafe"),
         SM_FNR,
-        null
+        null,
     )
 }

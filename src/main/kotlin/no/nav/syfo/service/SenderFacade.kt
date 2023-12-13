@@ -78,10 +78,11 @@ class SenderFacade(
         varselHendelse: ArbeidstakerHendelse,
         meldingType: BrukernotifikasjonKafkaProducer.MeldingType? = BrukernotifikasjonKafkaProducer.MeldingType.BESKJED,
         eksternVarsling: Boolean = true,
+        smsContent: String? = null,
     ) {
         var isSendingSucceed = true
         try {
-            brukernotifikasjonerService.sendVarsel(uuid, mottakerFnr, content, url, meldingType, eksternVarsling)
+            brukernotifikasjonerService.sendVarsel(uuid, mottakerFnr, content, url, meldingType, eksternVarsling, smsContent)
         } catch (e: Exception) {
             log.warn("Error while sending varsel to BRUKERNOTIFIKASJON: ${e.message}")
             isSendingSucceed = false
