@@ -22,7 +22,7 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 
 class BrukernotifikasjonKafkaProducer(
-    val env: Environment
+    val env: Environment,
 ) {
     private val kafkaBeskjedProducer = KafkaProducer<NokkelInput, BeskjedInput>(producerProperties(env))
     private val kafkaOppgaveProducer = KafkaProducer<NokkelInput, OppgaveInput>(producerProperties(env))
@@ -37,7 +37,7 @@ class BrukernotifikasjonKafkaProducer(
         content: String,
         uuid: String,
         varselUrl: URL?,
-        eksternVarsling: Boolean
+        eksternVarsling: Boolean,
     ) {
         val nokkelInput = buildNewNokkelInput(uuid, fnr)
         val beskjedInput = buildNewBeskjed(content, varselUrl, eksternVarsling)
@@ -45,7 +45,7 @@ class BrukernotifikasjonKafkaProducer(
         val record = ProducerRecord(
             topicBrukernotifikasjonBeskjed,
             nokkelInput,
-            beskjedInput
+            beskjedInput,
         )
 
         kafkaBeskjedProducer
@@ -57,15 +57,16 @@ class BrukernotifikasjonKafkaProducer(
         fnr: String,
         content: String,
         uuid: String,
-        varselUrl: URL
+        varselUrl: URL,
+        smsContent: String?,
     ) {
         val nokkelInput = buildNewNokkelInput(uuid, fnr)
-        val oppgave = buildNewOppgave(content, varselUrl)
+        val oppgave = buildNewOppgave(content, varselUrl, smsContent)
 
         val record = ProducerRecord(
             topicBrukernotifikasjonOppgave,
             nokkelInput,
-            oppgave
+            oppgave,
         )
         kafkaOppgaveProducer
             .send(record)
@@ -79,7 +80,7 @@ class BrukernotifikasjonKafkaProducer(
         val record = ProducerRecord(
             topicBrukernotifikasjonDone,
             nokkelInput,
-            doneInput
+            doneInput,
         )
 
         kafkaDoneProducer
@@ -113,18 +114,20 @@ class BrukernotifikasjonKafkaProducer(
             .withSikkerhetsnivaa(sikkerhetsNiva)
             .withSynligFremTil(null)
             .withEksternVarsling(eksternVarsling)
-        if (eksternVarsling)
+        if (eksternVarsling) {
             builder.withPrefererteKanaler(PreferertKanal.SMS)
+        }
         return builder.build()
     }
 
-    fun buildNewOppgave(content: String, varselUrl: URL): OppgaveInput = OppgaveInputBuilder()
+    fun buildNewOppgave(content: String, varselUrl: URL, smsContent: String? = null): OppgaveInput = OppgaveInputBuilder()
         .withTidspunkt(LocalDateTime.now(UTCPlus1))
         .withTekst(content)
         .withLink(varselUrl)
         .withSikkerhetsnivaa(sikkerhetsNiva)
         .withEksternVarsling(true)
         .withPrefererteKanaler(PreferertKanal.SMS)
+        .withSmsVarslingstekst(smsContent)
         .build()
 
     private fun LocalDateTime.toLocalDateTimeUTCPlus1() =

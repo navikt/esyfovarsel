@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import no.nav.syfo.BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_SMS_TEXT
 import no.nav.syfo.BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_TEXT
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
@@ -27,7 +28,6 @@ class AktivitetspliktForhandsvarselVarselService(
 
             val userAccessStatus = accessControlService.getUserAccessStatus(varselHendelse.arbeidstakerFnr)
             if (userAccessStatus.canUserBeDigitallyNotified) {
-                log.info("Sending [FORHAANDSVARSEL] to brukernotifikasjoner")
                 senderFacade.sendTilBrukernotifikasjoner(
                     uuid = data.journalpost.uuid,
                     mottakerFnr = varselHendelse.arbeidstakerFnr,
@@ -36,6 +36,7 @@ class AktivitetspliktForhandsvarselVarselService(
                     varselHendelse = varselHendelse,
                     meldingType = BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE,
                     eksternVarsling = true,
+                    smsContent = BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_SMS_TEXT,
                 )
             } else {
                 log.info("Sending [FORHAANDSVARSEL] to print")
