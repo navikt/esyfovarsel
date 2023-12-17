@@ -1,9 +1,8 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT
-import no.nav.syfo.BRUKERNOTIFIKASJONER_MER_VEILEDNING_URL
 import no.nav.syfo.DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT
-import no.nav.syfo.DITT_SYKEFRAVAER_MER_VEILEDNING_URL
+import no.nav.syfo.MER_VEILEDNING_URL
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
@@ -69,7 +68,7 @@ class MerVeiledningVarselService(
     private fun sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse: ArbeidstakerHendelse) {
         val uuid = "${UUID.randomUUID()}"
         val fnr = arbeidstakerHendelse.arbeidstakerFnr
-        val url = URL(urlEnv.baseUrlSykInfo + BRUKERNOTIFIKASJONER_MER_VEILEDNING_URL)
+        val url = URL(urlEnv.baseUrlNavEkstern + MER_VEILEDNING_URL)
 
         senderFacade.sendTilBrukernotifikasjoner(
             uuid,
@@ -100,7 +99,7 @@ class MerVeiledningVarselService(
         val melding = DittSykefravaerMelding(
             OpprettMelding(
                 DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT,
-                DITT_SYKEFRAVAER_MER_VEILEDNING_URL,
+                MER_VEILEDNING_URL,
                 Variant.INFO,
                 true,
                 DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING,

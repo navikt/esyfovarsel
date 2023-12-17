@@ -19,7 +19,6 @@
     "syfosmregisterScope": "syfosmregisterScope",
     "dkifScope": "dkifScope",
     "pdlScope": "pdlScope",
-    "baseUrlSykInfo": "http://ditt-sykefravaer:8080",
     "pdlUrl": "http://localhost:9091",
     "dkifUrl": "http://localhost:9093/rest/v1/person",
     "dialogmoterUrl": "http://dialogmoter:8080",
@@ -37,7 +36,8 @@
     "istilgangskontrollUrl": "http://istilgangskontrollUrl:9099",
     "istilgangskontrollScope": "istilgangskontrollScope",
     "dokumentarkivOppfolgingDocumentsPageUrl": "http://dokumentarkivOppfolgingDocumentsPageUrl:9099",
-    "urlAktivitetskravInfoPage": "http://aktivitetsplikt:9099"
+    "urlAktivitetskravInfoPage": "http://aktivitetsplikt:9099",
+    "baseUrlNavEkstern": "http://nav:8080"
   },
   "kafkaEnv": {
     "bootstrapServersUrl": "http://localhost:9092",
