@@ -46,7 +46,6 @@ fun getEnv(): Environment {
                 syfosmregisterScope = getEnvVar("SYFOSMREGISTER_SCOPE"),
                 dkifScope = getEnvVar("DKIF_SCOPE"),
                 pdlScope = getEnvVar("PDL_SCOPE"),
-                baseUrlSykInfo = getEnvVar("BASE_URL_SYK_INFO"),
                 pdlUrl = getEnvVar("PDL_URL"),
                 dkifUrl = getEnvVar("DKIF_URL"),
                 dialogmoterUrl = getEnvVar("BASE_URL_DIALOGMOTER"),
@@ -64,7 +63,8 @@ fun getEnv(): Environment {
                 istilgangskontrollUrl = getEnvVar("ISTILGANGSKONTROLL_URL"),
                 istilgangskontrollScope = getEnvVar("ISTILGANGSKONTROLL_SCOPE"),
                 dokumentarkivOppfolgingDocumentsPageUrl = getEnvVar("BASE_URL_DOKUMENTARKIV_OPPFOLGING_DOCUMENTS_PAGE"),
-                urlAktivitetskravInfoPage = getEnvVar("URL_AKTIVITETSKRAV_INFO_PAGE")
+                urlAktivitetskravInfoPage = getEnvVar("URL_AKTIVITETSKRAV_INFO_PAGE"),
+                baseUrlNavEkstern = getEnvVar("BASE_URL_NAV_EKSTERN")
                 ),
             KafkaEnv(
                 bootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
@@ -129,7 +129,6 @@ data class UrlEnv(
     val syfosmregisterScope: String,
     val dkifScope: String,
     val pdlScope: String,
-    val baseUrlSykInfo: String,
     val pdlUrl: String,
     val dkifUrl: String,
     val dialogmoterUrl: String,
@@ -148,6 +147,7 @@ data class UrlEnv(
     val istilgangskontrollScope: String,
     val dokumentarkivOppfolgingDocumentsPageUrl: String,
     val urlAktivitetskravInfoPage: String,
+    val baseUrlNavEkstern: String,
     )
 
 data class KafkaEnv(

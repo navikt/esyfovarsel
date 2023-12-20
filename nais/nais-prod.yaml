@@ -53,6 +53,7 @@ spec:
         - application: syfomodiaperson
           namespace: teamsykefravr
           cluster: prod-gcp
+        - application: meroppfolging-frontend
     outbound:
       external:
         - host: pdl-api.prod-fss-pub.nais.io
@@ -127,8 +128,6 @@ spec:
       value: "false"
     - name: TOGGLE_SEND_AKTIVITETSPLIKT_FORHANDSVARSEL
       value: "true"
-    - name: BASE_URL_SYK_INFO
-      value: https://www.nav.no/syk/info
     - name: BASE_URL_DIALOGMOTER
       value: https://www.nav.no/syk/dialogmoter
     - name: BASE_URL_OPPFOLGINGSPLANER
@@ -161,3 +160,5 @@ spec:
       value: https://www.nav.no/dokumentarkiv/tema/OPP
     - name: URL_AKTIVITETSKRAV_INFO_PAGE
       value: https://www.nav.no/syk/aktivitetskrav
+    - name: BASE_URL_NAV_EKSTERN
+      value: https://www.nav.no
