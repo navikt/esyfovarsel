@@ -47,6 +47,9 @@ spec:
         - application: syfomotebehov
           namespace: team-esyfo
           cluster: dev-fss
+        - application: syfomotebehov
+          namespace: team-esyfo
+          cluster: dev-gcp
         - application: esyfo-info-frontend
           namespace: team-esyfo
           cluster: dev-gcp
