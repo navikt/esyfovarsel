@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 group = "no.nav.syfo"
 version = "1.0"
 
-val kluentVersion = "1.68"
+val kluentVersion = "1.73"
 val ktorVersion = "2.3.1"
 val prometheusVersion = "0.15.0"
 val micrometerVersion = "1.8.4"
