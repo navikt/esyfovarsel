@@ -22,7 +22,7 @@ val jacksonVersion = "2.16.1"
 val postgresEmbeddedVersion = "1.0.2"
 val kafkaVersion = "3.6.0"
 val avroVersion = "1.11.3"
-val confluentVersion = "7.4.0"
+val confluentVersion = "7.5.3"
 val brukernotifikasjonerSchemaVersion = "2.5.1"
 val kotlinVersion = "1.8.22"
 
