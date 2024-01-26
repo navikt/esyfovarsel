@@ -8,6 +8,8 @@ jobs:
   deploy-topic-to-dev:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/varselbus-')
     name: Deploy topic to dev
+    permissions:
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -15,13 +17,14 @@ jobs:
       - name: Deploy topic varselbus to dev
         uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: nais/topics/varselbus-topic-dev.yaml
 
   deploy-topic-to-prod:
     if: github.ref == 'refs/heads/main'
     name: Deploy topic to prod
+    permissions:
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -29,6 +32,5 @@ jobs:
       - name: Deploy topic varselbus to prod
         uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: nais/topics/varselbus-topic-prod.yaml
