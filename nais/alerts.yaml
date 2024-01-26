@@ -46,7 +46,7 @@ spec:
             namespace: team-esyfo
             severity: warning
         - alert: KAFKA UTBETALING CONSUMER LAG
-          expr: kafka_consumergroup_group_topic_sum_lag{topic="tbd.utbetaling", group="esyfovarsel-group-utbetaling-spleis-01"} > 0
+          expr: kafka_consumergroup_group_topic_sum_lag{topic="flex.ditt-sykefravaer-melding", group="esyfovarsel-group-utbetaling-spleis-01"} > 0
           for: 15m
           annotations:
             summary: "esyfovarsel har ukonsumerte Kafkameldinger på topic tbd.utbetaling"
