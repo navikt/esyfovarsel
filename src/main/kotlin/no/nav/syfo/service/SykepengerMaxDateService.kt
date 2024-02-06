@@ -9,7 +9,7 @@ import no.nav.syfo.kafka.consumers.utbetaling.domain.*
 
 class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface, private val pdlConsumer: PdlConsumer) {
 
-    suspend fun processUtbetalingSpleisEvent(utbetaling: UtbetalingUtbetalt) {
+    suspend fun processUtbetalingSpleisEvent(utbetaling: UtbetalingSpleis) {
         val fnr = utbetaling.fødselsnummer
         processFodselsdato(fnr)
         databaseInterface.storeSpleisUtbetaling(utbetaling)

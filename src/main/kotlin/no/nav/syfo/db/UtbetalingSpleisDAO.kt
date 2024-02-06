@@ -1,14 +1,14 @@
 package no.nav.syfo.db
 
 import no.nav.syfo.domain.PersonIdent
-import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
+import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingSpleis
 import org.postgresql.util.PSQLException
 import java.sql.Date
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.*
 
-fun DatabaseInterface.storeSpleisUtbetaling(utbetaling: UtbetalingUtbetalt) {
+fun DatabaseInterface.storeSpleisUtbetaling(utbetaling: UtbetalingSpleis) {
     val insertStatement = """INSERT INTO UTBETALING_SPLEIS  (
         ID, 
         FNR, 

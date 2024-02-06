@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.*
-import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
+import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingSpleis
 import no.nav.syfo.service.SykepengerMaxDateService
 import org.apache.kafka.clients.CommonClientConfigs.GROUP_ID_CONFIG
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -33,8 +33,8 @@ class UtbetalingKafkaConsumer(
             kafkaListener.poll(pollDurationInMillis).forEach {
                 log.info("Received record from topic $topicUtbetaling")
                 try {
-                    val utbetaling: UtbetalingUtbetalt = objectMapper.readValue(it.value())
-                    if (utbetaling.event == "utbetaling_utbetalt") {
+                    val utbetaling: UtbetalingSpleis = objectMapper.readValue(it.value())
+                    if (utbetaling.event == "utbetaling_utbetalt" || utbetaling.event == "utbetaling_uten_utbetaling") {
                         sykepengerMaxDateService.processUtbetalingSpleisEvent(utbetaling)
                     }
                 } catch (e: IOException) {

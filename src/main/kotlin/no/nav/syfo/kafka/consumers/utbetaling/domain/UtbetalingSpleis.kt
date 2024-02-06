@@ -2,7 +2,7 @@ package no.nav.syfo.kafka.consumers.utbetaling.domain
 
 import java.time.LocalDate
 
-data class UtbetalingUtbetalt(
+data class UtbetalingSpleis(
     val fødselsnummer: String,
     val organisasjonsnummer: String? = null,
     val event: String,
