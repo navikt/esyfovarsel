@@ -17,3 +17,6 @@ data class UtbetalingSpleis(
     val utbetalingId: String,
     val korrelasjonsId: String,
 )
+
+const val UTBETALING_UTBETALT = "utbetaling_utbetalt"
+const val UTBETALING_UTEN_UTBETALING = "utbetaling_uten_utbetaling"

@@ -3,6 +3,7 @@ package no.nav.syfo.db
 import io.kotest.core.spec.style.DescribeSpec
 import no.nav.syfo.db.domain.PUtbetaling
 import no.nav.syfo.kafka.consumers.infotrygd.domain.InfotrygdSource.AAP_KAFKA_TOPIC
+import no.nav.syfo.kafka.consumers.utbetaling.domain.UTBETALING_UTBETALT
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingSpleis
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
@@ -170,7 +171,7 @@ private fun spleisUtbetaling(
 ) = UtbetalingSpleis(
     fødselsnummer = fnr,
     organisasjonsnummer = "234",
-    event = "ubetaling_utbetalt",
+    event = UTBETALING_UTBETALT,
     type = "UTBETALING",
     foreløpigBeregnetSluttPåSykepenger = forelopigBeregnetSluttPaSykepenger,
     forbrukteSykedager = 89,
