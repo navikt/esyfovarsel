@@ -2,7 +2,7 @@ package no.nav.syfo.kafka.consumers.utbetaling.domain
 
 import java.time.LocalDate
 
-data class UtbetalingUtbetalt(
+data class UtbetalingSpleis(
     val fødselsnummer: String,
     val organisasjonsnummer: String? = null,
     val event: String,
@@ -17,3 +17,6 @@ data class UtbetalingUtbetalt(
     val utbetalingId: String,
     val korrelasjonsId: String,
 )
+
+const val UTBETALING_UTBETALT = "utbetaling_utbetalt"
+const val UTBETALING_UTEN_UTBETALING = "utbetaling_uten_utbetaling"

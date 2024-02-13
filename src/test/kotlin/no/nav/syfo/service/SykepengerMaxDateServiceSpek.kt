@@ -7,9 +7,8 @@ import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.pdl.PdlFoedsel
 import no.nav.syfo.consumer.pdl.PdlHentPerson
 import no.nav.syfo.consumer.pdl.PdlPerson
-import no.nav.syfo.db.DatabaseInterface
-import no.nav.syfo.db.toList
-import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
+import no.nav.syfo.kafka.consumers.utbetaling.domain.UTBETALING_UTBETALT
+import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingSpleis
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import java.time.LocalDate
@@ -37,10 +36,10 @@ class SykepengerMaxDateServiceSpek : DescribeSpec({
         }
 
         it("Should store spleis utbetaling") {
-            val utbetalingUtbetalt = UtbetalingUtbetalt(
+            val utbetalingUtbetalt = UtbetalingSpleis(
                 fødselsnummer = "123",
                 organisasjonsnummer = "234",
-                event = "ubetaling_utbetalt",
+                event = UTBETALING_UTBETALT,
                 type = "UTBETALING",
                 foreløpigBeregnetSluttPåSykepenger = LocalDate.now().plusDays(100),
                 forbrukteSykedager = 100,
@@ -61,10 +60,10 @@ class SykepengerMaxDateServiceSpek : DescribeSpec({
         }
 
         it("Should ignore duplicate spleis utbetaling") {
-            val utbetalingUtbetalt = UtbetalingUtbetalt(
+            val utbetalingUtbetalt = UtbetalingSpleis(
                 fødselsnummer = "123",
                 organisasjonsnummer = "234",
-                event = "ubetaling_utbetalt",
+                event = UTBETALING_UTBETALT,
                 type = "UTBETALING",
                 foreløpigBeregnetSluttPåSykepenger = LocalDate.now().plusDays(100),
                 forbrukteSykedager = 100,

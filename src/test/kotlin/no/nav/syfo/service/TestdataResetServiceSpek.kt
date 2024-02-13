@@ -8,7 +8,7 @@ import no.nav.syfo.db.*
 import no.nav.syfo.db.domain.*
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.infotrygd.domain.InfotrygdSource
-import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
+import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingSpleis
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
@@ -49,7 +49,7 @@ class TestdataResetServiceSpek : DescribeSpec({
                 arbeidsgivernotifikasjonMerkelapp = null,
             )
 
-        val utbetalingUtbetalt = UtbetalingUtbetalt(
+        val utbetalingUtbetalt = UtbetalingSpleis(
             arbeidstakerFnr1,
             orgnummer,
             "utbetaling",

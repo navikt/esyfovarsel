@@ -12,7 +12,8 @@ import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.storeFodselsdato
 import no.nav.syfo.db.storeSpleisUtbetaling
 import no.nav.syfo.db.storeUtsendtVarsel
-import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
+import no.nav.syfo.kafka.consumers.utbetaling.domain.UTBETALING_UTBETALT
+import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingSpleis
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.planner.arbeidstakerFnr1
 import no.nav.syfo.testutil.EmbeddedDatabase
@@ -32,10 +33,10 @@ class MerVeiledningVarselFinderSpek : DescribeSpec({
     val merVeiledningVarselFinder =
         MerVeiledningVarselFinder(embeddedDatabase, sykmeldingServiceMockk, pdlConsumerMockk)
 
-    val spleisUtbetalingWhichResultsToVarsel = UtbetalingUtbetalt(
+    val spleisUtbetalingWhichResultsToVarsel = UtbetalingSpleis(
         fødselsnummer = arbeidstakerFnr1,
         organisasjonsnummer = "234",
-        event = "ubetaling_utbetalt",
+        event = UTBETALING_UTBETALT,
         type = "UTBETALING",
         foreløpigBeregnetSluttPåSykepenger = LocalDate.now().plusDays(15),
         forbrukteSykedager = 100,
@@ -47,10 +48,10 @@ class MerVeiledningVarselFinderSpek : DescribeSpec({
         utbetalingId = UUID.randomUUID().toString(),
         korrelasjonsId = UUID.randomUUID().toString(),
     )
-    val spleisUtbetalingWhichResultsToVarsel2 = UtbetalingUtbetalt(
+    val spleisUtbetalingWhichResultsToVarsel2 = UtbetalingSpleis(
         fødselsnummer = arbeidstakerFnr2,
         organisasjonsnummer = "234",
-        event = "ubetaling_utbetalt",
+        event = UTBETALING_UTBETALT,
         type = "UTBETALING",
         foreløpigBeregnetSluttPåSykepenger = LocalDate.now().plusDays(15),
         forbrukteSykedager = 100,

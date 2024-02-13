@@ -3,7 +3,8 @@ package no.nav.syfo.db
 import io.kotest.core.spec.style.DescribeSpec
 import no.nav.syfo.db.domain.PUtbetaling
 import no.nav.syfo.kafka.consumers.infotrygd.domain.InfotrygdSource.AAP_KAFKA_TOPIC
-import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingUtbetalt
+import no.nav.syfo.kafka.consumers.utbetaling.domain.UTBETALING_UTBETALT
+import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingSpleis
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.dropData
 import org.amshove.kluent.should
@@ -167,10 +168,10 @@ private fun spleisUtbetaling(
     tom: LocalDate = now().minusDays(1),
     forelopigBeregnetSluttPaSykepenger: LocalDate = now().plusDays(14),
     gjenstaendeSykedager: Int = 90
-) = UtbetalingUtbetalt(
+) = UtbetalingSpleis(
     fødselsnummer = fnr,
     organisasjonsnummer = "234",
-    event = "ubetaling_utbetalt",
+    event = UTBETALING_UTBETALT,
     type = "UTBETALING",
     foreløpigBeregnetSluttPåSykepenger = forelopigBeregnetSluttPaSykepenger,
     forbrukteSykedager = 89,
@@ -183,7 +184,7 @@ private fun spleisUtbetaling(
     korrelasjonsId = UUID.randomUUID().toString(),
 )
 
-private fun List<PUtbetaling>.skalInneholde(spleisUtbetaling: UtbetalingUtbetalt) =
+private fun List<PUtbetaling>.skalInneholde(spleisUtbetaling: UtbetalingSpleis) =
     this.shouldMatchAtLeastOneOf { pUtbetaling: PUtbetaling -> pUtbetaling.fnr == spleisUtbetaling.fødselsnummer && pUtbetaling.utbetaltTom == spleisUtbetaling.tom && pUtbetaling.forelopigBeregnetSlutt == spleisUtbetaling.foreløpigBeregnetSluttPåSykepenger && pUtbetaling.gjenstaendeSykedager == spleisUtbetaling.gjenståendeSykedager }
 
 private fun DatabaseInterface.shouldContainForelopigBeregnetSlutt(fnr: String, forelopigBeregnetSlutt: LocalDate) =
