@@ -57,6 +57,8 @@ spec:
           namespace: teamsykefravr
           cluster: prod-gcp
         - application: meroppfolging-frontend
+        - application: ditt-sykefravaer
+          namespace: flex
     outbound:
       external:
         - host: pdl-api.prod-fss-pub.nais.io
