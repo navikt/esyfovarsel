@@ -19,11 +19,18 @@ fun Route.registerSykepengerMaxDateRestApi(
     get("/api/v1/sykepenger/maxdate") {
         val principal: BrukerPrincipal = call.authentication.principal()!!
         val sykmeldtFnr = principal.fnr
+        val isoFormat = call.request.queryParameters["isoformat"]?.toBoolean() ?: false
 
         try {
             val sykepengerMaxDate = sykepengerMaxDateService.getSykepengerMaxDate(sykmeldtFnr)
-            val maxDate = sykepengerMaxDate?.let { formatDateForLetter(it.forelopig_beregnet_slutt) }
-            val utbetaltTom = sykepengerMaxDate?.let { formatDateForLetter(it.utbetalt_tom) }
+            val maxDate = sykepengerMaxDate?.let {
+                if (isoFormat) it.forelopig_beregnet_slutt.toString()
+                else formatDateForLetter(it.forelopig_beregnet_slutt)
+            }
+            val utbetaltTom = sykepengerMaxDate?.let {
+                if (isoFormat) it.utbetalt_tom.toString()
+                else formatDateForLetter(it.utbetalt_tom)
+            }
             log.info("Fetched sykepengerMaxDate from database: ${sykepengerMaxDate?.forelopig_beregnet_slutt}")
             call.respond(SykepengerMaxDateResponse(maxDate, utbetaltTom))
         } catch (e: Exception) {
@@ -35,6 +42,7 @@ fun Route.registerSykepengerMaxDateRestApi(
         }
     }
 }
+
 
 data class SykepengerMaxDateResponse(
     val maxDate: String?,
