@@ -79,15 +79,13 @@ enum class HendelseType {
     SM_DIALOGMOTE_NYTT_TID_STED,
     SM_DIALOGMOTE_LEST,
     SM_AKTIVITETSPLIKT,
+    SM_ARBEIDSUFORHET_FORHANDSVARSEL
 }
 
 fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
     val eventType = this.type
     if (eventType.isNotValidHendelseType()) {
-        throw IllegalArgumentException(
-            "${eventType.name} er ikke gyldig hendelse for å hente ut " +
-                "'synligTom'-felt",
-        )
+        throw IllegalArgumentException("${eventType.name} er ikke gyldig hendelse for å hente ut 'synligTom'-felt")
     }
     if (eventType.isAktivitetspliktType()) {
         return LocalDateTime.now().plusDays(30L)
@@ -141,13 +139,12 @@ fun HendelseType.isDialogmoteInnkallingType() = this in listOf(
     HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
 )
 
-fun HendelseType.isDialogmoteType() = this.isDialogmoteInnkallingType() or (
-    this in listOf(
+fun HendelseType.isDialogmoteType() =
+    this.isDialogmoteInnkallingType() or (this in listOf(
         HendelseType.SM_DIALOGMOTE_AVLYST,
         HendelseType.SM_DIALOGMOTE_REFERAT,
         HendelseType.SM_DIALOGMOTE_LEST,
-    )
-    )
+    ))
 
 fun ArbeidstakerHendelse.notCorrectMikrofrontendType() =
     !(this.type.isDialogmoteType() or this.type.isAktivitetspliktType())
