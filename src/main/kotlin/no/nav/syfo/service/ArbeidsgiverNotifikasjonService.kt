@@ -32,10 +32,7 @@ class ArbeidsgiverNotifikasjonService(
             return
         }
 
-        if (arbeidsgiverNotifikasjon.narmesteLederFnr !== null && !arbeidsgiverNotifikasjon.narmesteLederFnr.equals(
-                narmesteLederRelasjon.narmesteLederFnr
-            )
-        ) {
+        if (arbeidsgiverNotifikasjon.narmesteLederFnr !== null && arbeidsgiverNotifikasjon.narmesteLederFnr != narmesteLederRelasjon.narmesteLederFnr) {
             log.warn("Sender ikke varsel til ag-notifikasjon: den ansatte har nærmeste leder med annet fnr enn mottaker i varselHendelse")
             return
         }
