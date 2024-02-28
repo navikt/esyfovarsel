@@ -1,12 +1,9 @@
 package no.nav.syfo.testutil
 
 import no.nav.syfo.db.DatabaseInterface
-import no.nav.syfo.db.domain.PPlanlagtVarsel
-import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import org.amshove.kluent.should
-import java.time.LocalDate
 
 fun String.extractPortFromUrl(): Int {
     val portIndexStart = lastIndexOf(':') + 1

@@ -8,21 +8,8 @@ import java.time.format.DateTimeFormatter
 
 private const val BREV_DATE_FORMAT_PATTERN = "dd. MMMM yyyy"
 
-fun LocalDate.isEqualOrAfter(other: LocalDate): Boolean {
-    return this == other || this.isAfter(other)
-}
-
 fun LocalDate.isEqualOrBefore(other: LocalDate): Boolean {
     return this == other || this.isBefore(other)
-}
-
-fun todayIsBetweenFomAndTom(fom: LocalDate, tom: LocalDate): Boolean {
-    val today = LocalDate.now()
-    return dateIsInInterval(today, fom, tom)
-}
-
-fun dateIsInInterval(date: LocalDate, start: LocalDate, end: LocalDate): Boolean {
-    return date.isEqualOrAfter(start) && date.isEqualOrBefore(end)
 }
 
 fun parseDate(date: String): LocalDate {

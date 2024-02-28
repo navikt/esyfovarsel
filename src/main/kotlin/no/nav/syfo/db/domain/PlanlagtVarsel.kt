@@ -6,8 +6,6 @@ enum class VarselType {
     MER_VEILEDNING
 }
 
-const val UTSENDING_FEILET = "UTSENDING_FEILET"
-
 data class PlanlagtVarsel(
     val fnr: String,
     val aktorId: String,

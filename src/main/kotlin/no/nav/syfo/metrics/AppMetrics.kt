@@ -15,7 +15,6 @@ const val METRICS_NS = "esyfovarsel"
 
 const val MER_VEILEDNING_NOTICE_SENT = "${METRICS_NS}_mer_veiledning_notice_sent"
 const val SVAR_MOTEBEHOV_NOTICE_SENT = "${METRICS_NS}_svar_motebehov_notice_sent"
-const val AKTIVITETSKRAV_NOTICE_SENT = "${METRICS_NS}_aktivitetskrav_isyfo_sent"
 const val NOTICE_SENT = "${METRICS_NS}_notice_sent"
 
 val METRICS_REGISTRY =
@@ -36,11 +35,6 @@ val COUNT_ALL_NOTICE_SENT: Counter = Counter
     .description("Counts the number of all types of notice sent")
     .register(METRICS_REGISTRY)
 
-val COUNT_AKTIVIETSKRAV_ISYFO_SENT: Counter = Counter
-    .builder(AKTIVITETSKRAV_NOTICE_SENT)
-    .description("Counts the number of aktivitetskrav from isyfo sent")
-    .register(METRICS_REGISTRY)
-
 fun tellMerVeiledningVarselSendt(varslerSendt: Int) {
     COUNT_ALL_NOTICE_SENT.increment(varslerSendt.toDouble())
     COUNT_MER_VEILEDNING_NOTICE_SENT.increment(varslerSendt.toDouble())
@@ -49,10 +43,6 @@ fun tellMerVeiledningVarselSendt(varslerSendt: Int) {
 fun tellSvarMotebehovVarselSendt(varslerSendt: Int) {
     COUNT_ALL_NOTICE_SENT.increment(varslerSendt.toDouble())
     COUNT_SVAR_MOTEBEHOV_NOTICE_SENT.increment(varslerSendt.toDouble())
-}
-
-fun tellAktivitetskravFraIsAktivitetskrav() {
-    COUNT_AKTIVIETSKRAV_ISYFO_SENT.increment()
 }
 
 fun Routing.registerPrometheusApi() {

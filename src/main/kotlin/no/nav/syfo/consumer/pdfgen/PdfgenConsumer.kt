@@ -27,7 +27,7 @@ class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseI
     suspend fun getMerVeiledningPDF(fnr: String, isBrukerReservert: Boolean): ByteArray? {
         val mottakerNavn = pdlConsumer.hentPerson(fnr)?.getFullNameAsString()
         val sykepengerMaxDate = databaseInterface.fetchMaksDatoByFnr(fnr)
-        val merVeiledningPdfUrl = syfooppdfgenUrl + "/api/v1/genpdf/oppfolging/mer_veiledning"
+        val merVeiledningPdfUrl = "$syfooppdfgenUrl/api/v1/genpdf/oppfolging/mer_veiledning"
         val request = getPdfgenRequest(
             mottakerNavn,
             sykepengerMaxDate?.utbetalt_tom,

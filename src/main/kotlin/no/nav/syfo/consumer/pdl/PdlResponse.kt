@@ -69,17 +69,6 @@ data class PdlErrorExtension(
     val classification: String
 )
 
-fun PdlHentPerson.isKode6Eller7(): Boolean {
-    val adressebeskyttelse = this.hentPerson?.adressebeskyttelse
-    return if (adressebeskyttelse.isNullOrEmpty()) {
-        false
-    } else {
-        return adressebeskyttelse.any {
-            it.isKode6() || it.isKode7()
-        }
-    }
-}
-
 fun Adressebeskyttelse.isKode6(): Boolean {
     return this.gradering == Gradering.STRENGT_FORTROLIG || this.gradering == Gradering.STRENGT_FORTROLIG_UTLAND
 }
