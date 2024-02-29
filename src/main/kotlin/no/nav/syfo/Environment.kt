@@ -65,7 +65,7 @@ fun getEnv(): Environment {
                 dokumentarkivOppfolgingDocumentsPageUrl = getEnvVar("BASE_URL_DOKUMENTARKIV_OPPFOLGING_DOCUMENTS_PAGE"),
                 urlAktivitetskravInfoPage = getEnvVar("URL_AKTIVITETSKRAV_INFO_PAGE"),
                 baseUrlNavEkstern = getEnvVar("BASE_URL_NAV_EKSTERN")
-                ),
+            ),
             KafkaEnv(
                 bootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
                 schemaRegistry = KafkaSchemaRegistryEnv(
@@ -148,7 +148,7 @@ data class UrlEnv(
     val dokumentarkivOppfolgingDocumentsPageUrl: String,
     val urlAktivitetskravInfoPage: String,
     val baseUrlNavEkstern: String,
-    )
+)
 
 data class KafkaEnv(
     var bootstrapServersUrl: String,

@@ -28,6 +28,9 @@ spec:
       application: isdialogmote
       access: write
     - team: teamsykefravr
+      application: isarbeidsuforhet
+      access: write
+    - team: teamsykefravr
       application: isyfomock
       access: write
     - team: team-esyfo
