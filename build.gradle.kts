@@ -23,7 +23,7 @@ val postgresEmbeddedVersion = "1.0.2"
 val kafkaVersion = "3.6.0"
 val avroVersion = "1.11.3"
 val confluentVersion = "7.6.0"
-val brukernotifikasjonerSchemaVersion = "2.5.1"
+val brukernotifikasjonerSchemaVersion = "3.0.0"
 val kotlinVersion = "1.9.22"
 
 val githubUser: String by project
