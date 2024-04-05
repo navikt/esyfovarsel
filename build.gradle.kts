@@ -16,7 +16,7 @@ val javaxVersion = "2.1.1"
 val logstashEncoderVersion = "7.4"
 val postgresVersion = "42.7.3"
 val hikariVersion = "5.1.0"
-val flywayVersion = "7.5.2"
+val flywayVersion = "10.10.0"
 val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.17.0"
 val postgresEmbeddedVersion = "1.0.2"
@@ -106,6 +106,7 @@ dependencies {
     implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
 
     // JSON parsing
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
@@ -153,6 +154,9 @@ tasks {
     }
 
     withType<ShadowJar> {
+        mergeServiceFiles {
+            setPath("META-INF/services/org.flywaydb.core.extensibility.Plugin")
+        }
         setProperty("zip64", true)
         manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapApplicationKt"
     }
