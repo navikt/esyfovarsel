@@ -12,20 +12,26 @@ import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import org.apache.kafka.clients.CommonClientConfigs.GROUP_ID_CONFIG
 import org.apache.kafka.clients.CommonClientConfigs.SECURITY_PROTOCOL_CONFIG
-import org.apache.kafka.clients.consumer.ConsumerConfig.*
+import org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG
 import org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG
+import org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG
+import org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG
+import org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_RECORDS_CONFIG
+import org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG
 import org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG
 import org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG
 import org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG
-import org.apache.kafka.common.config.SaslConfigs.SASL_JAAS_CONFIG
-import org.apache.kafka.common.config.SaslConfigs.SASL_MECHANISM
-import org.apache.kafka.common.config.SslConfigs.*
+import org.apache.kafka.common.config.SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG
+import org.apache.kafka.common.config.SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG
+import org.apache.kafka.common.config.SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG
+import org.apache.kafka.common.config.SslConfigs.SSL_KEYSTORE_TYPE_CONFIG
+import org.apache.kafka.common.config.SslConfigs.SSL_KEY_PASSWORD_CONFIG
+import org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG
+import org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG
+import org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG
 import java.time.Duration
 import java.util.*
 
-const val topicBrukernotifikasjonBeskjed = "min-side.aapen-brukernotifikasjon-beskjed-v1"
-const val topicBrukernotifikasjonOppgave = "min-side.aapen-brukernotifikasjon-oppgave-v1"
-const val topicBrukernotifikasjonDone = "min-side.aapen-brukernotifikasjon-done-v1"
 const val topicDineSykmeldteHendelse = "teamsykmelding.dinesykmeldte-hendelser-v2"
 const val topicVarselBus = "team-esyfo.varselbus"
 const val topicSykepengedagerInfotrygd = "aap.sykepengedager.infotrygd.v1"
@@ -45,82 +51,47 @@ interface KafkaListener {
     suspend fun listen(applicationState: ApplicationState)
 }
 
-fun aivenConsumerProperties(env: Environment): Properties {
-    val sslConfig = env.kafkaEnv.sslConfig
-
-    return consumerProperties(env).apply {
+fun commonProperties(env: Environment): Properties {
+    return Properties().apply {
         put(SECURITY_PROTOCOL_CONFIG, SSL)
+        put(BOOTSTRAP_SERVERS_CONFIG, env.kafkaEnv.aivenBroker)
         put(SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "") // Disable server host name verification
         put(SSL_TRUSTSTORE_TYPE_CONFIG, JAVA_KEYSTORE)
         put(SSL_KEYSTORE_TYPE_CONFIG, PKCS12)
-        put(SSL_TRUSTSTORE_LOCATION_CONFIG, sslConfig.truststoreLocation)
-        put(SSL_TRUSTSTORE_PASSWORD_CONFIG, sslConfig.credstorePassword)
-        put(SSL_KEYSTORE_LOCATION_CONFIG, sslConfig.keystoreLocation)
-        put(SSL_KEYSTORE_PASSWORD_CONFIG, sslConfig.credstorePassword)
-        put(SSL_KEY_PASSWORD_CONFIG, sslConfig.credstorePassword)
-        put(BOOTSTRAP_SERVERS_CONFIG, env.kafkaEnv.aivenBroker)
-        remove(SASL_MECHANISM)
-        remove(SASL_JAAS_CONFIG)
-        remove(SASL_MECHANISM)
+        put(SSL_TRUSTSTORE_LOCATION_CONFIG, env.kafkaEnv.sslConfig.truststoreLocation)
+        put(SSL_TRUSTSTORE_PASSWORD_CONFIG, env.kafkaEnv.sslConfig.credstorePassword)
+        put(SSL_KEYSTORE_LOCATION_CONFIG, env.kafkaEnv.sslConfig.keystoreLocation)
+        put(SSL_KEYSTORE_PASSWORD_CONFIG, env.kafkaEnv.sslConfig.credstorePassword)
+        put(SSL_KEY_PASSWORD_CONFIG, env.kafkaEnv.sslConfig.credstorePassword)
+        if (!env.appEnv.remote) {
+            remove(SECURITY_PROTOCOL_CONFIG)
+        }
     }
 }
 
 fun consumerProperties(env: Environment): Properties {
-    val properties = HashMap<String, String>().apply {
+    return commonProperties(env).apply {
         put(GROUP_ID_CONFIG, "esyfovarsel-group-v04-gcp-v03")
         put(AUTO_OFFSET_RESET_CONFIG, "earliest")
         put(MAX_POLL_RECORDS_CONFIG, "1")
         put(ENABLE_AUTO_COMMIT_CONFIG, "false")
-        put(SECURITY_PROTOCOL_CONFIG, "SASL_SSL")
-        put(SASL_MECHANISM, "PLAIN")
         put(KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer")
         put(VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer")
-        put(
-            SASL_JAAS_CONFIG,
-            "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${env.authEnv.serviceuserUsername}\" password=\"${env.authEnv.serviceuserPassword}\";"
-        )
-        put(BOOTSTRAP_SERVERS_CONFIG, env.kafkaEnv.bootstrapServersUrl)
-    }.toProperties()
-    if (!env.appEnv.remote) {
-        properties.remove(SECURITY_PROTOCOL_CONFIG)
-        properties.remove(SASL_MECHANISM)
     }
-    return properties
 }
 
 fun producerProperties(env: Environment): Properties {
-    val sslConfig = env.kafkaEnv.sslConfig
     val schemaRegistryConfig = env.kafkaEnv.schemaRegistry
     val userinfoConfig = "${schemaRegistryConfig.username}:${schemaRegistryConfig.password}"
 
-    val properties = HashMap<String, String>().apply {
+    return commonProperties(env).apply {
         put(ACKS_CONFIG, "all")
-        put(SECURITY_PROTOCOL_CONFIG, SSL)
-        put(SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "") // Disable server host name verification
-        put(SSL_TRUSTSTORE_TYPE_CONFIG, JAVA_KEYSTORE)
-        put(SSL_KEYSTORE_TYPE_CONFIG, PKCS12)
-        put(SSL_TRUSTSTORE_LOCATION_CONFIG, sslConfig.truststoreLocation)
-        put(SSL_TRUSTSTORE_PASSWORD_CONFIG, sslConfig.credstorePassword)
-        put(SSL_KEYSTORE_LOCATION_CONFIG, sslConfig.keystoreLocation)
-        put(SSL_KEYSTORE_PASSWORD_CONFIG, sslConfig.credstorePassword)
-        put(SSL_KEY_PASSWORD_CONFIG, sslConfig.credstorePassword)
-        put(BOOTSTRAP_SERVERS_CONFIG, env.kafkaEnv.aivenBroker)
-
         put(KEY_SERIALIZER_CLASS_CONFIG, "io.confluent.kafka.serializers.KafkaAvroSerializer")
         put(VALUE_SERIALIZER_CLASS_CONFIG, "io.confluent.kafka.serializers.KafkaAvroSerializer")
         put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryConfig.url)
         put(BASIC_AUTH_CREDENTIALS_SOURCE, USER_INFO)
         put(USER_INFO_CONFIG, userinfoConfig)
-        put(BOOTSTRAP_SERVERS_CONFIG, env.kafkaEnv.aivenBroker)
-
-        remove(SASL_MECHANISM)
-        remove(SASL_JAAS_CONFIG)
-        remove(SASL_MECHANISM)
-    }.toProperties()
-    if (!env.appEnv.remote) {
-        properties.remove(SECURITY_PROTOCOL_CONFIG)
     }
-    return properties
 }
 
 fun createObjectMapper() = ObjectMapper().apply {

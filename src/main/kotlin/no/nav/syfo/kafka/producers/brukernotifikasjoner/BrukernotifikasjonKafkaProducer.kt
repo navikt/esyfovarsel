@@ -1,36 +1,29 @@
 package no.nav.syfo.kafka.producers.brukernotifikasjoner
 
-import no.nav.brukernotifikasjon.schemas.builders.BeskjedInputBuilder
-import no.nav.brukernotifikasjon.schemas.builders.DoneInputBuilder
-import no.nav.brukernotifikasjon.schemas.builders.NokkelInputBuilder
-import no.nav.brukernotifikasjon.schemas.builders.OppgaveInputBuilder
-import no.nav.brukernotifikasjon.schemas.builders.domain.PreferertKanal
-import no.nav.brukernotifikasjon.schemas.input.BeskjedInput
-import no.nav.brukernotifikasjon.schemas.input.DoneInput
-import no.nav.brukernotifikasjon.schemas.input.NokkelInput
-import no.nav.brukernotifikasjon.schemas.input.OppgaveInput
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.producerProperties
-import no.nav.syfo.kafka.common.topicBrukernotifikasjonBeskjed
-import no.nav.syfo.kafka.common.topicBrukernotifikasjonDone
-import no.nav.syfo.kafka.common.topicBrukernotifikasjonOppgave
+import no.nav.tms.varsel.action.EksternKanal
+import no.nav.tms.varsel.action.EksternVarslingBestilling
+import no.nav.tms.varsel.action.Sensitivitet
+import no.nav.tms.varsel.action.Tekst
+import no.nav.tms.varsel.action.Varseltype
+import no.nav.tms.varsel.builder.VarselActionBuilder
 import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.serialization.StringSerializer
 import java.net.URL
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
 
 class BrukernotifikasjonKafkaProducer(
     val env: Environment,
 ) {
-    private val kafkaBeskjedProducer = KafkaProducer<NokkelInput, BeskjedInput>(producerProperties(env))
-    private val kafkaOppgaveProducer = KafkaProducer<NokkelInput, OppgaveInput>(producerProperties(env))
-    private val kafkaDoneProducer = KafkaProducer<NokkelInput, DoneInput>(producerProperties(env))
-    private val UTCPlus1 = ZoneId.of("Europe/Oslo")
-    private val appNavn = "esyfovarsel"
-    private val namespace = "team-esyfo"
-    private val groupingId = "ESYFOVARSEL"
+    val brukernotifikasjonerTopic = "min-side.aapen-brukervarsel-v1"
+    val kafkaProducer = KafkaProducer<String, String>(producerProperties(env).apply {
+        put(
+            put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java),
+            put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java)
+        )
+    })
 
     fun sendBeskjed(
         fnr: String,
@@ -39,17 +32,17 @@ class BrukernotifikasjonKafkaProducer(
         varselUrl: URL?,
         eksternVarsling: Boolean,
     ) {
-        val nokkelInput = buildNewNokkelInput(uuid, fnr)
-        val beskjedInput = buildNewBeskjed(content, varselUrl, eksternVarsling)
-
-        val record = ProducerRecord(
-            topicBrukernotifikasjonBeskjed,
-            nokkelInput,
-            beskjedInput,
+        val varsel = createVarsel(
+            varseltype = Varseltype.Beskjed,
+            uuid = uuid,
+            fnr = fnr,
+            content = content,
+            varselUrl = varselUrl,
+            smsVarsling = eksternVarsling,
+            smsVarslingTekst = null,
         )
 
-        kafkaBeskjedProducer
-            .send(record)
+        kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
             .get() // Block until record has been sent
     }
 
@@ -60,84 +53,56 @@ class BrukernotifikasjonKafkaProducer(
         varselUrl: URL,
         smsContent: String?,
     ) {
-        val nokkelInput = buildNewNokkelInput(uuid, fnr)
-        val oppgave = buildNewOppgave(content, varselUrl, smsContent)
-
-        val record = ProducerRecord(
-            topicBrukernotifikasjonOppgave,
-            nokkelInput,
-            oppgave,
+        val varsel = createVarsel(
+            varseltype = Varseltype.Oppgave,
+            uuid = uuid,
+            fnr = fnr,
+            content = content,
+            varselUrl = varselUrl,
+            smsVarsling = true,
+            smsVarslingTekst = smsContent,
         )
-        kafkaOppgaveProducer
-            .send(record)
+
+        kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
             .get() // Block until record has been sent
     }
 
-    fun sendDone(uuid: String, fnr: String) {
-        val nokkelInput = buildNewNokkelInput(uuid, fnr)
-        val doneInput = buildNewDoneInput()
+    fun sendDone(uuid: String) {
+        val inaktiverVarsel = VarselActionBuilder.inaktiver {
+            varselId = uuid
+        }
 
-        val record = ProducerRecord(
-            topicBrukernotifikasjonDone,
-            nokkelInput,
-            doneInput,
-        )
-
-        kafkaDoneProducer
-            .send(record)
-            .get() // Block until record has been sent
+        kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, inaktiverVarsel)).get()
     }
 
-    private fun buildNewDoneInput() = DoneInputBuilder()
-        .withTidspunkt(LocalDateTime.now().toLocalDateTimeUTCPlus1())
-        .build()
-
-    private fun buildNewNokkelInput(uuid: String, fnr: String): NokkelInput {
-        return NokkelInputBuilder()
-            .withEventId(uuid)
-            .withGrupperingsId(groupingId)
-            .withFodselsnummer(fnr)
-            .withNamespace(namespace)
-            .withAppnavn(appNavn)
-            .build()
-    }
-
-    private fun buildNewBeskjed(
+    private fun createVarsel(
+        varseltype: Varseltype,
+        uuid: String,
+        fnr: String,
         content: String,
         varselUrl: URL?,
-        eksternVarsling: Boolean,
-    ): BeskjedInput {
-        val builder = BeskjedInputBuilder()
-            .withTidspunkt(LocalDateTime.now(UTCPlus1))
-            .withTekst(content)
-            .withLink(varselUrl)
-            .withSikkerhetsnivaa(sikkerhetsNiva)
-            .withSynligFremTil(null)
-            .withEksternVarsling(eksternVarsling)
-        if (eksternVarsling) {
-            builder.withPrefererteKanaler(PreferertKanal.SMS)
+        smsVarsling: Boolean,
+        smsVarslingTekst: String?,
+    ): String {
+        val opprettVarsel = VarselActionBuilder.opprett {
+            type = varseltype
+            varselId = uuid
+            sensitivitet = Sensitivitet.High
+            ident = fnr
+            tekst = Tekst(
+                spraakkode = "nb",
+                tekst = content,
+                default = true
+            )
+            link = varselUrl.let { it.toString() }
+            aktivFremTil = null
+            eksternVarsling = if (smsVarsling) {
+                EksternVarslingBestilling(
+                    prefererteKanaler = listOf(EksternKanal.SMS),
+                    smsVarslingstekst = smsVarslingTekst,
+                )
+            } else null
         }
-        return builder.build()
-    }
-
-    fun buildNewOppgave(content: String, varselUrl: URL, smsContent: String? = null): OppgaveInput = OppgaveInputBuilder()
-        .withTidspunkt(LocalDateTime.now(UTCPlus1))
-        .withTekst(content)
-        .withLink(varselUrl)
-        .withSikkerhetsnivaa(sikkerhetsNiva)
-        .withEksternVarsling(true)
-        .withPrefererteKanaler(PreferertKanal.SMS)
-        .withSmsVarslingstekst(smsContent)
-        .build()
-
-    private fun LocalDateTime.toLocalDateTimeUTCPlus1() =
-        this.atZone(UTCPlus1).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()
-
-    companion object {
-        const val sikkerhetsNiva = 4
-    }
-
-    enum class MeldingType {
-        OPPGAVE, BESKJED, DONE
+        return opprettVarsel
     }
 }

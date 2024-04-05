@@ -45,7 +45,7 @@ class TestdataResetConsumer(
     }
 
     fun testdataResetProperties(env: Environment): Properties {
-        val commonConsumerProperties = aivenConsumerProperties(env)
+        val commonConsumerProperties = consumerProperties(env)
         return commonConsumerProperties.apply {
             remove(CommonClientConfigs.GROUP_ID_CONFIG)
             put(CommonClientConfigs.GROUP_ID_CONFIG, "esyfovarsel-group-testdata-reset-01")

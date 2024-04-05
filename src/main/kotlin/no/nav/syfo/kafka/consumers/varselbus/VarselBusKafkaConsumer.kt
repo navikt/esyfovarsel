@@ -21,7 +21,7 @@ class VarselBusKafkaConsumer(
     private val objectMapper = createObjectMapper()
 
     init {
-        val kafkaConfig = aivenConsumerProperties(env)
+        val kafkaConfig = consumerProperties(env)
         kafkaListener = KafkaConsumer(kafkaConfig)
         kafkaListener.subscribe(listOf(topicVarselBus))
     }

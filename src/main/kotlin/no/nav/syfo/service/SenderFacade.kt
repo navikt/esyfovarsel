@@ -1,16 +1,23 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
-import no.nav.syfo.db.*
+import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.Kanal
-import no.nav.syfo.db.domain.Kanal.*
+import no.nav.syfo.db.domain.Kanal.ARBEIDSGIVERNOTIFIKASJON
+import no.nav.syfo.db.domain.Kanal.BREV
+import no.nav.syfo.db.domain.Kanal.BRUKERNOTIFIKASJON
+import no.nav.syfo.db.domain.Kanal.DINE_SYKMELDTE
+import no.nav.syfo.db.domain.Kanal.DITT_SYKEFRAVAER
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
+import no.nav.syfo.db.fetchUferdigstilteVarsler
+import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
+import no.nav.syfo.db.storeUtsendtVarsel
+import no.nav.syfo.db.storeUtsendtVarselFeilet
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
-import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
@@ -76,28 +83,44 @@ class SenderFacade(
         content: String,
         url: URL? = null,
         varselHendelse: ArbeidstakerHendelse,
-        meldingType: BrukernotifikasjonKafkaProducer.MeldingType? = BrukernotifikasjonKafkaProducer.MeldingType.BESKJED,
+        varseltype: InternalBrukernotifikasjonType,
         eksternVarsling: Boolean = true,
         smsContent: String? = null,
     ) {
-        var isSendingSucceed = true
         try {
-            brukernotifikasjonerService.sendVarsel(uuid, mottakerFnr, content, url, meldingType, eksternVarsling, smsContent)
+            when (varseltype) {
+                InternalBrukernotifikasjonType.BESKJED -> brukernotifikasjonerService.sendBeskjed(
+                    uuid = uuid,
+                    mottakerFnr = mottakerFnr,
+                    content = content,
+                    url = url,
+                    eksternVarsling = eksternVarsling
+                )
+
+                InternalBrukernotifikasjonType.OPPGAVE -> brukernotifikasjonerService.sendOppgave(
+                    uuid = uuid,
+                    mottakerFnr = mottakerFnr,
+                    content = content,
+                    url = url,
+                    smsContent = smsContent
+                )
+
+                InternalBrukernotifikasjonType.DONE -> brukernotifikasjonerService.ferdigstillVarsel(uuid = uuid)
+            }
+            lagreUtsendtArbeidstakerVarsel(
+                kanal = BRUKERNOTIFIKASJON,
+                varselHendelse = varselHendelse,
+                eksternReferanse = uuid
+            )
         } catch (e: Exception) {
             log.warn("Error while sending varsel to BRUKERNOTIFIKASJON: ${e.message}")
-            isSendingSucceed = false
             lagreIkkeUtsendtArbeidstakerVarsel(
                 kanal = BRUKERNOTIFIKASJON,
                 varselHendelse = varselHendelse,
                 eksternReferanse = uuid,
                 feilmelding = e.message,
-                journalpostId = null,
-                brukernotifikasjonerMeldingType = meldingType?.name
-                    ?: BrukernotifikasjonKafkaProducer.MeldingType.BESKJED.name,
+                journalpostId = varseltype.name
             )
-        }
-        if (isSendingSucceed) {
-            lagreUtsendtArbeidstakerVarsel(BRUKERNOTIFIKASJON, varselHendelse, uuid)
         }
     }
 
@@ -162,7 +185,10 @@ class SenderFacade(
             .forEach { ferdigstillVarsel(it) }
     }
 
-    suspend fun ferdigstillDittSykefravaerVarslerAvTyper(varselHendelse: ArbeidstakerHendelse, varselTyper: Set<HendelseType>) {
+    suspend fun ferdigstillDittSykefravaerVarslerAvTyper(
+        varselHendelse: ArbeidstakerHendelse,
+        varselTyper: Set<HendelseType>
+    ) {
         fetchUferdigstilteVarsler(
             PersonIdent(varselHendelse.arbeidstakerFnr),
             varselHendelse.orgnummer,
@@ -188,7 +214,7 @@ class SenderFacade(
         if (utsendtVarsel.eksternReferanse != null && utsendtVarsel.ferdigstiltTidspunkt == null) {
             when (utsendtVarsel.kanal) {
                 BRUKERNOTIFIKASJON.name -> {
-                    brukernotifikasjonerService.ferdigstillVarsel(utsendtVarsel.eksternReferanse, utsendtVarsel.fnr)
+                    brukernotifikasjonerService.ferdigstillVarsel(utsendtVarsel.eksternReferanse)
                 }
 
                 DITT_SYKEFRAVAER.name -> {
@@ -337,5 +363,11 @@ class SenderFacade(
                 utsendtForsokTidspunkt = LocalDateTime.now(),
             ),
         )
+    }
+
+    enum class InternalBrukernotifikasjonType {
+        OPPGAVE,
+        BESKJED,
+        DONE
     }
 }

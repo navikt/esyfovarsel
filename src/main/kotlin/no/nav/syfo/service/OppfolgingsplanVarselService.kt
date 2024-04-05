@@ -5,6 +5,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
+import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.BESKJED
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -59,12 +60,13 @@ class OppfolgingsplanVarselService(
         eksternVarsling: Boolean,
     ) {
         senderFacade.sendTilBrukernotifikasjoner(
-            UUID.randomUUID().toString(),
-            varselHendelse.arbeidstakerFnr,
-            BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT,
-            URL(oppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL),
-            varselHendelse,
-            eksternVarsling = eksternVarsling
+            uuid = UUID.randomUUID().toString(),
+            mottakerFnr = varselHendelse.arbeidstakerFnr,
+            content = BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT,
+            url = URL(oppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL),
+            varselHendelse = varselHendelse,
+            eksternVarsling = eksternVarsling,
+            varseltype = BESKJED
         )
     }
 }

@@ -107,7 +107,7 @@ class SenderFacadeSpek : DescribeSpec({
 
             coVerify(exactly = 1) { arbeidsgiverNotifikasjonService.deleteNotifikasjon(merkelapp = merkelapp, eksternReferanse = eksternRefArbeidsgiverNotifikasjoner) }
             verify(exactly = 1) { dineSykmeldteHendelseKafkaProducer.ferdigstillVarsel(eksternReferanse = eksternRefDineSykmeldte) }
-            verify(exactly = 1) { brukernotifikasjonerService.ferdigstillVarsel(uuid = eksternRefBrukernotifikasjoner, mottakerFnr = arbeidstakerFnr1) }
+            verify(exactly = 1) { brukernotifikasjonerService.ferdigstillVarsel(uuid = eksternRefBrukernotifikasjoner) }
             verify(exactly = 1) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(eksternReferanse = eksternRefDittSykefravaer, fnr = arbeidstakerFnr1) }
         }
 
@@ -126,7 +126,7 @@ class SenderFacadeSpek : DescribeSpec({
 
             coVerify(exactly = 0) { arbeidsgiverNotifikasjonService.deleteNotifikasjon(any(), any()) }
             verify(exactly = 0) { dineSykmeldteHendelseKafkaProducer.ferdigstillVarsel(any()) }
-            verify(exactly = 0) { brukernotifikasjonerService.ferdigstillVarsel(any(), any()) }
+            verify(exactly = 0) { brukernotifikasjonerService.ferdigstillVarsel(any()) }
             verify(exactly = 0) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(any(), any()) }
         }
     }
