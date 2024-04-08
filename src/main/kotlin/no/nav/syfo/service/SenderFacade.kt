@@ -119,7 +119,8 @@ class SenderFacade(
                 varselHendelse = varselHendelse,
                 eksternReferanse = uuid,
                 feilmelding = e.message,
-                journalpostId = null
+                journalpostId = null,
+                brukernotifikasjonerMeldingType = varseltype.name,
             )
         }
     }
