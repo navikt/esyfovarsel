@@ -17,56 +17,29 @@ class BrukernotifikasjonerService(
         uuid: String,
         mottakerFnr: String,
         content: String,
-        url: URL? = null,
+        url: URL?,
         varseltype: SenderFacade.InternalBrukernotifikasjonType,
-        eksternVarsling: Boolean = true,
+        eksternVarsling: Boolean,
         smsContent: String? = null,
     ) {
         when (varseltype) {
-            BESKJED -> sendBeskjed(
-                uuid = uuid,
-                mottakerFnr = mottakerFnr,
-                content = content,
-                url = url,
-                eksternVarsling = eksternVarsling
-            )
+            BESKJED -> {
+                brukernotifikasjonKafkaProducer.sendBeskjed(mottakerFnr, content, uuid, url, eksternVarsling)
+                log.info("Har sendt beskjed med uuid $uuid til brukernotifikasjoner: $content")
+            }
 
-            OPPGAVE -> sendOppgave(
-                uuid = uuid,
-                mottakerFnr = mottakerFnr,
-                content = content,
-                url = url,
-                smsContent = smsContent
-            )
+            OPPGAVE -> {
+                url?.let {
+                    brukernotifikasjonKafkaProducer.sendOppgave(mottakerFnr, content, uuid, it, smsContent)
+                    log.info("Har sendt oppgave med uuid $uuid til brukernotifikasjoner: $content")
+                } ?: throw IllegalArgumentException("Url must be set")
+            }
 
             DONE -> {
-                ferdigstillVarsel(uuid)
+                brukernotifikasjonKafkaProducer.sendDone(uuid)
+                log.info("Har sendt done med uuid $uuid til brukernotifikasjoner")
             }
         }
-    }
-
-    fun sendOppgave(
-        uuid: String,
-        mottakerFnr: String,
-        content: String,
-        url: URL?,
-        smsContent: String? = null,
-    ) {
-        if (url != null) {
-            brukernotifikasjonKafkaProducer.sendOppgave(mottakerFnr, content, uuid, url, smsContent)
-            log.info("Har sendt oppgave med uuid $uuid til brukernotifikasjoner: $content")
-        } else throw IllegalArgumentException("Url must be set")
-    }
-
-    fun sendBeskjed(
-        uuid: String,
-        mottakerFnr: String,
-        content: String,
-        url: URL?,
-        eksternVarsling: Boolean,
-    ) {
-        brukernotifikasjonKafkaProducer.sendBeskjed(mottakerFnr, content, uuid, url, eksternVarsling)
-        log.info("Har sendt beskjed med uuid $uuid til brukernotifikasjoner: $content")
     }
 
     fun ferdigstillVarsel(

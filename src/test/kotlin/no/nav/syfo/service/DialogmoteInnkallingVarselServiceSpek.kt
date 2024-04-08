@@ -60,7 +60,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
     val hendelseType = HendelseType.SM_DIALOGMOTE_INNKALT
 
     describe("DialogmoteInnkallingVarselServiceSpek") {
-        justRun { brukernotifikasjonerService.sendOppgave(any(), any(), any(), any(), any()) }
+        justRun { brukernotifikasjonerService.sendBrukernotifikasjonVarsel(any(), any(), any(), any(), any(), any()) }
         justRun { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) }
         justRun { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(any(), any()) }
         coJustRun { fysiskBrevUtsendingService.sendBrev(any(), any(), DistibusjonsType.ANNET) }
@@ -87,12 +87,14 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
             dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse)
 
             verify(exactly = 1) {
-                brukernotifikasjonerService.sendOppgave(
+                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     uuid = any(),
                     mottakerFnr = fnr1,
                     content = any(),
                     url = dialogmoteInnkallingVarselService.getVarselUrl(varselHendelse, journalpostUuid),
                     smsContent = null,
+                    varseltype = any(),
+                    eksternVarsling = any(),
                 )
             }
 
@@ -126,12 +128,14 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
             }
 
             verify(exactly = 0) {
-                brukernotifikasjonerService.sendOppgave(
-                    any(),
-                    fnr2,
-                    any(),
-                    any(),
-                    any(),
+                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
+                    uuid = any(),
+                    mottakerFnr = fnr2,
+                    content = any(),
+                    url = any(),
+                    varseltype = any(),
+                    eksternVarsling = any(),
+                    smsContent = any()
                 )
             }
 
@@ -155,12 +159,14 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
             )
             dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse)
             verify(exactly = 0) {
-                brukernotifikasjonerService.sendOppgave(
-                    any(),
-                    fnr3,
-                    any(),
-                    dialogmoteInnkallingVarselService.getVarselUrl(varselHendelse, journalpostUuid),
-                    any(),
+                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
+                    uuid = any(),
+                    mottakerFnr = fnr3,
+                    content = any(),
+                    url = dialogmoteInnkallingVarselService.getVarselUrl(varselHendelse, journalpostUuid),
+                    varseltype = any(),
+                    eksternVarsling = any(),
+                    smsContent = any()
                 )
             }
             coVerify(exactly = 1) {

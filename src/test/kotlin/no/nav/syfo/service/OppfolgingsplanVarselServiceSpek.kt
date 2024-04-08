@@ -41,7 +41,7 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
     )
 
     describe("OppfolgingsplanVarselServiceSpek") {
-        justRun { brukernotifikasjonerService.sendBeskjed(any(), any(), any(), any(), any()) }
+        justRun { brukernotifikasjonerService.sendBrukernotifikasjonVarsel(any(), any(), any(), any(), any(), any()) }
 
         it("Non-reserved users should be notified externally") {
             coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(fnr1) } returns true
@@ -54,12 +54,13 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
             )
             oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse)
             verify(exactly = 1) {
-                brukernotifikasjonerService.sendBeskjed(
+                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     any(),
                     fnr1,
                     any(),
                     URL(fakeOppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL),
-                    true
+                    any(),
+                    true,
                 )
             }
         }
@@ -75,11 +76,12 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
             )
             oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse)
             verify(exactly = 1) {
-                brukernotifikasjonerService.sendBeskjed(
+                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     any(),
                     fnr2,
                     any(),
                     URL(fakeOppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL),
+                    any(),
                     false
                 )
             }
