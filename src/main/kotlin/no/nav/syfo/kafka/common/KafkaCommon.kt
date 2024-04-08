@@ -5,9 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig.USER_INFO_CONFIG
-import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import org.apache.kafka.clients.CommonClientConfigs.GROUP_ID_CONFIG
@@ -43,7 +40,6 @@ const val topicTestdataReset = "teamsykefravr.testdata-reset"
 const val JAVA_KEYSTORE = "JKS"
 const val PKCS12 = "PKCS12"
 const val SSL = "SSL"
-const val USER_INFO = "USER_INFO"
 
 val pollDurationInMillis = Duration.ofMillis(1000L)
 
@@ -81,16 +77,10 @@ fun consumerProperties(env: Environment): Properties {
 }
 
 fun producerProperties(env: Environment): Properties {
-    val schemaRegistryConfig = env.kafkaEnv.schemaRegistry
-    val userinfoConfig = "${schemaRegistryConfig.username}:${schemaRegistryConfig.password}"
-
     return commonProperties(env).apply {
         put(ACKS_CONFIG, "all")
         put(KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
         put(VALUE_SERIALIZER_CLASS_CONFIG, JacksonKafkaSerializer::class.java)
-        put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryConfig.url)
-        put(BASIC_AUTH_CREDENTIALS_SOURCE, USER_INFO)
-        put(USER_INFO_CONFIG, userinfoConfig)
     }
 }
 

@@ -21,7 +21,6 @@ val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.17.0"
 val postgresEmbeddedVersion = "1.0.2"
 val kafkaVersion = "3.6.0"
-val confluentVersion = "7.6.0"
 val brukernotifikasjonerBuilderVersion = "1.0.2"
 val kotlinVersion = "1.9.23"
 
@@ -50,7 +49,6 @@ repositories {
     mavenCentral()
     maven(url = "https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     maven(url = "https://jitpack.io")
-    maven(url = "https://packages.confluent.io/maven/")
     maven(url = "https://repo.adeo.no/repository/maven-releases/")
     maven(url = "https://github.com/navikt/vault-jdbc")
 }
