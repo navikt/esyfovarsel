@@ -88,25 +88,15 @@ class SenderFacade(
         smsContent: String? = null,
     ) {
         try {
-            when (varseltype) {
-                InternalBrukernotifikasjonType.BESKJED -> brukernotifikasjonerService.sendBeskjed(
-                    uuid = uuid,
-                    mottakerFnr = mottakerFnr,
-                    content = content,
-                    url = url,
-                    eksternVarsling = eksternVarsling
-                )
-
-                InternalBrukernotifikasjonType.OPPGAVE -> brukernotifikasjonerService.sendOppgave(
-                    uuid = uuid,
-                    mottakerFnr = mottakerFnr,
-                    content = content,
-                    url = url,
-                    smsContent = smsContent
-                )
-
-                InternalBrukernotifikasjonType.DONE -> brukernotifikasjonerService.ferdigstillVarsel(uuid = uuid)
-            }
+            brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
+                uuid = uuid,
+                mottakerFnr = mottakerFnr,
+                content = content,
+                url = url,
+                varseltype = varseltype,
+                eksternVarsling = eksternVarsling,
+                smsContent = smsContent
+            )
             lagreUtsendtArbeidstakerVarsel(
                 kanal = BRUKERNOTIFIKASJON,
                 varselHendelse = varselHendelse,
