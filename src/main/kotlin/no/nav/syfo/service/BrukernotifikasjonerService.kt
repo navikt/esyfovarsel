@@ -36,8 +36,7 @@ class BrukernotifikasjonerService(
             }
 
             DONE -> {
-                brukernotifikasjonKafkaProducer.sendDone(uuid)
-                log.info("Har sendt done med uuid $uuid til brukernotifikasjoner")
+                ferdigstillVarsel(uuid)
             }
         }
     }
