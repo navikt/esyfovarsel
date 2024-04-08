@@ -23,7 +23,6 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.utils.enumValueOfOrNull
-import no.nav.tms.varsel.action.Varseltype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
@@ -78,42 +77,50 @@ class SenderFacade(
         }
     }
 
-    fun sendVarselTilBrukernotifikasjoner(
+    fun sendTilBrukernotifikasjoner(
         uuid: String,
         mottakerFnr: String,
         content: String,
         url: URL? = null,
         varselHendelse: ArbeidstakerHendelse,
-        varseltype: Varseltype?,
+        varseltype: InternalBrukernotifikasjonType,
         eksternVarsling: Boolean = true,
         smsContent: String? = null,
-        ferdigstill: Boolean = false,
     ) {
         try {
-            brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
-                uuid = uuid,
-                mottakerFnr = mottakerFnr,
-                content = content,
-                url = url,
-                varseltype = varseltype,
-                eksternVarsling = eksternVarsling,
-                smsContent = smsContent,
-                ferdigstill = ferdigstill
-            )
+            when (varseltype) {
+                InternalBrukernotifikasjonType.BESKJED -> brukernotifikasjonerService.sendBeskjed(
+                    uuid = uuid,
+                    mottakerFnr = mottakerFnr,
+                    content = content,
+                    url = url,
+                    eksternVarsling = eksternVarsling
+                )
+
+                InternalBrukernotifikasjonType.OPPGAVE -> brukernotifikasjonerService.sendOppgave(
+                    uuid = uuid,
+                    mottakerFnr = mottakerFnr,
+                    content = content,
+                    url = url,
+                    smsContent = smsContent
+                )
+
+                InternalBrukernotifikasjonType.DONE -> brukernotifikasjonerService.ferdigstillVarsel(uuid = uuid)
+            }
             lagreUtsendtArbeidstakerVarsel(
                 kanal = BRUKERNOTIFIKASJON,
                 varselHendelse = varselHendelse,
                 eksternReferanse = uuid
             )
         } catch (e: Exception) {
-            log.warn("Error while sending varsel to BRUKERNOTIFIKASJON for uuid ${uuid}. Exception: ${e.message}")
+            log.warn("Error while sending varsel to BRUKERNOTIFIKASJON: ${e.message}")
             lagreIkkeUtsendtArbeidstakerVarsel(
                 kanal = BRUKERNOTIFIKASJON,
                 varselHendelse = varselHendelse,
                 eksternReferanse = uuid,
                 feilmelding = e.message,
                 journalpostId = null,
-                brukernotifikasjonerMeldingType = varseltype?.name,
+                brukernotifikasjonerMeldingType = varseltype.name,
             )
         }
     }
@@ -357,5 +364,11 @@ class SenderFacade(
                 utsendtForsokTidspunkt = LocalDateTime.now(),
             ),
         )
+    }
+
+    enum class InternalBrukernotifikasjonType {
+        OPPGAVE,
+        BESKJED,
+        DONE
     }
 }

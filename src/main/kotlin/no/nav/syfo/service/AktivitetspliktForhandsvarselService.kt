@@ -4,8 +4,8 @@ import no.nav.syfo.BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_SMS_TE
 import no.nav.syfo.BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_TEXT
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
+import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
 import no.nav.syfo.utils.dataToVarselData
-import no.nav.tms.varsel.action.Varseltype
 import org.slf4j.LoggerFactory
 import java.net.URL
 
@@ -28,13 +28,13 @@ class AktivitetspliktForhandsvarselVarselService(
 
             val userAccessStatus = accessControlService.getUserAccessStatus(varselHendelse.arbeidstakerFnr)
             if (userAccessStatus.canUserBeDigitallyNotified) {
-                senderFacade.sendVarselTilBrukernotifikasjoner(
+                senderFacade.sendTilBrukernotifikasjoner(
                     uuid = data.journalpost.uuid,
                     mottakerFnr = varselHendelse.arbeidstakerFnr,
                     content = BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_TEXT,
                     url = URL(urlAktivitetskravInfoPage),
                     varselHendelse = varselHendelse,
-                    varseltype = Varseltype.Oppgave,
+                    varseltype = OPPGAVE,
                     eksternVarsling = true,
                     smsContent = BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_SMS_TEXT,
                 )

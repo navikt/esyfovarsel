@@ -48,7 +48,7 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
-import no.nav.tms.varsel.action.Varseltype
+import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.Serializable
@@ -112,9 +112,7 @@ class DialogmoteInnkallingVarselService(
         varselHendelse: ArbeidstakerHendelse,
         varselUuid: String,
     ) {
-        val ferdigstill = varselHendelse.type == SM_DIALOGMOTE_LEST
-
-        senderFacade.sendVarselTilBrukernotifikasjoner(
+        senderFacade.sendTilBrukernotifikasjoner(
             uuid = varselUuid,
             mottakerFnr = varselHendelse.arbeidstakerFnr,
             content = getArbeidstakerVarselText(varselHendelse.type),
@@ -122,7 +120,6 @@ class DialogmoteInnkallingVarselService(
             varselHendelse = varselHendelse,
             varseltype = getMeldingTypeForSykmeldtVarsling(varselHendelse.type),
             eksternVarsling = true,
-            ferdigstill = ferdigstill,
         )
     }
 
@@ -266,14 +263,15 @@ class DialogmoteInnkallingVarselService(
         } ?: throw IllegalArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
 
-    private fun getMeldingTypeForSykmeldtVarsling(hendelseType: HendelseType): Varseltype? {
+    fun getMeldingTypeForSykmeldtVarsling(hendelseType: HendelseType): InternalBrukernotifikasjonType {
         return when (hendelseType) {
-            SM_DIALOGMOTE_INNKALT -> Varseltype.Oppgave
-            SM_DIALOGMOTE_AVLYST -> Varseltype.Beskjed
-            SM_DIALOGMOTE_NYTT_TID_STED -> Varseltype.Oppgave
-            SM_DIALOGMOTE_REFERAT -> Varseltype.Beskjed
+            SM_DIALOGMOTE_INNKALT -> InternalBrukernotifikasjonType.OPPGAVE
+            SM_DIALOGMOTE_AVLYST -> InternalBrukernotifikasjonType.BESKJED
+            SM_DIALOGMOTE_NYTT_TID_STED -> InternalBrukernotifikasjonType.OPPGAVE
+            SM_DIALOGMOTE_REFERAT -> InternalBrukernotifikasjonType.BESKJED
+            SM_DIALOGMOTE_LEST -> InternalBrukernotifikasjonType.DONE
             else -> {
-                return null
+                throw IllegalArgumentException("Kan ikke mappe $hendelseType")
             }
         }
     }

@@ -20,7 +20,8 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import no.nav.syfo.metrics.tellSvarMotebehovVarselSendt
-import no.nav.tms.varsel.action.Varseltype
+import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.BESKJED
+import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -100,13 +101,13 @@ class MotebehovVarselService(
     private suspend fun sendVarselTilBrukernotifikasjoner(varselHendelse: ArbeidstakerHendelse) {
         val fnr = varselHendelse.arbeidstakerFnr
         val eksternVarsling = accessControlService.canUserBeNotifiedByEmailOrSMS(fnr)
-        senderFacade.sendVarselTilBrukernotifikasjoner(
+        senderFacade.sendTilBrukernotifikasjoner(
             uuid = UUID.randomUUID().toString(),
             mottakerFnr = fnr,
             content = BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
             url = URL(svarMotebehovUrl),
             varselHendelse = varselHendelse,
-            varseltype = Varseltype.Oppgave,
+            varseltype = OPPGAVE,
             eksternVarsling = eksternVarsling
         )
     }
@@ -137,13 +138,13 @@ class MotebehovVarselService(
 
     fun sendMotebehovTilbakemeldingTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         val data = dataToVarselDataMotebehovTilbakemelding(varselHendelse.data)
-        senderFacade.sendVarselTilBrukernotifikasjoner(
+        senderFacade.sendTilBrukernotifikasjoner(
             uuid = UUID.randomUUID().toString(),
             mottakerFnr = varselHendelse.arbeidstakerFnr,
             content = data.tilbakemelding,
             varselHendelse = varselHendelse,
             eksternVarsling = false,
-            varseltype = Varseltype.Beskjed
+            varseltype = BESKJED
         )
     }
 
