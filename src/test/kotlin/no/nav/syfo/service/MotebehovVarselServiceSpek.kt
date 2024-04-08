@@ -12,7 +12,7 @@ import no.nav.syfo.db.arbeidstakerFnr3
 import no.nav.syfo.db.orgnummer1
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
-import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
+import no.nav.tms.varsel.action.Varseltype
 
 class MotebehovVarselServiceSpek : DescribeSpec({
     val senderFacade: SenderFacade = mockk(relaxed = true)
@@ -55,13 +55,13 @@ class MotebehovVarselServiceSpek : DescribeSpec({
             coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(any()) } returns true
             motebehovVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelseSvarMotebehov2)
             verify(exactly = 1) {
-                senderFacade.sendTilBrukernotifikasjoner(
+                senderFacade.sendVarselTilBrukernotifikasjoner(
                     any(),
                     arbeidstakerFnr2,
                     BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
                     any(),
                     arbeidstakerHendelseSvarMotebehov2,
-                    varseltype = OPPGAVE,
+                    varseltype = Varseltype.Oppgave,
                     eksternVarsling = true,
                 )
             }
@@ -71,13 +71,13 @@ class MotebehovVarselServiceSpek : DescribeSpec({
             coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(any()) } returns false
             motebehovVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelseSvarMotebehov3)
             verify(exactly = 1) {
-                senderFacade.sendTilBrukernotifikasjoner(
+                senderFacade.sendVarselTilBrukernotifikasjoner(
                     any(),
                     arbeidstakerFnr3,
                     BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
                     any(),
                     arbeidstakerHendelseSvarMotebehov3,
-                    OPPGAVE,
+                    Varseltype.Oppgave,
                     eksternVarsling = false,
                 )
             }
