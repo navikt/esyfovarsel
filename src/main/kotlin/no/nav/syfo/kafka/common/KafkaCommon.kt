@@ -86,8 +86,8 @@ fun producerProperties(env: Environment): Properties {
 
     return commonProperties(env).apply {
         put(ACKS_CONFIG, "all")
-        put(KEY_SERIALIZER_CLASS_CONFIG, "io.confluent.kafka.serializers.KafkaAvroSerializer")
-        put(VALUE_SERIALIZER_CLASS_CONFIG, "io.confluent.kafka.serializers.KafkaAvroSerializer")
+        put(KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
+        put(VALUE_SERIALIZER_CLASS_CONFIG, JacksonKafkaSerializer::class.java)
         put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryConfig.url)
         put(BASIC_AUTH_CREDENTIALS_SOURCE, USER_INFO)
         put(USER_INFO_CONFIG, userinfoConfig)

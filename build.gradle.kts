@@ -21,7 +21,6 @@ val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.17.0"
 val postgresEmbeddedVersion = "1.0.2"
 val kafkaVersion = "3.6.0"
-val avroVersion = "1.11.3"
 val confluentVersion = "7.6.0"
 val brukernotifikasjonerBuilderVersion = "1.0.2"
 val kotlinVersion = "1.9.23"
@@ -119,8 +118,6 @@ dependencies {
     implementation("org.apache.kafka:kafka_2.13:$kafkaVersion") {
         exclude(group = "log4j")
     }
-    implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
-    implementation("org.apache.avro:avro:$avroVersion")
     implementation("no.nav.tms.varsel:kotlin-builder:$brukernotifikasjonerBuilderVersion")
 
     // Test
