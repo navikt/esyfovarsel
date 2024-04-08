@@ -22,30 +22,23 @@ class BrukernotifikasjonerService(
         ferdigstill: Boolean = false,
     ) {
         try {
-            when {
-                varseltype == Varseltype.Beskjed -> sendBeskjed(
-                    uuid = uuid,
-                    mottakerFnr = mottakerFnr,
-                    content = content,
-                    url = url,
-                    eksternVarsling = eksternVarsling
-                )
-
-                varseltype == Varseltype.Oppgave -> sendOppgave(
-                    uuid = uuid,
-                    mottakerFnr = mottakerFnr,
-                    content = content,
-                    url = url,
-                    smsContent = smsContent
-                )
-
-                ferdigstill -> {
-                    ferdigstillVarsel(uuid)
-                }
-
-                else -> {
-                    log.warn("Unknown varseltype/ferdigstill combo for uuid: $uuid")
-                }
+            if (varseltype == Varseltype.Beskjed) sendBeskjed(
+                uuid = uuid,
+                mottakerFnr = mottakerFnr,
+                content = content,
+                url = url,
+                eksternVarsling = eksternVarsling
+            )
+            else if (varseltype == Varseltype.Oppgave) sendOppgave(
+                uuid = uuid,
+                mottakerFnr = mottakerFnr,
+                content = content,
+                url = url,
+                smsContent = smsContent
+            ) else if (ferdigstill) {
+                ferdigstillVarsel(uuid)
+            } else {
+                log.warn("Unknown varseltype/ferdigstill combo for uuid: $uuid")
             }
         } catch (e: Exception) {
             log.warn("Error while sending varsel to BRUKERNOTIFIKASJON: ${e.message}")
@@ -59,10 +52,10 @@ class BrukernotifikasjonerService(
         url: URL?,
         smsContent: String? = null,
     ) {
-        url?.let {
+        if (url != null) {
             brukernotifikasjonKafkaProducer.sendOppgave(mottakerFnr, content, uuid, url, smsContent)
             log.info("Har sendt oppgave med uuid $uuid til brukernotifikasjoner: $content")
-        } ?: throw IllegalArgumentException("Url must be set")
+        } else throw IllegalArgumentException("Url must be set")
     }
 
     fun sendBeskjed(
