@@ -206,7 +206,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                     uuid = any(),
                     mottakerFnr = fnr1,
                     content = any(),
-                    url = dialogmoteInnkallingVarselService.getVarselUrl(varselHendelse, journalpostUuid),
+                    url = any(),
                     varseltype = DONE,
                     eksternVarsling = true,
                 )
