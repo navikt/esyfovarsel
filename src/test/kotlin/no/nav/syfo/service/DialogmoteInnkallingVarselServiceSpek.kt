@@ -2,11 +2,10 @@ package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.access.domain.UserAccessStatus
@@ -34,8 +33,8 @@ import org.amshove.kluent.shouldNotBeEqualTo
 class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
     val accessControlService = mockk<AccessControlService>()
     val dineSykmeldteHendelseKafkaProducer = mockk<DineSykmeldteHendelseKafkaProducer>()
-    val dittSykefravaerMeldingKafkaProducer = mockk<DittSykefravaerMeldingKafkaProducer>()
-    val brukernotifikasjonerService = mockk<BrukernotifikasjonerService>()
+    val dittSykefravaerMeldingKafkaProducer = mockk<DittSykefravaerMeldingKafkaProducer>(relaxed = true)
+    val brukernotifikasjonerService = mockk<BrukernotifikasjonerService>(relaxed = true)
     val arbeidsgiverNotifikasjonService = mockk<ArbeidsgiverNotifikasjonService>()
     val fysiskBrevUtsendingService = mockk<FysiskBrevUtsendingService>()
     val embeddedDatabase by lazy { EmbeddedDatabase() }
@@ -61,12 +60,10 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
     val hendelseType = HendelseType.SM_DIALOGMOTE_INNKALT
 
     describe("DialogmoteInnkallingVarselServiceSpek") {
-        justRun { brukernotifikasjonerService.sendBrukernotifikasjonVarsel(any(), any(), any(), any(), any(), any()) }
-        justRun { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) }
-        justRun { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(any(), any()) }
         coJustRun { fysiskBrevUtsendingService.sendBrev(any(), any(), DistibusjonsType.ANNET) }
 
         afterTest {
+            clearAllMocks()
             embeddedDatabase.connection.dropData()
         }
 
@@ -189,9 +186,6 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
             coEvery { accessControlService.getUserAccessStatus(arbeidstakerFnr1) } returns
                     UserAccessStatus(arbeidstakerFnr1, true)
 
-            every { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(any(), any()) } returns Unit
-            every { brukernotifikasjonerService.ferdigstillVarsel(any()) } returns Unit
-
             val varselHendelse = ArbeidstakerHendelse(
                 type = HendelseType.SM_DIALOGMOTE_LEST,
                 false,
@@ -204,10 +198,10 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
             verify(exactly = 1) {
                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     uuid = any(),
-                    mottakerFnr = fnr1,
+                    mottakerFnr = arbeidstakerFnr1,
                     content = any(),
                     url = any(),
-                    varseltype = any(),
+                    varseltype = DONE,
                     eksternVarsling = true,
                 )
             }
@@ -422,7 +416,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
             innkallinger2 shouldNotBeEqualTo null
             innkallinger2.size shouldBeEqualTo 1
 
-            verify(exactly = 2) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding("456", "66666666666") }
+            verify(exactly = 1) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding("789", "66666666666") }
         }
     }
 })

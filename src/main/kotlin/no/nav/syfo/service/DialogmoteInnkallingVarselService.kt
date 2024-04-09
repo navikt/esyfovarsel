@@ -372,7 +372,7 @@ class DialogmoteInnkallingVarselService(
         val messageText = getMessageText(arbeidstakerHendelse)
         val hendelseType = getDittSykefravarHendelseType(arbeidstakerHendelse)
 
-        if (messageText != null && hendelseType != null && hendelseType != SM_DIALOGMOTE_LEST.name) {
+        if (messageText != null && hendelseType != null && hendelseType != DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_LEST.name) {
             return DittSykefravaerMelding(
                 OpprettMelding(
                     messageText,
