@@ -142,6 +142,7 @@ val engineEnvironment: ApplicationEngineEnvironment = applicationEngineEnvironme
         env.toggleEnv.sendAktivitetspliktForhandsvarsel,
     )
     val arbeidsuforhetForhandsvarselService = ArbeidsuforhetForhandsvarselService(senderFacade)
+    val friskmeldingTilArbeidsformidlingVedtakService = FriskmeldingTilArbeidsformidlingVedtakService(senderFacade)
     val oppfolgingsplanVarselService =
         OppfolgingsplanVarselService(senderFacade, accessControlService, env.urlEnv.oppfolgingsplanerUrl)
     val sykepengerMaxDateService = SykepengerMaxDateService(database, pdlConsumer)
@@ -172,6 +173,7 @@ val engineEnvironment: ApplicationEngineEnvironment = applicationEngineEnvironme
             aktivitetspliktForhandsvarselVarselService,
             arbeidsuforhetForhandsvarselService,
             mikrofrontendService,
+            friskmeldingTilArbeidsformidlingVedtakService,
         )
 
     val veilederTilgangskontrollConsumer =

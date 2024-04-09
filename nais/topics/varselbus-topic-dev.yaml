@@ -31,6 +31,9 @@ spec:
       application: isarbeidsuforhet
       access: write
     - team: teamsykefravr
+      application: isfrisktilarbeid
+      access: write
+    - team: teamsykefravr
       application: isyfomock
       access: write
     - team: team-esyfo
