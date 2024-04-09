@@ -207,7 +207,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                     mottakerFnr = fnr1,
                     content = any(),
                     url = any(),
-                    varseltype = DONE,
+                    varseltype = any(),
                     eksternVarsling = true,
                 )
             }
