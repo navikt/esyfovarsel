@@ -2,8 +2,8 @@ package no.nav.syfo.db
 
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingSpleis
-import org.postgresql.util.PSQLException
 import java.sql.Date
+import java.sql.SQLIntegrityConstraintViolationException
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.*
@@ -47,7 +47,7 @@ fun DatabaseInterface.storeSpleisUtbetaling(utbetaling: UtbetalingSpleis) {
                 it.executeUpdate()
             }
             connection.commit()
-        } catch (e: PSQLException) {
+        } catch (e: SQLIntegrityConstraintViolationException) {
             log.debug("Ignoring duplicate message from Spleis with utbetalingID " + utbetaling.utbetalingId)
         }
     }
