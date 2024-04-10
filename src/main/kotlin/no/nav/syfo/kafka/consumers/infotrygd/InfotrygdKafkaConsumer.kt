@@ -67,7 +67,7 @@ class InfotrygdKafkaConsumer(
     }
 
     fun infotrygdConsumerProperties(env: Environment): Properties {
-        val commonConsumerProperties = aivenConsumerProperties(env)
+        val commonConsumerProperties = consumerProperties(env)
         return commonConsumerProperties.apply {
             remove(CommonClientConfigs.GROUP_ID_CONFIG)
             put(CommonClientConfigs.GROUP_ID_CONFIG, "esyfovarsel-group-infotrygd-01")

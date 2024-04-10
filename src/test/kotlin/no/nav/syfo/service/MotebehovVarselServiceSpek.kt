@@ -12,7 +12,7 @@ import no.nav.syfo.db.arbeidstakerFnr3
 import no.nav.syfo.db.orgnummer1
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
-import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
+import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
 
 class MotebehovVarselServiceSpek : DescribeSpec({
     val senderFacade: SenderFacade = mockk(relaxed = true)
@@ -61,7 +61,7 @@ class MotebehovVarselServiceSpek : DescribeSpec({
                     BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
                     any(),
                     arbeidstakerHendelseSvarMotebehov2,
-                    OPPGAVE,
+                    varseltype = OPPGAVE,
                     eksternVarsling = true,
                 )
             }

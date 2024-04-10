@@ -21,9 +21,7 @@ val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.17.0"
 val postgresEmbeddedVersion = "1.0.3"
 val kafkaVersion = "3.6.0"
-val avroVersion = "1.11.3"
-val confluentVersion = "7.6.0"
-val brukernotifikasjonerSchemaVersion = "2.5.1"
+val brukernotifikasjonerBuilderVersion = "1.0.2"
 val kotlinVersion = "1.9.23"
 
 val githubUser: String by project
@@ -49,8 +47,8 @@ allOpen {
 
 repositories {
     mavenCentral()
+    maven(url = "https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     maven(url = "https://jitpack.io")
-    maven(url = "https://packages.confluent.io/maven/")
     maven(url = "https://repo.adeo.no/repository/maven-releases/")
     maven(url = "https://github.com/navikt/vault-jdbc")
 }
@@ -118,9 +116,7 @@ dependencies {
     implementation("org.apache.kafka:kafka_2.13:$kafkaVersion") {
         exclude(group = "log4j")
     }
-    implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
-    implementation("org.apache.avro:avro:$avroVersion")
-    implementation("com.github.navikt:brukernotifikasjon-schemas:$brukernotifikasjonerSchemaVersion")
+    implementation("no.nav.tms.varsel:kotlin-builder:$brukernotifikasjonerBuilderVersion")
 
     // Test
     testImplementation(kotlin("test"))

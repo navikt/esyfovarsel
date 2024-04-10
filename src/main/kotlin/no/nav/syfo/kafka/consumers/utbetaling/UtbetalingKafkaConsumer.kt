@@ -55,7 +55,7 @@ class UtbetalingKafkaConsumer(
     }
 
     private fun utbetalingSpleisConsumerProperties(env: Environment): Properties {
-        val commonConsumerProperties = aivenConsumerProperties(env)
+        val commonConsumerProperties = consumerProperties(env)
         return commonConsumerProperties.apply {
             remove(GROUP_ID_CONFIG)
             put(GROUP_ID_CONFIG, "esyfovarsel-group-utbetaling-spleis-01")

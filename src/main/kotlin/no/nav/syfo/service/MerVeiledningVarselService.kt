@@ -10,6 +10,7 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
+import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.BESKJED
 import org.slf4j.LoggerFactory
 import java.net.URL
 import java.time.LocalDateTime
@@ -48,7 +49,8 @@ class MerVeiledningVarselService(
 
             sendBrevVarselTilArbeidstaker(planlagtVarselUuid, arbeidstakerHendelse, journalpostId!!)
         } else {
-            val pdf = pdfgenConsumer.getMerVeiledningPDF(arbeidstakerHendelse.arbeidstakerFnr, isBrukerReservert = false)
+            val pdf =
+                pdfgenConsumer.getMerVeiledningPDF(arbeidstakerHendelse.arbeidstakerFnr, isBrukerReservert = false)
 
             val journalpostId = pdf?.let {
                 dokarkivService.getJournalpostId(
@@ -71,11 +73,12 @@ class MerVeiledningVarselService(
         val url = URL(urlEnv.baseUrlNavEkstern + MER_VEILEDNING_URL)
 
         senderFacade.sendTilBrukernotifikasjoner(
-            uuid,
-            fnr,
-            BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT,
-            url,
-            arbeidstakerHendelse,
+            uuid = uuid,
+            mottakerFnr = fnr,
+            content = BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT,
+            url = url,
+            varselHendelse = arbeidstakerHendelse,
+            varseltype = BESKJED
         )
     }
 

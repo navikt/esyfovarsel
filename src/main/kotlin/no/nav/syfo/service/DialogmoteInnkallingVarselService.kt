@@ -43,12 +43,12 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataNarmesteLeder
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
-import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
+import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.Serializable
@@ -118,7 +118,7 @@ class DialogmoteInnkallingVarselService(
             content = getArbeidstakerVarselText(varselHendelse.type),
             url = getVarselUrl(varselHendelse, varselUuid),
             varselHendelse = varselHendelse,
-            meldingType = getMeldingTypeForSykmeldtVarsling(varselHendelse.type),
+            varseltype = getMeldingTypeForSykmeldtVarsling(varselHendelse.type),
             eksternVarsling = true,
         )
     }
@@ -263,13 +263,13 @@ class DialogmoteInnkallingVarselService(
         } ?: throw IllegalArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
 
-    fun getMeldingTypeForSykmeldtVarsling(hendelseType: HendelseType): BrukernotifikasjonKafkaProducer.MeldingType {
+    fun getMeldingTypeForSykmeldtVarsling(hendelseType: HendelseType): InternalBrukernotifikasjonType {
         return when (hendelseType) {
-            SM_DIALOGMOTE_INNKALT -> BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
-            SM_DIALOGMOTE_AVLYST -> BrukernotifikasjonKafkaProducer.MeldingType.BESKJED
-            SM_DIALOGMOTE_NYTT_TID_STED -> BrukernotifikasjonKafkaProducer.MeldingType.OPPGAVE
-            SM_DIALOGMOTE_REFERAT -> BrukernotifikasjonKafkaProducer.MeldingType.BESKJED
-            SM_DIALOGMOTE_LEST -> BrukernotifikasjonKafkaProducer.MeldingType.DONE
+            SM_DIALOGMOTE_INNKALT -> InternalBrukernotifikasjonType.OPPGAVE
+            SM_DIALOGMOTE_AVLYST -> InternalBrukernotifikasjonType.BESKJED
+            SM_DIALOGMOTE_NYTT_TID_STED -> InternalBrukernotifikasjonType.OPPGAVE
+            SM_DIALOGMOTE_REFERAT -> InternalBrukernotifikasjonType.BESKJED
+            SM_DIALOGMOTE_LEST -> InternalBrukernotifikasjonType.DONE
             else -> {
                 throw IllegalArgumentException("Kan ikke mappe $hendelseType")
             }
@@ -372,7 +372,7 @@ class DialogmoteInnkallingVarselService(
         val messageText = getMessageText(arbeidstakerHendelse)
         val hendelseType = getDittSykefravarHendelseType(arbeidstakerHendelse)
 
-        if (messageText != null && hendelseType != null && hendelseType != SM_DIALOGMOTE_LEST.name) {
+        if (messageText != null && hendelseType != null && hendelseType != DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_LEST.name) {
             return DittSykefravaerMelding(
                 OpprettMelding(
                     messageText,

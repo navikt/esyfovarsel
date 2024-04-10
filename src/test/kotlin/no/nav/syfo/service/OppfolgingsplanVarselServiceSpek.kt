@@ -8,7 +8,6 @@ import io.mockk.verify
 import no.nav.syfo.BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
-import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.testutil.EmbeddedDatabase
@@ -42,7 +41,7 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
     )
 
     describe("OppfolgingsplanVarselServiceSpek") {
-        justRun { brukernotifikasjonerService.sendVarsel(any(), any(), any(), any(), any(), any()) }
+        justRun { brukernotifikasjonerService.sendBrukernotifikasjonVarsel(any(), any(), any(), any(), any(), any()) }
 
         it("Non-reserved users should be notified externally") {
             coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(fnr1) } returns true
@@ -55,13 +54,13 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
             )
             oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse)
             verify(exactly = 1) {
-                brukernotifikasjonerService.sendVarsel(
+                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     any(),
                     fnr1,
                     any(),
                     URL(fakeOppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL),
-                    BrukernotifikasjonKafkaProducer.MeldingType.BESKJED,
-                    true
+                    any(),
+                    true,
                 )
             }
         }
@@ -77,12 +76,12 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
             )
             oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse)
             verify(exactly = 1) {
-                brukernotifikasjonerService.sendVarsel(
+                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     any(),
                     fnr2,
                     any(),
                     URL(fakeOppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL),
-                    BrukernotifikasjonKafkaProducer.MeldingType.BESKJED,
+                    any(),
                     false
                 )
             }
