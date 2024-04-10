@@ -17,14 +17,10 @@ import java.time.LocalDate
 class PlanlagtVarselDAOSpek : DescribeSpec({
     describe("PlanlagtVarselDAOSpek") {
 
-        val embeddedDatabase by lazy { EmbeddedDatabase() }
+        val embeddedDatabase = EmbeddedDatabase()
 
-        afterTest {
+        beforeTest {
             embeddedDatabase.connection.dropData()
-        }
-
-        afterSpec {
-            embeddedDatabase.stop()
         }
 
         it("Store and fetch PlanlagtVarsel") {

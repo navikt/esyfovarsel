@@ -23,7 +23,7 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
     val brukernotifikasjonerService = mockk<BrukernotifikasjonerService>()
     val arbeidsgiverNotifikasjonService = mockk<ArbeidsgiverNotifikasjonService>()
     val fysiskBrevUtsendingService = mockk<FysiskBrevUtsendingService>()
-    val embeddedDatabase by lazy { EmbeddedDatabase() }
+    val embeddedDatabase = EmbeddedDatabase()
     val fakeOppfolgingsplanerUrl = "http://localhost/oppfolgingsplaner"
 
     val senderFacade = SenderFacade(

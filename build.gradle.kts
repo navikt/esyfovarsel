@@ -9,6 +9,7 @@ val prometheusVersion = "0.16.0"
 val micrometerVersion = "1.12.5"
 val kotestVersion = "5.8.1"
 val kotestExtensionsVersion = "2.0.0"
+val h2Version = "2.2.224"
 val mockkVersion = "1.13.10"
 val slf4jVersion = "2.0.12"
 val logbackVersion = "1.5.4"
@@ -19,7 +20,6 @@ val hikariVersion = "5.1.0"
 val flywayVersion = "10.10.0"
 val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.17.0"
-val postgresEmbeddedVersion = "1.0.3"
 val kafkaVersion = "3.7.0"
 val brukernotifikasjonerBuilderVersion = "1.0.3-test-3"
 val kotlinVersion = "1.9.23"
@@ -122,13 +122,13 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
-    testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
     testImplementation("io.kotest:kotest-runner-junit5-jvm:$kotestVersion")
     testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
     testImplementation("io.kotest:kotest-property:$kotestVersion")
     testImplementation("io.kotest.extensions:kotest-assertions-ktor:$kotestExtensionsVersion")
+    testImplementation("com.h2database:h2:$h2Version")
 
     constraints {
         implementation("org.apache.zookeeper:zookeeper") {

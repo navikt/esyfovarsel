@@ -13,14 +13,10 @@ import java.util.*
 
 class UtsendtVarselFeiletDAOSpek : DescribeSpec({
     describe("UtsendtVarselFeiletDAOSpek") {
-        val embeddedDatabase by lazy { EmbeddedDatabase() }
+        val embeddedDatabase = EmbeddedDatabase()
 
-        afterTest {
+        beforeTest {
             embeddedDatabase.connection.dropData()
-        }
-
-        afterSpec {
-            embeddedDatabase.stop()
         }
 
         it("Store ikke-utsendt varsel til NL i database") {
