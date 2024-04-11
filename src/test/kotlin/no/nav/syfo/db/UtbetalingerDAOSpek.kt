@@ -17,18 +17,14 @@ import java.util.*
 
 class UtbetalingerDAOSpek : DescribeSpec({
     describe("UtbetalingerDAOSpek") {
-        val embeddedDatabase by lazy { EmbeddedDatabase() }
+        val embeddedDatabase = EmbeddedDatabase()
         val nowPlus1Day = now().plusDays(1)
         val nowPlus2Days = now().plusDays(2)
         val nowMinus1Day = now().minusDays(1)
         val nowMinus2Days = now().minusDays(2)
 
-        afterTest {
+        beforeTest {
             embeddedDatabase.connection.dropData()
-        }
-
-        afterSpec {
-            embeddedDatabase.stop()
         }
 
         it("Should include utbetaling with max date 14 days in the future, and gjenstående sykedager < 91") {

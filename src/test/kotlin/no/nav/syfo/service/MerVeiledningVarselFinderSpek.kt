@@ -26,7 +26,7 @@ import java.util.*
 
 class MerVeiledningVarselFinderSpek : DescribeSpec({
 
-    val embeddedDatabase by lazy { EmbeddedDatabase() }
+    val embeddedDatabase = EmbeddedDatabase()
     val sykmeldingerConsumerMock: SykmeldingerConsumer = mockk(relaxed = true)
     val sykmeldingServiceMockk = SykmeldingService(sykmeldingerConsumerMock)
     val pdlConsumerMockk: PdlConsumer = mockk(relaxed = true)
@@ -65,13 +65,9 @@ class MerVeiledningVarselFinderSpek : DescribeSpec({
     )
 
     describe("MerVeiledningVarselFinderSpek") {
-        afterTest {
+        beforeTest {
             clearAllMocks()
             embeddedDatabase.connection.dropData()
-        }
-
-        afterSpec {
-            embeddedDatabase.stop()
         }
 
         it("Should send MER_VEILEDNING when it was not sent during past 3 months") {

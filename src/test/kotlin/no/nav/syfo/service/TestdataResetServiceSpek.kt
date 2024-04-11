@@ -26,7 +26,7 @@ import java.util.*
 
 class TestdataResetServiceSpek : DescribeSpec({
     describe("TestdataResetServiceSpek") {
-        val embeddedDatabase by lazy { EmbeddedDatabase() }
+        val embeddedDatabase = EmbeddedDatabase()
         val mikrofrontendService: MikrofrontendService = mockk(relaxed = true)
         val senderFacade: SenderFacade = mockk(relaxed = true)
         val testdataResetService = TestdataResetService(embeddedDatabase, mikrofrontendService, senderFacade)
@@ -83,14 +83,9 @@ class TestdataResetServiceSpek : DescribeSpec({
         val mikrofrontendSynlighet =
             MikrofrontendSynlighet(arbeidstakerFnr1, Tjeneste.DIALOGMOTE, LocalDate.now().plusWeeks(1))
 
-        afterTest {
+        beforeTest {
             embeddedDatabase.connection.dropData()
         }
-
-        afterSpec {
-            embeddedDatabase.stop()
-        }
-
 
         it("Reset all testdata") {
             embeddedDatabase.storePlanlagtVarsel(planlagtVarsel)

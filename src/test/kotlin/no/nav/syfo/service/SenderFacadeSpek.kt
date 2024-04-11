@@ -22,7 +22,7 @@ import java.util.*
 
 class SenderFacadeSpek : DescribeSpec({
     describe("SenderFacadeSpek") {
-        val embeddedDatabase by lazy { EmbeddedDatabase() }
+        val embeddedDatabase = EmbeddedDatabase()
 
         val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService = mockk(relaxed = true)
         val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer = mockk(relaxed = true)
@@ -86,15 +86,10 @@ class SenderFacadeSpek : DescribeSpec({
             eksternReferanse = eksternRefDittSykefravaer,
         )
 
-        afterTest {
+        beforeTest {
             clearAllMocks()
             embeddedDatabase.connection.dropData()
         }
-
-        afterSpec {
-            embeddedDatabase.stop()
-        }
-
 
         it("Complete notifications for user") {
 

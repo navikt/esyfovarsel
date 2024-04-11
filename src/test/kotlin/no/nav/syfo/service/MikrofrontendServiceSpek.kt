@@ -26,7 +26,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class MikrofrontendServiceSpek : DescribeSpec({
-    val embeddedDatabase by lazy { EmbeddedDatabase() }
+    val embeddedDatabase = EmbeddedDatabase()
     val minSideMicrofrontendKafkaProducer: MinSideMicrofrontendKafkaProducer = mockk(relaxed = true)
     val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(embeddedDatabase)
     val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(embeddedDatabase)
@@ -37,13 +37,9 @@ class MikrofrontendServiceSpek : DescribeSpec({
         embeddedDatabase
     )
 
-    afterTest {
+    beforeTest {
         clearAllMocks()
         embeddedDatabase.connection.dropData()
-    }
-
-    afterSpec {
-        embeddedDatabase.stop()
     }
 
     describe("MikrofrontendServiceSpek") {

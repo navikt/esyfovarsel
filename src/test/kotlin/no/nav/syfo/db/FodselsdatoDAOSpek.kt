@@ -6,13 +6,9 @@ import org.amshove.kluent.*
 
 class FodselsdatoDAOSpek : DescribeSpec({
     describe("FodselsdatoDAOSpek") {
-        val embeddedDatabase by lazy { EmbeddedDatabase() }
+        val embeddedDatabase = EmbeddedDatabase()
         beforeTest {
             embeddedDatabase.connection.dropData()
-        }
-
-        afterTest {
-            embeddedDatabase.stop()
         }
 
         it("Should fetch birthdate") {

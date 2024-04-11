@@ -37,7 +37,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
     val brukernotifikasjonerService = mockk<BrukernotifikasjonerService>(relaxed = true)
     val arbeidsgiverNotifikasjonService = mockk<ArbeidsgiverNotifikasjonService>()
     val fysiskBrevUtsendingService = mockk<FysiskBrevUtsendingService>()
-    val embeddedDatabase by lazy { EmbeddedDatabase() }
+    val embeddedDatabase = EmbeddedDatabase()
     val fakeDialogmoterUrl = "http://localhost/dialogmoter"
     val journalpostUuid = "97b886fe-6beb-40df-af2b-04e504bc340c"
     val journalpostId = "1"
@@ -62,13 +62,9 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
     describe("DialogmoteInnkallingVarselServiceSpek") {
         coJustRun { fysiskBrevUtsendingService.sendBrev(any(), any(), DistibusjonsType.ANNET) }
 
-        afterTest {
+        beforeTest {
             clearAllMocks()
             embeddedDatabase.connection.dropData()
-        }
-
-        afterSpec {
-            embeddedDatabase.stop()
         }
 
         it("Non-reserved users should be notified externally") {

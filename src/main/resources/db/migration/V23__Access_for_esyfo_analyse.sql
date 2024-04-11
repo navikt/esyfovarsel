@@ -1,3 +1,6 @@
+/*
+Removed to support H2 database
+
 DO $$
 BEGIN
   CREATE USER "esyfo-analyse";
@@ -7,3 +10,4 @@ END
 $$;
 
 GRANT SELECT ON ALL TABLES IN SCHEMA PUBLIC TO "esyfo-analyse";
+*/

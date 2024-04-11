@@ -17,7 +17,7 @@ import kotlin.test.assertEquals
 
 class SykepengerMaxDateServiceSpek : DescribeSpec({
     describe("SykepengerMaxDateService") {
-        val embeddedDatabase by lazy { EmbeddedDatabase() }
+        val embeddedDatabase = EmbeddedDatabase()
         val pdlConsumer = mockk<PdlConsumer>(relaxed = true)
         val sykepengerMaxDateService = SykepengerMaxDateService(embeddedDatabase, pdlConsumer)
         coEvery { pdlConsumer.hentPerson(any()) } returns PdlHentPerson(
@@ -27,12 +27,8 @@ class SykepengerMaxDateServiceSpek : DescribeSpec({
                 foedsel = listOf(PdlFoedsel("1986-01-01"))
             )
         )
-        afterTest {
+        beforeTest {
             embeddedDatabase.connection.dropData()
-        }
-
-        afterSpec {
-            embeddedDatabase.stop()
         }
 
         it("Should store spleis utbetaling") {
