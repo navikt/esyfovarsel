@@ -31,6 +31,7 @@ class Database(val env: DbEnv) : DatabaseInterface {
     )
 
     init {
+        runFlywayRepair(hikariDataSource)
         runFlywayMigrations(hikariDataSource)
     }
 
@@ -38,6 +39,12 @@ class Database(val env: DbEnv) : DatabaseInterface {
         get() = hikariDataSource.connection
 
     override val log: Logger = LoggerFactory.getLogger(Database::class.qualifiedName)
+
+    fun runFlywayRepair(hikariDataSource: HikariDataSource) =
+        Flyway.configure().run {
+            dataSource(hikariDataSource)
+            load().repair()
+        }
 
     private fun runFlywayMigrations(hikariDataSource: HikariDataSource) =
         Flyway.configure().run {
