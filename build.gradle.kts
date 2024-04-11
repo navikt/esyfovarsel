@@ -20,7 +20,7 @@ val flywayVersion = "10.10.0"
 val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.17.0"
 val postgresEmbeddedVersion = "1.0.3"
-val kafkaVersion = "3.6.0"
+val kafkaVersion = "3.7.0"
 val brukernotifikasjonerBuilderVersion = "1.0.3-test-3"
 val kotlinVersion = "1.9.23"
 
