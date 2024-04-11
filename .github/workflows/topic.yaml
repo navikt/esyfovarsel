@@ -6,7 +6,6 @@ on:
       - .github/workflows/topic.yaml
 jobs:
   deploy-topic-to-dev:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/varselbus-')
     name: Deploy topic to dev
     permissions:
       id-token: write

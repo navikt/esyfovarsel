@@ -8,7 +8,7 @@ const val DINE_SYKMELDTE_DIALOGMOTE_NYTT_TID_STED_TEKST = "Endring av dialogmøt
 const val DINE_SYKMELDTE_DIALOGMOTE_REFERAT_TEKST = "Referat fra dialogmøte"
 
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST = "NAV ønsker svar på om du trenger et dialogmøte"
-const val BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT = "Det nærmer seg datoen da du ikke lenger kan få sykepenger."
+const val BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT = "Det nærmer seg datoen du ikke lenger kan få sykepenger. NAV trenger å vite om du har behov for mer oppfølging"
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST = "Du er innkalt til dialogmøte - vi trenger svaret ditt"
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST = "Dialogmøtet med NAV er avlyst"
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST = "Dialogmøtet med NAV er flyttet"

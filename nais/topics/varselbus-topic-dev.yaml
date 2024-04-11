@@ -39,3 +39,6 @@ spec:
     - team: team-esyfo
       application: aktivitetskrav-backend
       access: write
+    - team: team-esyfo
+      application: meroppfolging-backend
+      access: write

@@ -10,7 +10,7 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
-import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.BESKJED
+import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
 import org.slf4j.LoggerFactory
 import java.net.URL
 import java.time.LocalDateTime
@@ -78,7 +78,7 @@ class MerVeiledningVarselService(
             content = BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT,
             url = url,
             varselHendelse = arbeidstakerHendelse,
-            varseltype = BESKJED
+            varseltype = OPPGAVE
         )
     }
 
