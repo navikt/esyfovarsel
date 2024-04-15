@@ -64,7 +64,7 @@ fun main() {
     } else {
         val server = embeddedServer(
             factory = Netty,
-            environment = engineEnvironment,
+            environment = createEngineEnvironment(),
             configure = {
                 connectionGroupSize = 8
                 workerGroupSize = 8
@@ -82,7 +82,7 @@ fun main() {
     }
 }
 
-val engineEnvironment: ApplicationEngineEnvironment = applicationEngineEnvironment {
+fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineEnvironment {
     val env = getEnv()
     config = HoconApplicationConfig(ConfigFactory.load())
     database = Database(env.dbEnv)
