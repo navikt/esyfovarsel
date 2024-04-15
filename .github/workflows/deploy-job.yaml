@@ -60,7 +60,7 @@ jobs:
         uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
-          RESOURCE: nais/job-trigger-dev-gcp.yaml
+          RESOURCE: nais/job-trigger-dev.yaml
 
   deploy-prod:
     if: ${{ github.actor != 'dependabot[bot]' && github.ref == 'refs/heads/main' }}
@@ -75,4 +75,4 @@ jobs:
         uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
-          RESOURCE: nais/job-trigger-prod-gcp.yaml
+          RESOURCE: nais/job-trigger-prod.yaml
