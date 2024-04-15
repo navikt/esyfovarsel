@@ -52,7 +52,7 @@ jobs:
     name: Deploy job to prod-gcp
     permissions:
       id-token: write
-    needs: deploy-dev
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
