@@ -80,7 +80,7 @@ spec:
   gcp:
     sqlInstances:
       - autoBackupHour: 1
-        cascadingDelete: true
+        cascadingDelete: false
         collation: nb_NO.UTF8
         databases:
           - envVarPrefix: GCP_DB

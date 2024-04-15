@@ -1,0 +1,64 @@
+name: deploy-job
+
+on: push
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: navikt/teamesyfo-github-actions-workflows/actions/gradle-cached@main
+      - run: ./gradlew test
+        env:
+          ORG_GRADLE_PROJECT_githubUser: x-access-token
+          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: write
+      id-token: write
+    outputs:
+      image: ${{ steps.build-and-publish.outputs.image }}
+    steps:
+      - uses: navikt/teamesyfo-github-actions-workflows/actions/jar-to-docker@main
+        id: build-and-publish
+        with:
+          app: esyfovarsel
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-dev:
+    if: ${{ github.actor != 'dependabot[bot]'}}
+    name: Deploy job to dev-gcp
+    permissions:
+      id-token: write
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy jobb
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: nais/job-trigger-dev.yaml
+          VAR: image=${{ needs.build.outputs.image }}
+
+  deploy-prod:
+    if: ${{ github.actor != 'dependabot[bot]' && github.ref == 'refs/heads/main' }}
+    name: Deploy job to prod-gcp
+    permissions:
+      id-token: write
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy jobb
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: nais/job-trigger-prod.yaml
+          VAR: image=${{ needs.build.outputs.image }}
