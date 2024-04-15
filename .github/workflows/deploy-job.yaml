@@ -1,0 +1,74 @@
+name: deploy-job
+
+on: push
+
+jobs:
+  build:
+    name: Checkout code and create docker tag
+    permissions:
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Java 19
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '19'
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: actions/cache@v3
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-cache-${{ hashFiles('build.gradle.kts') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-cache-
+      - uses: actions/cache@v3
+        with:
+          path: ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-wrapper-
+      - name: Run tests
+        run: |
+          ./gradlew test
+      - name: Build jar
+        env:
+          ORG_GRADLE_PROJECT_githubUser: x-access-token
+          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          ./gradlew shadowJar -x test
+      - name: Push docker image to GAR
+        uses: nais/docker-build-push@v0
+        if: ${{ github.actor != 'dependabot[bot]' }}
+        id: docker-build-push
+        with:
+          team: team-esyfo
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+
+  deploy-dev:
+    if: ${{ github.actor != 'dependabot[bot]'}}
+    name: Deploy job to dev-gcp
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy jobb
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: nais/job-trigger-dev-gcp.yaml
+
+  deploy-prod:
+    if: ${{ github.actor != 'dependabot[bot]' && github.ref == 'refs/heads/main' }}
+    name: Deploy job to prod-gcp
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy jobb
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: nais/job-trigger-prod-gcp.yaml
