@@ -3,49 +3,33 @@ name: deploy-job
 on: push
 
 jobs:
-  build:
-    name: Checkout code and create docker tag
-    permissions:
-      id-token: write
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Java 19
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '19'
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - uses: actions/cache@v3
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-cache-${{ hashFiles('build.gradle.kts') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-cache-
-      - uses: actions/cache@v3
-        with:
-          path: ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-wrapper-
-      - name: Run tests
-        run: |
-          ./gradlew test
-      - name: Build jar
+      - uses: navikt/teamesyfo-github-actions-workflows/actions/gradle-cached@main
+      - run: ./gradlew test
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
-        run: |
-          ./gradlew shadowJar -x test
-      - name: Push docker image to GAR
-        uses: nais/docker-build-push@v0
-        if: ${{ github.actor != 'dependabot[bot]' }}
-        id: docker-build-push
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: write
+      id-token: write
+    outputs:
+      image: ${{ steps.build-and-publish.outputs.image }}
+    steps:
+      - uses: navikt/teamesyfo-github-actions-workflows/actions/jar-to-docker@main
+        id: build-and-publish
         with:
-          team: team-esyfo
+          app: esyfovarsel
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
   deploy-dev:
     if: ${{ github.actor != 'dependabot[bot]'}}
@@ -61,6 +45,7 @@ jobs:
         env:
           CLUSTER: dev-gcp
           RESOURCE: nais/job-trigger-dev.yaml
+          VAR: image=${{ needs.build.outputs.image }}
 
   deploy-prod:
     if: ${{ github.actor != 'dependabot[bot]' && github.ref == 'refs/heads/main' }}
@@ -76,3 +61,4 @@ jobs:
         env:
           CLUSTER: prod-gcp
           RESOURCE: nais/job-trigger-prod.yaml
+          VAR: image=${{ needs.build.outputs.image }}
