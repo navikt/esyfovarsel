@@ -27,11 +27,11 @@ class SendMerVeiledningVarslerJobb(
             try {
                 merVeiledningVarselService.sendVarselTilArbeidstaker(
                     ArbeidstakerHendelse(
-                        HendelseType.SM_MER_VEILEDNING,
-                        false,
-                        null,
-                        it.fnr,
-                        null,
+                        type = HendelseType.SM_MER_VEILEDNING,
+                        ferdigstill = false,
+                        data = null,
+                        arbeidstakerFnr = it.fnr,
+                        orgnummer = null,
                     ),
                     it.uuid,
                 )
