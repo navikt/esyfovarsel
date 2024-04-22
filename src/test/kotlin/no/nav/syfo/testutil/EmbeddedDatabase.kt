@@ -31,27 +31,27 @@ class EmbeddedDatabase : DatabaseInterface {
         }
     }
 
+    fun dropData() {
+        val tables = listOf(
+            "PLANLAGT_VARSEL",
+            "SYKMELDING_IDS",
+            "UTSENDT_VARSEL",
+            "UTBETALING_INFOTRYGD",
+            "UTBETALING_SPLEIS",
+            "MIKROFRONTEND_SYNLIGHET"
+        )
+
+        connection.use { connection ->
+            tables.forEach { table ->
+                connection.prepareStatement("DELETE FROM $table").executeUpdate()
+            }
+            connection.commit()
+        }
+    }
+
     override val connection: Connection
         get() = dataSource.connection.apply { autoCommit = false }
     override val log: Logger
         get() = LoggerFactory.getLogger(EmbeddedDatabase::class.qualifiedName)
 }
 
-fun Connection.dropData() {
-    val query1 = "DELETE FROM PLANLAGT_VARSEL"
-    val query2 = "DELETE FROM SYKMELDING_IDS"
-    val query3 = "DELETE FROM UTSENDT_VARSEL"
-    val query5 = "DELETE FROM UTBETALING_INFOTRYGD"
-    val query6 = "DELETE FROM UTBETALING_SPLEIS"
-    val query7 = "DELETE FROM MIKROFRONTEND_SYNLIGHET"
-
-    use { connection ->
-        connection.prepareStatement(query1).executeUpdate()
-        connection.prepareStatement(query2).executeUpdate()
-        connection.prepareStatement(query3).executeUpdate()
-        connection.prepareStatement(query5).executeUpdate()
-        connection.prepareStatement(query6).executeUpdate()
-        connection.prepareStatement(query7).executeUpdate()
-        connection.commit()
-    }
-}

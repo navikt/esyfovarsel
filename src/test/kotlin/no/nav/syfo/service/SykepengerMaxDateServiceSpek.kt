@@ -10,7 +10,6 @@ import no.nav.syfo.consumer.pdl.PdlPerson
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UTBETALING_UTBETALT
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingSpleis
 import no.nav.syfo.testutil.EmbeddedDatabase
-import no.nav.syfo.testutil.dropData
 import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
@@ -28,7 +27,7 @@ class SykepengerMaxDateServiceSpek : DescribeSpec({
             )
         )
         beforeTest {
-            embeddedDatabase.connection.dropData()
+            embeddedDatabase.dropData()
         }
 
         it("Should store spleis utbetaling") {

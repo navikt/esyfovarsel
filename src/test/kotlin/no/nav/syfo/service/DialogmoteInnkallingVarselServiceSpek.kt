@@ -22,7 +22,6 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import no.nav.syfo.planner.arbeidstakerFnr1
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.DONE
 import no.nav.syfo.testutil.EmbeddedDatabase
-import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.mocks.fnr1
 import no.nav.syfo.testutil.mocks.fnr2
 import no.nav.syfo.testutil.mocks.fnr3
@@ -64,7 +63,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
         beforeTest {
             clearAllMocks()
-            embeddedDatabase.connection.dropData()
+            embeddedDatabase.dropData()
         }
 
         it("Non-reserved users should be notified externally") {

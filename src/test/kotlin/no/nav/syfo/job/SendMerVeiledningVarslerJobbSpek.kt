@@ -31,7 +31,7 @@ class SendMerVeiledningVarslerJobbSpek : DescribeSpec({
     )
 
     describe("SendMerVeiledningVarslerJobbSpek") {
-        afterTest {
+        beforeTest {
             clearAllMocks()
         }
 

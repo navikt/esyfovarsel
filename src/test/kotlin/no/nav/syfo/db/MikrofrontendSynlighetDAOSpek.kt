@@ -4,7 +4,6 @@ import io.kotest.core.spec.style.DescribeSpec
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import no.nav.syfo.testutil.EmbeddedDatabase
-import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.shouldContainMikrofrontendEntry
 import no.nav.syfo.testutil.shouldNotContainMikrofrontendEntryForUser
 import org.amshove.kluent.should
@@ -16,7 +15,7 @@ class MikrofrontendSynlighetDAOSpek : DescribeSpec({
         val embeddedDatabase = EmbeddedDatabase()
 
         beforeTest {
-            embeddedDatabase.connection.dropData()
+            embeddedDatabase.dropData()
         }
 
         val mikrofrontendSynlighet1 = MikrofrontendSynlighet(

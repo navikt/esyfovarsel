@@ -8,7 +8,10 @@ import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.*
 
-fun DatabaseInterface.storeSpleisUtbetaling(utbetaling: UtbetalingSpleis) {
+fun DatabaseInterface.storeSpleisUtbetaling(
+    utbetaling: UtbetalingSpleis,
+    opprettetDato: LocalDateTime = LocalDateTime.now()
+) {
     val insertStatement = """INSERT INTO UTBETALING_SPLEIS  (
         ID, 
         FNR, 
@@ -43,7 +46,7 @@ fun DatabaseInterface.storeSpleisUtbetaling(utbetaling: UtbetalingSpleis) {
                 it.setDate(12, Date.valueOf(utbetaling.tom))
                 it.setString(13, utbetaling.utbetalingId)
                 it.setString(14, utbetaling.korrelasjonsId)
-                it.setTimestamp(15, Timestamp.valueOf(LocalDateTime.now()))
+                it.setTimestamp(15, Timestamp.valueOf(opprettetDato))
                 it.executeUpdate()
             }
             connection.commit()

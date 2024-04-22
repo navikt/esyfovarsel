@@ -39,7 +39,7 @@ class MikrofrontendServiceSpek : DescribeSpec({
 
     beforeTest {
         clearAllMocks()
-        embeddedDatabase.connection.dropData()
+        embeddedDatabase.dropData()
     }
 
     describe("MikrofrontendServiceSpek") {
