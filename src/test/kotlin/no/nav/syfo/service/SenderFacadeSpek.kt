@@ -16,7 +16,6 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProdu
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.planner.arbeidstakerFnr1
 import no.nav.syfo.testutil.EmbeddedDatabase
-import no.nav.syfo.testutil.dropData
 import java.time.LocalDateTime
 import java.util.*
 
@@ -88,7 +87,7 @@ class SenderFacadeSpek : DescribeSpec({
 
         beforeTest {
             clearAllMocks()
-            embeddedDatabase.connection.dropData()
+            embeddedDatabase.dropData()
         }
 
         it("Complete notifications for user") {

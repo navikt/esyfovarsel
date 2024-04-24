@@ -22,7 +22,7 @@ class MotebehovVarselServiceSpek : DescribeSpec({
         MotebehovVarselService(senderFacade, accessControlService, sykmeldingService, "http://localhost")
 
     describe("MotebehovVarselServiceSpek") {
-        afterTest {
+        beforeTest {
             clearAllMocks()
         }
 

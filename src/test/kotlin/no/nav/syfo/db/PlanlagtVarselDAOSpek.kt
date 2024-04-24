@@ -6,7 +6,6 @@ import no.nav.syfo.db.domain.PPlanlagtVarsel
 import no.nav.syfo.db.domain.PlanlagtVarsel
 import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.testutil.EmbeddedDatabase
-import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.mocks.orgnummer
 import org.amshove.kluent.should
 import org.amshove.kluent.shouldBeEqualTo
@@ -20,7 +19,7 @@ class PlanlagtVarselDAOSpek : DescribeSpec({
         val embeddedDatabase = EmbeddedDatabase()
 
         beforeTest {
-            embeddedDatabase.connection.dropData()
+            embeddedDatabase.dropData()
         }
 
         it("Store and fetch PlanlagtVarsel") {

@@ -8,7 +8,7 @@ class FodselsdatoDAOSpek : DescribeSpec({
     describe("FodselsdatoDAOSpek") {
         val embeddedDatabase = EmbeddedDatabase()
         beforeTest {
-            embeddedDatabase.connection.dropData()
+            embeddedDatabase.dropData()
         }
 
         it("Should fetch birthdate") {

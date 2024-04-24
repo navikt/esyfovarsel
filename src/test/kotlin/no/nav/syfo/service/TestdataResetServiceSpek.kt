@@ -4,8 +4,23 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.syfo.db.*
-import no.nav.syfo.db.domain.*
+import no.nav.syfo.db.arbeidstakerAktorId1
+import no.nav.syfo.db.domain.Kanal
+import no.nav.syfo.db.domain.PUtsendtVarsel
+import no.nav.syfo.db.domain.PUtsendtVarselFeilet
+import no.nav.syfo.db.domain.PlanlagtVarsel
+import no.nav.syfo.db.domain.VarselType
+import no.nav.syfo.db.fetchInfotrygdUtbetalingByFnr
+import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
+import no.nav.syfo.db.fetchPlanlagtVarselByFnr
+import no.nav.syfo.db.fetchUtsendtVarselByFnr
+import no.nav.syfo.db.fetchUtsendtVarselFeiletByFnr
+import no.nav.syfo.db.storeInfotrygdUtbetaling
+import no.nav.syfo.db.storeMikrofrontendSynlighetEntry
+import no.nav.syfo.db.storePlanlagtVarsel
+import no.nav.syfo.db.storeSpleisUtbetaling
+import no.nav.syfo.db.storeUtsendtVarsel
+import no.nav.syfo.db.storeUtsendtVarselFeilet
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.infotrygd.domain.InfotrygdSource
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingSpleis
@@ -16,7 +31,6 @@ import no.nav.syfo.planner.arbeidstakerFnr1
 import no.nav.syfo.planner.narmesteLederFnr1
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.testutil.EmbeddedDatabase
-import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.mocks.orgnummer
 import org.amshove.kluent.shouldBeEqualTo
 import java.time.LocalDate
@@ -84,7 +98,7 @@ class TestdataResetServiceSpek : DescribeSpec({
             MikrofrontendSynlighet(arbeidstakerFnr1, Tjeneste.DIALOGMOTE, LocalDate.now().plusWeeks(1))
 
         beforeTest {
-            embeddedDatabase.connection.dropData()
+            embeddedDatabase.dropData()
         }
 
         it("Reset all testdata") {

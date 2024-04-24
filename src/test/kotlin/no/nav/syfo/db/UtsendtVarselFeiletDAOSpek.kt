@@ -6,7 +6,6 @@ import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.testutil.EmbeddedDatabase
-import no.nav.syfo.testutil.dropData
 import org.amshove.kluent.should
 import java.time.LocalDateTime
 import java.util.*
@@ -16,7 +15,7 @@ class UtsendtVarselFeiletDAOSpek : DescribeSpec({
         val embeddedDatabase = EmbeddedDatabase()
 
         beforeTest {
-            embeddedDatabase.connection.dropData()
+            embeddedDatabase.dropData()
         }
 
         it("Store ikke-utsendt varsel til NL i database") {

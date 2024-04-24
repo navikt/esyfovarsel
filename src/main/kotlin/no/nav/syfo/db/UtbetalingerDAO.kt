@@ -14,7 +14,7 @@ fun DatabaseInterface.fetchMerVeiledningVarslerToSend(): List<PUtbetaling> {
                                 (SELECT UTBETALINGER2.ID
                                 FROM UTBETALINGER AS UTBETALINGER2
                                 WHERE UTBETALINGER1.FNR = UTBETALINGER2.FNR
-                                ORDER BY UTBETALT_TOM DESC, OPPRETTET DESC
+                                ORDER BY OPPRETTET DESC
                                 LIMIT 1)
                             AND GJENSTAENDE_SYKEDAGER < $gjenstaendeSykedagerLimit
                             AND FORELOPIG_BEREGNET_SLUTT >= current_date + INTERVAL '$maxDateLimit' DAY
@@ -40,7 +40,7 @@ fun DatabaseInterface.fetchMaksDatoByFnr(fnr: String): PMaksDato? {
                                 (SELECT UTBETALINGER2.ID
                                 FROM UTBETALINGER AS UTBETALINGER2
                                 WHERE UTBETALINGER1.FNR = UTBETALINGER2.FNR
-                                ORDER BY UTBETALT_TOM DESC, OPPRETTET DESC
+                                ORDER BY OPPRETTET DESC
                                 LIMIT 1)
                             AND FNR = ?
                             """

@@ -17,7 +17,6 @@ import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingSpleis
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.planner.arbeidstakerFnr1
 import no.nav.syfo.testutil.EmbeddedDatabase
-import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.mocks.orgnummer
 import org.amshove.kluent.shouldBeEqualTo
 import java.time.LocalDate
@@ -67,7 +66,7 @@ class MerVeiledningVarselFinderSpek : DescribeSpec({
     describe("MerVeiledningVarselFinderSpek") {
         beforeTest {
             clearAllMocks()
-            embeddedDatabase.connection.dropData()
+            embeddedDatabase.dropData()
         }
 
         it("Should send MER_VEILEDNING when it was not sent during past 3 months") {
