@@ -45,8 +45,8 @@ class JobApiSpek : DescribeSpec({
     describe("JobTriggerApi test") {
         val accessControlService = mockk<AccessControlService>()
         val merVeiledningVarselFinder = mockk<MerVeiledningVarselFinder>(relaxed = true)
-        val merVeiledningVarselService = mockk<MerVeiledningVarselService>()
-        val mikrofrontendService = mockk<MikrofrontendService>()
+        val merVeiledningVarselService = mockk<MerVeiledningVarselService>(relaxed = true)
+        val mikrofrontendService = mockk<MikrofrontendService>(relaxed = true)
 
         coEvery { accessControlService.getUserAccessStatus(fnr1) } returns userAccessStatus1
         coEvery { accessControlService.getUserAccessStatus(fnr2) } returns userAccessStatus2
@@ -112,7 +112,8 @@ class JobApiSpek : DescribeSpec({
         val sendMerVeiledningVarslerJobb =
             SendMerVeiledningVarslerJobb(
                 merVeiledningVarselFinder,
-                merVeiledningVarselService
+                merVeiledningVarselService,
+                mikrofrontendService
             )
 
         with(TestApplicationEngine()) {
@@ -126,6 +127,7 @@ class JobApiSpek : DescribeSpec({
                 with(handleRequest(HttpMethod.Post, urlPathJobTrigger)) {
                     response.status()?.isSuccess() shouldBeEqualTo true
                     coVerify(exactly = 5) { merVeiledningVarselService.sendVarselTilArbeidstaker(any(), any()) }
+                    coVerify(exactly = 5) { mikrofrontendService.updateMikrofrontendForUserByHendelse(any()) }
                 }
             }
         }
