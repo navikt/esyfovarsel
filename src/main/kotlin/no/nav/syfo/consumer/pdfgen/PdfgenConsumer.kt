@@ -21,17 +21,17 @@ import java.time.LocalDate
 class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseInterface: DatabaseInterface) {
     private val client = httpClient()
     private val syfooppdfgenUrl = urlEnv.syfooppdfgenUrl
+    private val urlForReservedUsers = "$syfooppdfgenUrl/api/v1/genpdf/oppfolging/mer_veiledning_for_reserverte"
+    private val urlForDigitalUsers = "$syfooppdfgenUrl/api/v1/genpdf/oppfolging/mer_veiledning_for_digitale"
 
     private val log = LoggerFactory.getLogger(PdfgenConsumer::class.qualifiedName)
 
     suspend fun getMerVeiledningPdfForReserverte(fnr: String): ByteArray? {
-        return getPdf(fnr, "$syfooppdfgenUrl/api/v1/genpdf/oppfolging/mer_veiledning_for_reserverte_brukere")
-
+        return getPdf(fnr, urlForReservedUsers)
     }
 
     suspend fun getMerVeiledningPdfForDigitale(fnr: String): ByteArray? {
-        return getPdf(fnr, "$syfooppdfgenUrl/api/v1/genpdf/oppfolging/mer_veiledning_for_digitale_brukere")
-
+        return getPdf(fnr, urlForDigitalUsers)
     }
 
     private suspend fun getPdf(fnr: String, merVeiledningPdfUrl: String): ByteArray? {
