@@ -25,36 +25,24 @@ class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseI
     private val log = LoggerFactory.getLogger(PdfgenConsumer::class.qualifiedName)
 
     suspend fun getMerVeiledningPdfForReserverte(fnr: String): ByteArray? {
-        val mottakerNavn = pdlConsumer.hentPerson(fnr)?.getFullNameAsString()
-        val sykepengerMaxDate = databaseInterface.fetchMaksDatoByFnr(fnr)
-        val merVeiledningPdfUrl = "$syfooppdfgenUrl/api/v1/genpdf/oppfolging/mer_veiledning_for_reserverte_brukere"
-        val request = getPdfgenRequest(
-            mottakerNavn,
-            sykepengerMaxDate?.utbetalt_tom,
-            sykepengerMaxDate?.forelopig_beregnet_slutt,
-            true,
-        )
-
-        return getPdf(merVeiledningPdfUrl, request)
+        return getPdf(fnr, "$syfooppdfgenUrl/api/v1/genpdf/oppfolging/mer_veiledning_for_reserverte_brukere")
 
     }
 
     suspend fun getMerVeiledningPdfForDigitale(fnr: String): ByteArray? {
+        return getPdf(fnr, "$syfooppdfgenUrl/api/v1/genpdf/oppfolging/mer_veiledning_for_digitale_brukere")
+
+    }
+
+    private suspend fun getPdf(fnr: String, merVeiledningPdfUrl: String): ByteArray? {
         val mottakerNavn = pdlConsumer.hentPerson(fnr)?.getFullNameAsString()
         val sykepengerMaxDate = databaseInterface.fetchMaksDatoByFnr(fnr)
-        val merVeiledningPdfUrl = "$syfooppdfgenUrl/api/v1/genpdf/oppfolging/mer_veiledning_for_digitale_brukere"
         val request = getPdfgenRequest(
             mottakerNavn,
             sykepengerMaxDate?.utbetalt_tom,
             sykepengerMaxDate?.forelopig_beregnet_slutt,
-            false,
         )
 
-        return getPdf(merVeiledningPdfUrl, request)
-
-    }
-
-    private suspend fun getPdf(merVeiledningPdfUrl: String, request: PdfgenRequest): ByteArray? {
         return try {
             val response = client.post(merVeiledningPdfUrl) {
                 headers {
@@ -80,7 +68,7 @@ class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseI
         }
     }
 
-    private fun getPdfgenRequest(navn: String?, utbetaltTom: LocalDate?, maxDate: LocalDate?, isBrukerReservert: Boolean): PdfgenRequest {
+    private fun getPdfgenRequest(navn: String?, utbetaltTom: LocalDate?, maxDate: LocalDate?): PdfgenRequest {
         val sentDateFormatted = formatDateForLetter(LocalDate.now())
         val utbetaltTomFormatted = utbetaltTom?.let { formatDateForLetter(it) }
         val maxDateFormatted = maxDate?.let { formatDateForLetter(it) }
@@ -91,7 +79,6 @@ class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseI
                 sendtdato = sentDateFormatted,
                 utbetaltTom = utbetaltTomFormatted,
                 maxdato = maxDateFormatted,
-                isBrukerReservert = isBrukerReservert,
             ),
         )
     }
