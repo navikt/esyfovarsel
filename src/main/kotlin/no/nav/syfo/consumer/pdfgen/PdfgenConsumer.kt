@@ -21,26 +21,18 @@ import java.time.LocalDate
 class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseInterface: DatabaseInterface) {
     private val client = httpClient()
     private val syfooppdfgenUrl = urlEnv.syfooppdfgenUrl
-    private val urlForReservedUsers = "$syfooppdfgenUrl/api/v1/genpdf/oppfolging/mer_veiledning_for_reserverte"
-    private val urlForDigitalUsers = "$syfooppdfgenUrl/api/v1/genpdf/oppfolging/mer_veiledning_for_digitale"
 
     private val log = LoggerFactory.getLogger(PdfgenConsumer::class.qualifiedName)
 
-    suspend fun getMerVeiledningPdfForReserverte(fnr: String): ByteArray? {
-        return getPdf(fnr, urlForReservedUsers)
-    }
-
-    suspend fun getMerVeiledningPdfForDigitale(fnr: String): ByteArray? {
-        return getPdf(fnr, urlForDigitalUsers)
-    }
-
-    private suspend fun getPdf(fnr: String, merVeiledningPdfUrl: String): ByteArray? {
+    suspend fun getMerVeiledningPDF(fnr: String, isBrukerReservert: Boolean): ByteArray? {
         val mottakerNavn = pdlConsumer.hentPerson(fnr)?.getFullNameAsString()
         val sykepengerMaxDate = databaseInterface.fetchMaksDatoByFnr(fnr)
+        val merVeiledningPdfUrl = "$syfooppdfgenUrl/api/v1/genpdf/oppfolging/mer_veiledning"
         val request = getPdfgenRequest(
             mottakerNavn,
             sykepengerMaxDate?.utbetalt_tom,
             sykepengerMaxDate?.forelopig_beregnet_slutt,
+            isBrukerReservert,
         )
 
         return try {
@@ -66,9 +58,10 @@ class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseI
             log.error("Exception while calling syfooppdfgen: ${e.message}", e)
             null
         }
+
     }
 
-    private fun getPdfgenRequest(navn: String?, utbetaltTom: LocalDate?, maxDate: LocalDate?): PdfgenRequest {
+    private fun getPdfgenRequest(navn: String?, utbetaltTom: LocalDate?, maxDate: LocalDate?, isBrukerReservert: Boolean): PdfgenRequest {
         val sentDateFormatted = formatDateForLetter(LocalDate.now())
         val utbetaltTomFormatted = utbetaltTom?.let { formatDateForLetter(it) }
         val maxDateFormatted = maxDate?.let { formatDateForLetter(it) }
@@ -79,6 +72,7 @@ class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseI
                 sendtdato = sentDateFormatted,
                 utbetaltTom = utbetaltTomFormatted,
                 maxdato = maxDateFormatted,
+                isBrukerReservert = isBrukerReservert,
             ),
         )
     }

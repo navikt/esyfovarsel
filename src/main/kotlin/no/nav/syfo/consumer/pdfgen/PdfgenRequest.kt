@@ -9,4 +9,5 @@ class Brevdata(
     val sendtdato: String,
     val utbetaltTom: String?,
     val maxdato: String?,
+    val isBrukerReservert: Boolean?,
 )
