@@ -35,7 +35,7 @@ class MerVeiledningVarselService(
         val isBrukerReservert = !userAccessStatus.canUserBeDigitallyNotified
 
         if (isBrukerReservert) {
-            val pdf = pdfgenConsumer.getMerVeiledningPDF(arbeidstakerHendelse.arbeidstakerFnr, isBrukerReservert = true)
+            val pdf = pdfgenConsumer.getMerVeiledningPdfForReserverte(arbeidstakerHendelse.arbeidstakerFnr)
 
             val journalpostId = pdf?.let {
                 dokarkivService.getJournalpostId(
@@ -50,7 +50,7 @@ class MerVeiledningVarselService(
             sendBrevVarselTilArbeidstaker(planlagtVarselUuid, arbeidstakerHendelse, journalpostId!!)
         } else {
             val pdf =
-                pdfgenConsumer.getMerVeiledningPDF(arbeidstakerHendelse.arbeidstakerFnr, isBrukerReservert = false)
+                pdfgenConsumer.getMerVeiledningPdfForDigitale(arbeidstakerHendelse.arbeidstakerFnr)
 
             val journalpostId = pdf?.let {
                 dokarkivService.getJournalpostId(
