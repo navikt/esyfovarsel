@@ -12,6 +12,8 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.net.URL
 
 class BrukernotifikasjonKafkaProducer(
@@ -24,6 +26,8 @@ class BrukernotifikasjonKafkaProducer(
             put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java)
         )
     })
+    private val log: Logger = LoggerFactory.getLogger(BrukernotifikasjonKafkaProducer::class.java)
+
 
     fun sendBeskjed(
         fnr: String,
@@ -84,6 +88,10 @@ class BrukernotifikasjonKafkaProducer(
         smsVarsling: Boolean,
         smsVarslingTekst: String?,
     ): String {
+        if (varselUrl.toString().length > 200) {
+            log.error("varselUrl for $varseltype is longer than 200 characters: ${varselUrl.toString()} UUID: $uuid")
+        }
+
         val opprettVarsel = VarselActionBuilder.opprett {
             type = varseltype
             varselId = uuid
@@ -94,7 +102,7 @@ class BrukernotifikasjonKafkaProducer(
                 tekst = content,
                 default = true
             )
-            link = varselUrl.let { it.toString() }
+            link = varselUrl?.toString()
             aktivFremTil = null
             eksternVarsling = if (smsVarsling) {
                 EksternVarslingBestilling(
