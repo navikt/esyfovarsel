@@ -91,6 +91,9 @@ fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
     if (eventType.isAktivitetspliktType()) {
         return LocalDateTime.now().plusDays(30L)
     }
+    if (eventType.isMerOppfolgingType()) {
+        return LocalDateTime.now().plusWeeks(13)
+    }
     return if (eventType != HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV) this.motetidspunkt() else null
 }
 
@@ -133,6 +136,7 @@ fun EsyfovarselHendelse.skalFerdigstilles() =
     ferdigstill ?: false
 
 fun HendelseType.isAktivitetspliktType() = this == HendelseType.SM_AKTIVITETSPLIKT
+fun HendelseType.isMerOppfolgingType() = this == HendelseType.SM_MER_VEILEDNING
 
 fun HendelseType.isDialogmoteInnkallingType() = this in listOf(
     HendelseType.SM_DIALOGMOTE_INNKALT,
@@ -148,7 +152,7 @@ fun HendelseType.isDialogmoteType() =
     ))
 
 fun ArbeidstakerHendelse.notCorrectMikrofrontendType() =
-    !(this.type.isDialogmoteType() or this.type.isAktivitetspliktType())
+    !(this.type.isDialogmoteType() or this.type.isAktivitetspliktType() or this.type.isMerOppfolgingType())
 
 fun ArbeidstakerHendelse.isAktivitetspliktWithFerdigstilling() =
     (this.type.isAktivitetspliktType() and (this.ferdigstill == true))
@@ -157,4 +161,5 @@ fun ArbeidstakerHendelse.isNotEligibleForMikrofrontendProcessing(): Boolean {
     return this.notCorrectMikrofrontendType() or isAktivitetspliktWithFerdigstilling()
 }
 
-fun HendelseType.isNotValidHendelseType() = !this.isAktivitetspliktType() && !this.isDialogmoteInnkallingType()
+fun HendelseType.isNotValidHendelseType() =
+    !this.isAktivitetspliktType() && !this.isDialogmoteInnkallingType() && !this.isMerOppfolgingType()

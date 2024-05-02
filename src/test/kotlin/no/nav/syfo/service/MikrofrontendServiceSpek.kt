@@ -16,7 +16,8 @@ import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKa
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
 import no.nav.syfo.service.microfrontend.MikrofrontendService
-import no.nav.syfo.service.mikrofrontend.MikrofrontendAktivitetskravService
+import no.nav.syfo.service.microfrontend.MikrofrontendAktivitetskravService
+import no.nav.syfo.service.microfrontend.MikrofrontendMerOppfolgingService
 import no.nav.syfo.testutil.*
 import no.nav.syfo.utils.DuplicateMotebehovException
 import no.nav.syfo.utils.MotebehovAfterBookingException
@@ -30,10 +31,12 @@ class MikrofrontendServiceSpek : DescribeSpec({
     val minSideMicrofrontendKafkaProducer: MinSideMicrofrontendKafkaProducer = mockk(relaxed = true)
     val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(embeddedDatabase)
     val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(embeddedDatabase)
+    val mikrofrontendMerOppfolgingService = MikrofrontendMerOppfolgingService(embeddedDatabase)
     val mikrofrontendService = MikrofrontendService(
         minSideMicrofrontendKafkaProducer,
         mikrofrontendDialogmoteService,
         mikrofrontendAktivitetskravService,
+        mikrofrontendMerOppfolgingService,
         embeddedDatabase
     )
 
@@ -106,7 +109,7 @@ class MikrofrontendServiceSpek : DescribeSpec({
 
         it("Enabling MF with a syfomotebehov event should result entry without synligTom in DB and publication on min-side topic") {
             mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
-            embeddedDatabase.shouldContainMikrofrontendEntryWithoutMotetidspunkt(
+            embeddedDatabase.shouldContainMikrofrontendEntryWithoutSynligTom(
                 arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr,
                 Tjeneste.DIALOGMOTE
             )
@@ -155,14 +158,28 @@ class MikrofrontendServiceSpek : DescribeSpec({
 
         it("Receving DM-innkalling event after MB-event, should result in 'synligTom' being set") {
             mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
-            embeddedDatabase.shouldContainMikrofrontendEntryWithoutMotetidspunkt(
+            embeddedDatabase.shouldContainMikrofrontendEntryWithoutSynligTom(
                 arbeidstakerHendelseSvarMotebehov.arbeidstakerFnr,
                 Tjeneste.DIALOGMOTE
             )
             mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
-            embeddedDatabase.shouldContainMikrofrontendEntryWithMotetidspunkt(
+            embeddedDatabase.shouldContainMikrofrontendEntryWithSynligTom(
                 arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr,
                 Tjeneste.DIALOGMOTE
+            )
+        }
+
+        it("Should store MER_OPPFOLGING event in DB with synligTom set") {
+            mikrofrontendService.updateMikrofrontendForUserByHendelse(ArbeidstakerHendelse(
+                type = HendelseType.SM_MER_VEILEDNING,
+                ferdigstill = false,
+                data = null,
+                arbeidstakerFnr = arbeidstakerFnr1,
+                orgnummer = null
+            ))
+            embeddedDatabase.shouldContainMikrofrontendEntryWithSynligTom(
+                arbeidstakerFnr1,
+                Tjeneste.MER_OPPFOLGING
             )
         }
 

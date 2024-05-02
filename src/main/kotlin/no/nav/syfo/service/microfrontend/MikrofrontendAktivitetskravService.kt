@@ -1,4 +1,4 @@
-package no.nav.syfo.service.mikrofrontend
+package no.nav.syfo.service.microfrontend
 
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PMikrofrontendSynlighet
@@ -13,7 +13,7 @@ import no.nav.syfo.service.microfrontend.MikrofrontendService.Companion.actionEn
 import no.nav.syfo.utils.dataToVarselData
 
 class MikrofrontendAktivitetskravService(val database: DatabaseInterface) {
-    val mikrofrontendId = "syfo-aktivitetskrav"
+    private val mikrofrontendId = "syfo-aktivitetskrav"
 
     fun createOrUpdateAktivitetskravMicrofrontendByHendelse(hendelse: ArbeidstakerHendelse): MinSideRecord? {
         return createOrUpdateMinSideRecord(hendelse)

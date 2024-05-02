@@ -47,7 +47,8 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonPro
 import no.nav.syfo.service.*
 import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
 import no.nav.syfo.service.microfrontend.MikrofrontendService
-import no.nav.syfo.service.mikrofrontend.MikrofrontendAktivitetskravService
+import no.nav.syfo.service.microfrontend.MikrofrontendAktivitetskravService
+import no.nav.syfo.service.microfrontend.MikrofrontendMerOppfolgingService
 import no.nav.syfo.utils.LeaderElection
 import no.nav.syfo.utils.RunOnElection
 import java.util.concurrent.Executors
@@ -156,12 +157,14 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
     )
     val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(database)
     val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(database)
+    val mikrofrontendMerOppfolgingService = MikrofrontendMerOppfolgingService(database)
     val mikrofrontendService =
         MikrofrontendService(
-            minSideMicrofrontendKafkaProducer,
-            mikrofrontendDialogmoteService,
-            mikrofrontendAktivitetskravService,
-            database,
+            minSideMicrofrontendKafkaProducer = minSideMicrofrontendKafkaProducer,
+            mikrofrontendDialogmoteService = mikrofrontendDialogmoteService,
+            mikrofrontendAktivitetskravService = mikrofrontendAktivitetskravService,
+            mikrofrontendMerOppfolgingService = mikrofrontendMerOppfolgingService,
+            database = database,
         )
 
     val varselBusService =
@@ -239,6 +242,7 @@ fun Application.serverModule(
     val sendMerVeiledningVarslerJobb = SendMerVeiledningVarslerJobb(
         merVeiledningVarselFinder,
         merVeiledningVarselService,
+        mikrofrontendService,
     )
 
     install(ContentNegotiation) {

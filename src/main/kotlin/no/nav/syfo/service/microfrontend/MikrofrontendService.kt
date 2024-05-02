@@ -1,15 +1,24 @@
 package no.nav.syfo.service.microfrontend
 
-import no.nav.syfo.db.*
+import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste
+import no.nav.syfo.db.storeMikrofrontendSynlighetEntry
 import no.nav.syfo.domain.PersonIdent
-import no.nav.syfo.kafka.consumers.varselbus.domain.*
-import no.nav.syfo.kafka.producers.mineside_microfrontend.*
-import no.nav.syfo.service.mikrofrontend.MikrofrontendAktivitetskravService
+import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import no.nav.syfo.kafka.consumers.varselbus.domain.getSynligTom
+import no.nav.syfo.kafka.consumers.varselbus.domain.isNotEligibleForMikrofrontendProcessing
+import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
+import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideEvent
+import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
+import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideRecord
+import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 
 class MikrofrontendService(
     val minSideMicrofrontendKafkaProducer: MinSideMicrofrontendKafkaProducer,
     val mikrofrontendDialogmoteService: MikrofrontendDialogmoteService,
     val mikrofrontendAktivitetskravService: MikrofrontendAktivitetskravService,
+    val mikrofrontendMerOppfolgingService: MikrofrontendMerOppfolgingService,
     val database: DatabaseInterface
 ) {
 
@@ -26,9 +35,12 @@ class MikrofrontendService(
 
         val recordToSend = when (tjeneste) {
             Tjeneste.DIALOGMOTE
-                -> mikrofrontendDialogmoteService.updateDialogmoteFrontendForUserByHendelse(hendelse)
+            -> mikrofrontendDialogmoteService.updateDialogmoteFrontendForUserByHendelse(hendelse)
+
             Tjeneste.AKTIVITETSKRAV
-                -> mikrofrontendAktivitetskravService.createOrUpdateAktivitetskravMicrofrontendByHendelse(hendelse)
+            -> mikrofrontendAktivitetskravService.createOrUpdateAktivitetskravMicrofrontendByHendelse(hendelse)
+
+            Tjeneste.MER_OPPFOLGING -> mikrofrontendMerOppfolgingService.createEnableMerOppfolgingRecord(hendelse)
         }
 
         recordToSend?.let { record ->
@@ -43,6 +55,7 @@ class MikrofrontendService(
         val mikrofrontendsToClose = mutableListOf<Triple<String, String, Tjeneste>>()
         mikrofrontendsToClose.addAll(mikrofrontendDialogmoteService.findExpiredDialogmoteMikrofrontends())
         mikrofrontendsToClose.addAll(mikrofrontendAktivitetskravService.findExpiredAktivitetskravMikrofrontends())
+        mikrofrontendsToClose.addAll(mikrofrontendMerOppfolgingService.findExpiredAktivitetskravMikrofrontends())
         mikrofrontendsToClose.forEach {
             val (fnr, mikrofrontendId, tjeneste) = it
             disableMikrofrontendForUser(
@@ -97,9 +110,14 @@ class MikrofrontendService(
             HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
             HendelseType.SM_DIALOGMOTE_REFERAT,
             HendelseType.SM_DIALOGMOTE_AVLYST
-                -> Tjeneste.DIALOGMOTE
+            -> Tjeneste.DIALOGMOTE
+
             HendelseType.SM_AKTIVITETSPLIKT
-                -> Tjeneste.AKTIVITETSKRAV
+            -> Tjeneste.AKTIVITETSKRAV
+
+            HendelseType.SM_MER_VEILEDNING
+            -> Tjeneste.MER_OPPFOLGING
+
             else -> throw IllegalArgumentException("$this is not a valid type for updating MF state")
         }
 }

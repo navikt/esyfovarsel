@@ -23,14 +23,14 @@ fun DatabaseInterface.shouldContainMikrofrontendEntry(fnr: String, tjeneste: Tje
         }
     }
 
-fun DatabaseInterface.shouldContainMikrofrontendEntryWithoutMotetidspunkt(fnr: String, tjeneste: Tjeneste) =
+fun DatabaseInterface.shouldContainMikrofrontendEntryWithoutSynligTom(fnr: String, tjeneste: Tjeneste) =
     this.should("Should contain at least one row with specified fnr and 'tjeneste' without synligTom") {
         this.fetchMikrofrontendSynlighetEntriesByFnr(fnr).any {
             it.synligFor == fnr && it.tjeneste == tjeneste.name && it.synligTom == null
         }
     }
 
-fun DatabaseInterface.shouldContainMikrofrontendEntryWithMotetidspunkt(fnr: String, tjeneste: Tjeneste) =
+fun DatabaseInterface.shouldContainMikrofrontendEntryWithSynligTom(fnr: String, tjeneste: Tjeneste) =
     this.should("Should contain at least one row with specified fnr and 'tjeneste' with synligTom") {
         this.fetchMikrofrontendSynlighetEntriesByFnr(fnr).any {
             it.synligFor == fnr && it.tjeneste == tjeneste.name && it.synligTom != null

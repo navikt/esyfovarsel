@@ -5,11 +5,13 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.metrics.tellMerVeiledningVarselSendt
 import no.nav.syfo.service.MerVeiledningVarselFinder
 import no.nav.syfo.service.MerVeiledningVarselService
+import no.nav.syfo.service.microfrontend.MikrofrontendService
 import org.slf4j.LoggerFactory
 
 class SendMerVeiledningVarslerJobb(
     private val merVeiledningVarselFinder: MerVeiledningVarselFinder,
     private val merVeiledningVarselService: MerVeiledningVarselService,
+    private val mikrofrontendService: MikrofrontendService,
 ) {
     private val log = LoggerFactory.getLogger(SendMerVeiledningVarslerJobb::class.qualifiedName)
     private val logName = "[${SendMerVeiledningVarslerJobb::class.simpleName}]"
@@ -34,6 +36,16 @@ class SendMerVeiledningVarslerJobb(
                         orgnummer = null,
                     ),
                     it.uuid,
+                )
+
+                mikrofrontendService.updateMikrofrontendForUserByHendelse(
+                    ArbeidstakerHendelse(
+                        type = HendelseType.SM_MER_VEILEDNING,
+                        ferdigstill = false,
+                        data = null,
+                        arbeidstakerFnr = it.fnr,
+                        orgnummer = null,
+                    )
                 )
 
                 antallVarslerSendt++
