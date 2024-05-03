@@ -10,6 +10,8 @@ import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.engine.apache.ApacheEngineConfig
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
 import io.ktor.client.request.forms.FormDataContent
@@ -46,6 +48,12 @@ class AzureAdTokenConsumer(authEnv: AuthEnv) {
 
     val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
         config()
+        install(HttpRequestRetry) {
+            retryOnExceptionIf(2) { _, cause ->
+                cause !is ClientRequestException
+            }
+            constantDelay(500L)
+        }
         engine {
             customizeClient {
                 setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
