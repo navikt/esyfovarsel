@@ -32,6 +32,10 @@ spec:
   prometheus:
     enabled: true
     path: /prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   azure:
     application:
       allowAllUsers: true
