@@ -14,12 +14,12 @@ import no.nav.syfo.consumer.pdl.getFullNameAsString
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.fetchMaksDatoByFnr
 import no.nav.syfo.utils.formatDateForLetter
-import no.nav.syfo.utils.httpClient
+import no.nav.syfo.utils.httpClientWithRetry
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class PdfgenConsumer(urlEnv: UrlEnv, val pdlConsumer: PdlConsumer, val databaseInterface: DatabaseInterface) {
-    private val client = httpClient()
+    private val client = httpClientWithRetry()
     private val syfooppdfgenUrl = urlEnv.syfooppdfgenUrl
     private val urlForReservedUsers = "$syfooppdfgenUrl/api/v1/genpdf/oppfolging/mer_veiledning_for_reserverte"
     private val urlForDigitalUsers = "$syfooppdfgenUrl/api/v1/genpdf/oppfolging/mer_veiledning_for_digitale"
