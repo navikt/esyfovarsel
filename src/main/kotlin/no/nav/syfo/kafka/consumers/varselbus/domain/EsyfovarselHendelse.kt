@@ -157,8 +157,11 @@ fun ArbeidstakerHendelse.notCorrectMikrofrontendType() =
 fun ArbeidstakerHendelse.isAktivitetspliktWithFerdigstilling() =
     (this.type.isAktivitetspliktType() and (this.ferdigstill == true))
 
+fun ArbeidstakerHendelse.isMerOppfolgingWithFerdigstilling() =
+    (this.type.isMerOppfolgingType() and (this.ferdigstill == true))
+
 fun ArbeidstakerHendelse.isNotEligibleForMikrofrontendProcessing(): Boolean {
-    return this.notCorrectMikrofrontendType() or isAktivitetspliktWithFerdigstilling()
+    return this.notCorrectMikrofrontendType() or isAktivitetspliktWithFerdigstilling() or isMerOppfolgingWithFerdigstilling()
 }
 
 fun HendelseType.isNotValidHendelseType() =
