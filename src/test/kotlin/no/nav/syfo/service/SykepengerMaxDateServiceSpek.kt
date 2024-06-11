@@ -3,10 +3,11 @@ package no.nav.syfo.service
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coEvery
 import io.mockk.mockk
+import no.nav.syfo.consumer.pdl.Foedselsdato
+import no.nav.syfo.consumer.pdl.HentPerson
+import no.nav.syfo.consumer.pdl.HentPersonData
+import no.nav.syfo.consumer.pdl.Navn
 import no.nav.syfo.consumer.pdl.PdlConsumer
-import no.nav.syfo.consumer.pdl.PdlFoedsel
-import no.nav.syfo.consumer.pdl.PdlHentPerson
-import no.nav.syfo.consumer.pdl.PdlPerson
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UTBETALING_UTBETALT
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingSpleis
 import no.nav.syfo.testutil.EmbeddedDatabase
@@ -19,11 +20,16 @@ class SykepengerMaxDateServiceSpek : DescribeSpec({
         val embeddedDatabase = EmbeddedDatabase()
         val pdlConsumer = mockk<PdlConsumer>(relaxed = true)
         val sykepengerMaxDateService = SykepengerMaxDateService(embeddedDatabase, pdlConsumer)
-        coEvery { pdlConsumer.hentPerson(any()) } returns PdlHentPerson(
-            hentPerson = PdlPerson(
-                adressebeskyttelse = null,
-                navn = null,
-                foedsel = listOf(PdlFoedsel("1986-01-01"))
+        coEvery { pdlConsumer.hentPerson(any()) } returns HentPersonData(
+            hentPerson = HentPerson(
+                foedselsdato = Foedselsdato(foedselsdato = "1990-01-01"),
+                navn = listOf(
+                    Navn(
+                        fornavn = "Test",
+                        mellomnavn = null,
+                        etternavn = "Testesen"
+                    )
+                )
             )
         )
         beforeTest {
