@@ -147,7 +147,7 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
     val oppfolgingsplanVarselService =
         OppfolgingsplanVarselService(senderFacade, accessControlService, env.urlEnv.oppfolgingsplanerUrl)
     val sykepengerMaxDateService = SykepengerMaxDateService(database, pdlConsumer)
-    val pdfgenConsumer = PdfgenConsumer(env.urlEnv, pdlConsumer, database)
+    val pdfgenConsumer = PdfgenConsumer(env.urlEnv, database)
     val merVeiledningVarselService = MerVeiledningVarselService(
         senderFacade,
         env.urlEnv,
