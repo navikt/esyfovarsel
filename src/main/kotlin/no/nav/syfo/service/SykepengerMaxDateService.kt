@@ -1,11 +1,17 @@
 package no.nav.syfo.service
 
-import java.time.*
-import no.nav.syfo.consumer.pdl.*
-import no.nav.syfo.db.*
+import no.nav.syfo.consumer.pdl.PdlConsumer
+import no.nav.syfo.consumer.pdl.getFodselsdato
+import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PMaksDato
-import no.nav.syfo.kafka.consumers.infotrygd.domain.*
-import no.nav.syfo.kafka.consumers.utbetaling.domain.*
+import no.nav.syfo.db.fetchFodselsdatoByFnr
+import no.nav.syfo.db.fetchMaksDatoByFnr
+import no.nav.syfo.db.storeFodselsdato
+import no.nav.syfo.db.storeInfotrygdUtbetaling
+import no.nav.syfo.db.storeSpleisUtbetaling
+import no.nav.syfo.kafka.consumers.infotrygd.domain.InfotrygdSource
+import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingSpleis
+import java.time.LocalDate
 
 class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface, private val pdlConsumer: PdlConsumer) {
 
@@ -19,16 +25,27 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface,
         return databaseInterface.fetchMaksDatoByFnr(fnr)
     }
 
-    suspend fun processInfotrygdEvent(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int, source: InfotrygdSource) {
+    suspend fun processInfotrygdEvent(
+        fnr: String,
+        sykepengerMaxDate: LocalDate,
+        utbetaltTilDate: LocalDate,
+        gjenstaendeSykepengedager: Int,
+        source: InfotrygdSource
+    ) {
         processFodselsdato(fnr)
-        databaseInterface.storeInfotrygdUtbetaling(fnr, sykepengerMaxDate, utbetaltTilDate, gjenstaendeSykepengedager, source)
+        databaseInterface.storeInfotrygdUtbetaling(
+            fnr,
+            sykepengerMaxDate,
+            utbetaltTilDate,
+            gjenstaendeSykepengedager,
+            source
+        )
     }
 
     private suspend fun processFodselsdato(fnr: String) {
         val lagretFodselsdato = databaseInterface.fetchFodselsdatoByFnr(fnr)
-        if (lagretFodselsdato.isEmpty()){
-            val pdlFodsel = pdlConsumer.hentPerson(fnr)?.hentPerson?.foedsel
-            val fodselsdato = if (!pdlFodsel.isNullOrEmpty()) pdlFodsel.first().foedselsdato else null
+        if (lagretFodselsdato.isEmpty()) {
+            val fodselsdato = pdlConsumer.hentPerson(fnr)?.getFodselsdato()
             databaseInterface.storeFodselsdato(fnr, fodselsdato)
         }
     }

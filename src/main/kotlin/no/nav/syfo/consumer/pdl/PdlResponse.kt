@@ -19,39 +19,6 @@ data class PdlIdent(
     val ident: String
 ) : Serializable
 
-data class PdlPersonResponse(
-    val errors: List<PdlError>?,
-    val data: PdlHentPerson?
-) : Serializable
-
-data class PdlHentPerson(
-    val hentPerson: PdlPerson?
-) : Serializable
-
-data class PdlPerson(
-    val adressebeskyttelse: List<Adressebeskyttelse>?,
-    val navn: List<PersonNavn>?,
-    val foedsel: List<PdlFoedsel>?
-) : Serializable
-
-data class PdlFoedsel(val foedselsdato: String?)
-
-data class PersonNavn(
-    val fornavn: String?,
-    val mellomnavn: String?,
-    val etternavn: String?,
-)
-
-data class Adressebeskyttelse(
-    val gradering: Gradering
-) : Serializable
-
-enum class Gradering : Serializable {
-    STRENGT_FORTROLIG_UTLAND,
-    STRENGT_FORTROLIG,
-    FORTROLIG
-}
-
 data class PdlError(
     val message: String,
     val locations: List<PdlErrorLocation>,
@@ -68,29 +35,3 @@ data class PdlErrorExtension(
     val code: String?,
     val classification: String
 )
-
-fun Adressebeskyttelse.isKode6(): Boolean {
-    return this.gradering == Gradering.STRENGT_FORTROLIG || this.gradering == Gradering.STRENGT_FORTROLIG_UTLAND
-}
-
-fun Adressebeskyttelse.isKode7(): Boolean {
-    return this.gradering == Gradering.FORTROLIG
-}
-
-fun PdlHentPerson.getFullNameAsString(): String? {
-    val navn = this.hentPerson?.navn?.first()
-
-    return if (navn == null) {
-        null
-    } else {
-        "${navn.fornavn}${getMellomnavn(navn.mellomnavn)} ${navn.etternavn}"
-    }
-}
-
-fun PdlHentPerson.getFodselsdato(): String? {
-    return this.hentPerson?.foedsel?.first()?.foedselsdato
-}
-
-private fun getMellomnavn(mellomnavn: String?): String {
-    return if (mellomnavn !== null) " $mellomnavn" else ""
-}
