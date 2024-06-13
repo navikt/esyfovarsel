@@ -5,9 +5,9 @@ import no.nav.syfo.db.domain.PUtbetaling
 
 
 fun DatabaseInterface.fetchMerVeiledningVarslerToSend(): List<PUtbetaling> {
-    val gjenstaendeSykedagerLimit = 91
-    val nyttVarselLimit = 106
-    val maxDateLimit = 14
+//    val gjenstaendeSykedagerLimit = 91
+//    val nyttVarselLimit = 106
+//    val maxDateLimit = 14
     val queryStatement = """SELECT ID, FNR, UTBETALT_TOM, FORELOPIG_BEREGNET_SLUTT, GJENSTAENDE_SYKEDAGER, OPPRETTET
                             FROM UTBETALINGER AS UTBETALINGER1
                             WHERE ID =
@@ -16,13 +16,13 @@ fun DatabaseInterface.fetchMerVeiledningVarslerToSend(): List<PUtbetaling> {
                                 WHERE UTBETALINGER1.FNR = UTBETALINGER2.FNR
                                 ORDER BY OPPRETTET DESC
                                 LIMIT 1)
-                            AND GJENSTAENDE_SYKEDAGER < $gjenstaendeSykedagerLimit
-                            AND FORELOPIG_BEREGNET_SLUTT >= current_date + INTERVAL '$maxDateLimit' DAY
+                            AND GJENSTAENDE_SYKEDAGER < 91
+                            AND FORELOPIG_BEREGNET_SLUTT >= current_date + INTERVAL '14' DAY
                             AND FNR NOT IN 
                                 (SELECT FNR 
                                 FROM UTSENDT_VARSEL 
                                 WHERE TYPE = 'SM_MER_VEILEDNING' 
-                                AND UTSENDT_TIDSPUNKT > NOW() - INTERVAL '$nyttVarselLimit' DAY)
+                                AND UTSENDT_TIDSPUNKT > NOW() - INTERVAL '106' DAY)
                                 """
         .trimIndent()
 

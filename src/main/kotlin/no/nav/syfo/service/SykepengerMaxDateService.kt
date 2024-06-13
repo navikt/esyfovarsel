@@ -1,6 +1,7 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.consumer.pdl.PdlConsumer
+import no.nav.syfo.consumer.pdl.getFodselsdato
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PMaksDato
 import no.nav.syfo.db.fetchFodselsdatoByFnr
@@ -24,15 +25,27 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface,
         return databaseInterface.fetchMaksDatoByFnr(fnr)
     }
 
-    suspend fun processInfotrygdEvent(fnr: String, sykepengerMaxDate: LocalDate, utbetaltTilDate: LocalDate, gjenstaendeSykepengedager: Int, source: InfotrygdSource) {
+    suspend fun processInfotrygdEvent(
+        fnr: String,
+        sykepengerMaxDate: LocalDate,
+        utbetaltTilDate: LocalDate,
+        gjenstaendeSykepengedager: Int,
+        source: InfotrygdSource
+    ) {
         processFodselsdato(fnr)
-        databaseInterface.storeInfotrygdUtbetaling(fnr, sykepengerMaxDate, utbetaltTilDate, gjenstaendeSykepengedager, source)
+        databaseInterface.storeInfotrygdUtbetaling(
+            fnr,
+            sykepengerMaxDate,
+            utbetaltTilDate,
+            gjenstaendeSykepengedager,
+            source
+        )
     }
 
     private suspend fun processFodselsdato(fnr: String) {
         val lagretFodselsdato = databaseInterface.fetchFodselsdatoByFnr(fnr)
-        if (lagretFodselsdato.isEmpty()){
-            val fodselsdato = pdlConsumer.hentPerson(fnr)?.hentPerson?.foedselsdato?.foedselsdato
+        if (lagretFodselsdato.isEmpty()) {
+            val fodselsdato = pdlConsumer.hentPerson(fnr)?.getFodselsdato()
             databaseInterface.storeFodselsdato(fnr, fodselsdato)
         }
     }

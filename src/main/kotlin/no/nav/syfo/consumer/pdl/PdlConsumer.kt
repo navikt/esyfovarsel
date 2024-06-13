@@ -48,7 +48,7 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
 
         return when (response?.status) {
             HttpStatusCode.OK -> {
-                val fodselsdato = response.body<HentPersonResponse>().data.hentPerson.foedselsdato.foedselsdato
+                val fodselsdato = response.body<HentPersonResponse>().data.getFodselsdato()
                 if (fodselsdato == null) {
                     log.warn("Returnert fødselsdato for en person fra PDL er null. Fortsetter som om bruker er yngre enn $maxAlder år da fødselsdato er ukjent.")
                     return true

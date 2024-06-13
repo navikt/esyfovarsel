@@ -14,12 +14,16 @@ fun HentPersonData.getFullNameAsString(): String {
     return "${navn.fornavn}${getMellomnavn(navn.mellomnavn)} ${navn.etternavn}"
 }
 
+fun HentPersonData.getFodselsdato(): String? {
+    return this.hentPerson.foedselsdato.first().foedselsdato
+}
+
 private fun getMellomnavn(mellomnavn: String?): String {
     return if (mellomnavn !== null) " $mellomnavn" else ""
 }
 
 data class HentPerson(
-    val foedselsdato: Foedselsdato,
+    val foedselsdato: List<Foedselsdato>,
     val navn: List<Navn>
 )
 

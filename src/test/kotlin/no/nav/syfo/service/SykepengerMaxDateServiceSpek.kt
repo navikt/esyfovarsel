@@ -22,7 +22,7 @@ class SykepengerMaxDateServiceSpek : DescribeSpec({
         val sykepengerMaxDateService = SykepengerMaxDateService(embeddedDatabase, pdlConsumer)
         coEvery { pdlConsumer.hentPerson(any()) } returns HentPersonData(
             hentPerson = HentPerson(
-                foedselsdato = Foedselsdato(foedselsdato = "1990-01-01"),
+                foedselsdato = listOf(Foedselsdato(foedselsdato = "1990-01-01")),
                 navn = listOf(
                     Navn(
                         fornavn = "Test",
