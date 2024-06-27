@@ -52,6 +52,7 @@ spec:
           namespace: teamsykefravr
           cluster: prod-gcp
         - application: meroppfolging-frontend
+        - application: meroppfolging-backend
         - application: ditt-sykefravaer
           namespace: flex
     outbound:
