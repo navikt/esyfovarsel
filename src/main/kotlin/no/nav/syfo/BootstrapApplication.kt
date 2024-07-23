@@ -144,6 +144,7 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
     )
     val arbeidsuforhetForhandsvarselService = ArbeidsuforhetForhandsvarselService(senderFacade)
     val friskmeldingTilArbeidsformidlingVedtakService = FriskmeldingTilArbeidsformidlingVedtakService(senderFacade)
+    val manglendeMedvirkningVarselService = ManglendeMedvirkningVarselService(senderFacade)
     val oppfolgingsplanVarselService =
         OppfolgingsplanVarselService(senderFacade, accessControlService, env.urlEnv.oppfolgingsplanerUrl)
     val sykepengerMaxDateService = SykepengerMaxDateService(database, pdlConsumer)
@@ -177,6 +178,7 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
             arbeidsuforhetForhandsvarselService,
             mikrofrontendService,
             friskmeldingTilArbeidsformidlingVedtakService,
+            manglendeMedvirkningVarselService,
         )
 
     val veilederTilgangskontrollConsumer =
