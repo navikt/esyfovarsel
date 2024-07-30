@@ -1,24 +1,17 @@
 package no.nav.syfo.consumer.dokarkiv
 
-import io.ktor.client.call.body
-import io.ktor.client.request.accept
-import io.ktor.client.request.header
-import io.ktor.client.request.parameter
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.http.*
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.consumer.dokarkiv.domain.DokarkivRequest
 import no.nav.syfo.consumer.dokarkiv.domain.DokarkivResponse
-import no.nav.syfo.utils.httpClient
+import no.nav.syfo.utils.httpClientWithRetry
 import org.slf4j.LoggerFactory
 
 class DokarkivConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
-    private val client = httpClient()
+    private val client = httpClientWithRetry()
     private val dokarkivUrl = urlEnv.dokarkivUrl
     private val dokarkivScope = urlEnv.dokarkivScope
 
