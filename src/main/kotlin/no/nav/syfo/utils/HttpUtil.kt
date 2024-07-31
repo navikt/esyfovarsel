@@ -21,7 +21,7 @@ fun httpClient(): HttpClient {
     }
 }
 
-fun httpClientWithRetry(): HttpClient {
+fun httpClientWithRetry(expectSuccess: Boolean = false): HttpClient {
     return HttpClient(CIO) {
         install(HttpRequestRetry) {
             retryOnExceptionIf(2) { _, cause ->
@@ -39,5 +39,6 @@ fun httpClientWithRetry(): HttpClient {
         install(HttpTimeout) {
             requestTimeoutMillis = 60000
         }
+        this.expectSuccess = expectSuccess
     }
 }

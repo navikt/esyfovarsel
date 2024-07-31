@@ -11,9 +11,12 @@ import no.nav.syfo.db.storeInfotrygdUtbetaling
 import no.nav.syfo.db.storeSpleisUtbetaling
 import no.nav.syfo.kafka.consumers.infotrygd.domain.InfotrygdSource
 import no.nav.syfo.kafka.consumers.utbetaling.domain.UtbetalingSpleis
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface, private val pdlConsumer: PdlConsumer) {
+
+    private val log = LoggerFactory.getLogger(SykepengerMaxDateService::class.qualifiedName)
 
     suspend fun processUtbetalingSpleisEvent(utbetaling: UtbetalingSpleis) {
         val fnr = utbetaling.fødselsnummer
@@ -45,6 +48,7 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface,
     private suspend fun processFodselsdato(fnr: String) {
         val lagretFodselsdato = databaseInterface.fetchFodselsdatoByFnr(fnr)
         if (lagretFodselsdato.isEmpty()) {
+            log.info("Mangler lagret fødselsdato, henter fra PDL")
             val fodselsdato = pdlConsumer.hentPerson(fnr)?.getFodselsdato()
             databaseInterface.storeFodselsdato(fnr, fodselsdato)
         }

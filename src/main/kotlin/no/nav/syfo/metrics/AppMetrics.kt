@@ -16,6 +16,8 @@ const val METRICS_NS = "esyfovarsel"
 const val MER_VEILEDNING_NOTICE_SENT = "${METRICS_NS}_mer_veiledning_notice_sent"
 const val SVAR_MOTEBEHOV_NOTICE_SENT = "${METRICS_NS}_svar_motebehov_notice_sent"
 const val NOTICE_SENT = "${METRICS_NS}_notice_sent"
+const val CALL_PDL_SUCCESS = "${METRICS_NS}_call_pdl_success_count"
+const val CALL_PDL_FAIL = "${METRICS_NS}_call_pdl_fail_count"
 
 val METRICS_REGISTRY =
     PrometheusMeterRegistry(PrometheusConfig.DEFAULT, CollectorRegistry.defaultRegistry, Clock.SYSTEM)
@@ -33,6 +35,14 @@ val COUNT_SVAR_MOTEBEHOV_NOTICE_SENT: Counter = Counter
 val COUNT_ALL_NOTICE_SENT: Counter = Counter
     .builder(NOTICE_SENT)
     .description("Counts the number of all types of notice sent")
+    .register(METRICS_REGISTRY)
+
+val COUNT_CALL_PDL_SUCCESS: Counter = Counter.builder(CALL_PDL_SUCCESS)
+    .description("Counts the number of successful calls to pdl")
+    .register(METRICS_REGISTRY)
+
+val COUNT_CALL_PDL_FAIL: Counter = Counter.builder(CALL_PDL_FAIL)
+    .description("Counts the number of failed calls to pdl")
     .register(METRICS_REGISTRY)
 
 fun tellMerVeiledningVarselSendt(varslerSendt: Int) {
