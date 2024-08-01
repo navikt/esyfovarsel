@@ -46,7 +46,7 @@ class MerVeiledningVarselFinder(
         }
     }
 
-    suspend fun isBrukerYngreEnn67Ar(fnr: String): Boolean {
+    private suspend fun isBrukerYngreEnn67Ar(fnr: String): Boolean {
         val storedBirthdateList = databaseAccess.fetchFodselsdatoByFnr(fnr)
         val storedBirthdate = if (storedBirthdateList.isNotEmpty()) storedBirthdateList.first() else null
 

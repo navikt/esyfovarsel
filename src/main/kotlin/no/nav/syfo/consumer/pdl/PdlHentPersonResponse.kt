@@ -1,6 +1,7 @@
 package no.nav.syfo.consumer.pdl
 
 data class HentPersonResponse(
+    val errors: List<PdlError>?,
     val data: HentPersonData
 )
 
@@ -8,18 +9,8 @@ data class HentPersonData(
     val hentPerson: HentPerson
 )
 
-fun HentPersonData.getFullNameAsString(): String {
-    val navn = this.hentPerson.navn.first()
-
-    return "${navn.fornavn}${getMellomnavn(navn.mellomnavn)} ${navn.etternavn}"
-}
-
 fun HentPersonData.getFodselsdato(): String? {
     return this.hentPerson.foedselsdato.first().foedselsdato
-}
-
-private fun getMellomnavn(mellomnavn: String?): String {
-    return if (mellomnavn !== null) " $mellomnavn" else ""
 }
 
 data class HentPerson(
@@ -36,3 +27,24 @@ data class Navn(
     val mellomnavn: String?,
     val etternavn: String
 )
+
+data class PdlError(
+    val message: String,
+    val locations: List<PdlErrorLocation>,
+    val path: List<String>?,
+    val extensions: PdlErrorExtension
+)
+
+data class PdlErrorLocation(
+    val line: Int?,
+    val column: Int?
+)
+
+data class PdlErrorExtension(
+    val code: String?,
+    val classification: String
+)
+
+fun PdlError.errorMessage(): String {
+    return "${this.message} with code: ${extensions.code} and classification: ${extensions.classification}"
+}
