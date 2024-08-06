@@ -4,6 +4,7 @@ import no.nav.syfo.BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT
 import no.nav.syfo.DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT
 import no.nav.syfo.MER_VEILEDNING_URL
 import no.nav.syfo.UrlEnv
+import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
@@ -11,6 +12,7 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
+import no.nav.syfo.utils.dataToVarselData
 import org.slf4j.LoggerFactory
 import java.net.URL
 import java.time.LocalDateTime
@@ -27,7 +29,7 @@ class MerVeiledningVarselService(
     val accessControlService: AccessControlService,
 ) {
     private val log = LoggerFactory.getLogger(MerVeiledningVarselService::class.qualifiedName)
-    suspend fun sendVarselTilArbeidstaker(
+    suspend fun sendVarselTilArbeidstakerFromJob(
         arbeidstakerHendelse: ArbeidstakerHendelse,
         planlagtVarselUuid: String,
     ) {
@@ -65,6 +67,31 @@ class MerVeiledningVarselService(
             sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
         }
         sendOppgaveTilDittSykefravaer(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, arbeidstakerHendelse)
+    }
+
+    suspend fun sendVarselTilArbeidstaker(
+        arbeidstakerHendelse: ArbeidstakerHendelse,
+    ) {
+        val data = dataToVarselData(arbeidstakerHendelse.data)
+        requireNotNull(data.journalpost)
+        requireNotNull(data.journalpost.id)
+        val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerHendelse.arbeidstakerFnr)
+
+        if (userAccessStatus.canUserBeDigitallyNotified) {
+            sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
+        } else {
+            senderFacade.sendBrevTilFysiskPrint(
+                data.journalpost.uuid,
+                arbeidstakerHendelse,
+                data.journalpost.id,
+                DistibusjonsType.VIKTIG,
+            )
+        }
+        sendOppgaveTilDittSykefravaer(
+            arbeidstakerHendelse.arbeidstakerFnr,
+            UUID.randomUUID().toString(),
+            arbeidstakerHendelse
+        )
     }
 
     private fun sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse: ArbeidstakerHendelse) {

@@ -179,6 +179,7 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
             mikrofrontendService,
             friskmeldingTilArbeidsformidlingVedtakService,
             manglendeMedvirkningVarselService,
+            merVeiledningVarselService
         )
 
     val veilederTilgangskontrollConsumer =
