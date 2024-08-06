@@ -15,6 +15,7 @@ class VarselBusService(
     private val arbeidsuforhetForhandsvarselService: ArbeidsuforhetForhandsvarselService,
     private val mikrofrontendService: MikrofrontendService,
     private val friskmeldingTilArbeidsformidlingVedtakService: FriskmeldingTilArbeidsformidlingVedtakService,
+    private val manglendeMedvirkningVarselService: ManglendeMedvirkningVarselService,
 ) {
     private val log: Logger = LoggerFactory.getLogger(VarselBusService::class.qualifiedName)
     suspend fun processVarselHendelse(
@@ -62,10 +63,13 @@ class VarselBusService(
                 SM_ARBEIDSUFORHET_FORHANDSVARSEL -> arbeidsuforhetForhandsvarselService.sendVarselTilArbeidstaker(
                     varselHendelse.toArbeidstakerHendelse()
                 )
-                
+
                 SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING -> friskmeldingTilArbeidsformidlingVedtakService.sendVarselTilArbeidstaker(
                     varselHendelse.toArbeidstakerHendelse()
                 )
+
+                SM_FORHANDSVARSEL_MANGLENDE_MEDVIRKNING ->
+                    manglendeMedvirkningVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
                 else -> {
                     log.warn("Klarte ikke mappe varsel av type ${varselHendelse.type} ved behandling forsøk")
