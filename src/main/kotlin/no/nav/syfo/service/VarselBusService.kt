@@ -20,6 +20,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_S
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_MER_VEILEDNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_FORHANDSVARSEL_MANGLENDE_MEDVIRKNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.skalFerdigstilles
 import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidstakerHendelse
