@@ -4,4 +4,3 @@ data class UserAccessStatus(
     var fnr: String?,
     val canUserBeDigitallyNotified: Boolean,
 )
-

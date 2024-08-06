@@ -27,7 +27,7 @@ class SendMerVeiledningVarslerJobb(
 
         varslerToSendToday.forEach {
             try {
-                merVeiledningVarselService.sendVarselTilArbeidstaker(
+                merVeiledningVarselService.sendVarselTilArbeidstakerFromJob(
                     ArbeidstakerHendelse(
                         type = HendelseType.SM_MER_VEILEDNING,
                         ferdigstill = false,

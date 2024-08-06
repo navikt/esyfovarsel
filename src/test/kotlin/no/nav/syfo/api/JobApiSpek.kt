@@ -126,7 +126,7 @@ class JobApiSpek : DescribeSpec({
             it("esyfovarsel-job trigger utsending av 2 varsler digitalt og 3 varsler som brev") {
                 with(handleRequest(HttpMethod.Post, urlPathJobTrigger)) {
                     response.status()?.isSuccess() shouldBeEqualTo true
-                    coVerify(exactly = 5) { merVeiledningVarselService.sendVarselTilArbeidstaker(any(), any()) }
+                    coVerify(exactly = 5) { merVeiledningVarselService.sendVarselTilArbeidstakerFromJob(any(), any()) }
                     coVerify(exactly = 5) { mikrofrontendService.updateMikrofrontendForUserByHendelse(any()) }
                 }
             }
