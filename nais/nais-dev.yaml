@@ -133,6 +133,10 @@ spec:
       value: http://narmesteleder.teamsykmelding
     - name: NARMESTELEDER_SCOPE
       value: api://dev-gcp.teamsykmelding.narmesteleder/.default
+    - name: BEHANDLENDEENHET_URL
+      value: http://syfobehandlendeenhet.teamsykmelding
+    - name: BEHANDLENDEENHET_SCOPE
+      value: api://dev-gcp.teamsykmelding.syfobehandlendeenhet/.default
     - name: BASE_URL_DINE_SYKMELDTE
       value: https://www-gcp.dev.nav.no/arbeidsgiver/sykmeldte
     - name: DOKDIST_FORDELING_URL

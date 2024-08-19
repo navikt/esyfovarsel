@@ -4,8 +4,10 @@ import no.nav.syfo.BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT
 import no.nav.syfo.DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT
 import no.nav.syfo.MER_VEILEDNING_URL
 import no.nav.syfo.UrlEnv
+import no.nav.syfo.behandlendeenhet.BehandlendeEnhetClient
+import no.nav.syfo.behandlendeenhet.domain.isPilot
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
-import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
+import no.nav.syfo.consumer.pdfgen.PdfgenClient
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
@@ -24,49 +26,100 @@ const val DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING = "ESYFOVARSEL_MER_VEILE
 class MerVeiledningVarselService(
     val senderFacade: SenderFacade,
     val urlEnv: UrlEnv,
-    val pdfgenConsumer: PdfgenConsumer,
+    val pdfgenConsumer: PdfgenClient,
     val dokarkivService: DokarkivService,
     val accessControlService: AccessControlService,
+    val behandlendeEnhetClient: BehandlendeEnhetClient,
 ) {
     private val log = LoggerFactory.getLogger(MerVeiledningVarselService::class.qualifiedName)
+
     suspend fun sendVarselTilArbeidstakerFromJob(
         arbeidstakerHendelse: ArbeidstakerHendelse,
         planlagtVarselUuid: String,
     ) {
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerHendelse.arbeidstakerFnr)
         val isBrukerReservert = !userAccessStatus.canUserBeDigitallyNotified
+        val isPilotbruker =
+            behandlendeEnhetClient.getBehandlendeEnhet(arbeidstakerHendelse.arbeidstakerFnr)?.isPilot() == true
 
-        if (isBrukerReservert) {
-            val pdf = pdfgenConsumer.getMerVeiledningPdfForReserverte(arbeidstakerHendelse.arbeidstakerFnr)
-
-            val journalpostId = pdf?.let {
-                dokarkivService.getJournalpostId(
-                    arbeidstakerHendelse.arbeidstakerFnr,
-                    planlagtVarselUuid,
-                    it,
-                )
+        when {
+            isBrukerReservert -> {
+                sendInformasjonTilReserverte(arbeidstakerHendelse, planlagtVarselUuid)
             }
 
-            log.info("Forsøkte å journalføre SSPS til reservert bruker i dokarkiv, journalpostId er $journalpostId")
-
-            sendBrevVarselTilArbeidstaker(planlagtVarselUuid, arbeidstakerHendelse, journalpostId!!)
-        } else {
-            val pdf =
-                pdfgenConsumer.getMerVeiledningPdfForDigitale(arbeidstakerHendelse.arbeidstakerFnr)
-
-            val journalpostId = pdf?.let {
-                dokarkivService.getJournalpostId(
-                    arbeidstakerHendelse.arbeidstakerFnr,
-                    planlagtVarselUuid,
-                    it,
-                )
+            isPilotbruker -> {
+                sendInformasjonTilDigitalePilotBrukere(arbeidstakerHendelse, planlagtVarselUuid)
             }
 
-            log.info("Forsøkte å journalføre SSPS til bruker som ikke er reservert i dokarkiv, journalpostId er $journalpostId")
-
-            sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
+            else -> {
+                sendInformasjonTilDigitaleIkkePilotBrukere(arbeidstakerHendelse, planlagtVarselUuid)
+            }
         }
+
         sendOppgaveTilDittSykefravaer(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, arbeidstakerHendelse)
+    }
+
+    private suspend fun sendInformasjonTilReserverte(
+        arbeidstakerHendelse: ArbeidstakerHendelse,
+        planlagtVarselUuid: String
+    ) {
+        val pdf = pdfgenConsumer.getMerVeiledningPdfForReserverte(arbeidstakerHendelse.arbeidstakerFnr)
+
+        val journalpostId = pdf?.let {
+            dokarkivService.journalforDokument(
+                fnr = arbeidstakerHendelse.arbeidstakerFnr,
+                uuid = planlagtVarselUuid,
+                pdf = it,
+            )
+        }
+
+        log.info("Forsøkte å journalføre SSPS til reservert bruker i dokarkiv, journalpostId er $journalpostId")
+
+        sendBrevVarselTilArbeidstaker(planlagtVarselUuid, arbeidstakerHendelse, journalpostId!!)
+    }
+
+    private suspend fun sendInformasjonTilDigitalePilotBrukere(
+        arbeidstakerHendelse: ArbeidstakerHendelse,
+        planlagtVarselUuid: String
+    ) {
+        val pdf =
+            pdfgenConsumer.getMerVeiledningPdfForDigitalePilotBrukere(arbeidstakerHendelse.arbeidstakerFnr)
+
+        val journalpostId = pdf?.let {
+            dokarkivService.journalforDokument(
+                arbeidstakerHendelse.arbeidstakerFnr,
+                planlagtVarselUuid,
+                it,
+            )
+        }
+
+        if (journalpostId != null) {
+            log.info("Journalførte SSPS for pilotbruker i dokarkiv, journalpostId er $journalpostId")
+        } else {
+            log.error("Kunne ikke journalføre SSPS for pilotbruker i dokarkiv for planlagt uuid $planlagtVarselUuid.")
+        }
+
+        sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
+    }
+
+    private suspend fun sendInformasjonTilDigitaleIkkePilotBrukere(
+        arbeidstakerHendelse: ArbeidstakerHendelse,
+        planlagtVarselUuid: String
+    ) {
+        val pdf =
+            pdfgenConsumer.getMerVeiledningPdfForDigitale(arbeidstakerHendelse.arbeidstakerFnr)
+
+        val journalpostId = pdf?.let {
+            dokarkivService.journalforDokument(
+                arbeidstakerHendelse.arbeidstakerFnr,
+                planlagtVarselUuid,
+                it,
+            )
+        }
+
+        log.info("Forsøkte å journalføre SSPS til bruker som ikke er reservert i dokarkiv, journalpostId er $journalpostId")
+
+        sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
     }
 
     suspend fun sendVarselTilArbeidstaker(

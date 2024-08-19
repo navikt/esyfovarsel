@@ -19,12 +19,13 @@ import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.auth.setupLocalRoutesWithAuthentication
 import no.nav.syfo.auth.setupRoutesWithAuthentication
+import no.nav.syfo.behandlendeenhet.BehandlendeEnhetClient
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
 import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.dokarkiv.DokarkivConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
-import no.nav.syfo.consumer.pdfgen.PdfgenConsumer
+import no.nav.syfo.consumer.pdfgen.PdfgenClient
 import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
@@ -148,13 +149,15 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
     val oppfolgingsplanVarselService =
         OppfolgingsplanVarselService(senderFacade, accessControlService, env.urlEnv.oppfolgingsplanerUrl)
     val sykepengerMaxDateService = SykepengerMaxDateService(database, pdlConsumer)
-    val pdfgenConsumer = PdfgenConsumer(env.urlEnv, database)
+    val pdfgenConsumer = PdfgenClient(env.urlEnv, database)
+    val behandlendeEnhetClient = BehandlendeEnhetClient(env.urlEnv, azureAdTokenConsumer)
     val merVeiledningVarselService = MerVeiledningVarselService(
-        senderFacade,
-        env.urlEnv,
-        pdfgenConsumer,
-        dokarkivService,
-        accessControlService,
+        senderFacade = senderFacade,
+        urlEnv = env.urlEnv,
+        pdfgenConsumer = pdfgenConsumer,
+        dokarkivService = dokarkivService,
+        accessControlService = accessControlService,
+        behandlendeEnhetClient = behandlendeEnhetClient
     )
     val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(database)
     val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(database)
