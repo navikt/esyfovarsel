@@ -68,6 +68,8 @@ spec:
         - application: istilgangskontroll
           namespace: teamsykefravr
         - application: syfooppdfgen
+        - application: syfobehandlendeenhet
+          namespace: teamsykefravr
   gcp:
     sqlInstances:
       - autoBackupHour: 1
