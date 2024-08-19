@@ -54,7 +54,7 @@ fun getEnv(): Environment {
                 arbeidsgiverNotifikasjonProdusentApiScope = getEnvVar("AG_NOTIFIKASJON_PRODUSENT_API_SCOPE"),
                 narmestelederUrl = getEnvVar("NARMESTELEDER_URL"),
                 narmestelederScope = getEnvVar("NARMESTELEDER_SCOPE"),
-                behandlendeEnhetUrl = getEnvVar("BEHANDLENDEENHET_SCOPE"),
+                behandlendeEnhetUrl = getEnvVar("BEHANDLENDEENHET_URL"),
                 behandlendeEnhetScope = getEnvVar("BEHANDLENDEENHET_SCOPE"),
                 baseUrlDineSykmeldte = getEnvVar("BASE_URL_DINE_SYKMELDTE"),
                 dokdistfordelingUrl = getEnvVar("DOKDIST_FORDELING_URL"),
