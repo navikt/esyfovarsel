@@ -148,7 +148,7 @@ spec:
     - name: DOKARKIV_URL
       value: https://dokarkiv.dev-fss-pub.nais.io
     - name: DOKARKIV_SCOPE
-      value: api://dev-fss.teamdokumenthandtering.dokarkiv-q2/.default
+      value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
     - name: SYFOOPPDFGEN_URL
       value: http://syfooppdfgen
     - name: ISTILGANGSKONTROLL_URL
