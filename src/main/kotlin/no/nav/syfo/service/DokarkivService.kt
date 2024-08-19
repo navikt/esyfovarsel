@@ -7,7 +7,7 @@ import no.nav.syfo.consumer.dokarkiv.domain.Dokument
 import no.nav.syfo.consumer.dokarkiv.domain.Dokumentvariant
 
 class DokarkivService(val dokarkivConsumer: DokarkivConsumer) {
-    suspend fun getJournalpostId(fnr: String, uuid: String, pdf: ByteArray): String {
+    suspend fun journalforDokument(fnr: String, uuid: String, pdf: ByteArray): String {
         val dokarkivRequest = createDokarkivRequest(fnr, pdf, uuid)
         return dokarkivConsumer.postDocumentToDokarkiv(dokarkivRequest)?.journalpostId.toString()
     }

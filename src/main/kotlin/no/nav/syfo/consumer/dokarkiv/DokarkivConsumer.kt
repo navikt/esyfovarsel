@@ -52,10 +52,10 @@ class DokarkivConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAd
                 }
             }
         } catch (e: Exception) {
-            log.error("Exception while posting document to Dokarkiv, message: ${e.message}")
+            log.error("Exception while posting document to Dokarkiv, message: ${e.message}, cause: ${e.cause}")
             return null
         } catch (e: Error) {
-            log.error("Error while post documenting to Dokarkiv, message: ${e.message}")
+            log.error("Error while post documenting to Dokarkiv, message: ${e.message}, cause: ${e.cause}")
             throw e
         }
     }

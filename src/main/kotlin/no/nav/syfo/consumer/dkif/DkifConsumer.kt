@@ -10,9 +10,9 @@ import no.nav.syfo.consumer.domain.Kontaktinfo
 import no.nav.syfo.consumer.domain.KontaktinfoMapper
 import no.nav.syfo.utils.NAV_CALL_ID_HEADER
 import no.nav.syfo.utils.NAV_PERSONIDENT_HEADER
+import no.nav.syfo.utils.createCallId
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
-import java.util.*
 
 class DkifConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client = httpClient()
@@ -52,10 +52,5 @@ class DkifConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer:
 
     companion object {
         private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.dkif.DkifConsumer")
-
-        private fun createCallId(): String {
-            val randomUUID = UUID.randomUUID().toString()
-            return "esyfovarsel-$randomUUID"
-        }
     }
 }

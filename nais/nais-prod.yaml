@@ -73,6 +73,8 @@ spec:
         - application: istilgangskontroll
           namespace: teamsykefravr
         - application: syfooppdfgen
+        - application: syfobehandlendeenhet
+          namespace: teamsykefravr
   gcp:
     sqlInstances:
       - autoBackupHour: 1
@@ -141,6 +143,10 @@ spec:
       value: http://narmesteleder.teamsykmelding
     - name: NARMESTELEDER_SCOPE
       value: api://prod-gcp.teamsykmelding.narmesteleder/.default
+    - name: BEHANDLENDEENHET_URL
+      value: http://syfobehandlendeenhet.teamsykefravr
+    - name: BEHANDLENDEENHET_SCOPE
+      value: api://prod-gcp.teamsykefravr.syfobehandlendeenhet/.default
     - name: BASE_URL_DINE_SYKMELDTE
       value: https://www.nav.no/arbeidsgiver/sykmeldte
     - name: DOKDIST_FORDELING_URL

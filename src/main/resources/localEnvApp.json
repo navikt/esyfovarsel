@@ -27,6 +27,8 @@
     "arbeidsgiverNotifikasjonProdusentApiScope": "agNotifikasjonProdusentScope",
     "narmestelederUrl": "http://localhost:9097",
     "narmestelederScope": "narmestelederScope",
+    "behandlendeEnhetUrl": "http://localhost:9091",
+    "behandlendeEnhetScope": "behandlendeEnhetScope",
     "baseUrlDineSykmeldte": "http://dine-sykmeldte:9099",
     "dokdistfordelingUrl": "http://dokdistfordelingUrl:9099",
     "dokdistfordelingScope": "dokdistfordelingScope",

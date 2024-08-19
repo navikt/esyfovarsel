@@ -22,7 +22,7 @@ class FysiskBrevUtsendingServiceSpek : DescribeSpec({
         )
 
         it("Journalpost skal distribueres dersom brev blir sendt til dokarkiv") {
-            coEvery { dokarkivService.getJournalpostId(any(), any(), any()) } returns journalpostId
+            coEvery { dokarkivService.journalforDokument(any(), any(), any()) } returns journalpostId
             coEvery {
                 journalpostdistribusjonConsumer.distribuerJournalpost(
                     journalpostId,
