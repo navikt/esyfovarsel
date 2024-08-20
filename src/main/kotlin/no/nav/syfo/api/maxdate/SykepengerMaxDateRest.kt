@@ -38,7 +38,13 @@ fun Route.registerSykepengerMaxDateRestApi(
                 }
             }
             log.info("Fetched sykepengerMaxDate from database: ${sykepengerMaxDate?.forelopig_beregnet_slutt}")
-            call.respond(SykepengerMaxDateResponse(maxDate, utbetaltTom))
+            call.respond(
+                SykepengerMaxDateResponse(
+                    maxDate = maxDate,
+                    utbetaltTom = utbetaltTom,
+                    gjenstaendeSykedager = sykepengerMaxDate?.gjenstaende_sykedager
+                )
+            )
         } catch (e: Exception) {
             log.error("Encountered exception during fetching sykepengerMaxDate from database: ${e.message}")
             call.respond(
@@ -52,4 +58,5 @@ fun Route.registerSykepengerMaxDateRestApi(
 data class SykepengerMaxDateResponse(
     val maxDate: String?,
     val utbetaltTom: String?,
+    val gjenstaendeSykedager: String?
 ) : Serializable
