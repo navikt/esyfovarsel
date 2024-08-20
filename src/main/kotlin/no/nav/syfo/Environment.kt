@@ -201,6 +201,8 @@ fun isJob(): Boolean = getBooleanEnvVar("JOB")
 
 fun getBooleanEnvVar(varName: String) = System.getenv(varName).toBoolean()
 
-val DEV_GCP = "dev-gcp"
+const val DEV_GCP = "dev-gcp"
+const val PROD_GCP = "prod-gcp"
 
 fun Environment.isDevGcp() = DEV_GCP == appEnv.cluster
+fun Environment.isProdGcp() = PROD_GCP == appEnv.cluster

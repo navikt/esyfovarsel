@@ -24,7 +24,7 @@ class MerVeiledningVarselServiceTest : DescribeSpec({
     val testEnv = getTestEnv()
     val merveiledningVarselService = MerVeiledningVarselService(
         senderFacade = senderFacade,
-        urlEnv = testEnv.urlEnv,
+        env = testEnv,
         pdfgenConsumer = pdfgenClient,
         dokarkivService = dokarkivService,
         accessControlService = accessControlService,
