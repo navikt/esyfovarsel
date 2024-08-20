@@ -5,6 +5,10 @@ data class BehandlendeEnhet(
     var navn: String,
 )
 
-fun BehandlendeEnhet.isPilot(): Boolean {
+fun BehandlendeEnhet.isPilot(isProduction: Boolean): Boolean {
+    if (isProduction) {
+        return listOf("0624").contains(this.enhetId)
+    }
+
     return listOf("0314").contains(this.enhetId)
 }

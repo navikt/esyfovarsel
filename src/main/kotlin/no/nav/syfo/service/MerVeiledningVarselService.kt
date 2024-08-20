@@ -2,12 +2,13 @@ package no.nav.syfo.service
 
 import no.nav.syfo.BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT
 import no.nav.syfo.DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT
+import no.nav.syfo.Environment
 import no.nav.syfo.MER_VEILEDNING_URL
-import no.nav.syfo.UrlEnv
 import no.nav.syfo.behandlendeenhet.BehandlendeEnhetClient
 import no.nav.syfo.behandlendeenhet.domain.isPilot
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.consumer.pdfgen.PdfgenClient
+import no.nav.syfo.isProdGcp
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
@@ -25,7 +26,7 @@ const val DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING = "ESYFOVARSEL_MER_VEILE
 
 class MerVeiledningVarselService(
     val senderFacade: SenderFacade,
-    val urlEnv: UrlEnv,
+    val env: Environment,
     val pdfgenConsumer: PdfgenClient,
     val dokarkivService: DokarkivService,
     val accessControlService: AccessControlService,
@@ -40,7 +41,8 @@ class MerVeiledningVarselService(
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerHendelse.arbeidstakerFnr)
         val isBrukerReservert = !userAccessStatus.canUserBeDigitallyNotified
         val isPilotbruker =
-            behandlendeEnhetClient.getBehandlendeEnhet(arbeidstakerHendelse.arbeidstakerFnr)?.isPilot() == true
+            behandlendeEnhetClient.getBehandlendeEnhet(arbeidstakerHendelse.arbeidstakerFnr)
+                ?.isPilot(env.isProdGcp()) == true
 
         when {
             isBrukerReservert -> {
@@ -150,7 +152,7 @@ class MerVeiledningVarselService(
     private fun sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse: ArbeidstakerHendelse) {
         val uuid = "${UUID.randomUUID()}"
         val fnr = arbeidstakerHendelse.arbeidstakerFnr
-        val url = URL(urlEnv.baseUrlNavEkstern + MER_VEILEDNING_URL)
+        val url = URL(env.urlEnv.baseUrlNavEkstern + MER_VEILEDNING_URL)
 
         senderFacade.sendTilBrukernotifikasjoner(
             uuid = uuid,
