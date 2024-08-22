@@ -22,7 +22,7 @@ val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.17.2"
 val kafkaVersion = "3.8.0"
 val brukernotifikasjonerBuilderVersion = "1.0.4"
-val kotlinVersion = "2.0.10"
+val kotlinVersion = "2.0.20"
 
 val githubUser: String by project
 val githubPassword: String by project
