@@ -2,7 +2,6 @@ package no.nav.syfo.db
 
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.infotrygd.domain.InfotrygdSource
-import org.postgresql.util.PSQLException
 import java.sql.Date
 import java.sql.Timestamp
 import java.time.LocalDate
@@ -38,8 +37,8 @@ fun DatabaseInterface.storeInfotrygdUtbetaling(
                 it.executeUpdate()
             }
             connection.commit()
-        } catch (e: PSQLException) {
-            log.debug("Ignoring duplicate message from Infotrygd with max date $sykepengerMaxDate and utbet tom $utbetaltTilDate")
+        } catch (e: Exception) {
+            log.error("[INFOTRYGD KAFKA] Ignoring inserting a message from Infotrygd with max date $sykepengerMaxDate,  utbet tom $utbetaltTilDate and gjenstaendeSykepengedager $gjenstaendeSykepengedager")
         }
     }
 }

@@ -36,6 +36,10 @@ class SykepengerMaxDateService(private val databaseInterface: DatabaseInterface,
         source: InfotrygdSource
     ) {
         processFodselsdato(fnr)
+        log.info("[INFOTRYGD KAFKA] Processed fodselsdato. Going to storeInfotrygdUtbetaling with max date: " +
+                "${sykepengerMaxDate.toString()}, utbetaltTil: ${utbetaltTilDate.toString()}," +
+                " gjenstaendeSykepengedager: ${gjenstaendeSykepengedager}")
+
         databaseInterface.storeInfotrygdUtbetaling(
             fnr,
             sykepengerMaxDate,
