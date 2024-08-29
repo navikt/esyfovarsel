@@ -36,17 +36,22 @@ class InfotrygdKafkaConsumer(
                 log.info("Received record from topic $topicSykepengedagerInfotrygd. Opprettet ${it.timestamp()}")
                 try {
                     val kInfotrygdSykepengedager: KInfotrygdSykepengedager = objectMapper.readValue(it.value())
-
+                    log.info("[INFOTRYGD KAFKA] Mapped record record from topic $topicSykepengedagerInfotrygd}")
                     val fnr = kInfotrygdSykepengedager.after.F_NR
                     val sykepengerMaxDate = parseDate(kInfotrygdSykepengedager.after.MAX_DATO)
+                    log.info("[INFOTRYGD KAFKA] MAX_DATO from  record record from topic $topicSykepengedagerInfotrygd is $sykepengerMaxDate} ")
                     val utbetaltTom = kInfotrygdSykepengedager.after.UTBET_TOM
+                    log.info("[INFOTRYGD KAFKA] UTBET_TOM from  record from topic $topicSykepengedagerInfotrygd is $utbetaltTom} ")
                     if (utbetaltTom != null) {
+                        log.info("[INFOTRYGD KAFKA] UTBET_TOM from  record from topic $topicSykepengedagerInfotrygd is not null} ")
                         val utbetaltTomDate = parseDate(utbetaltTom)
+                        val gjenstaendeSykepengedager = utbetaltTomDate.gjenstaendeSykepengedager(sykepengerMaxDate)
+                        log.info("[INFOTRYGD KAFKA] gjenstaendeSykepengedager from  record from topic $topicSykepengedagerInfotrygd is $gjenstaendeSykepengedager} ")
                         sykepengerMaxDateService.processInfotrygdEvent(
                             fnr,
                             sykepengerMaxDate,
                             utbetaltTomDate,
-                            utbetaltTomDate.gjenstaendeSykepengedager(sykepengerMaxDate),
+                            gjenstaendeSykepengedager,
                             InfotrygdSource.AAP_KAFKA_TOPIC
                         )
                     }
