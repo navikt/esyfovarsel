@@ -7,7 +7,7 @@ data class BehandlendeEnhet(
 
 fun BehandlendeEnhet.isPilot(isProduction: Boolean): Boolean {
     if (isProduction) {
-        return listOf("0624").contains(this.enhetId)
+        return listOf("0624", "0220").contains(this.enhetId)
     }
 
     return listOf("0314").contains(this.enhetId)
