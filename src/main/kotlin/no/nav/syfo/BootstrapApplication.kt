@@ -157,7 +157,8 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
         pdfgenConsumer = pdfgenConsumer,
         dokarkivService = dokarkivService,
         accessControlService = accessControlService,
-        behandlendeEnhetClient = behandlendeEnhetClient
+        behandlendeEnhetClient = behandlendeEnhetClient,
+        databaseAccess = database,
     )
     val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(database)
     val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(database)

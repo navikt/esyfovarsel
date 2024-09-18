@@ -12,7 +12,6 @@ import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.fetchFNReUtsendtMerveiledningVarsler
 import no.nav.syfo.isProdGcp
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
