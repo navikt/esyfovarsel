@@ -8,8 +8,11 @@ import no.nav.syfo.behandlendeenhet.BehandlendeEnhetClient
 import no.nav.syfo.behandlendeenhet.domain.isPilot
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.consumer.pdfgen.PdfgenClient
+import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.fetchFNReUtsendtMerveiledningVarsler
 import no.nav.syfo.isProdGcp
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
@@ -31,6 +34,7 @@ class MerVeiledningVarselService(
     val dokarkivService: DokarkivService,
     val accessControlService: AccessControlService,
     val behandlendeEnhetClient: BehandlendeEnhetClient,
+    private val databaseAccess: DatabaseInterface,
 ) {
     private val log = LoggerFactory.getLogger(MerVeiledningVarselService::class.qualifiedName)
 
@@ -131,7 +135,11 @@ class MerVeiledningVarselService(
         requireNotNull(data.journalpost)
         requireNotNull(data.journalpost.id)
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerHendelse.arbeidstakerFnr)
-
+        // sjekker vi først om FNRe er i listen fra utsendt_varsel...
+        if (databaseAccess.fetchFNReUtsendtMerveiledningVarsler().contains(arbeidstakerHendelse.arbeidstakerFnr)) {
+            log.info("Fnr er i listen fra utsendt_varsel, sender ikke varsel")
+            return
+        }
         if (userAccessStatus.canUserBeDigitallyNotified) {
             sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
         } else {

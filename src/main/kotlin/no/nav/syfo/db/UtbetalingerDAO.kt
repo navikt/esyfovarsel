@@ -33,6 +33,26 @@ fun DatabaseInterface.fetchMerVeiledningVarslerToSend(): List<PUtbetaling> {
     }
 }
 
+fun DatabaseInterface.fetchFNReUtsendtMerveiledningVarsler(): List<String> {
+    val nyttVarselLimit = 106
+    val queryStatement = """SELECT FNR
+                            FROM UTSENDT_VARSEL
+                            WHERE TYPE = 'SM_MER_VEILEDNING'
+                                  AND UTSENDT_TIDSPUNKT > NOW() - INTERVAL '$nyttVarselLimit' DAY"""
+        .trimIndent()
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.executeQuery().toList { getString("FNR")
+            }
+        }
+    }
+}
+/**
+ * SELECT FNR
+ *                                 FROM UTSENDT_VARSEL
+ *                                 WHERE TYPE = 'SM_MER_VEILEDNING'
+ *                                 AND UTSENDT_TIDSPUNKT > NOW() - INTERVAL '$nyttVarselLimit' DAY
+ */
 fun DatabaseInterface.fetchMaksDatoByFnr(fnr: String): PMaksDato? {
     val queryStatement = """SELECT *
                             FROM UTBETALINGER AS UTBETALINGER1
