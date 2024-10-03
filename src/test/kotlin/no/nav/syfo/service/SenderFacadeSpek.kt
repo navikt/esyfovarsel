@@ -1,6 +1,8 @@
 package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -9,15 +11,20 @@ import no.nav.syfo.db.arbeidstakerAktorId1
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.VarselType
+import no.nav.syfo.db.fetchFNReUtsendtMerveiledningVarsler
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.domain.PersonIdent
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.planner.arbeidstakerFnr1
+import no.nav.syfo.planner.arbeidstakerFnr2
+import no.nav.syfo.planner.arbeidstakerFnr3
+import no.nav.syfo.planner.arbeidstakerFnr4
 import no.nav.syfo.testutil.EmbeddedDatabase
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class SenderFacadeSpek : DescribeSpec({
     describe("SenderFacadeSpek") {
@@ -41,6 +48,7 @@ class SenderFacadeSpek : DescribeSpec({
         val eksternRefArbeidsgiverNotifikasjoner = "arbeidsgivernotifikasjoner"
         val eksternRefDineSykmeldte = "dine_sykmeldte"
         val eksternRefBrukernotifikasjoner = "brukernotifikasjoner"
+        val eksternRefNoBrukernotifikasjoner = "bruker_no_notifikasjoner"
         val eksternRefDittSykefravaer = "ditt_sykefravær"
         val merkelapp = "merkelapp"
 
@@ -85,6 +93,39 @@ class SenderFacadeSpek : DescribeSpec({
             eksternReferanse = eksternRefDittSykefravaer,
         )
 
+        val sMMerVeiledningNoNotificationSentBefore = utsendtVarsel.copy(
+            uuid = UUID.randomUUID().toString(),
+            fnr = arbeidstakerFnr1,
+            type = HendelseType.SM_MER_VEILEDNING.name,
+            eksternReferanse = eksternRefNoBrukernotifikasjoner,
+            ferdigstiltTidspunkt = null
+        )
+        val sMMerVeiledningNoNotificationSentBeforeFnr2 = utsendtVarsel.copy(
+            uuid = UUID.randomUUID().toString(),
+            fnr = arbeidstakerFnr2,
+            type = HendelseType.SM_MER_VEILEDNING.name,
+            eksternReferanse = eksternRefNoBrukernotifikasjoner,
+            ferdigstiltTidspunkt = null
+        )
+
+        val sMMerVeiledningNotificationSentBeforeOneDay = utsendtVarsel.copy(
+            uuid = UUID.randomUUID().toString(),
+            fnr = arbeidstakerFnr3,
+            type = HendelseType.SM_MER_VEILEDNING.name,
+            utsendtTidspunkt = LocalDateTime.now().minusDays(1),
+            ferdigstiltTidspunkt = LocalDateTime.now().minusDays(1),
+            eksternReferanse = eksternRefBrukernotifikasjoner,
+        )
+
+        val sMMerVeiledningNotificationSentBefore106Days = utsendtVarsel.copy(
+            uuid = UUID.randomUUID().toString(),
+            fnr = arbeidstakerFnr4,
+            type = HendelseType.SM_MER_VEILEDNING.name,
+            utsendtTidspunkt = LocalDateTime.now().minusDays(106),
+            ferdigstiltTidspunkt = LocalDateTime.now().minusDays(106),
+            eksternReferanse = eksternRefBrukernotifikasjoner,
+        )
+
         beforeTest {
             clearAllMocks()
             embeddedDatabase.dropData()
@@ -122,6 +163,44 @@ class SenderFacadeSpek : DescribeSpec({
             verify(exactly = 0) { dineSykmeldteHendelseKafkaProducer.ferdigstillVarsel(any()) }
             verify(exactly = 0) { brukernotifikasjonerService.ferdigstillVarsel(any()) }
             verify(exactly = 0) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(any(), any()) }
+        }
+
+        it("Don't get users who have already sent notifications for less than 106 days ") {
+            embeddedDatabase.storeUtsendtVarsel(sMMerVeiledningNoNotificationSentBefore)
+            embeddedDatabase.storeUtsendtVarsel(sMMerVeiledningNotificationSentBeforeOneDay)
+            embeddedDatabase.storeUtsendtVarsel(sMMerVeiledningNotificationSentBefore106Days)
+            embeddedDatabase.setUtsendtVarselToFerdigstilt(
+                sMMerVeiledningNotificationSentBeforeOneDay.eksternReferanse.toString()
+            )
+            embeddedDatabase.setUtsendtVarselToFerdigstilt(
+                sMMerVeiledningNotificationSentBefore106Days.eksternReferanse.toString()
+            )
+            val fnre = embeddedDatabase.fetchFNReUtsendtMerveiledningVarsler()
+            fnre shouldBe listOf(
+                sMMerVeiledningNoNotificationSentBefore.fnr,
+                sMMerVeiledningNotificationSentBefore106Days.fnr,
+            )
+        }
+
+        it("Get all users who have not sent notifications") {
+            embeddedDatabase.storeUtsendtVarsel(sMMerVeiledningNoNotificationSentBefore)
+            embeddedDatabase.storeUtsendtVarsel(sMMerVeiledningNoNotificationSentBeforeFnr2)
+
+            val fnre = embeddedDatabase.fetchFNReUtsendtMerveiledningVarsler()
+            fnre shouldContainExactlyInAnyOrder
+                    listOf(
+                        sMMerVeiledningNoNotificationSentBefore.fnr,
+                        sMMerVeiledningNoNotificationSentBeforeFnr2.fnr
+                    )
+        }
+
+        it("Get no users when all have already sent notifications") {
+            embeddedDatabase.storeUtsendtVarsel(sMMerVeiledningNotificationSentBeforeOneDay)
+            embeddedDatabase.setUtsendtVarselToFerdigstilt(
+                sMMerVeiledningNotificationSentBeforeOneDay.eksternReferanse.toString()
+            )
+            val fnre = embeddedDatabase.fetchFNReUtsendtMerveiledningVarsler()
+            fnre shouldBe emptyList()
         }
     }
 })
