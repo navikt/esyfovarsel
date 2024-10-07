@@ -33,12 +33,6 @@ fun DatabaseInterface.fetchMerVeiledningVarslerToSend(): List<PUtbetaling> {
     }
 }
 
-/**
- * SELECT FNR
- *                                 FROM UTSENDT_VARSEL
- *                                 WHERE TYPE = 'SM_MER_VEILEDNING'
- *                                 AND UTSENDT_TIDSPUNKT > NOW() - INTERVAL '$nyttVarselLimit' DAY
- */
 fun DatabaseInterface.fetchMaksDatoByFnr(fnr: String): PMaksDato? {
     val queryStatement = """SELECT *
                             FROM UTBETALINGER AS UTBETALINGER1

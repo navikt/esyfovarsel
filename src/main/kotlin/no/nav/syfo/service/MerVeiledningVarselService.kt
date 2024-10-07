@@ -9,7 +9,7 @@ import no.nav.syfo.behandlendeenhet.domain.isPilot
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.consumer.pdfgen.PdfgenClient
 import no.nav.syfo.db.DatabaseInterface
-import no.nav.syfo.db.fetchFNReUtsendtMerveiledningVarsler
+import no.nav.syfo.db.fetchFNRUtsendtMerVeiledningVarsler
 import no.nav.syfo.isProdGcp
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
@@ -134,8 +134,7 @@ class MerVeiledningVarselService(
         requireNotNull(data.journalpost)
         requireNotNull(data.journalpost.id)
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerHendelse.arbeidstakerFnr)
-        // sjekker vi først om FNRe er i listen fra utsendt_varsel...
-        if (databaseAccess.fetchFNReUtsendtMerveiledningVarsler().contains(arbeidstakerHendelse.arbeidstakerFnr)) {
+        if (databaseAccess.fetchFNRUtsendtMerVeiledningVarsler().contains(arbeidstakerHendelse.arbeidstakerFnr)) {
             log.info("Fnr er i listen fra utsendt_varsel, sender ikke varsel")
             return
         }

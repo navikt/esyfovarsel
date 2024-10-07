@@ -68,7 +68,7 @@ fun DatabaseInterface.fetchUtsendtVarselByFnr(fnr: String): List<PUtsendtVarsel>
     }
 }
 
-fun DatabaseInterface.fetchFNReUtsendtMerveiledningVarsler(): List<String> {
+fun DatabaseInterface.fetchFNRUtsendtMerVeiledningVarsler(): List<String> {
     val nyttVarselLimit = 106
     val queryStatement = """SELECT * 
                             FROM UTSENDT_VARSEL

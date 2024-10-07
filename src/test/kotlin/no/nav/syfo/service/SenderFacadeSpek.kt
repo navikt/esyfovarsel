@@ -11,7 +11,7 @@ import no.nav.syfo.db.arbeidstakerAktorId1
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.VarselType
-import no.nav.syfo.db.fetchFNReUtsendtMerveiledningVarsler
+import no.nav.syfo.db.fetchFNRUtsendtMerVeiledningVarsler
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.domain.PersonIdent
@@ -175,7 +175,7 @@ class SenderFacadeSpek : DescribeSpec({
             embeddedDatabase.setUtsendtVarselToFerdigstilt(
                 sMMerVeiledningNotificationSentBefore106Days.eksternReferanse.toString()
             )
-            val fnre = embeddedDatabase.fetchFNReUtsendtMerveiledningVarsler()
+            val fnre = embeddedDatabase.fetchFNRUtsendtMerVeiledningVarsler()
             fnre shouldBe listOf(
                 sMMerVeiledningNoNotificationSentBefore.fnr,
                 sMMerVeiledningNotificationSentBefore106Days.fnr,
@@ -186,7 +186,7 @@ class SenderFacadeSpek : DescribeSpec({
             embeddedDatabase.storeUtsendtVarsel(sMMerVeiledningNoNotificationSentBefore)
             embeddedDatabase.storeUtsendtVarsel(sMMerVeiledningNoNotificationSentBeforeFnr2)
 
-            val fnre = embeddedDatabase.fetchFNReUtsendtMerveiledningVarsler()
+            val fnre = embeddedDatabase.fetchFNRUtsendtMerVeiledningVarsler()
             fnre shouldContainExactlyInAnyOrder
                     listOf(
                         sMMerVeiledningNoNotificationSentBefore.fnr,
@@ -199,7 +199,7 @@ class SenderFacadeSpek : DescribeSpec({
             embeddedDatabase.setUtsendtVarselToFerdigstilt(
                 sMMerVeiledningNotificationSentBeforeOneDay.eksternReferanse.toString()
             )
-            val fnre = embeddedDatabase.fetchFNReUtsendtMerveiledningVarsler()
+            val fnre = embeddedDatabase.fetchFNRUtsendtMerVeiledningVarsler()
             fnre shouldBe emptyList()
         }
     }
