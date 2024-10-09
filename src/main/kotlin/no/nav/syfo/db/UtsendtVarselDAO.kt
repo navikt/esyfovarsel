@@ -68,6 +68,24 @@ fun DatabaseInterface.fetchUtsendtVarselByFnr(fnr: String): List<PUtsendtVarsel>
     }
 }
 
+fun DatabaseInterface.fetchFNRUtsendtMerVeiledningVarsler(): List<String> {
+    val nyttVarselLimit = 106
+    val queryStatement = """SELECT * 
+                            FROM UTSENDT_VARSEL
+                            WHERE TYPE = 'SM_MER_VEILEDNING'
+                                  AND ( FERDIGSTILT_TIDSPUNKT IS NULL OR
+                                        UTSENDT_TIDSPUNKT < NOW() - INTERVAL '$nyttVarselLimit' DAY
+                                        )"""
+        .trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.executeQuery().toList { getString("FNR")
+            }
+        }
+    }
+}
+
 fun DatabaseInterface.setUtsendtVarselToFerdigstilt(eksternRef: String): Int {
     val now = Timestamp.valueOf(LocalDateTime.now())
     val updateStatement = """UPDATE UTSENDT_VARSEL

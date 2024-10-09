@@ -14,6 +14,7 @@ import no.nav.syfo.consumer.pdfgen.PdfgenClient
 import no.nav.syfo.getTestEnv
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import no.nav.syfo.testutil.EmbeddedDatabase
 
 class MerVeiledningVarselServiceTest : DescribeSpec({
     val senderFacade = mockk<SenderFacade>(relaxed = true)
@@ -22,6 +23,7 @@ class MerVeiledningVarselServiceTest : DescribeSpec({
     val accessControlService = mockk<AccessControlService>(relaxed = true)
     val behandlendeEnhetClient = mockk<BehandlendeEnhetClient>(relaxed = true)
     val testEnv = getTestEnv()
+    val embeddedDatabase = EmbeddedDatabase()
     val merveiledningVarselService = MerVeiledningVarselService(
         senderFacade = senderFacade,
         env = testEnv,
@@ -29,6 +31,7 @@ class MerVeiledningVarselServiceTest : DescribeSpec({
         dokarkivService = dokarkivService,
         accessControlService = accessControlService,
         behandlendeEnhetClient = behandlendeEnhetClient,
+        databaseAccess = embeddedDatabase,
     )
 
     beforeTest {
