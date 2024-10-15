@@ -23,6 +23,7 @@ fun DatabaseInterface.storeInfotrygdUtbetaling(
         GJENSTAENDE_SYKEDAGER,
         OPPRETTET,
         SOURCE) VALUES (?,?,?,?,?,?,?)
+        ON CONFLICT (FNR, MAX_DATE, UTBET_TOM) DO NOTHING
     """.trimIndent()
     connection.use { connection ->
         try {
