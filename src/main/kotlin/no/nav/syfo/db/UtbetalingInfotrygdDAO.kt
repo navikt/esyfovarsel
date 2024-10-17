@@ -38,7 +38,7 @@ fun DatabaseInterface.storeInfotrygdUtbetaling(
             }
             connection.commit()
         } catch (e: Exception) {
-            log.error("[INFOTRYGD KAFKA] Ignoring inserting a message from Infotrygd with max date $sykepengerMaxDate,  utbet tom $utbetaltTilDate and gjenstaendeSykepengedager $gjenstaendeSykepengedager")
+            log.info("[INFOTRYGD KAFKA] Ignoring inserting a message from Infotrygd with max date $sykepengerMaxDate,  utbet tom $utbetaltTilDate and gjenstaendeSykepengedager $gjenstaendeSykepengedager")
         }
     }
 }
