@@ -23,7 +23,6 @@ fun DatabaseInterface.storeInfotrygdUtbetaling(
         GJENSTAENDE_SYKEDAGER,
         OPPRETTET,
         SOURCE) VALUES (?,?,?,?,?,?,?)
-        ON CONFLICT (FNR, MAX_DATE, UTBET_TOM) DO NOTHING
     """.trimIndent()
     connection.use { connection ->
         try {
@@ -39,7 +38,7 @@ fun DatabaseInterface.storeInfotrygdUtbetaling(
             }
             connection.commit()
         } catch (e: Exception) {
-            log.error("[INFOTRYGD KAFKA] Ignoring inserting a message from Infotrygd with max date $sykepengerMaxDate,  utbet tom $utbetaltTilDate and gjenstaendeSykepengedager $gjenstaendeSykepengedager")
+            log.info("[INFOTRYGD KAFKA] Ignoring inserting a message from Infotrygd with max date $sykepengerMaxDate,  utbet tom $utbetaltTilDate and gjenstaendeSykepengedager $gjenstaendeSykepengedager")
         }
     }
 }
