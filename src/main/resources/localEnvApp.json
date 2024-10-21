@@ -30,8 +30,6 @@
     "baseUrlDineSykmeldte": "http://dine-sykmeldte:9099",
     "dokdistfordelingUrl": "http://dokdistfordelingUrl:9099",
     "dokdistfordelingScope": "dokdistfordelingScope",
-    "dokarkivUrl": "http://dokarkivUrl:9099",
-    "dokarkivScope": "dokarkivScope",
     "istilgangskontrollUrl": "http://istilgangskontrollUrl:9099",
     "istilgangskontrollScope": "istilgangskontrollScope",
     "dokumentarkivOppfolgingDocumentsPageUrl": "http://dokumentarkivOppfolgingDocumentsPageUrl:9099",
