@@ -8,18 +8,14 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.accept
 import io.ktor.server.routing.post
 import kotlinx.coroutines.launch
-import no.nav.syfo.job.SendMerVeiledningVarslerJobb
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 
 const val urlPathJobTrigger = "/job/trigger"
 
-fun Route.registerJobTriggerApi(sendMerVeiledningVarslerJobb: SendMerVeiledningVarslerJobb, mikrofrontendService: MikrofrontendService) {
+fun Route.registerJobTriggerApi(mikrofrontendService: MikrofrontendService) {
     accept(ContentType.Application.Json) {
         post(urlPathJobTrigger) {
             call.respond(HttpStatusCode.OK)
-            launch {
-                sendMerVeiledningVarslerJobb.sendVarsler()
-            }
             launch {
                 mikrofrontendService.findAndCloseExpiredMikrofrontends()
             }

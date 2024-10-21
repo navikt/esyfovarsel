@@ -26,7 +26,7 @@ class MikrofrontendMerOppfolgingService(val database: DatabaseInterface) {
         return null
     }
 
-    fun findExpiredAktivitetskravMikrofrontends(): List<Triple<String, String, Tjeneste>> {
+    fun findExpiredMerOppfolgingMikrofrontends(): List<Triple<String, String, Tjeneste>> {
         return database.fetchFnrsWithExpiredMicrofrontendEntries(Tjeneste.MER_OPPFOLGING)
             .map { Triple(it, mikrofrontendId, Tjeneste.MER_OPPFOLGING) }
     }

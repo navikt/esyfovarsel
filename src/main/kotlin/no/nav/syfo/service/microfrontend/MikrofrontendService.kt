@@ -55,7 +55,7 @@ class MikrofrontendService(
         val mikrofrontendsToClose = mutableListOf<Triple<String, String, Tjeneste>>()
         mikrofrontendsToClose.addAll(mikrofrontendDialogmoteService.findExpiredDialogmoteMikrofrontends())
         mikrofrontendsToClose.addAll(mikrofrontendAktivitetskravService.findExpiredAktivitetskravMikrofrontends())
-        mikrofrontendsToClose.addAll(mikrofrontendMerOppfolgingService.findExpiredAktivitetskravMikrofrontends())
+        mikrofrontendsToClose.addAll(mikrofrontendMerOppfolgingService.findExpiredMerOppfolgingMikrofrontends())
         mikrofrontendsToClose.forEach {
             val (fnr, mikrofrontendId, tjeneste) = it
             disableMikrofrontendForUser(

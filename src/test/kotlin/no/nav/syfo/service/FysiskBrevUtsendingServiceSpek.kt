@@ -9,7 +9,6 @@ import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsume
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonResponse
 
 class FysiskBrevUtsendingServiceSpek : DescribeSpec({
-    val dokarkivService = mockk<DokarkivService>()
     val journalpostdistribusjonConsumer = mockk<JournalpostdistribusjonConsumer>()
 
     val uuid = "UUID"
@@ -22,7 +21,6 @@ class FysiskBrevUtsendingServiceSpek : DescribeSpec({
         )
 
         it("Journalpost skal distribueres dersom brev blir sendt til dokarkiv") {
-            coEvery { dokarkivService.journalforDokument(any(), any(), any()) } returns journalpostId
             coEvery {
                 journalpostdistribusjonConsumer.distribuerJournalpost(
                     journalpostId,
