@@ -1,5 +1,9 @@
 package no.nav.syfo.service
 
+import java.net.URL
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.*
 import no.nav.syfo.BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT
 import no.nav.syfo.DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT
 import no.nav.syfo.Environment
@@ -16,13 +20,9 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
-import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
+import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.*
 import no.nav.syfo.utils.dataToVarselData
 import org.slf4j.LoggerFactory
-import java.net.URL
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.*
 
 const val DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING = "ESYFOVARSEL_MER_VEILEDNING"
 
@@ -52,11 +52,7 @@ class MerVeiledningVarselService(
                 sendInformasjonTilReserverte(arbeidstakerHendelse, planlagtVarselUuid)
             }
 
-            isPilotbruker -> {
-                sendInformasjonTilDigitalePilotBrukere(arbeidstakerHendelse, planlagtVarselUuid)
-            }
-
-            else -> {
+            !isPilotbruker -> {
                 sendInformasjonTilDigitaleIkkePilotBrukere(arbeidstakerHendelse, planlagtVarselUuid)
             }
         }
@@ -66,7 +62,7 @@ class MerVeiledningVarselService(
 
     private suspend fun sendInformasjonTilReserverte(
         arbeidstakerHendelse: ArbeidstakerHendelse,
-        planlagtVarselUuid: String
+        planlagtVarselUuid: String,
     ) {
         val pdf = pdfgenConsumer.getMerVeiledningPdfForReserverte(arbeidstakerHendelse.arbeidstakerFnr)
 
@@ -83,33 +79,9 @@ class MerVeiledningVarselService(
         sendBrevVarselTilArbeidstaker(planlagtVarselUuid, arbeidstakerHendelse, journalpostId!!)
     }
 
-    private suspend fun sendInformasjonTilDigitalePilotBrukere(
-        arbeidstakerHendelse: ArbeidstakerHendelse,
-        planlagtVarselUuid: String
-    ) {
-        val pdf =
-            pdfgenConsumer.getMerVeiledningPdfForDigitalePilotBrukere(arbeidstakerHendelse.arbeidstakerFnr)
-
-        val journalpostId = pdf?.let {
-            dokarkivService.journalforDokument(
-                arbeidstakerHendelse.arbeidstakerFnr,
-                planlagtVarselUuid,
-                it,
-            )
-        }
-
-        if (journalpostId != null) {
-            log.info("Journalførte SSPS for pilotbruker i dokarkiv, journalpostId er $journalpostId")
-        } else {
-            log.error("Kunne ikke journalføre SSPS for pilotbruker i dokarkiv for planlagt uuid $planlagtVarselUuid.")
-        }
-
-        sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
-    }
-
     private suspend fun sendInformasjonTilDigitaleIkkePilotBrukere(
         arbeidstakerHendelse: ArbeidstakerHendelse,
-        planlagtVarselUuid: String
+        planlagtVarselUuid: String,
     ) {
         val pdf =
             pdfgenConsumer.getMerVeiledningPdfForDigitale(arbeidstakerHendelse.arbeidstakerFnr)
