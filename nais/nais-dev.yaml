@@ -55,7 +55,6 @@ spec:
       external:
         - host: pdl-api.dev-fss-pub.nais.io
         - host: dokdistfordeling-q1.dev-fss-pub.nais.io
-        - host: dokarkiv.dev-fss-pub.nais.io
       rules:
         - application: digdir-krr-proxy
           namespace: team-rocket
@@ -66,9 +65,6 @@ spec:
         - application: narmesteleder
           namespace: teamsykmelding
         - application: istilgangskontroll
-          namespace: teamsykefravr
-        - application: syfooppdfgen
-        - application: syfobehandlendeenhet
           namespace: teamsykefravr
   gcp:
     sqlInstances:
@@ -135,22 +131,12 @@ spec:
       value: http://narmesteleder.teamsykmelding
     - name: NARMESTELEDER_SCOPE
       value: api://dev-gcp.teamsykmelding.narmesteleder/.default
-    - name: BEHANDLENDEENHET_URL
-      value: http://syfobehandlendeenhet.teamsykefravr
-    - name: BEHANDLENDEENHET_SCOPE
-      value: api://dev-gcp.teamsykefravr.syfobehandlendeenhet/.default
     - name: BASE_URL_DINE_SYKMELDTE
       value: https://www-gcp.dev.nav.no/arbeidsgiver/sykmeldte
     - name: DOKDIST_FORDELING_URL
       value: https://dokdistfordeling-q1.dev-fss-pub.nais.io
     - name: DOKDIST_FORDELING_SCOPE
       value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
-    - name: DOKARKIV_URL
-      value: https://dokarkiv-q2.dev-fss-pub.nais.io
-    - name: DOKARKIV_SCOPE
-      value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
-    - name: SYFOOPPDFGEN_URL
-      value: http://syfooppdfgen
     - name: ISTILGANGSKONTROLL_URL
       value: http://istilgangskontroll.teamsykefravr
     - name: ISTILGANGSKONTROLL_SCOPE

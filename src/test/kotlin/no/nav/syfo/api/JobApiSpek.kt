@@ -33,7 +33,7 @@ class JobApiSpek : DescribeSpec({
                 registerJobTriggerApi(mikrofrontendService)
             }
 
-            it("esyfovarsel-job trigger utsending av 2 varsler digitalt og 3 varsler som brev") {
+            it("esyfovarsel-job does not trigger sending of varsler") {
                 with(handleRequest(HttpMethod.Post, urlPathJobTrigger)) {
                     response.status()?.isSuccess() shouldBeEqualTo true
                     coVerify(exactly = 0) { mikrofrontendService.updateMikrofrontendForUserByHendelse(any()) }
