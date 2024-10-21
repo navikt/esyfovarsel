@@ -18,9 +18,6 @@ fun Route.registerJobTriggerApi(sendMerVeiledningVarslerJobb: SendMerVeiledningV
         post(urlPathJobTrigger) {
             call.respond(HttpStatusCode.OK)
             launch {
-                sendMerVeiledningVarslerJobb.sendVarsler()
-            }
-            launch {
                 mikrofrontendService.findAndCloseExpiredMikrofrontends()
             }
         }
