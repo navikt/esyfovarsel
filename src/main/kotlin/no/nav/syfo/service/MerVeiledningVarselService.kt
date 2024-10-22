@@ -102,6 +102,8 @@ class MerVeiledningVarselService(
     suspend fun sendVarselTilArbeidstaker(
         arbeidstakerHendelse: ArbeidstakerHendelse,
     ) {
+        log.info("DEBUG")
+        log.info(arbeidstakerHendelse.toString())
         val data = dataToVarselData(arbeidstakerHendelse.data)
         requireNotNull(data.journalpost)
         requireNotNull(data.journalpost.id)
