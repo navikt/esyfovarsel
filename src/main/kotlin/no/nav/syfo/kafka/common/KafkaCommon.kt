@@ -70,7 +70,7 @@ fun consumerProperties(env: Environment): Properties {
         put(GROUP_ID_CONFIG, "esyfovarsel-group-v04-gcp-v03")
         put(AUTO_OFFSET_RESET_CONFIG, "earliest")
         put(MAX_POLL_RECORDS_CONFIG, "1")
-        put(ENABLE_AUTO_COMMIT_CONFIG, "false")
+        put(ENABLE_AUTO_COMMIT_CONFIG, "true")
         put(KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer")
         put(VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer")
     }
