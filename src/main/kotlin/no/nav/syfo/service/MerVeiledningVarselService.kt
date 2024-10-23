@@ -51,15 +51,15 @@ class MerVeiledningVarselService(
             isBrukerReservert -> {
                 log.info("${arbeidstakerHendelse.arbeidstakerFnr}, reservert, skal varsle reservert fra jobb")
                 sendInformasjonTilReserverte(arbeidstakerHendelse, planlagtVarselUuid)
+                sendOppgaveTilDittSykefravaer(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, arbeidstakerHendelse)
             }
 
             !isPilotbruker -> {
                 log.info("${arbeidstakerHendelse.arbeidstakerFnr} is not a pilot, skal varsle fra jobb")
                 sendInformasjonTilDigitaleIkkePilotBrukere(arbeidstakerHendelse, planlagtVarselUuid)
+                sendOppgaveTilDittSykefravaer(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, arbeidstakerHendelse)
             }
         }
-
-        sendOppgaveTilDittSykefravaer(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, arbeidstakerHendelse)
     }
 
     private suspend fun sendInformasjonTilReserverte(
