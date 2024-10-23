@@ -47,4 +47,4 @@ spec:
       access: write
     - team: team-esyfo
       application: esyfo-kafka-manager
-      access: write
+      access: readwrite
