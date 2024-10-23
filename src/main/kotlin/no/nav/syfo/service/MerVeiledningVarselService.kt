@@ -49,10 +49,12 @@ class MerVeiledningVarselService(
 
         when {
             isBrukerReservert -> {
+                log.info("${arbeidstakerHendelse.arbeidstakerFnr}, reservert, skal varsle reservert fra jobb")
                 sendInformasjonTilReserverte(arbeidstakerHendelse, planlagtVarselUuid)
             }
 
             !isPilotbruker -> {
+                log.info("${arbeidstakerHendelse.arbeidstakerFnr} is not a pilot, skal varsle fra jobb")
                 sendInformasjonTilDigitaleIkkePilotBrukere(arbeidstakerHendelse, planlagtVarselUuid)
             }
         }
@@ -105,19 +107,20 @@ class MerVeiledningVarselService(
         log.info("DEBUG")
         log.info(arbeidstakerHendelse.toString())
         val data = dataToVarselData(arbeidstakerHendelse.data)
-        log.info("[ACHTUNG dataToVarselData] journalpost ${data.journalpost}")
-        log.info("[ACHTUNG dataToVarselData] journalpost.id} ${data.journalpost?.id}")
-        log.info("[ACHTUNG dataToVarselData] data.journalpost.uuid ${data.journalpost?.uuid}")
         requireNotNull(data.journalpost)
         requireNotNull(data.journalpost.id)
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerHendelse.arbeidstakerFnr)
         if (databaseAccess.fetchFNRUtsendtMerVeiledningVarsler().contains(arbeidstakerHendelse.arbeidstakerFnr)) {
-            log.info("Fnr er i listen fra utsendt_varsel, sender ikke varsel")
+            log.info("Fnr ${arbeidstakerHendelse.arbeidstakerFnr} er i listen fra utsendt_varsel, sender ikke varsel")
             return
         }
+        log.info("userAccessStatus: $userAccessStatus")
+
         if (userAccessStatus.canUserBeDigitallyNotified) {
+            log.info("${arbeidstakerHendelse.arbeidstakerFnr} Inside canUserBeDigitallyNotified, skal sende sendDigitaltVarselTilArbeidstaker")
             sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
         } else {
+            log.info("${arbeidstakerHendelse.arbeidstakerFnr} Bruker er reservert, skal IKKE sende sendDigitaltVarselTilArbeidstaker, kun send Brev TilFysiskPrint")
             senderFacade.sendBrevTilFysiskPrint(
                 data.journalpost.uuid,
                 arbeidstakerHendelse,
@@ -164,6 +167,7 @@ class MerVeiledningVarselService(
         uuid: String,
         arbeidstakerHendelse: ArbeidstakerHendelse,
     ) {
+        log.info("${arbeidstakerHendelse.arbeidstakerFnr} skal sende til ditt sfrvr")
         val melding = DittSykefravaerMelding(
             OpprettMelding(
                 DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT,

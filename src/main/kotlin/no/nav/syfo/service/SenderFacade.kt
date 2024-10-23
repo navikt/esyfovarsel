@@ -240,6 +240,7 @@ class SenderFacade(
     ) {
         var isSendingSucceed = true
         try {
+            log.info("${varselHendelse.arbeidstakerFnr} skal sende til fysisk print")
             fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType)
         } catch (e: Exception) {
             isSendingSucceed = false

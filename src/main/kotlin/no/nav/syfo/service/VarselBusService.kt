@@ -45,7 +45,7 @@ class VarselBusService(
     suspend fun processVarselHendelse(
         varselHendelse: EsyfovarselHendelse,
     ) {
-        if (varselHendelse.skalFerdigstilles()) {
+       if (varselHendelse.skalFerdigstilles()) {
             ferdigstillVarsel(varselHendelse)
         } else {
             when (varselHendelse.type) {

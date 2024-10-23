@@ -129,8 +129,7 @@ fun EsyfovarselHendelse.toNarmestelederHendelse(): NarmesteLederHendelse {
 
 fun EsyfovarselHendelse.toArbeidstakerHendelse(): ArbeidstakerHendelse {
     return if (this is ArbeidstakerHendelse) {
-        log.info("[ACHTUNG] this: $this")
-        log.info("[ACHTUNG] this.data: ${this.data}")
+        log.info("${this.arbeidstakerFnr}, mapper event til arbeidstakerHendelse")
         this
     } else {
         throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type ArbeidstakerHendelse")
