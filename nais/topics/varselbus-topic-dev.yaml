@@ -45,3 +45,6 @@ spec:
     - team: teamsykefravr
       application: ismanglendemedvirkning
       access: write
+    - team: team-esyfo
+      application: esyfo-kafka-manager
+      access: write
