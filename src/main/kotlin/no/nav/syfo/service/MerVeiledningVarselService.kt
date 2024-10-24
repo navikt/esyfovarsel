@@ -1,5 +1,9 @@
 package no.nav.syfo.service
 
+import java.net.URL
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.*
 import no.nav.syfo.BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT
 import no.nav.syfo.DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT
 import no.nav.syfo.Environment
@@ -9,20 +13,19 @@ import no.nav.syfo.behandlendeenhet.domain.isPilot
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.consumer.pdfgen.PdfgenClient
 import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.domain.Kanal.*
+import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.fetchFNRUtsendtMerVeiledningVarsler
+import no.nav.syfo.db.storeUtsendtMerVeiledningVarselBackup
 import no.nav.syfo.isProdGcp
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
-import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
+import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.*
 import no.nav.syfo.utils.dataToVarselData
 import org.slf4j.LoggerFactory
-import java.net.URL
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.*
 
 const val DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING = "ESYFOVARSEL_MER_VEILEDNING"
 
@@ -47,26 +50,53 @@ class MerVeiledningVarselService(
             behandlendeEnhetClient.getBehandlendeEnhet(arbeidstakerHendelse.arbeidstakerFnr)
                 ?.isPilot(env.isProdGcp()) == true
 
-        when {
-            isBrukerReservert -> {
+        if (!isPilotbruker) {
+            if (isBrukerReservert) {
+                log.info("${arbeidstakerHendelse.arbeidstakerFnr}, reservert, skal varsle reservert fra jobb")
                 sendInformasjonTilReserverte(arbeidstakerHendelse, planlagtVarselUuid)
-            }
-
-            isPilotbruker -> {
-                sendInformasjonTilDigitalePilotBrukere(arbeidstakerHendelse, planlagtVarselUuid)
-            }
-
-            else -> {
+                sendOppgaveTilDittSykefravaer(
+                    arbeidstakerHendelse.arbeidstakerFnr,
+                    planlagtVarselUuid,
+                    arbeidstakerHendelse
+                )
+            } else {
+                log.info("${arbeidstakerHendelse.arbeidstakerFnr} is not a pilot, skal varsle fra jobb")
                 sendInformasjonTilDigitaleIkkePilotBrukere(arbeidstakerHendelse, planlagtVarselUuid)
+                sendOppgaveTilDittSykefravaer(
+                    arbeidstakerHendelse.arbeidstakerFnr,
+                    planlagtVarselUuid,
+                    arbeidstakerHendelse
+                )
             }
-        }
+        } else {
+            val kanal = if (isBrukerReservert) {
+                BREV
+            } else {
+                BRUKERNOTIFIKASJON
+            }
 
-        sendOppgaveTilDittSykefravaer(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, arbeidstakerHendelse)
+            databaseAccess.storeUtsendtMerVeiledningVarselBackup(
+                PUtsendtVarsel(
+                    UUID.randomUUID().toString(),
+                    arbeidstakerHendelse.arbeidstakerFnr,
+                    null,
+                    null,
+                    arbeidstakerHendelse.orgnummer,
+                    arbeidstakerHendelse.type.name,
+                    kanal = kanal.name,
+                    LocalDateTime.now(),
+                    null,
+                    "${UUID.randomUUID()}",
+                    null,
+                    null,
+                ),
+            )
+        }
     }
 
     private suspend fun sendInformasjonTilReserverte(
         arbeidstakerHendelse: ArbeidstakerHendelse,
-        planlagtVarselUuid: String
+        planlagtVarselUuid: String,
     ) {
         val pdf = pdfgenConsumer.getMerVeiledningPdfForReserverte(arbeidstakerHendelse.arbeidstakerFnr)
 
@@ -83,33 +113,9 @@ class MerVeiledningVarselService(
         sendBrevVarselTilArbeidstaker(planlagtVarselUuid, arbeidstakerHendelse, journalpostId!!)
     }
 
-    private suspend fun sendInformasjonTilDigitalePilotBrukere(
-        arbeidstakerHendelse: ArbeidstakerHendelse,
-        planlagtVarselUuid: String
-    ) {
-        val pdf =
-            pdfgenConsumer.getMerVeiledningPdfForDigitalePilotBrukere(arbeidstakerHendelse.arbeidstakerFnr)
-
-        val journalpostId = pdf?.let {
-            dokarkivService.journalforDokument(
-                arbeidstakerHendelse.arbeidstakerFnr,
-                planlagtVarselUuid,
-                it,
-            )
-        }
-
-        if (journalpostId != null) {
-            log.info("Journalførte SSPS for pilotbruker i dokarkiv, journalpostId er $journalpostId")
-        } else {
-            log.error("Kunne ikke journalføre SSPS for pilotbruker i dokarkiv for planlagt uuid $planlagtVarselUuid.")
-        }
-
-        sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
-    }
-
     private suspend fun sendInformasjonTilDigitaleIkkePilotBrukere(
         arbeidstakerHendelse: ArbeidstakerHendelse,
-        planlagtVarselUuid: String
+        planlagtVarselUuid: String,
     ) {
         val pdf =
             pdfgenConsumer.getMerVeiledningPdfForDigitale(arbeidstakerHendelse.arbeidstakerFnr)
@@ -130,17 +136,23 @@ class MerVeiledningVarselService(
     suspend fun sendVarselTilArbeidstaker(
         arbeidstakerHendelse: ArbeidstakerHendelse,
     ) {
+        log.info("DEBUG")
+        log.info(arbeidstakerHendelse.toString())
         val data = dataToVarselData(arbeidstakerHendelse.data)
         requireNotNull(data.journalpost)
         requireNotNull(data.journalpost.id)
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerHendelse.arbeidstakerFnr)
         if (databaseAccess.fetchFNRUtsendtMerVeiledningVarsler().contains(arbeidstakerHendelse.arbeidstakerFnr)) {
-            log.info("Fnr er i listen fra utsendt_varsel, sender ikke varsel")
+            log.info("Fnr ${arbeidstakerHendelse.arbeidstakerFnr} er i listen fra utsendt_varsel, sender ikke varsel")
             return
         }
+        log.info("userAccessStatus: $userAccessStatus")
+
         if (userAccessStatus.canUserBeDigitallyNotified) {
+            log.info("${arbeidstakerHendelse.arbeidstakerFnr} Inside canUserBeDigitallyNotified, skal sende sendDigitaltVarselTilArbeidstaker")
             sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
         } else {
+            log.info("${arbeidstakerHendelse.arbeidstakerFnr} Bruker er reservert, skal IKKE sende sendDigitaltVarselTilArbeidstaker, kun send Brev TilFysiskPrint")
             senderFacade.sendBrevTilFysiskPrint(
                 data.journalpost.uuid,
                 arbeidstakerHendelse,
@@ -187,6 +199,7 @@ class MerVeiledningVarselService(
         uuid: String,
         arbeidstakerHendelse: ArbeidstakerHendelse,
     ) {
+        log.info("${arbeidstakerHendelse.arbeidstakerFnr} skal sende til ditt sfrvr")
         val melding = DittSykefravaerMelding(
             OpprettMelding(
                 DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT,

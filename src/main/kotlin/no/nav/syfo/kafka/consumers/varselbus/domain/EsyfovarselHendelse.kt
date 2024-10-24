@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.syfo.kafka.common.createObjectMapper
 import java.io.Serializable
 import java.time.LocalDateTime
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 private val objectMapper = createObjectMapper()
 
@@ -127,6 +129,7 @@ fun EsyfovarselHendelse.toNarmestelederHendelse(): NarmesteLederHendelse {
 
 fun EsyfovarselHendelse.toArbeidstakerHendelse(): ArbeidstakerHendelse {
     return if (this is ArbeidstakerHendelse) {
+        log.info("${this.arbeidstakerFnr}, mapper event til arbeidstakerHendelse")
         this
     } else {
         throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type ArbeidstakerHendelse")
@@ -167,3 +170,5 @@ fun ArbeidstakerHendelse.isNotEligibleForMikrofrontendProcessing(): Boolean {
 
 fun HendelseType.isNotValidHendelseType() =
     !this.isAktivitetspliktType() && !this.isDialogmoteInnkallingType() && !this.isMerOppfolgingType()
+
+private val log: Logger = LoggerFactory.getLogger(EsyfovarselHendelse::class.qualifiedName)
