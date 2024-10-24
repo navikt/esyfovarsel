@@ -13,7 +13,10 @@ import no.nav.syfo.behandlendeenhet.domain.isPilot
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.consumer.pdfgen.PdfgenClient
 import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.domain.Kanal.*
+import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.fetchFNRUtsendtMerVeiledningVarsler
+import no.nav.syfo.db.storeUtsendtMerVeiledningVarselBackup
 import no.nav.syfo.isProdGcp
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
@@ -47,18 +50,47 @@ class MerVeiledningVarselService(
             behandlendeEnhetClient.getBehandlendeEnhet(arbeidstakerHendelse.arbeidstakerFnr)
                 ?.isPilot(env.isProdGcp()) == true
 
-        when {
-            isBrukerReservert -> {
+        if (!isPilotbruker) {
+            if (isBrukerReservert) {
                 log.info("${arbeidstakerHendelse.arbeidstakerFnr}, reservert, skal varsle reservert fra jobb")
                 sendInformasjonTilReserverte(arbeidstakerHendelse, planlagtVarselUuid)
-                sendOppgaveTilDittSykefravaer(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, arbeidstakerHendelse)
-            }
-
-            !isPilotbruker -> {
+                sendOppgaveTilDittSykefravaer(
+                    arbeidstakerHendelse.arbeidstakerFnr,
+                    planlagtVarselUuid,
+                    arbeidstakerHendelse
+                )
+            } else {
                 log.info("${arbeidstakerHendelse.arbeidstakerFnr} is not a pilot, skal varsle fra jobb")
                 sendInformasjonTilDigitaleIkkePilotBrukere(arbeidstakerHendelse, planlagtVarselUuid)
-                sendOppgaveTilDittSykefravaer(arbeidstakerHendelse.arbeidstakerFnr, planlagtVarselUuid, arbeidstakerHendelse)
+                sendOppgaveTilDittSykefravaer(
+                    arbeidstakerHendelse.arbeidstakerFnr,
+                    planlagtVarselUuid,
+                    arbeidstakerHendelse
+                )
             }
+        } else {
+            val kanal = if (isBrukerReservert) {
+                BREV
+            } else {
+                BRUKERNOTIFIKASJON
+            }
+
+            databaseAccess.storeUtsendtMerVeiledningVarselBackup(
+                PUtsendtVarsel(
+                    UUID.randomUUID().toString(),
+                    arbeidstakerHendelse.arbeidstakerFnr,
+                    null,
+                    null,
+                    arbeidstakerHendelse.orgnummer,
+                    arbeidstakerHendelse.type.name,
+                    kanal = kanal.name,
+                    LocalDateTime.now(),
+                    null,
+                    "${UUID.randomUUID()}",
+                    null,
+                    null,
+                ),
+            )
         }
     }
 
