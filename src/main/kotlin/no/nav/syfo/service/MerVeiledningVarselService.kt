@@ -134,8 +134,6 @@ class MerVeiledningVarselService(
     suspend fun sendVarselTilArbeidstaker(
         arbeidstakerHendelse: ArbeidstakerHendelse,
     ) {
-        log.info("DEBUG")
-        log.info(arbeidstakerHendelse.toString())
         val data = dataToVarselData(arbeidstakerHendelse.data)
         requireNotNull(data.journalpost)
         requireNotNull(data.journalpost.id)
@@ -143,7 +141,6 @@ class MerVeiledningVarselService(
         if (databaseAccess.fetchFNRUtsendtMerVeiledningVarsler().contains(arbeidstakerHendelse.arbeidstakerFnr)) {
             return
         }
-        log.info("userAccessStatus: $userAccessStatus")
 
         if (userAccessStatus.canUserBeDigitallyNotified) {
             sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
