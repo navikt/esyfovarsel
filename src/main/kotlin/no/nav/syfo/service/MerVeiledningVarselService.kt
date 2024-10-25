@@ -50,46 +50,28 @@ class MerVeiledningVarselService(
             behandlendeEnhetClient.getBehandlendeEnhet(arbeidstakerHendelse.arbeidstakerFnr)
                 ?.isPilot(env.isProdGcp()) == true
 
-        if (!isPilotbruker) {
-            if (isBrukerReservert) {
-                sendInformasjonTilReserverte(arbeidstakerHendelse, planlagtVarselUuid)
-                sendOppgaveTilDittSykefravaer(
-                    arbeidstakerHendelse.arbeidstakerFnr,
-                    planlagtVarselUuid,
-                    arbeidstakerHendelse
-                )
-            } else {
-                sendInformasjonTilDigitaleIkkePilotBrukere(arbeidstakerHendelse, planlagtVarselUuid)
-                sendOppgaveTilDittSykefravaer(
-                    arbeidstakerHendelse.arbeidstakerFnr,
-                    planlagtVarselUuid,
-                    arbeidstakerHendelse
-                )
-            }
+        val kanal = if (isBrukerReservert) {
+            BREV
         } else {
-            val kanal = if (isBrukerReservert) {
-                BREV
-            } else {
-                BRUKERNOTIFIKASJON
-            }
-
-            databaseAccess.storeUtsendtMerVeiledningVarselBackup(
-                PUtsendtVarsel(
-                    UUID.randomUUID().toString(),
-                    arbeidstakerHendelse.arbeidstakerFnr,
-                    null,
-                    null,
-                    arbeidstakerHendelse.orgnummer,
-                    arbeidstakerHendelse.type.name,
-                    kanal = kanal.name,
-                    LocalDateTime.now(),
-                    null,
-                    "${UUID.randomUUID()}",
-                    null,
-                    null,
-                ),
-            )
+            BRUKERNOTIFIKASJON
         }
+
+        databaseAccess.storeUtsendtMerVeiledningVarselBackup(
+            PUtsendtVarsel(
+                uuid = UUID.randomUUID().toString(),
+                fnr = arbeidstakerHendelse.arbeidstakerFnr,
+                aktorId = null,
+                narmesteLederFnr = null,
+                orgnummer = arbeidstakerHendelse.orgnummer,
+                type = arbeidstakerHendelse.type.name,
+                kanal = kanal.name,
+                utsendtTidspunkt = LocalDateTime.now(),
+                planlagtVarselId = null,
+                eksternReferanse = "${UUID.randomUUID()}",
+                ferdigstiltTidspunkt = null,
+                arbeidsgivernotifikasjonMerkelapp = null,
+            ),
+        )
     }
 
     private suspend fun sendInformasjonTilReserverte(

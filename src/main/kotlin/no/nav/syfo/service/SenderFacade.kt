@@ -99,12 +99,6 @@ class SenderFacade(
                 varselHendelse = varselHendelse,
                 eksternReferanse = uuid
             )
-// TODO: Uncomment when we go live for all
-//            lagreUtsendtMerVeiledningVarselBackUp(
-//                kanal = BRUKERNOTIFIKASJON,
-//                varselHendelse = varselHendelse,
-//                eksternReferanse = uuid
-//            )
         } catch (e: Exception) {
             log.warn("Error while sending varsel to BRUKERNOTIFIKASJON: ${e.message}")
             lagreIkkeUtsendtArbeidstakerVarsel(
@@ -243,7 +237,6 @@ class SenderFacade(
     ) {
         var isSendingSucceed = true
         try {
-            log.info("${varselHendelse.arbeidstakerFnr} skal sende til fysisk print")
             fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType)
         } catch (e: Exception) {
             isSendingSucceed = false
@@ -259,8 +252,6 @@ class SenderFacade(
         }
         if (isSendingSucceed) {
             lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid)
-            // TODO: Uncomment when we go live for all
-            // lagreUtsendtMerVeiledningVarselBackUp(BREV, varselHendelse, uuid)
         }
     }
 
