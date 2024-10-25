@@ -1,17 +1,17 @@
 package no.nav.syfo.service
 
+import java.net.URL
+import java.time.LocalDateTime
+import java.util.*
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.Kanal
-import no.nav.syfo.db.domain.Kanal.ARBEIDSGIVERNOTIFIKASJON
-import no.nav.syfo.db.domain.Kanal.BREV
-import no.nav.syfo.db.domain.Kanal.BRUKERNOTIFIKASJON
-import no.nav.syfo.db.domain.Kanal.DINE_SYKMELDTE
-import no.nav.syfo.db.domain.Kanal.DITT_SYKEFRAVAER
+import no.nav.syfo.db.domain.Kanal.*
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.db.fetchUferdigstilteVarsler
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
+import no.nav.syfo.db.storeUtsendtMerVeiledningVarselBackup
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
 import no.nav.syfo.domain.PersonIdent
@@ -25,9 +25,6 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.utils.enumValueOfOrNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.URL
-import java.time.LocalDateTime
-import java.util.*
 
 class SenderFacade(
     private val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
@@ -178,7 +175,7 @@ class SenderFacade(
 
     suspend fun ferdigstillDittSykefravaerVarslerAvTyper(
         varselHendelse: ArbeidstakerHendelse,
-        varselTyper: Set<HendelseType>
+        varselTyper: Set<HendelseType>,
     ) {
         fetchUferdigstilteVarsler(
             PersonIdent(varselHendelse.arbeidstakerFnr),
@@ -303,6 +300,32 @@ class SenderFacade(
                 null,
             ),
         )
+    }
+
+    fun lagreUtsendtMerVeiledningVarselBackUp(
+        kanal: Kanal,
+        varselHendelse: ArbeidstakerHendelse,
+        eksternReferanse: String,
+    ) {
+        if (varselHendelse.type == HendelseType.SM_MER_VEILEDNING) {
+            log.info("Storing backup mer veiledning varsel")
+            database.storeUtsendtMerVeiledningVarselBackup(
+                PUtsendtVarsel(
+                    UUID.randomUUID().toString(),
+                    varselHendelse.arbeidstakerFnr,
+                    null,
+                    null,
+                    null,
+                    varselHendelse.type.name,
+                    kanal.name,
+                    LocalDateTime.now(),
+                    null,
+                    eksternReferanse,
+                    null,
+                    null,
+                ),
+            )
+        }
     }
 
     private fun lagreIkkeUtsendtArbeidstakerVarsel(

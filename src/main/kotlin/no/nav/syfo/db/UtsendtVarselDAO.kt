@@ -118,3 +118,34 @@ fun DatabaseInterface.deleteUtsendtVarselByFnr(fnr: PersonIdent) {
     }
 }
 
+fun DatabaseInterface.storeUtsendtMerVeiledningVarselBackup(PUtsendtVarsel: PUtsendtVarsel) {
+    val insertStatement = """INSERT INTO UTSENDT_MER_VEILEDNING_VARSEL_BACKUP (
+        uuid,
+        narmesteLeder_fnr,
+        fnr,   
+        orgnummer,
+        type,
+        kanal,
+        utsendt_tidspunkt,
+        ekstern_ref,
+        arbeidsgivernotifikasjon_merkelapp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """.trimIndent()
+
+    connection.use { connection ->
+        connection.prepareStatement(insertStatement).use {
+            it.setObject(1, UUID.fromString(PUtsendtVarsel.uuid))
+            it.setString(2, PUtsendtVarsel.narmesteLederFnr)
+            it.setString(3, PUtsendtVarsel.fnr)
+            it.setString(4, PUtsendtVarsel.orgnummer)
+            it.setString(5, PUtsendtVarsel.type)
+            it.setString(6, PUtsendtVarsel.kanal)
+            it.setTimestamp(7, Timestamp.valueOf(PUtsendtVarsel.utsendtTidspunkt))
+            it.setString(8, PUtsendtVarsel.eksternReferanse)
+            it.setString(9, PUtsendtVarsel.arbeidsgivernotifikasjonMerkelapp)
+            it.executeUpdate()
+        }
+
+        connection.commit()
+    }
+}
+

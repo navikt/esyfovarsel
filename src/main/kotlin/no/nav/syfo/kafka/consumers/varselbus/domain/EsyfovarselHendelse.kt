@@ -1,9 +1,9 @@
 package no.nav.syfo.kafka.consumers.varselbus.domain
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import no.nav.syfo.kafka.common.createObjectMapper
 import java.io.Serializable
 import java.time.LocalDateTime
+import no.nav.syfo.kafka.common.createObjectMapper
 
 private val objectMapper = createObjectMapper()
 
@@ -167,3 +167,4 @@ fun ArbeidstakerHendelse.isNotEligibleForMikrofrontendProcessing(): Boolean {
 
 fun HendelseType.isNotValidHendelseType() =
     !this.isAktivitetspliktType() && !this.isDialogmoteInnkallingType() && !this.isMerOppfolgingType()
+
