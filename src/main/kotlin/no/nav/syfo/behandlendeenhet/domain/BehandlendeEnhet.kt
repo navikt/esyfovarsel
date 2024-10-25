@@ -16,5 +16,5 @@ fun BehandlendeEnhet.isPilot(isProd: Boolean): Boolean {
         return listOf(OVRE_EIKER_ENHETSNUMMER, ASKER_ENHETSNUMMER, NORDRE_AKER_ENHETSNUMMER).contains(this.enhetId)
     }
 
-    return listOf(TEST_ENHETSNUMMER, TEST_ENHETSNUMMER_2, "1037", "1742", "0105", "1532").contains(this.enhetId)
+    return listOf(TEST_ENHETSNUMMER, TEST_ENHETSNUMMER_2, "1037", "1742", "0105", "1532", "1169", "1837", "0806").contains(this.enhetId)
 }
