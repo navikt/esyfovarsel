@@ -1,20 +1,10 @@
 package no.nav.syfo.service
 
-import java.net.URL
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.*
 import no.nav.syfo.BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT
 import no.nav.syfo.DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT
 import no.nav.syfo.Environment
 import no.nav.syfo.MER_VEILEDNING_URL
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
-import no.nav.syfo.db.DatabaseInterface
-import no.nav.syfo.db.domain.Kanal.BREV
-import no.nav.syfo.db.domain.Kanal.BRUKERNOTIFIKASJON
-import no.nav.syfo.db.domain.PUtsendtVarsel
-import no.nav.syfo.db.fetchFNRUtsendtMerVeiledningVarsler
-import no.nav.syfo.db.storeUtsendtMerVeiledningVarselBackup
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
@@ -22,6 +12,10 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
 import no.nav.syfo.utils.dataToVarselData
+import java.net.URL
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.*
 
 const val DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING = "ESYFOVARSEL_MER_VEILEDNING"
 
@@ -29,38 +23,7 @@ class MerVeiledningVarselService(
     val senderFacade: SenderFacade,
     val env: Environment,
     val accessControlService: AccessControlService,
-    private val databaseAccess: DatabaseInterface,
 ) {
-
-    suspend fun sendVarselTilArbeidstakerFromJob(
-        arbeidstakerHendelse: ArbeidstakerHendelse,
-    ) {
-        val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerHendelse.arbeidstakerFnr)
-        val isBrukerReservert = !userAccessStatus.canUserBeDigitallyNotified
-
-        val kanal = if (isBrukerReservert) {
-            BREV
-        } else {
-            BRUKERNOTIFIKASJON
-        }
-
-        databaseAccess.storeUtsendtMerVeiledningVarselBackup(
-            PUtsendtVarsel(
-                uuid = UUID.randomUUID().toString(),
-                fnr = arbeidstakerHendelse.arbeidstakerFnr,
-                aktorId = null,
-                narmesteLederFnr = null,
-                orgnummer = arbeidstakerHendelse.orgnummer,
-                type = arbeidstakerHendelse.type.name,
-                kanal = kanal.name,
-                utsendtTidspunkt = LocalDateTime.now(),
-                planlagtVarselId = null,
-                eksternReferanse = "${UUID.randomUUID()}",
-                ferdigstiltTidspunkt = null,
-                arbeidsgivernotifikasjonMerkelapp = null,
-            ),
-        )
-    }
 
     suspend fun sendVarselTilArbeidstaker(
         arbeidstakerHendelse: ArbeidstakerHendelse,
@@ -69,9 +32,6 @@ class MerVeiledningVarselService(
         requireNotNull(data.journalpost)
         requireNotNull(data.journalpost.id)
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerHendelse.arbeidstakerFnr)
-        if (databaseAccess.fetchFNRUtsendtMerVeiledningVarsler().contains(arbeidstakerHendelse.arbeidstakerFnr)) {
-            return
-        }
 
         if (userAccessStatus.canUserBeDigitallyNotified) {
             sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)

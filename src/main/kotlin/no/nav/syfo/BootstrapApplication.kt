@@ -36,8 +36,7 @@ import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.grantAccessToIAMUsers
-import no.nav.syfo.job.SendMerVeiledningVarslerJobb
-import no.nav.syfo.job.sendNotificationsJob
+import no.nav.syfo.job.closeExpiredMicrofrontendsJob
 import no.nav.syfo.kafka.common.launchKafkaListener
 import no.nav.syfo.kafka.consumers.infotrygd.InfotrygdKafkaConsumer
 import no.nav.syfo.kafka.consumers.testdata.reset.TestdataResetConsumer
@@ -58,7 +57,6 @@ import no.nav.syfo.service.DialogmoteInnkallingVarselService
 import no.nav.syfo.service.FriskmeldingTilArbeidsformidlingVedtakService
 import no.nav.syfo.service.FysiskBrevUtsendingService
 import no.nav.syfo.service.ManglendeMedvirkningVarselService
-import no.nav.syfo.service.MerVeiledningVarselFinder
 import no.nav.syfo.service.MerVeiledningVarselService
 import no.nav.syfo.service.MotebehovVarselService
 import no.nav.syfo.service.OppfolgingsplanVarselService
@@ -81,7 +79,7 @@ lateinit var database: DatabaseInterface
 fun main() {
     if (isJob()) {
         val env = getJobEnv()
-        sendNotificationsJob(env)
+        closeExpiredMicrofrontendsJob(env)
     } else {
         val server = embeddedServer(
             factory = Netty,
@@ -170,7 +168,6 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
         senderFacade = senderFacade,
         env = env,
         accessControlService = accessControlService,
-        databaseAccess = database,
     )
     val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(database)
     val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(database)
@@ -212,11 +209,8 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
 
         serverModule(
             env,
-            merVeiledningVarselService,
             sykepengerMaxDateService,
-            sykmeldingService,
             mikrofrontendService,
-            pdlConsumer,
             veilederTilgangskontrollConsumer,
         )
 
@@ -245,25 +239,10 @@ private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsume
 
 fun Application.serverModule(
     env: Environment,
-    merVeiledningVarselService: MerVeiledningVarselService,
     sykepengerMaxDateService: SykepengerMaxDateService,
-    sykmeldingService: SykmeldingService,
     mikrofrontendService: MikrofrontendService,
-    pdlConsumer: PdlConsumer,
     veilederTilgangskontrollConsumer: VeilederTilgangskontrollConsumer,
 ) {
-    val merVeiledningVarselFinder = MerVeiledningVarselFinder(
-        database,
-        sykmeldingService,
-        pdlConsumer,
-    )
-
-    val sendMerVeiledningVarslerJobb = SendMerVeiledningVarslerJobb(
-        merVeiledningVarselFinder,
-        merVeiledningVarselService,
-        mikrofrontendService,
-    )
-
     install(ContentNegotiation) {
         jackson {
             registerKotlinModule()
@@ -285,7 +264,6 @@ fun Application.serverModule(
 
     runningRemotely {
         setupRoutesWithAuthentication(
-            sendMerVeiledningVarslerJobb,
             mikrofrontendService,
             sykepengerMaxDateService,
             veilederTilgangskontrollConsumer,
@@ -295,7 +273,6 @@ fun Application.serverModule(
 
     runningLocally {
         setupLocalRoutesWithAuthentication(
-            sendMerVeiledningVarslerJobb,
             mikrofrontendService,
             sykepengerMaxDateService,
             veilederTilgangskontrollConsumer,

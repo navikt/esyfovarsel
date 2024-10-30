@@ -13,7 +13,6 @@ fun getJobEnv() =
         objectMapper.readValue(File(localJobPropertiesPath), JobEnv::class.java)
     } else {
         JobEnv(
-            sendVarsler = getBooleanEnvVar("SEND_VARSLER"),
             jobTriggerUrl = getEnvVar("ESYFOVARSEL_JOB_TRIGGER_URL"),
             serviceuserUsername = File("$serviceuserMounthPath/username").readText(),
             serviceuserPassword = File("$serviceuserMounthPath/password").readText(),
@@ -176,7 +175,6 @@ data class ToggleEnv(
 )
 
 data class JobEnv(
-    val sendVarsler: Boolean,
     val jobTriggerUrl: String,
     val serviceuserUsername: String,
     val serviceuserPassword: String,

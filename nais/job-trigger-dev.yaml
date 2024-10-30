@@ -19,7 +19,5 @@ spec:
       value: remote
     - name: JOB
       value: "true"
-    - name: SEND_VARSLER
-      value: "true"
     - name: ESYFOVARSEL_JOB_TRIGGER_URL
       value: http://esyfovarsel/job/trigger
