@@ -54,14 +54,9 @@ fun getEnv(): Environment {
                 arbeidsgiverNotifikasjonProdusentApiScope = getEnvVar("AG_NOTIFIKASJON_PRODUSENT_API_SCOPE"),
                 narmestelederUrl = getEnvVar("NARMESTELEDER_URL"),
                 narmestelederScope = getEnvVar("NARMESTELEDER_SCOPE"),
-                behandlendeEnhetUrl = getEnvVar("BEHANDLENDEENHET_URL"),
-                behandlendeEnhetScope = getEnvVar("BEHANDLENDEENHET_SCOPE"),
                 baseUrlDineSykmeldte = getEnvVar("BASE_URL_DINE_SYKMELDTE"),
                 dokdistfordelingUrl = getEnvVar("DOKDIST_FORDELING_URL"),
                 dokdistfordelingScope = getEnvVar("DOKDIST_FORDELING_SCOPE"),
-                dokarkivUrl = getEnvVar("DOKARKIV_URL"),
-                dokarkivScope = getEnvVar("DOKARKIV_SCOPE"),
-                syfooppdfgenUrl = getEnvVar("SYFOOPPDFGEN_URL"),
                 istilgangskontrollUrl = getEnvVar("ISTILGANGSKONTROLL_URL"),
                 istilgangskontrollScope = getEnvVar("ISTILGANGSKONTROLL_SCOPE"),
                 dokumentarkivOppfolgingDocumentsPageUrl = getEnvVar("BASE_URL_DOKUMENTARKIV_OPPFOLGING_DOCUMENTS_PAGE"),
@@ -139,14 +134,9 @@ data class UrlEnv(
     val arbeidsgiverNotifikasjonProdusentApiScope: String,
     val narmestelederUrl: String,
     val narmestelederScope: String,
-    val behandlendeEnhetUrl: String,
-    val behandlendeEnhetScope: String,
     val baseUrlDineSykmeldte: String,
     val dokdistfordelingUrl: String,
     val dokdistfordelingScope: String,
-    val dokarkivUrl: String,
-    val dokarkivScope: String,
-    val syfooppdfgenUrl: String,
     val istilgangskontrollUrl: String,
     val istilgangskontrollScope: String,
     val dokumentarkivOppfolgingDocumentsPageUrl: String,
@@ -202,7 +192,5 @@ fun isJob(): Boolean = getBooleanEnvVar("JOB")
 fun getBooleanEnvVar(varName: String) = System.getenv(varName).toBoolean()
 
 const val DEV_GCP = "dev-gcp"
-const val PROD_GCP = "prod-gcp"
 
 fun Environment.isDevGcp() = DEV_GCP == appEnv.cluster
-fun Environment.isProdGcp() = PROD_GCP == appEnv.cluster

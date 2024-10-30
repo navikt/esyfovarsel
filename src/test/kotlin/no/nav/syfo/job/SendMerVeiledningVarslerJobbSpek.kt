@@ -49,7 +49,7 @@ class SendMerVeiledningVarslerJobbSpek : DescribeSpec({
 
             sendVarselJobb.sendVarsler()
 
-            coVerify { merVeiledningVarselService.sendVarselTilArbeidstakerFromJob(any(), merVeiledningVarsel.uuid) }
+            coVerify { merVeiledningVarselService.sendVarselTilArbeidstakerFromJob(any()) }
             coVerify { mikrofrontendService.updateMikrofrontendForUserByHendelse(any()) }
         }
     }

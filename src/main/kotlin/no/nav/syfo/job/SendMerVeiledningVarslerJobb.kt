@@ -35,7 +35,6 @@ class SendMerVeiledningVarslerJobb(
                         arbeidstakerFnr = it.fnr,
                         orgnummer = null,
                     ),
-                    it.uuid,
                 )
 
                 mikrofrontendService.updateMikrofrontendForUserByHendelse(

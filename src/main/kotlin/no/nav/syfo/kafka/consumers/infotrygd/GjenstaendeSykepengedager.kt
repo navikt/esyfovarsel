@@ -1,9 +1,8 @@
 package no.nav.syfo.kafka.consumers.infotrygd
 
-import no.nav.syfo.utils.isEqualOrBefore
 import java.time.DayOfWeek
 import java.time.LocalDate
-import kotlin.streams.toList
+import no.nav.syfo.utils.isEqualOrBefore
 
 fun LocalDate.gjenstaendeSykepengedager(other: LocalDate): Int {
     // datesUntil teller med startdato og ikke sluttdato, mens vi ikke vil telle med startdato, men sluttdato, derfor er det lagt til en dag på begge datoene

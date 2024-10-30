@@ -3,10 +3,13 @@ package no.nav.syfo.kafka.consumers.varselbus
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
-import no.nav.syfo.kafka.common.*
+import no.nav.syfo.kafka.common.KafkaListener
+import no.nav.syfo.kafka.common.consumerProperties
+import no.nav.syfo.kafka.common.createObjectMapper
+import no.nav.syfo.kafka.common.pollDurationInMillis
+import no.nav.syfo.kafka.common.topicVarselBus
 import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
 import no.nav.syfo.service.VarselBusService
-import no.nav.syfo.shutdownApplication
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
