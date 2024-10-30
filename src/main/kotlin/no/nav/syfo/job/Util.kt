@@ -23,7 +23,7 @@ fun closeExpiredMicrofrontendsJob(env: JobEnv) {
         }
         val status = response.status
         if (status == HttpStatusCode.OK) {
-            logg.info("Har trigget varselutsending")
+            logg.info("Jobb startet")
         } else {
             logg.error("Feil i esyfovarsel-job: Klarte ikke kalle trigger-API i esyfovarsel. Fikk svar med status: $status")
         }
