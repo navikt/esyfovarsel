@@ -69,7 +69,7 @@ fun DatabaseInterface.fetchUtsendtVarselByFnr(fnr: String): List<PUtsendtVarsel>
 }
 
 fun DatabaseInterface.fetchFNRUtsendtMerVeiledningVarsler(): List<String> {
-    val nyttVarselLimit = 106
+    val nyttVarselLimit = 107
     val queryStatement = """SELECT * 
                             FROM UTSENDT_VARSEL
                             WHERE TYPE = 'SM_MER_VEILEDNING'
