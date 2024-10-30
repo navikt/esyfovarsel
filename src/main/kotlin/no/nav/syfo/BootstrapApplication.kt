@@ -5,13 +5,20 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.typesafe.config.ConfigFactory
-import io.ktor.serialization.jackson.*
-import io.ktor.server.application.*
-import io.ktor.server.config.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.routing.*
+import io.ktor.serialization.jackson.jackson
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.engine.ApplicationEngineEnvironment
+import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.connector
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.engine.stop
+import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.routing.routing
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -19,13 +26,10 @@ import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.auth.setupLocalRoutesWithAuthentication
 import no.nav.syfo.auth.setupRoutesWithAuthentication
-import no.nav.syfo.behandlendeenhet.BehandlendeEnhetClient
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
 import no.nav.syfo.consumer.dkif.DkifConsumer
-import no.nav.syfo.consumer.dokarkiv.DokarkivConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
-import no.nav.syfo.consumer.pdfgen.PdfgenClient
 import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
@@ -45,15 +49,30 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaPr
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
-import no.nav.syfo.service.*
-import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
-import no.nav.syfo.service.microfrontend.MikrofrontendService
+import no.nav.syfo.service.AccessControlService
+import no.nav.syfo.service.AktivitetspliktForhandsvarselVarselService
+import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
+import no.nav.syfo.service.ArbeidsuforhetForhandsvarselService
+import no.nav.syfo.service.BrukernotifikasjonerService
+import no.nav.syfo.service.DialogmoteInnkallingVarselService
+import no.nav.syfo.service.FriskmeldingTilArbeidsformidlingVedtakService
+import no.nav.syfo.service.FysiskBrevUtsendingService
+import no.nav.syfo.service.ManglendeMedvirkningVarselService
+import no.nav.syfo.service.MerVeiledningVarselFinder
+import no.nav.syfo.service.MerVeiledningVarselService
+import no.nav.syfo.service.MotebehovVarselService
+import no.nav.syfo.service.OppfolgingsplanVarselService
+import no.nav.syfo.service.SenderFacade
+import no.nav.syfo.service.SykepengerMaxDateService
+import no.nav.syfo.service.SykmeldingService
+import no.nav.syfo.service.TestdataResetService
+import no.nav.syfo.service.VarselBusService
 import no.nav.syfo.service.microfrontend.MikrofrontendAktivitetskravService
+import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
 import no.nav.syfo.service.microfrontend.MikrofrontendMerOppfolgingService
+import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.utils.LeaderElection
 import no.nav.syfo.utils.RunOnElection
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 val state: ApplicationState = ApplicationState()
 val backgroundTasksContext = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
@@ -104,8 +123,6 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
         env.urlEnv.baseUrlDineSykmeldte,
     )
     val journalpostdistribusjonConsumer = JournalpostdistribusjonConsumer(env.urlEnv, azureAdTokenConsumer)
-    val dokarkivConsumer = DokarkivConsumer(env.urlEnv, azureAdTokenConsumer)
-    val dokarkivService = DokarkivService(dokarkivConsumer)
 
     val brukernotifikasjonKafkaProducer = BrukernotifikasjonKafkaProducer(env)
     val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
@@ -149,15 +166,10 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
     val oppfolgingsplanVarselService =
         OppfolgingsplanVarselService(senderFacade, accessControlService, env.urlEnv.oppfolgingsplanerUrl)
     val sykepengerMaxDateService = SykepengerMaxDateService(database, pdlConsumer)
-    val pdfgenConsumer = PdfgenClient(env.urlEnv, database)
-    val behandlendeEnhetClient = BehandlendeEnhetClient(env.urlEnv, azureAdTokenConsumer)
     val merVeiledningVarselService = MerVeiledningVarselService(
         senderFacade = senderFacade,
         env = env,
-        pdfgenConsumer = pdfgenConsumer,
-        dokarkivService = dokarkivService,
         accessControlService = accessControlService,
-        behandlendeEnhetClient = behandlendeEnhetClient,
         databaseAccess = database,
     )
     val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(database)

@@ -7,9 +7,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import no.nav.syfo.BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT
 import no.nav.syfo.access.domain.UserAccessStatus
-import no.nav.syfo.behandlendeenhet.BehandlendeEnhetClient
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
-import no.nav.syfo.consumer.pdfgen.PdfgenClient
 import no.nav.syfo.getTestEnv
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
@@ -17,19 +15,13 @@ import no.nav.syfo.testutil.EmbeddedDatabase
 
 class MerVeiledningVarselServiceTest : DescribeSpec({
     val senderFacade = mockk<SenderFacade>(relaxed = true)
-    val pdfgenClient = mockk<PdfgenClient>(relaxed = true)
-    val dokarkivService = mockk<DokarkivService>(relaxed = true)
     val accessControlService = mockk<AccessControlService>(relaxed = true)
-    val behandlendeEnhetClient = mockk<BehandlendeEnhetClient>(relaxed = true)
     val testEnv = getTestEnv()
     val embeddedDatabase = EmbeddedDatabase()
     val merveiledningVarselService = MerVeiledningVarselService(
         senderFacade = senderFacade,
         env = testEnv,
-        pdfgenConsumer = pdfgenClient,
-        dokarkivService = dokarkivService,
         accessControlService = accessControlService,
-        behandlendeEnhetClient = behandlendeEnhetClient,
         databaseAccess = embeddedDatabase,
     )
 
