@@ -2,22 +2,24 @@ package no.nav.syfo.auth
 
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
-import io.ktor.server.routing.*
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.AuthenticationConfig
+import io.ktor.server.auth.UserIdPrincipal
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.basic
+import io.ktor.server.auth.jwt.JWTCredential
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.jwt.jwt
+import io.ktor.server.routing.routing
+import java.net.URL
+import java.util.concurrent.TimeUnit
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.api.job.registerJobTriggerApi
-import no.nav.syfo.api.maxdate.registerSykepengerMaxDateAzureApi
-import no.nav.syfo.api.maxdate.registerSykepengerMaxDateAzureApiV2
-import no.nav.syfo.api.maxdate.registerSykepengerMaxDateRestApi
-import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
-import no.nav.syfo.service.SykepengerMaxDateService
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.URL
-import java.util.concurrent.TimeUnit
 
 val log: Logger = LoggerFactory.getLogger(Authentication::class.qualifiedName)
 
@@ -103,8 +105,6 @@ private fun JWTCredential.inExpectedAudience(expectedAudience: List<String>) = e
 
 fun Application.setupLocalRoutesWithAuthentication(
     mikrofrontendService: MikrofrontendService,
-    sykepengerMaxDateService: SykepengerMaxDateService,
-    veilederTilgangskontrollConsumer: VeilederTilgangskontrollConsumer,
     authEnv: AuthEnv,
 ) {
     install(Authentication) {
@@ -120,22 +120,14 @@ fun Application.setupLocalRoutesWithAuthentication(
     }
 
     routing {
-        registerSykepengerMaxDateRestApi(sykepengerMaxDateService)
-
         authenticate("auth-basic") {
             registerJobTriggerApi(mikrofrontendService)
-        }
-        authenticate(JwtIssuerType.INTERNAL_AZUREAD.name) {
-            registerSykepengerMaxDateAzureApi(sykepengerMaxDateService, veilederTilgangskontrollConsumer)
-            registerSykepengerMaxDateAzureApiV2(sykepengerMaxDateService, veilederTilgangskontrollConsumer)
         }
     }
 }
 
 fun Application.setupRoutesWithAuthentication(
     mikrofrontendService: MikrofrontendService,
-    sykepengerMaxDateService: SykepengerMaxDateService,
-    veilederTilgangskontrollConsumer: VeilederTilgangskontrollConsumer,
     authEnv: AuthEnv,
 ) {
     val wellKnownTokenX = getWellKnown(authEnv.tokenXWellKnownUrl)
@@ -149,13 +141,6 @@ fun Application.setupRoutesWithAuthentication(
     routing {
         authenticate("auth-basic") {
             registerJobTriggerApi(mikrofrontendService)
-        }
-        authenticate(JwtIssuerType.INTERNAL_AZUREAD.name) {
-            registerSykepengerMaxDateAzureApi(sykepengerMaxDateService, veilederTilgangskontrollConsumer)
-            registerSykepengerMaxDateAzureApiV2(sykepengerMaxDateService, veilederTilgangskontrollConsumer)
-        }
-        authenticate("tokenx") {
-            registerSykepengerMaxDateRestApi(sykepengerMaxDateService)
         }
     }
 }
