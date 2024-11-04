@@ -45,9 +45,9 @@ val COUNT_CALL_PDL_FAIL: Counter = Counter.builder(CALL_PDL_FAIL)
     .description("Counts the number of failed calls to pdl")
     .register(METRICS_REGISTRY)
 
-fun tellMerVeiledningVarselSendt(varslerSendt: Int) {
-    COUNT_ALL_NOTICE_SENT.increment(varslerSendt.toDouble())
-    COUNT_MER_VEILEDNING_NOTICE_SENT.increment(varslerSendt.toDouble())
+fun tellMerVeiledningVarselSendt() {
+    COUNT_ALL_NOTICE_SENT.increment()
+    COUNT_MER_VEILEDNING_NOTICE_SENT.increment()
 }
 
 fun tellSvarMotebehovVarselSendt(varslerSendt: Int) {

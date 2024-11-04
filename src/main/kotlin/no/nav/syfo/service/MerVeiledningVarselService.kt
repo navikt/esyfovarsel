@@ -10,6 +10,7 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
+import no.nav.syfo.metrics.tellMerVeiledningVarselSendt
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
 import no.nav.syfo.utils.dataToVarselData
 import java.net.URL
@@ -48,6 +49,7 @@ class MerVeiledningVarselService(
             UUID.randomUUID().toString(),
             arbeidstakerHendelse
         )
+        tellMerVeiledningVarselSendt()
     }
 
     private fun sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse: ArbeidstakerHendelse) {
