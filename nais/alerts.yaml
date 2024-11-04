@@ -36,24 +36,3 @@ spec:
           labels:
             namespace: team-esyfo
             severity: warning
-        - alert: KAFKA INFOTRYGD CONSUMER LAG
-          expr: kafka_consumergroup_group_topic_sum_lag{topic="aap.sykepengedager.infotrygd.v1", group="esyfovarsel-group-infotrygd-01"} > 0
-          for: 15m
-          annotations:
-            summary: "esyfovarsel har ukonsumerte Kafkameldinger på topic aap.sykepengedager.infotrygd.v1"
-            action: "Finn ut hvorfor esyfovarsel har stoppet å konsumere fra topic"
-          labels:
-            namespace: team-esyfo
-            severity: warning
-        - alert: KAFKA UTBETALING CONSUMER LAG
-          expr: kafka_consumergroup_group_topic_sum_lag{topic="flex.ditt-sykefravaer-melding", group="esyfovarsel-group-utbetaling-spleis-01"} > 0
-          for: 15m
-          annotations:
-            summary: "esyfovarsel har ukonsumerte Kafkameldinger på topic tbd.utbetaling"
-            action: "Finn ut hvorfor esyfovarsel har stoppet å konsumere fra topic"
-          labels:
-            namespace: team-esyfo
-            severity: warning
-
-
-

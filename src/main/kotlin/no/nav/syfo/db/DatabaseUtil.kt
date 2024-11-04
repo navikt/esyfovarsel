@@ -22,15 +22,6 @@ fun ResultSet.toPPlanlagtVarsel() = PPlanlagtVarsel(
     sistEndret = getTimestamp("sist_endret").toLocalDateTime()
 )
 
-fun ResultSet.toPUtbetaling() = PUtbetaling(
-    id = UUID.fromString(getString("id")),
-    fnr = getString("fnr"),
-    utbetaltTom = getDate("utbetalt_tom").toLocalDate(),
-    forelopigBeregnetSlutt = getDate("forelopig_beregnet_slutt").toLocalDate(),
-    gjenstaendeSykedager = getInt("gjenstaende_sykedager"),
-    opprettet = getTimestamp("opprettet").toLocalDateTime(),
-)
-
 fun ResultSet.toPUtsendtVarsel() = PUtsendtVarsel(
     uuid = getString("uuid"),
     fnr = getString("fnr"),
@@ -58,15 +49,6 @@ fun ResultSet.toVarslingIdsListeCount(): Int {
     this.last()
     return this.row
 }
-
-fun ResultSet.toPMaksDato() = PMaksDato(
-    id = getString("id"),
-    fnr = getString("fnr"),
-    forelopig_beregnet_slutt = getTimestamp("forelopig_beregnet_slutt").toLocalDateTime().toLocalDate(),
-    utbetalt_tom = getTimestamp("utbetalt_tom").toLocalDateTime().toLocalDate(),
-    gjenstaende_sykedager = getString("gjenstaende_sykedager"),
-    opprettet = getTimestamp("opprettet").toLocalDateTime(),
-)
 
 fun ResultSet.toPMikrofrontendSynlighet() = PMikrofrontendSynlighet(
     uuid = getString("uuid"),
