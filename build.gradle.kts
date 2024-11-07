@@ -20,7 +20,7 @@ val hikariVersion = "5.1.0"
 val flywayVersion = "10.20.1"
 val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.18.1"
-val kafkaVersion = "3.8.1"
+val kafkaVersion = "3.9.0"
 val brukernotifikasjonerBuilderVersion = "1.1.0"
 val kotlinVersion = "2.0.21"
 
