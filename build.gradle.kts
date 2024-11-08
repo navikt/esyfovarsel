@@ -21,7 +21,7 @@ val flywayVersion = "10.21.0"
 val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.18.1"
 val kafkaVersion = "3.9.0"
-val brukernotifikasjonerBuilderVersion = "1.1.0"
+val brukernotifikasjonerBuilderVersion = "2.0.0"
 val kotlinVersion = "2.0.21"
 
 val githubUser: String by project
