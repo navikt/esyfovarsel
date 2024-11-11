@@ -63,7 +63,8 @@ class MerVeiledningVarselService(
             content = BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT,
             url = url,
             varselHendelse = arbeidstakerHendelse,
-            varseltype = OPPGAVE
+            varseltype = OPPGAVE,
+            dagerTilDeaktivering = 105,
         )
     }
 
