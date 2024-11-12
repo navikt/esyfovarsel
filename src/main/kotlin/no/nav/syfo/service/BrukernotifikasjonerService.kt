@@ -21,16 +21,17 @@ class BrukernotifikasjonerService(
         varseltype: SenderFacade.InternalBrukernotifikasjonType,
         eksternVarsling: Boolean,
         smsContent: String? = null,
+        dagerTilDeaktivering: Long? = null,
     ) {
         when (varseltype) {
             BESKJED -> {
-                brukernotifikasjonKafkaProducer.sendBeskjed(mottakerFnr, content, uuid, url, eksternVarsling)
+                brukernotifikasjonKafkaProducer.sendBeskjed(mottakerFnr, content, uuid, url, eksternVarsling, dagerTilDeaktivering)
                 log.info("Har sendt beskjed med uuid $uuid til brukernotifikasjoner: $content")
             }
 
             OPPGAVE -> {
                 url?.let {
-                    brukernotifikasjonKafkaProducer.sendOppgave(mottakerFnr, content, uuid, it, smsContent)
+                    brukernotifikasjonKafkaProducer.sendOppgave(mottakerFnr, content, uuid, it, smsContent, dagerTilDeaktivering)
                     log.info("Har sendt oppgave med uuid $uuid til brukernotifikasjoner: $content")
                 } ?: throw IllegalArgumentException("Url must be set")
             }

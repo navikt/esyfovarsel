@@ -15,6 +15,8 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 class BrukernotifikasjonKafkaProducer(
     val env: Environment,
@@ -35,6 +37,7 @@ class BrukernotifikasjonKafkaProducer(
         uuid: String,
         varselUrl: URL?,
         eksternVarsling: Boolean,
+        dagerTilDeaktivering: Long?,
     ) {
         val varsel = createVarsel(
             varseltype = Varseltype.Beskjed,
@@ -44,6 +47,7 @@ class BrukernotifikasjonKafkaProducer(
             varselUrl = varselUrl,
             smsVarsling = eksternVarsling,
             smsVarslingTekst = null,
+            dagerTilDeaktivering = dagerTilDeaktivering,
         )
 
         kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
@@ -56,6 +60,7 @@ class BrukernotifikasjonKafkaProducer(
         uuid: String,
         varselUrl: URL,
         smsContent: String?,
+        dagerTilDeaktivering: Long?,
     ) {
         val varsel = createVarsel(
             varseltype = Varseltype.Oppgave,
@@ -65,6 +70,7 @@ class BrukernotifikasjonKafkaProducer(
             varselUrl = varselUrl,
             smsVarsling = true,
             smsVarslingTekst = smsContent,
+            dagerTilDeaktivering = dagerTilDeaktivering,
         )
 
         kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
@@ -87,6 +93,7 @@ class BrukernotifikasjonKafkaProducer(
         varselUrl: URL?,
         smsVarsling: Boolean,
         smsVarslingTekst: String?,
+        dagerTilDeaktivering: Long?,
     ): String {
         if (varselUrl.toString().length > 200) {
             log.error("varselUrl for $varseltype is longer than 200 characters: ${varselUrl.toString()} UUID: $uuid")
@@ -103,7 +110,7 @@ class BrukernotifikasjonKafkaProducer(
                 default = true
             )
             link = varselUrl?.toString()
-            aktivFremTil = null
+            aktivFremTil = dagerTilDeaktivering?.let { ZonedDateTime.now(ZoneId.of("Z")).plusDays(it) }
             eksternVarsling = if (smsVarsling) {
                 EksternVarslingBestilling(
                     prefererteKanaler = listOf(EksternKanal.SMS),

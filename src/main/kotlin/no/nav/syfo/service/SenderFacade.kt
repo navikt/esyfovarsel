@@ -83,6 +83,7 @@ class SenderFacade(
         varseltype: InternalBrukernotifikasjonType,
         eksternVarsling: Boolean = true,
         smsContent: String? = null,
+        dagerTilDeaktivering: Long? = null,
     ) {
         try {
             brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
@@ -92,7 +93,8 @@ class SenderFacade(
                 url = url,
                 varseltype = varseltype,
                 eksternVarsling = eksternVarsling,
-                smsContent = smsContent
+                smsContent = smsContent,
+                dagerTilDeaktivering = dagerTilDeaktivering,
             )
             lagreUtsendtArbeidstakerVarsel(
                 kanal = BRUKERNOTIFIKASJON,
