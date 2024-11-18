@@ -102,7 +102,8 @@ class MerVeiledningVarselServiceTest : DescribeSpec({
                     content = BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT,
                     url = any(),
                     varselHendelse = hendelse,
-                    varseltype = SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
+                    varseltype = SenderFacade.InternalBrukernotifikasjonType.OPPGAVE,
+                    dagerTilDeaktivering = 105,
                 )
             }
         }
