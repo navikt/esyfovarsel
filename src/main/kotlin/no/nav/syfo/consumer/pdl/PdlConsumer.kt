@@ -1,31 +1,23 @@
 package no.nav.syfo.consumer.pdl
 
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.call.body
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import java.io.FileNotFoundException
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.metrics.COUNT_CALL_PDL_FAIL
 import no.nav.syfo.metrics.COUNT_CALL_PDL_SUCCESS
 import no.nav.syfo.utils.httpClientWithRetry
-import no.nav.syfo.utils.isAlderMindreEnnGittAr
 import org.slf4j.LoggerFactory
-import java.io.FileNotFoundException
 
 open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val httpClient = httpClientWithRetry(expectSuccess = true)
     private val log = LoggerFactory.getLogger(PdlConsumer::class.qualifiedName)
-
-    suspend fun isBrukerYngreEnnGittMaxAlder(ident: String, maxAlder: Int): Boolean {
-        val fodselsdato = hentPerson(ident)?.getFodselsdato()
-        if (fodselsdato == null) {
-            log.warn("Returnert fødselsdato for en person fra PDL er null. Fortsetter som om bruker er yngre enn $maxAlder år da fødselsdato er ukjent.")
-            return true
-        } else {
-            return isAlderMindreEnnGittAr(fodselsdato, maxAlder)
-        }
-    }
 
     suspend fun hentPerson(
         personIdent: String,
@@ -68,7 +60,4 @@ open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsu
         return this::class.java.getResource(graphQueryResourcePath)?.readText()?.replace("[\n\r]", "")
             ?: throw FileNotFoundException("Could not found resource: $graphQueryResourcePath")
     }
-
-    class LocalPdlConsumer(urlEnv: UrlEnv, azureAdTokenConsumer: AzureAdTokenConsumer) :
-        PdlConsumer(urlEnv, azureAdTokenConsumer)
 }
