@@ -36,8 +36,6 @@ class EmbeddedDatabase : DatabaseInterface {
             "PLANLAGT_VARSEL",
             "SYKMELDING_IDS",
             "UTSENDT_VARSEL",
-            "UTBETALING_INFOTRYGD",
-            "UTBETALING_SPLEIS",
             "MIKROFRONTEND_SYNLIGHET"
         )
 
