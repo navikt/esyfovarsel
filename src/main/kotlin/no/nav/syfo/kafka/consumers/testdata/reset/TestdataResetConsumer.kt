@@ -15,7 +15,7 @@ class TestdataResetConsumer(
     val env: Environment,
     private val testdataResetService: TestdataResetService
 ) : KafkaListener {
-    private val log: Logger = LoggerFactory.getLogger(TestdataResetConsumer::class.java)
+    private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.kafka.consumers.infotrygd.InfotrygdKafkaConsumer")
     private val kafkaListener: KafkaConsumer<String, String>
 
     init {
