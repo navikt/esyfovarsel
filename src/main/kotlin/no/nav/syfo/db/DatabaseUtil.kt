@@ -1,26 +1,14 @@
 package no.nav.syfo.db
 
-import no.nav.syfo.db.domain.*
 import java.sql.ResultSet
-import java.util.*
-
+import no.nav.syfo.db.domain.PMikrofrontendSynlighet
+import no.nav.syfo.db.domain.PUtsendtVarsel
 
 fun <T> ResultSet.toList(mapper: ResultSet.() -> T) = mutableListOf<T>().apply {
     while (next()) {
         add(mapper())
     }
 }
-
-fun ResultSet.toPPlanlagtVarsel() = PPlanlagtVarsel(
-    uuid = getString("uuid"),
-    fnr = getString("fnr"),
-    aktorId = getString("aktor_id"),
-    orgnummer = getString("orgnummer"),
-    type = getString("type"),
-    utsendingsdato = getDate("utsendingsdato").toLocalDate(),
-    opprettet = getTimestamp("opprettet").toLocalDateTime(),
-    sistEndret = getTimestamp("sist_endret").toLocalDateTime()
-)
 
 fun ResultSet.toPUtsendtVarsel() = PUtsendtVarsel(
     uuid = getString("uuid"),
@@ -36,19 +24,6 @@ fun ResultSet.toPUtsendtVarsel() = PUtsendtVarsel(
     eksternReferanse = getString("ekstern_ref"),
     arbeidsgivernotifikasjonMerkelapp = getString("arbeidsgivernotifikasjon_merkelapp")
 )
-
-fun ResultSet.toVarslingIdsListe(): List<String> {
-    val rader = ArrayList<String>()
-    while (this.next()) {
-        rader.add(getString("sykmelding_id"))
-    }
-    return rader
-}
-
-fun ResultSet.toVarslingIdsListeCount(): Int {
-    this.last()
-    return this.row
-}
 
 fun ResultSet.toPMikrofrontendSynlighet() = PMikrofrontendSynlighet(
     uuid = getString("uuid"),

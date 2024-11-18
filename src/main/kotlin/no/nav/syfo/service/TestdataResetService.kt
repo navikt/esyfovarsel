@@ -2,10 +2,8 @@ package no.nav.syfo.service
 
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deleteMikrofrontendSynlighetByFnr
-import no.nav.syfo.db.deletePlanlagtVarselByVarselId
 import no.nav.syfo.db.deleteUtsendtVarselByFnr
 import no.nav.syfo.db.deleteUtsendtVarselFeiletByFnr
-import no.nav.syfo.db.fetchPlanlagtVarselByFnr
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import org.slf4j.Logger
@@ -31,10 +29,6 @@ class TestdataResetService(
 
         // Slette utsendte varsler
         database.deleteUtsendtVarselByFnr(fnr)
-
-        // Slette planlagte varsler
-        val planlagteVarsler = database.fetchPlanlagtVarselByFnr(fnr.value)
-        planlagteVarsler.forEach { database.deletePlanlagtVarselByVarselId(it.uuid) }
 
         // Slette/skjule mikrofrontend
         mikrofrontendService.closeAllMikrofrontendForUser(fnr)
