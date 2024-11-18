@@ -33,8 +33,11 @@ class EmbeddedDatabase : DatabaseInterface {
 
     fun dropData() {
         val tables = listOf(
+            "PLANLAGT_VARSEL",
             "SYKMELDING_IDS",
             "UTSENDT_VARSEL",
+            "UTBETALING_INFOTRYGD",
+            "UTBETALING_SPLEIS",
             "MIKROFRONTEND_SYNLIGHET"
         )
 

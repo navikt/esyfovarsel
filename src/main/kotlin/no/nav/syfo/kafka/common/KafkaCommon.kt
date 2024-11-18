@@ -31,6 +31,8 @@ import java.util.*
 
 const val topicDineSykmeldteHendelse = "teamsykmelding.dinesykmeldte-hendelser-v2"
 const val topicVarselBus = "team-esyfo.varselbus"
+const val topicSykepengedagerInfotrygd = "aap.sykepengedager.infotrygd.v1"
+const val topicUtbetaling = "tbd.utbetaling"
 const val topicDittSykefravaerMelding = "flex.ditt-sykefravaer-melding"
 const val topicMinSideMicrofrontend = "min-side.aapen-microfrontend-v1"
 const val topicTestdataReset = "teamsykefravr.testdata-reset"

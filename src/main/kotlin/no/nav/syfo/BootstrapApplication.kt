@@ -30,13 +30,17 @@ import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsume
 import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
+import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
+import no.nav.syfo.consumer.veiledertilgang.VeilederTilgangskontrollConsumer
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.grantAccessToIAMUsers
 import no.nav.syfo.job.closeExpiredMicrofrontendsJob
 import no.nav.syfo.kafka.common.launchKafkaListener
+import no.nav.syfo.kafka.consumers.infotrygd.InfotrygdKafkaConsumer
 import no.nav.syfo.kafka.consumers.testdata.reset.TestdataResetConsumer
+import no.nav.syfo.kafka.consumers.utbetaling.UtbetalingKafkaConsumer
 import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
@@ -57,6 +61,7 @@ import no.nav.syfo.service.MerVeiledningVarselService
 import no.nav.syfo.service.MotebehovVarselService
 import no.nav.syfo.service.OppfolgingsplanVarselService
 import no.nav.syfo.service.SenderFacade
+import no.nav.syfo.service.SykepengerMaxDateService
 import no.nav.syfo.service.SykmeldingService
 import no.nav.syfo.service.TestdataResetService
 import no.nav.syfo.service.VarselBusService
@@ -103,6 +108,7 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
     database.grantAccessToIAMUsers()
 
     val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
+    val pdlConsumer = getPdlConsumer(env.urlEnv, azureAdTokenConsumer)
     val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer)
     val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
     val narmesteLederConsumer = NarmesteLederConsumer(env.urlEnv, azureAdTokenConsumer)
@@ -157,6 +163,7 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
     val manglendeMedvirkningVarselService = ManglendeMedvirkningVarselService(senderFacade)
     val oppfolgingsplanVarselService =
         OppfolgingsplanVarselService(senderFacade, accessControlService, env.urlEnv.oppfolgingsplanerUrl)
+    val sykepengerMaxDateService = SykepengerMaxDateService(database, pdlConsumer)
     val merVeiledningVarselService = MerVeiledningVarselService(
         senderFacade = senderFacade,
         env = env,
@@ -188,6 +195,9 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
             merVeiledningVarselService
         )
 
+    val veilederTilgangskontrollConsumer =
+        VeilederTilgangskontrollConsumer(env.urlEnv, azureAdTokenConsumer)
+
     val testdataResetService = TestdataResetService(database, mikrofrontendService, senderFacade)
 
     connector {
@@ -199,14 +209,24 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
 
         serverModule(
             env,
+            sykepengerMaxDateService,
             mikrofrontendService,
+            veilederTilgangskontrollConsumer,
         )
 
         kafkaModule(
             env,
             varselBusService,
+            sykepengerMaxDateService,
             testdataResetService,
         )
+    }
+}
+
+private fun getPdlConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsumer): PdlConsumer {
+    return when {
+        isLocal() -> PdlConsumer.LocalPdlConsumer(urlEnv, azureADConsumer)
+        else -> PdlConsumer(urlEnv, azureADConsumer)
     }
 }
 
@@ -219,7 +239,9 @@ private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsume
 
 fun Application.serverModule(
     env: Environment,
+    sykepengerMaxDateService: SykepengerMaxDateService,
     mikrofrontendService: MikrofrontendService,
+    veilederTilgangskontrollConsumer: VeilederTilgangskontrollConsumer,
 ) {
     install(ContentNegotiation) {
         jackson {
@@ -243,6 +265,8 @@ fun Application.serverModule(
     runningRemotely {
         setupRoutesWithAuthentication(
             mikrofrontendService,
+            sykepengerMaxDateService,
+            veilederTilgangskontrollConsumer,
             env.authEnv,
         )
     }
@@ -250,6 +274,8 @@ fun Application.serverModule(
     runningLocally {
         setupLocalRoutesWithAuthentication(
             mikrofrontendService,
+            sykepengerMaxDateService,
+            veilederTilgangskontrollConsumer,
             env.authEnv,
         )
     }
@@ -265,9 +291,24 @@ fun Application.serverModule(
 fun Application.kafkaModule(
     env: Environment,
     varselbusService: VarselBusService,
+    sykepengerMaxDateService: SykepengerMaxDateService,
     testdataResetService: TestdataResetService,
 ) {
     runningRemotely {
+        launch(backgroundTasksContext) {
+            launchKafkaListener(
+                state,
+                InfotrygdKafkaConsumer(env, sykepengerMaxDateService),
+            )
+        }
+
+        launch(backgroundTasksContext) {
+            launchKafkaListener(
+                state,
+                UtbetalingKafkaConsumer(env, sykepengerMaxDateService),
+            )
+        }
+
         launch(backgroundTasksContext) {
             launchKafkaListener(
                 state,
