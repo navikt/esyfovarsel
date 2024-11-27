@@ -19,6 +19,7 @@ import java.time.ZoneOffset
 import java.util.*
 
 const val DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING = "ESYFOVARSEL_MER_VEILEDNING"
+const val DAGER_TIL_DEAKTIVERING_AV_VARSEL: Long = 105
 
 class MerVeiledningVarselService(
     val senderFacade: SenderFacade,
@@ -56,14 +57,14 @@ class MerVeiledningVarselService(
         val uuid = "${UUID.randomUUID()}"
         val fnr = arbeidstakerHendelse.arbeidstakerFnr
         val url = URL(env.urlEnv.baseUrlNavEkstern + MER_VEILEDNING_URL)
-
         senderFacade.sendTilBrukernotifikasjoner(
             uuid = uuid,
             mottakerFnr = fnr,
             content = BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT,
             url = url,
             varselHendelse = arbeidstakerHendelse,
-            varseltype = OPPGAVE
+            varseltype = OPPGAVE,
+            dagerTilDeaktivering = DAGER_TIL_DEAKTIVERING_AV_VARSEL,
         )
     }
 

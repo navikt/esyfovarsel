@@ -44,10 +44,7 @@ spec:
     inbound:
       rules:
         - application: esyfovarsel-job
-        - application: syfomodiaperson
-          namespace: teamsykefravr
           cluster: dev-gcp
-        - application: meroppfolging-frontend
         - application: meroppfolging-backend
         - application: ditt-sykefravaer
           namespace: flex
