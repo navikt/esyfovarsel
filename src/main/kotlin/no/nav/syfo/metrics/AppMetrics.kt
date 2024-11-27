@@ -6,10 +6,10 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.micrometer.core.instrument.Clock
 import io.micrometer.core.instrument.Counter
-import io.micrometer.prometheus.PrometheusConfig
-import io.micrometer.prometheus.PrometheusMeterRegistry
-import io.prometheus.client.CollectorRegistry
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.prometheus.client.hotspot.DefaultExports
+import io.prometheus.metrics.model.registry.PrometheusRegistry
 
 const val METRICS_NS = "esyfovarsel"
 
@@ -20,7 +20,7 @@ const val CALL_PDL_SUCCESS = "${METRICS_NS}_call_pdl_success_count"
 const val CALL_PDL_FAIL = "${METRICS_NS}_call_pdl_fail_count"
 
 val METRICS_REGISTRY =
-    PrometheusMeterRegistry(PrometheusConfig.DEFAULT, CollectorRegistry.defaultRegistry, Clock.SYSTEM)
+    PrometheusMeterRegistry(PrometheusConfig.DEFAULT, PrometheusRegistry.defaultRegistry, Clock.SYSTEM)
 
 val COUNT_MER_VEILEDNING_NOTICE_SENT: Counter = Counter
     .builder(MER_VEILEDNING_NOTICE_SENT)
