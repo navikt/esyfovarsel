@@ -22,7 +22,7 @@ val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.18.1"
 val kafkaVersion = "3.9.0"
 val brukernotifikasjonerBuilderVersion = "2.1.0"
-val kotlinVersion = "2.0.21"
+val kotlinVersion = "2.1.0"
 
 val githubUser: String by project
 val githubPassword: String by project
@@ -30,7 +30,7 @@ val githubPassword: String by project
 plugins {
     kotlin("jvm") version "1.9.24"
     id("java")
-    id("org.jetbrains.kotlin.plugin.allopen") version "2.0.21"
+    id("org.jetbrains.kotlin.plugin.allopen") version "2.1.0"
     id("com.diffplug.spotless") version "6.25.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
