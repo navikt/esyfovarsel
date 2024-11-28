@@ -1,9 +1,11 @@
 package no.nav.syfo.kafka.producers.brukernotifikasjoner
 
+import java.net.URL
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.producerProperties
 import no.nav.tms.varsel.action.EksternKanal
-import no.nav.tms.varsel.action.EksternVarslingBestilling
 import no.nav.tms.varsel.action.Sensitivitet
 import no.nav.tms.varsel.action.Tekst
 import no.nav.tms.varsel.action.Varseltype
@@ -14,9 +16,6 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.URL
-import java.time.ZoneId
-import java.time.ZonedDateTime
 
 class BrukernotifikasjonKafkaProducer(
     val env: Environment,
@@ -46,7 +45,7 @@ class BrukernotifikasjonKafkaProducer(
             content = content,
             varselUrl = varselUrl,
             smsVarsling = eksternVarsling,
-            smsVarslingTekst = null,
+            smsTekst = null,
             dagerTilDeaktivering = dagerTilDeaktivering,
         )
 
@@ -69,7 +68,7 @@ class BrukernotifikasjonKafkaProducer(
             content = content,
             varselUrl = varselUrl,
             smsVarsling = true,
-            smsVarslingTekst = smsContent,
+            smsTekst = smsContent,
             dagerTilDeaktivering = dagerTilDeaktivering,
         )
 
@@ -92,7 +91,7 @@ class BrukernotifikasjonKafkaProducer(
         content: String,
         varselUrl: URL?,
         smsVarsling: Boolean,
-        smsVarslingTekst: String?,
+        smsTekst: String?,
         dagerTilDeaktivering: Long?,
     ): String {
         if (varselUrl.toString().length > 200) {
@@ -111,12 +110,12 @@ class BrukernotifikasjonKafkaProducer(
             )
             link = varselUrl?.toString()
             aktivFremTil = dagerTilDeaktivering?.let { ZonedDateTime.now(ZoneId.of("Z")).plusDays(it) }
-            eksternVarsling = if (smsVarsling) {
-                EksternVarslingBestilling(
-                    prefererteKanaler = listOf(EksternKanal.SMS),
-                    smsVarslingstekst = smsVarslingTekst,
-                )
-            } else null
+            if (smsVarsling) {
+                eksternVarsling {
+                    smsVarslingstekst = smsTekst
+                    preferertKanal = EksternKanal.SMS
+                }
+            }
         }
         return opprettVarsel
     }
