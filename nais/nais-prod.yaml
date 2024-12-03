@@ -50,8 +50,6 @@ spec:
         - application: esyfovarsel-job
           cluster: prod-gcp
         - application: meroppfolging-backend
-        - application: ditt-sykefravaer
-          namespace: flex
     outbound:
       external:
         - host: pdl-api.prod-fss-pub.nais.io
