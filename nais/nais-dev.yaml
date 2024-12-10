@@ -45,7 +45,6 @@ spec:
       rules:
         - application: esyfovarsel-job
           cluster: dev-gcp
-        - application: meroppfolging-backend
     outbound:
       external:
         - host: pdl-api.dev-fss-pub.nais.io
