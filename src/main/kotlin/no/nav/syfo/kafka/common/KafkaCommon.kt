@@ -34,6 +34,8 @@ const val topicVarselBus = "team-esyfo.varselbus"
 const val topicDittSykefravaerMelding = "flex.ditt-sykefravaer-melding"
 const val topicMinSideMicrofrontend = "min-side.aapen-microfrontend-v1"
 const val topicTestdataReset = "teamsykefravr.testdata-reset"
+const val minsideVarselHendelseTopic = "min-side.aapen-varsel-hendelse-v1"
+const val minsideBrukervarselTopic = "min-side.aapen-brukervarsel-v1"
 
 const val JAVA_KEYSTORE = "JKS"
 const val PKCS12 = "PKCS12"

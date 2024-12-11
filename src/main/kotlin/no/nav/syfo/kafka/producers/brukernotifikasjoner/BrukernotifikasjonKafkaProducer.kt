@@ -4,6 +4,7 @@ import java.net.URL
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import no.nav.syfo.Environment
+import no.nav.syfo.kafka.common.minsideBrukervarselTopic
 import no.nav.syfo.kafka.common.producerProperties
 import no.nav.tms.varsel.action.EksternKanal
 import no.nav.tms.varsel.action.Sensitivitet
@@ -20,7 +21,6 @@ import org.slf4j.LoggerFactory
 class BrukernotifikasjonKafkaProducer(
     val env: Environment,
 ) {
-    val brukernotifikasjonerTopic = "min-side.aapen-brukervarsel-v1"
     val kafkaProducer = KafkaProducer<String, String>(producerProperties(env).apply {
         put(
             put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java),
@@ -49,7 +49,7 @@ class BrukernotifikasjonKafkaProducer(
             dagerTilDeaktivering = dagerTilDeaktivering,
         )
 
-        kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
+        kafkaProducer.send(ProducerRecord(minsideBrukervarselTopic, uuid, varsel))
             .get() // Block until record has been sent
     }
 
@@ -72,7 +72,7 @@ class BrukernotifikasjonKafkaProducer(
             dagerTilDeaktivering = dagerTilDeaktivering,
         )
 
-        kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
+        kafkaProducer.send(ProducerRecord(minsideBrukervarselTopic, uuid, varsel))
             .get() // Block until record has been sent
     }
 
@@ -81,7 +81,7 @@ class BrukernotifikasjonKafkaProducer(
             varselId = uuid
         }
 
-        kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, inaktiverVarsel)).get()
+        kafkaProducer.send(ProducerRecord(minsideBrukervarselTopic, uuid, inaktiverVarsel)).get()
     }
 
     private fun createVarsel(
