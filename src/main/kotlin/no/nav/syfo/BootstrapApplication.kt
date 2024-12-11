@@ -36,6 +36,7 @@ import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.grantAccessToIAMUsers
 import no.nav.syfo.job.closeExpiredMicrofrontendsJob
 import no.nav.syfo.kafka.common.launchKafkaListener
+import no.nav.syfo.kafka.consumers.brukernotifikasjoner.BrukernotifikasjonKafkaConsumer
 import no.nav.syfo.kafka.consumers.testdata.reset.TestdataResetConsumer
 import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
@@ -54,6 +55,7 @@ import no.nav.syfo.service.FriskmeldingTilArbeidsformidlingVedtakService
 import no.nav.syfo.service.FysiskBrevUtsendingService
 import no.nav.syfo.service.ManglendeMedvirkningVarselService
 import no.nav.syfo.service.MerVeiledningVarselService
+import no.nav.syfo.service.MinSideVarselHendelseService
 import no.nav.syfo.service.MotebehovVarselService
 import no.nav.syfo.service.OppfolgingsplanVarselService
 import no.nav.syfo.service.SenderFacade
@@ -189,6 +191,7 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
         )
 
     val testdataResetService = TestdataResetService(database, mikrofrontendService, senderFacade)
+    val minSideVarselHendelseService = MinSideVarselHendelseService(database)
 
     connector {
         port = env.appEnv.applicationPort
@@ -206,6 +209,7 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
             env,
             varselBusService,
             testdataResetService,
+            minSideVarselHendelseService,
         )
     }
 }
@@ -266,12 +270,20 @@ fun Application.kafkaModule(
     env: Environment,
     varselbusService: VarselBusService,
     testdataResetService: TestdataResetService,
+    minSideVarselHendelseService: MinSideVarselHendelseService,
 ) {
     runningRemotely {
         launch(backgroundTasksContext) {
             launchKafkaListener(
                 state,
                 VarselBusKafkaConsumer(env, varselbusService),
+            )
+        }
+
+        launch(backgroundTasksContext) {
+            launchKafkaListener(
+                state,
+                BrukernotifikasjonKafkaConsumer(env, minSideVarselHendelseService),
             )
         }
 
