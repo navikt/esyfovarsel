@@ -49,15 +49,16 @@ class SenderFacadeSpek : DescribeSpec({
                 uuid = UUID.randomUUID().toString(),
                 fnr = arbeidstakerFnr1,
                 aktorId = arbeidstakerAktorId1,
-                utsendtTidspunkt = LocalDateTime.now(),
-                type = VarselType.MER_VEILEDNING.name,
                 narmesteLederFnr = null,
                 orgnummer = null,
+                type = VarselType.MER_VEILEDNING.name,
                 kanal = null,
+                utsendtTidspunkt = LocalDateTime.now(),
                 planlagtVarselId = null,
                 eksternReferanse = null,
                 ferdigstiltTidspunkt = null,
                 arbeidsgivernotifikasjonMerkelapp = null,
+                isForcedLetter = false,
             )
 
         val arbeidsgivernotifikasjonUtsendtVarsel = utsendtVarsel.copy(

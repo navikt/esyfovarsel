@@ -1,14 +1,12 @@
 package no.nav.syfo.db
 
 import io.kotest.core.spec.style.DescribeSpec
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
-import no.nav.syfo.db.domain.Kanal
-import no.nav.syfo.db.domain.PUtsendtVarselFeilet
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
-import no.nav.syfo.testutil.EmbeddedDatabase
-import org.amshove.kluent.should
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.syfo.db.domain.PUtsendtVarsel
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import no.nav.syfo.testutil.EmbeddedDatabase
+import org.amshove.kluent.shouldBeEqualTo
 
 class UtsendtVarselFeiletDAOSpek : DescribeSpec({
     describe("UtsendtVarselFeiletDAOSpek") {
@@ -18,53 +16,101 @@ class UtsendtVarselFeiletDAOSpek : DescribeSpec({
             embeddedDatabase.dropData()
         }
 
-        it("Store ikke-utsendt varsel til NL i database") {
-            val fnr = "12121212121"
-            embeddedDatabase.storeUtsendtVarselFeilet(ikkeUtsendtVarsel(fnr))
-            embeddedDatabase.skalHaLagretIkkeUtsendtVarsel(
-                HendelseType.NL_DIALOGMOTE_NYTT_TID_STED,
-                Kanal.DINE_SYKMELDTE,
-                fnr
-            )
+        it("Returns 3 varsler") {
+            val utsendtVarsel1 = // skal sendes
+                PUtsendtVarsel(
+                    uuid = UUID.randomUUID().toString(),
+                    fnr = no.nav.syfo.planner.arbeidstakerFnr1,
+                    aktorId = arbeidstakerAktorId1,
+                    narmesteLederFnr = null,
+                    orgnummer = null,
+                    type = HendelseType.SM_AKTIVITETSPLIKT.name,
+                    kanal = "BRUKERNOTIFIKASJON",
+                    utsendtTidspunkt = LocalDateTime.now().minusDays(2),
+                    planlagtVarselId = null,
+                    eksternReferanse = "123",
+                    ferdigstiltTidspunkt = null,
+                    arbeidsgivernotifikasjonMerkelapp = null,
+                    isForcedLetter = false,
+                )
+
+            val utsendtVarsel2 = // skal sendes
+                PUtsendtVarsel(
+                    uuid = UUID.randomUUID().toString(),
+                    fnr = arbeidstakerFnr2,
+                    aktorId = arbeidstakerAktorId2,
+                    narmesteLederFnr = null,
+                    orgnummer = null,
+                    type = HendelseType.SM_AKTIVITETSPLIKT.name,
+                    kanal = "BRUKERNOTIFIKASJON",
+                    utsendtTidspunkt = LocalDateTime.now().minusDays(3),
+                    planlagtVarselId = null,
+                    eksternReferanse = "456",
+                    ferdigstiltTidspunkt = null,
+                    arbeidsgivernotifikasjonMerkelapp = null,
+                    isForcedLetter = false,
+                )
+
+            val utsendtVarsel3 = // skal ikke sendes: not overdue
+                PUtsendtVarsel(
+                    uuid = UUID.randomUUID().toString(),
+                    fnr = arbeidstakerFnr2,
+                    aktorId = arbeidstakerAktorId2,
+                    narmesteLederFnr = null,
+                    orgnummer = null,
+                    type = HendelseType.SM_AKTIVITETSPLIKT.name,
+                    kanal = "BRUKERNOTIFIKASJON",
+                    utsendtTidspunkt = LocalDateTime.now().minusDays(1),
+                    planlagtVarselId = null,
+                    eksternReferanse = "789",
+                    ferdigstiltTidspunkt = null,
+                    arbeidsgivernotifikasjonMerkelapp = null,
+                    isForcedLetter = false,
+                )
+
+            val utsendtVarsel4 = // skal ikke sendes: Forced letter was sent before
+                PUtsendtVarsel(
+                    uuid = UUID.randomUUID().toString(),
+                    fnr = arbeidstakerFnr2,
+                    aktorId = arbeidstakerAktorId2,
+                    narmesteLederFnr = null,
+                    orgnummer = null,
+                    type = HendelseType.SM_AKTIVITETSPLIKT.name,
+                    kanal = "BRUKERNOTIFIKASJON",
+                    utsendtTidspunkt = LocalDateTime.now().minusDays(1),
+                    planlagtVarselId = null,
+                    eksternReferanse = "987",
+                    ferdigstiltTidspunkt = null,
+                    arbeidsgivernotifikasjonMerkelapp = null,
+                    isForcedLetter = true,
+                )
+
+            val utsendtVarsel5 = // skal ikke sendes: not aktivitetskrav
+                PUtsendtVarsel(
+                    uuid = UUID.randomUUID().toString(),
+                    fnr = arbeidstakerFnr2,
+                    aktorId = arbeidstakerAktorId2,
+                    narmesteLederFnr = null,
+                    orgnummer = null,
+                    type = HendelseType.SM_MER_VEILEDNING.name,
+                    kanal = "BRUKERNOTIFIKASJON",
+                    utsendtTidspunkt = LocalDateTime.now().minusDays(3),
+                    planlagtVarselId = null,
+                    eksternReferanse = "654",
+                    ferdigstiltTidspunkt = null,
+                    arbeidsgivernotifikasjonMerkelapp = null,
+                    isForcedLetter = false,
+                )
+            embeddedDatabase.storeUtsendtVarsel(utsendtVarsel1)
+            embeddedDatabase.storeUtsendtVarsel(utsendtVarsel2)
+            embeddedDatabase.storeUtsendtVarsel(utsendtVarsel3)
+            embeddedDatabase.storeUtsendtVarsel(utsendtVarsel4)
+            embeddedDatabase.storeUtsendtVarsel(utsendtVarsel5)
+
+            val result = embeddedDatabase.fetchAlleUferdigstilteAktivitetspliktVarsler().size
+            //            val result = job.sendForcedLetterFromJob()
+
+            result shouldBeEqualTo 3
         }
     }
 })
-
-private fun ikkeUtsendtVarsel(fnr: String) = PUtsendtVarselFeilet(
-    uuid = UUID.randomUUID().toString(),
-    arbeidstakerFnr = fnr,
-    narmesteLederFnr = "01010101010",
-    orgnummer = null,
-    hendelsetypeNavn = HendelseType.NL_DIALOGMOTE_NYTT_TID_STED.name,
-    kanal = Kanal.DINE_SYKMELDTE.name,
-    utsendtForsokTidspunkt = LocalDateTime.now(),
-    uuidEksternReferanse = "00000",
-    feilmelding = "Achtung!",
-    journalpostId = null,
-    brukernotifikasjonerMeldingType = null,
-    arbeidsgivernotifikasjonMerkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
-)
-
-private fun DatabaseInterface.skalHaLagretIkkeUtsendtVarsel(
-    type: HendelseType,
-    kanal: Kanal,
-    fnr: String,
-) =
-    this.should("Skal ha lagret ikke-utsendt varsel av type ${type.name} ") {
-        this.fetchUtsendtVarselFeiletByFnr(fnr)
-            .filter { it.hendelsetypeNavn == type.name }.any { it.kanal.equals(kanal.name) }
-    }
-
-fun DatabaseInterface.fetchUtsendtVarselFeiletByFnr(fnr: String): List<PUtsendtVarselFeilet> {
-    val queryStatement = """SELECT *
-                            FROM UTSENDING_VARSEL_FEILET
-                            WHERE arbeidstaker_fnr = ?
-    """.trimIndent()
-
-    return connection.use { connection ->
-        connection.prepareStatement(queryStatement).use {
-            it.setString(1, fnr)
-            it.executeQuery().toList { toPUtsendtVarselFeilet() }
-        }
-    }
-}

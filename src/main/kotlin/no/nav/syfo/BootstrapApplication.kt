@@ -34,7 +34,9 @@ import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.grantAccessToIAMUsers
+import no.nav.syfo.job.SendForcedAktivitetspliktLetterJob
 import no.nav.syfo.job.closeExpiredMicrofrontendsJob
+import no.nav.syfo.job.sendForcedPhysicalAktivitetspliktLetterJob
 import no.nav.syfo.kafka.common.launchKafkaListener
 import no.nav.syfo.kafka.consumers.testdata.reset.TestdataResetConsumer
 import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
@@ -75,6 +77,7 @@ fun main() {
     if (isJob()) {
         val env = getJobEnv()
         closeExpiredMicrofrontendsJob(env)
+        sendForcedPhysicalAktivitetspliktLetterJob(env)
     } else {
         val server = embeddedServer(
             factory = Netty,
@@ -174,6 +177,8 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
             database = database,
         )
 
+    val sendForcedAktivitetspliktLetterJob = SendForcedAktivitetspliktLetterJob(database, senderFacade)
+
     val varselBusService =
         VarselBusService(
             senderFacade,
@@ -200,6 +205,7 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
         serverModule(
             env,
             mikrofrontendService,
+            sendForcedAktivitetspliktLetterJob,
         )
 
         kafkaModule(
@@ -220,6 +226,7 @@ private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsume
 fun Application.serverModule(
     env: Environment,
     mikrofrontendService: MikrofrontendService,
+    sendForcedAktivitetspliktLetterJob: SendForcedAktivitetspliktLetterJob,
 ) {
     install(ContentNegotiation) {
         jackson {
@@ -243,6 +250,7 @@ fun Application.serverModule(
     runningRemotely {
         setupRoutesWithAuthentication(
             mikrofrontendService,
+            sendForcedAktivitetspliktLetterJob,
             env.authEnv,
         )
     }
@@ -250,6 +258,7 @@ fun Application.serverModule(
     runningLocally {
         setupLocalRoutesWithAuthentication(
             mikrofrontendService,
+            sendForcedAktivitetspliktLetterJob,
             env.authEnv,
         )
     }

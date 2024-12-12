@@ -14,6 +14,7 @@ fun getJobEnv() =
     } else {
         JobEnv(
             jobTriggerUrl = getEnvVar("ESYFOVARSEL_JOB_TRIGGER_URL"),
+            revarsleUnreadAktivitetskravPlikt = getBooleanEnvVar("REVARSLE_UNREAD_AKTIVITETSKRAV_PLIKT"),
             serviceuserUsername = File("$serviceuserMounthPath/username").readText(),
             serviceuserPassword = File("$serviceuserMounthPath/password").readText(),
         )
@@ -176,6 +177,7 @@ data class ToggleEnv(
 
 data class JobEnv(
     val jobTriggerUrl: String,
+    val revarsleUnreadAktivitetskravPlikt: Boolean,
     val serviceuserUsername: String,
     val serviceuserPassword: String,
 )

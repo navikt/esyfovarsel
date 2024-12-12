@@ -17,6 +17,7 @@ import java.net.URL
 import java.util.concurrent.TimeUnit
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.api.job.registerJobTriggerApi
+import no.nav.syfo.job.SendForcedAktivitetspliktLetterJob
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -105,6 +106,7 @@ private fun JWTCredential.inExpectedAudience(expectedAudience: List<String>) = e
 
 fun Application.setupLocalRoutesWithAuthentication(
     mikrofrontendService: MikrofrontendService,
+    sendForcedAktivitetspliktLetterJob: SendForcedAktivitetspliktLetterJob,
     authEnv: AuthEnv,
 ) {
     install(Authentication) {
@@ -121,13 +123,14 @@ fun Application.setupLocalRoutesWithAuthentication(
 
     routing {
         authenticate("auth-basic") {
-            registerJobTriggerApi(mikrofrontendService)
+            registerJobTriggerApi(mikrofrontendService, sendForcedAktivitetspliktLetterJob)
         }
     }
 }
 
 fun Application.setupRoutesWithAuthentication(
     mikrofrontendService: MikrofrontendService,
+    sendForcedAktivitetspliktLetterJob: SendForcedAktivitetspliktLetterJob,
     authEnv: AuthEnv,
 ) {
     val wellKnownTokenX = getWellKnown(authEnv.tokenXWellKnownUrl)
@@ -140,7 +143,7 @@ fun Application.setupRoutesWithAuthentication(
 
     routing {
         authenticate("auth-basic") {
-            registerJobTriggerApi(mikrofrontendService)
+            registerJobTriggerApi(mikrofrontendService, sendForcedAktivitetspliktLetterJob)
         }
     }
 }

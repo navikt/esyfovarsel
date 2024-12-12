@@ -14,5 +14,6 @@ data class PUtsendtVarsel(
     val planlagtVarselId: String?,
     val eksternReferanse: String?,
     val ferdigstiltTidspunkt: LocalDateTime?,
-    val arbeidsgivernotifikasjonMerkelapp: String?
+    val arbeidsgivernotifikasjonMerkelapp: String?,
+    val isForcedLetter: Boolean
 )

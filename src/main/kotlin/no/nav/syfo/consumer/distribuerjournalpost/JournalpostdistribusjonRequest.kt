@@ -5,5 +5,6 @@ data class JournalpostdistribusjonRequest(
     val bestillendeFagsystem: String = "UKJENT",
     val dokumentProdApp: String = "esyfovarsel",
     val distribusjonstype: String,
-    val distribusjonstidspunkt: String = "UMIDDELBART"
+    val distribusjonstidspunkt: String = "UMIDDELBART",
+    val tvingSentralPrint: Boolean? = false,
 )

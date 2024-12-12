@@ -6,12 +6,15 @@ import java.util.*
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.Kanal
-import no.nav.syfo.db.domain.Kanal.*
+import no.nav.syfo.db.domain.Kanal.ARBEIDSGIVERNOTIFIKASJON
+import no.nav.syfo.db.domain.Kanal.BREV
+import no.nav.syfo.db.domain.Kanal.BRUKERNOTIFIKASJON
+import no.nav.syfo.db.domain.Kanal.DINE_SYKMELDTE
+import no.nav.syfo.db.domain.Kanal.DITT_SYKEFRAVAER
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.db.fetchUferdigstilteVarsler
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
-import no.nav.syfo.db.storeUtsendtMerVeiledningVarselBackup
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
 import no.nav.syfo.domain.PersonIdent
@@ -257,6 +260,33 @@ class SenderFacade(
         }
     }
 
+    suspend fun sendForcedBrevTilFysiskPrint(
+        uuid: String,
+        varselHendelse: ArbeidstakerHendelse,
+        journalpostId: String,
+        distribusjonsType: DistibusjonsType = DistibusjonsType.VIKTIG,
+    ) {
+        var isSendingSucceed = true
+        try {
+            fysiskBrevUtsendingService.sendForcedBrev(uuid, journalpostId, distribusjonsType)
+        } catch (e: Exception) {
+            isSendingSucceed = false
+            log.warn("Error while sending forced brev til forced fysisk print: ${e.message}")
+            lagreIkkeUtsendtArbeidstakerVarsel(
+                kanal = BREV,
+                varselHendelse = varselHendelse,
+                eksternReferanse = uuid,
+                feilmelding = e.message,
+                journalpostId = journalpostId,
+                brukernotifikasjonerMeldingType = null,
+                isForcedLetter = true,
+            )
+        }
+        if (isSendingSucceed) {
+            lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid, isForcedLetter = true)
+        }
+    }
+
     private fun lagreUtsendtNarmesteLederVarsel(
         kanal: Kanal,
         varselHendelse: NarmesteLederHendelse,
@@ -277,6 +307,7 @@ class SenderFacade(
                 eksternReferanse,
                 null,
                 arbeidsgivernotifikasjonMerkelapp,
+                isForcedLetter = false
             ),
         )
     }
@@ -285,6 +316,7 @@ class SenderFacade(
         kanal: Kanal,
         varselHendelse: ArbeidstakerHendelse,
         eksternReferanse: String,
+        isForcedLetter: Boolean = false,
     ) {
         database.storeUtsendtVarsel(
             PUtsendtVarsel(
@@ -300,34 +332,9 @@ class SenderFacade(
                 eksternReferanse,
                 null,
                 null,
+                isForcedLetter,
             ),
         )
-    }
-
-    fun lagreUtsendtMerVeiledningVarselBackUp(
-        kanal: Kanal,
-        varselHendelse: ArbeidstakerHendelse,
-        eksternReferanse: String,
-    ) {
-        if (varselHendelse.type == HendelseType.SM_MER_VEILEDNING) {
-            log.info("Storing backup mer veiledning varsel")
-            database.storeUtsendtMerVeiledningVarselBackup(
-                PUtsendtVarsel(
-                    UUID.randomUUID().toString(),
-                    varselHendelse.arbeidstakerFnr,
-                    null,
-                    null,
-                    null,
-                    varselHendelse.type.name,
-                    kanal.name,
-                    LocalDateTime.now(),
-                    null,
-                    eksternReferanse,
-                    null,
-                    null,
-                ),
-            )
-        }
     }
 
     private fun lagreIkkeUtsendtArbeidstakerVarsel(
@@ -337,6 +344,7 @@ class SenderFacade(
         feilmelding: String?,
         journalpostId: String? = null,
         brukernotifikasjonerMeldingType: String? = null,
+        isForcedLetter: Boolean = false,
     ) {
         database.storeUtsendtVarselFeilet(
             PUtsendtVarselFeilet(
@@ -352,6 +360,7 @@ class SenderFacade(
                 kanal = kanal.name,
                 feilmelding = feilmelding,
                 utsendtForsokTidspunkt = LocalDateTime.now(),
+                isForcedLetter = isForcedLetter,
             ),
         )
     }
@@ -377,6 +386,7 @@ class SenderFacade(
                 kanal = kanal.name,
                 feilmelding = feilmelding,
                 utsendtForsokTidspunkt = LocalDateTime.now(),
+                isForcedLetter = false,
             ),
         )
     }

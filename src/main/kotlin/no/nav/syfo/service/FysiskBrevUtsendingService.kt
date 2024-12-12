@@ -12,7 +12,7 @@ class FysiskBrevUtsendingService(
     suspend fun sendBrev(
         uuid: String,
         journalpostId: String,
-        distribusjonsType: DistibusjonsType
+        distribusjonsType: DistibusjonsType,
     ) {
         val bestillingsId = journalpostdistribusjonConsumer.distribuerJournalpost(
             journalpostId,
@@ -20,6 +20,19 @@ class FysiskBrevUtsendingService(
             distribusjonsType
         ).bestillingsId
         log.info("Sendte til print, bestillingsId er $bestillingsId, varsel med UUID: $uuid")
+    }
+
+    suspend fun sendForcedBrev(
+        uuid: String,
+        journalpostId: String,
+        distribusjonsType: DistibusjonsType,
+    ) {
+        val bestillingsId = journalpostdistribusjonConsumer.distribuerTvungetJournalpost(
+            journalpostId,
+            uuid,
+            distribusjonsType
+        ).bestillingsId
+        log.info("Sendte tvunget  brev til print, bestillingsId er $bestillingsId, varsel med UUID: $uuid")
     }
 }
 

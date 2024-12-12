@@ -40,15 +40,16 @@ class TestdataResetServiceSpek : DescribeSpec({
                 uuid = UUID.randomUUID().toString(),
                 fnr = arbeidstakerFnr1,
                 aktorId = arbeidstakerAktorId1,
-                utsendtTidspunkt = LocalDateTime.now(),
-                type = VarselType.MER_VEILEDNING.name,
                 narmesteLederFnr = null,
                 orgnummer = null,
+                type = VarselType.MER_VEILEDNING.name,
                 kanal = null,
+                utsendtTidspunkt = LocalDateTime.now(),
                 planlagtVarselId = null,
                 eksternReferanse = null,
                 ferdigstiltTidspunkt = null,
                 arbeidsgivernotifikasjonMerkelapp = null,
+                isForcedLetter = false,
             )
 
         val pUtsendtVarselFeilet = PUtsendtVarselFeilet(
@@ -63,7 +64,8 @@ class TestdataResetServiceSpek : DescribeSpec({
             null,
             Kanal.BRUKERNOTIFIKASJON.name,
             null,
-            LocalDateTime.now()
+            LocalDateTime.now(),
+            false
         )
 
         val mikrofrontendSynlighet =

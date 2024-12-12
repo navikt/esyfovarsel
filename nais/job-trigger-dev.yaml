@@ -6,7 +6,7 @@ metadata:
   labels:
     team: team-esyfo
 spec:
-  image: {{ image }}
+  image: { { image } }
   accessPolicy:
     outbound:
       rules:
@@ -21,3 +21,5 @@ spec:
       value: "true"
     - name: ESYFOVARSEL_JOB_TRIGGER_URL
       value: http://esyfovarsel/job/trigger
+    - name: REVARSLE_UNREAD_AKTIVITETSKRAV_PLIKT
+      value: "true"
