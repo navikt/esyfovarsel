@@ -48,7 +48,9 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
                 log.info("Sent document to print")
                 response.body()
             } else {
-                throw RuntimeException("Failed to send document with uuid $uuid to print. journalpostId: $journalpostId. Response status: ${response.status}. Response: $response")
+                throw RuntimeException(
+                    "Failed to send document with uuid $uuid to print. journalpostId: $journalpostId. Response status: ${response.status}. Response: $response"
+                )
             }
         } catch (e: Exception) {
             throw RuntimeException(

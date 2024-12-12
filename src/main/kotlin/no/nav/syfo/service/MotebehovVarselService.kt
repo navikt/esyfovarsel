@@ -57,7 +57,9 @@ class MotebehovVarselService(
             sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
             tellSvarMotebehovVarselSendt(1)
         } else {
-            log.info("[MotebehovVarselService]: Sender ikke Svar møtebehov-varsel til NL fordi arbeidstaker ikke er sykmeldt fra bedriften")
+            log.info(
+                "[MotebehovVarselService]: Sender ikke Svar møtebehov-varsel til NL fordi arbeidstaker ikke er sykmeldt fra bedriften"
+            )
         }
     }
 
@@ -81,6 +83,7 @@ class MotebehovVarselService(
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
                 LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
                 Meldingstype.OPPGAVE,
+                UUID.randomUUID().toString()
             ),
         )
     }
@@ -159,10 +162,11 @@ class MotebehovVarselService(
                 ansattFnr = varselHendelse.arbeidstakerFnr,
                 merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
                 messageText = data.tilbakemelding,
-                emailTitle = ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_TITLE,
-                emailBody = ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_BODY,
+                epostTittel = ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_TITLE,
+                epostHtmlBody = ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_BODY,
                 hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
                 meldingstype = Meldingstype.BESKJED,
+                grupperingsid = UUID.randomUUID().toString()
             ),
         )
     }

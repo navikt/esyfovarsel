@@ -35,7 +35,10 @@ class EmbeddedDatabase : DatabaseInterface {
         val tables = listOf(
             "SYKMELDING_IDS",
             "UTSENDT_VARSEL",
-            "MIKROFRONTEND_SYNLIGHET"
+            "MIKROFRONTEND_SYNLIGHET",
+            "UTSENDING_VARSEL_FEILET",
+            "ARBEIDSGIVERNOTIFIKASJONER_SAK",
+            "ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE"
         )
 
         connection.use { connection ->
@@ -51,4 +54,3 @@ class EmbeddedDatabase : DatabaseInterface {
     override val log: Logger
         get() = LoggerFactory.getLogger(EmbeddedDatabase::class.qualifiedName)
 }
-

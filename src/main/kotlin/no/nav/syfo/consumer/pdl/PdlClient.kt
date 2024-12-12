@@ -7,17 +7,17 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import java.io.FileNotFoundException
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.metrics.COUNT_CALL_PDL_FAIL
 import no.nav.syfo.metrics.COUNT_CALL_PDL_SUCCESS
 import no.nav.syfo.utils.httpClientWithRetry
 import org.slf4j.LoggerFactory
+import java.io.FileNotFoundException
 
-open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
+open class PdlClient(private val urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val httpClient = httpClientWithRetry(expectSuccess = true)
-    private val log = LoggerFactory.getLogger(PdlConsumer::class.qualifiedName)
+    private val log = LoggerFactory.getLogger(PdlClient::class.qualifiedName)
 
     suspend fun hentPerson(
         personIdent: String,

@@ -95,6 +95,26 @@ fun DatabaseInterface.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef: Str
     }
 }
 
+fun DatabaseInterface.fetchUferdigstilteNarmesteLederVarsler(
+    sykmeldtFnr: PersonIdent,
+    narmesteLederFnr: PersonIdent,
+): List<PUtsendtVarsel> {
+    val queryStatement = """SELECT *
+                            FROM UTSENDT_VARSEL
+                            WHERE fnr = ?
+                            AND narmesteLeder_fnr = ?
+                            AND ferdigstilt_tidspunkt is null
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, sykmeldtFnr.value)
+            it.setString(2, narmesteLederFnr.value)
+            it.executeQuery().toList { toPUtsendtVarsel() }
+        }
+    }
+}
+
 fun DatabaseInterface.fetchUtsendtVarselByFnr(fnr: String): List<PUtsendtVarsel> {
     val queryStatement = """SELECT *
                             FROM UTSENDT_VARSEL

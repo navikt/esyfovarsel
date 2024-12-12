@@ -14,10 +14,10 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
-import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
-import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.service.microfrontend.MikrofrontendAktivitetskravService
+import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
 import no.nav.syfo.service.microfrontend.MikrofrontendMerOppfolgingService
+import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.testutil.*
 import no.nav.syfo.utils.DuplicateMotebehovException
 import no.nav.syfo.utils.MotebehovAfterBookingException
@@ -52,15 +52,15 @@ class MikrofrontendServiceSpek : DescribeSpec({
         val tomorrow = today.plusDays(1L)
 
         val dataTidspunktToday: String = "{" +
-                "\"journalpost\":null," +
-                "\"narmesteLeder\":null," +
-                "\"motetidspunkt\":{\"tidspunkt\":\"$today\"}" +
-                "}"
+            "\"journalpost\":null," +
+            "\"narmesteLeder\":null," +
+            "\"motetidspunkt\":{\"tidspunkt\":\"$today\"}" +
+            "}"
         val dataTidspunktTomorrow: String = "{" +
-                "\"journalpost\":null," +
-                "\"narmesteLeder\":null," +
-                "\"motetidspunkt\":{\"tidspunkt\":\"$tomorrow\"}" +
-                "}"
+            "\"journalpost\":null," +
+            "\"narmesteLeder\":null," +
+            "\"motetidspunkt\":{\"tidspunkt\":\"$tomorrow\"}" +
+            "}"
 
         val arbeidstakerHendelseDialogmoteInnkalt = ArbeidstakerHendelse(
             type = HendelseType.SM_DIALOGMOTE_INNKALT,
@@ -96,7 +96,9 @@ class MikrofrontendServiceSpek : DescribeSpec({
             ferdigstill = true
         )
 
-        it("Enabling MF with a dialogmote event should result in motetidspunkt storage in DB and publication on min-side topic") {
+        it(
+            "Enabling MF with a dialogmote event should result in motetidspunkt storage in DB and publication on min-side topic"
+        ) {
             mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
             embeddedDatabase.shouldContainMikrofrontendEntry(
                 arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr,
@@ -107,7 +109,9 @@ class MikrofrontendServiceSpek : DescribeSpec({
             }
         }
 
-        it("Enabling MF with a syfomotebehov event should result entry without synligTom in DB and publication on min-side topic") {
+        it(
+            "Enabling MF with a syfomotebehov event should result entry without synligTom in DB and publication on min-side topic"
+        ) {
             mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
             embeddedDatabase.shouldContainMikrofrontendEntryWithoutSynligTom(
                 arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr,
@@ -170,13 +174,15 @@ class MikrofrontendServiceSpek : DescribeSpec({
         }
 
         it("Should store MER_OPPFOLGING event in DB with synligTom set") {
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(ArbeidstakerHendelse(
-                type = HendelseType.SM_MER_VEILEDNING,
-                ferdigstill = false,
-                data = null,
-                arbeidstakerFnr = arbeidstakerFnr1,
-                orgnummer = null
-            ))
+            mikrofrontendService.updateMikrofrontendForUserByHendelse(
+                ArbeidstakerHendelse(
+                    type = HendelseType.SM_MER_VEILEDNING,
+                    ferdigstill = false,
+                    data = null,
+                    arbeidstakerFnr = arbeidstakerFnr1,
+                    orgnummer = null
+                )
+            )
             embeddedDatabase.shouldContainMikrofrontendEntryWithSynligTom(
                 arbeidstakerFnr1,
                 Tjeneste.MER_OPPFOLGING
@@ -207,12 +213,15 @@ class MikrofrontendServiceSpek : DescribeSpec({
         it("Closing entries for user should not close other users entries") {
             mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
             mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkaltIdag)
-            mikrofrontendService.closeAllMikrofrontendForUser(PersonIdent(arbeidstakerHendelseDialogmoteInnkaltIdag.arbeidstakerFnr))
+            mikrofrontendService.closeAllMikrofrontendForUser(
+                PersonIdent(arbeidstakerHendelseDialogmoteInnkaltIdag.arbeidstakerFnr)
+            )
             embeddedDatabase.shouldNotContainMikrofrontendEntryForUser(
                 arbeidstakerHendelseDialogmoteInnkaltIdag.arbeidstakerFnr
             )
             embeddedDatabase.shouldContainMikrofrontendEntry(
-                arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr, Tjeneste.DIALOGMOTE
+                arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr,
+                Tjeneste.DIALOGMOTE
             )
         }
     }

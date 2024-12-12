@@ -19,9 +19,9 @@ class TestdataResetService(
     suspend fun resetTestdata(fnr: PersonIdent) {
         log.info(
             "Nullstiller testdata for arbeidstaker ${fnr.value}. Ferdigstiller varsler " +
-                    "som er sendt til Min side - arbeidsgiver, Dine sykmeldte, Min side (personbruker), " +
-                    "Ditt sykefravær. Fjerner mikrofrontend på Min side. " +
-                    "Sletter planlagte og utsendte varsler, feilede varsler."
+                "som er sendt til Min side - arbeidsgiver, Dine sykmeldte, Min side (personbruker), " +
+                "Ditt sykefravær. Fjerner mikrofrontend på Min side. " +
+                "Sletter planlagte og utsendte varsler, feilede varsler."
         )
 
         // Ferdigstille varsler

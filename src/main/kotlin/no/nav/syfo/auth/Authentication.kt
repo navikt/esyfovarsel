@@ -13,14 +13,14 @@ import io.ktor.server.auth.jwt.JWTCredential
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.routing.routing
-import java.net.URL
-import java.util.concurrent.TimeUnit
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.api.job.registerJobTriggerApi
 import no.nav.syfo.job.SendAktivitetspliktLetterToSentralPrintJob
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.URL
+import java.util.concurrent.TimeUnit
 
 val log: Logger = LoggerFactory.getLogger(Authentication::class.qualifiedName)
 
@@ -93,7 +93,9 @@ private fun AuthenticationConfig.configureJwt(
             if (credentialsHasExpectedAudience) {
                 JWTPrincipal(credential.payload)
             } else {
-                log.warn("Auth: Unexpected audience for jwt ${credential.payload.issuer}, ${credential.payload.audience}")
+                log.warn(
+                    "Auth: Unexpected audience for jwt ${credential.payload.issuer}, ${credential.payload.audience}"
+                )
                 null
             }
         }

@@ -1,0 +1,42 @@
+mutation nyStatusSakByGrupperingsid(
+  $idempotencyKey: String,
+  $grupperingsid: String!,
+  $merkelapp: String!,
+  $nyStatus: SaksStatus!,
+  $tidspunkt: ISO8601DateTime,
+  $overstyrStatustekstMed: String,
+  $hardDelete: HardDeleteUpdateInput,
+  $nyLenkeTilSak: String
+) {
+  nyStatusSakByGrupperingsid(
+    idempotencyKey: $idempotencyKey,
+    grupperingsid: $grupperingsid,
+    merkelapp: $merkelapp,
+    nyStatus: $nyStatus,
+    tidspunkt: $tidspunkt,
+    overstyrStatustekstMed: $overstyrStatustekstMed,
+    hardDelete: $hardDelete,
+    nyLenkeTilSak: $nyLenkeTilSak
+  ) {
+    ... on NyStatusSakVellykket {
+      id
+      statuser {
+        status
+        tidspunkt
+        overstyrStatusTekstMed
+      }
+    }
+    ... on SakFinnesIkke {
+      feilmelding
+    }
+    ... on Konflikt {
+      feilmelding
+    }
+    ... on UgyldigMerkelapp {
+      feilmelding
+    }
+    ... on UkjentProdusent {
+      feilmelding
+    }
+  }
+}

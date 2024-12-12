@@ -16,5 +16,4 @@ class AccessControlService(val dkifConsumer: DkifConsumer) {
 
     suspend fun canUserBeNotifiedByEmailOrSMS(fnr: String) =
         getUserAccessStatus(fnr).canUserBeDigitallyNotified
-
 }

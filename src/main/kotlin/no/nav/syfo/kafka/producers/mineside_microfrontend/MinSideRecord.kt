@@ -14,4 +14,3 @@ data class MinSideRecord(
     @JsonProperty("sensitivitet") val sensitivitet: String = "high",
     @JsonProperty("@initiated_by") val initiatedBy: String = "team-esyfo"
 )
-

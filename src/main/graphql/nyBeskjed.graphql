@@ -1,0 +1,26 @@
+mutation nyBeskjed($nyBeskjed: NyBeskjedInput!) {
+    nyBeskjed(nyBeskjed: $nyBeskjed) {
+        ... on NyBeskjedVellykket {
+            id
+            eksterneVarsler {
+                id
+            }
+        }
+        ... on UgyldigMerkelapp {
+            feilmelding
+        }
+        ... on UgyldigMottaker {
+            feilmelding
+        }
+        ... on DuplikatEksternIdOgMerkelapp {
+            feilmelding
+            idTilEksisterende
+        }
+        ... on UkjentProdusent {
+            feilmelding
+        }
+        ... on UkjentRolle {
+            feilmelding
+        }
+    }
+}

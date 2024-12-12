@@ -24,7 +24,7 @@ fun DatabaseInterface.storeFodselsdato(fnr: String, fodselsdato: String?) {
     }
 }
 
-fun DatabaseInterface.fetchFodselsdatoByFnr(fnr: String): List<String?>{
+fun DatabaseInterface.fetchFodselsdatoByFnr(fnr: String): List<String?> {
     val queryStatement = """SELECT *
                             FROM FODSELSDATO
                             WHERE fnr = ?

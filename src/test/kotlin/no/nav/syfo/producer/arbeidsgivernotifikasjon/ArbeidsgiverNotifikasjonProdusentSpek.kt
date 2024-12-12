@@ -31,6 +31,7 @@ class ArbeidsgiverNotifikasjonProdusentSpek : DescribeSpec({
         "Hei du",
         "Body",
         LocalDateTime.now().plusDays(1),
+        UUID.randomUUID().toString()
     )
 
     beforeSpec {
@@ -45,11 +46,11 @@ class ArbeidsgiverNotifikasjonProdusentSpek : DescribeSpec({
 
     describe("ArbeidsgiverNotifikasjonProdusentSpek") {
         it("Should send oppgave") {
-            arbeidsgiverNotifikasjonProdusent.createNewTaskForArbeidsgiver(arbeidsgiverNotifikasjon)
+            arbeidsgiverNotifikasjonProdusent.createNewOppgaveForArbeidsgiver(arbeidsgiverNotifikasjon)
         }
 
         it("Should send beskjed") {
-            arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(
+            arbeidsgiverNotifikasjonProdusent.createNewBeskjedForArbeidsgiver(
                 arbeidsgiverNotifikasjon
             )
         }

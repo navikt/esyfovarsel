@@ -25,7 +25,14 @@ class BrukernotifikasjonerService(
     ) {
         when (varseltype) {
             BESKJED -> {
-                brukernotifikasjonKafkaProducer.sendBeskjed(mottakerFnr, content, uuid, url, eksternVarsling, dagerTilDeaktivering)
+                brukernotifikasjonKafkaProducer.sendBeskjed(
+                    mottakerFnr,
+                    content,
+                    uuid,
+                    url,
+                    eksternVarsling,
+                    dagerTilDeaktivering
+                )
                 log.info("Har sendt beskjed med uuid $uuid til brukernotifikasjoner: $content")
             }
 

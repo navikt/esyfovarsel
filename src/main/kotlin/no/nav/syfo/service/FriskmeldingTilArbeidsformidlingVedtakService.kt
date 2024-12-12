@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 class FriskmeldingTilArbeidsformidlingVedtakService(
     private val senderFacade: SenderFacade,
 ) {
-    
+
     suspend fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         log.info("[VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING] sending enabled")
         val data = dataToVarselData(varselHendelse.data)

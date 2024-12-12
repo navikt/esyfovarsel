@@ -6,7 +6,7 @@ import no.nav.syfo.utils.dataToVarselData
 import org.slf4j.LoggerFactory
 
 class ArbeidsuforhetForhandsvarselService(private val senderFacade: SenderFacade) {
-    
+
     suspend fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         log.info("[ARBEIDSUFORHET_FORHANDSVARSEL] sending enabled")
         val data = dataToVarselData(varselHendelse.data)
