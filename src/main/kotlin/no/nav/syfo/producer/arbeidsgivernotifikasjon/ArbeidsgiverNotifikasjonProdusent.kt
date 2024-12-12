@@ -82,7 +82,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
         narmesteLederId: String,
         url: String
     ): String? {
-        log.info("Forsøker å opprette ny kalenderavtale for narmesteLederId: $narmesteLederId")
+        log.info("Forsøker å opprette ny kalenderavtale")
         val apolloClient = ApolloClient.Builder()
             .serverUrl(arbeidsgiverNotifikasjonProdusentBasepath)
             .build()
@@ -115,6 +115,11 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
         )
 
         val response: ApolloResponse<NyKalenderavtaleMutation.Data> = apolloClient.mutation(mutation).execute()
+
+        response.errors?.forEach {
+            log.error("Error while creating new kalenderavtale: ${it.message}")
+        }
+
         val result = response.data?.nyKalenderavtale
 
         return when {
