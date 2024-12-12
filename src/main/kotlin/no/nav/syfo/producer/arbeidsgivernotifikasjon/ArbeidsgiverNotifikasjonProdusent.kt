@@ -1,5 +1,16 @@
 package no.nav.syfo.producer.arbeidsgivernotifikasjon
 
+import com.apollo.graphql.NyKalenderavtaleMutation
+import com.apollo.graphql.OppdaterKalenderavtaleMutation
+import com.apollo.graphql.type.FutureTemporalInput
+import com.apollo.graphql.type.HardDeleteUpdateInput
+import com.apollo.graphql.type.KalenderavtaleTilstand
+import com.apollo.graphql.type.MottakerInput
+import com.apollo.graphql.type.NaermesteLederMottakerInput
+import com.apollo.graphql.type.NyTidStrategi
+import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.ApolloResponse
+import com.apollographql.apollo.api.Optional
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -14,8 +25,11 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nybeskjed.NyBeskje
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyOppgaveErrorResponse
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyOppgaveResponse
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyoppgaveMutationStatus.NY_OPPGAVE_VELLYKKET
+import no.nav.syfo.service.NyKalenderInput
+import no.nav.syfo.service.OppdaterKalenderInput
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
+import java.time.format.DateTimeFormatter
 
 open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client = httpClient()
@@ -60,6 +74,148 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
             }
             val errors = response.body<NyOppgaveErrorResponse>().errors
             throw RuntimeException("Could not send task to arbeidsgiver. because of error: ${errors[0].message}, data was null")
+        }
+    }
+
+    suspend fun createNewKalenderavtale(
+        kalenderInput: NyKalenderInput,
+        narmesteLederId: String,
+        url: String
+    ): String? {
+        val apolloClient = ApolloClient.Builder()
+            .serverUrl(arbeidsgiverNotifikasjonProdusentBasepath)
+            .build()
+
+        val mutation = NyKalenderavtaleMutation(
+            virksomhetsnummer = kalenderInput.virksomhetsnummer,
+            grupperingsid = narmesteLederId,
+            merkelapp = kalenderInput.merkelapp,
+            eksternId = kalenderInput.eksternId,
+            tekst = kalenderInput.tekst,
+            lenke = url,
+            mottakere = listOf(
+                MottakerInput(
+                    naermesteLeder = Optional.present(
+                        NaermesteLederMottakerInput(
+                            naermesteLederFnr = kalenderInput.naermesteLederFnr,
+                            ansattFnr = kalenderInput.sykmeldtFnr
+                        )
+                    )
+                )
+            ),
+            startTidspunkt = kalenderInput.startTidspunkt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            sluttTidspunkt = Optional.presentIfNotNull(kalenderInput.sluttTidspunkt?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)),
+            lokasjon = Optional.absent(),
+            erDigitalt = Optional.absent(),
+            tilstand = Optional.present(KalenderavtaleTilstand.VENTER_SVAR_FRA_ARBEIDSGIVER),
+            eksterneVarsler = listOf(),
+            paaminnelse = Optional.absent(),
+            hardDelete = Optional.present(FutureTemporalInput(den = Optional.present(kalenderInput.hardDeleteTidspunkt))),
+        )
+
+        val response: ApolloResponse<NyKalenderavtaleMutation.Data> = apolloClient.mutation(mutation).execute()
+        val result = response.data?.nyKalenderavtale
+
+        return when {
+            result?.onNyKalenderavtaleVellykket != null -> {
+                log.info("Opprettet ny kalenderavtale!")
+                result.onNyKalenderavtaleVellykket.id
+            }
+
+            result?.onUgyldigKalenderavtale != null -> {
+                log.error("Error: ${result.onUgyldigKalenderavtale.feilmelding}")
+                null
+            }
+
+            result?.onUgyldigMerkelapp != null -> {
+                log.error("Feil ved oppretting av kalenderavtale - Ugyldig merkelapp: ${result.onUgyldigMerkelapp.feilmelding}")
+                null
+            }
+
+            result?.onUgyldigMottaker != null -> {
+                log.error("Feil ved oppretting av kalenderavtale - Ugyldig mottaker: ${result.onUgyldigMottaker.feilmelding}")
+                null
+            }
+
+            result?.onDuplikatEksternIdOgMerkelapp != null -> {
+                log.error("Feil ved oppretting av kalenderavtale - Duplikat ekstern id og merkelapp: ${result.onDuplikatEksternIdOgMerkelapp.feilmelding}, Existing ID: ${result.onDuplikatEksternIdOgMerkelapp.idTilEksisterende}")
+                null
+            }
+
+            result?.onUkjentProdusent != null -> {
+                log.error("Feil ved oppretting av kalenderavtale - Ukjent produsent: ${result.onUkjentProdusent.feilmelding}")
+                null
+            }
+
+            result?.onSakFinnesIkke != null -> {
+                log.error("Feil ved oppretting av kalenderavtale - Sak finnes ikke: ${result.onSakFinnesIkke.feilmelding}")
+                null
+            }
+
+            else -> {
+                log.error("Feil ved oppretting av kalenderavtale - Uventet feil")
+                null
+            }
+        }
+    }
+
+    suspend fun updateKalenderavtale(
+        oppdaterKalenderInput: OppdaterKalenderInput
+    ): String? {
+        val apolloClient = ApolloClient.Builder()
+            .serverUrl(arbeidsgiverNotifikasjonProdusentBasepath)
+            .build()
+
+        val mutation = OppdaterKalenderavtaleMutation(
+            id = oppdaterKalenderInput.id,
+            eksterneVarsler = listOf(),
+            paaminnelse = Optional.absent(),
+            hardDelete = Optional.present(HardDeleteUpdateInput(
+                nyTid = FutureTemporalInput(
+                    den = Optional.present(oppdaterKalenderInput.hardDeleteTidspunkt),
+                ),
+                strategi = NyTidStrategi.OVERSKRIV,
+            )),
+        )
+
+        val response: ApolloResponse<OppdaterKalenderavtaleMutation.Data> = apolloClient.mutation(mutation).execute()
+        val result = response.data?.oppdaterKalenderavtale
+
+        return when {
+            result?.onOppdaterKalenderavtaleVellykket != null -> {
+                log.info("Opprettet ny kalenderavtale!")
+                result.onOppdaterKalenderavtaleVellykket.id
+            }
+
+            result?.onUgyldigKalenderavtale != null -> {
+                log.error("Error: ${result.onUgyldigKalenderavtale.feilmelding}")
+                null
+            }
+
+            result?.onUgyldigMerkelapp != null -> {
+                log.error("Feil ved oppretting av kalenderavtale - Ugyldig merkelapp: ${result.onUgyldigMerkelapp.feilmelding}")
+                null
+            }
+
+            result?.onUkjentProdusent != null -> {
+                log.error("Feil ved oppretting av kalenderavtale - Ukjent produsent: ${result.onUkjentProdusent.feilmelding}")
+                null
+            }
+
+            result?.onNotifikasjonFinnesIkke != null -> {
+                log.error("Feil ved oppretting av kalenderavtale - Notifikasjon finnes ikke: ${result.onNotifikasjonFinnesIkke.feilmelding}")
+                null
+            }
+
+            result?.onKonflikt != null -> {
+                log.error("Feil ved oppretting av kalenderavtale - Konflikt: ${result.onKonflikt.feilmelding}")
+                null
+            }
+
+            else -> {
+                log.error("Feil ved oppretting av kalenderavtale - Uventet feil")
+                null
+            }
         }
     }
 

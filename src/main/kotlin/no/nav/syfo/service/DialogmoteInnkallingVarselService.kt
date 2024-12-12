@@ -81,6 +81,7 @@ class DialogmoteInnkallingVarselService(
         varselHendelse.data = dataToVarselDataNarmesteLeder(varselHendelse.data)
         sendVarselTilDineSykmeldte(varselHendelse)
         sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
+        sendKalenderAvtaleTilArbeidsgiverNotifikasjon(varselHendelse)
     }
 
     suspend fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
@@ -165,6 +166,33 @@ class DialogmoteInnkallingVarselService(
             )
         } else {
             log.warn("Kunne ikke mappe tekstene til arbeidsgiver-tekst for dialogmote varsel av type: ${varselHendelse.type.name}")
+        }
+    }
+
+    private suspend fun sendKalenderAvtaleTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
+        when (varselHendelse.type) {
+            NL_DIALOGMOTE_INNKALT -> {
+                senderFacade.createNewKalenderavtale(
+                    kalenderInput = NyKalenderInput(
+                        virksomhetsnummer = varselHendelse.orgnummer,
+                        grupperingsid = UUID.randomUUID().toString(),
+                        merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
+                        eksternId = UUID.randomUUID().toString(),
+                        tekst = "Du er innkalt til dialogmøte - vi trenger svaret ditt",
+                        sykmeldtFnr = varselHendelse.arbeidstakerFnr,
+                        naermesteLederFnr = varselHendelse.narmesteLederFnr,
+                        startTidspunkt = LocalDateTime.now().plusWeeks(1), //TODO få inn data fra isyfo
+                        sluttTidspunkt = null,
+                        hardDeleteTidspunkt = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+                    )
+                )
+            }
+
+            else -> {
+//                log.error("Wrong type of dialogmote varsel for kalenderavtale: ${varselHendelse.type}")
+                return
+            }
+
         }
     }
 

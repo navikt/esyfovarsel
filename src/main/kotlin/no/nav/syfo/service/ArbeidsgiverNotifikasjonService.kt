@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import com.apollo.graphql.type.KalenderavtaleTilstand
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
@@ -67,6 +68,34 @@ class ArbeidsgiverNotifikasjonService(
             ),
         )
     }
+
+    suspend fun createNewKalenderavtale(
+        nyKalenderInput: NyKalenderInput
+    ): String? {
+        val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(
+            nyKalenderInput.sykmeldtFnr,
+            nyKalenderInput.virksomhetsnummer
+        )
+
+        if (narmesteLederRelasjon?.narmesteLederId == null) {
+            log.warn("Sender ikke kalenderavtale: narmesteLederRelasjon er null, eller mangler narmesteLederId")
+            return null
+        }
+
+        val url = dineSykmeldteUrl + "/${narmesteLederRelasjon.narmesteLederId}"
+
+        return arbeidsgiverNotifikasjonProdusent.createNewKalenderavtale(
+            kalenderInput = nyKalenderInput,
+            narmesteLederId = narmesteLederRelasjon.narmesteLederId,
+            url = url
+        )
+    }
+
+    suspend fun updateKalenderavtale(
+        oppdaterKalenderInput: OppdaterKalenderInput
+    ): String? {
+        return arbeidsgiverNotifikasjonProdusent.updateKalenderavtale(oppdaterKalenderInput)
+    }
 }
 
 data class ArbeidsgiverNotifikasjonInput(
@@ -80,6 +109,46 @@ data class ArbeidsgiverNotifikasjonInput(
     val emailBody: String,
     val hardDeleteDate: LocalDateTime,
     val meldingstype: Meldingstype = BESKJED,
+)
+
+/**
+ * @param virksomhetsnummer Organisasjonsnummeret til virksomheten som skal motta kalenderavtalen.
+ * @param grupperingsid Grupperings-ID-en knytter denne kalenderavtalen til en sak med samme grupperings-ID og merkelapp. Det vises ikke til brukere. Saksnummer er en naturlig grupperings-ID.
+ * @param merkelapp Merkelapp for kalenderavtalen. Er typisk navnet på ytelse eller lignende. Den vises ikke til brukeren, men brukes i kombinasjon med grupperings-ID for å koble kalenderavtalen til sak.
+ * @param eksternId Den eksterne ID-en brukes for å unikt identifisere en notifikasjon. Den må være unik for merkelappen.
+ * @param tekst Teksten som vises til brukeren.
+ * @param sykmeldtFnr Fødselsnummeret til den sykmeldte
+ * @param naermesteLederFnr Fødselsnummeret til nærmeste leder
+ * @param startTidspunkt Når avtalen starter.
+ * @param sluttTidspunkt Når avtalen slutter (valgfritt).
+ * @param hardDeleteTidspunkt Når avtalen skal slettes.
+ */
+data class NyKalenderInput(
+    val virksomhetsnummer: String,
+    val grupperingsid: String,
+    val merkelapp: String,
+    val eksternId: String,
+    val tekst: String,
+    val sykmeldtFnr: String,
+    val naermesteLederFnr: String,
+    val startTidspunkt: LocalDateTime,
+    val sluttTidspunkt: LocalDateTime?,
+    val hardDeleteTidspunkt: LocalDateTime,
+)
+
+/**
+ * @param id ID-en til kalenderavtalen som skal oppdateres.
+ * @param nyTilstand Den nye tilstanden til avtalen.
+ * @param nyTekst Den nye teksten som skal vises til brukeren.
+ * @param nyLenke Den nye lenken som brukeren skal føres til.
+ * @param hardDeleteTidspunkt Når avtalen skal slettes.
+ */
+data class OppdaterKalenderInput(
+    val id: String,
+    val nyTilstand: KalenderavtaleTilstand,
+    val nyTekst: String,
+    val nyLenke: String?,
+    val hardDeleteTidspunkt: LocalDateTime,
 )
 
 enum class Meldingstype {
