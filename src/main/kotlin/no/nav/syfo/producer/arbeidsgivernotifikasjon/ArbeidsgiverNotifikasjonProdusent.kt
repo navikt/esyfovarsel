@@ -9,12 +9,21 @@ import com.apollo.graphql.type.MottakerInput
 import com.apollo.graphql.type.NaermesteLederMottakerInput
 import com.apollo.graphql.type.NyTidStrategi
 import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.ApolloRequest
 import com.apollographql.apollo.api.ApolloResponse
+import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Optional
+import com.apollographql.apollo.interceptor.ApolloInterceptor
+import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
@@ -85,6 +94,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
         log.info("Forsøker å opprette ny kalenderavtale")
         val apolloClient = ApolloClient.Builder()
             .serverUrl(arbeidsgiverNotifikasjonProdusentBasepath)
+            .addInterceptor(BearerTokenInterceptor { azureAdTokenConsumer.getToken(scope) })
             .build()
 
         val mutation = NyKalenderavtaleMutation(
@@ -283,5 +293,20 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
                 e,
             )
         }
+    }
+}
+
+class BearerTokenInterceptor(private val tokenProvider: suspend () -> String) : ApolloInterceptor {
+    override fun <D : Operation.Data> intercept(
+        request: ApolloRequest<D>,
+        chain: ApolloInterceptorChain
+    ): Flow<ApolloResponse<D>> = flow {
+        val token = withContext(Dispatchers.IO) { tokenProvider() }
+        val newRequest = request.newBuilder()
+            .addHttpHeader("Authorization", "Bearer $token")
+            .addHttpHeader("Content-Type", "application/json")
+            .addHttpHeader("Accept", "application/json")
+            .build()
+        emitAll(chain.proceed(newRequest))
     }
 }
