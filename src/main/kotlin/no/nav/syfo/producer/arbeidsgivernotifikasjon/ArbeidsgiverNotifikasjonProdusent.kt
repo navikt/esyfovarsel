@@ -82,6 +82,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
         narmesteLederId: String,
         url: String
     ): String? {
+        log.info("Forsøker å opprette ny kalenderavtale for narmesteLederId: $narmesteLederId")
         val apolloClient = ApolloClient.Builder()
             .serverUrl(arbeidsgiverNotifikasjonProdusentBasepath)
             .build()
@@ -123,7 +124,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
             }
 
             result?.onUgyldigKalenderavtale != null -> {
-                log.error("Error: ${result.onUgyldigKalenderavtale.feilmelding}")
+                log.error("Feil ved oppretting av kalenderavtale - Ugyldig kalenderavtale: ${result.onUgyldigKalenderavtale.feilmelding}")
                 null
             }
 
@@ -188,32 +189,32 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
             }
 
             result?.onUgyldigKalenderavtale != null -> {
-                log.error("Error: ${result.onUgyldigKalenderavtale.feilmelding}")
+                log.error("Feil ved oppdatering av kalenderavtale - Ugyldig kalenderavtale: ${result.onUgyldigKalenderavtale.feilmelding}")
                 null
             }
 
             result?.onUgyldigMerkelapp != null -> {
-                log.error("Feil ved oppretting av kalenderavtale - Ugyldig merkelapp: ${result.onUgyldigMerkelapp.feilmelding}")
+                log.error("Feil ved oppdatering av kalenderavtale - Ugyldig merkelapp: ${result.onUgyldigMerkelapp.feilmelding}")
                 null
             }
 
             result?.onUkjentProdusent != null -> {
-                log.error("Feil ved oppretting av kalenderavtale - Ukjent produsent: ${result.onUkjentProdusent.feilmelding}")
+                log.error("Feil ved oppdatering av kalenderavtale - Ukjent produsent: ${result.onUkjentProdusent.feilmelding}")
                 null
             }
 
             result?.onNotifikasjonFinnesIkke != null -> {
-                log.error("Feil ved oppretting av kalenderavtale - Notifikasjon finnes ikke: ${result.onNotifikasjonFinnesIkke.feilmelding}")
+                log.error("Feil ved oppdatering av kalenderavtale - Notifikasjon finnes ikke: ${result.onNotifikasjonFinnesIkke.feilmelding}")
                 null
             }
 
             result?.onKonflikt != null -> {
-                log.error("Feil ved oppretting av kalenderavtale - Konflikt: ${result.onKonflikt.feilmelding}")
+                log.error("Feil ved oppdatering av kalenderavtale - Konflikt: ${result.onKonflikt.feilmelding}")
                 null
             }
 
             else -> {
-                log.error("Feil ved oppretting av kalenderavtale - Uventet feil")
+                log.error("Feil ved oppdatering av kalenderavtale - Uventet feil")
                 null
             }
         }
