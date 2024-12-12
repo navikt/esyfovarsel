@@ -110,7 +110,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
             tilstand = Optional.present(KalenderavtaleTilstand.VENTER_SVAR_FRA_ARBEIDSGIVER),
             eksterneVarsler = listOf(),
             paaminnelse = Optional.absent(),
-            hardDelete = Optional.present(FutureTemporalInput(den = Optional.present(kalenderInput.hardDeleteTidspunkt))),
+            hardDelete = Optional.present(FutureTemporalInput(den = Optional.present(kalenderInput.hardDeleteTidspunkt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))),
         )
 
         val response: ApolloResponse<NyKalenderavtaleMutation.Data> = apolloClient.mutation(mutation).execute()
