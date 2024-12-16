@@ -189,7 +189,7 @@ class DialogmoteInnkallingVarselService(
 
         when (varselHendelse.type) {
             NL_DIALOGMOTE_INNKALT -> {
-                senderFacade.createNewSak(
+                val newSakId = senderFacade.createNewSak(
                     sakInput = NySakInput(
                         grupperingsid = narmesteLederRelasjon.narmesteLederId,
                         merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
@@ -199,9 +199,11 @@ class DialogmoteInnkallingVarselService(
                         tittel = "Innkalling til dialogmøte",
                         lenke = lenkeTilDialogmoteLanding,
                         initiellStatus = SaksStatus.MOTTATT,
-                        tidspunkt = LocalDateTime.now().plusWeeks(1) //TODO få inn data fra isyfo,
+                        tidspunkt = OffsetDateTime.now().plusWeeks(1) //TODO få inn data fra isyfo,
                     )
-                ).also {
+                )
+
+                if (newSakId != null) {
                     senderFacade.createNewKalenderavtale(
                         kalenderInput = NyKalenderInput(
                             virksomhetsnummer = varselHendelse.orgnummer,
@@ -217,6 +219,8 @@ class DialogmoteInnkallingVarselService(
                             hardDeleteTidspunkt = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
                         )
                     )
+                } else {
+                    log.warn("Kunne ikke opprette sak for dialogmote innkalling siden newSakId er null")
                 }
             }
 
