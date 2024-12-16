@@ -23,6 +23,9 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProdu
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyKalenderInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.OppdaterKalenderInput
 import no.nav.syfo.utils.enumValueOfOrNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -150,6 +153,10 @@ class SenderFacade(
         kalenderInput: NyKalenderInput
     ): String? {
         return arbeidsgiverNotifikasjonService.createNewKalenderavtale(kalenderInput)
+    }
+
+    suspend fun createNewSak(sakInput: NySakInput): String? {
+        return arbeidsgiverNotifikasjonService.createNewSak(sakInput)
     }
 
     suspend fun updateKalenderavtale(

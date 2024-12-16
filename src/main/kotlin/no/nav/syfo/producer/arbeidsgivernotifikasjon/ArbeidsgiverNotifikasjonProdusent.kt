@@ -1,12 +1,10 @@
 package no.nav.syfo.producer.arbeidsgivernotifikasjon
 
 import com.apollo.graphql.NyKalenderavtaleMutation
+import com.apollo.graphql.NySakMutation
 import com.apollo.graphql.OppdaterKalenderavtaleMutation
 import com.apollo.graphql.type.FutureTemporalInput
 import com.apollo.graphql.type.HardDeleteUpdateInput
-import com.apollo.graphql.type.KalenderavtaleTilstand
-import com.apollo.graphql.type.MottakerInput
-import com.apollo.graphql.type.NaermesteLederMottakerInput
 import com.apollo.graphql.type.NyTidStrategi
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.ApolloRequest
@@ -28,23 +26,29 @@ import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyKalenderInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.OppdaterKalenderInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toNyKalenderavtaleMutation
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toNySakMutation
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nybeskjed.NyBeskjedErrorResponse
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nybeskjed.NyBeskjedMutationStatus.NY_BESKJED_VELLYKKET
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nybeskjed.NyBeskjedResponse
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyOppgaveErrorResponse
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyOppgaveResponse
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyoppgaveMutationStatus.NY_OPPGAVE_VELLYKKET
-import no.nav.syfo.service.NyKalenderInput
-import no.nav.syfo.service.OppdaterKalenderInput
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
-import java.time.format.DateTimeFormatter
 
 open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val client = httpClient()
     private val arbeidsgiverNotifikasjonProdusentBasepath = urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl
     private val log = LoggerFactory.getLogger(ArbeidsgiverNotifikasjonProdusent::class.qualifiedName)
     private val scope = urlEnv.arbeidsgiverNotifikasjonProdusentApiScope
+    private val apolloClient = ApolloClient.Builder()
+        .serverUrl(arbeidsgiverNotifikasjonProdusentBasepath)
+        .addInterceptor(BearerTokenInterceptor { azureAdTokenConsumer.getToken(scope) })
+        .build()
 
     suspend fun createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? {
         log.info("About to send new notification with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api")
@@ -86,152 +90,130 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
         }
     }
 
+    suspend fun createNewSak(
+        nySakInput: NySakInput
+    ): String? {
+        log.info("About to create new sak with to ag-notifikasjon-produsent-api")
+        val response: ApolloResponse<NySakMutation.Data> = apolloClient.mutation(nySakInput.toNySakMutation()).execute()
+        val result = response.data?.nySak
+
+        if (result?.onNySakVellykket != null) {
+            log.info("Created new sak with id ${result.onNySakVellykket.id}")
+            return result.onNySakVellykket.id
+        } else {
+            log.error("Could not create new sak")
+            response.errors?.forEach {
+                log.error("Response errors when creating new sak: ${it.message}")
+            }
+            result?.onUgyldigMerkelapp?.let {
+                log.error("createNewSak - Ugyldig merkelapp: ${it.feilmelding}")
+            }
+            result?.onUgyldigMottaker?.let {
+                log.error("createNewSak - Ugyldig mottaker: ${it.feilmelding}")
+            }
+            result?.onDuplikatGrupperingsid?.let {
+                log.error("createNewSak - Duplikat grupperingsid: ${it.feilmelding}")
+            }
+            result?.onDuplikatGrupperingsidEtterDelete?.let {
+                log.error("createNewSak - Duplikat grupperingsid etter delete: ${it.feilmelding}")
+            }
+            result?.onUkjentProdusent?.let {
+                log.error("createNewSak - Ukjent produsent: ${it.feilmelding}")
+            }
+            result?.onUkjentRolle?.let {
+                log.error("createNewSak - Ukjent rolle: ${it.feilmelding}")
+            }
+            return null
+        }
+    }
+
     suspend fun createNewKalenderavtale(
-        kalenderInput: NyKalenderInput,
-        narmesteLederId: String,
-        url: String
+        nyKalenderInput: NyKalenderInput,
     ): String? {
         log.info("Forsøker å opprette ny kalenderavtale")
-        val apolloClient = ApolloClient.Builder()
-            .serverUrl(arbeidsgiverNotifikasjonProdusentBasepath)
-            .addInterceptor(BearerTokenInterceptor { azureAdTokenConsumer.getToken(scope) })
-            .build()
 
-        val mutation = NyKalenderavtaleMutation(
-            virksomhetsnummer = kalenderInput.virksomhetsnummer,
-            grupperingsid = narmesteLederId,
-            merkelapp = kalenderInput.merkelapp,
-            eksternId = kalenderInput.eksternId,
-            tekst = kalenderInput.tekst,
-            lenke = url,
-            mottakere = listOf(
-                MottakerInput(
-                    naermesteLeder = Optional.present(
-                        NaermesteLederMottakerInput(
-                            naermesteLederFnr = kalenderInput.naermesteLederFnr,
-                            ansattFnr = kalenderInput.sykmeldtFnr
-                        )
-                    )
-                )
-            ),
-            startTidspunkt = kalenderInput.startTidspunkt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-            sluttTidspunkt = Optional.presentIfNotNull(kalenderInput.sluttTidspunkt?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)),
-            lokasjon = Optional.absent(),
-            erDigitalt = Optional.absent(),
-            tilstand = Optional.present(KalenderavtaleTilstand.VENTER_SVAR_FRA_ARBEIDSGIVER),
-            eksterneVarsler = listOf(),
-            paaminnelse = Optional.absent(),
-            hardDelete = Optional.present(FutureTemporalInput(den = Optional.present(kalenderInput.hardDeleteTidspunkt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))),
-        )
-
-        val response: ApolloResponse<NyKalenderavtaleMutation.Data> = apolloClient.mutation(mutation).execute()
-
-        response.errors?.forEach {
-            log.error("Error while creating new kalenderavtale: ${it.message}")
-        }
-
+        val response: ApolloResponse<NyKalenderavtaleMutation.Data> =
+            apolloClient.mutation(nyKalenderInput.toNyKalenderavtaleMutation()).execute()
         val result = response.data?.nyKalenderavtale
 
-        return when {
-            result?.onNyKalenderavtaleVellykket != null -> {
-                log.info("Opprettet ny kalenderavtale!")
-                result.onNyKalenderavtaleVellykket.id
+        if (result?.onNyKalenderavtaleVellykket != null) {
+            log.info("Opprettet ny kalenderavtale!")
+            return result.onNyKalenderavtaleVellykket.id
+        } else {
+            log.error("Feil ved oppretting av kalenderavtale")
+
+            response.errors?.forEach {
+                log.error("Response errors ved oppretting av kalenderavtale: ${it.message}")
             }
 
-            result?.onUgyldigKalenderavtale != null -> {
-                log.error("Feil ved oppretting av kalenderavtale - Ugyldig kalenderavtale: ${result.onUgyldigKalenderavtale.feilmelding}")
-                null
+            result?.onUgyldigKalenderavtale?.let {
+                log.error("createNewKalenderavtale - Ugyldig kalenderavtale: ${it.feilmelding}")
             }
-
-            result?.onUgyldigMerkelapp != null -> {
-                log.error("Feil ved oppretting av kalenderavtale - Ugyldig merkelapp: ${result.onUgyldigMerkelapp.feilmelding}")
-                null
+            result?.onUgyldigMerkelapp?.let {
+                log.error("createNewKalenderavtale - Ugyldig merkelapp: ${it.feilmelding}")
             }
-
-            result?.onUgyldigMottaker != null -> {
-                log.error("Feil ved oppretting av kalenderavtale - Ugyldig mottaker: ${result.onUgyldigMottaker.feilmelding}")
-                null
+            result?.onUgyldigMottaker?.let {
+                log.error("createNewKalenderavtale - Ugyldig mottaker: ${it.feilmelding}")
             }
-
-            result?.onDuplikatEksternIdOgMerkelapp != null -> {
-                log.error("Feil ved oppretting av kalenderavtale - Duplikat ekstern id og merkelapp: ${result.onDuplikatEksternIdOgMerkelapp.feilmelding}, Existing ID: ${result.onDuplikatEksternIdOgMerkelapp.idTilEksisterende}")
-                null
+            result?.onDuplikatEksternIdOgMerkelapp?.let {
+                log.error("createNewKalenderavtale - Duplikat ekstern id og merkelapp: ${it.feilmelding}, Existing ID: ${it.idTilEksisterende}")
             }
-
-            result?.onUkjentProdusent != null -> {
-                log.error("Feil ved oppretting av kalenderavtale - Ukjent produsent: ${result.onUkjentProdusent.feilmelding}")
-                null
+            result?.onUkjentProdusent?.let {
+                log.error("createNewKalenderavtale - Ukjent produsent: ${it.feilmelding}")
             }
-
-            result?.onSakFinnesIkke != null -> {
-                log.error("Feil ved oppretting av kalenderavtale - Sak finnes ikke: ${result.onSakFinnesIkke.feilmelding}")
-                null
+            result?.onSakFinnesIkke?.let {
+                log.error("createNewKalenderavtale - Sak finnes ikke: ${it.feilmelding}")
             }
-
-            else -> {
-                log.error("Feil ved oppretting av kalenderavtale - Uventet feil")
-                null
-            }
+            return null
         }
     }
 
     suspend fun updateKalenderavtale(
         oppdaterKalenderInput: OppdaterKalenderInput
     ): String? {
-        val apolloClient = ApolloClient.Builder()
-            .serverUrl(arbeidsgiverNotifikasjonProdusentBasepath)
-            .build()
-
         val mutation = OppdaterKalenderavtaleMutation(
             id = oppdaterKalenderInput.id,
             eksterneVarsler = listOf(),
             paaminnelse = Optional.absent(),
-            hardDelete = Optional.present(HardDeleteUpdateInput(
-                nyTid = FutureTemporalInput(
-                    den = Optional.present(oppdaterKalenderInput.hardDeleteTidspunkt),
-                ),
-                strategi = NyTidStrategi.OVERSKRIV,
-            )),
+            hardDelete = Optional.present(
+                HardDeleteUpdateInput(
+                    nyTid = FutureTemporalInput(
+                        den = Optional.present(oppdaterKalenderInput.hardDeleteTidspunkt),
+                    ),
+                    strategi = NyTidStrategi.OVERSKRIV,
+                )
+            ),
         )
 
         val response: ApolloResponse<OppdaterKalenderavtaleMutation.Data> = apolloClient.mutation(mutation).execute()
         val result = response.data?.oppdaterKalenderavtale
 
-        return when {
-            result?.onOppdaterKalenderavtaleVellykket != null -> {
-                log.info("Opprettet ny kalenderavtale!")
-                result.onOppdaterKalenderavtaleVellykket.id
+        if (result?.onOppdaterKalenderavtaleVellykket != null) {
+            log.info("Oppdaterte kalenderavtale!")
+            return result.onOppdaterKalenderavtaleVellykket.id
+        } else {
+            log.error("Feil ved oppdatering av kalenderavtale")
+
+            response.errors?.forEach {
+                log.error("Response errors ved oppdatering av kalenderavtale: ${it.message}")
             }
 
-            result?.onUgyldigKalenderavtale != null -> {
-                log.error("Feil ved oppdatering av kalenderavtale - Ugyldig kalenderavtale: ${result.onUgyldigKalenderavtale.feilmelding}")
-                null
+            result?.onUgyldigKalenderavtale?.let {
+                log.error("updateKalenderavtale - Ugyldig kalenderavtale: ${it.feilmelding}")
             }
-
-            result?.onUgyldigMerkelapp != null -> {
-                log.error("Feil ved oppdatering av kalenderavtale - Ugyldig merkelapp: ${result.onUgyldigMerkelapp.feilmelding}")
-                null
+            result?.onUgyldigMerkelapp?.let {
+                log.error("updateKalenderavtale - Ugyldig merkelapp: ${it.feilmelding}")
             }
-
-            result?.onUkjentProdusent != null -> {
-                log.error("Feil ved oppdatering av kalenderavtale - Ukjent produsent: ${result.onUkjentProdusent.feilmelding}")
-                null
+            result?.onUkjentProdusent?.let {
+                log.error("updateKalenderavtale - Ukjent produsent: ${it.feilmelding}")
             }
-
-            result?.onNotifikasjonFinnesIkke != null -> {
-                log.error("Feil ved oppdatering av kalenderavtale - Notifikasjon finnes ikke: ${result.onNotifikasjonFinnesIkke.feilmelding}")
-                null
+            result?.onNotifikasjonFinnesIkke?.let {
+                log.error("updateKalenderavtale - Notifikasjon finnes ikke: ${it.feilmelding}")
             }
-
-            result?.onKonflikt != null -> {
-                log.error("Feil ved oppdatering av kalenderavtale - Konflikt: ${result.onKonflikt.feilmelding}")
-                null
+            result?.onKonflikt?.let {
+                log.error("updateKalenderavtale - Konflikt: ${it.feilmelding}")
             }
-
-            else -> {
-                log.error("Feil ved oppdatering av kalenderavtale - Uventet feil")
-                null
-            }
+            return null
         }
     }
 
