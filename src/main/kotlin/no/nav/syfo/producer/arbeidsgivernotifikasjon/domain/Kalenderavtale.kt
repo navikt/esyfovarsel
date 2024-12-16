@@ -6,8 +6,8 @@ import com.apollo.graphql.type.KalenderavtaleTilstand
 import com.apollo.graphql.type.MottakerInput
 import com.apollo.graphql.type.NaermesteLederMottakerInput
 import com.apollographql.apollo.api.Optional
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 /**
  * @param virksomhetsnummer Organisasjonsnummeret til virksomheten som skal motta kalenderavtalen.
@@ -53,8 +53,8 @@ fun NyKalenderInput.toNyKalenderavtaleMutation(): NyKalenderavtaleMutation {
                 )
             )
         ),
-        startTidspunkt = startTidspunkt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-        sluttTidspunkt = Optional.presentIfNotNull(sluttTidspunkt?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)),
+        startTidspunkt = startTidspunkt.formatAsISO8601(),
+        sluttTidspunkt = Optional.presentIfNotNull(sluttTidspunkt?.formatAsISO8601()),
         lokasjon = Optional.absent(),
         erDigitalt = Optional.absent(),
         tilstand = Optional.present(KalenderavtaleTilstand.VENTER_SVAR_FRA_ARBEIDSGIVER),
@@ -63,9 +63,7 @@ fun NyKalenderInput.toNyKalenderavtaleMutation(): NyKalenderavtaleMutation {
         hardDelete = Optional.present(
             FutureTemporalInput(
                 den = Optional.present(
-                    hardDeleteTidspunkt.format(
-                        DateTimeFormatter.ISO_LOCAL_DATE_TIME
-                    )
+                    hardDeleteTidspunkt.formatAsISO8601()
                 )
             )
         ),

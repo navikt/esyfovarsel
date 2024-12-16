@@ -6,8 +6,8 @@ import com.apollo.graphql.type.MottakerInput
 import com.apollo.graphql.type.NaermesteLederMottakerInput
 import com.apollo.graphql.type.SaksStatus
 import com.apollographql.apollo.api.Optional
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 data class NySakInput(
     val grupperingsid: String,
@@ -45,14 +45,12 @@ fun NySakInput.toNySakMutation(): NySakMutation {
         lenke = Optional.present(lenke),
         initiellStatus = initiellStatus,
         nesteSteg = Optional.presentIfNotNull(nesteSteg),
-        tidspunkt = Optional.present(tidspunkt),
+        tidspunkt = Optional.presentIfNotNull(tidspunkt.formatAsISO8601()),
         overstyrStatustekstMed = Optional.presentIfNotNull(overstyrStatustekstMed),
         hardDelete = Optional.presentIfNotNull(
             FutureTemporalInput(
                 den = Optional.presentIfNotNull(
-                    hardDeleteDate?.format(
-                        DateTimeFormatter.ISO_LOCAL_DATE_TIME
-                    )
+                    hardDeleteDate?.formatAsISO8601()
                 )
             )
         ),

@@ -93,7 +93,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
     suspend fun createNewSak(
         nySakInput: NySakInput
     ): String? {
-        log.info("About to create new sak with to ag-notifikasjon-produsent-api")
+        log.info("About to create new sak in ag-notifikasjon-produsent-api")
         val response: ApolloResponse<NySakMutation.Data> = apolloClient.mutation(nySakInput.toNySakMutation()).execute()
         val result = response.data?.nySak
 
