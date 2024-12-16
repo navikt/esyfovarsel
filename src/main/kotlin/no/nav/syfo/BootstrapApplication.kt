@@ -144,6 +144,7 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
         senderFacade,
         env.urlEnv.dialogmoterUrl,
         accessControlService,
+        narmesteLederService
     )
 
     val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(
