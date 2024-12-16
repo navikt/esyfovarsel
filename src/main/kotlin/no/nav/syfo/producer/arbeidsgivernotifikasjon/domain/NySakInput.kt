@@ -22,7 +22,7 @@ data class NySakInput(
     val nesteSteg: String? = null,
     val tidspunkt: OffsetDateTime,
     val overstyrStatustekstMed: String? = null,
-    val hardDeleteDate: OffsetDateTime? = null,
+    val hardDeleteDate: OffsetDateTime,
 )
 
 fun NySakInput.toNySakMutation(): NySakMutation {
@@ -47,10 +47,10 @@ fun NySakInput.toNySakMutation(): NySakMutation {
         nesteSteg = Optional.presentIfNotNull(nesteSteg),
         tidspunkt = Optional.presentIfNotNull(tidspunkt.formatAsISO8601()),
         overstyrStatustekstMed = Optional.presentIfNotNull(overstyrStatustekstMed),
-        hardDelete = Optional.presentIfNotNull(
+        hardDelete = Optional.present(
             FutureTemporalInput(
-                den = Optional.presentIfNotNull(
-                    hardDeleteDate?.formatAsISO8601()
+                den = Optional.present(
+                    hardDeleteDate.formatAsISO8601()
                 )
             )
         ),
