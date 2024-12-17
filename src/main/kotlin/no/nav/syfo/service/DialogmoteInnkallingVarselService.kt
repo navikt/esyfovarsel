@@ -221,7 +221,7 @@ class DialogmoteInnkallingVarselService(
                         )
                     )
                 } else {
-                    log.warn("Kunne ikke opprette sak for dialogmote innkalling siden newSakId er null")
+                    log.warn("Kunne ikke opprette kalenderavtale for dialogmoteinnkalling siden newSakId er null")
                 }
             }
 
