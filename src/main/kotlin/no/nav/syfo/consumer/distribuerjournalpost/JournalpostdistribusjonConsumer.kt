@@ -83,6 +83,8 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
                 log.info("Sent document to forced print")
                 response.body()
             } else {
+
+                log.error("[FORCED PHYSICAL PRINT]: response status: ${response.status}, body:  ${response.body<String>()}")
                 throw RuntimeException("Failed to send document with uuid $uuid to forced print. journalpostId: $journalpostId. Response status: ${response.status}. Response: $response")
             }
         } catch (e: Exception) {
