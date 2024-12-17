@@ -6,7 +6,6 @@ import com.apollo.graphql.type.MottakerInput
 import com.apollo.graphql.type.NaermesteLederMottakerInput
 import com.apollo.graphql.type.SaksStatus
 import com.apollographql.apollo.api.Optional
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601
 import java.time.OffsetDateTime
 
 data class NySakInput(
@@ -45,12 +44,12 @@ fun NySakInput.toNySakMutation(): NySakMutation {
         lenke = Optional.present(lenke),
         initiellStatus = initiellStatus,
         nesteSteg = Optional.presentIfNotNull(nesteSteg),
-        tidspunkt = Optional.presentIfNotNull(tidspunkt.formatAsISO8601()),
+        tidspunkt = Optional.presentIfNotNull(tidspunkt),
         overstyrStatustekstMed = Optional.presentIfNotNull(overstyrStatustekstMed),
         hardDelete = Optional.present(
             FutureTemporalInput(
                 den = Optional.present(
-                    hardDeleteDate.formatAsISO8601()
+                    hardDeleteDate
                 )
             )
         ),
