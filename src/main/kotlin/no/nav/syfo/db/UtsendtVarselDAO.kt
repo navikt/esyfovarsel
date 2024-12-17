@@ -62,7 +62,7 @@ fun DatabaseInterface.fetchAlleUferdigstilteAktivitetspliktVarsler(
                             FROM UTSENDT_VARSEL
                             WHERE type = 'SM_AKTIVITETSPLIKT'
                             AND kanal = 'BRUKERNOTIFIKASJON'
-                            and is_forced_letter = false
+                            AND is_forced_letter = false
                             AND ferdigstilt_tidspunkt is null
     """.trimIndent()
 
