@@ -6,12 +6,12 @@ metadata:
   labels:
     team: team-esyfo
 spec:
-  image: { { image } }
+  image: {{ image }}
   accessPolicy:
     outbound:
       rules:
         - application: esyfovarsel
-  schedule: "*/5 * * * *"
+  schedule: "*/2 * * * *"
   filesFrom:
     - secret: esyfovarsel-serviceuser
   env:
