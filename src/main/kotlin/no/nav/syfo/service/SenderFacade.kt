@@ -14,6 +14,7 @@ import no.nav.syfo.db.domain.Kanal.DITT_SYKEFRAVAER
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.db.fetchUferdigstilteVarsler
+import no.nav.syfo.db.setUferdigstiltUtsendtVarselToForcedLEtter
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
@@ -271,7 +272,7 @@ class SenderFacade(
             fysiskBrevUtsendingService.sendForcedBrev(uuid, journalpostId, distribusjonsType)
         } catch (e: Exception) {
             isSendingSucceed = false
-            log.warn("Error while sending forced brev til forced fysisk print: ${e.message}")
+            log.warn("[FORCED PHYSICAL PRINT]: Error while sending forced brev til forced fysisk print: ${e.message}")
             lagreIkkeUtsendtArbeidstakerVarsel(
                 kanal = BREV,
                 varselHendelse = varselHendelse,
@@ -283,7 +284,9 @@ class SenderFacade(
             )
         }
         if (isSendingSucceed) {
+            log.info("[FORCED PHYSICAL PRINT]: sending forced physical letter with journalpostId ${journalpostId} succeded, storing in database")
             lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid, isForcedLetter = true)
+            database.setUferdigstiltUtsendtVarselToForcedLEtter(eksternRef = uuid)
         }
     }
 

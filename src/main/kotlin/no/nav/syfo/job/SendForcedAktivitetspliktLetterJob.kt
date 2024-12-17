@@ -22,7 +22,7 @@ class SendForcedAktivitetspliktLetterJob(private val db: DatabaseInterface, priv
 
         unreadVarslerOverdude.forEach { pUtsendtVarsel ->
             if (pUtsendtVarsel.eksternReferanse.isNullOrBlank()) {
-                log.error("User can not be notified by letter due to missing journalpostId: ${pUtsendtVarsel.eksternReferanse}")
+                log.error("[FORCED PHYSICAL PRINT]: User can not be notified by letter due to missing journalpostId: ${pUtsendtVarsel.eksternReferanse}")
             } else {
                 senderFacade.sendForcedBrevTilFysiskPrint(
                     uuid = pUtsendtVarsel.uuid,
@@ -39,7 +39,7 @@ class SendForcedAktivitetspliktLetterJob(private val db: DatabaseInterface, priv
             }
             sentForcedLettersAmount++
         }
-        log.info("SendForcedAktivitetspliktLetterJob sent ${sentForcedLettersAmount} forced letters")
+        log.info("[FORCED PHYSICAL PRINT]: SendForcedAktivitetspliktLetterJob sent ${sentForcedLettersAmount} forced letters")
         return sentForcedLettersAmount
     }
 

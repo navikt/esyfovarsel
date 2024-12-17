@@ -32,7 +32,7 @@ class FysiskBrevUtsendingService(
             uuid,
             distribusjonsType
         ).bestillingsId
-        log.info("Sendte tvunget  brev til print, bestillingsId er $bestillingsId, varsel med UUID: $uuid")
+        log.info("[FORCED PHYSICAL PRINT]: Sent forced letter to physical print, bestillingsId is $bestillingsId, varsel with UUID: $uuid")
     }
 }
 

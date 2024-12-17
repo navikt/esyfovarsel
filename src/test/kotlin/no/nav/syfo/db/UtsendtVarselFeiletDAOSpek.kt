@@ -17,9 +17,10 @@ class UtsendtVarselFeiletDAOSpek : DescribeSpec({
         }
 
         it("Returns 3 varsler") {
+            val uuidToTest = UUID.randomUUID().toString()
             val utsendtVarsel1 = // skal sendes
                 PUtsendtVarsel(
-                    uuid = UUID.randomUUID().toString(),
+                    uuid = uuidToTest,
                     fnr = no.nav.syfo.planner.arbeidstakerFnr1,
                     aktorId = arbeidstakerAktorId1,
                     narmesteLederFnr = null,
@@ -107,10 +108,14 @@ class UtsendtVarselFeiletDAOSpek : DescribeSpec({
             embeddedDatabase.storeUtsendtVarsel(utsendtVarsel4)
             embeddedDatabase.storeUtsendtVarsel(utsendtVarsel5)
 
-            val result = embeddedDatabase.fetchAlleUferdigstilteAktivitetspliktVarsler().size
-            //            val result = job.sendForcedLetterFromJob()
+            val result = embeddedDatabase.fetchAlleUferdigstilteAktivitetspliktVarsler()
+            result.size shouldBeEqualTo 3
 
-            result shouldBeEqualTo 3
+
+            // Should not pick original uferdigstilt utsend varsel to notify user by physical letter for the second time
+            embeddedDatabase.setUferdigstiltUtsendtVarselToForcedLEtter(eksternRef = "123")
+            val result2 = embeddedDatabase.fetchAlleUferdigstilteAktivitetspliktVarsler()
+            result2.size shouldBeEqualTo 2
         }
     }
 })
