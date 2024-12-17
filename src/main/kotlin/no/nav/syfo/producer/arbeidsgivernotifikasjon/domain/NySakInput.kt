@@ -44,12 +44,12 @@ fun NySakInput.toNySakMutation(): NySakMutation {
         lenke = Optional.present(lenke),
         initiellStatus = initiellStatus,
         nesteSteg = Optional.presentIfNotNull(nesteSteg),
-        tidspunkt = Optional.presentIfNotNull(tidspunkt),
+        tidspunkt = Optional.presentIfNotNull(tidspunkt.toString()),
         overstyrStatustekstMed = Optional.presentIfNotNull(overstyrStatustekstMed),
         hardDelete = Optional.present(
             FutureTemporalInput(
                 den = Optional.present(
-                    hardDeleteDate
+                    hardDeleteDate.toString()
                 )
             )
         ),

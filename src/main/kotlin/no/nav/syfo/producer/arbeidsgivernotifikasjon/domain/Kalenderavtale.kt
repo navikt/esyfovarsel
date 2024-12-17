@@ -52,8 +52,8 @@ fun NyKalenderInput.toNyKalenderavtaleMutation(): NyKalenderavtaleMutation {
                 )
             )
         ),
-        startTidspunkt = startTidspunkt,
-        sluttTidspunkt = Optional.presentIfNotNull(sluttTidspunkt),
+        startTidspunkt = startTidspunkt.toString(),
+        sluttTidspunkt = Optional.presentIfNotNull(sluttTidspunkt.toString()),
         lokasjon = Optional.absent(),
         erDigitalt = Optional.absent(),
         tilstand = Optional.present(KalenderavtaleTilstand.VENTER_SVAR_FRA_ARBEIDSGIVER),
@@ -62,7 +62,7 @@ fun NyKalenderInput.toNyKalenderavtaleMutation(): NyKalenderavtaleMutation {
         hardDelete = Optional.present(
             FutureTemporalInput(
                 den = Optional.present(
-                    hardDeleteTidspunkt
+                    hardDeleteTidspunkt.toString()
                 )
             )
         ),
