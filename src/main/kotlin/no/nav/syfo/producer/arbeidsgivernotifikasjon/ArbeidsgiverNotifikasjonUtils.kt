@@ -11,5 +11,5 @@ fun LocalDateTime.formatAsISO8601(): String {
 
 fun OffsetDateTime.formatAsISO8601(): String {
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
-    return this.toLocalDateTime().format(formatter)
+    return this.format(formatter)
 }
