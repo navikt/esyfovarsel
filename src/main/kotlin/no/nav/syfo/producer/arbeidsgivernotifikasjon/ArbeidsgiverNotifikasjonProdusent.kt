@@ -113,6 +113,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
             }
             result?.onDuplikatGrupperingsid?.let {
                 log.error("createNewSak - Duplikat grupperingsid: ${it.feilmelding}")
+                return it.idTilEksisterende
             }
             result?.onDuplikatGrupperingsidEtterDelete?.let {
                 log.error("createNewSak - Duplikat grupperingsid etter delete: ${it.feilmelding}")
