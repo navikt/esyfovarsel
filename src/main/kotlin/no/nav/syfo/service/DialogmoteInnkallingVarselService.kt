@@ -200,7 +200,7 @@ class DialogmoteInnkallingVarselService(
                         lenke = lenkeTilDialogmoteLanding,
                         initiellStatus = SaksStatus.MOTTATT,
                         tidspunkt = OffsetDateTime.now().plusWeeks(1), //TODO få inn data fra isyfo
-                        hardDeleteDate = OffsetDateTime.now().plusWeeks(1), //TODO endre
+                        hardDeleteDate = LocalDateTime.now().plusWeeks(1), //TODO endre
                     )
                 )
 

@@ -7,6 +7,7 @@ import com.apollo.graphql.type.NaermesteLederMottakerInput
 import com.apollo.graphql.type.SaksStatus
 import com.apollographql.apollo.api.Optional
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 
 data class NySakInput(
@@ -22,7 +23,7 @@ data class NySakInput(
     val nesteSteg: String? = null,
     val tidspunkt: OffsetDateTime,
     val overstyrStatustekstMed: String? = null,
-    val hardDeleteDate: OffsetDateTime,
+    val hardDeleteDate: LocalDateTime,
 )
 
 fun NySakInput.toNySakMutation(): NySakMutation {
