@@ -27,6 +27,8 @@ import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_ENDRING_MESSAGE_TEXT
 import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_INNKALLING_MESSAGE_TEXT
 import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_REFERAT_MESSAGE_TEXT
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
+import no.nav.syfo.consumer.pdl.PdlClient
+import no.nav.syfo.consumer.pdl.fornavn
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
@@ -74,6 +76,7 @@ class DialogmoteInnkallingVarselService(
     val dialogmoterUrl: String,
     val accessControlService: AccessControlService,
     val narmesteLederService: NarmesteLederService,
+    val pdlClient: PdlClient,
 ) {
     val WEEKS_BEFORE_DELETE = 4L
     val SMS_KEY = "smsText"
@@ -186,6 +189,7 @@ class DialogmoteInnkallingVarselService(
         }
 
         val lenkeTilDialogmoteLanding = "$dialogmoterUrl/arbeidsgiver/${narmesteLederRelasjon.narmesteLederId}"
+        val sykmeldtesFornavn: String? = pdlClient.hentPerson(varselHendelse.arbeidstakerFnr)?.fornavn()
 
         when (varselHendelse.type) {
             NL_DIALOGMOTE_INNKALT -> {
@@ -196,7 +200,7 @@ class DialogmoteInnkallingVarselService(
                         virksomhetsnummer = varselHendelse.orgnummer,
                         narmesteLederFnr = varselHendelse.narmesteLederFnr,
                         ansattFnr = varselHendelse.arbeidstakerFnr,
-                        tittel = "Innkalling til dialogmøte",
+                        tittel = sykmeldtesFornavn?.let { "Dialogmøte med $it" } ?: "Innkalling til dialogmøte",
                         lenke = lenkeTilDialogmoteLanding,
                         initiellStatus = SaksStatus.MOTTATT,
                         tidspunkt = OffsetDateTime.now().plusWeeks(1), //TODO få inn data fra isyfo
@@ -211,7 +215,7 @@ class DialogmoteInnkallingVarselService(
                             grupperingsid = narmesteLederRelasjon.narmesteLederId,
                             merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
                             eksternId = UUID.randomUUID().toString(),
-                            tekst = "Du er innkalt til dialogmøte - vi trenger svaret ditt",
+                            tekst = sykmeldtesFornavn?.let { "Dialogmøte med $it" } ?: "Innkalling til dialogmøte",
                             ansattFnr = varselHendelse.arbeidstakerFnr,
                             narmesteLederFnr = varselHendelse.narmesteLederFnr,
                             startTidspunkt = LocalDateTime.now().plusWeeks(1), //TODO få inn data fra isyfo

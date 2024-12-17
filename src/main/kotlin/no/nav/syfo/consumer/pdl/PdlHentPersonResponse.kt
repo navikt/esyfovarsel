@@ -48,3 +48,11 @@ data class PdlErrorExtension(
 fun PdlError.errorMessage(): String {
     return "${this.message} with code: ${extensions.code} and classification: ${extensions.classification}"
 }
+
+fun HentPersonData.fornavn(): String? {
+    val nameList = this.hentPerson.navn
+    if (nameList.isEmpty()) {
+        return null
+    }
+    return nameList[0].fornavn
+}
