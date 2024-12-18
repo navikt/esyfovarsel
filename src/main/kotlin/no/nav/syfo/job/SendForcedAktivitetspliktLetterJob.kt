@@ -36,8 +36,8 @@ class SendForcedAktivitetspliktLetterJob(private val db: DatabaseInterface, priv
                     distribusjonsType = DistibusjonsType.VIKTIG,
                     journalpostId = pUtsendtVarsel.journalpostId
                 )
+                sentForcedLettersAmount++
             }
-            sentForcedLettersAmount++
         }
         log.info("[FORCED PHYSICAL PRINT]: SendForcedAktivitetspliktLetterJob sent ${sentForcedLettersAmount} forced letters")
         return sentForcedLettersAmount
