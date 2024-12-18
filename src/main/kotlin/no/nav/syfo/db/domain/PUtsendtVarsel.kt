@@ -15,5 +15,6 @@ data class PUtsendtVarsel(
     val eksternReferanse: String?,
     val ferdigstiltTidspunkt: LocalDateTime?,
     val arbeidsgivernotifikasjonMerkelapp: String?,
-    val isForcedLetter: Boolean
+    val isForcedLetter: Boolean,
+    val journalpostId: String?,
 )

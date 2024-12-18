@@ -29,7 +29,7 @@ class AktivitetspliktForhandsvarselVarselService(
             val userAccessStatus = accessControlService.getUserAccessStatus(varselHendelse.arbeidstakerFnr)
             if (userAccessStatus.canUserBeDigitallyNotified) {
                 senderFacade.sendTilBrukernotifikasjoner(
-                    uuid = data.journalpost.uuid,
+                    uuid = data.journalpost.uuid, // aktivitetskravUuid
                     mottakerFnr = varselHendelse.arbeidstakerFnr,
                     content = BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_TEXT,
                     url = URL(urlAktivitetskravInfoPage),
@@ -37,13 +37,14 @@ class AktivitetspliktForhandsvarselVarselService(
                     varseltype = OPPGAVE,
                     eksternVarsling = true,
                     smsContent = BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_SMS_TEXT,
+                    journalpostId = data.journalpost.id,  // journalpostId
                 )
             } else {
                 log.info("Sending [FORHAANDSVARSEL] to print")
                 senderFacade.sendBrevTilFysiskPrint(
-                    data.journalpost.uuid,
+                    data.journalpost.uuid, // aktivitetskravUuid
                     varselHendelse,
-                    data.journalpost.id,
+                    data.journalpost.id, // journalpostId
                     DistibusjonsType.VIKTIG,
                 )
             }

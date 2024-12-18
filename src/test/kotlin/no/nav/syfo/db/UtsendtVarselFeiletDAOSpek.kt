@@ -33,6 +33,7 @@ class UtsendtVarselFeiletDAOSpek : DescribeSpec({
                     ferdigstiltTidspunkt = null,
                     arbeidsgivernotifikasjonMerkelapp = null,
                     isForcedLetter = false,
+                    journalpostId = "111"
                 )
 
             val utsendtVarsel2 = // skal sendes
@@ -50,6 +51,7 @@ class UtsendtVarselFeiletDAOSpek : DescribeSpec({
                     ferdigstiltTidspunkt = null,
                     arbeidsgivernotifikasjonMerkelapp = null,
                     isForcedLetter = false,
+                    journalpostId = "222",
                 )
 
             val utsendtVarsel3 = // skal ikke sendes: not overdue
@@ -67,6 +69,7 @@ class UtsendtVarselFeiletDAOSpek : DescribeSpec({
                     ferdigstiltTidspunkt = null,
                     arbeidsgivernotifikasjonMerkelapp = null,
                     isForcedLetter = false,
+                    journalpostId = "333",
                 )
 
             val utsendtVarsel4 = // skal ikke sendes: Forced letter was sent before
@@ -84,6 +87,7 @@ class UtsendtVarselFeiletDAOSpek : DescribeSpec({
                     ferdigstiltTidspunkt = null,
                     arbeidsgivernotifikasjonMerkelapp = null,
                     isForcedLetter = true,
+                    journalpostId = "444"
                 )
 
             val utsendtVarsel5 = // skal ikke sendes: not aktivitetskrav
@@ -101,6 +105,7 @@ class UtsendtVarselFeiletDAOSpek : DescribeSpec({
                     ferdigstiltTidspunkt = null,
                     arbeidsgivernotifikasjonMerkelapp = null,
                     isForcedLetter = false,
+                    journalpostId = "555",
                 )
             embeddedDatabase.storeUtsendtVarsel(utsendtVarsel1)
             embeddedDatabase.storeUtsendtVarsel(utsendtVarsel2)

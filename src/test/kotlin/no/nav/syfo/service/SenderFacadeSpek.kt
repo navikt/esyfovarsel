@@ -59,6 +59,7 @@ class SenderFacadeSpek : DescribeSpec({
                 ferdigstiltTidspunkt = null,
                 arbeidsgivernotifikasjonMerkelapp = null,
                 isForcedLetter = false,
+                journalpostId = null,
             )
 
         val arbeidsgivernotifikasjonUtsendtVarsel = utsendtVarsel.copy(

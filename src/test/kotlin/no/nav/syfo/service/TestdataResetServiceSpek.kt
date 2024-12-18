@@ -50,6 +50,7 @@ class TestdataResetServiceSpek : DescribeSpec({
                 ferdigstiltTidspunkt = null,
                 arbeidsgivernotifikasjonMerkelapp = null,
                 isForcedLetter = false,
+                journalpostId = null,
             )
 
         val pUtsendtVarselFeilet = PUtsendtVarselFeilet(

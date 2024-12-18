@@ -24,7 +24,8 @@ fun ResultSet.toPUtsendtVarsel() = PUtsendtVarsel(
     eksternReferanse = getString("ekstern_ref"),
     ferdigstiltTidspunkt = getTimestamp("ferdigstilt_tidspunkt")?.toLocalDateTime(),
     arbeidsgivernotifikasjonMerkelapp = getString("arbeidsgivernotifikasjon_merkelapp"),
-    isForcedLetter = getBoolean("is_forced_letter")
+    isForcedLetter = getBoolean("is_forced_letter"),
+    journalpostId = getString("journalpost_id"),
 )
 
 fun ResultSet.toPMikrofrontendSynlighet() = PMikrofrontendSynlighet(

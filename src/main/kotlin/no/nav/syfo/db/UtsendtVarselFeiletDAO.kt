@@ -35,7 +35,7 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
             it.setString(10, varsel.kanal)
             it.setString(11, varsel.feilmelding)
             it.setTimestamp(12, Timestamp.valueOf(varsel.utsendtForsokTidspunkt))
-            it.setBoolean(13, varsel.isForcedLetter)
+            it.setBoolean(13, varsel.isForcedLetter ?: false)
             it.executeUpdate()
         }
 

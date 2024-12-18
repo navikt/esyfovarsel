@@ -15,5 +15,5 @@ data class PUtsendtVarselFeilet(
     val kanal: String?,
     val feilmelding: String?,
     val utsendtForsokTidspunkt: LocalDateTime,
-    val isForcedLetter: Boolean,
+    val isForcedLetter: Boolean? =false,
 )

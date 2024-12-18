@@ -23,7 +23,7 @@ class FysiskBrevUtsendingService(
     }
 
     suspend fun sendForcedBrev(
-        uuid: String,
+        uuid: String, // aktivitetskravUuid
         journalpostId: String,
         distribusjonsType: DistibusjonsType,
     ) {

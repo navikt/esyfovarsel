@@ -42,12 +42,14 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
                     ferdigstiltTidspunkt = null,
                     arbeidsgivernotifikasjonMerkelapp = null,
                     isForcedLetter = true,
+                    journalpostId = "111"
                 )
 
             val isVarselOverdude = job.isVarselUnredIn2Days(utsendtVarsel)
 
             isVarselOverdude shouldBeEqualTo true
         }
+
         it("Sends letter if varsel wasn't read in exactly 2 days") {
             val utsendtVarsel =
                 PUtsendtVarsel(
@@ -64,12 +66,14 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
                     ferdigstiltTidspunkt = null,
                     arbeidsgivernotifikasjonMerkelapp = null,
                     isForcedLetter = true,
+                    journalpostId = "222",
                 )
 
             val isVarselOverdude = job.isVarselUnredIn2Days(utsendtVarsel)
 
             isVarselOverdude shouldBeEqualTo true
         }
+
         it("Does not send letter if varsel wasn't read in less than 2 days") {
             val utsendtVarsel =
                 PUtsendtVarsel(
@@ -86,6 +90,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
                     ferdigstiltTidspunkt = null,
                     arbeidsgivernotifikasjonMerkelapp = null,
                     isForcedLetter = true,
+                    journalpostId = "333",
                 )
 
             val isVarselOverdude = job.isVarselUnredIn2Days(utsendtVarsel)

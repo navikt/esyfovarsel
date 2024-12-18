@@ -74,12 +74,13 @@ class SenderFacade(
                 feilmelding = e.message,
                 journalpostId = null,
                 brukernotifikasjonerMeldingType = null,
+                isForcedLetter = false,
             )
         }
     }
 
     fun sendTilBrukernotifikasjoner(
-        uuid: String,
+        uuid: String,// aktivitetskravUuid
         mottakerFnr: String,
         content: String,
         url: URL? = null,
@@ -88,10 +89,11 @@ class SenderFacade(
         eksternVarsling: Boolean = true,
         smsContent: String? = null,
         dagerTilDeaktivering: Long? = null,
+        journalpostId: String? = null,
     ) {
         try {
             brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
-                uuid = uuid,
+                uuid = uuid, // aktivitetskravUuid
                 mottakerFnr = mottakerFnr,
                 content = content,
                 url = url,
@@ -103,7 +105,8 @@ class SenderFacade(
             lagreUtsendtArbeidstakerVarsel(
                 kanal = BRUKERNOTIFIKASJON,
                 varselHendelse = varselHendelse,
-                eksternReferanse = uuid
+                eksternReferanse = uuid, // aktivitetskravUuid
+                journalpostId = journalpostId,
             )
         } catch (e: Exception) {
             log.warn("Error while sending varsel to BRUKERNOTIFIKASJON: ${e.message}")
@@ -114,6 +117,7 @@ class SenderFacade(
                 feilmelding = e.message,
                 journalpostId = null,
                 brukernotifikasjonerMeldingType = varseltype.name,
+                isForcedLetter = false,
             )
         }
     }
@@ -254,10 +258,11 @@ class SenderFacade(
                 feilmelding = e.message,
                 journalpostId = journalpostId,
                 brukernotifikasjonerMeldingType = null,
+                isForcedLetter = false,
             )
         }
         if (isSendingSucceed) {
-            lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid)
+            lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid, journalpostId = journalpostId)
         }
     }
 
@@ -285,7 +290,7 @@ class SenderFacade(
         }
         if (isSendingSucceed) {
             log.info("[FORCED PHYSICAL PRINT]: sending forced physical letter with journalpostId ${journalpostId} succeded, storing in database")
-            lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid, isForcedLetter = true)
+            lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid, isForcedLetter = true, journalpostId = journalpostId)
             database.setUferdigstiltUtsendtVarselToForcedLEtter(eksternRef = uuid)
         }
     }
@@ -310,7 +315,8 @@ class SenderFacade(
                 eksternReferanse,
                 null,
                 arbeidsgivernotifikasjonMerkelapp,
-                isForcedLetter = false
+                isForcedLetter = false,
+                null,
             ),
         )
     }
@@ -320,6 +326,7 @@ class SenderFacade(
         varselHendelse: ArbeidstakerHendelse,
         eksternReferanse: String,
         isForcedLetter: Boolean = false,
+        journalpostId: String? = null,
     ) {
         database.storeUtsendtVarsel(
             PUtsendtVarsel(
@@ -336,6 +343,7 @@ class SenderFacade(
                 null,
                 null,
                 isForcedLetter,
+                journalpostId,
             ),
         )
     }
@@ -347,7 +355,7 @@ class SenderFacade(
         feilmelding: String?,
         journalpostId: String? = null,
         brukernotifikasjonerMeldingType: String? = null,
-        isForcedLetter: Boolean = false,
+        isForcedLetter: Boolean,
     ) {
         database.storeUtsendtVarselFeilet(
             PUtsendtVarselFeilet(
