@@ -21,7 +21,7 @@ class SendForcedAktivitetspliktLetterJob(private val db: DatabaseInterface, priv
         var sentForcedLettersAmount = unreadVarslerOverdude.size
 
         unreadVarslerOverdude.forEach { pUtsendtVarsel ->
-            if (pUtsendtVarsel.eksternReferanse.isNullOrBlank()) {
+            if (pUtsendtVarsel.journalpostId.isNullOrBlank()) {
                 log.error("[FORCED PHYSICAL PRINT]: User can not be notified by letter due to missing journalpostId: ${pUtsendtVarsel.eksternReferanse}")
             } else {
                 senderFacade.sendForcedBrevTilFysiskPrint(
@@ -34,7 +34,7 @@ class SendForcedAktivitetspliktLetterJob(private val db: DatabaseInterface, priv
                         orgnummer = pUtsendtVarsel.orgnummer,
                     ),
                     distribusjonsType = DistibusjonsType.VIKTIG,
-                    journalpostId = pUtsendtVarsel.eksternReferanse
+                    journalpostId = pUtsendtVarsel.journalpostId
                 )
             }
             sentForcedLettersAmount++
