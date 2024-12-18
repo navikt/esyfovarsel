@@ -52,6 +52,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
                     any(),
                     true,
                     any(),
+                    journalpostId = any(),
                 )
             }
         }
