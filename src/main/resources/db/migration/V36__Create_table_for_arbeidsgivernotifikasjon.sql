@@ -13,7 +13,6 @@ CREATE TABLE ARBEIDSGIVERNOTIFIKASJONER_SAK
     nesteSteg              VARCHAR(255),
     tidspunkt              TIMESTAMP WITH TIME ZONE NOT NULL,
     overstyrStatustekstMed TEXT,
-    sakStatus              VARCHAR(50)              NOT NULL,
     hardDeleteDate         TIMESTAMP                NOT NULL,
     PRIMARY KEY (grupperingsid),
     UNIQUE (grupperingsid, merkelapp)
