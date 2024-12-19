@@ -12,6 +12,7 @@ import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdl.PdlClient
+import no.nav.syfo.db.Database
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
@@ -39,6 +40,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
     val arbeidsgiverNotifikasjonService = mockk<ArbeidsgiverNotifikasjonService>()
     val fysiskBrevUtsendingService = mockk<FysiskBrevUtsendingService>()
     val narmesteLederService = mockk<NarmesteLederService>()
+    val database = mockk<Database>()
     val pdlClient = mockk<PdlClient>()
     val embeddedDatabase = EmbeddedDatabase()
     val fakeDialogmoterUrl = "http://localhost/dialogmoter"
@@ -60,7 +62,8 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
         fakeDialogmoterUrl,
         accessControlService,
         narmesteLederService,
-        pdlClient
+        pdlClient,
+        database
     )
     val hendelseType = HendelseType.SM_DIALOGMOTE_INNKALT
 
