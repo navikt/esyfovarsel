@@ -1,10 +1,13 @@
 package no.nav.syfo.producer.arbeidsgivernotifikasjon.domain
 
 import com.apollo.graphql.NyKalenderavtaleMutation
+import com.apollo.graphql.OppdaterKalenderavtaleMutation
 import com.apollo.graphql.type.FutureTemporalInput
+import com.apollo.graphql.type.HardDeleteUpdateInput
 import com.apollo.graphql.type.KalenderavtaleTilstand
 import com.apollo.graphql.type.MottakerInput
 import com.apollo.graphql.type.NaermesteLederMottakerInput
+import com.apollo.graphql.type.NyTidStrategi
 import com.apollographql.apollo.api.Optional
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601DateTime
 import java.time.LocalDateTime
@@ -86,3 +89,19 @@ data class OppdaterKalenderInput(
     val nyLenke: String? = null,
     val hardDeleteTidspunkt: LocalDateTime,
 )
+
+fun OppdaterKalenderInput.toOppdaterKalenderavtaleMutation(): OppdaterKalenderavtaleMutation {
+    return OppdaterKalenderavtaleMutation(
+        id = id,
+        eksterneVarsler = listOf(),
+        paaminnelse = Optional.absent(),
+        hardDelete = Optional.present(
+            HardDeleteUpdateInput(
+                nyTid = FutureTemporalInput(
+                    den = Optional.present(hardDeleteTidspunkt.formatAsISO8601DateTime()),
+                ),
+                strategi = NyTidStrategi.OVERSKRIV,
+            )
+        ),
+    )
+}

@@ -3,14 +3,10 @@ package no.nav.syfo.producer.arbeidsgivernotifikasjon
 import com.apollo.graphql.NyKalenderavtaleMutation
 import com.apollo.graphql.NySakMutation
 import com.apollo.graphql.OppdaterKalenderavtaleMutation
-import com.apollo.graphql.type.FutureTemporalInput
-import com.apollo.graphql.type.HardDeleteUpdateInput
-import com.apollo.graphql.type.NyTidStrategi
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.ApolloRequest
 import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.Operation
-import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import io.ktor.client.call.*
@@ -31,6 +27,7 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.OppdaterKalenderInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toNyKalenderavtaleMutation
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toNySakMutation
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toOppdaterKalenderavtaleMutation
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nybeskjed.NyBeskjedErrorResponse
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nybeskjed.NyBeskjedMutationStatus.NY_BESKJED_VELLYKKET
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nybeskjed.NyBeskjedResponse
@@ -172,21 +169,9 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
     suspend fun updateKalenderavtale(
         oppdaterKalenderInput: OppdaterKalenderInput
     ): String? {
-        val mutation = OppdaterKalenderavtaleMutation(
-            id = oppdaterKalenderInput.id,
-            eksterneVarsler = listOf(),
-            paaminnelse = Optional.absent(),
-            hardDelete = Optional.present(
-                HardDeleteUpdateInput(
-                    nyTid = FutureTemporalInput(
-                        den = Optional.present(oppdaterKalenderInput.hardDeleteTidspunkt),
-                    ),
-                    strategi = NyTidStrategi.OVERSKRIV,
-                )
-            ),
-        )
 
-        val response: ApolloResponse<OppdaterKalenderavtaleMutation.Data> = apolloClient.mutation(mutation).execute()
+        val response: ApolloResponse<OppdaterKalenderavtaleMutation.Data> =
+            apolloClient.mutation(oppdaterKalenderInput.toOppdaterKalenderavtaleMutation()).execute()
         val result = response.data?.oppdaterKalenderavtale
 
         if (result?.onOppdaterKalenderavtaleVellykket != null) {

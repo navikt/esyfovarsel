@@ -302,7 +302,7 @@ class DialogmoteInnkallingVarselService(
                 id = narmesteLederId,
                 nyTilstand = KalenderavtaleTilstand.AVLYST,
                 nyTekst = avlystTekst,
-                hardDeleteTidspunkt = LocalDateTime.now().plusHours(1),
+                hardDeleteTidspunkt = LocalDateTime.now(),
             )
         )
     }
