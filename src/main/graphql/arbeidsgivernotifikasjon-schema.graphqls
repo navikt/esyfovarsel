@@ -369,10 +369,10 @@ type Mutation {
         mottakere: [MottakerInput!]!
 
         # Når avtalen starter.
-        startTidspunkt: ISO8601LocalDateTime!
+        startTidspunkt: ISO8601DateTime!
 
         # Når avtalen slutter.
-        sluttTidspunkt: ISO8601LocalDateTime
+        sluttTidspunkt: ISO8601DateTime
 
         # Her kan dere oppgi en fysisk adresse som brukeren kan møte opp på dersom dere har det.
         # Denne vil vises til brukeren hvis den er angitt.

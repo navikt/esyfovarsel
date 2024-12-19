@@ -6,7 +6,7 @@ import com.apollo.graphql.type.MottakerInput
 import com.apollo.graphql.type.NaermesteLederMottakerInput
 import com.apollo.graphql.type.SaksStatus
 import com.apollographql.apollo.api.Optional
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601DateTime
 import java.time.LocalDateTime
 
 // Ny sak som vises til arbeidsgiver
@@ -46,12 +46,12 @@ fun NySakInput.toNySakMutation(): NySakMutation {
         lenke = Optional.present(lenke),
         initiellStatus = initiellStatus,
         nesteSteg = Optional.presentIfNotNull(nesteSteg),
-        tidspunkt = Optional.presentIfNotNull(tidspunkt.formatAsISO8601()),
+        tidspunkt = Optional.presentIfNotNull(tidspunkt.formatAsISO8601DateTime()),
         overstyrStatustekstMed = Optional.presentIfNotNull(overstyrStatustekstMed),
         hardDelete = Optional.present(
             FutureTemporalInput(
                 den = Optional.present(
-                    hardDeleteDate.formatAsISO8601()
+                    hardDeleteDate.formatAsISO8601DateTime()
                 )
             )
         ),
