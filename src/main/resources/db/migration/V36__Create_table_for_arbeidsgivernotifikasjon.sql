@@ -19,6 +19,9 @@ CREATE TABLE ARBEIDSGIVERNOTIFIKASJONER_SAK
     UNIQUE (grupperingsid, merkelapp)
 );
 
+CREATE INDEX idx_arbeidsgivernotifikasjoner_sak_merkelapp ON ARBEIDSGIVERNOTIFIKASJONER_SAK (merkelapp);
+CREATE INDEX idx_arbeidsgivernotifikasjoner_sak_grupperingsid ON ARBEIDSGIVERNOTIFIKASJONER_SAK (grupperingsid);
+
 DROP TABLE IF EXISTS ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE;
 CREATE TABLE ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE
 (
@@ -36,3 +39,6 @@ CREATE TABLE ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE
     hardDeleteTidspunkt    TIMESTAMP   NOT NULL,
     UNIQUE (grupperingsid, merkelapp)
 );
+
+CREATE INDEX idx_arbeidsgivernotifikasjoner_kalenderavtale_merkelapp ON ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE (merkelapp);
+CREATE INDEX idx_arbeidsgivernotifikasjoner_kalenderavtale_grupperingsid ON ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE (grupperingsid);
