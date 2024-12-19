@@ -1,5 +1,7 @@
 package no.nav.syfo.consumer.pdl
 
+import capitalizeFirstLetter
+
 data class HentPersonResponse(
     val errors: List<PdlError>?,
     val data: HentPersonData
@@ -49,10 +51,22 @@ fun PdlError.errorMessage(): String {
     return "${this.message} with code: ${extensions.code} and classification: ${extensions.classification}"
 }
 
-fun HentPersonData.fornavn(): String? {
+fun HentPersonData.firstName(): String? {
     val nameList = this.hentPerson.navn
-    if (nameList.isEmpty()) {
-        return null
+    return nameList.firstOrNull()?.fornavn?.capitalizeFirstLetter()
+}
+
+fun HentPersonData.fullName(): String? {
+    val nameList = this.hentPerson.navn
+    return nameList.firstOrNull()?.let {
+        val firstName = it.fornavn.capitalizeFirstLetter()
+        val middleName = it.mellomnavn?.capitalizeFirstLetter()
+        val surName = it.etternavn.capitalizeFirstLetter()
+
+        if (middleName.isNullOrBlank()) {
+            "$firstName $surName"
+        } else {
+            "$firstName ${middleName.capitalizeFirstLetter()} $surName"
+        }
     }
-    return nameList[0].fornavn
 }

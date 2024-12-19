@@ -8,8 +8,8 @@ import com.apollo.graphql.type.SaksStatus
 import com.apollographql.apollo.api.Optional
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601
 import java.time.LocalDateTime
-import java.time.OffsetDateTime
 
+// Ny sak som vises til arbeidsgiver
 data class NySakInput(
     val grupperingsid: String,
     val merkelapp: String,
@@ -21,7 +21,7 @@ data class NySakInput(
     val lenke: String,
     val initiellStatus: SaksStatus,
     val nesteSteg: String? = null,
-    val tidspunkt: OffsetDateTime,
+    val tidspunkt: LocalDateTime,
     val overstyrStatustekstMed: String? = null,
     val hardDeleteDate: LocalDateTime,
 )

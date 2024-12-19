@@ -10,6 +10,8 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601
 import java.time.LocalDateTime
 
 /**
+ * Kalenderavtale som sendes til arbeidsgiver
+ *
  * @param virksomhetsnummer Organisasjonsnummeret til virksomheten som skal motta kalenderavtalen.
  * @param grupperingsid Grupperings-ID-en knytter denne kalenderavtalen til en sak med samme grupperings-ID og merkelapp. Det vises ikke til brukere. Saksnummer er en naturlig grupperings-ID.
  * @param merkelapp Merkelapp for kalenderavtalen. Er typisk navnet på ytelse eller lignende. Den vises ikke til brukeren, men brukes i kombinasjon med grupperings-ID for å koble kalenderavtalen til sak.
@@ -81,6 +83,6 @@ data class OppdaterKalenderInput(
     val id: String,
     val nyTilstand: KalenderavtaleTilstand,
     val nyTekst: String,
-    val nyLenke: String?,
+    val nyLenke: String? = null,
     val hardDeleteTidspunkt: LocalDateTime,
 )

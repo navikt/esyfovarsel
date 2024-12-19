@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import com.apollo.graphql.type.KalenderavtaleTilstand
 import com.apollo.graphql.type.SaksStatus
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_TITLE
@@ -27,9 +28,14 @@ import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_ENDRING_MESSAGE_TEXT
 import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_INNKALLING_MESSAGE_TEXT
 import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_REFERAT_MESSAGE_TEXT
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
+import no.nav.syfo.consumer.pdl.HentPersonData
 import no.nav.syfo.consumer.pdl.PdlClient
-import no.nav.syfo.consumer.pdl.fornavn
+import no.nav.syfo.consumer.pdl.firstName
+import no.nav.syfo.consumer.pdl.fullName
+import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.Kanal
+import no.nav.syfo.db.getArbeidsgivernotifikasjonerSak
+import no.nav.syfo.db.storeArbeidsgivernotifikasjonerSak
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
@@ -54,6 +60,7 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyKalenderInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.OppdaterKalenderInput
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -77,6 +84,7 @@ class DialogmoteInnkallingVarselService(
     val accessControlService: AccessControlService,
     val narmesteLederService: NarmesteLederService,
     val pdlClient: PdlClient,
+    val database: DatabaseInterface,
 ) {
     val WEEKS_BEFORE_DELETE = 4L
     val SMS_KEY = "smsText"
@@ -88,8 +96,37 @@ class DialogmoteInnkallingVarselService(
         log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}")
         varselHendelse.data = dataToVarselDataNarmesteLeder(varselHendelse.data)
         sendVarselTilDineSykmeldte(varselHendelse)
+
+        val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(
+            varselHendelse.arbeidstakerFnr, varselHendelse.orgnummer
+        )
+
+        if (narmesteLederRelasjon?.narmesteLederId == null) {
+            log.warn("Sender ikke kalenderavtale: narmesteLederRelasjon er null, eller mangler narmesteLederId")
+            return
+        }
+
+        val existingSak =
+            database.getArbeidsgivernotifikasjonerSak(
+                narmesteLederRelasjon.narmesteLederId,
+                ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP
+            )
+        val lenkeTilDialogmoteLanding = "$dialogmoterUrl/arbeidsgiver/${narmesteLederRelasjon.narmesteLederId}"
+        val personData = pdlClient.hentPerson(varselHendelse.arbeidstakerFnr)
+
+        if (existingSak == null) {
+            createNewSak(
+                varselHendelse,
+                narmesteLederRelasjon.narmesteLederId,
+                personData,
+                lenkeTilDialogmoteLanding
+            )
+        }
+
         sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
-        sendKalenderAvtaleTilArbeidsgiverNotifikasjon(varselHendelse)
+        sendKalenderAvtaleTilArbeidsgiverNotifikasjon(
+            varselHendelse, narmesteLederRelasjon.narmesteLederId, personData, lenkeTilDialogmoteLanding
+        )
     }
 
     suspend fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
@@ -177,64 +214,97 @@ class DialogmoteInnkallingVarselService(
         }
     }
 
-    private suspend fun sendKalenderAvtaleTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
-        val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(
-            varselHendelse.arbeidstakerFnr,
-            varselHendelse.orgnummer
+    private suspend fun createNewSak(
+        varselHendelse: NarmesteLederHendelse,
+        narmesteLederId: String,
+        personData: HentPersonData?,
+        lenkeTilDialogmoteLanding: String
+    ) {
+        val sakInput = NySakInput(
+            grupperingsid = narmesteLederId,
+            merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
+            virksomhetsnummer = varselHendelse.orgnummer,
+            narmesteLederFnr = varselHendelse.narmesteLederFnr,
+            ansattFnr = varselHendelse.arbeidstakerFnr,
+            tittel = personData?.let { "Dialogmøte med ${it.fullName()}" } ?: "Innkalling til dialogmøte",
+            lenke = lenkeTilDialogmoteLanding,
+            initiellStatus = SaksStatus.MOTTATT,
+            tidspunkt = LocalDateTime.now().plusWeeks(1),
+            hardDeleteDate = LocalDateTime.now().plusHours(5)
+        )
+        senderFacade.createNewSak(
+            sakInput
         )
 
-        if (narmesteLederRelasjon?.narmesteLederId == null) {
-            log.warn("Sender ikke kalenderavtale: narmesteLederRelasjon er null, eller mangler narmesteLederId")
-            return
-        }
+        database.storeArbeidsgivernotifikasjonerSak(sakInput)
+    }
 
-        val lenkeTilDialogmoteLanding = "$dialogmoterUrl/arbeidsgiver/${narmesteLederRelasjon.narmesteLederId}"
-        val sykmeldtesFornavn: String? = pdlClient.hentPerson(varselHendelse.arbeidstakerFnr)?.fornavn()
+    private suspend fun sendKalenderAvtaleTilArbeidsgiverNotifikasjon(
+        varselHendelse: NarmesteLederHendelse,
+        narmesteLederId: String,
+        personData: HentPersonData?,
+        lenkeTilDialogmoteLanding: String
+    ) {
+        val innkallingTekst = personData?.let { "Dialogmøte med ${it.firstName()}" } ?: "Innkalling til dialogmøte"
+        val avlystTekst = personData?.let { "Dialogmøte med ${it.firstName()} er avlyst" } ?: "Dialogmøtet er avlyst"
 
         when (varselHendelse.type) {
             NL_DIALOGMOTE_INNKALT -> {
-                val newSakId = senderFacade.createNewSak(
-                    sakInput = NySakInput(
-                        grupperingsid = narmesteLederRelasjon.narmesteLederId,
-                        merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
-                        virksomhetsnummer = varselHendelse.orgnummer,
-                        narmesteLederFnr = varselHendelse.narmesteLederFnr,
-                        ansattFnr = varselHendelse.arbeidstakerFnr,
-                        tittel = sykmeldtesFornavn?.let { "Dialogmøte med $it" } ?: "Innkalling til dialogmøte",
-                        lenke = lenkeTilDialogmoteLanding,
-                        initiellStatus = SaksStatus.MOTTATT,
-                        tidspunkt = OffsetDateTime.now().plusWeeks(1), //TODO få inn data fra isyfo
-                        hardDeleteDate = LocalDateTime.now().plusWeeks(1), //TODO endre
-                    )
-                )
+                createNewKalenderavtale(varselHendelse, narmesteLederId, innkallingTekst, lenkeTilDialogmoteLanding)
+            }
 
-                if (newSakId != null) {
-                    senderFacade.createNewKalenderavtale(
-                        kalenderInput = NyKalenderInput(
-                            virksomhetsnummer = varselHendelse.orgnummer,
-                            grupperingsid = narmesteLederRelasjon.narmesteLederId,
-                            merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
-                            eksternId = UUID.randomUUID().toString(),
-                            tekst = sykmeldtesFornavn?.let { "Dialogmøte med $it" } ?: "Innkalling til dialogmøte",
-                            ansattFnr = varselHendelse.arbeidstakerFnr,
-                            narmesteLederFnr = varselHendelse.narmesteLederFnr,
-                            startTidspunkt = LocalDateTime.now().plusWeeks(1), //TODO få inn data fra isyfo
-                            sluttTidspunkt = null,
-                            lenke = lenkeTilDialogmoteLanding,
-                            hardDeleteTidspunkt = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
-                        )
-                    )
-                } else {
-                    log.warn("Kunne ikke opprette kalenderavtale for dialogmoteinnkalling siden newSakId er null")
-                }
+            NL_DIALOGMOTE_NYTT_TID_STED -> {
+                updateKalenderWithAvlyst(
+                    narmesteLederId,
+                    personData?.let { "Dialogmøte med ${it.firstName()} er avlyst" } ?: "Dialogmøtet er avlyst")
+                createNewKalenderavtale(varselHendelse, narmesteLederId, innkallingTekst, lenkeTilDialogmoteLanding)
+            }
+
+            NL_DIALOGMOTE_AVLYST -> {
+                updateKalenderWithAvlyst(narmesteLederId, avlystTekst)
             }
 
             else -> {
-//                log.error("Wrong type of dialogmote varsel for kalenderavtale: ${varselHendelse.type}")
-                return
+                log.warn("Ikke implementert kalenderavtale for type: ${varselHendelse.type.name}")
             }
         }
-        return
+    }
+
+    private suspend fun createNewKalenderavtale(
+        varselHendelse: NarmesteLederHendelse,
+        narmesteLederId: String,
+        innkallingTekst: String,
+        lenkeTilDialogmoteLanding: String
+    ) {
+        senderFacade.createNewKalenderavtale(
+            NyKalenderInput(
+                virksomhetsnummer = varselHendelse.orgnummer,
+                grupperingsid = narmesteLederId,
+                merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
+                eksternId = UUID.randomUUID().toString(),
+                tekst = innkallingTekst,
+                ansattFnr = varselHendelse.arbeidstakerFnr,
+                narmesteLederFnr = varselHendelse.narmesteLederFnr,
+                startTidspunkt = LocalDateTime.now().plusWeeks(1),
+                sluttTidspunkt = null,
+                lenke = lenkeTilDialogmoteLanding,
+                hardDeleteTidspunkt = LocalDateTime.now().plusHours(1),
+            )
+        )
+    }
+
+    private suspend fun updateKalenderWithAvlyst(
+        narmesteLederId: String,
+        avlystTekst: String,
+    ) {
+        senderFacade.updateKalenderavtale(
+            OppdaterKalenderInput(
+                id = narmesteLederId,
+                nyTilstand = KalenderavtaleTilstand.AVLYST,
+                nyTekst = avlystTekst,
+                hardDeleteTidspunkt = LocalDateTime.now().plusHours(1),
+            )
+        )
     }
 
     private fun sendVarselTilDineSykmeldte(varselHendelse: NarmesteLederHendelse) {
