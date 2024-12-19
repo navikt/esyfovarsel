@@ -1,0 +1,52 @@
+mutation nySak(
+    $grupperingsid: String!,
+    $merkelapp: String!,
+    $virksomhetsnummer: String!,
+    $mottakere: [MottakerInput!]!,
+    $tittel: String!,
+    $tilleggsinformasjon: String,
+    $lenke: String,
+    $initiellStatus: SaksStatus!,
+    $nesteSteg: String,
+    $tidspunkt: ISO8601DateTime,
+    $overstyrStatustekstMed: String,
+    $hardDelete: FutureTemporalInput
+) {
+    nySak(
+        grupperingsid: $grupperingsid,
+        merkelapp: $merkelapp,
+        virksomhetsnummer: $virksomhetsnummer,
+        mottakere: $mottakere,
+        tittel: $tittel,
+        tilleggsinformasjon: $tilleggsinformasjon,
+        lenke: $lenke,
+        initiellStatus: $initiellStatus,
+        nesteSteg: $nesteSteg,
+        tidspunkt: $tidspunkt,
+        overstyrStatustekstMed: $overstyrStatustekstMed,
+        hardDelete: $hardDelete
+    ) {
+        ... on NySakVellykket {
+            id
+        }
+        ... on UgyldigMerkelapp {
+            feilmelding
+        }
+        ... on UgyldigMottaker {
+            feilmelding
+        }
+        ... on DuplikatGrupperingsid {
+            feilmelding
+            idTilEksisterende
+        }
+        ... on DuplikatGrupperingsidEtterDelete {
+            feilmelding
+        }
+        ... on UkjentProdusent {
+            feilmelding
+        }
+        ... on UkjentRolle {
+            feilmelding
+        }
+    }
+}

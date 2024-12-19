@@ -30,6 +30,7 @@ import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsume
 import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
+import no.nav.syfo.consumer.pdl.PdlClient
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.DatabaseInterface
@@ -114,6 +115,7 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
         narmesteLederService,
         env.urlEnv.baseUrlDineSykmeldte,
     )
+    val pdlClient = PdlClient(env.urlEnv, azureAdTokenConsumer)
     val journalpostdistribusjonConsumer = JournalpostdistribusjonConsumer(env.urlEnv, azureAdTokenConsumer)
 
     val brukernotifikasjonKafkaProducer = BrukernotifikasjonKafkaProducer(env)
@@ -144,6 +146,9 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
         senderFacade,
         env.urlEnv.dialogmoterUrl,
         accessControlService,
+        narmesteLederService,
+        pdlClient,
+        database
     )
 
     val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(

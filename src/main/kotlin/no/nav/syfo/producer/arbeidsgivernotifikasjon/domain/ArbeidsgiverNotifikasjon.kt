@@ -2,6 +2,7 @@ package no.nav.syfo.producer.arbeidsgivernotifikasjon.domain
 
 import java.time.LocalDateTime
 
+// Varsler (oppgaver og beskjeder) som sendes til arbeidsgiver
 data class ArbeidsgiverNotifikasjon(
     val varselId: String,
     val virksomhetsnummer: String,

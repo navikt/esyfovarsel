@@ -4,18 +4,18 @@ import java.io.Serializable
 import java.time.LocalDate
 
 data class NarmesteLederRelasjon(
-    var narmesteLederId: String? = null,
-    var fnr: String? = null,
-    var orgnummer: String? = null,
-    var narmesteLederFnr: String? = null,
-    var narmesteLederTelefonnummer: String? = null,
-    var narmesteLederEpost: String? = null,
-    var aktivFom: LocalDate? = null,
-    var aktivTom: LocalDate? = null,
-    var arbeidsgiverForskutterer: Boolean = false,
-    var skrivetilgang: Boolean = false,
-    var tilganger: List<Tilgang>,
-    var navn: String?
+    val narmesteLederId: String? = null,
+    val fnr: String? = null,
+    val orgnummer: String? = null,
+    val narmesteLederFnr: String? = null,
+    val narmesteLederTelefonnummer: String? = null,
+    val narmesteLederEpost: String? = null,
+    val aktivFom: LocalDate? = null,
+    val aktivTom: LocalDate? = null,
+    val arbeidsgiverForskutterer: Boolean = false,
+    val skrivetilgang: Boolean = false,
+    val tilganger: List<Tilgang>,
+    val navn: String?
 ) : Serializable
 
 enum class Tilgang : Serializable {
