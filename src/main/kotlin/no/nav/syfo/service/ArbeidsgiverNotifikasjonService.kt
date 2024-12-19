@@ -4,6 +4,9 @@ import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyKalenderInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.OppdaterKalenderInput
 import no.nav.syfo.service.Meldingstype.BESKJED
 import no.nav.syfo.service.Meldingstype.OPPGAVE
 import org.slf4j.Logger
@@ -67,6 +70,24 @@ class ArbeidsgiverNotifikasjonService(
             ),
         )
     }
+
+    suspend fun createNewKalenderavtale(
+        nyKalenderInput: NyKalenderInput
+    ): String? {
+        return arbeidsgiverNotifikasjonProdusent.createNewKalenderavtale(
+            nyKalenderInput = nyKalenderInput,
+        )
+    }
+
+    suspend fun createNewSak(sakInput: NySakInput): String? {
+        return arbeidsgiverNotifikasjonProdusent.createNewSak(sakInput)
+    }
+
+    suspend fun updateKalenderavtale(
+        oppdaterKalenderInput: OppdaterKalenderInput
+    ): String? {
+        return arbeidsgiverNotifikasjonProdusent.updateKalenderavtale(oppdaterKalenderInput)
+    }
 }
 
 data class ArbeidsgiverNotifikasjonInput(
@@ -81,6 +102,8 @@ data class ArbeidsgiverNotifikasjonInput(
     val hardDeleteDate: LocalDateTime,
     val meldingstype: Meldingstype = BESKJED,
 )
+
+
 
 enum class Meldingstype {
     OPPGAVE,

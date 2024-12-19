@@ -1,12 +1,13 @@
 package no.nav.syfo.service
 
-import java.net.URL
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.Kanal
-import no.nav.syfo.db.domain.Kanal.*
+import no.nav.syfo.db.domain.Kanal.ARBEIDSGIVERNOTIFIKASJON
+import no.nav.syfo.db.domain.Kanal.BREV
+import no.nav.syfo.db.domain.Kanal.BRUKERNOTIFIKASJON
+import no.nav.syfo.db.domain.Kanal.DINE_SYKMELDTE
+import no.nav.syfo.db.domain.Kanal.DITT_SYKEFRAVAER
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.db.fetchUferdigstilteVarsler
@@ -22,9 +23,15 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProdu
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyKalenderInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.OppdaterKalenderInput
 import no.nav.syfo.utils.enumValueOfOrNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.URL
+import java.time.LocalDateTime
+import java.util.*
 
 class SenderFacade(
     private val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
@@ -140,6 +147,22 @@ class SenderFacade(
                 varsel.merkelapp,
             )
         }
+    }
+
+    suspend fun createNewKalenderavtale(
+        kalenderInput: NyKalenderInput
+    ): String? {
+        return arbeidsgiverNotifikasjonService.createNewKalenderavtale(kalenderInput)
+    }
+
+    suspend fun createNewSak(sakInput: NySakInput): String? {
+        return arbeidsgiverNotifikasjonService.createNewSak(sakInput)
+    }
+
+    suspend fun updateKalenderavtale(
+        oppdaterKalenderInput: OppdaterKalenderInput
+    ): String? {
+        return arbeidsgiverNotifikasjonService.updateKalenderavtale(oppdaterKalenderInput)
     }
 
     suspend fun ferdigstillVarslerForFnr(fnr: PersonIdent) {

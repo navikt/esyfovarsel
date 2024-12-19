@@ -15,9 +15,9 @@ import no.nav.syfo.metrics.COUNT_CALL_PDL_SUCCESS
 import no.nav.syfo.utils.httpClientWithRetry
 import org.slf4j.LoggerFactory
 
-open class PdlConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
+open class PdlClient(private val urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
     private val httpClient = httpClientWithRetry(expectSuccess = true)
-    private val log = LoggerFactory.getLogger(PdlConsumer::class.qualifiedName)
+    private val log = LoggerFactory.getLogger(PdlClient::class.qualifiedName)
 
     suspend fun hentPerson(
         personIdent: String,
