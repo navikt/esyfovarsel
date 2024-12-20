@@ -4,7 +4,8 @@ import com.apollo.graphql.type.SaksStatus
 import java.time.LocalDateTime
 
 data class PSakInput(
-    val grupperingsid: String,
+    val sakId:  String,
+    val grupperingsid:  String,
     val merkelapp: String,
     val virksomhetsnummer: String,
     val narmesteLederFnr: String,

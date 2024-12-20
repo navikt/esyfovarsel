@@ -9,6 +9,7 @@ import com.apollo.graphql.type.MottakerInput
 import com.apollo.graphql.type.NaermesteLederMottakerInput
 import com.apollo.graphql.type.NyTidStrategi
 import com.apollographql.apollo.api.Optional
+import no.nav.syfo.db.domain.PKalenderInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601DateTime
 import java.time.LocalDateTime
 
@@ -24,9 +25,11 @@ import java.time.LocalDateTime
  * @param narmesteLederFnr Fødselsnummeret til nærmeste leder
  * @param startTidspunkt Når avtalen starter.
  * @param sluttTidspunkt Når avtalen slutter (valgfritt).
- * @param hardDeleteTidspunkt Når avtalen skal slettes.
+ * @param kalenderavtaleTilstand Tilstanden til avtalen.
+ * @param hardDeleteDate Når avtalen skal slettes.
  */
 data class NyKalenderInput(
+    val sakId: String,
     val virksomhetsnummer: String,
     val grupperingsid: String,
     val merkelapp: String,
@@ -37,7 +40,8 @@ data class NyKalenderInput(
     val narmesteLederFnr: String,
     val startTidspunkt: LocalDateTime,
     val sluttTidspunkt: LocalDateTime?,
-    val hardDeleteTidspunkt: LocalDateTime,
+    val kalenderavtaleTilstand: KalenderTilstand,
+    val hardDeleteDate: LocalDateTime,
 )
 
 fun NyKalenderInput.toNyKalenderavtaleMutation(): NyKalenderavtaleMutation {
@@ -62,18 +66,32 @@ fun NyKalenderInput.toNyKalenderavtaleMutation(): NyKalenderavtaleMutation {
         sluttTidspunkt = Optional.presentIfNotNull(sluttTidspunkt?.formatAsISO8601DateTime()),
         lokasjon = Optional.absent(),
         erDigitalt = Optional.absent(),
-        tilstand = Optional.present(KalenderavtaleTilstand.VENTER_SVAR_FRA_ARBEIDSGIVER),
+        tilstand = Optional.present(KalenderavtaleTilstand.valueOf(kalenderavtaleTilstand.name)),
         eksterneVarsler = listOf(),
         paaminnelse = Optional.absent(),
         hardDelete = Optional.present(
             FutureTemporalInput(
                 den = Optional.present(
-                    hardDeleteTidspunkt.formatAsISO8601DateTime()
+                    hardDeleteDate.formatAsISO8601DateTime()
                 )
             )
         ),
     )
 }
+
+fun NyKalenderInput.toPKalenderInput(): PKalenderInput {
+    return PKalenderInput(
+        eksternId = eksternId,
+        sakId = sakId,
+        kalenderId = "",
+        tekst = tekst,
+        startTidspunkt = startTidspunkt,
+        sluttTidspunkt = sluttTidspunkt,
+        kalenderavtaleTilstand = kalenderavtaleTilstand,
+        hardDeleteDate = hardDeleteDate,
+    )
+}
+
 
 /**
  * @param id ID-en til kalenderavtalen som skal oppdateres.
@@ -84,7 +102,7 @@ fun NyKalenderInput.toNyKalenderavtaleMutation(): NyKalenderavtaleMutation {
  */
 data class OppdaterKalenderInput(
     val id: String,
-    val nyTilstand: KalenderavtaleTilstand,
+    val nyTilstand: KalenderTilstand,
     val nyTekst: String,
     val nyLenke: String? = null,
     val hardDeleteTidspunkt: LocalDateTime,
@@ -104,4 +122,12 @@ fun OppdaterKalenderInput.toOppdaterKalenderavtaleMutation(): OppdaterKalenderav
             )
         ),
     )
+}
+
+enum class KalenderTilstand {
+    VENTER_SVAR_FRA_ARBEIDSGIVER,
+    ARBEIDSGIVER_VIL_AVLYSE,
+    ARBEIDSGIVER_VIL_ENDRE_TID_ELLER_STED,
+    ARBEIDSGIVER_HAR_GODTATT,
+    AVLYST,
 }

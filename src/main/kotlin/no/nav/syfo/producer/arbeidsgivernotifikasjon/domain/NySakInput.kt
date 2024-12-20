@@ -19,7 +19,7 @@ data class NySakInput(
     val tittel: String,
     val tilleggsinformasjon: String? = null,
     val lenke: String,
-    val initiellStatus: SaksStatus,
+    val initiellStatus: SakStatus,
     val nesteSteg: String? = null,
     val tidspunkt: LocalDateTime,
     val overstyrStatustekstMed: String? = null,
@@ -44,7 +44,7 @@ fun NySakInput.toNySakMutation(): NySakMutation {
         tittel = tittel,
         tilleggsinformasjon = Optional.presentIfNotNull(tilleggsinformasjon),
         lenke = Optional.present(lenke),
-        initiellStatus = initiellStatus,
+        initiellStatus = SaksStatus.valueOf(initiellStatus.name),
         nesteSteg = Optional.presentIfNotNull(nesteSteg),
         tidspunkt = Optional.presentIfNotNull(tidspunkt.formatAsISO8601DateTime()),
         overstyrStatustekstMed = Optional.presentIfNotNull(overstyrStatustekstMed),
@@ -56,4 +56,10 @@ fun NySakInput.toNySakMutation(): NySakMutation {
             )
         ),
     )
+}
+
+enum class SakStatus {
+    MOTTATT,
+    UNDER_BEHANDLING,
+    FERDIG
 }

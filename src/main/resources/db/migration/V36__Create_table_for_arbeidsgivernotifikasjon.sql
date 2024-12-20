@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS ARBEIDSGIVERNOTIFIKASJONER_SAK;
 CREATE TABLE ARBEIDSGIVERNOTIFIKASJONER_SAK
 (
+    id                     UUID PRIMARY KEY,
     grupperingsid          VARCHAR(50)              NOT NULL,
     merkelapp              VARCHAR(50)              NOT NULL,
     virksomhetsnummer      VARCHAR(20)              NOT NULL,
@@ -14,7 +15,7 @@ CREATE TABLE ARBEIDSGIVERNOTIFIKASJONER_SAK
     tidspunkt              TIMESTAMP WITH TIME ZONE NOT NULL,
     overstyrStatustekstMed TEXT,
     hardDeleteDate         TIMESTAMP                NOT NULL,
-    PRIMARY KEY (grupperingsid),
+    opprettet              TIMESTAMP                NOT NULL,
     UNIQUE (grupperingsid, merkelapp)
 );
 
@@ -25,19 +26,14 @@ DROP TABLE IF EXISTS ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE;
 CREATE TABLE ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE
 (
     eksternId              UUID PRIMARY KEY,
-    virksomhetsnummer      VARCHAR(20) NOT NULL,
-    grupperingsid          VARCHAR(50) NOT NULL,
-    merkelapp              VARCHAR(50) NOT NULL,
+    sakId                  UUID        NOT NULL,
+    kalenderId             TEXT        NOT NULL,
     tekst                  TEXT        NOT NULL,
-    narmesteLederFnr       VARCHAR(11) NOT NULL,
-    ansattFnr              VARCHAR(11) NOT NULL,
-    lenke                  TEXT        NOT NULL,
     startTidspunkt         TIMESTAMP   NOT NULL,
     sluttTidspunkt         TIMESTAMP,
     kalenderavtaleTilstand VARCHAR(50) NOT NULL,
-    hardDeleteTidspunkt    TIMESTAMP   NOT NULL,
-    UNIQUE (grupperingsid, merkelapp)
+    hardDeleteDate         TIMESTAMP   NOT NULL,
+    opprettet              TIMESTAMP                NOT NULL
 );
 
-CREATE INDEX idx_arbeidsgivernotifikasjoner_kalenderavtale_merkelapp ON ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE (merkelapp);
-CREATE INDEX idx_arbeidsgivernotifikasjoner_kalenderavtale_grupperingsid ON ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE (grupperingsid);
+CREATE INDEX idx_arbeidsgivernotifikasjoner_kalenderavtale_sakid ON ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE (sakId);
