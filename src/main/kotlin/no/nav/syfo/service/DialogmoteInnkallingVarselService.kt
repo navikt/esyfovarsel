@@ -266,7 +266,7 @@ class DialogmoteInnkallingVarselService(
 
             NL_DIALOGMOTE_NYTT_TID_STED -> {
                 updateKalenderAvtale(
-                    sakId = narmesteLederId,
+                    sakId = sakId,
                     avlystTekst = avlystTekst,
                     nyTilstand = KalenderTilstand.AVLYST,
                     hardDeleteDate = LocalDateTime.now()
@@ -283,7 +283,7 @@ class DialogmoteInnkallingVarselService(
 
             NL_DIALOGMOTE_AVLYST -> {
                 updateKalenderAvtale(
-                    sakId = narmesteLederId,
+                    sakId = sakId,
                     avlystTekst = avlystTekst,
                     nyTilstand = KalenderTilstand.AVLYST,
                     hardDeleteDate = LocalDateTime.now()
