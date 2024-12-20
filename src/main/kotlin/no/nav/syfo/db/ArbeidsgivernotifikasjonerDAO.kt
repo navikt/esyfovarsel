@@ -123,15 +123,15 @@ fun DatabaseInterface.storeArbeidsgivernotifikasjonerKalenderavtale(
     connection.use { connection ->
         connection.prepareStatement(insertStatement).use { preparedStatement ->
             preparedStatement.setObject(1, uuid)
-            preparedStatement.setString(1, kalenderInput.eksternId)
-            preparedStatement.setString(2, kalenderInput.sakId)
-            preparedStatement.setString(3, kalenderInput.kalenderId)
-            preparedStatement.setString(4, kalenderInput.tekst)
-            preparedStatement.setTimestamp(5, Timestamp.valueOf(kalenderInput.startTidspunkt))
-            preparedStatement.setTimestamp(6, kalenderInput.sluttTidspunkt?.let { Timestamp.valueOf(it) })
-            preparedStatement.setString(7, kalenderInput.kalenderavtaleTilstand.name)
-            preparedStatement.setTimestamp(8, Timestamp.valueOf(kalenderInput.hardDeleteDate))
-            preparedStatement.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()))
+            preparedStatement.setString(2, kalenderInput.eksternId)
+            preparedStatement.setString(3, kalenderInput.sakId)
+            preparedStatement.setString(4, kalenderInput.kalenderId)
+            preparedStatement.setString(5, kalenderInput.tekst)
+            preparedStatement.setTimestamp(6, Timestamp.valueOf(kalenderInput.startTidspunkt))
+            preparedStatement.setTimestamp(7, kalenderInput.sluttTidspunkt?.let { Timestamp.valueOf(it) })
+            preparedStatement.setString(8, kalenderInput.kalenderavtaleTilstand.name)
+            preparedStatement.setTimestamp(9, Timestamp.valueOf(kalenderInput.hardDeleteDate))
+            preparedStatement.setTimestamp(10, Timestamp.valueOf(LocalDateTime.now()))
 
             preparedStatement.executeUpdate()
         }
