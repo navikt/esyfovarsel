@@ -323,7 +323,7 @@ class DialogmoteInnkallingVarselService(
         )
         if (kalenderId != null) {
             log.info("Successfully created new kalenderavtale. Storing...")
-            database.storeArbeidsgivernotifikasjonerKalenderavtale(kalenderInput.toPKalenderInput())
+            database.storeArbeidsgivernotifikasjonerKalenderavtale(kalenderInput.toPKalenderInput(kalenderId))
         }
     }
 

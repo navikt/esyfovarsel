@@ -79,11 +79,11 @@ fun NyKalenderInput.toNyKalenderavtaleMutation(): NyKalenderavtaleMutation {
     )
 }
 
-fun NyKalenderInput.toPKalenderInput(): PKalenderInput {
+fun NyKalenderInput.toPKalenderInput(kalenderId: String): PKalenderInput {
     return PKalenderInput(
         eksternId = eksternId,
         sakId = sakId,
-        kalenderId = "",
+        kalenderId = kalenderId,
         tekst = tekst,
         startTidspunkt = startTidspunkt,
         sluttTidspunkt = sluttTidspunkt,
