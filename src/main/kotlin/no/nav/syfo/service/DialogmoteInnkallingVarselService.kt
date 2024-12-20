@@ -267,7 +267,7 @@ class DialogmoteInnkallingVarselService(
             NL_DIALOGMOTE_NYTT_TID_STED -> {
                 updateKalenderAvtale(
                     sakId = sakId,
-                    avlystTekst = avlystTekst,
+                    nyTekst = avlystTekst,
                     nyTilstand = KalenderTilstand.AVLYST,
                     hardDeleteDate = LocalDateTime.now()
                 )
@@ -284,7 +284,7 @@ class DialogmoteInnkallingVarselService(
             NL_DIALOGMOTE_AVLYST -> {
                 updateKalenderAvtale(
                     sakId = sakId,
-                    avlystTekst = avlystTekst,
+                    nyTekst = avlystTekst,
                     nyTilstand = KalenderTilstand.AVLYST,
                     hardDeleteDate = LocalDateTime.now()
                 )
@@ -329,7 +329,7 @@ class DialogmoteInnkallingVarselService(
 
     private suspend fun updateKalenderAvtale(
         sakId: String,
-        avlystTekst: String,
+        nyTekst: String,
         nyTilstand: KalenderTilstand,
         hardDeleteDate: LocalDateTime
     ) {
@@ -339,7 +339,7 @@ class DialogmoteInnkallingVarselService(
             OppdaterKalenderInput(
                 id = storedKalenderAvtale.kalenderId,
                 nyTilstand = nyTilstand,
-                nyTekst = avlystTekst,
+                nyTekst = nyTekst,
                 hardDeleteTidspunkt = hardDeleteDate,
             )
         )
@@ -349,7 +349,7 @@ class DialogmoteInnkallingVarselService(
                 eksternId = storedKalenderAvtale.eksternId,
                 sakId = sakId,
                 kalenderId = kalenderId,
-                tekst = avlystTekst,
+                tekst = nyTekst,
                 startTidspunkt = storedKalenderAvtale.startTidspunkt,
                 sluttTidspunkt = storedKalenderAvtale.sluttTidspunkt,
                 kalenderavtaleTilstand = nyTilstand,

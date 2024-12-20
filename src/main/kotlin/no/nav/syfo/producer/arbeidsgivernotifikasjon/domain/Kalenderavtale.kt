@@ -113,6 +113,11 @@ fun OppdaterKalenderInput.toOppdaterKalenderavtaleMutation(): OppdaterKalenderav
         id = id,
         eksterneVarsler = listOf(),
         paaminnelse = Optional.absent(),
+        nyTilstand = Optional.present(KalenderavtaleTilstand.valueOf(nyTilstand.name)),
+        nyLokasjon = Optional.absent(),
+        nyLenke =  Optional.absent(),
+        nyTekst = Optional.present(nyTekst),
+        nyErDigitalt = Optional.absent(),
         hardDelete = Optional.present(
             HardDeleteUpdateInput(
                 nyTid = FutureTemporalInput(
