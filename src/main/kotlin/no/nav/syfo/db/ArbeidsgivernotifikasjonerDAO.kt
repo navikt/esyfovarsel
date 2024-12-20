@@ -153,7 +153,7 @@ fun DatabaseInterface.getArbeidsgivernotifikasjonerKalenderavtale(
 
     val listOfSak = connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
-            it.setObject(1, UUID.fromString(sakId))
+            it.setString(1, sakId)
             it.executeQuery().toList { toPKalenderInput() }
         }
     }
