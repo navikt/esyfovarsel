@@ -25,15 +25,16 @@ CREATE INDEX idx_arbeidsgivernotifikasjoner_sak_grupperingsid ON ARBEIDSGIVERNOT
 DROP TABLE IF EXISTS ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE;
 CREATE TABLE ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE
 (
-    eksternId              UUID PRIMARY KEY,
-    sakId                  UUID        NOT NULL,
+    id                     UUID PRIMARY KEY,
+    eksternId              TEXT        NOT NULL,
+    sakId                  TEXT        NOT NULL,
     kalenderId             TEXT        NOT NULL,
     tekst                  TEXT        NOT NULL,
     startTidspunkt         TIMESTAMP   NOT NULL,
     sluttTidspunkt         TIMESTAMP,
     kalenderavtaleTilstand VARCHAR(50) NOT NULL,
     hardDeleteDate         TIMESTAMP   NOT NULL,
-    opprettet              TIMESTAMP                NOT NULL
+    opprettet              TIMESTAMP   NOT NULL
 );
 
 CREATE INDEX idx_arbeidsgivernotifikasjoner_kalenderavtale_sakid ON ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE (sakId);

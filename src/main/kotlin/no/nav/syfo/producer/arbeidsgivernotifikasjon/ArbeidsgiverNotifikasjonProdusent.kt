@@ -155,6 +155,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
             }
             result?.onDuplikatEksternIdOgMerkelapp?.let {
                 log.error("createNewKalenderavtale - Duplikat ekstern id og merkelapp: ${it.feilmelding}, Existing ID: ${it.idTilEksisterende}")
+                return it.idTilEksisterende
             }
             result?.onUkjentProdusent?.let {
                 log.error("createNewKalenderavtale - Ukjent produsent: ${it.feilmelding}")

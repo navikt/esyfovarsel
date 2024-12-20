@@ -103,9 +103,11 @@ fun ResultSet.toPSakInput() = PSakInput(
 
 fun DatabaseInterface.storeArbeidsgivernotifikasjonerKalenderavtale(
     kalenderInput: PKalenderInput
-) {
+): String {
+    val uuid = UUID.randomUUID()
     val insertStatement = """
         INSERT INTO ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE (
+            id,
             eksternId,
             sakId,
             kalenderId,
@@ -115,14 +117,15 @@ fun DatabaseInterface.storeArbeidsgivernotifikasjonerKalenderavtale(
             kalenderavtaleTilstand,
             hardDeleteDate,
             opprettet
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """.trimIndent()
 
     connection.use { connection ->
         connection.prepareStatement(insertStatement).use { preparedStatement ->
-            preparedStatement.setObject(1, kalenderInput.eksternId)
-            preparedStatement.setObject(2, kalenderInput.sakId)
-            preparedStatement.setObject(3, kalenderInput.kalenderId)
+            preparedStatement.setObject(1, uuid)
+            preparedStatement.setString(1, kalenderInput.eksternId)
+            preparedStatement.setString(2, kalenderInput.sakId)
+            preparedStatement.setString(3, kalenderInput.kalenderId)
             preparedStatement.setString(4, kalenderInput.tekst)
             preparedStatement.setTimestamp(5, Timestamp.valueOf(kalenderInput.startTidspunkt))
             preparedStatement.setTimestamp(6, kalenderInput.sluttTidspunkt?.let { Timestamp.valueOf(it) })
@@ -134,6 +137,7 @@ fun DatabaseInterface.storeArbeidsgivernotifikasjonerKalenderavtale(
         }
 
         connection.commit()
+        return uuid.toString()
     }
 }
 
