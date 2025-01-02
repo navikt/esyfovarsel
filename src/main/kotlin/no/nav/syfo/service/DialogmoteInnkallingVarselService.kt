@@ -69,6 +69,7 @@ import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.Serializable
+import java.net.URI
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -152,10 +153,12 @@ class DialogmoteInnkallingVarselService(
     }
 
     fun getVarselUrl(varselHendelse: ArbeidstakerHendelse, varselUuid: String): URL {
-        if (SM_DIALOGMOTE_REFERAT === varselHendelse.type) {
-            return URL("$dialogmoterUrl/sykmeldt/referat/$varselUuid")
+        val urlString = if (SM_DIALOGMOTE_REFERAT === varselHendelse.type) {
+            "$dialogmoterUrl/sykmeldt/referat/$varselUuid"
+        } else {
+            "$dialogmoterUrl/sykmeldt/moteinnkalling"
         }
-        return URL("$dialogmoterUrl/sykmeldt/moteinnkalling")
+        return URI(urlString).toURL()
     }
 
     private fun varsleArbeidstakerViaBrukernotifkasjoner(
