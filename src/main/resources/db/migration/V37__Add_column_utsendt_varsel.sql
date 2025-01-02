@@ -1,5 +1,2 @@
 ALTER TABLE UTSENDT_VARSEL
-    DROP COLUMN IF EXISTS journalpost_id;
-
-ALTER TABLE UTSENDT_VARSEL
     ADD COLUMN journalpost_id varchar(50);
