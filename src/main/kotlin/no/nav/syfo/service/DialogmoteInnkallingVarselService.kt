@@ -190,7 +190,7 @@ class DialogmoteInnkallingVarselService(
     }
 
     private suspend fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
-        val texts = getArbeisgiverTexts(varselHendelse)
+        val texts = getArbeidsgiverTexts(varselHendelse)
         val sms = texts[SMS_KEY]
         val emailTitle = texts[EMAIL_TITLE_KEY]
         val emailBody = texts[EMAIL_BODY_KEY]
@@ -398,7 +398,7 @@ class DialogmoteInnkallingVarselService(
         }
     }
 
-    private fun getArbeisgiverTexts(hendelse: NarmesteLederHendelse): HashMap<String, String> {
+    private fun getArbeidsgiverTexts(hendelse: NarmesteLederHendelse): HashMap<String, String> {
         return when (hendelse.type) {
             NL_DIALOGMOTE_INNKALT -> hashMapOf(
                 SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_MESSAGE_TEXT,
