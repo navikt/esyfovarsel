@@ -18,7 +18,7 @@ class SendForcedAktivitetspliktLetterJob(private val db: DatabaseInterface, priv
         val unreadVarslerOverdude = allUnreadVarsler.filter { isVarselUnredIn2Days(it) }
 
         log.info("SendForcedAktivitetspliktLetterJob is about to send ${unreadVarslerOverdude.size} forced letters")
-        var sentForcedLettersAmount = unreadVarslerOverdude.size
+        var sentForcedLettersAmount = 0
 
         unreadVarslerOverdude.forEach { pUtsendtVarsel ->
             if (pUtsendtVarsel.journalpostId.isNullOrBlank()) {
