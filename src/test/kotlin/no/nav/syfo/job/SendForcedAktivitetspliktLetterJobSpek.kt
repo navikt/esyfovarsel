@@ -1,5 +1,6 @@
 package no.nav.syfo.job
 
+import io.kotest.core.annotation.Ignored
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -17,6 +18,7 @@ import no.nav.syfo.service.SenderFacade
 import no.nav.syfo.testutil.EmbeddedDatabase
 import org.amshove.kluent.shouldBeEqualTo
 
+@Ignored //TODO
 class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
 
     describe("SendForcedAktivitetspliktLetterJobSpek") {

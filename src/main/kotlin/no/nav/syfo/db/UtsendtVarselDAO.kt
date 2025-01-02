@@ -17,11 +17,13 @@ fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
         utsendt_tidspunkt,
         ekstern_ref,
         arbeidsgivernotifikasjon_merkelapp, 
-        is_forced_letter,
-        journalpost_id
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        is_forced_letter
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """.trimIndent()
-
+/*,
+        journalpost_id
+        , ?
+        */
     connection.use { connection ->
         connection.prepareStatement(insertStatement).use {
             it.setObject(1, UUID.fromString(PUtsendtVarsel.uuid))
@@ -34,7 +36,7 @@ fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
             it.setString(8, PUtsendtVarsel.eksternReferanse)
             it.setString(9, PUtsendtVarsel.arbeidsgivernotifikasjonMerkelapp)
             it.setBoolean(10, PUtsendtVarsel.isForcedLetter)
-            it.setString(11, PUtsendtVarsel.journalpostId)
+//            it.setString(11, PUtsendtVarsel.journalpostId)
             it.executeUpdate()
         }
 

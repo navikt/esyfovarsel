@@ -25,7 +25,7 @@ fun ResultSet.toPUtsendtVarsel() = PUtsendtVarsel(
     ferdigstiltTidspunkt = getTimestamp("ferdigstilt_tidspunkt")?.toLocalDateTime(),
     arbeidsgivernotifikasjonMerkelapp = getString("arbeidsgivernotifikasjon_merkelapp"),
     isForcedLetter = getBoolean("is_forced_letter"),
-    journalpostId = getString("journalpost_id"),
+    journalpostId = ""// TODO getString("journalpost_id"),
 )
 
 fun ResultSet.toPMikrofrontendSynlighet() = PMikrofrontendSynlighet(
@@ -46,7 +46,7 @@ fun ResultSet.toPUtsendtVarselFeilet() = PUtsendtVarselFeilet(
     hendelsetypeNavn = getString("hendelsetype_navn"),
     arbeidsgivernotifikasjonMerkelapp = getString("arbeidsgivernotifikasjon_merkelapp"),
     brukernotifikasjonerMeldingType = getString("brukernotifikasjoner_melding_type"),
-    journalpostId = getString("journalpost_id"),
+    journalpostId = "",// TODO getString("journalpost_id"),
     kanal = getString("kanal"),
     feilmelding = getString("feilmelding"),
     utsendtForsokTidspunkt = getTimestamp("utsendt_forsok_tidspunkt").toLocalDateTime(),
