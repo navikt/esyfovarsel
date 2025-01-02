@@ -1,14 +1,16 @@
 package no.nav.syfo.db
 
 import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.shouldBe
+import java.time.LocalDateTime
+import java.util.*
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.db.domain.Kanal
+import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.testutil.EmbeddedDatabase
 import org.amshove.kluent.should
-import java.time.LocalDateTime
-import java.util.*
 
 class UtsendtVarselDAOSpek : DescribeSpec({
     describe("UtsendtVarselDAOSpek") {
@@ -26,6 +28,33 @@ class UtsendtVarselDAOSpek : DescribeSpec({
                 Kanal.DINE_SYKMELDTE,
                 fnr
             )
+        }
+
+        it("Should not fetch ferdigstilt aktivitetsplikt varsel") {
+            val uuid = UUID.randomUUID().toString()
+            val utsendtVarsel6 = PUtsendtVarsel(
+                uuid = uuid,
+                fnr = "22121212121",
+                aktorId = null,
+                narmesteLederFnr = null,
+                orgnummer = null,
+                type = "SM_AKTIVITETSPLIKT",
+                kanal = "BRUKERNOTIFIKASJON",
+                utsendtTidspunkt = LocalDateTime.now().minusDays(3),
+                planlagtVarselId = null,
+                eksternReferanse = "123",
+                ferdigstiltTidspunkt = null,
+                arbeidsgivernotifikasjonMerkelapp = null,
+                isForcedLetter = false,
+                journalpostId = "666"
+            )
+
+            embeddedDatabase.storeUtsendtVarsel(utsendtVarsel6)
+            embeddedDatabase.setUtsendtVarselToFerdigstilt("123")
+
+            val res = embeddedDatabase.fetchAlleUferdigstilteAktivitetspliktVarsler()
+
+            res.size shouldBe 0
         }
     }
 })

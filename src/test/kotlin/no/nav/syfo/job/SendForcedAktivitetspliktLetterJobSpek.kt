@@ -9,6 +9,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.syfo.db.arbeidstakerAktorId1
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.VarselType
+import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.planner.arbeidstakerFnr1
@@ -102,6 +103,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
         }
 
         it("Sends 2 forced letters for all unread varsler older than 2 days") {
+            // Should send:
             val utsendtVarsel1 = PUtsendtVarsel(
                 uuid = UUID.randomUUID().toString(),
                 fnr = "12121212121",
@@ -119,6 +121,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
                 journalpostId = "111"
             )
 
+            // Should send:
             val utsendtVarsel2 = PUtsendtVarsel(
                 uuid = UUID.randomUUID().toString(),
                 fnr = "22121212121",
@@ -136,6 +139,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
                 journalpostId = "222"
             )
 
+            // Should send:
             val utsendtVarsel3 = PUtsendtVarsel(
                 uuid = UUID.randomUUID().toString(),
                 fnr = "22121212121",
@@ -153,6 +157,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
                 journalpostId = "333"
             )
 
+            // Should not send: utsendt varsel was a forced letter
             val utsendtVarsel4 = PUtsendtVarsel(
                 uuid = UUID.randomUUID().toString(),
                 fnr = "22121212121",
@@ -170,9 +175,10 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
                 journalpostId = "444"
             )
 
+            // Should not send: utsendt varsel missing journalpostId
             val utsendtVarsel5 = PUtsendtVarsel(
                 uuid = UUID.randomUUID().toString(),
-                fnr = "22121212121",
+                fnr = "55555555555",
                 aktorId = null,
                 narmesteLederFnr = null,
                 orgnummer = null,
@@ -183,10 +189,12 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
                 eksternReferanse = null,
                 ferdigstiltTidspunkt = null,
                 arbeidsgivernotifikasjonMerkelapp = null,
-                isForcedLetter = true,
-                journalpostId = "555"
+                isForcedLetter = false,
+                journalpostId = null,
             )
 
+            // Should not send: utsendt varsel was ferdigstilt
+            val eksternReferanse = "123"
             val utsendtVarsel6 = PUtsendtVarsel(
                 uuid = UUID.randomUUID().toString(),
                 fnr = "22121212121",
@@ -197,7 +205,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
                 kanal = "BRUKERNOTIFIKASJON",
                 utsendtTidspunkt = LocalDateTime.now().minusDays(3),
                 planlagtVarselId = null,
-                eksternReferanse = null,
+                eksternReferanse = "123",
                 ferdigstiltTidspunkt = LocalDateTime.now(),
                 arbeidsgivernotifikasjonMerkelapp = null,
                 isForcedLetter = false,
@@ -210,6 +218,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
             embeddedDatabase.storeUtsendtVarsel(utsendtVarsel4)
             embeddedDatabase.storeUtsendtVarsel(utsendtVarsel5)
             embeddedDatabase.storeUtsendtVarsel(utsendtVarsel6)
+            embeddedDatabase.setUtsendtVarselToFerdigstilt(eksternReferanse)
 
             val result = runBlocking { job.sendForcedLetterFromJob() }
 
@@ -253,16 +262,16 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
 
             coVerify(exactly = 0) {
                 senderFacade.sendForcedBrevTilFysiskPrint(
-                    uuid = utsendtVarsel4.uuid,
+                    uuid = utsendtVarsel5.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
-                    journalpostId = "555"
+                    journalpostId = any(),
                 )
             }
 
             coVerify(exactly = 0) {
                 senderFacade.sendForcedBrevTilFysiskPrint(
-                    uuid = utsendtVarsel4.uuid,
+                    uuid = utsendtVarsel6.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
                     journalpostId = "666"
