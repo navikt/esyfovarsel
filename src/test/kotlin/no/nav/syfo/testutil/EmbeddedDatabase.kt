@@ -35,7 +35,8 @@ class EmbeddedDatabase : DatabaseInterface {
         val tables = listOf(
             "SYKMELDING_IDS",
             "UTSENDT_VARSEL",
-            "MIKROFRONTEND_SYNLIGHET"
+            "MIKROFRONTEND_SYNLIGHET",
+            "UTSENDING_VARSEL_FEILET",
         )
 
         connection.use { connection ->
