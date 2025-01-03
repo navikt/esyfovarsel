@@ -2,24 +2,25 @@ package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
-import io.mockk.clearAllMocks
-import io.mockk.coEvery
-import io.mockk.coJustRun
-import io.mockk.coVerify
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
+import no.nav.syfo.consumer.narmesteLeder.NarmesteLederRelasjon
+import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
+import no.nav.syfo.consumer.narmesteLeder.Tilgang
+import no.nav.syfo.consumer.pdl.*
+import no.nav.syfo.db.Database
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.domain.PersonIdent
-import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import no.nav.syfo.kafka.common.createObjectMapper
+import no.nav.syfo.kafka.consumers.varselbus.domain.*
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import no.nav.syfo.planner.arbeidstakerFnr1
+import no.nav.syfo.planner.narmesteLederFnr1
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.DONE
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.fnr1
@@ -34,14 +35,19 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
     val dineSykmeldteHendelseKafkaProducer = mockk<DineSykmeldteHendelseKafkaProducer>()
     val dittSykefravaerMeldingKafkaProducer = mockk<DittSykefravaerMeldingKafkaProducer>(relaxed = true)
     val brukernotifikasjonerService = mockk<BrukernotifikasjonerService>(relaxed = true)
-    val arbeidsgiverNotifikasjonService = mockk<ArbeidsgiverNotifikasjonService>()
+    val arbeidsgiverNotifikasjonService = mockk<ArbeidsgiverNotifikasjonService>(relaxed = true)
     val fysiskBrevUtsendingService = mockk<FysiskBrevUtsendingService>()
+    val narmesteLederService = mockk<NarmesteLederService>()
+    val database = mockk<Database>(relaxed = true)
+    val pdlClient = mockk<PdlClient>()
     val embeddedDatabase = EmbeddedDatabase()
     val fakeDialogmoterUrl = "http://localhost/dialogmoter"
     val journalpostUuid = "97b886fe-6beb-40df-af2b-04e504bc340c"
     val journalpostId = "1"
     val journalpostUuidAddressProtection = "c00c88dd-ab2b-404a-807c-3a2ae2581ced"
     val journalpostIdAddressProtection = "2"
+
+    val objectMapper = createObjectMapper()
 
     val senderFacade = SenderFacade(
         dineSykmeldteHendelseKafkaProducer,
@@ -55,6 +61,9 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
         senderFacade,
         fakeDialogmoterUrl,
         accessControlService,
+        narmesteLederService,
+        pdlClient,
+        database
     )
     val hendelseType = HendelseType.SM_DIALOGMOTE_INNKALT
 
@@ -64,6 +73,19 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
         beforeTest {
             clearAllMocks()
             embeddedDatabase.dropData()
+
+            coEvery { narmesteLederService.getNarmesteLederRelasjon(any(), any()) } returns NarmesteLederRelasjon(
+                narmesteLederId = "1234",
+                tilganger = listOf(Tilgang.SYKMELDING),
+                navn = "Hest hestesen",
+            )
+            coEvery { pdlClient.hentPerson(any()) } returns HentPersonData(
+                hentPerson = HentPerson(
+                    foedselsdato = listOf(Foedselsdato(foedselsdato = "1990-01-01")),
+                    navn = listOf(Navn(fornavn = "Test", mellomnavn = null, etternavn = "Testesen")),
+                )
+            )
+            coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns "123"
         }
 
         it("Non-reserved users should be notified externally") {
@@ -357,6 +379,31 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
             avlysninger3 shouldNotBeEqualTo null
 
             verify(exactly = 2) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding("456", "66666666666") }
+        }
+
+        it("Should create sak, varsel and kalenderavtale for employer") {
+            val varselHendelseInnkalling = NarmesteLederHendelse(
+                type = HendelseType.NL_DIALOGMOTE_INNKALT,
+                ferdigstill = false,
+                data = objectMapper.writeValueAsString(
+                    VarselData(narmesteLeder = VarselDataNarmesteLeder(navn = "Test Testesen"))
+                ),
+                narmesteLederFnr = narmesteLederFnr1,
+                arbeidstakerFnr = arbeidstakerFnr1,
+                orgnummer = orgnummer,
+            )
+
+            dialogmoteInnkallingVarselService.sendVarselTilNarmesteLeder(varselHendelseInnkalling)
+
+            coVerify(exactly = 1) {
+                arbeidsgiverNotifikasjonService.createNewSak(any())
+            }
+            coVerify(exactly = 1) {
+                arbeidsgiverNotifikasjonService.createNewKalenderavtale(any())
+            }
+            coVerify(exactly = 1) {
+                arbeidsgiverNotifikasjonService.sendNotifikasjon(any())
+            }
         }
 
         it("Ny innkalling hendelse skal ferdigstille tidligere innkalling") {

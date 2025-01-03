@@ -1,0 +1,44 @@
+mutation oppdaterKalenderavtale(
+  $id: ID!,
+  $nyTilstand: KalenderavtaleTilstand,
+  $nyTekst: String,
+  $nyLenke: String,
+  $nyLokasjon: LokasjonInput,
+  $nyErDigitalt: Boolean,
+  $hardDelete: HardDeleteUpdateInput,
+  $idempotencyKey: String,
+  $eksterneVarsler: [EksterntVarselInput!]!,
+  $paaminnelse: PaaminnelseInput
+) {
+  oppdaterKalenderavtale(
+    id: $id,
+    nyTilstand: $nyTilstand,
+    nyTekst: $nyTekst,
+    nyLenke: $nyLenke,
+    nyLokasjon: $nyLokasjon,
+    nyErDigitalt: $nyErDigitalt,
+    hardDelete: $hardDelete,
+    idempotencyKey: $idempotencyKey,
+    eksterneVarsler: $eksterneVarsler,
+    paaminnelse: $paaminnelse
+  ) {
+    ... on OppdaterKalenderavtaleVellykket {
+      id
+    }
+    ... on UgyldigKalenderavtale {
+      feilmelding
+    }
+    ... on UgyldigMerkelapp {
+      feilmelding
+    }
+    ... on Konflikt {
+      feilmelding
+    }
+    ... on NotifikasjonFinnesIkke {
+      feilmelding
+    }
+    ... on UkjentProdusent {
+      feilmelding
+    }
+  }
+}

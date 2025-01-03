@@ -23,6 +23,7 @@ val jacksonVersion = "2.18.2"
 val kafkaVersion = "3.9.0"
 val brukernotifikasjonerBuilderVersion = "2.1.1"
 val kotlinVersion = "2.1.0"
+val graphqlApolloVersion = "4.1.0"
 
 val githubUser: String by project
 val githubPassword: String by project
@@ -33,6 +34,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.allopen") version "2.1.0"
     id("com.diffplug.spotless") version "6.25.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.apollographql.apollo") version "4.1.0"
 }
 
 java {
@@ -118,6 +120,9 @@ dependencies {
     }
     implementation("no.nav.tms.varsel:kotlin-builder:$brukernotifikasjonerBuilderVersion")
 
+    // GraphQL
+    implementation("com.apollographql.apollo", "apollo-runtime", graphqlApolloVersion)
+
     // Test
     testImplementation(kotlin("test"))
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
@@ -159,5 +164,11 @@ tasks {
 
     withType<Test> {
         useJUnitPlatform()
+    }
+}
+
+apollo {
+    service("service") {
+        packageName.set("com.apollo.graphql")
     }
 }
