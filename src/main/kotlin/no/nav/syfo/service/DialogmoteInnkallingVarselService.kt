@@ -107,7 +107,7 @@ class DialogmoteInnkallingVarselService(
         )
 
         if (narmesteLederRelasjon?.narmesteLederId == null) {
-            log.warn("Sender ikke kalenderavtale: narmesteLederRelasjon er null, eller mangler narmesteLederId")
+            log.warn("Sender ikke varsel: narmesteLederRelasjon er null, eller mangler narmesteLederId")
             return
         }
 
