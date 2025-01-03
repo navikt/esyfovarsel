@@ -14,7 +14,7 @@ import no.nav.syfo.db.domain.Kanal.DITT_SYKEFRAVAER
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.db.fetchUferdigstilteVarsler
-import no.nav.syfo.db.setUferdigstiltUtsendtVarselToForcedLEtter
+import no.nav.syfo.db.setUferdigstiltUtsendtVarselToForcedLetter
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
@@ -80,7 +80,7 @@ class SenderFacade(
     }
 
     fun sendTilBrukernotifikasjoner(
-        uuid: String,// aktivitetskravUuid
+        uuid: String, // aktivitetskravUuid
         mottakerFnr: String,
         content: String,
         url: URL? = null,
@@ -278,20 +278,17 @@ class SenderFacade(
         } catch (e: Exception) {
             isSendingSucceed = false
             log.warn("[FORCED PHYSICAL PRINT]: Error while sending forced brev til forced fysisk print: ${e.message}")
-            lagreIkkeUtsendtArbeidstakerVarsel(
-                kanal = BREV,
-                varselHendelse = varselHendelse,
-                eksternReferanse = uuid,
-                feilmelding = e.message,
-                journalpostId = journalpostId,
-                brukernotifikasjonerMeldingType = null,
-                isForcedLetter = true,
-            )
         }
         if (isSendingSucceed) {
             log.info("[FORCED PHYSICAL PRINT]: sending forced physical letter with journalpostId ${journalpostId} succeded, storing in database")
-            lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid, isForcedLetter = true, journalpostId = journalpostId)
-            database.setUferdigstiltUtsendtVarselToForcedLEtter(eksternRef = uuid)
+            lagreUtsendtArbeidstakerVarsel(
+                BREV,
+                varselHendelse,
+                uuid,
+                isForcedLetter = true,
+                journalpostId = journalpostId
+            )
+            database.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef = uuid)
         }
     }
 

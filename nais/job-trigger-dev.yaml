@@ -11,7 +11,7 @@ spec:
     outbound:
       rules:
         - application: esyfovarsel
-  schedule: "*/2 * * * *"
+  schedule: "*/5 * * * *"
   filesFrom:
     - secret: esyfovarsel-serviceuser
   env:

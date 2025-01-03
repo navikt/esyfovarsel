@@ -76,7 +76,7 @@ fun DatabaseInterface.fetchAlleUferdigstilteAktivitetspliktVarsler(
     }
 }
 
-fun DatabaseInterface.setUferdigstiltUtsendtVarselToForcedLEtter(eksternRef: String): Int {
+fun DatabaseInterface.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef: String): Int {
     val updateStatement = """UPDATE UTSENDT_VARSEL
                    SET is_forced_letter = ?
                    WHERE EKSTERN_REF = ?
