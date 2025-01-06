@@ -55,6 +55,36 @@ class OppfolgingsplanVarselService(
         )
     }
 
+    suspend fun sendOppfolgingsplanForesporselVarselTilNarmesteLeder(
+        varselHendelse: NarmesteLederHendelse
+    ){
+        senderFacade.sendTilDineSykmeldte(
+            varselHendelse,
+            DineSykmeldteVarsel(
+                ansattFnr = varselHendelse.arbeidstakerFnr,
+                orgnr = varselHendelse.orgnummer,
+                oppgavetype = varselHendelse.type.toDineSykmeldteHendelseType().toString(),
+                lenke = null,
+                tekst = "DINE_SYKMELDTE_OPPFOLGINGSPLAN_FORESPORSEL_TEKST",
+                utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
+            )
+        )
+        senderFacade.sendTilArbeidsgiverNotifikasjon(
+            varselHendelse,
+            ArbeidsgiverNotifikasjonInput(
+                UUID.randomUUID(),
+                varselHendelse.orgnummer,
+                varselHendelse.narmesteLederFnr,
+                varselHendelse.arbeidstakerFnr,
+                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                "ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_MESSAGE_TEXT",
+                "ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_TITLE",
+                "ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_BODY",
+                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
+            )
+        )
+    }
+
     private fun varsleArbeidstakerViaBrukernotifikasjoner(
         varselHendelse: ArbeidstakerHendelse,
         eksternVarsling: Boolean,

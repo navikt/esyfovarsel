@@ -48,3 +48,6 @@ spec:
     - team: team-esyfo
       application: esyfo-kafka-manager
       access: readwrite
+    - team: teamsykefravr
+      application: isoppfolgingsplan
+      access: write
