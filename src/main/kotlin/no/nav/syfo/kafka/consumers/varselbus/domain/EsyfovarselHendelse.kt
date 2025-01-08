@@ -36,6 +36,7 @@ data class VarselData(
     val narmesteLeder: VarselDataNarmesteLeder? = null,
     val motetidspunkt: VarselDataMotetidspunkt? = null,
     val aktivitetskrav: VarselDataAktivitetskrav? = null,
+    val dialogmoteSvar: VarselDataDialogmoteSvar? = null,
 )
 
 data class VarselDataJournalpost(
@@ -61,6 +62,16 @@ data class VarselDataMotebehovTilbakemelding(
     val tilbakemelding: String,
 )
 
+enum class DialogmoteSvarType {
+    KOMMER,
+    NYTT_TID_STED,
+    KOMMER_IKKE,
+}
+
+data class VarselDataDialogmoteSvar(
+    val svar: DialogmoteSvarType,
+)
+
 enum class HendelseType {
     NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
     SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
@@ -82,6 +93,7 @@ enum class HendelseType {
     SM_ARBEIDSUFORHET_FORHANDSVARSEL,
     SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING,
     SM_FORHANDSVARSEL_MANGLENDE_MEDVIRKNING,
+    NL_DIALOGMOTE_SVAR
 }
 
 fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
