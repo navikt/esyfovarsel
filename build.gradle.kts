@@ -31,7 +31,7 @@ plugins {
     kotlin("jvm") version "1.9.24"
     id("java")
     id("org.jetbrains.kotlin.plugin.allopen") version "2.1.0"
-    id("com.diffplug.spotless") version "6.25.0"
+    id("com.diffplug.spotless") version "7.0.1"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
