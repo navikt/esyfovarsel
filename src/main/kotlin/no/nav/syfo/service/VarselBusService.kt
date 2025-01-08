@@ -21,7 +21,6 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_MER_VEILEDNI
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_FORHANDSVARSEL_MANGLENDE_MEDVIRKNING
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_OPPFOLGINGSPLAN_FORESPORSEL
 import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.skalFerdigstilles
 import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidstakerHendelse
@@ -50,9 +49,6 @@ class VarselBusService(
             ferdigstillVarsel(varselHendelse)
         } else {
             when (varselHendelse.type) {
-                NL_OPPFOLGINGSPLAN_FORESPORSEL -> oppfolgingsplanVarselService.sendOppfolgingsplanForesporselVarselTilNarmesteLeder(
-                    varselHendelse.toNarmestelederHendelse()
-                )
                 NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilNarmesteLeder(
                     varselHendelse.toNarmestelederHendelse()
                 )
