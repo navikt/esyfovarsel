@@ -42,3 +42,6 @@ spec:
     - team: teamsykefravr
       application: ismanglendemedvirkning
       access: write
+    - team: teamsykefravr
+      application: isoppfolgingsplan
+      access: write
