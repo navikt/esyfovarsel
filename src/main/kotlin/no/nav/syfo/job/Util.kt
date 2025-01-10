@@ -36,7 +36,7 @@ fun closeExpiredMicrofrontendsJob(env: JobEnv) {
 fun sendForcedPhysicalAktivitetspliktLetterJob(env: JobEnv) {
     val logg = LoggerFactory.getLogger(Util::class.java)
     runBlocking {
-        if (env.revarsleUnreadAktivitetskravPlikt) {
+        if (env.revarsleUnreadAktivitetskrav) {
             runBlocking {
                 logg.info("Starter sendForcedPhysicalAktivitetspliktLetterJob")
                 val credentials = "${env.serviceuserUsername}:${env.serviceuserPassword}"
