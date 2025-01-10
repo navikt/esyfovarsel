@@ -64,9 +64,11 @@ fun DatabaseInterface.fetchAlleUferdigstilteAktivitetspliktVarsler(
     val queryStatement = """SELECT *
                             FROM UTSENDT_VARSEL
                             WHERE type = 'SM_AKTIVITETSPLIKT'
-                            AND kanal = 'BRUKERNOTIFIKASJON'
-                            AND ferdigstilt_tidspunkt is null
-                            AND (is_forced_letter is false OR is_forced_letter is null)
+                              AND kanal = 'BRUKERNOTIFIKASJON'
+                              AND ferdigstilt_tidspunkt IS NULL
+                              AND (is_forced_letter IS FALSE OR is_forced_letter IS NULL)
+                              AND utsendt_tidspunkt >= CURRENT_DATE - 14
+                              AND utsendt_tidspunkt < CURRENT_DATE - 1;
     """.trimIndent()
 
     return connection.use { connection ->

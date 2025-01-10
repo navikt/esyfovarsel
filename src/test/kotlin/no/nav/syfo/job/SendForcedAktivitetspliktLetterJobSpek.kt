@@ -6,13 +6,10 @@ import io.mockk.mockk
 import java.time.LocalDateTime
 import java.util.*
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.db.arbeidstakerAktorId1
 import no.nav.syfo.db.domain.PUtsendtVarsel
-import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
-import no.nav.syfo.planner.arbeidstakerFnr1
 import no.nav.syfo.service.SenderFacade
 import no.nav.syfo.testutil.EmbeddedDatabase
 import org.amshove.kluent.shouldBeEqualTo
@@ -27,79 +24,6 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
 
         beforeTest {
             embeddedDatabase.dropData()
-        }
-
-        it("Returns varsel if varsel wasn't read in more than 2 days") {
-
-            val utsendtVarsel =
-                PUtsendtVarsel(
-                    uuid = UUID.randomUUID().toString(),
-                    fnr = arbeidstakerFnr1,
-                    aktorId = arbeidstakerAktorId1,
-                    narmesteLederFnr = null,
-                    orgnummer = null,
-                    type = VarselType.MER_VEILEDNING.name,
-                    kanal = "BRUKERNOTIFIKASJON",
-                    utsendtTidspunkt = LocalDateTime.now().minusDays(3),
-                    planlagtVarselId = null,
-                    eksternReferanse = null,
-                    ferdigstiltTidspunkt = null,
-                    arbeidsgivernotifikasjonMerkelapp = null,
-                    isForcedLetter = true,
-                    journalpostId = "111"
-                )
-
-            val isVarselOverdude = job.isVarselUnredIn2Days(utsendtVarsel)
-
-            isVarselOverdude shouldBeEqualTo true
-        }
-
-        it("Returns varsel if varsel wasn't read in exactly 2 days") {
-            val utsendtVarsel =
-                PUtsendtVarsel(
-                    uuid = UUID.randomUUID().toString(),
-                    fnr = arbeidstakerFnr1,
-                    aktorId = arbeidstakerAktorId1,
-                    narmesteLederFnr = null,
-                    orgnummer = null,
-                    type = VarselType.MER_VEILEDNING.name,
-                    kanal = "BRUKERNOTIFIKASJON",
-                    utsendtTidspunkt = LocalDateTime.now().minusDays(2),
-                    planlagtVarselId = null,
-                    eksternReferanse = null,
-                    ferdigstiltTidspunkt = null,
-                    arbeidsgivernotifikasjonMerkelapp = null,
-                    isForcedLetter = true,
-                    journalpostId = "222",
-                )
-
-            val isVarselOverdude = job.isVarselUnredIn2Days(utsendtVarsel)
-
-            isVarselOverdude shouldBeEqualTo true
-        }
-
-        it("Does not return varsel if varsel wasn't read in less than 2 days") {
-            val utsendtVarsel =
-                PUtsendtVarsel(
-                    uuid = UUID.randomUUID().toString(),
-                    fnr = arbeidstakerFnr1,
-                    aktorId = arbeidstakerAktorId1,
-                    narmesteLederFnr = null,
-                    orgnummer = null,
-                    type = VarselType.MER_VEILEDNING.name,
-                    kanal = "BRUKERNOTIFIKASJON",
-                    utsendtTidspunkt = LocalDateTime.now().minusDays(1),
-                    planlagtVarselId = null,
-                    eksternReferanse = null,
-                    ferdigstiltTidspunkt = null,
-                    arbeidsgivernotifikasjonMerkelapp = null,
-                    isForcedLetter = true,
-                    journalpostId = "333",
-                )
-
-            val isVarselOverdude = job.isVarselUnredIn2Days(utsendtVarsel)
-
-            isVarselOverdude shouldBeEqualTo false
         }
 
         it("Sends 2 forced letters for all unread varsler older than 2 days") {
@@ -225,7 +149,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
             result shouldBeEqualTo 3
 
             coVerify(exactly = 1) {
-                senderFacade.sendForcedBrevTilFysiskPrint(
+                senderFacade.sendForcedBrevTilTvingSentralPrint(
                     uuid = utsendtVarsel1.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
@@ -234,7 +158,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
             }
 
             coVerify(exactly = 1) {
-                senderFacade.sendForcedBrevTilFysiskPrint(
+                senderFacade.sendForcedBrevTilTvingSentralPrint(
                     uuid = utsendtVarsel2.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
@@ -243,7 +167,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
             }
 
             coVerify(exactly = 1) {
-                senderFacade.sendForcedBrevTilFysiskPrint(
+                senderFacade.sendForcedBrevTilTvingSentralPrint(
                     uuid = utsendtVarsel3.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
@@ -252,7 +176,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
             }
 
             coVerify(exactly = 0) {
-                senderFacade.sendForcedBrevTilFysiskPrint(
+                senderFacade.sendForcedBrevTilTvingSentralPrint(
                     uuid = utsendtVarsel4.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
@@ -261,7 +185,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
             }
 
             coVerify(exactly = 0) {
-                senderFacade.sendForcedBrevTilFysiskPrint(
+                senderFacade.sendForcedBrevTilTvingSentralPrint(
                     uuid = utsendtVarsel5.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
@@ -270,7 +194,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
             }
 
             coVerify(exactly = 0) {
-                senderFacade.sendForcedBrevTilFysiskPrint(
+                senderFacade.sendForcedBrevTilTvingSentralPrint(
                     uuid = utsendtVarsel6.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),

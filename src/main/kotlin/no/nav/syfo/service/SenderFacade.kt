@@ -266,7 +266,7 @@ class SenderFacade(
         }
     }
 
-    suspend fun sendForcedBrevTilFysiskPrint(
+    suspend fun sendForcedBrevTilTvingSentralPrint(
         uuid: String,
         varselHendelse: ArbeidstakerHendelse,
         journalpostId: String,
@@ -274,7 +274,7 @@ class SenderFacade(
     ) {
         var isSendingSucceed = true
         try {
-            fysiskBrevUtsendingService.sendForcedBrev(uuid, journalpostId, distribusjonsType)
+            fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType, tvingSentralPrint = true)
         } catch (e: Exception) {
             isSendingSucceed = false
             log.warn("[FORCED PHYSICAL PRINT]: Error while sending forced brev til forced fysisk print: ${e.message}")

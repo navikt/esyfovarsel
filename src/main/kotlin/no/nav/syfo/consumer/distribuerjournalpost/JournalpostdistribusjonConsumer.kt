@@ -24,12 +24,14 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
         journalpostId: String,
         uuid: String,
         distribusjonstype: DistibusjonsType,
+        tvingSentralPrint: Boolean = false,
     ): JournalpostdistribusjonResponse {
         val requestURL = "$dokdistfordelingUrl/rest/v1/distribuerjournalpost"
         val token = azureAdTokenConsumer.getToken(dokdistfordelingScope)
         val request = JournalpostdistribusjonRequest(
             journalpostId = journalpostId,
-            distribusjonstype = distribusjonstype.name
+            distribusjonstype = distribusjonstype.name,
+            tvingSentralPrint = tvingSentralPrint,
         )
 
         return try {
@@ -51,45 +53,6 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
         } catch (e: Exception) {
             throw RuntimeException(
                 "Exception while calling distribuerjournalpost with uuid $uuid and journalpostId: $journalpostId. Error message: ${e.message}",
-                e,
-            )
-        }
-    }
-
-    suspend fun distribuerTvungetJournalpost(
-        journalpostId: String,
-        uuid: String,
-        distribusjonstype: DistibusjonsType,
-    ): JournalpostdistribusjonResponse {
-        val requestURL = "$dokdistfordelingUrl/rest/v1/distribuerjournalpost"
-        val token = azureAdTokenConsumer.getToken(dokdistfordelingScope)
-        val request = JournalpostdistribusjonRequest(
-            journalpostId = journalpostId,
-            distribusjonstype = distribusjonstype.name,
-            tvingSentralPrint = true,
-        )
-
-        return try {
-            val response = client.post(requestURL) {
-                headers {
-                    append(HttpHeaders.Accept, ContentType.Application.Json)
-                    append(HttpHeaders.ContentType, ContentType.Application.Json)
-                    append(HttpHeaders.Authorization, "Bearer $token")
-                }
-                setBody(request)
-            }
-
-            if (response.status == HttpStatusCode.OK) {
-                log.info("Sent document to forced print")
-                response.body()
-            } else {
-
-                log.error("[FORCED PHYSICAL PRINT]: response status: ${response.status}, body:  ${response.body<String>()}")
-                throw RuntimeException("Failed to send document with uuid $uuid to forced print. journalpostId: $journalpostId. Response status: ${response.status}. Response: $response")
-            }
-        } catch (e: Exception) {
-            throw RuntimeException(
-                "Exception while calling distribuerTvungetJournalpost with uuid $uuid and journalpostId: $journalpostId. Error message: ${e.message}",
                 e,
             )
         }

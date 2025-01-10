@@ -1,9 +1,7 @@
 package no.nav.syfo.job
 
-import java.time.LocalDateTime
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.db.DatabaseInterface
-import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.fetchAlleUferdigstilteAktivitetspliktVarsler
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
@@ -14,8 +12,7 @@ class SendForcedAktivitetspliktLetterJob(private val db: DatabaseInterface, priv
     private val log = LoggerFactory.getLogger(SendForcedAktivitetspliktLetterJob::class.java)
 
     suspend fun sendForcedLetterFromJob(): Int {
-        val allUnreadVarsler = db.fetchAlleUferdigstilteAktivitetspliktVarsler()
-        val unreadVarslerOverdude = allUnreadVarsler.filter { isVarselUnredIn2Days(it) }
+        val unreadVarslerOverdude = db.fetchAlleUferdigstilteAktivitetspliktVarsler()
 
         log.info("SendForcedAktivitetspliktLetterJob is about to send ${unreadVarslerOverdude.size} forced letters")
         var sentForcedLettersAmount = 0
@@ -24,7 +21,7 @@ class SendForcedAktivitetspliktLetterJob(private val db: DatabaseInterface, priv
             if (pUtsendtVarsel.journalpostId.isNullOrBlank()) {
                 log.error("[FORCED PHYSICAL PRINT]: User can not be notified by letter due to missing journalpostId in varsel with uuid: ${pUtsendtVarsel.uuid}")
             } else {
-                senderFacade.sendForcedBrevTilFysiskPrint(
+                senderFacade.sendForcedBrevTilTvingSentralPrint(
                     uuid = pUtsendtVarsel.uuid,
                     varselHendelse = ArbeidstakerHendelse(
                         type = HendelseType.SM_AKTIVITETSPLIKT,
@@ -41,12 +38,5 @@ class SendForcedAktivitetspliktLetterJob(private val db: DatabaseInterface, priv
         }
         log.info("[FORCED PHYSICAL PRINT]: SendForcedAktivitetspliktLetterJob sent ${sentForcedLettersAmount} forced letters")
         return sentForcedLettersAmount
-    }
-
-    fun isVarselUnredIn2Days(pUtsendtVarsel: PUtsendtVarsel): Boolean {
-        return pUtsendtVarsel.utsendtTidspunkt.isBefore(
-            LocalDateTime.now().minusDays(2)
-        )
-                || pUtsendtVarsel.utsendtTidspunkt.isEqual(LocalDateTime.now().minusDays(2))
     }
 }
