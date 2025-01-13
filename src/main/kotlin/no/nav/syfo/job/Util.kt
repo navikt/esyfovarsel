@@ -33,11 +33,11 @@ fun closeExpiredMicrofrontendsJob(env: JobEnv) {
     }
 }
 
-fun sendForcedPhysicalAktivitetspliktLetterJob(env: JobEnv) {
+fun sendSentralPrintAktivitetspliktLetterJob(env: JobEnv) {
     val logg = LoggerFactory.getLogger(Util::class.java)
         if (env.revarsleUnreadAktivitetskrav) {
             runBlocking {
-                logg.info("Starter sendForcedPhysicalAktivitetspliktLetterJob")
+                logg.info("Starter sendSentralPrintAktivitetspliktLetterJob")
                 val credentials = "${env.serviceuserUsername}:${env.serviceuserPassword}"
                 val encodededCredentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
                 val httpClient = httpClient()
@@ -48,14 +48,14 @@ fun sendForcedPhysicalAktivitetspliktLetterJob(env: JobEnv) {
                 }
                 val status = response.status
                 if (status == HttpStatusCode.OK) {
-                    logg.info("Triggered sendForcedPhysicalAktivitetspliktLetterJob")
+                    logg.info("Triggered sendSentralPrintAktivitetspliktLetterJob")
                 } else {
-                    logg.error("Error in sendForcedPhysicalAktivitetspliktLetterJob: got status: $status")
+                    logg.error("Error in sendSentralPrintAktivitetspliktLetterJob: got status: $status")
                 }
                 httpClient.close()
             }
         } else {
-            logg.info("sendForcedPhysicalAktivitetspliktLetterJob toggle is false")
+            logg.info("sendSentralPrintAktivitetspliktLetterJob toggle is false")
         }
 }
 

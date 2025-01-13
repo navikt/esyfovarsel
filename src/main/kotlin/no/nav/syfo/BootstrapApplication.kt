@@ -36,7 +36,7 @@ import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.grantAccessToIAMUsers
 import no.nav.syfo.job.SendForcedAktivitetspliktLetterJob
 import no.nav.syfo.job.closeExpiredMicrofrontendsJob
-import no.nav.syfo.job.sendForcedPhysicalAktivitetspliktLetterJob
+import no.nav.syfo.job.sendSentralPrintAktivitetspliktLetterJob
 import no.nav.syfo.kafka.common.launchKafkaListener
 import no.nav.syfo.kafka.consumers.testdata.reset.TestdataResetConsumer
 import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
@@ -77,7 +77,7 @@ fun main() {
     if (isJob()) {
         val env = getJobEnv()
         closeExpiredMicrofrontendsJob(env)
-        sendForcedPhysicalAktivitetspliktLetterJob(env)
+        sendSentralPrintAktivitetspliktLetterJob(env)
     } else {
         val server = embeddedServer(
             factory = Netty,
