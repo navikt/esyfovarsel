@@ -272,14 +272,8 @@ class SenderFacade(
         journalpostId: String,
         distribusjonsType: DistibusjonsType = DistibusjonsType.VIKTIG,
     ) {
-        var isSendingSucceed = true
         try {
             fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType, tvingSentralPrint = true)
-        } catch (e: Exception) {
-            isSendingSucceed = false
-            log.warn("[FORCED PHYSICAL PRINT]: Error while sending forced brev til forced fysisk print: ${e.message}")
-        }
-        if (isSendingSucceed) {
             log.info("[FORCED PHYSICAL PRINT]: sending forced physical letter with journalpostId ${journalpostId} succeded, storing in database")
             lagreUtsendtArbeidstakerVarsel(
                 BREV,
@@ -289,6 +283,8 @@ class SenderFacade(
                 journalpostId = journalpostId
             )
             database.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef = uuid)
+        } catch (e: Exception) {
+            log.warn("[FORCED PHYSICAL PRINT]: Error while sending forced brev til forced fysisk print: ${e.message}")
         }
     }
 
