@@ -266,7 +266,7 @@ class SenderFacade(
         }
     }
 
-    suspend fun sendForcedBrevTilTvingSentralPrint(
+    suspend fun sendBrevTilTvingSentralPrint(
         uuid: String,
         varselHendelse: ArbeidstakerHendelse,
         journalpostId: String,
@@ -274,7 +274,7 @@ class SenderFacade(
     ) {
         try {
             fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType, tvingSentralPrint = true)
-            log.info("[FORCED PHYSICAL PRINT]: sending forced physical letter with journalpostId ${journalpostId} succeded, storing in database")
+            log.info("[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sending direct sentral print letter with journalpostId ${journalpostId} succeded, storing in database")
             lagreUtsendtArbeidstakerVarsel(
                 BREV,
                 varselHendelse,
@@ -284,7 +284,7 @@ class SenderFacade(
             )
             database.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef = uuid)
         } catch (e: Exception) {
-            log.warn("[FORCED PHYSICAL PRINT]: Error while sending forced brev til forced fysisk print: ${e.message}")
+            log.warn("[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: Error while sending brev til direct sentral print: ${e.message}")
         }
     }
 

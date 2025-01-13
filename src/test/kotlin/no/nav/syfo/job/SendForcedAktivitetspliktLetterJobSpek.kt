@@ -20,7 +20,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
 
         val embeddedDatabase = EmbeddedDatabase()
         val senderFacade = mockk<SenderFacade>(relaxed = true)
-        val job = SendForcedAktivitetspliktLetterJob(embeddedDatabase, senderFacade)
+        val job = SendAktivitetspliktLetterToSentralPrintJob(embeddedDatabase, senderFacade)
 
         beforeTest {
             embeddedDatabase.dropData()
@@ -144,12 +144,12 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
             embeddedDatabase.storeUtsendtVarsel(utsendtVarsel6)
             embeddedDatabase.setUtsendtVarselToFerdigstilt(eksternReferanse)
 
-            val result = runBlocking { job.sendForcedLetterFromJob() }
+            val result = runBlocking { job.sendLetterToTvingSentralPrintFromJob() }
 
             result shouldBeEqualTo 3
 
             coVerify(exactly = 1) {
-                senderFacade.sendForcedBrevTilTvingSentralPrint(
+                senderFacade.sendBrevTilTvingSentralPrint(
                     uuid = utsendtVarsel1.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
@@ -158,7 +158,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
             }
 
             coVerify(exactly = 1) {
-                senderFacade.sendForcedBrevTilTvingSentralPrint(
+                senderFacade.sendBrevTilTvingSentralPrint(
                     uuid = utsendtVarsel2.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
@@ -167,7 +167,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
             }
 
             coVerify(exactly = 1) {
-                senderFacade.sendForcedBrevTilTvingSentralPrint(
+                senderFacade.sendBrevTilTvingSentralPrint(
                     uuid = utsendtVarsel3.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
@@ -176,7 +176,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
             }
 
             coVerify(exactly = 0) {
-                senderFacade.sendForcedBrevTilTvingSentralPrint(
+                senderFacade.sendBrevTilTvingSentralPrint(
                     uuid = utsendtVarsel4.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
@@ -185,7 +185,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
             }
 
             coVerify(exactly = 0) {
-                senderFacade.sendForcedBrevTilTvingSentralPrint(
+                senderFacade.sendBrevTilTvingSentralPrint(
                     uuid = utsendtVarsel5.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
@@ -194,7 +194,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
             }
 
             coVerify(exactly = 0) {
-                senderFacade.sendForcedBrevTilTvingSentralPrint(
+                senderFacade.sendBrevTilTvingSentralPrint(
                     uuid = utsendtVarsel6.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),

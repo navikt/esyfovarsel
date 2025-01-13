@@ -8,20 +8,20 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.service.SenderFacade
 import org.slf4j.LoggerFactory
 
-class SendForcedAktivitetspliktLetterJob(private val db: DatabaseInterface, private val senderFacade: SenderFacade) {
-    private val log = LoggerFactory.getLogger(SendForcedAktivitetspliktLetterJob::class.java)
+class SendAktivitetspliktLetterToSentralPrintJob(private val db: DatabaseInterface, private val senderFacade: SenderFacade) {
+    private val log = LoggerFactory.getLogger(SendAktivitetspliktLetterToSentralPrintJob::class.java)
 
-    suspend fun sendForcedLetterFromJob(): Int {
+    suspend fun sendLetterToTvingSentralPrintFromJob(): Int {
         val unreadVarslerOverdude = db.fetchAlleUferdigstilteAktivitetspliktVarsler()
 
-        log.info("SendForcedAktivitetspliktLetterJob is about to send ${unreadVarslerOverdude.size} forced letters")
-        var sentForcedLettersAmount = 0
+        log.info("SendAktivitetspliktLetterToSentralPrintJob is about to send ${unreadVarslerOverdude.size} forced letters")
+        var sentToTvingSentralPrintLettersAmount = 0
 
         unreadVarslerOverdude.forEach { pUtsendtVarsel ->
             if (pUtsendtVarsel.journalpostId.isNullOrBlank()) {
-                log.error("[FORCED PHYSICAL PRINT]: User can not be notified by letter due to missing journalpostId in varsel with uuid: ${pUtsendtVarsel.uuid}")
+                log.error("[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: User can not be notified by letter due to missing journalpostId in varsel with uuid: ${pUtsendtVarsel.uuid}")
             } else {
-                senderFacade.sendForcedBrevTilTvingSentralPrint(
+                senderFacade.sendBrevTilTvingSentralPrint(
                     uuid = pUtsendtVarsel.uuid,
                     varselHendelse = ArbeidstakerHendelse(
                         type = HendelseType.SM_AKTIVITETSPLIKT,
@@ -33,10 +33,10 @@ class SendForcedAktivitetspliktLetterJob(private val db: DatabaseInterface, priv
                     distribusjonsType = DistibusjonsType.VIKTIG,
                     journalpostId = pUtsendtVarsel.journalpostId
                 )
-                sentForcedLettersAmount++
+                sentToTvingSentralPrintLettersAmount++
             }
         }
-        log.info("[FORCED PHYSICAL PRINT]: SendForcedAktivitetspliktLetterJob sent ${sentForcedLettersAmount} forced letters")
-        return sentForcedLettersAmount
+        log.info("[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sendLetterToTvingSentralPrintFromJob sent ${sentToTvingSentralPrintLettersAmount} letters")
+        return sentToTvingSentralPrintLettersAmount
     }
 }
