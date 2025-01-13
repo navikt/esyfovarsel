@@ -35,7 +35,6 @@ fun closeExpiredMicrofrontendsJob(env: JobEnv) {
 
 fun sendForcedPhysicalAktivitetspliktLetterJob(env: JobEnv) {
     val logg = LoggerFactory.getLogger(Util::class.java)
-    runBlocking {
         if (env.revarsleUnreadAktivitetskrav) {
             runBlocking {
                 logg.info("Starter sendForcedPhysicalAktivitetspliktLetterJob")
@@ -58,7 +57,6 @@ fun sendForcedPhysicalAktivitetspliktLetterJob(env: JobEnv) {
         } else {
             logg.info("sendForcedPhysicalAktivitetspliktLetterJob toggle is false")
         }
-    }
 }
 
 
