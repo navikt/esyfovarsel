@@ -80,7 +80,7 @@ class SenderFacade(
     }
 
     fun sendTilBrukernotifikasjoner(
-        uuid: String, // aktivitetskravUuid
+        uuid: String,
         mottakerFnr: String,
         content: String,
         url: URL? = null,
@@ -93,7 +93,7 @@ class SenderFacade(
     ) {
         try {
             brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
-                uuid = uuid, // aktivitetskravUuid
+                uuid = uuid,
                 mottakerFnr = mottakerFnr,
                 content = content,
                 url = url,
@@ -105,7 +105,7 @@ class SenderFacade(
             lagreUtsendtArbeidstakerVarsel(
                 kanal = BRUKERNOTIFIKASJON,
                 varselHendelse = varselHendelse,
-                eksternReferanse = uuid, // aktivitetskravUuid
+                eksternReferanse = uuid,
                 journalpostId = journalpostId,
             )
         } catch (e: Exception) {
