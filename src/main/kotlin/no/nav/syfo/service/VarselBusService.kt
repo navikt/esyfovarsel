@@ -16,6 +16,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_L
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_NYTT_TID_STED
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT_ENDRET
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_MER_VEILEDNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
@@ -76,6 +77,7 @@ class VarselBusService(
                 SM_DIALOGMOTE_INNKALT,
                 SM_DIALOGMOTE_AVLYST,
                 SM_DIALOGMOTE_REFERAT,
+                SM_DIALOGMOTE_REFERAT_ENDRET,
                 SM_DIALOGMOTE_NYTT_TID_STED,
                 SM_DIALOGMOTE_LEST,
                 -> dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())

@@ -1,5 +1,12 @@
 package no.nav.syfo.service
 
+import java.io.IOException
+import java.io.Serializable
+import java.net.URI
+import java.net.URL
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.util.*
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_TITLE
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_MESSAGE_TEXT
@@ -38,6 +45,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_I
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_LEST
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_NYTT_TID_STED
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT_ENDRET
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataNarmesteLeder
@@ -50,12 +58,6 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType
 import org.slf4j.LoggerFactory
-import java.io.IOException
-import java.io.Serializable
-import java.net.URL
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.util.*
 
 enum class DittSykefravaerHendelsetypeDialogmoteInnkalling : Serializable {
     ESYFOVARSEL_DIALOGMOTE_INNKALT,
@@ -102,10 +104,10 @@ class DialogmoteInnkallingVarselService(
     }
 
     fun getVarselUrl(varselHendelse: ArbeidstakerHendelse, varselUuid: String): URL {
-        if (SM_DIALOGMOTE_REFERAT === varselHendelse.type) {
-            return URL("$dialogmoterUrl/sykmeldt/referat/$varselUuid")
+        if (SM_DIALOGMOTE_REFERAT === varselHendelse.type || SM_DIALOGMOTE_REFERAT_ENDRET === varselHendelse.type) {
+            return URI("$dialogmoterUrl/sykmeldt/referat/$varselUuid").toURL()
         }
-        return URL("$dialogmoterUrl/sykmeldt/moteinnkalling")
+        return URI("$dialogmoterUrl/sykmeldt/moteinnkalling").toURL()
     }
 
     private fun varsleArbeidstakerViaBrukernotifkasjoner(
