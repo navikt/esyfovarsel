@@ -11,7 +11,7 @@ spec:
     outbound:
       rules:
         - application: esyfovarsel
-  schedule: "05 09,18 * * *"
+  schedule: "05 09,18 * * *" #  runs at 9:05 and 18:05 daily
   filesFrom:
     - secret: esyfovarsel-serviceuser
   env:
@@ -21,3 +21,5 @@ spec:
       value: "true"
     - name: ESYFOVARSEL_JOB_TRIGGER_URL
       value: http://esyfovarsel/job/trigger
+    - name: REVARSLE_UNREAD_AKTIVITETSKRAV
+      value: "true"

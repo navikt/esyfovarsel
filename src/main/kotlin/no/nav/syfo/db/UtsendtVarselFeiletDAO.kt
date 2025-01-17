@@ -1,6 +1,5 @@
 package no.nav.syfo.db
 
-import java.sql.ResultSet
 import java.sql.Timestamp
 import java.util.*
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
@@ -19,7 +18,8 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
         journalpost_id,
         kanal,
         feilmelding,
-        utsendt_forsok_tidspunkt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""".trimIndent()
+        utsendt_forsok_tidspunkt,
+        is_forced_letter) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""".trimIndent()
 
     connection.use { connection ->
         connection.prepareStatement(insertStatement).use {
@@ -35,13 +35,13 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
             it.setString(10, varsel.kanal)
             it.setString(11, varsel.feilmelding)
             it.setTimestamp(12, Timestamp.valueOf(varsel.utsendtForsokTidspunkt))
+            it.setBoolean(13, varsel.isForcedLetter ?: false)
             it.executeUpdate()
         }
 
         connection.commit()
     }
 }
-
 
 fun DatabaseInterface.deleteUtsendtVarselFeiletByFnr(fnr: PersonIdent) {
     val updateStatement = """DELETE FROM UTSENDING_VARSEL_FEILET
@@ -56,19 +56,3 @@ fun DatabaseInterface.deleteUtsendtVarselFeiletByFnr(fnr: PersonIdent) {
         connection.commit()
     }
 }
-
-
-fun ResultSet.toPUtsendtVarselFeilet() = PUtsendtVarselFeilet(
-    uuid = getString("uuid"),
-    uuidEksternReferanse = getString("uuid_ekstern_referanse"),
-    narmesteLederFnr = getString("narmesteleder_fnr"),
-    arbeidstakerFnr = getString("arbeidstaker_fnr"),
-    orgnummer = getString("orgnummer"),
-    hendelsetypeNavn = getString("hendelsetype_navn"),
-    arbeidsgivernotifikasjonMerkelapp = getString("arbeidsgivernotifikasjon_merkelapp"),
-    brukernotifikasjonerMeldingType = getString("brukernotifikasjoner_melding_type"),
-    journalpostId = getString("journalpost_id"),
-    kanal = getString("kanal"),
-    feilmelding = getString("feilmelding"),
-    utsendtForsokTidspunkt = getTimestamp("utsendt_forsok_tidspunkt").toLocalDateTime(),
-)

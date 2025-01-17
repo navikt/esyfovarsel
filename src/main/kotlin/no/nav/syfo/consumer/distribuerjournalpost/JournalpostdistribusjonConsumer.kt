@@ -1,8 +1,13 @@
 package no.nav.syfo.consumer.distribuerjournalpost
 
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
+import io.ktor.client.call.body
+import io.ktor.client.request.headers
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.append
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.utils.httpClient
@@ -13,18 +18,20 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
     private val dokdistfordelingUrl = urlEnv.dokdistfordelingUrl
     private val dokdistfordelingScope = urlEnv.dokdistfordelingScope
 
-    private val log = LoggerFactory.getLogger("no.nav.syfo.consumer.JournalpostdistribusjonConsumer")
+    private val log = LoggerFactory.getLogger(JournalpostdistribusjonConsumer::class.java)
 
     suspend fun distribuerJournalpost(
         journalpostId: String,
         uuid: String,
-        distribusjonstype: DistibusjonsType
+        distribusjonstype: DistibusjonsType,
+        tvingSentralPrint: Boolean = false,
     ): JournalpostdistribusjonResponse {
         val requestURL = "$dokdistfordelingUrl/rest/v1/distribuerjournalpost"
         val token = azureAdTokenConsumer.getToken(dokdistfordelingScope)
         val request = JournalpostdistribusjonRequest(
             journalpostId = journalpostId,
-            distribusjonstype = distribusjonstype.name
+            distribusjonstype = distribusjonstype.name,
+            tvingSentralPrint = tvingSentralPrint,
         )
 
         return try {

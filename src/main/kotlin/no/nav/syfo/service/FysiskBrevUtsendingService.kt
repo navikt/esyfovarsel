@@ -12,12 +12,14 @@ class FysiskBrevUtsendingService(
     suspend fun sendBrev(
         uuid: String,
         journalpostId: String,
-        distribusjonsType: DistibusjonsType
+        distribusjonsType: DistibusjonsType,
+        tvingSentralPrint: Boolean = false,
     ) {
         val bestillingsId = journalpostdistribusjonConsumer.distribuerJournalpost(
             journalpostId,
             uuid,
-            distribusjonsType
+            distribusjonsType,
+            tvingSentralPrint = tvingSentralPrint
         ).bestillingsId
         log.info("Sendte til print, bestillingsId er $bestillingsId, varsel med UUID: $uuid")
     }

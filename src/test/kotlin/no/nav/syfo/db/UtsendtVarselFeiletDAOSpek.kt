@@ -1,14 +1,14 @@
 package no.nav.syfo.db
 
 import io.kotest.core.spec.style.DescribeSpec
+import java.time.LocalDateTime
+import java.util.*
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.testutil.EmbeddedDatabase
 import org.amshove.kluent.should
-import java.time.LocalDateTime
-import java.util.*
 
 class UtsendtVarselFeiletDAOSpek : DescribeSpec({
     describe("UtsendtVarselFeiletDAOSpek") {
@@ -32,17 +32,18 @@ class UtsendtVarselFeiletDAOSpek : DescribeSpec({
 
 private fun ikkeUtsendtVarsel(fnr: String) = PUtsendtVarselFeilet(
     uuid = UUID.randomUUID().toString(),
+    uuidEksternReferanse = "00000",
     arbeidstakerFnr = fnr,
     narmesteLederFnr = "01010101010",
     orgnummer = null,
     hendelsetypeNavn = HendelseType.NL_DIALOGMOTE_NYTT_TID_STED.name,
-    kanal = Kanal.DINE_SYKMELDTE.name,
-    utsendtForsokTidspunkt = LocalDateTime.now(),
-    uuidEksternReferanse = "00000",
-    feilmelding = "Achtung!",
-    journalpostId = null,
+    arbeidsgivernotifikasjonMerkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
     brukernotifikasjonerMeldingType = null,
-    arbeidsgivernotifikasjonMerkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
+    journalpostId = null,
+    kanal = Kanal.DINE_SYKMELDTE.name,
+    feilmelding = "Achtung!",
+    utsendtForsokTidspunkt = LocalDateTime.now(),
+    isForcedLetter = false
 )
 
 private fun DatabaseInterface.skalHaLagretIkkeUtsendtVarsel(

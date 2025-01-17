@@ -6,12 +6,16 @@ import java.util.*
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.Kanal
-import no.nav.syfo.db.domain.Kanal.*
+import no.nav.syfo.db.domain.Kanal.ARBEIDSGIVERNOTIFIKASJON
+import no.nav.syfo.db.domain.Kanal.BREV
+import no.nav.syfo.db.domain.Kanal.BRUKERNOTIFIKASJON
+import no.nav.syfo.db.domain.Kanal.DINE_SYKMELDTE
+import no.nav.syfo.db.domain.Kanal.DITT_SYKEFRAVAER
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.db.fetchUferdigstilteVarsler
+import no.nav.syfo.db.setUferdigstiltUtsendtVarselToForcedLetter
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
-import no.nav.syfo.db.storeUtsendtMerVeiledningVarselBackup
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
 import no.nav.syfo.domain.PersonIdent
@@ -70,6 +74,7 @@ class SenderFacade(
                 feilmelding = e.message,
                 journalpostId = null,
                 brukernotifikasjonerMeldingType = null,
+                isForcedLetter = false,
             )
         }
     }
@@ -84,6 +89,7 @@ class SenderFacade(
         eksternVarsling: Boolean = true,
         smsContent: String? = null,
         dagerTilDeaktivering: Long? = null,
+        journalpostId: String? = null,
     ) {
         try {
             brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
@@ -99,7 +105,8 @@ class SenderFacade(
             lagreUtsendtArbeidstakerVarsel(
                 kanal = BRUKERNOTIFIKASJON,
                 varselHendelse = varselHendelse,
-                eksternReferanse = uuid
+                eksternReferanse = uuid,
+                journalpostId = journalpostId,
             )
         } catch (e: Exception) {
             log.warn("Error while sending varsel to BRUKERNOTIFIKASJON: ${e.message}")
@@ -110,6 +117,7 @@ class SenderFacade(
                 feilmelding = e.message,
                 journalpostId = null,
                 brukernotifikasjonerMeldingType = varseltype.name,
+                isForcedLetter = false,
             )
         }
     }
@@ -250,10 +258,33 @@ class SenderFacade(
                 feilmelding = e.message,
                 journalpostId = journalpostId,
                 brukernotifikasjonerMeldingType = null,
+                isForcedLetter = false,
             )
         }
         if (isSendingSucceed) {
-            lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid)
+            lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid, journalpostId = journalpostId)
+        }
+    }
+
+    suspend fun sendBrevTilTvingSentralPrint(
+        uuid: String,
+        varselHendelse: ArbeidstakerHendelse,
+        journalpostId: String,
+        distribusjonsType: DistibusjonsType = DistibusjonsType.VIKTIG,
+    ) {
+        try {
+            fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType, tvingSentralPrint = true)
+            log.info("[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sending direct sentral print letter with journalpostId ${journalpostId} succeded, storing in database")
+            lagreUtsendtArbeidstakerVarsel(
+                BREV,
+                varselHendelse,
+                uuid,
+                isForcedLetter = true,
+                journalpostId = journalpostId
+            )
+            database.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef = uuid)
+        } catch (e: Exception) {
+            log.warn("[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: Error while sending brev til direct sentral print: ${e.message}")
         }
     }
 
@@ -277,6 +308,8 @@ class SenderFacade(
                 eksternReferanse,
                 null,
                 arbeidsgivernotifikasjonMerkelapp,
+                isForcedLetter = false,
+                null,
             ),
         )
     }
@@ -285,6 +318,8 @@ class SenderFacade(
         kanal: Kanal,
         varselHendelse: ArbeidstakerHendelse,
         eksternReferanse: String,
+        isForcedLetter: Boolean = false,
+        journalpostId: String? = null,
     ) {
         database.storeUtsendtVarsel(
             PUtsendtVarsel(
@@ -300,34 +335,10 @@ class SenderFacade(
                 eksternReferanse,
                 null,
                 null,
+                isForcedLetter,
+                journalpostId,
             ),
         )
-    }
-
-    fun lagreUtsendtMerVeiledningVarselBackUp(
-        kanal: Kanal,
-        varselHendelse: ArbeidstakerHendelse,
-        eksternReferanse: String,
-    ) {
-        if (varselHendelse.type == HendelseType.SM_MER_VEILEDNING) {
-            log.info("Storing backup mer veiledning varsel")
-            database.storeUtsendtMerVeiledningVarselBackup(
-                PUtsendtVarsel(
-                    UUID.randomUUID().toString(),
-                    varselHendelse.arbeidstakerFnr,
-                    null,
-                    null,
-                    null,
-                    varselHendelse.type.name,
-                    kanal.name,
-                    LocalDateTime.now(),
-                    null,
-                    eksternReferanse,
-                    null,
-                    null,
-                ),
-            )
-        }
     }
 
     private fun lagreIkkeUtsendtArbeidstakerVarsel(
@@ -337,6 +348,7 @@ class SenderFacade(
         feilmelding: String?,
         journalpostId: String? = null,
         brukernotifikasjonerMeldingType: String? = null,
+        isForcedLetter: Boolean,
     ) {
         database.storeUtsendtVarselFeilet(
             PUtsendtVarselFeilet(
@@ -352,6 +364,7 @@ class SenderFacade(
                 kanal = kanal.name,
                 feilmelding = feilmelding,
                 utsendtForsokTidspunkt = LocalDateTime.now(),
+                isForcedLetter = isForcedLetter,
             ),
         )
     }
@@ -377,6 +390,7 @@ class SenderFacade(
                 kanal = kanal.name,
                 feilmelding = feilmelding,
                 utsendtForsokTidspunkt = LocalDateTime.now(),
+                isForcedLetter = false,
             ),
         )
     }

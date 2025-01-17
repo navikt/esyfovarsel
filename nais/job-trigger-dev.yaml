@@ -21,3 +21,5 @@ spec:
       value: "true"
     - name: ESYFOVARSEL_JOB_TRIGGER_URL
       value: http://esyfovarsel/job/trigger
+    - name: REVARSLE_UNREAD_AKTIVITETSKRAV
+      value: "true"

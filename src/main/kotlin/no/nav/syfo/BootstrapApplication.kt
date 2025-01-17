@@ -34,7 +34,9 @@ import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.grantAccessToIAMUsers
+import no.nav.syfo.job.SendAktivitetspliktLetterToSentralPrintJob
 import no.nav.syfo.job.closeExpiredMicrofrontendsJob
+import no.nav.syfo.job.sendSentralPrintAktivitetspliktLetterJob
 import no.nav.syfo.kafka.common.launchKafkaListener
 import no.nav.syfo.kafka.consumers.testdata.reset.TestdataResetConsumer
 import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
@@ -75,6 +77,7 @@ fun main() {
     if (isJob()) {
         val env = getJobEnv()
         closeExpiredMicrofrontendsJob(env)
+        sendSentralPrintAktivitetspliktLetterJob(env)
     } else {
         val server = embeddedServer(
             factory = Netty,
@@ -174,6 +177,8 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
             database = database,
         )
 
+    val sendAktivitetspliktLetterToSentralPrintJob = SendAktivitetspliktLetterToSentralPrintJob(database, senderFacade)
+
     val varselBusService =
         VarselBusService(
             senderFacade,
@@ -200,6 +205,7 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
         serverModule(
             env,
             mikrofrontendService,
+            sendAktivitetspliktLetterToSentralPrintJob,
         )
 
         kafkaModule(
@@ -220,6 +226,7 @@ private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsume
 fun Application.serverModule(
     env: Environment,
     mikrofrontendService: MikrofrontendService,
+    sendAktivitetspliktLetterToSentralPrintJob: SendAktivitetspliktLetterToSentralPrintJob,
 ) {
     install(ContentNegotiation) {
         jackson {
@@ -243,6 +250,7 @@ fun Application.serverModule(
     runningRemotely {
         setupRoutesWithAuthentication(
             mikrofrontendService,
+            sendAktivitetspliktLetterToSentralPrintJob,
             env.authEnv,
         )
     }
@@ -250,6 +258,7 @@ fun Application.serverModule(
     runningLocally {
         setupLocalRoutesWithAuthentication(
             mikrofrontendService,
+            sendAktivitetspliktLetterToSentralPrintJob,
             env.authEnv,
         )
     }
