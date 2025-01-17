@@ -1,10 +1,10 @@
 package no.nav.syfo.db
 
+import no.nav.syfo.db.domain.PUtsendtVarsel
+import no.nav.syfo.domain.PersonIdent
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.syfo.db.domain.PUtsendtVarsel
-import no.nav.syfo.domain.PersonIdent
 
 fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
     val insertStatement = """INSERT INTO UTSENDT_VARSEL (
@@ -59,8 +59,7 @@ fun DatabaseInterface.fetchUferdigstilteVarsler(
     }
 }
 
-fun DatabaseInterface.fetchAlleUferdigstilteAktivitetspliktVarsler(
-): List<PUtsendtVarsel> {
+fun DatabaseInterface.fetchAlleUferdigstilteAktivitetspliktVarsler(): List<PUtsendtVarsel> {
     val queryStatement = """SELECT *
                             FROM UTSENDT_VARSEL
                             WHERE type = 'SM_AKTIVITETSPLIKT'
@@ -160,4 +159,3 @@ fun DatabaseInterface.deleteUtsendtVarselByFnr(fnr: PersonIdent) {
         connection.commit()
     }
 }
-

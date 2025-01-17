@@ -37,7 +37,7 @@ class AktivitetspliktForhandsvarselVarselService(
                     varseltype = OPPGAVE,
                     eksternVarsling = true,
                     smsContent = BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_SMS_TEXT,
-                    journalpostId = data.journalpost.id,  // journalpostId
+                    journalpostId = data.journalpost.id, // journalpostId
                 )
             } else {
                 log.info("Sending [FORHAANDSVARSEL] to print")

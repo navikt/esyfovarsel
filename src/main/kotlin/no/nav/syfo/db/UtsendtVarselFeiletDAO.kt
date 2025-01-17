@@ -2,7 +2,6 @@ package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.domain.PersonIdent
-import java.sql.ResultSet
 import java.sql.Timestamp
 import java.util.*
 
@@ -20,7 +19,8 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
         kanal,
         feilmelding,
         utsendt_forsok_tidspunkt,
-        is_forced_letter) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""".trimIndent()
+        is_forced_letter) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """.trimIndent()
 
     connection.use { connection ->
         connection.prepareStatement(insertStatement).use {
@@ -57,18 +57,3 @@ fun DatabaseInterface.deleteUtsendtVarselFeiletByFnr(fnr: PersonIdent) {
         connection.commit()
     }
 }
-
-fun ResultSet.toPUtsendtVarselFeilet() = PUtsendtVarselFeilet(
-    uuid = getString("uuid"),
-    uuidEksternReferanse = getString("uuid_ekstern_referanse"),
-    narmesteLederFnr = getString("narmesteleder_fnr"),
-    arbeidstakerFnr = getString("arbeidstaker_fnr"),
-    orgnummer = getString("orgnummer"),
-    hendelsetypeNavn = getString("hendelsetype_navn"),
-    arbeidsgivernotifikasjonMerkelapp = getString("arbeidsgivernotifikasjon_merkelapp"),
-    brukernotifikasjonerMeldingType = getString("brukernotifikasjoner_melding_type"),
-    journalpostId = getString("journalpost_id"),
-    kanal = getString("kanal"),
-    feilmelding = getString("feilmelding"),
-    utsendtForsokTidspunkt = getTimestamp("utsendt_forsok_tidspunkt").toLocalDateTime(),
-)

@@ -8,15 +8,21 @@ import no.nav.syfo.db.domain.Kanal.BREV
 import no.nav.syfo.db.domain.Kanal.BRUKERNOTIFIKASJON
 import no.nav.syfo.db.domain.Kanal.DINE_SYKMELDTE
 import no.nav.syfo.db.domain.Kanal.DITT_SYKEFRAVAER
+import no.nav.syfo.db.domain.PKalenderInput
+import no.nav.syfo.db.domain.PSakInput
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
+import no.nav.syfo.db.fetchUferdigstilteNarmesteLederVarsler
 import no.nav.syfo.db.fetchUferdigstilteVarsler
+import no.nav.syfo.db.getArbeidsgivernotifikasjonerKalenderavtale
+import no.nav.syfo.db.getPaagaaendeArbeidsgivernotifikasjonerSak
 import no.nav.syfo.db.setUferdigstiltUtsendtVarselToForcedLetter
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
+import no.nav.syfo.db.storeArbeidsgivernotifikasjonerKalenderavtale
+import no.nav.syfo.db.storeArbeidsgivernotifikasjonerSak
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
-import no.nav.syfo.db.*
-import no.nav.syfo.db.domain.*
+import no.nav.syfo.db.updateArbeidsgivernotifikasjonerSakStatus
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
@@ -34,6 +40,9 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toPKalenderInput
 import no.nav.syfo.utils.enumValueOfOrNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.URL
+import java.time.LocalDateTime
+import java.util.*
 
 class SenderFacade(
     private val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
@@ -379,7 +388,9 @@ class SenderFacade(
     ) {
         try {
             fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType, tvingSentralPrint = true)
-            log.info("[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sending direct sentral print letter with journalpostId ${journalpostId} succeded, storing in database")
+            log.info(
+                "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sending direct sentral print letter with journalpostId $journalpostId succeded, storing in database"
+            )
             lagreUtsendtArbeidstakerVarsel(
                 BREV,
                 varselHendelse,
@@ -389,7 +400,9 @@ class SenderFacade(
             )
             database.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef = uuid)
         } catch (e: Exception) {
-            log.warn("[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: Error while sending brev til direct sentral print: ${e.message}")
+            log.warn(
+                "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: Error while sending brev til direct sentral print: ${e.message}"
+            )
         }
     }
 

@@ -1,14 +1,14 @@
 package no.nav.syfo.db
 
 import io.kotest.core.spec.style.DescribeSpec
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.testutil.EmbeddedDatabase
 import org.amshove.kluent.should
+import java.time.LocalDateTime
+import java.util.*
 
 class UtsendtVarselFeiletDAOSpek : DescribeSpec({
     describe("UtsendtVarselFeiletDAOSpek") {

@@ -13,7 +13,6 @@
     <ID>ConstructorParameterNaming:WellKnown.kt$WellKnown$var token_endpoint: String</ID>
     <ID>CyclomaticComplexMethod:VarselBusService.kt$VarselBusService$suspend fun processVarselHendelse( varselHendelse: EsyfovarselHendelse, )</ID>
     <ID>EmptyFunctionBlock:JacksonKafkaSerializer.kt$JacksonKafkaSerializer${}</ID>
-    <ID>EmptyKtFile:SendMerVeiledningVarslerJobb.kt$.SendMerVeiledningVarslerJobb.kt</ID>
     <ID>Filename:AktivitetspliktForhandsvarselService.kt$no.nav.syfo.service.AktivitetspliktForhandsvarselService.kt</ID>
     <ID>Filename:SyfosmDTO.kt$no.nav.syfo.consumer.syfosmregister.SyfosmDTO.kt</ID>
     <ID>FunctionParameterNaming:UtsendtVarselDAO.kt$PUtsendtVarsel: PUtsendtVarsel</ID>
@@ -50,12 +49,19 @@
     <ID>MaxLineLength:MikrofrontendServiceSpek.kt$MikrofrontendServiceSpek$"Enabling MF with a syfomotebehov event should result entry without synligTom in DB and publication on min-side topic"</ID>
     <ID>MaxLineLength:MotebehovVarselService.kt$MotebehovVarselService$"[MotebehovVarselService]: Sender ikke Svar møtebehov-varsel til NL fordi arbeidstaker ikke er sykmeldt fra bedriften"</ID>
     <ID>MaxLineLength:NarmesteLederService.kt$NarmesteLederService$return (narmesteLederRelasjon !== null) &amp;&amp; (narmesteLederRelasjon.narmesteLederFnr !== null) &amp;&amp; (narmesteLederRelasjon.narmesteLederEpost !== null)</ID>
+    <ID>MaxLineLength:SendAktivitetspliktLetterToSentralPrintJob.kt$SendAktivitetspliktLetterToSentralPrintJob$"[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: User can not be notified by letter due to missing journalpostId in varsel with uuid: ${pUtsendtVarsel.uuid}"</ID>
+    <ID>MaxLineLength:SendAktivitetspliktLetterToSentralPrintJob.kt$SendAktivitetspliktLetterToSentralPrintJob$"[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sendLetterToTvingSentralPrintFromJob sent $sentToTvingSentralPrintLettersAmount letters"</ID>
+    <ID>MaxLineLength:SendAktivitetspliktLetterToSentralPrintJob.kt$SendAktivitetspliktLetterToSentralPrintJob$class</ID>
+    <ID>MaxLineLength:SenderFacade.kt$SenderFacade$"[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: Error while sending brev til direct sentral print: ${e.message}"</ID>
+    <ID>MaxLineLength:SenderFacade.kt$SenderFacade$"[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sending direct sentral print letter with journalpostId $journalpostId succeded, storing in database"</ID>
     <ID>MaxLineLength:SenderFacade.kt$SenderFacade$kalenderavtaleTilstand = oppdaterKalenderInput.nyTilstand ?: storedKalenderAvtale.kalenderavtaleTilstand</ID>
     <ID>MaxLineLength:SykmeldingService.kt$SykmeldingService$.</ID>
     <ID>MaxLineLength:SykmeldingService.kt$SykmeldingService$sykmeldingerConsumer.getSykmeldingerPaDato(varselDato, fnr) ?: return SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = false)</ID>
     <ID>MaxLineLength:SykmeldingService.kt$SykmeldingService$val</ID>
+    <ID>MaxLineLength:Util.kt$"Feil i closeExpiredMicrofrontendsJob: Klarte ikke kalle trigger-API i esyfovarsel. Fikk svar med status: $status"</ID>
     <ID>MaxLineLength:Util.kt$"System call attempting to authenticate with invalid credentials: ${credentials.name}/${credentials.password}"</ID>
     <ID>MaxLineLength:Util.kt$return "Level4" == credentials.payload.getClaim("acr").asString() || "idporten-loa-high" == credentials.payload.getClaim("acr").asString()</ID>
+    <ID>MaxLineLength:UtsendtVarselDAOSpek.kt$UtsendtVarselDAOSpek$// Should not pick uferdigstilt utsend varsel to notify user by physical letter varsel was ferdigstilt (lest)</ID>
     <ID>MaxLineLength:VarselBusService.kt$VarselBusService$NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING</ID>
     <ID>MaxLineLength:VarselBusService.kt$VarselBusService$SM_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING</ID>
     <ID>MaxLineLength:VarselBusService.kt$VarselBusService$SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING</ID>
@@ -82,6 +88,8 @@
     <ID>MaximumLineLength:MikrofrontendServiceSpek.kt$MikrofrontendServiceSpek$ </ID>
     <ID>MaximumLineLength:MotebehovVarselService.kt$MotebehovVarselService$ </ID>
     <ID>MaximumLineLength:NarmesteLederService.kt$NarmesteLederService$ </ID>
+    <ID>MaximumLineLength:SendAktivitetspliktLetterToSentralPrintJob.kt$SendAktivitetspliktLetterToSentralPrintJob$ </ID>
+    <ID>MaximumLineLength:SendAktivitetspliktLetterToSentralPrintJob.kt$SendAktivitetspliktLetterToSentralPrintJob$class</ID>
     <ID>MaximumLineLength:SenderFacade.kt$SenderFacade$ </ID>
     <ID>MaximumLineLength:SykmeldingService.kt$SykmeldingService$ </ID>
     <ID>MaximumLineLength:Util.kt$ </ID>
@@ -90,6 +98,7 @@
     <ID>NestedBlockDepth:TestdataResetConsumer.kt$TestdataResetConsumer$override suspend fun listen(applicationState: ApplicationState)</ID>
     <ID>NoWildcardImports:AktivitetspliktForhandsvarselServiceTest.kt$import io.mockk.*</ID>
     <ID>NoWildcardImports:BootstrapApplication.kt$import no.nav.syfo.service.*</ID>
+    <ID>NoWildcardImports:DialogmoteInnkallingNarmesteLederVarselServiceSpek.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.*</ID>
     <ID>NoWildcardImports:DialogmoteInnkallingSykmeldtVarselService.kt$import no.nav.syfo.*</ID>
     <ID>NoWildcardImports:DialogmoteInnkallingSykmeldtVarselService.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*</ID>
     <ID>NoWildcardImports:DialogmoteInnkallingSykmeldtVarselServiceSpek.kt$import io.mockk.*</ID>
@@ -102,19 +111,13 @@
     <ID>NoWildcardImports:FodselsdatoDAOSpek.kt$import org.amshove.kluent.*</ID>
     <ID>NoWildcardImports:FriskmeldingTilArbeidsformidlingVedtakServiceTest.kt$import io.mockk.*</ID>
     <ID>NoWildcardImports:HttpUtil.kt$import io.ktor.client.plugins.*</ID>
-    <ID>NoWildcardImports:JournalpostdistribusjonConsumer.kt$import io.ktor.client.call.*</ID>
-    <ID>NoWildcardImports:JournalpostdistribusjonConsumer.kt$import io.ktor.client.request.*</ID>
-    <ID>NoWildcardImports:JournalpostdistribusjonConsumer.kt$import io.ktor.http.*</ID>
+    <ID>NoWildcardImports:Kalenderavtale.kt$import com.apollo.graphql.type.*</ID>
     <ID>NoWildcardImports:MikrofrontendDialogmoteService.kt$import no.nav.syfo.db.*</ID>
     <ID>NoWildcardImports:MikrofrontendServiceSpek.kt$import no.nav.syfo.testutil.*</ID>
     <ID>NoWildcardImports:SyfosmDTO.kt$import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.*</ID>
     <ID>NoWildcardImports:TestdataResetConsumer.kt$import no.nav.syfo.kafka.common.*</ID>
-    <ID>NoWildcardImports:Util.kt$import io.ktor.client.request.*</ID>
-    <ID>NoWildcardImports:Util.kt$import io.ktor.client.statement.*</ID>
-    <ID>NoWildcardImports:Util.kt$import io.ktor.http.*</ID>
     <ID>NoWildcardImports:VarselBusService.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.*</ID>
     <ID>NoWildcardImports:VarselBusService.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*</ID>
-    <ID>NoWildcardImports:VarselFunctions.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*</ID>
     <ID>PackageName:MikrofrontendSynlighet.kt$package no.nav.syfo.kafka.producers.mineside_microfrontend</ID>
     <ID>PackageName:MinSideMicrofrontendKafkaProducer.kt$package no.nav.syfo.kafka.producers.mineside_microfrontend</ID>
     <ID>PackageName:MinSideRecord.kt$package no.nav.syfo.kafka.producers.mineside_microfrontend</ID>
@@ -182,10 +185,6 @@
     <ID>VariableNaming:DialogmoteInnkallingSykmeldtVarselService.kt$DialogmoteInnkallingSykmeldtVarselService$val WEEKS_BEFORE_DELETE = 4L</ID>
     <ID>VariableNaming:MotebehovVarselService.kt$MotebehovVarselService$val WEEKS_BEFORE_DELETE = 4L</ID>
     <ID>WildcardImport:AktivitetspliktForhandsvarselServiceTest.kt$import io.mockk.*</ID>
-    <ID>WildcardImport:ArbeidsgiverNotifikasjonProdusent.kt$import io.ktor.client.call.*</ID>
-    <ID>WildcardImport:ArbeidsgiverNotifikasjonProdusent.kt$import io.ktor.client.request.*</ID>
-    <ID>WildcardImport:ArbeidsgiverNotifikasjonProdusent.kt$import io.ktor.client.statement.*</ID>
-    <ID>WildcardImport:ArbeidsgiverNotifikasjonProdusent.kt$import io.ktor.http.*</ID>
     <ID>WildcardImport:BootstrapApplication.kt$import no.nav.syfo.service.*</ID>
     <ID>WildcardImport:DialogmoteInnkallingNarmesteLederVarselServiceSpek.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.*</ID>
     <ID>WildcardImport:DialogmoteInnkallingSykmeldtVarselService.kt$import no.nav.syfo.*</ID>
@@ -200,21 +199,12 @@
     <ID>WildcardImport:FodselsdatoDAOSpek.kt$import org.amshove.kluent.*</ID>
     <ID>WildcardImport:FriskmeldingTilArbeidsformidlingVedtakServiceTest.kt$import io.mockk.*</ID>
     <ID>WildcardImport:HttpUtil.kt$import io.ktor.client.plugins.*</ID>
-    <ID>WildcardImport:JournalpostdistribusjonConsumer.kt$import io.ktor.client.call.*</ID>
-    <ID>WildcardImport:JournalpostdistribusjonConsumer.kt$import io.ktor.client.request.*</ID>
-    <ID>WildcardImport:JournalpostdistribusjonConsumer.kt$import io.ktor.http.*</ID>
     <ID>WildcardImport:Kalenderavtale.kt$import com.apollo.graphql.type.*</ID>
     <ID>WildcardImport:MikrofrontendDialogmoteService.kt$import no.nav.syfo.db.*</ID>
     <ID>WildcardImport:MikrofrontendServiceSpek.kt$import no.nav.syfo.testutil.*</ID>
-    <ID>WildcardImport:SenderFacade.kt$import no.nav.syfo.db.*</ID>
-    <ID>WildcardImport:SenderFacade.kt$import no.nav.syfo.db.domain.*</ID>
     <ID>WildcardImport:SyfosmDTO.kt$import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.*</ID>
     <ID>WildcardImport:TestdataResetConsumer.kt$import no.nav.syfo.kafka.common.*</ID>
-    <ID>WildcardImport:Util.kt$import io.ktor.client.request.*</ID>
-    <ID>WildcardImport:Util.kt$import io.ktor.client.statement.*</ID>
-    <ID>WildcardImport:Util.kt$import io.ktor.http.*</ID>
     <ID>WildcardImport:VarselBusService.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.*</ID>
     <ID>WildcardImport:VarselBusService.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*</ID>
-    <ID>WildcardImport:VarselFunctions.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*</ID>
   </CurrentIssues>
 </SmellBaseline>
