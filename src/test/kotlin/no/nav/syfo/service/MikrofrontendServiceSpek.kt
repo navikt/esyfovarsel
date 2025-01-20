@@ -10,6 +10,9 @@ import no.nav.syfo.db.arbeidstakerFnr2
 import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
 import no.nav.syfo.db.orgnummer1
 import no.nav.syfo.domain.PersonIdent
+import no.nav.syfo.exceptions.DuplicateMotebehovException
+import no.nav.syfo.exceptions.MotebehovAfterBookingException
+import no.nav.syfo.exceptions.VeilederAlreadyBookedMeetingException
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
@@ -18,10 +21,11 @@ import no.nav.syfo.service.microfrontend.MikrofrontendAktivitetskravService
 import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
 import no.nav.syfo.service.microfrontend.MikrofrontendMerOppfolgingService
 import no.nav.syfo.service.microfrontend.MikrofrontendService
-import no.nav.syfo.testutil.*
-import no.nav.syfo.utils.DuplicateMotebehovException
-import no.nav.syfo.utils.MotebehovAfterBookingException
-import no.nav.syfo.utils.VeilederAlreadyBookedMeetingException
+import no.nav.syfo.testutil.EmbeddedDatabase
+import no.nav.syfo.testutil.shouldContainMikrofrontendEntry
+import no.nav.syfo.testutil.shouldContainMikrofrontendEntryWithSynligTom
+import no.nav.syfo.testutil.shouldContainMikrofrontendEntryWithoutSynligTom
+import no.nav.syfo.testutil.shouldNotContainMikrofrontendEntryForUser
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

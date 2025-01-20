@@ -1,4 +1,4 @@
-package no.nav.syfo.utils
+package no.nav.syfo.exceptions
 
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 

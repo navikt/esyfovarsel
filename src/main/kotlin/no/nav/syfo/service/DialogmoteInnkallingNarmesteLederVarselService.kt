@@ -14,6 +14,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_N
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_REFERAT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_SVAR
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.getMotetidspunkt
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
@@ -122,8 +123,9 @@ class DialogmoteInnkallingNarmesteLederVarselService(
         narmesteLederId: String,
     ) {
         sendVarselTilDineSykmeldte(varselHendelse)
-        val motetidspunkt = varselHendelse.data?.toVarselData()?.motetidspunkt?.tidspunkt
-        require(motetidspunkt != null) { "Dialogmøte-innkalling mangler motetidspunkt" }
+        val varselData = varselHendelse.data?.toVarselData()
+        require(varselData != null) { "DialogmoteInnkalt mangler varselData" }
+        val motetidspunkt = varselData.getMotetidspunkt()
         val texts = varselHendelse.dialogmoteNarmesteLederTexts()
         val (sakId, grupperingsId) = createNewSak(
             narmestelederId = narmesteLederId,
@@ -154,8 +156,9 @@ class DialogmoteInnkallingNarmesteLederVarselService(
     ) {
         sendVarselTilDineSykmeldte(varselHendelse)
         val sak = getPaagaaendeSak(narmesteLederId)
-        val motetidspunkt = varselHendelse.data?.toVarselData()?.motetidspunkt?.tidspunkt
-        require(motetidspunkt != null) { "Dialogmøte-endring mangler motetidspunkt" }
+        val varselData = varselHendelse.data?.toVarselData()
+        require(varselData != null) { "DialogmoteInnkalt mangler varselData" }
+        val motetidspunkt = varselData.getMotetidspunkt()
         val texts = varselHendelse.dialogmoteNarmesteLederTexts()
         senderFacade.updateKalenderavtale(
             sakId = sak.id,
