@@ -76,7 +76,6 @@ fun main() {
     if (isJob()) {
         val env = getJobEnv()
         closeExpiredMicrofrontendsJob(env)
-//        sendSentralPrintAktivitetspliktLetterJob(env)
     } else {
         val server = embeddedServer(
             factory = Netty,
