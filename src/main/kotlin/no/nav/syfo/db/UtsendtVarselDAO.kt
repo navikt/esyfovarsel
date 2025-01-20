@@ -66,6 +66,7 @@ fun DatabaseInterface.fetchAlleUferdigstilteAktivitetspliktVarsler(
                             WHERE type = 'SM_AKTIVITETSPLIKT'
                               AND kanal = 'BRUKERNOTIFIKASJON'
                               AND ferdigstilt_tidspunkt IS NULL
+                              AND journalpost_id IS NOT NULL
                               AND (is_forced_letter IS FALSE OR is_forced_letter IS NULL)
                               AND utsendt_tidspunkt >= CURRENT_DATE - 14
                               AND utsendt_tidspunkt < CURRENT_DATE - 1;
