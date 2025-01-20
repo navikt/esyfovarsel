@@ -332,7 +332,8 @@ class DialogmoteInnkallingNarmesteLederVarselService(
         narmesteLederId: String,
     ): PSakInput {
         return senderFacade.getPaagaaendeSak(
-            narmesteLederId = narmesteLederId, merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP
+            narmesteLederId = narmesteLederId,
+            merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP
         ) ?: throw IllegalStateException("Fant ikke sak for narmeste leder med id $narmesteLederId")
     }
 

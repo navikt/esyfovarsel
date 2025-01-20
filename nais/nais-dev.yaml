@@ -126,7 +126,7 @@ spec:
     - name: NARMESTELEDER_SCOPE
       value: api://dev-gcp.teamsykmelding.narmesteleder/.default
     - name: BASE_URL_DINE_SYKMELDTE
-      value: https://www-gcp.dev.nav.no/arbeidsgiver/sykmeldte
+      value: https://www.ekstern.dev.nav.no/arbeidsgiver/sykmeldte
     - name: DOKDIST_FORDELING_URL
       value: https://dokdistfordeling-q1.dev-fss-pub.nais.io
     - name: DOKDIST_FORDELING_SCOPE
