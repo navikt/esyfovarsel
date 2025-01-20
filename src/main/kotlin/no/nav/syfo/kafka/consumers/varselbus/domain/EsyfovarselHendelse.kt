@@ -1,7 +1,7 @@
 package no.nav.syfo.kafka.consumers.varselbus.domain
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import no.nav.syfo.exceptions.DialogmotetidspunktValidationException
+import no.nav.syfo.exceptions.MotetidspunktValidationException
 import no.nav.syfo.kafka.common.createObjectMapper
 import java.io.Serializable
 import java.time.LocalDateTime
@@ -185,9 +185,9 @@ fun HendelseType.isNotValidHendelseType() =
 
 fun VarselData.getMotetidspunkt(): LocalDateTime {
     val tidspunkt = motetidspunkt?.tidspunkt
-        ?: throw DialogmotetidspunktValidationException("Dialogmøte-innkalling mangler motetidspunkt")
+        ?: throw MotetidspunktValidationException("Varseldata mangler motetidspunkt")
     if (tidspunkt.isBefore(LocalDateTime.now())) {
-        throw DialogmotetidspunktValidationException("Dialogmøte-innkalling har motetidspunkt i fortiden")
+        throw MotetidspunktValidationException("Varseldata har motetidspunkt i fortiden")
     }
     return tidspunkt
 }
