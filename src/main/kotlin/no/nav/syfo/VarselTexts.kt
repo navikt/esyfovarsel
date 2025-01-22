@@ -95,3 +95,18 @@ const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_BODY =
             "Har du spørsmål, kan du kontakte oss på 55 55 33 36.<br>\n" +
             "Vennlig hilsen NAV<br>\n" +
             "Du kan ikke svare på denne meldingen.</body>"
+
+const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_MESSAGE_TEXT = "Vi trenger en oppfølgingsplan fra deg"
+const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_TITLE = "Nav trenger en oppfølgingsplan fra deg"
+const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_BODY = """
+    Hei,  
+    
+    Nav ber om at du sender inn oppfølgingsplan for en av dine ansatte som er sykmeldt.
+    Logg inn på “Min side - arbeidsgiver“. I “bjella” ser du hvem det gjelder.
+
+    Har du spørsmål, kan du kontakte oss på 55 55 33 36.
+
+    Vennlig hilsen Nav
+
+    Du kan ikke svare på denne meldingen.
+"""
