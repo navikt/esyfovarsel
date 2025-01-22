@@ -7,6 +7,8 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.KalenderTilstand
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
 import java.sql.ResultSet
+import java.sql.SQLException
+import java.sql.SQLIntegrityConstraintViolationException
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.*
@@ -33,30 +35,38 @@ fun DatabaseInterface.storeArbeidsgivernotifikasjonerSak(sakInput: NySakInput): 
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """.trimIndent()
 
-    connection.use { connection ->
-        connection.prepareStatement(insertStatement).use { preparedStatement ->
-            preparedStatement.setObject(1, uuid)
-            preparedStatement.setString(2, sakInput.narmestelederId)
-            preparedStatement.setString(3, sakInput.grupperingsid)
-            preparedStatement.setString(4, sakInput.merkelapp)
-            preparedStatement.setString(5, sakInput.virksomhetsnummer)
-            preparedStatement.setString(6, sakInput.narmesteLederFnr)
-            preparedStatement.setString(7, sakInput.ansattFnr)
-            preparedStatement.setString(8, sakInput.tittel)
-            preparedStatement.setString(9, sakInput.tilleggsinformasjon)
-            preparedStatement.setString(10, sakInput.lenke)
-            preparedStatement.setString(11, sakInput.initiellStatus.name)
-            preparedStatement.setString(12, sakInput.nesteSteg)
-            preparedStatement.setString(13, sakInput.overstyrStatustekstMed)
-            preparedStatement.setTimestamp(14, Timestamp.valueOf(sakInput.hardDeleteDate))
-            preparedStatement.setTimestamp(15, Timestamp.valueOf(LocalDateTime.now()))
+    return try {
+        connection.use { connection ->
+            connection.prepareStatement(insertStatement).use { preparedStatement ->
+                preparedStatement.setObject(1, uuid)
+                preparedStatement.setString(2, sakInput.narmestelederId)
+                preparedStatement.setString(3, sakInput.grupperingsid)
+                preparedStatement.setString(4, sakInput.merkelapp)
+                preparedStatement.setString(5, sakInput.virksomhetsnummer)
+                preparedStatement.setString(6, sakInput.narmesteLederFnr)
+                preparedStatement.setString(7, sakInput.ansattFnr)
+                preparedStatement.setString(8, sakInput.tittel)
+                preparedStatement.setString(9, sakInput.tilleggsinformasjon)
+                preparedStatement.setString(10, sakInput.lenke)
+                preparedStatement.setString(11, sakInput.initiellStatus.name)
+                preparedStatement.setString(12, sakInput.nesteSteg)
+                preparedStatement.setString(13, sakInput.overstyrStatustekstMed)
+                preparedStatement.setTimestamp(14, Timestamp.valueOf(sakInput.hardDeleteDate))
+                preparedStatement.setTimestamp(15, Timestamp.valueOf(LocalDateTime.now()))
 
-            preparedStatement.executeUpdate()
+                preparedStatement.executeUpdate()
+            }
+            connection.commit()
         }
-
-        connection.commit()
-
-        return uuid.toString()
+        uuid.toString()
+    } catch (e: SQLIntegrityConstraintViolationException) {
+        connection.rollback()
+        log.error("Integrity constraint violation: ${e.message}")
+        throw e
+    } catch (e: SQLException) {
+        connection.rollback()
+        log.error("Database error occurred: ${e.message}")
+        throw e
     }
 }
 

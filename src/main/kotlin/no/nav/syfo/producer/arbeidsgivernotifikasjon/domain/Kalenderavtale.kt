@@ -2,7 +2,18 @@ package no.nav.syfo.producer.arbeidsgivernotifikasjon.domain
 
 import com.apollo.graphql.NyKalenderavtaleMutation
 import com.apollo.graphql.OppdaterKalenderavtaleMutation
-import com.apollo.graphql.type.*
+import com.apollo.graphql.type.EksterntVarselEpostInput
+import com.apollo.graphql.type.EksterntVarselInput
+import com.apollo.graphql.type.EpostKontaktInfoInput
+import com.apollo.graphql.type.EpostMottakerInput
+import com.apollo.graphql.type.FutureTemporalInput
+import com.apollo.graphql.type.HardDeleteUpdateInput
+import com.apollo.graphql.type.KalenderavtaleTilstand
+import com.apollo.graphql.type.MottakerInput
+import com.apollo.graphql.type.NaermesteLederMottakerInput
+import com.apollo.graphql.type.NyTidStrategi
+import com.apollo.graphql.type.SendetidspunktInput
+import com.apollo.graphql.type.Sendevindu
 import com.apollographql.apollo.api.Optional
 import no.nav.syfo.db.domain.PKalenderInput
 import no.nav.syfo.kafka.consumers.varselbus.domain.DialogmoteSvarType
@@ -36,53 +47,63 @@ fun NyKalenderInput.toNyKalenderavtaleMutation(): NyKalenderavtaleMutation {
         eksternId = eksternId,
         tekst = tekst,
         lenke = lenke,
-        mottakere = listOf(
-            MottakerInput(
-                naermesteLeder = Optional.present(
-                    NaermesteLederMottakerInput(
-                        naermesteLederFnr = narmesteLederFnr,
-                        ansattFnr = ansattFnr
-                    )
-                )
-            )
-        ),
+        mottakere = createMottakere(),
         startTidspunkt = startTidspunkt.formatAsISO8601DateTime(),
         sluttTidspunkt = Optional.presentIfNotNull(sluttTidspunkt?.formatAsISO8601DateTime()),
         lokasjon = Optional.absent(),
         erDigitalt = Optional.absent(),
         tilstand = Optional.present(KalenderavtaleTilstand.valueOf(kalenderavtaleTilstand.name)),
-        eksterneVarsler = listOf(
-            EksterntVarselInput(
-                epost = Optional.presentIfNotNull(
-                    EksterntVarselEpostInput(
-                        mottaker = EpostMottakerInput(
-                            kontaktinfo = Optional.present(
-                                EpostKontaktInfoInput(
-                                    epostadresse = ledersEpost
-                                )
-                            )
-                        ),
-                        epostTittel = epostTittel,
-                        epostHtmlBody = epostHtmlBody,
-                        sendetidspunkt = SendetidspunktInput(
-                            tidspunkt = Optional.Absent,
-                            sendevindu = Optional.present(Sendevindu.NKS_AAPNINGSTID)
-                        )
-                    )
-                )
-            )
-        ),
+        eksterneVarsler = createEksterneVarsler(),
         paaminnelse = Optional.absent(),
-        hardDelete = hardDeleteDate?.let {
-            Optional.present(
-                FutureTemporalInput(
-                    den = Optional.present(
-                        hardDeleteDate.formatAsISO8601DateTime()
+        hardDelete = createHardDelete()
+    )
+}
+
+private fun NyKalenderInput.createMottakere(): List<MottakerInput> {
+    return listOf(
+        MottakerInput(
+            naermesteLeder = Optional.present(
+                NaermesteLederMottakerInput(
+                    naermesteLederFnr = narmesteLederFnr,
+                    ansattFnr = ansattFnr
+                )
+            )
+        )
+    )
+}
+
+private fun NyKalenderInput.createEksterneVarsler(): List<EksterntVarselInput> {
+    return listOf(
+        EksterntVarselInput(
+            epost = Optional.presentIfNotNull(
+                EksterntVarselEpostInput(
+                    mottaker = EpostMottakerInput(
+                        kontaktinfo = Optional.present(
+                            EpostKontaktInfoInput(
+                                epostadresse = ledersEpost
+                            )
+                        )
+                    ),
+                    epostTittel = epostTittel,
+                    epostHtmlBody = epostHtmlBody,
+                    sendetidspunkt = SendetidspunktInput(
+                        tidspunkt = Optional.Absent,
+                        sendevindu = Optional.present(Sendevindu.NKS_AAPNINGSTID)
                     )
                 )
             )
-        } ?: Optional.absent(),
+        )
     )
+}
+
+private fun NyKalenderInput.createHardDelete(): Optional<FutureTemporalInput> {
+    return hardDeleteDate?.let {
+        Optional.present(
+            FutureTemporalInput(
+                den = Optional.present(it.formatAsISO8601DateTime())
+            )
+        )
+    } ?: Optional.absent()
 }
 
 fun NyKalenderInput.toPKalenderInput(kalenderId: String): PKalenderInput {
