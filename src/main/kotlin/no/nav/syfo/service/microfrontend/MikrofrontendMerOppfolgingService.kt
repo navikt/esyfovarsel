@@ -30,5 +30,4 @@ class MikrofrontendMerOppfolgingService(val database: DatabaseInterface) {
         return database.fetchFnrsWithExpiredMicrofrontendEntries(Tjeneste.MER_OPPFOLGING)
             .map { Triple(it, mikrofrontendId, Tjeneste.MER_OPPFOLGING) }
     }
-
 }

@@ -49,7 +49,6 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
         }
     }
 
-
     fun mockArbeidsgiverNotifikasjonServer(): NettyApplicationEngine {
         return mockServer(urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl) {
             val responseNyBeskjed = """

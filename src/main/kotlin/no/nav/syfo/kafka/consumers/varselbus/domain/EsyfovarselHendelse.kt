@@ -1,9 +1,10 @@
 package no.nav.syfo.kafka.consumers.varselbus.domain
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import no.nav.syfo.exceptions.MotetidspunktValidationException
+import no.nav.syfo.kafka.common.createObjectMapper
 import java.io.Serializable
 import java.time.LocalDateTime
-import no.nav.syfo.kafka.common.createObjectMapper
 
 private val objectMapper = createObjectMapper()
 
@@ -158,11 +159,13 @@ fun HendelseType.isDialogmoteInnkallingType() = this in listOf(
 )
 
 fun HendelseType.isDialogmoteType() =
-    this.isDialogmoteInnkallingType() or (this in listOf(
-        HendelseType.SM_DIALOGMOTE_AVLYST,
-        HendelseType.SM_DIALOGMOTE_REFERAT,
-        HendelseType.SM_DIALOGMOTE_LEST,
-    ))
+    this.isDialogmoteInnkallingType() or (
+        this in listOf(
+            HendelseType.SM_DIALOGMOTE_AVLYST,
+            HendelseType.SM_DIALOGMOTE_REFERAT,
+            HendelseType.SM_DIALOGMOTE_LEST,
+        )
+        )
 
 fun ArbeidstakerHendelse.notCorrectMikrofrontendType() =
     !(this.type.isDialogmoteType() or this.type.isAktivitetspliktType() or this.type.isMerOppfolgingType())
@@ -180,3 +183,11 @@ fun ArbeidstakerHendelse.isNotEligibleForMikrofrontendProcessing(): Boolean {
 fun HendelseType.isNotValidHendelseType() =
     !this.isAktivitetspliktType() && !this.isDialogmoteInnkallingType() && !this.isMerOppfolgingType()
 
+fun VarselData.getMotetidspunkt(): LocalDateTime {
+    val tidspunkt = motetidspunkt?.tidspunkt
+        ?: throw MotetidspunktValidationException("Varseldata mangler motetidspunkt")
+    if (tidspunkt.isBefore(LocalDateTime.now())) {
+        throw MotetidspunktValidationException("Varseldata har motetidspunkt i fortiden")
+    }
+    return tidspunkt
+}

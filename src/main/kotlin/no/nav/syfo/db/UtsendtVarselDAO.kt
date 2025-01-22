@@ -1,10 +1,10 @@
 package no.nav.syfo.db
 
+import no.nav.syfo.db.domain.PUtsendtVarsel
+import no.nav.syfo.domain.PersonIdent
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.syfo.db.domain.PUtsendtVarsel
-import no.nav.syfo.domain.PersonIdent
 
 fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
     val insertStatement = """INSERT INTO UTSENDT_VARSEL (
@@ -59,8 +59,7 @@ fun DatabaseInterface.fetchUferdigstilteVarsler(
     }
 }
 
-fun DatabaseInterface.fetchAlleUferdigstilteAktivitetspliktVarsler(
-): List<PUtsendtVarsel> {
+fun DatabaseInterface.fetchAlleUferdigstilteAktivitetspliktVarsler(): List<PUtsendtVarsel> {
     val queryStatement = """SELECT *
                             FROM UTSENDT_VARSEL
                             WHERE type = 'SM_AKTIVITETSPLIKT'
@@ -93,6 +92,26 @@ fun DatabaseInterface.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef: Str
         }
         connection.commit()
         rowsUpdated
+    }
+}
+
+fun DatabaseInterface.fetchUferdigstilteNarmesteLederVarsler(
+    sykmeldtFnr: PersonIdent,
+    narmesteLederFnr: PersonIdent,
+): List<PUtsendtVarsel> {
+    val queryStatement = """SELECT *
+                            FROM UTSENDT_VARSEL
+                            WHERE fnr = ?
+                            AND narmesteLeder_fnr = ?
+                            AND ferdigstilt_tidspunkt is null
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, sykmeldtFnr.value)
+            it.setString(2, narmesteLederFnr.value)
+            it.executeQuery().toList { toPUtsendtVarsel() }
+        }
     }
 }
 
@@ -141,4 +160,3 @@ fun DatabaseInterface.deleteUtsendtVarselByFnr(fnr: PersonIdent) {
         connection.commit()
     }
 }
-

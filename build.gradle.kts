@@ -23,6 +23,8 @@ val jacksonVersion = "2.18.2"
 val kafkaVersion = "3.9.0"
 val brukernotifikasjonerBuilderVersion = "2.1.1"
 val kotlinVersion = "2.1.0"
+val graphqlApolloVersion = "4.1.0"
+val detektVersion = "1.23.7"
 
 val githubUser: String by project
 val githubPassword: String by project
@@ -33,6 +35,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.allopen") version "2.1.0"
     id("com.diffplug.spotless") version "6.25.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.apollographql.apollo") version "4.1.0"
+    id("io.gitlab.arturbosch.detekt") version "1.23.7"
 }
 
 java {
@@ -118,6 +122,9 @@ dependencies {
     }
     implementation("no.nav.tms.varsel:kotlin-builder:$brukernotifikasjonerBuilderVersion")
 
+    // GraphQL
+    implementation("com.apollographql.apollo", "apollo-runtime", graphqlApolloVersion)
+
     // Test
     testImplementation(kotlin("test"))
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
@@ -129,6 +136,8 @@ dependencies {
     testImplementation("io.kotest:kotest-property:$kotestVersion")
     testImplementation("io.kotest.extensions:kotest-assertions-ktor:$kotestExtensionsVersion")
     testImplementation("com.h2database:h2:$h2Version")
+
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$detektVersion")
 
     constraints {
         implementation("org.apache.zookeeper:zookeeper") {
@@ -160,4 +169,19 @@ tasks {
     withType<Test> {
         useJUnitPlatform()
     }
+
+}
+
+apollo {
+    service("service") {
+        packageName.set("com.apollo.graphql")
+    }
+}
+
+detekt {
+    buildUponDefaultConfig = true // preconfigure defaults
+    allRules = false // activate all available (even unstable) rules.
+    config.setFrom("$projectDir/detekt-config.yml") // point to your custom config defining rules to run, overwriting default behavior
+    baseline = file("$projectDir/detekt-baseline.xml") // a way of suppressing issues before introducing detekt
+    autoCorrect = true // enable auto-correction of issues
 }

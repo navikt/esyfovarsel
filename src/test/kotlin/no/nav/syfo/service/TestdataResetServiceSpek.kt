@@ -4,9 +4,6 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.syfo.db.arbeidstakerAktorId1
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PUtsendtVarsel
@@ -27,6 +24,9 @@ import no.nav.syfo.planner.narmesteLederFnr1
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import org.amshove.kluent.shouldBeEqualTo
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 class TestdataResetServiceSpek : DescribeSpec({
     describe("TestdataResetServiceSpek") {
@@ -81,14 +81,14 @@ class TestdataResetServiceSpek : DescribeSpec({
             embeddedDatabase.storeUtsendtVarselFeilet(pUtsendtVarselFeilet)
             embeddedDatabase.storeMikrofrontendSynlighetEntry(mikrofrontendSynlighet)
 
-            //Verify that testdata exists
+            // Verify that testdata exists
             embeddedDatabase.fetchUtsendtVarselByFnr(arbeidstakerFnr1).size shouldBeEqualTo 1
             embeddedDatabase.fetchUtsendtVarselFeiletByFnr(arbeidstakerFnr1).size shouldBeEqualTo 1
             embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(arbeidstakerFnr1).size shouldBeEqualTo 1
 
             testdataResetService.resetTestdata(PersonIdent(arbeidstakerFnr1))
 
-            //Check that testdata is deleted
+            // Check that testdata is deleted
             embeddedDatabase.fetchUtsendtVarselByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
             embeddedDatabase.fetchUtsendtVarselFeiletByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
             embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0

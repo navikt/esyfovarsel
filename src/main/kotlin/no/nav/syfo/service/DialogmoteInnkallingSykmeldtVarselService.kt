@@ -1,49 +1,14 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_BODY
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_TITLE
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_MESSAGE_TEXT
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_BODY
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_TITLE
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_MESSAGE_TEXT
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_BODY
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_TITLE
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_MESSAGE_TEXT
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_BODY
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_TITLE
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_MESSAGE_TEXT
-import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST
-import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST
-import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST
-import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST
-import no.nav.syfo.DINE_SYKMELDTE_DIALOGMOTE_AVLYST_TEKST
-import no.nav.syfo.DINE_SYKMELDTE_DIALOGMOTE_INNKALT_TEKST
-import no.nav.syfo.DINE_SYKMELDTE_DIALOGMOTE_NYTT_TID_STED_TEKST
-import no.nav.syfo.DINE_SYKMELDTE_DIALOGMOTE_REFERAT_TEKST
-import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_AVLYSNING_MESSAGE_TEXT
-import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_ENDRING_MESSAGE_TEXT
-import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_INNKALLING_MESSAGE_TEXT
-import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_REFERAT_MESSAGE_TEXT
+import no.nav.syfo.*
+import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_AVLYST
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_INNKALT
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_NYTT_TID_STED
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_REFERAT
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_AVLYST
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_INNKALT
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_LEST
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_NYTT_TID_STED
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT
-import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
-import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataNarmesteLeder
-import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
-import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
@@ -52,10 +17,9 @@ import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.Serializable
+import java.net.URI
 import java.net.URL
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
-import java.util.*
 
 enum class DittSykefravaerHendelsetypeDialogmoteInnkalling : Serializable {
     ESYFOVARSEL_DIALOGMOTE_INNKALT,
@@ -65,23 +29,14 @@ enum class DittSykefravaerHendelsetypeDialogmoteInnkalling : Serializable {
     ESYFOVARSEL_DIALOGMOTE_LEST,
 }
 
-class DialogmoteInnkallingVarselService(
+class DialogmoteInnkallingSykmeldtVarselService(
     val senderFacade: SenderFacade,
     val dialogmoterUrl: String,
     val accessControlService: AccessControlService,
+    val database: DatabaseInterface,
 ) {
     val WEEKS_BEFORE_DELETE = 4L
-    val SMS_KEY = "smsText"
-    val EMAIL_TITLE_KEY = "emailTitle"
-    val EMAIL_BODY_KEY = "emailBody"
-    private val log = LoggerFactory.getLogger(DialogmoteInnkallingVarselService::class.qualifiedName)
-
-    suspend fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
-        log.info("[DIALOGMOTE_STATUS_VARSEL_SERVICE]: sender dialogmote hendelse til narmeste leder ${varselHendelse.type}")
-        varselHendelse.data = dataToVarselDataNarmesteLeder(varselHendelse.data)
-        sendVarselTilDineSykmeldte(varselHendelse)
-        sendVarselTilArbeidsgiverNotifikasjon(varselHendelse)
-    }
+    private val log = LoggerFactory.getLogger(DialogmoteInnkallingSykmeldtVarselService::class.qualifiedName)
 
     suspend fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         val jounalpostData = dataToVarselDataJournalpost(varselHendelse.data)
@@ -102,10 +57,12 @@ class DialogmoteInnkallingVarselService(
     }
 
     fun getVarselUrl(varselHendelse: ArbeidstakerHendelse, varselUuid: String): URL {
-        if (SM_DIALOGMOTE_REFERAT === varselHendelse.type) {
-            return URL("$dialogmoterUrl/sykmeldt/referat/$varselUuid")
+        val urlString = if (SM_DIALOGMOTE_REFERAT === varselHendelse.type) {
+            "$dialogmoterUrl/sykmeldt/referat/$varselUuid"
+        } else {
+            "$dialogmoterUrl/sykmeldt/moteinnkalling"
         }
-        return URL("$dialogmoterUrl/sykmeldt/moteinnkalling")
+        return URI(urlString).toURL()
     }
 
     private fun varsleArbeidstakerViaBrukernotifkasjoner(
@@ -135,51 +92,9 @@ class DialogmoteInnkallingVarselService(
                 journalpostId = journalpostId
             )
         } catch (e: RuntimeException) {
-            log.info("Feil i sending av fysisk brev om dialogmote: ${e.message} for hendelsetype: ${arbeidstakerHendelse.type.name}")
-        }
-    }
-
-    private suspend fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
-        val texts = getArbeisgiverTexts(varselHendelse)
-        val sms = texts[SMS_KEY]
-        val emailTitle = texts[EMAIL_TITLE_KEY]
-        val emailBody = texts[EMAIL_BODY_KEY]
-
-        if (!sms.isNullOrBlank() && !emailTitle.isNullOrBlank() && !emailBody.isNullOrBlank()) {
-            val input = ArbeidsgiverNotifikasjonInput(
-                uuid = UUID.randomUUID(),
-                virksomhetsnummer = varselHendelse.orgnummer,
-                narmesteLederFnr = varselHendelse.narmesteLederFnr,
-                ansattFnr = varselHendelse.arbeidstakerFnr,
-                merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
-                messageText = sms,
-                emailTitle = emailTitle,
-                emailBody = emailBody,
-                hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
-                meldingstype = Meldingstype.OPPGAVE,
+            log.info(
+                "Feil i sending av fysisk brev om dialogmote: ${e.message} for hendelsetype: ${arbeidstakerHendelse.type.name}"
             )
-
-            senderFacade.sendTilArbeidsgiverNotifikasjon(
-                varselHendelse,
-                input,
-            )
-        } else {
-            log.warn("Kunne ikke mappe tekstene til arbeidsgiver-tekst for dialogmote varsel av type: ${varselHendelse.type.name}")
-        }
-    }
-
-    private fun sendVarselTilDineSykmeldte(varselHendelse: NarmesteLederHendelse) {
-        val varselText = getDineSykmeldteVarselText(varselHendelse.type)
-        if (varselText.isNotBlank()) {
-            val dineSykmeldteVarsel = DineSykmeldteVarsel(
-                ansattFnr = varselHendelse.arbeidstakerFnr,
-                orgnr = varselHendelse.orgnummer,
-                oppgavetype = varselHendelse.type.toDineSykmeldteHendelseType().toString(),
-                lenke = null,
-                tekst = varselText,
-                utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
-            )
-            senderFacade.sendTilDineSykmeldte(varselHendelse, dineSykmeldteVarsel)
         }
     }
 
@@ -194,73 +109,6 @@ class DialogmoteInnkallingVarselService(
                 throw IllegalArgumentException("Kan ikke mappe $hendelseType til arbeidstaker varsel text")
             }
         }
-    }
-
-    private fun getDineSykmeldteVarselText(hendelseType: HendelseType): String {
-        return when (hendelseType) {
-            NL_DIALOGMOTE_INNKALT -> DINE_SYKMELDTE_DIALOGMOTE_INNKALT_TEKST
-            NL_DIALOGMOTE_AVLYST -> DINE_SYKMELDTE_DIALOGMOTE_AVLYST_TEKST
-            NL_DIALOGMOTE_NYTT_TID_STED -> DINE_SYKMELDTE_DIALOGMOTE_NYTT_TID_STED_TEKST
-            NL_DIALOGMOTE_REFERAT -> DINE_SYKMELDTE_DIALOGMOTE_REFERAT_TEKST
-            else -> {
-                throw IllegalArgumentException("Kan ikke mappe $hendelseType til Dine sykmeldte varsel text")
-            }
-        }
-    }
-
-    private fun getArbeisgiverTexts(hendelse: NarmesteLederHendelse): HashMap<String, String> {
-        return when (hendelse.type) {
-            NL_DIALOGMOTE_INNKALT -> hashMapOf(
-                SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_MESSAGE_TEXT,
-                EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_TITLE,
-                EMAIL_BODY_KEY to getEmailBody(hendelse),
-            )
-
-            NL_DIALOGMOTE_AVLYST -> hashMapOf(
-                SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_MESSAGE_TEXT,
-                EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_TITLE,
-                EMAIL_BODY_KEY to getEmailBody(hendelse),
-            )
-
-            NL_DIALOGMOTE_NYTT_TID_STED -> hashMapOf(
-                SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_MESSAGE_TEXT,
-                EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_TITLE,
-                EMAIL_BODY_KEY to getEmailBody(hendelse),
-            )
-
-            NL_DIALOGMOTE_REFERAT -> hashMapOf(
-                SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_MESSAGE_TEXT,
-                EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_TITLE,
-                EMAIL_BODY_KEY to getEmailBody(hendelse),
-            )
-
-            else -> hashMapOf()
-        }
-    }
-
-    private fun getEmailBody(hendelse: NarmesteLederHendelse): String {
-        var greeting = "<body>Hei.<br><br>"
-
-        val narmesteLeder = hendelse.data as VarselDataNarmesteLeder
-        if (!narmesteLeder.navn.isNullOrBlank()) {
-            greeting = "Til <body>${narmesteLeder.navn},<br><br>"
-        }
-
-        return when (hendelse.type) {
-            NL_DIALOGMOTE_INNKALT -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_BODY
-            NL_DIALOGMOTE_AVLYST -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_BODY
-            NL_DIALOGMOTE_REFERAT -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_BODY
-            NL_DIALOGMOTE_NYTT_TID_STED -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_BODY
-            else -> ""
-        }
-    }
-
-    fun dataToVarselDataNarmesteLeder(data: Any?): VarselDataNarmesteLeder {
-        return data?.let {
-            val varselData = data.toVarselData()
-            varselData.narmesteLeder
-                ?: throw IOException("VarselDataNarmesteLeder har feil format")
-        } ?: throw IllegalArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
 
     fun getMeldingTypeForSykmeldtVarsling(hendelseType: HendelseType): InternalBrukernotifikasjonType {
@@ -297,7 +145,9 @@ class DialogmoteInnkallingVarselService(
             SM_DIALOGMOTE_NYTT_TID_STED -> DITT_SYKEFRAVAER_DIALOGMOTE_ENDRING_MESSAGE_TEXT
             SM_DIALOGMOTE_LEST -> ""
             else -> {
-                log.error("Klarte ikke mappe varsel av type ${arbeidstakerHendelse.type} ved mapping hendelsetype til ditt sykefravar melding tekst")
+                log.error(
+                    "Klarte ikke mappe varsel av type ${arbeidstakerHendelse.type} ved mapping hendelsetype til ditt sykefravar melding tekst"
+                )
                 null
             }
         }
@@ -311,7 +161,9 @@ class DialogmoteInnkallingVarselService(
             SM_DIALOGMOTE_NYTT_TID_STED -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_NYTT_TID_STED.toString()
             SM_DIALOGMOTE_LEST -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_LEST.toString()
             else -> {
-                log.error("Klarte ikke mappe varsel av type ${arbeidstakerHendelse.type} ved mapping hendelsetype til ditt sykefravar hendelsetype")
+                log.error(
+                    "Klarte ikke mappe varsel av type ${arbeidstakerHendelse.type} ved mapping hendelsetype til ditt sykefravar hendelsetype"
+                )
                 null
             }
         }

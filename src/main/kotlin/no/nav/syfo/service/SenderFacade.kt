@@ -1,8 +1,5 @@
 package no.nav.syfo.service
 
-import java.net.URL
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.Kanal
@@ -11,13 +8,21 @@ import no.nav.syfo.db.domain.Kanal.BREV
 import no.nav.syfo.db.domain.Kanal.BRUKERNOTIFIKASJON
 import no.nav.syfo.db.domain.Kanal.DINE_SYKMELDTE
 import no.nav.syfo.db.domain.Kanal.DITT_SYKEFRAVAER
+import no.nav.syfo.db.domain.PKalenderInput
+import no.nav.syfo.db.domain.PSakInput
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
+import no.nav.syfo.db.fetchUferdigstilteNarmesteLederVarsler
 import no.nav.syfo.db.fetchUferdigstilteVarsler
+import no.nav.syfo.db.getArbeidsgivernotifikasjonerKalenderavtale
+import no.nav.syfo.db.getPaagaaendeArbeidsgivernotifikasjonerSak
 import no.nav.syfo.db.setUferdigstiltUtsendtVarselToForcedLetter
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
+import no.nav.syfo.db.storeArbeidsgivernotifikasjonerKalenderavtale
+import no.nav.syfo.db.storeArbeidsgivernotifikasjonerSak
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
+import no.nav.syfo.db.updateArbeidsgivernotifikasjonerSakStatus
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
@@ -26,9 +31,18 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProdu
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.KalenderTilstand
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyKalenderInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyStatusSakInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.OppdaterKalenderInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toPKalenderInput
 import no.nav.syfo.utils.enumValueOfOrNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.URL
+import java.time.LocalDateTime
+import java.util.*
 
 class SenderFacade(
     private val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
@@ -150,6 +164,80 @@ class SenderFacade(
         }
     }
 
+    suspend fun createNewKalenderavtale(
+        kalenderInput: NyKalenderInput
+    ) {
+        val kalenderId = arbeidsgiverNotifikasjonService.createNewKalenderavtale(kalenderInput)
+        require(kalenderId != null) { "Failed to create new kalenderavtale" }
+
+        database.storeArbeidsgivernotifikasjonerKalenderavtale(kalenderInput.toPKalenderInput(kalenderId))
+    }
+
+    suspend fun createNewSak(sakInput: NySakInput): String {
+        val createdSak = arbeidsgiverNotifikasjonService.createNewSak(sakInput)
+        require(createdSak != null) { "Failed to create new sak" }
+
+        return database.storeArbeidsgivernotifikasjonerSak(sakInput)
+    }
+
+    fun getPaagaaendeSak(narmesteLederId: String, merkelapp: String): PSakInput? {
+        return database.getPaagaaendeArbeidsgivernotifikasjonerSak(
+            narmestelederId = narmesteLederId,
+            merkelapp = merkelapp
+        )
+    }
+
+    suspend fun nyStatusSak(
+        sakId: String,
+        nyStatusSakInput: NyStatusSakInput
+    ) {
+        val oppdatertSak = arbeidsgiverNotifikasjonService.nyStatusSak(nyStatusSakInput)
+        require(oppdatertSak != null) { "Failed to update sak" }
+        database.updateArbeidsgivernotifikasjonerSakStatus(sakId, nyStatusSakInput.sakStatus)
+    }
+
+    suspend fun updateKalenderavtale(
+        sakId: String,
+        grupperingsId: String,
+        nyTilstand: KalenderTilstand,
+        nyTekst: String? = null,
+        hardDeleteTidspunkt: LocalDateTime? = null,
+        ledersEpost: String? = null,
+        epostTittel: String? = null,
+        epostHtmlBody: String? = null,
+    ) {
+        val storedKalenderAvtale = database.getArbeidsgivernotifikasjonerKalenderavtale(sakId)
+        require(storedKalenderAvtale != null) { "Kalenderavtale not found for sakId: $sakId" }
+
+        val oppdaterKalenderInput = OppdaterKalenderInput(
+            id = storedKalenderAvtale.kalenderId,
+            nyTilstand = nyTilstand,
+            nyTekst = nyTekst,
+            hardDeleteTidspunkt = hardDeleteTidspunkt,
+            ledersEpost = ledersEpost,
+            epostTittel = epostTittel,
+            epostHtmlBody = epostHtmlBody
+        )
+
+        val kalenderId = arbeidsgiverNotifikasjonService.updateKalenderavtale(oppdaterKalenderInput)
+        require(kalenderId != null) { "Failed to update kalenderavtale" }
+
+        database.storeArbeidsgivernotifikasjonerKalenderavtale(
+            PKalenderInput(
+                sakId = sakId,
+                eksternId = storedKalenderAvtale.eksternId,
+                grupperingsid = grupperingsId,
+                merkelapp = storedKalenderAvtale.merkelapp,
+                kalenderId = kalenderId,
+                tekst = oppdaterKalenderInput.nyTekst ?: storedKalenderAvtale.tekst,
+                startTidspunkt = storedKalenderAvtale.startTidspunkt,
+                sluttTidspunkt = storedKalenderAvtale.sluttTidspunkt,
+                kalenderavtaleTilstand = oppdaterKalenderInput.nyTilstand ?: storedKalenderAvtale.kalenderavtaleTilstand,
+                hardDeleteDate = oppdaterKalenderInput.hardDeleteTidspunkt
+            )
+        )
+    }
+
     suspend fun ferdigstillVarslerForFnr(fnr: PersonIdent) {
         fetchUferdigstilteVarsler(fnr)
             .forEach { ferdigstillVarsel(it) }
@@ -183,6 +271,16 @@ class SenderFacade(
             .forEach { ferdigstillVarsel(it) }
     }
 
+    suspend fun ferdigstillDineSykmeldteVarsler(varselHendelse: NarmesteLederHendelse) {
+        fetchUferdigstilteNarmesteLederVarsler(
+            arbeidstakerFnr = PersonIdent(varselHendelse.arbeidstakerFnr),
+            narmesteLederFnr = PersonIdent(varselHendelse.narmesteLederFnr),
+            orgnummer = varselHendelse.orgnummer,
+            kanal = DINE_SYKMELDTE,
+        )
+            .forEach { ferdigstillVarsel(it) }
+    }
+
     suspend fun ferdigstillDittSykefravaerVarslerAvTyper(
         varselHendelse: ArbeidstakerHendelse,
         varselTyper: Set<HendelseType>,
@@ -203,6 +301,22 @@ class SenderFacade(
         kanal: Kanal? = null,
     ): List<PUtsendtVarsel> {
         return database.fetchUferdigstilteVarsler(arbeidstakerFnr)
+            .filter { orgnummer == null || it.orgnummer == orgnummer }
+            .filter { types.isEmpty() || types.contains(enumValueOfOrNull<HendelseType>(it.type)) }
+            .filter { kanal == null || it.kanal == kanal.name }
+    }
+
+    fun fetchUferdigstilteNarmesteLederVarsler(
+        arbeidstakerFnr: PersonIdent,
+        narmesteLederFnr: PersonIdent,
+        orgnummer: String? = null,
+        types: Set<HendelseType> = emptySet(),
+        kanal: Kanal? = null,
+    ): List<PUtsendtVarsel> {
+        return database.fetchUferdigstilteNarmesteLederVarsler(
+            sykmeldtFnr = arbeidstakerFnr,
+            narmesteLederFnr = narmesteLederFnr
+        )
             .filter { orgnummer == null || it.orgnummer == orgnummer }
             .filter { types.isEmpty() || types.contains(enumValueOfOrNull<HendelseType>(it.type)) }
             .filter { kanal == null || it.kanal == kanal.name }
@@ -274,7 +388,9 @@ class SenderFacade(
     ) {
         try {
             fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType, tvingSentralPrint = true)
-            log.info("[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sending direct sentral print letter with journalpostId ${journalpostId} succeded, storing in database")
+            log.info(
+                "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sending direct sentral print letter with journalpostId $journalpostId succeded, storing in database"
+            )
             lagreUtsendtArbeidstakerVarsel(
                 BREV,
                 varselHendelse,
@@ -284,7 +400,9 @@ class SenderFacade(
             )
             database.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef = uuid)
         } catch (e: Exception) {
-            log.warn("[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: Error while sending brev til direct sentral print: ${e.message}")
+            log.warn(
+                "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: Error while sending brev til direct sentral print: ${e.message}"
+            )
         }
     }
 

@@ -24,4 +24,3 @@ class FysiskBrevUtsendingService(
         log.info("Sendte til print, bestillingsId er $bestillingsId, varsel med UUID: $uuid")
     }
 }
-

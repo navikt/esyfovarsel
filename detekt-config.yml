@@ -1,0 +1,16 @@
+style:
+  MagicNumber:
+    active: false
+  ReturnCount:
+    active: false
+  ThrowsCount:
+    active: false
+config:
+  validation: true
+  warningsAsErrors: true
+exceptions:
+  TooGenericExceptionCaught:
+    active: false
+complexity:
+  LongParameterList:
+    active: false

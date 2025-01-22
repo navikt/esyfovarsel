@@ -1,6 +1,5 @@
 package no.nav.syfo.utils
 
-
 /**
  * Returns an enum entry with the specified name or `null` if no such entry was found.
  */

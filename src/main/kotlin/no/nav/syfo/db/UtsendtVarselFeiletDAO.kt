@@ -1,9 +1,9 @@
 package no.nav.syfo.db
 
-import java.sql.Timestamp
-import java.util.*
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.domain.PersonIdent
+import java.sql.Timestamp
+import java.util.*
 
 fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
     val insertStatement = """INSERT INTO UTSENDING_VARSEL_FEILET (
@@ -19,7 +19,8 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
         kanal,
         feilmelding,
         utsendt_forsok_tidspunkt,
-        is_forced_letter) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""".trimIndent()
+        is_forced_letter) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """.trimIndent()
 
     connection.use { connection ->
         connection.prepareStatement(insertStatement).use {

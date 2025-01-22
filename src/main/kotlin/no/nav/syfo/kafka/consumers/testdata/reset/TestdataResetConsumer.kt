@@ -33,9 +33,10 @@ class TestdataResetConsumer(
                     if (it.value() != null) {
                         testdataResetService.resetTestdata(PersonIdent(it.value()))
                     } else {
-                        log.warn("TestdataResetConsumer: Value of ConsumerRecord from topic $topicTestdataReset is null")
+                        log.warn(
+                            "TestdataResetConsumer: Value of ConsumerRecord from topic $topicTestdataReset is null"
+                        )
                     }
-
                 } catch (e: Exception) {
                     log.error("TestdataResetConsumer: Exception in [$topicTestdataReset]-listener: ${e.message}", e)
                 }

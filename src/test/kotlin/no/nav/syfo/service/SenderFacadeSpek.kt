@@ -107,7 +107,9 @@ class SenderFacadeSpek : DescribeSpec({
                     eksternReferanse = eksternRefArbeidsgiverNotifikasjoner
                 )
             }
-            verify(exactly = 1) { dineSykmeldteHendelseKafkaProducer.ferdigstillVarsel(eksternReferanse = eksternRefDineSykmeldte) }
+            verify(
+                exactly = 1
+            ) { dineSykmeldteHendelseKafkaProducer.ferdigstillVarsel(eksternReferanse = eksternRefDineSykmeldte) }
             verify(exactly = 1) { brukernotifikasjonerService.ferdigstillVarsel(uuid = eksternRefBrukernotifikasjoner) }
             verify(exactly = 1) {
                 dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(

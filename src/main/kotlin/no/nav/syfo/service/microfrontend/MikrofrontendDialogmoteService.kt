@@ -2,6 +2,9 @@ package no.nav.syfo.service.microfrontend
 
 import no.nav.syfo.db.*
 import no.nav.syfo.db.domain.toMikrofrontendSynlighet
+import no.nav.syfo.exceptions.DuplicateMotebehovException
+import no.nav.syfo.exceptions.MotebehovAfterBookingException
+import no.nav.syfo.exceptions.VeilederAlreadyBookedMeetingException
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.getSynligTom
@@ -9,9 +12,6 @@ import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideRecord
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import no.nav.syfo.service.microfrontend.MikrofrontendService.Companion.actionDisabled
 import no.nav.syfo.service.microfrontend.MikrofrontendService.Companion.actionEnabled
-import no.nav.syfo.utils.DuplicateMotebehovException
-import no.nav.syfo.utils.MotebehovAfterBookingException
-import no.nav.syfo.utils.VeilederAlreadyBookedMeetingException
 import org.slf4j.LoggerFactory
 
 class MikrofrontendDialogmoteService(

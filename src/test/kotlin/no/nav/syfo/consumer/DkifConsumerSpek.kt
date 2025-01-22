@@ -12,7 +12,7 @@ import org.amshove.kluent.shouldNotBe
 
 const val fnrNonReservedUser = fnr1
 const val fnrReservedUser = fnr2
-const val fnrInvalid = "${fnr1}-with-invalid-input"
+const val fnrInvalid = "$fnr1-with-invalid-input"
 
 class DkifConsumerSpek : DescribeSpec({
 
@@ -45,7 +45,6 @@ class DkifConsumerSpek : DescribeSpec({
             val dkifResponse = dkifConsumer.person(fnrReservedUser)
             dkifResponse shouldNotBe null
             dkifResponse!!.kanVarsles shouldBeEqualTo false
-
         }
 
         it("DKIF consumer should return null on invalid aktorid") {

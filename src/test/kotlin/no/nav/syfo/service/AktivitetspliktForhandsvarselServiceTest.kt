@@ -16,7 +16,12 @@ const val SM_FNR = "123456789"
 class AktivitetskravVarselServiceTest : DescribeSpec({
     val accessControlService = mockk<AccessControlService>()
     val senderFacade = mockk<SenderFacade>(relaxed = true)
-    val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(senderFacade, accessControlService, "http://dokumentarkivOppfolgingDocumentsPageUrl", true)
+    val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(
+        senderFacade,
+        accessControlService,
+        "http://dokumentarkivOppfolgingDocumentsPageUrl",
+        true
+    )
 
     beforeTest {
         clearAllMocks()

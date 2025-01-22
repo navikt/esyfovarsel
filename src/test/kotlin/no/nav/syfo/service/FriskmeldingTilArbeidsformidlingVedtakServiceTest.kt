@@ -10,7 +10,6 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
 import org.amshove.kluent.shouldBeEqualTo
 import java.io.IOException
 
-
 class FriskmeldingTilArbeidsformidlingVedtakServiceTest : DescribeSpec({
     val senderFacade = mockk<SenderFacade>(relaxed = true)
     val friskmeldingTilArbeidsformidlingVedtakService = FriskmeldingTilArbeidsformidlingVedtakService(senderFacade)
@@ -23,7 +22,7 @@ class FriskmeldingTilArbeidsformidlingVedtakServiceTest : DescribeSpec({
         arbeidstakerFnr = SM_FNR,
         orgnummer = null,
     )
-    
+
     beforeTest {
         clearAllMocks()
     }
@@ -48,7 +47,7 @@ class FriskmeldingTilArbeidsformidlingVedtakServiceTest : DescribeSpec({
                     journalpost = VarselDataJournalpost(uuid = "something", id = null)
                 )
             )
-            
+
             val exception = shouldThrow<IOException> {
                 friskmeldingTilArbeidsformidlingVedtakService.sendVarselTilArbeidstaker(feilendeHendelse)
             }

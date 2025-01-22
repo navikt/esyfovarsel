@@ -17,8 +17,6 @@ import io.ktor.server.engine.stop
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.routing.routing
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -30,6 +28,7 @@ import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsume
 import no.nav.syfo.consumer.dkif.DkifConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
+import no.nav.syfo.consumer.pdl.PdlClient
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.DatabaseInterface
@@ -45,28 +44,16 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaPr
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
-import no.nav.syfo.service.AccessControlService
-import no.nav.syfo.service.AktivitetspliktForhandsvarselVarselService
-import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
-import no.nav.syfo.service.ArbeidsuforhetForhandsvarselService
-import no.nav.syfo.service.BrukernotifikasjonerService
-import no.nav.syfo.service.DialogmoteInnkallingVarselService
-import no.nav.syfo.service.FriskmeldingTilArbeidsformidlingVedtakService
-import no.nav.syfo.service.FysiskBrevUtsendingService
-import no.nav.syfo.service.ManglendeMedvirkningVarselService
-import no.nav.syfo.service.MerVeiledningVarselService
-import no.nav.syfo.service.MotebehovVarselService
-import no.nav.syfo.service.OppfolgingsplanVarselService
-import no.nav.syfo.service.SenderFacade
-import no.nav.syfo.service.SykmeldingService
-import no.nav.syfo.service.TestdataResetService
-import no.nav.syfo.service.VarselBusService
+import no.nav.syfo.service.*
+import no.nav.syfo.service.DialogmoteInnkallingNarmesteLederVarselService
 import no.nav.syfo.service.microfrontend.MikrofrontendAktivitetskravService
 import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
 import no.nav.syfo.service.microfrontend.MikrofrontendMerOppfolgingService
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.utils.LeaderElection
 import no.nav.syfo.utils.RunOnElection
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 val state: ApplicationState = ApplicationState()
 val backgroundTasksContext = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
@@ -115,6 +102,7 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
         narmesteLederService,
         env.urlEnv.baseUrlDineSykmeldte,
     )
+    val pdlClient = PdlClient(env.urlEnv, azureAdTokenConsumer)
     val journalpostdistribusjonConsumer = JournalpostdistribusjonConsumer(env.urlEnv, azureAdTokenConsumer)
 
     val brukernotifikasjonKafkaProducer = BrukernotifikasjonKafkaProducer(env)
@@ -141,10 +129,17 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
         sykmeldingService,
         env.urlEnv.dialogmoterUrl,
     )
-    val dialogmoteInnkallingVarselService = DialogmoteInnkallingVarselService(
-        senderFacade,
-        env.urlEnv.dialogmoterUrl,
-        accessControlService,
+    val dialogmoteInnkallingSykmeldtVarselService = DialogmoteInnkallingSykmeldtVarselService(
+        senderFacade = senderFacade,
+        dialogmoterUrl = env.urlEnv.dialogmoterUrl,
+        accessControlService = accessControlService,
+        database = database
+    )
+    val dialogmoteInnkallingNarmesteLederVarselService = DialogmoteInnkallingNarmesteLederVarselService(
+        senderFacade = senderFacade,
+        dialogmoterUrl = env.urlEnv.dialogmoterUrl,
+        narmesteLederService = narmesteLederService,
+        pdlClient = pdlClient,
     )
 
     val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(
@@ -182,7 +177,8 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
             senderFacade,
             motebehovVarselService,
             oppfolgingsplanVarselService,
-            dialogmoteInnkallingVarselService,
+            dialogmoteInnkallingSykmeldtVarselService,
+            dialogmoteInnkallingNarmesteLederVarselService,
             aktivitetspliktForhandsvarselVarselService,
             arbeidsuforhetForhandsvarselService,
             mikrofrontendService,

@@ -14,12 +14,16 @@ class SendAktivitetspliktLetterToSentralPrintJob(private val db: DatabaseInterfa
     suspend fun sendLetterToTvingSentralPrintFromJob(): Int {
         val unreadVarslerOverdude = db.fetchAlleUferdigstilteAktivitetspliktVarsler()
 
-        log.info("SendAktivitetspliktLetterToSentralPrintJob is about to send ${unreadVarslerOverdude.size} forced letters")
+        log.info(
+            "SendAktivitetspliktLetterToSentralPrintJob is about to send ${unreadVarslerOverdude.size} forced letters"
+        )
         var sentToTvingSentralPrintLettersAmount = 0
 
         unreadVarslerOverdude.forEach { pUtsendtVarsel ->
             if (pUtsendtVarsel.journalpostId.isNullOrBlank()) {
-                log.error("[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: User can not be notified by letter due to missing journalpostId in varsel with uuid: ${pUtsendtVarsel.uuid}")
+                log.error(
+                    "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: User can not be notified by letter due to missing journalpostId in varsel with uuid: ${pUtsendtVarsel.uuid}"
+                )
             } else {
                 senderFacade.sendBrevTilTvingSentralPrint(
                     uuid = pUtsendtVarsel.uuid,
@@ -36,7 +40,9 @@ class SendAktivitetspliktLetterToSentralPrintJob(private val db: DatabaseInterfa
                 sentToTvingSentralPrintLettersAmount++
             }
         }
-        log.info("[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sendLetterToTvingSentralPrintFromJob sent ${sentToTvingSentralPrintLettersAmount} letters")
+        log.info(
+            "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sendLetterToTvingSentralPrintFromJob sent $sentToTvingSentralPrintLettersAmount letters"
+        )
         return sentToTvingSentralPrintLettersAmount
     }
 }

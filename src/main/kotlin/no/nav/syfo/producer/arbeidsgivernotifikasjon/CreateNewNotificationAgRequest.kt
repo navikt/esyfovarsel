@@ -6,7 +6,7 @@ data class NotificationAgRequest(
 )
 
 enum class EpostSendevinduTypes {
-    LOEPENDE;
+    LOEPENDE
 }
 
 sealed interface Variables

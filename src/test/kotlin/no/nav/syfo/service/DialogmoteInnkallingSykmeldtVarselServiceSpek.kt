@@ -2,14 +2,14 @@ package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
-import io.mockk.clearAllMocks
-import io.mockk.coEvery
-import io.mockk.coJustRun
-import io.mockk.coVerify
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
+import no.nav.syfo.consumer.narmesteLeder.NarmesteLederRelasjon
+import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
+import no.nav.syfo.consumer.narmesteLeder.Tilgang
+import no.nav.syfo.consumer.pdl.*
+import no.nav.syfo.db.Database
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
@@ -29,13 +29,16 @@ import no.nav.syfo.testutil.mocks.orgnummer
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
 
-class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
+class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
     val accessControlService = mockk<AccessControlService>()
     val dineSykmeldteHendelseKafkaProducer = mockk<DineSykmeldteHendelseKafkaProducer>()
     val dittSykefravaerMeldingKafkaProducer = mockk<DittSykefravaerMeldingKafkaProducer>(relaxed = true)
     val brukernotifikasjonerService = mockk<BrukernotifikasjonerService>(relaxed = true)
-    val arbeidsgiverNotifikasjonService = mockk<ArbeidsgiverNotifikasjonService>()
+    val arbeidsgiverNotifikasjonService = mockk<ArbeidsgiverNotifikasjonService>(relaxed = true)
     val fysiskBrevUtsendingService = mockk<FysiskBrevUtsendingService>()
+    val narmesteLederService = mockk<NarmesteLederService>()
+    val database = mockk<Database>(relaxed = true)
+    val pdlClient = mockk<PdlClient>()
     val embeddedDatabase = EmbeddedDatabase()
     val fakeDialogmoterUrl = "http://localhost/dialogmoter"
     val journalpostUuid = "97b886fe-6beb-40df-af2b-04e504bc340c"
@@ -51,10 +54,11 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
         fysiskBrevUtsendingService,
         embeddedDatabase,
     )
-    val dialogmoteInnkallingVarselService = DialogmoteInnkallingVarselService(
+    val dialogmoteInnkallingSykmeldtVarselService = DialogmoteInnkallingSykmeldtVarselService(
         senderFacade,
         fakeDialogmoterUrl,
         accessControlService,
+        database
     )
     val hendelseType = HendelseType.SM_DIALOGMOTE_INNKALT
 
@@ -64,11 +68,24 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
         beforeTest {
             clearAllMocks()
             embeddedDatabase.dropData()
+
+            coEvery { narmesteLederService.getNarmesteLederRelasjon(any(), any()) } returns NarmesteLederRelasjon(
+                narmesteLederId = "1234",
+                tilganger = listOf(Tilgang.SYKMELDING),
+                navn = "Hest hestesen",
+            )
+            coEvery { pdlClient.hentPerson(any()) } returns HentPersonData(
+                hentPerson = HentPerson(
+                    foedselsdato = listOf(Foedselsdato(foedselsdato = "1990-01-01")),
+                    navn = listOf(Navn(fornavn = "Test", mellomnavn = null, etternavn = "Testesen")),
+                )
+            )
+            coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns "123"
         }
 
         it("Non-reserved users should be notified externally") {
             coEvery { accessControlService.getUserAccessStatus(fnr1) } returns
-                    UserAccessStatus(fnr1, true)
+                UserAccessStatus(fnr1, true)
 
             val varselHendelse = ArbeidstakerHendelse(
                 hendelseType,
@@ -77,14 +94,14 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 fnr1,
                 orgnummer,
             )
-            dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse)
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
 
             verify(exactly = 1) {
                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     uuid = any(),
                     mottakerFnr = fnr1,
                     content = any(),
-                    url = dialogmoteInnkallingVarselService.getVarselUrl(varselHendelse, journalpostUuid),
+                    url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
                     smsContent = null,
                     varseltype = any(),
                     eksternVarsling = any(),
@@ -101,7 +118,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
         it("Reserved users should be notified physically") {
             coEvery { accessControlService.getUserAccessStatus(fnr2) } returns
-                    UserAccessStatus(fnr2, canUserBeDigitallyNotified = false)
+                UserAccessStatus(fnr2, canUserBeDigitallyNotified = false)
 
             val varselHendelse = ArbeidstakerHendelse(
                 hendelseType,
@@ -110,7 +127,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 fnr2,
                 orgnummer,
             )
-            dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse)
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
 
             coVerify(exactly = 1) {
                 fysiskBrevUtsendingService.sendBrev(
@@ -141,7 +158,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
         }
         it("Reserved users should get brevpost") {
             coEvery { accessControlService.getUserAccessStatus(fnr3) } returns
-                    UserAccessStatus(fnr3, canUserBeDigitallyNotified = false)
+                UserAccessStatus(fnr3, canUserBeDigitallyNotified = false)
 
             val varselHendelse = ArbeidstakerHendelse(
                 hendelseType,
@@ -150,13 +167,13 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 fnr3,
                 orgnummer,
             )
-            dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse)
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
             verify(exactly = 0) {
                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     uuid = any(),
                     mottakerFnr = fnr3,
                     content = any(),
-                    url = dialogmoteInnkallingVarselService.getVarselUrl(varselHendelse, journalpostUuid),
+                    url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
                     varseltype = any(),
                     eksternVarsling = any(),
                     smsContent = any()
@@ -179,7 +196,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
         it("Users should not be notified when lest hendelse is sent") {
             coEvery { accessControlService.getUserAccessStatus(arbeidstakerFnr1) } returns
-                    UserAccessStatus(arbeidstakerFnr1, true)
+                UserAccessStatus(arbeidstakerFnr1, true)
 
             val varselHendelse = ArbeidstakerHendelse(
                 type = HendelseType.SM_DIALOGMOTE_LEST,
@@ -188,7 +205,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 arbeidstakerFnr1,
                 orgnummer,
             )
-            dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelse)
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
 
             verify(exactly = 1) {
                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
@@ -213,7 +230,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
         it("Endring hendelse skal ferdigstille tidligere innkalling") {
             coEvery { accessControlService.getUserAccessStatus("66666666666") } returns
-                    UserAccessStatus("66666666666", true)
+                UserAccessStatus("66666666666", true)
             coEvery { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) } returns "123"
 
             val varselHendelseInnkalling = ArbeidstakerHendelse(
@@ -224,7 +241,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 orgnummer,
             )
 
-            dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelseInnkalling)
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseInnkalling)
 
             verify(atLeast = 1) {
                 dittSykefravaerMeldingKafkaProducer.sendMelding(
@@ -254,7 +271,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 orgnummer,
             )
 
-            dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)
 
             val utsendte2 = senderFacade.fetchUferdigstilteVarsler(
                 arbeidstakerFnr = PersonIdent("66666666666"),
@@ -268,7 +285,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
             innkallinger2 shouldBeEqualTo null
             endringer2 shouldNotBeEqualTo null
 
-            dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)
 
             val utsendte3 = senderFacade.fetchUferdigstilteVarsler(
                 arbeidstakerFnr = PersonIdent("66666666666"),
@@ -287,7 +304,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
         it("Avlysning hendelse skal ferdigstille tidligere innkalling") {
             coEvery { accessControlService.getUserAccessStatus("66666666666") } returns
-                    UserAccessStatus("66666666666", true)
+                UserAccessStatus("66666666666", true)
             coEvery { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) } returns "456"
 
             val varselHendelseInnkalling = ArbeidstakerHendelse(
@@ -298,7 +315,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 orgnummer,
             )
 
-            dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelseInnkalling)
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseInnkalling)
 
             verify(atLeast = 1) {
                 dittSykefravaerMeldingKafkaProducer.sendMelding(
@@ -328,7 +345,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 orgnummer,
             )
 
-            dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelseAvlyst)
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseAvlyst)
 
             val utsendte2 = senderFacade.fetchUferdigstilteVarsler(
                 arbeidstakerFnr = PersonIdent("66666666666"),
@@ -342,7 +359,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
             innkallinger2 shouldBeEqualTo null
             avlysninger2 shouldNotBeEqualTo null
 
-            dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelseAvlyst)
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseAvlyst)
 
             val utsendte3 = senderFacade.fetchUferdigstilteVarsler(
                 arbeidstakerFnr = PersonIdent("66666666666"),
@@ -361,7 +378,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
 
         it("Ny innkalling hendelse skal ferdigstille tidligere innkalling") {
             coEvery { accessControlService.getUserAccessStatus("66666666666") } returns
-                    UserAccessStatus("66666666666", true)
+                UserAccessStatus("66666666666", true)
             coEvery { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) } returns "789"
 
             val varselHendelseInnkalling = ArbeidstakerHendelse(
@@ -372,7 +389,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 orgnummer,
             )
 
-            dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelseInnkalling)
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseInnkalling)
 
             verify(atLeast = 1) {
                 dittSykefravaerMeldingKafkaProducer.sendMelding(
@@ -399,7 +416,7 @@ class DialogmoteInnkallingVarselServiceSpek : DescribeSpec({
                 orgnummer,
             )
 
-            dialogmoteInnkallingVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)
 
             val utsendte2 = senderFacade.fetchUferdigstilteVarsler(
                 arbeidstakerFnr = PersonIdent("66666666666"),

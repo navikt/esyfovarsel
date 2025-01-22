@@ -1,8 +1,5 @@
 package no.nav.syfo.kafka.producers.brukernotifikasjoner
 
-import java.net.URL
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.producerProperties
 import no.nav.tms.varsel.action.EksternKanal
@@ -16,19 +13,23 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.URL
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 class BrukernotifikasjonKafkaProducer(
     val env: Environment,
 ) {
     val brukernotifikasjonerTopic = "min-side.aapen-brukervarsel-v1"
-    val kafkaProducer = KafkaProducer<String, String>(producerProperties(env).apply {
-        put(
-            put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java),
-            put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java)
-        )
-    })
+    val kafkaProducer = KafkaProducer<String, String>(
+        producerProperties(env).apply {
+            put(
+                put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java),
+                put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java)
+            )
+        }
+    )
     private val log: Logger = LoggerFactory.getLogger(BrukernotifikasjonKafkaProducer::class.java)
-
 
     fun sendBeskjed(
         fnr: String,
@@ -95,7 +96,7 @@ class BrukernotifikasjonKafkaProducer(
         dagerTilDeaktivering: Long?,
     ): String {
         if (varselUrl.toString().length > 200) {
-            log.error("varselUrl for $varseltype is longer than 200 characters: ${varselUrl.toString()} UUID: $uuid")
+            log.error("varselUrl for $varseltype is longer than 200 characters: $varselUrl UUID: $uuid")
         }
 
         val opprettVarsel = VarselActionBuilder.opprett {

@@ -56,11 +56,12 @@ class OppfolgingsplanVarselService(
                 ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT,
                 ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_TITLE,
                 ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_BODY,
-                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
+                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+                meldingstype = Meldingstype.BESKJED,
+                grupperingsid = UUID.randomUUID().toString(),
             )
         )
     }
-
 
     private fun varsleArbeidstakerViaBrukernotifikasjoner(
         varselHendelse: ArbeidstakerHendelse,

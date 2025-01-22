@@ -4,6 +4,10 @@ import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyKalenderInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyStatusSakInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.OppdaterKalenderInput
 import no.nav.syfo.service.Meldingstype.BESKJED
 import no.nav.syfo.service.Meldingstype.OPPGAVE
 import org.slf4j.Logger
@@ -33,31 +37,33 @@ class ArbeidsgiverNotifikasjonService(
         }
 
         if (arbeidsgiverNotifikasjon.narmesteLederFnr !== null && arbeidsgiverNotifikasjon.narmesteLederFnr != narmesteLederRelasjon.narmesteLederFnr) {
-            log.warn("Sender ikke varsel til ag-notifikasjon: den ansatte har nærmeste leder med annet fnr enn mottaker i varselHendelse")
+            log.warn(
+                "Sender ikke varsel til ag-notifikasjon: den ansatte har nærmeste leder med annet fnr enn mottaker i varselHendelse"
+            )
             return
         }
 
         val url = dineSykmeldteUrl + "/${narmesteLederRelasjon.narmesteLederId}"
         val arbeidsgiverNotifikasjonen = ArbeidsgiverNotifikasjon(
-            arbeidsgiverNotifikasjon.uuid.toString(),
-            arbeidsgiverNotifikasjon.virksomhetsnummer,
-            url,
-            narmesteLederRelasjon.narmesteLederFnr!!,
-            arbeidsgiverNotifikasjon.ansattFnr,
-            arbeidsgiverNotifikasjon.messageText,
-            narmesteLederRelasjon.narmesteLederEpost!!,
-            arbeidsgiverNotifikasjon.merkelapp,
-            arbeidsgiverNotifikasjon.emailTitle,
-            arbeidsgiverNotifikasjon.emailBody,
-            arbeidsgiverNotifikasjon.hardDeleteDate,
+            varselId = arbeidsgiverNotifikasjon.uuid.toString(),
+            virksomhetsnummer = arbeidsgiverNotifikasjon.virksomhetsnummer,
+            url = url,
+            narmesteLederFnr = narmesteLederRelasjon.narmesteLederFnr!!,
+            ansattFnr = arbeidsgiverNotifikasjon.ansattFnr,
+            messageText = arbeidsgiverNotifikasjon.messageText,
+            narmesteLederEpostadresse = narmesteLederRelasjon.narmesteLederEpost!!,
+            merkelapp = arbeidsgiverNotifikasjon.merkelapp,
+            emailTitle = arbeidsgiverNotifikasjon.epostTittel,
+            emailBody = arbeidsgiverNotifikasjon.epostHtmlBody,
+            hardDeleteDate = arbeidsgiverNotifikasjon.hardDeleteDate,
+            grupperingsid = arbeidsgiverNotifikasjon.grupperingsid
         )
 
         when (arbeidsgiverNotifikasjon.meldingstype) {
-            BESKJED -> arbeidsgiverNotifikasjonProdusent.createNewNotificationForArbeidsgiver(arbeidsgiverNotifikasjonen)
-            OPPGAVE -> arbeidsgiverNotifikasjonProdusent.createNewTaskForArbeidsgiver(arbeidsgiverNotifikasjonen)
+            BESKJED -> arbeidsgiverNotifikasjonProdusent.createNewBeskjedForArbeidsgiver(arbeidsgiverNotifikasjonen)
+            OPPGAVE -> arbeidsgiverNotifikasjonProdusent.createNewOppgaveForArbeidsgiver(arbeidsgiverNotifikasjonen)
         }
     }
-
 
     suspend fun deleteNotifikasjon(merkelapp: String, eksternReferanse: String) {
         arbeidsgiverNotifikasjonProdusent.deleteNotifikasjonForArbeidsgiver(
@@ -66,6 +72,30 @@ class ArbeidsgiverNotifikasjonService(
                 eksternReferanse,
             ),
         )
+    }
+
+    suspend fun createNewKalenderavtale(
+        nyKalenderInput: NyKalenderInput
+    ): String? {
+        return arbeidsgiverNotifikasjonProdusent.createNewKalenderavtale(
+            nyKalenderInput = nyKalenderInput,
+        )
+    }
+
+    suspend fun createNewSak(sakInput: NySakInput): String? {
+        return arbeidsgiverNotifikasjonProdusent.createNewSak(sakInput)
+    }
+
+    suspend fun nyStatusSak(
+        nyStatusSakInput: NyStatusSakInput
+    ): String? {
+        return arbeidsgiverNotifikasjonProdusent.nyStatusSak(nyStatusSakInput)
+    }
+
+    suspend fun updateKalenderavtale(
+        oppdaterKalenderInput: OppdaterKalenderInput
+    ): String? {
+        return arbeidsgiverNotifikasjonProdusent.updateKalenderavtale(oppdaterKalenderInput)
     }
 }
 
@@ -76,10 +106,11 @@ data class ArbeidsgiverNotifikasjonInput(
     val ansattFnr: String,
     val merkelapp: String,
     val messageText: String,
-    val emailTitle: String,
-    val emailBody: String,
-    val hardDeleteDate: LocalDateTime,
+    val epostTittel: String,
+    val epostHtmlBody: String,
+    val hardDeleteDate: LocalDateTime? = null,
     val meldingstype: Meldingstype = BESKJED,
+    val grupperingsid: String,
 )
 
 enum class Meldingstype {

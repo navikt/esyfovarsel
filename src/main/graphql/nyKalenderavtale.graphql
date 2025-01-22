@@ -1,0 +1,61 @@
+mutation nyKalenderavtale(
+  $virksomhetsnummer: String!,
+  $grupperingsid: String!,
+  $merkelapp: String!,
+  $eksternId: String!,
+  $tekst: String!,
+  $lenke: String!,
+  $mottakere: [MottakerInput!]!,
+  $startTidspunkt: ISO8601DateTime!,
+  $sluttTidspunkt: ISO8601DateTime,
+  $lokasjon: LokasjonInput,
+  $erDigitalt: Boolean,
+  $tilstand: KalenderavtaleTilstand,
+  $eksterneVarsler: [EksterntVarselInput!]!,
+  $paaminnelse: PaaminnelseInput,
+  $hardDelete: FutureTemporalInput
+) {
+  nyKalenderavtale(
+    virksomhetsnummer: $virksomhetsnummer,
+    grupperingsid: $grupperingsid,
+    merkelapp: $merkelapp,
+    eksternId: $eksternId,
+    tekst: $tekst,
+    lenke: $lenke,
+    mottakere: $mottakere,
+    startTidspunkt: $startTidspunkt,
+    sluttTidspunkt: $sluttTidspunkt,
+    lokasjon: $lokasjon,
+    erDigitalt: $erDigitalt,
+    tilstand: $tilstand,
+    eksterneVarsler: $eksterneVarsler,
+    paaminnelse: $paaminnelse,
+    hardDelete: $hardDelete
+  ) {
+    ... on NyKalenderavtaleVellykket {
+      id
+      eksterneVarsler {
+        id
+      }
+    }
+    ... on UgyldigKalenderavtale {
+      feilmelding
+    }
+    ... on UgyldigMerkelapp {
+      feilmelding
+    }
+    ... on UgyldigMottaker {
+      feilmelding
+    }
+    ... on DuplikatEksternIdOgMerkelapp {
+      feilmelding
+      idTilEksisterende
+    }
+    ... on UkjentProdusent {
+      feilmelding
+    }
+    ... on SakFinnesIkke {
+      feilmelding
+    }
+  }
+}
