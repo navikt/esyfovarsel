@@ -62,6 +62,7 @@ class MikrofrontendDialogmoteService(
 
     private fun setMikrofrontendSynlighet(hendelse: ArbeidstakerHendelse): MinSideRecord? {
         val ferdigstill = hendelse.ferdigstill ?: false
+        log.info("MF ${hendelse.arbeidstakerFnr}, ferdigstill: ${hendelse.ferdigstill}" )
 
         val (userHasExistingDMEntries, userHasExistingMBEntries) =
             userHasExistingMikrofrontendEntries(hendelse.arbeidstakerFnr)
@@ -81,8 +82,10 @@ class MikrofrontendDialogmoteService(
             }
         } else {
             if (!ferdigstill) {
+                log.info("MF !ferdigstill ${hendelse.arbeidstakerFnr}")
                 return minSideRecordEnabled(hendelse.arbeidstakerFnr)
             } else if (userHasExistingMBEntries) {
+                log.info("MF will be disabled ${hendelse.arbeidstakerFnr}")
                 return minSideRecordDisabled(hendelse.arbeidstakerFnr)
             }
         }
@@ -140,10 +143,15 @@ class MikrofrontendDialogmoteService(
             microfrontendId = dialogmoteMikrofrontendId
         )
 
-    fun minSideRecordDisabled(fnr: String) =
-        MinSideRecord(
+    fun minSideRecordDisabled(fnr: String)
+    : MinSideRecord {
+        log.info("MF disabled record for fnr: $fnr")
+         return MinSideRecord(
             eventType = actionDisabled,
             fnr = fnr,
             microfrontendId = dialogmoteMikrofrontendId
         )
+    }
+
+
 }

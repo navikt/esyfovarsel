@@ -13,14 +13,17 @@ import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideEvent
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideRecord
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class MikrofrontendService(
     val minSideMicrofrontendKafkaProducer: MinSideMicrofrontendKafkaProducer,
     val mikrofrontendDialogmoteService: MikrofrontendDialogmoteService,
     val mikrofrontendAktivitetskravService: MikrofrontendAktivitetskravService,
     val mikrofrontendMerOppfolgingService: MikrofrontendMerOppfolgingService,
-    val database: DatabaseInterface
+    val database: DatabaseInterface,
 ) {
+    private val log: Logger = LoggerFactory.getLogger(MikrofrontendService::class.qualifiedName)
 
     companion object {
         val actionEnabled = MinSideEvent.ENABLE.toString().lowercase()
@@ -34,14 +37,16 @@ class MikrofrontendService(
         val tjeneste = hendelse.type.toMikrofrontendTjenesteType()
 
         val recordToSend = when (tjeneste) {
-            Tjeneste.DIALOGMOTE
-            -> mikrofrontendDialogmoteService.updateDialogmoteFrontendForUserByHendelse(hendelse)
+            Tjeneste.DIALOGMOTE,
+                -> mikrofrontendDialogmoteService.updateDialogmoteFrontendForUserByHendelse(hendelse)
 
-            Tjeneste.AKTIVITETSKRAV
-            -> mikrofrontendAktivitetskravService.createOrUpdateAktivitetskravMicrofrontendByHendelse(hendelse)
+            Tjeneste.AKTIVITETSKRAV,
+                -> mikrofrontendAktivitetskravService.createOrUpdateAktivitetskravMicrofrontendByHendelse(hendelse)
 
             Tjeneste.MER_OPPFOLGING -> mikrofrontendMerOppfolgingService.createEnableMerOppfolgingRecord(hendelse)
         }
+
+        log.info("MF disabled record for fnr: ${recordToSend?.fnr}, sction: ${recordToSend?.eventType}")
 
         recordToSend?.let { record ->
             when (record.eventType) {
@@ -77,7 +82,7 @@ class MikrofrontendService(
     private fun enableMikrofrontendForUser(
         hendelse: ArbeidstakerHendelse,
         minSideRecord: MinSideRecord,
-        tjeneste: Tjeneste
+        tjeneste: Tjeneste,
     ) {
         storeMikrofrontendSynlighetEntryInDb(hendelse, tjeneste)
         minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(minSideRecord)
@@ -86,7 +91,7 @@ class MikrofrontendService(
     private fun disableMikrofrontendForUser(
         fnr: String,
         minSideRecord: MinSideRecord,
-        tjeneste: Tjeneste
+        tjeneste: Tjeneste,
     ) {
         minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(minSideRecord)
         database.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste(fnr, tjeneste)
@@ -109,14 +114,14 @@ class MikrofrontendService(
             HendelseType.SM_DIALOGMOTE_LEST,
             HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
             HendelseType.SM_DIALOGMOTE_REFERAT,
-            HendelseType.SM_DIALOGMOTE_AVLYST
-            -> Tjeneste.DIALOGMOTE
+            HendelseType.SM_DIALOGMOTE_AVLYST,
+                -> Tjeneste.DIALOGMOTE
 
-            HendelseType.SM_AKTIVITETSPLIKT
-            -> Tjeneste.AKTIVITETSKRAV
+            HendelseType.SM_AKTIVITETSPLIKT,
+                -> Tjeneste.AKTIVITETSKRAV
 
-            HendelseType.SM_MER_VEILEDNING
-            -> Tjeneste.MER_OPPFOLGING
+            HendelseType.SM_MER_VEILEDNING,
+                -> Tjeneste.MER_OPPFOLGING
 
             else -> throw IllegalArgumentException("$this is not a valid type for updating MF state")
         }
