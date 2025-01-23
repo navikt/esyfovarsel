@@ -24,6 +24,7 @@ class MikrofrontendDialogmoteService(
     }
 
     fun updateDialogmoteFrontendForUserByHendelse(hendelse: ArbeidstakerHendelse): MinSideRecord? {
+        log.info("[MIKROFRONTEND_SERVICE]: Updating MIKROFRONTEND_SYNLIGHET for Dialogmote for user with fnr: ${hendelse.type}")
         return when (hendelse.type) {
             HendelseType.SM_DIALOGMOTE_NYTT_TID_STED -> setNewDateForMikrofrontendUser(hendelse)
             HendelseType.SM_DIALOGMOTE_AVLYST,
