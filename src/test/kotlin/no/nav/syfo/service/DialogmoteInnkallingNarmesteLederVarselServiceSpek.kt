@@ -14,7 +14,13 @@ import no.nav.syfo.consumer.pdl.HentPersonData
 import no.nav.syfo.consumer.pdl.Navn
 import no.nav.syfo.consumer.pdl.PdlClient
 import no.nav.syfo.kafka.common.createObjectMapper
-import no.nav.syfo.kafka.consumers.varselbus.domain.*
+import no.nav.syfo.kafka.consumers.varselbus.domain.DialogmoteSvarType
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.VarselData
+import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataDialogmoteSvar
+import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataMotetidspunkt
+import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataNarmesteLeder
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.planner.arbeidstakerFnr1
@@ -151,6 +157,20 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek : DescribeSpec({
             }
             coVerify(exactly = 0) {
                 arbeidsgiverNotifikasjonService.sendNotifikasjon(any())
+            }
+        }
+
+        it("Sends varsel the old way for changes, if there is no sak") {
+            coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns null
+
+            val varselHendelseInnkalling = createHendelse(type = HendelseType.NL_DIALOGMOTE_NYTT_TID_STED)
+            dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelseInnkalling)
+
+            coVerify(exactly = 1) {
+                arbeidsgiverNotifikasjonService.sendNotifikasjon(any())
+            }
+            coVerify(exactly = 0) {
+                arbeidsgiverNotifikasjonService.createNewKalenderavtale(any())
             }
         }
     }
