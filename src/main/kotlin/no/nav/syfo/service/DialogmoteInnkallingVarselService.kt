@@ -191,6 +191,7 @@ class DialogmoteInnkallingVarselService(
             SM_DIALOGMOTE_AVLYST -> BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST
             SM_DIALOGMOTE_NYTT_TID_STED -> BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST
             SM_DIALOGMOTE_REFERAT -> BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST
+            SM_DIALOGMOTE_REFERAT_ENDRET -> BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST
             SM_DIALOGMOTE_LEST -> ""
             else -> {
                 throw IllegalArgumentException("Kan ikke mappe $hendelseType til arbeidstaker varsel text")

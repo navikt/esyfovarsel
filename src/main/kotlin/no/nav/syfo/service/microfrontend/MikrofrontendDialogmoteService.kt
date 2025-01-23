@@ -28,6 +28,7 @@ class MikrofrontendDialogmoteService(
             HendelseType.SM_DIALOGMOTE_NYTT_TID_STED -> setNewDateForMikrofrontendUser(hendelse)
             HendelseType.SM_DIALOGMOTE_AVLYST,
             HendelseType.SM_DIALOGMOTE_REFERAT -> minSideRecordDisabled(hendelse.arbeidstakerFnr)
+            HendelseType.SM_DIALOGMOTE_REFERAT_ENDRET -> null
             HendelseType.SM_DIALOGMOTE_INNKALT,
             HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV -> setMikrofrontendSynlighet(hendelse)
             else -> null
