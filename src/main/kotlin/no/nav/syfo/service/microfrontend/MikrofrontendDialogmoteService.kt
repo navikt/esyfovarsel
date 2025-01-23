@@ -24,7 +24,9 @@ class MikrofrontendDialogmoteService(
     }
 
     fun updateDialogmoteFrontendForUserByHendelse(hendelse: ArbeidstakerHendelse): MinSideRecord? {
-        log.info("[MIKROFRONTEND_SERVICE]: Updating MIKROFRONTEND_SYNLIGHET for Dialogmote for user with fnr: ${hendelse.type}")
+        if (hendelse.type == HendelseType.SM_DIALOGMOTE_REFERAT_ENDRET) {
+            log.info("MF: Updating MIKROFRONTEND_SYNLIGHET for SM_DIALOGMOTE_REFERAT_ENDRET  ${hendelse.type}")
+        }
         return when (hendelse.type) {
             HendelseType.SM_DIALOGMOTE_NYTT_TID_STED -> setNewDateForMikrofrontendUser(hendelse)
             HendelseType.SM_DIALOGMOTE_AVLYST,
@@ -62,7 +64,10 @@ class MikrofrontendDialogmoteService(
 
     private fun setMikrofrontendSynlighet(hendelse: ArbeidstakerHendelse): MinSideRecord? {
         val ferdigstill = hendelse.ferdigstill ?: false
-        log.info("MF ${hendelse.arbeidstakerFnr}, ferdigstill: ${hendelse.ferdigstill}" )
+        if (hendelse.type == HendelseType.SM_DIALOGMOTE_REFERAT_ENDRET){
+
+            log.info("MF hendelseferdigstill: ${hendelse.ferdigstill}, ${ferdigstill}" )
+        }
 
         val (userHasExistingDMEntries, userHasExistingMBEntries) =
             userHasExistingMikrofrontendEntries(hendelse.arbeidstakerFnr)
@@ -82,11 +87,17 @@ class MikrofrontendDialogmoteService(
             }
         } else {
             if (!ferdigstill) {
-                log.info("MF !ferdigstill ${hendelse.arbeidstakerFnr}")
-                return minSideRecordEnabled(hendelse.arbeidstakerFnr)
+                if (hendelse.type == HendelseType.SM_DIALOGMOTE_REFERAT_ENDRET){
+                    log.info("MF will be enabled ${hendelse.arbeidstakerFnr}")
+                } else {
+                    return minSideRecordEnabled(hendelse.arbeidstakerFnr)
+                }
             } else if (userHasExistingMBEntries) {
-                log.info("MF will be disabled ${hendelse.arbeidstakerFnr}")
-                return minSideRecordDisabled(hendelse.arbeidstakerFnr)
+                if (hendelse.type == HendelseType.SM_DIALOGMOTE_REFERAT_ENDRET){
+                    log.info("MF will be disabled ${hendelse.arbeidstakerFnr}")
+                } else {
+                    return minSideRecordDisabled(hendelse.arbeidstakerFnr)
+                }
             }
         }
         return null
@@ -145,13 +156,10 @@ class MikrofrontendDialogmoteService(
 
     fun minSideRecordDisabled(fnr: String)
     : MinSideRecord {
-        log.info("MF disabled record for fnr: $fnr")
          return MinSideRecord(
             eventType = actionDisabled,
             fnr = fnr,
             microfrontendId = dialogmoteMikrofrontendId
         )
     }
-
-
 }
