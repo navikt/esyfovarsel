@@ -272,6 +272,7 @@ class DialogmoteInnkallingVarselService(
             SM_DIALOGMOTE_AVLYST -> InternalBrukernotifikasjonType.BESKJED
             SM_DIALOGMOTE_NYTT_TID_STED -> InternalBrukernotifikasjonType.OPPGAVE
             SM_DIALOGMOTE_REFERAT -> InternalBrukernotifikasjonType.BESKJED
+            SM_DIALOGMOTE_REFERAT_ENDRET -> InternalBrukernotifikasjonType.BESKJED
             SM_DIALOGMOTE_LEST -> InternalBrukernotifikasjonType.DONE
             else -> {
                 throw IllegalArgumentException("Kan ikke mappe $hendelseType")
@@ -297,6 +298,7 @@ class DialogmoteInnkallingVarselService(
             SM_DIALOGMOTE_INNKALT -> DITT_SYKEFRAVAER_DIALOGMOTE_INNKALLING_MESSAGE_TEXT
             SM_DIALOGMOTE_AVLYST -> DITT_SYKEFRAVAER_DIALOGMOTE_AVLYSNING_MESSAGE_TEXT
             SM_DIALOGMOTE_REFERAT -> DITT_SYKEFRAVAER_DIALOGMOTE_REFERAT_MESSAGE_TEXT
+            SM_DIALOGMOTE_REFERAT_ENDRET -> DITT_SYKEFRAVAER_DIALOGMOTE_REFERAT_MESSAGE_TEXT
             SM_DIALOGMOTE_NYTT_TID_STED -> DITT_SYKEFRAVAER_DIALOGMOTE_ENDRING_MESSAGE_TEXT
             SM_DIALOGMOTE_LEST -> ""
             else -> {
@@ -311,6 +313,7 @@ class DialogmoteInnkallingVarselService(
             SM_DIALOGMOTE_INNKALT -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_INNKALT.toString()
             SM_DIALOGMOTE_AVLYST -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_AVLYST.toString()
             SM_DIALOGMOTE_REFERAT -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_REFERAT.toString()
+            SM_DIALOGMOTE_REFERAT_ENDRET -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_REFERAT.toString()
             SM_DIALOGMOTE_NYTT_TID_STED -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_NYTT_TID_STED.toString()
             SM_DIALOGMOTE_LEST -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_LEST.toString()
             else -> {
