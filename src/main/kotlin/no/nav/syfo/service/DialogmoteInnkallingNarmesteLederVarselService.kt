@@ -35,6 +35,8 @@ class DialogmoteInnkallingNarmesteLederVarselService(
     private val narmesteLederService: NarmesteLederService,
     private val pdlClient: PdlClient,
 ) {
+    val oldVarselService = DialogmoteInnkallingNarmestelederVarselServiceOLD(senderFacade)
+
     companion object {
         private const val WEEKS_BEFORE_DELETE = 4L
         private val log = LoggerFactory.getLogger(DialogmoteInnkallingNarmesteLederVarselService::class.qualifiedName)
@@ -156,6 +158,12 @@ class DialogmoteInnkallingNarmesteLederVarselService(
     ) {
         sendVarselTilDineSykmeldte(varselHendelse)
         val sak = getPaagaaendeSak(narmesteLederId)
+        if (sak == null) {
+            log.warn("handleNyttTidSted: Fant ikke sak for narmesteLederId: $narmesteLederId. Sender på gammel måte")
+            oldVarselService.sendVarselTilNarmesteLeder(varselHendelse)
+            return
+        }
+
         val varselData = varselHendelse.data?.toVarselData()
         require(varselData != null) { "DialogmoteInnkalt mangler varselData" }
         val motetidspunkt = varselData.getMotetidspunkt()
@@ -197,6 +205,11 @@ class DialogmoteInnkallingNarmesteLederVarselService(
     ) {
         sendVarselTilDineSykmeldte(varselHendelse)
         val sak = getPaagaaendeSak(narmesteLederId)
+        if (sak == null) {
+            log.warn("handleAvlyst: Fant ikke sak for narmesteLederId: $narmesteLederId. Sender på gammel måte")
+            oldVarselService.sendVarselTilNarmesteLeder(varselHendelse)
+            return
+        }
         val texts = varselHendelse.dialogmoteNarmesteLederTexts()
         senderFacade.updateKalenderavtale(
             sakId = sak.id,
@@ -215,6 +228,10 @@ class DialogmoteInnkallingNarmesteLederVarselService(
         narmesteLederId: String,
     ) {
         val sak = getPaagaaendeSak(narmesteLederId)
+        if (sak == null) {
+            log.warn("handleSvar: Fant ikke sak for narmesteLederId: $narmesteLederId. Skipper")
+            return
+        }
         val svar = varselHendelse.data?.toVarselData()?.dialogmoteSvar?.svar
         require(svar != null) { "DialogmoteSvar-data mangler svar" }
         senderFacade.updateKalenderavtale(
@@ -231,6 +248,11 @@ class DialogmoteInnkallingNarmesteLederVarselService(
         narmesteLederId: String,
     ) {
         val sak = getPaagaaendeSak(narmesteLederId)
+        if (sak == null) {
+            log.warn("handleReferat: Fant ikke sak for narmesteLederId: $narmesteLederId. Sender på gammel måte")
+            oldVarselService.sendVarselTilNarmesteLeder(varselHendelse)
+            return
+        }
         val texts = varselHendelse.dialogmoteNarmesteLederTexts()
         updateSakStatus(sakId = sak.id, grupperingsId = sak.grupperingsid, nyStatus = SakStatus.FERDIG)
         senderFacade.updateKalenderavtale(
@@ -330,11 +352,11 @@ class DialogmoteInnkallingNarmesteLederVarselService(
 
     private fun getPaagaaendeSak(
         narmesteLederId: String,
-    ): PSakInput {
+    ): PSakInput? {
         return senderFacade.getPaagaaendeSak(
             narmesteLederId = narmesteLederId,
             merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP
-        ) ?: throw IllegalStateException("Fant ikke sak for narmeste leder med id $narmesteLederId")
+        )
     }
 
     private fun sendVarselTilDineSykmeldte(varselHendelse: NarmesteLederHendelse) {
