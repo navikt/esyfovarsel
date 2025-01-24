@@ -50,6 +50,7 @@ class VarselBusKafkaConsumer(
         val varselEvent: EsyfovarselHendelse = objectMapper.readValue(record.value())
         varselEvent.data = objectMapper.readTree(record.value())["data"]
         log.info("VARSEL BUS: Mottatt melding med UUID ${record.key()} av type: ${varselEvent.type}")
+        log.info("VARSEL BUS: MF: Mottatt melding med UUID ${record.key()} av type: ${varselEvent.type}")
 
         varselBusService.processVarselHendelse(varselEvent)
 

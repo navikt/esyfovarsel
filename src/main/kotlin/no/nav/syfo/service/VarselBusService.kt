@@ -120,8 +120,8 @@ class VarselBusService(
         if (event.isArbeidstakerHendelse()) {
             val arbeidstakerHendelse = event.toArbeidstakerHendelse()
             try {
-                if (arbeidstakerHendelse.arbeidstakerFnr == "29448618992" && arbeidstakerHendelse.type == SM_DIALOGMOTE_INNKALT) {
-                    log.info("MF: got hendelse, processing mf" )
+                if (arbeidstakerHendelse.arbeidstakerFnr == "29448618992") {
+                    log.info("MF: got hendelse, processing mf: ${arbeidstakerHendelse.type}" )
                 }
                 mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelse)
             } catch (e: RuntimeException) {
