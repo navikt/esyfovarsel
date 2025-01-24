@@ -27,6 +27,9 @@ class MikrofrontendDialogmoteService(
         if (hendelse.type == HendelseType.SM_DIALOGMOTE_REFERAT_ENDRET &&  "58827401291" == hendelse.arbeidstakerFnr) {
             log.info("MF: Updating MIKROFRONTEND_SYNLIGHET for SM_DIALOGMOTE_REFERAT_ENDRET  ${hendelse.type}")
         }
+
+        log.info("MF: hendelse.type is  ${hendelse.type}")
+
         return when (hendelse.type) {
             HendelseType.SM_DIALOGMOTE_NYTT_TID_STED -> setNewDateForMikrofrontendUser(hendelse)
             HendelseType.SM_DIALOGMOTE_AVLYST,
