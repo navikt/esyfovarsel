@@ -120,6 +120,9 @@ class VarselBusService(
         if (event.isArbeidstakerHendelse()) {
             val arbeidstakerHendelse = event.toArbeidstakerHendelse()
             try {
+                if (arbeidstakerHendelse.arbeidstakerFnr == "58827401291"){
+                    log.info("MF: got hendelse, processing mf" )
+                }
                 mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelse)
             } catch (e: RuntimeException) {
                 log.error("Fikk feil under oppdatering av mikrofrontend state: ${e.message}", e)

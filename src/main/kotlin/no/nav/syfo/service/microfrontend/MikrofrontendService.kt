@@ -32,6 +32,9 @@ class MikrofrontendService(
 
     fun updateMikrofrontendForUserByHendelse(hendelse: ArbeidstakerHendelse) {
         if (hendelse.isNotEligibleForMikrofrontendProcessing()) {
+            if ("58827401291" == hendelse.arbeidstakerFnr) {
+                log.info("MF: Hendelse ${hendelse.type} is not eligible for MF processing")
+            }
             return
         }
         val tjeneste = hendelse.type.toMikrofrontendTjenesteType()

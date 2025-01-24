@@ -24,7 +24,7 @@ class MikrofrontendDialogmoteService(
     }
 
     fun updateDialogmoteFrontendForUserByHendelse(hendelse: ArbeidstakerHendelse): MinSideRecord? {
-        if (hendelse.type == HendelseType.SM_DIALOGMOTE_REFERAT_ENDRET) {
+        if (hendelse.type == HendelseType.SM_DIALOGMOTE_REFERAT_ENDRET &&  "58827401291" == hendelse.arbeidstakerFnr) {
             log.info("MF: Updating MIKROFRONTEND_SYNLIGHET for SM_DIALOGMOTE_REFERAT_ENDRET  ${hendelse.type}")
         }
         return when (hendelse.type) {
