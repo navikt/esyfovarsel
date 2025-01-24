@@ -39,6 +39,10 @@ class MikrofrontendService(
         }
         val tjeneste = hendelse.type.toMikrofrontendTjenesteType()
 
+        if ("29448618992" == hendelse.arbeidstakerFnr) {
+            log.info("MF: tjeneste ${tjeneste} ")
+        }
+
         val recordToSend = when (tjeneste) {
             Tjeneste.DIALOGMOTE,
                 -> mikrofrontendDialogmoteService.updateDialogmoteFrontendForUserByHendelse(hendelse)
@@ -49,7 +53,7 @@ class MikrofrontendService(
             Tjeneste.MER_OPPFOLGING -> mikrofrontendMerOppfolgingService.createEnableMerOppfolgingRecord(hendelse)
         }
 
-        log.info("MF disabled record for fnr: ${recordToSend?.fnr}, sction: ${recordToSend?.eventType}")
+        log.info("MF record for fnr: ${recordToSend?.fnr}, sction: ${recordToSend?.eventType}, recordToSend: $recordToSend")
 
         recordToSend?.let { record ->
             when (record.eventType) {
