@@ -152,7 +152,10 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
     val friskmeldingTilArbeidsformidlingVedtakService = FriskmeldingTilArbeidsformidlingVedtakService(senderFacade)
     val manglendeMedvirkningVarselService = ManglendeMedvirkningVarselService(senderFacade)
     val oppfolgingsplanVarselService =
-        OppfolgingsplanVarselService(senderFacade, accessControlService, env.urlEnv.oppfolgingsplanerUrl)
+        OppfolgingsplanVarselService(
+            senderFacade, accessControlService,
+            env.urlEnv.oppfolgingsplanerUrl, narmesteLederService, pdlClient
+        )
     val merVeiledningVarselService = MerVeiledningVarselService(
         senderFacade = senderFacade,
         env = env,

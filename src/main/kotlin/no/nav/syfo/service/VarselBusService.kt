@@ -27,6 +27,9 @@ class VarselBusService(
             ferdigstillVarsel(varselHendelse)
         } else {
             when (varselHendelse.type) {
+                NL_OPPFOLGINGSPLAN_FORESPORSEL -> oppfolgingsplanVarselService.sendOppfolgingsplanForesporselVarselTilNarmesteLeder(
+                    varselHendelse.toNarmestelederHendelse()
+                )
                 NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilNarmesteLeder(
                     varselHendelse.toNarmestelederHendelse()
                 )

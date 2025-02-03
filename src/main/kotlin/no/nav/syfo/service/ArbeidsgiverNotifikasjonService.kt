@@ -43,7 +43,8 @@ class ArbeidsgiverNotifikasjonService(
             return
         }
 
-        val url = dineSykmeldteUrl + "/${narmesteLederRelasjon.narmesteLederId}"
+        val url = arbeidsgiverNotifikasjon.link ?: "$dineSykmeldteUrl/${narmesteLederRelasjon.narmesteLederId}"
+
         val arbeidsgiverNotifikasjonen = ArbeidsgiverNotifikasjon(
             varselId = arbeidsgiverNotifikasjon.uuid.toString(),
             virksomhetsnummer = arbeidsgiverNotifikasjon.virksomhetsnummer,
@@ -111,6 +112,7 @@ data class ArbeidsgiverNotifikasjonInput(
     val hardDeleteDate: LocalDateTime? = null,
     val meldingstype: Meldingstype = BESKJED,
     val grupperingsid: String,
+    val link: String? = null,
 )
 
 enum class Meldingstype {
