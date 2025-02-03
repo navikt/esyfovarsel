@@ -6,6 +6,8 @@ import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL
+import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
+import no.nav.syfo.consumer.pdl.PdlClient
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
@@ -25,6 +27,8 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
     val fysiskBrevUtsendingService = mockk<FysiskBrevUtsendingService>()
     val embeddedDatabase = EmbeddedDatabase()
     val fakeOppfolgingsplanerUrl = "http://localhost/oppfolgingsplaner"
+    val narmesteLederService = mockk<NarmesteLederService>()
+    val pdlClient = mockk<PdlClient>()
 
     val senderFacade = SenderFacade(
         dineSykmeldteHendelseKafkaProducer,
@@ -37,7 +41,9 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
     val oppfolgingsplanVarselService = OppfolgingsplanVarselService(
         senderFacade,
         accessControlService,
-        fakeOppfolgingsplanerUrl
+        fakeOppfolgingsplanerUrl,
+        narmesteLederService,
+        pdlClient,
     )
 
     describe("OppfolgingsplanVarselServiceSpek") {

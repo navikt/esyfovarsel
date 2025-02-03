@@ -116,7 +116,7 @@ spec:
     - name: BASE_URL_DIALOGMOTER
       value: https://www.ekstern.dev.nav.no/syk/dialogmoter
     - name: BASE_URL_OPPFOLGINGSPLANER
-      value: https://www-gcp.dev.nav.no/syk/oppfolgingsplaner
+      value: https://www.ekstern.dev.nav.no/syk/oppfolgingsplaner
     - name: AG_NOTIFIKASJON_PRODUSENT_API_URL
       value: http://notifikasjon-produsent-api.fager/api/graphql
     - name: AG_NOTIFIKASJON_PRODUSENT_API_SCOPE
