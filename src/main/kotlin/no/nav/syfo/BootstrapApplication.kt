@@ -105,13 +105,13 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
     val pdlClient = PdlClient(env.urlEnv, azureAdTokenConsumer)
     val journalpostdistribusjonConsumer = JournalpostdistribusjonConsumer(env.urlEnv, azureAdTokenConsumer)
 
-    val brukernotifikasjonKafkaProducer = BrukernotifikasjonKafkaProducer(env)
+    val brukernotifikasjonKafkaProducer = BrukernotifikasjonKafkaProducer(env, pdlClient)
     val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
     val dittSykefravaerMeldingKafkaProducer = DittSykefravaerMeldingKafkaProducer(env)
     val minSideMicrofrontendKafkaProducer = MinSideMicrofrontendKafkaProducer(env)
 
     val accessControlService = AccessControlService(dkifConsumer)
-    val fysiskBrevUtsendingService = FysiskBrevUtsendingService(journalpostdistribusjonConsumer)
+    val fysiskBrevUtsendingService = FysiskBrevUtsendingService(journalpostdistribusjonConsumer, pdlClient)
     val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
     val brukernotifikasjonerService =
         BrukernotifikasjonerService(brukernotifikasjonKafkaProducer)
