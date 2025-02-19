@@ -65,7 +65,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
         return URI(urlString).toURL()
     }
 
-    private fun varsleArbeidstakerViaBrukernotifkasjoner(
+    private suspend fun varsleArbeidstakerViaBrukernotifkasjoner(
         varselHendelse: ArbeidstakerHendelse,
         varselUuid: String,
     ) {

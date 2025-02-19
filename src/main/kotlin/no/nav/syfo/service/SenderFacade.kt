@@ -93,7 +93,7 @@ class SenderFacade(
         }
     }
 
-    fun sendTilBrukernotifikasjoner(
+    suspend fun sendTilBrukernotifikasjoner(
         uuid: String,
         mottakerFnr: String,
         content: String,

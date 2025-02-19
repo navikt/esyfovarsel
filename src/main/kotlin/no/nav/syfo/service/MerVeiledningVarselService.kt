@@ -53,7 +53,7 @@ class MerVeiledningVarselService(
         tellMerVeiledningVarselSendt()
     }
 
-    private fun sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse: ArbeidstakerHendelse) {
+    private suspend fun sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse: ArbeidstakerHendelse) {
         val uuid = "${UUID.randomUUID()}"
         val fnr = arbeidstakerHendelse.arbeidstakerFnr
         val url = URL(env.urlEnv.baseUrlNavEkstern + MER_VEILEDNING_URL)

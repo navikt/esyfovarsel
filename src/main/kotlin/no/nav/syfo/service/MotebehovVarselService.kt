@@ -139,7 +139,7 @@ class MotebehovVarselService(
         )
     }
 
-    fun sendMotebehovTilbakemeldingTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
+    suspend fun sendMotebehovTilbakemeldingTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         val data = dataToVarselDataMotebehovTilbakemelding(varselHendelse.data)
         senderFacade.sendTilBrukernotifikasjoner(
             uuid = UUID.randomUUID().toString(),
