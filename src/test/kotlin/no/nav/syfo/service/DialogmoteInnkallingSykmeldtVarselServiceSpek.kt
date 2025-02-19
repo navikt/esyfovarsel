@@ -63,7 +63,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
     val hendelseType = HendelseType.SM_DIALOGMOTE_INNKALT
 
     describe("DialogmoteInnkallingVarselServiceSpek") {
-        coJustRun { fysiskBrevUtsendingService.sendBrev(any(), any(), DistibusjonsType.ANNET) }
+        coJustRun { fysiskBrevUtsendingService.sendBrev(any(), any(), DistibusjonsType.ANNET, arbeidstakerFnr = any()) }
 
         beforeTest {
             clearAllMocks()
@@ -78,42 +78,43 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                 hentPerson = HentPerson(
                     foedselsdato = listOf(Foedselsdato(foedselsdato = "1990-01-01")),
                     navn = listOf(Navn(fornavn = "Test", mellomnavn = null, etternavn = "Testesen")),
+                    doedsfall = listOf()
                 )
             )
             coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns "123"
         }
 
         it("Non-reserved users should be notified externally") {
-            coEvery { accessControlService.getUserAccessStatus(fnr1) } returns
-                UserAccessStatus(fnr1, true)
+             coEvery { accessControlService.getUserAccessStatus(fnr1) } returns
+                     UserAccessStatus(fnr1, true)
 
-            val varselHendelse = ArbeidstakerHendelse(
-                hendelseType,
-                false,
-                varselData(journalpostUuid, journalpostId),
-                fnr1,
-                orgnummer,
-            )
-            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
+             val varselHendelse = ArbeidstakerHendelse(
+                 hendelseType,
+                 false,
+                 varselData(journalpostUuid, journalpostId),
+                 fnr1,
+                 orgnummer,
+             )
+             dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
 
-            verify(exactly = 1) {
-                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
-                    uuid = any(),
-                    mottakerFnr = fnr1,
-                    content = any(),
-                    url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
-                    smsContent = null,
-                    varseltype = any(),
-                    eksternVarsling = any(),
-                )
-            }
+             coVerify (exactly = 1) {
+                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
+                     uuid = any(),
+                     mottakerFnr = fnr1,
+                     content = any(),
+                     url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
+                     smsContent = null,
+                     varseltype = any(),
+                     eksternVarsling = any(),
+                 )
+             }
 
-            verify(atLeast = 1) {
-                dittSykefravaerMeldingKafkaProducer.sendMelding(
-                    any(),
-                    any(),
-                )
-            }
+             coVerify(atLeast = 1) {
+                 dittSykefravaerMeldingKafkaProducer.sendMelding(
+                     any(),
+                     any(),
+                 )
+             }
         }
 
         it("Reserved users should be notified physically") {
@@ -134,10 +135,11 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                     journalpostUuid,
                     journalpostId,
                     DistibusjonsType.ANNET,
+                    arbeidstakerFnr = fnr2,
                 )
             }
 
-            verify(exactly = 0) {
+            coVerify(exactly = 0) {
                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     uuid = any(),
                     mottakerFnr = fnr2,
@@ -168,7 +170,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                 orgnummer,
             )
             dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
-            verify(exactly = 0) {
+            coVerify(exactly = 0) {
                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     uuid = any(),
                     mottakerFnr = fnr3,
@@ -183,7 +185,8 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                 fysiskBrevUtsendingService.sendBrev(
                     journalpostUuidAddressProtection,
                     journalpostIdAddressProtection,
-                    DistibusjonsType.ANNET
+                    DistibusjonsType.ANNET,
+                    arbeidstakerFnr = fnr3,
                 )
             }
             verify(atLeast = 1) {
@@ -207,7 +210,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
             )
             dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
 
-            verify(exactly = 1) {
+            coVerify(exactly = 1) {
                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     uuid = any(),
                     mottakerFnr = arbeidstakerFnr1,

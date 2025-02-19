@@ -23,7 +23,6 @@ val jacksonVersion = "2.18.2"
 val kafkaVersion = "3.9.0"
 val brukernotifikasjonerBuilderVersion = "2.1.1"
 val kotlinVersion = "2.1.10"
-val coroutinesVersion = "1.10.1"
 val graphqlApolloVersion = "4.1.0"
 val detektVersion = "1.23.7"
 
@@ -137,7 +136,6 @@ dependencies {
     testImplementation("io.kotest:kotest-property:$kotestVersion")
     testImplementation("io.kotest.extensions:kotest-assertions-ktor:$kotestExtensionsVersion")
     testImplementation("com.h2database:h2:$h2Version")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$detektVersion")
 

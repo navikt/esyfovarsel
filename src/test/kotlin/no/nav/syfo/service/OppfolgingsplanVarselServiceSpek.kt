@@ -2,9 +2,10 @@ package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coEvery
-import io.mockk.justRun
+import io.mockk.coJustRun
+import io.mockk.coVerify
 import io.mockk.mockk
-import io.mockk.verify
+import java.net.URL
 import no.nav.syfo.BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdl.PdlClient
@@ -16,7 +17,6 @@ import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.fnr1
 import no.nav.syfo.testutil.mocks.fnr2
 import no.nav.syfo.testutil.mocks.orgnummer
-import java.net.URL
 
 class OppfolgingsplanVarselServiceSpek : DescribeSpec({
     val accessControlService = mockk<AccessControlService>()
@@ -47,7 +47,7 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
     )
 
     describe("OppfolgingsplanVarselServiceSpek") {
-        justRun { brukernotifikasjonerService.sendBrukernotifikasjonVarsel(any(), any(), any(), any(), any(), any()) }
+        coJustRun { brukernotifikasjonerService.sendBrukernotifikasjonVarsel(any(), any(), any(), any(), any(), any()) }
 
         it("Non-reserved users should be notified externally") {
             coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(fnr1) } returns true
@@ -59,7 +59,7 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
                 orgnummer
             )
             oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse)
-            verify(exactly = 1) {
+            coVerify(exactly = 1) {
                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     any(),
                     fnr1,
@@ -81,7 +81,7 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
                 orgnummer
             )
             oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse)
-            verify(exactly = 1) {
+            coVerify(exactly = 1) {
                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     any(),
                     fnr2,
