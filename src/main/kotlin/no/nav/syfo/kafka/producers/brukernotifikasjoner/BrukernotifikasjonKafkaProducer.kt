@@ -1,6 +1,12 @@
 package no.nav.syfo.kafka.producers.brukernotifikasjoner
 
+import java.net.URL
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import no.nav.syfo.Environment
+import no.nav.syfo.consumer.pdl.PdlClient
 import no.nav.syfo.kafka.common.producerProperties
 import no.nav.tms.varsel.action.EksternKanal
 import no.nav.tms.varsel.action.Sensitivitet
@@ -13,12 +19,10 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.URL
-import java.time.ZoneId
-import java.time.ZonedDateTime
 
 class BrukernotifikasjonKafkaProducer(
     val env: Environment,
+    val pdlClient: PdlClient,
 ) {
     val brukernotifikasjonerTopic = "min-side.aapen-brukervarsel-v1"
     val kafkaProducer = KafkaProducer<String, String>(
@@ -31,7 +35,7 @@ class BrukernotifikasjonKafkaProducer(
     )
     private val log: Logger = LoggerFactory.getLogger(BrukernotifikasjonKafkaProducer::class.java)
 
-    fun sendBeskjed(
+    suspend fun sendBeskjed(
         fnr: String,
         content: String,
         uuid: String,
@@ -50,11 +54,13 @@ class BrukernotifikasjonKafkaProducer(
             dagerTilDeaktivering = dagerTilDeaktivering,
         )
 
-        kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
-            .get() // Block until record has been sent
+        withContext(Dispatchers.IO) {
+            kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
+                .get()
+        } // Block until record has been sent
     }
 
-    fun sendOppgave(
+    suspend fun sendOppgave(
         fnr: String,
         content: String,
         uuid: String,
@@ -73,8 +79,10 @@ class BrukernotifikasjonKafkaProducer(
             dagerTilDeaktivering = dagerTilDeaktivering,
         )
 
-        kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
-            .get() // Block until record has been sent
+        withContext(Dispatchers.IO) {
+            kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
+                .get()
+        } // Block until record has been sent
     }
 
     fun sendDone(uuid: String) {
@@ -85,7 +93,7 @@ class BrukernotifikasjonKafkaProducer(
         kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, inaktiverVarsel)).get()
     }
 
-    private fun createVarsel(
+    private suspend fun createVarsel(
         varseltype: Varseltype,
         uuid: String,
         fnr: String,
@@ -99,6 +107,9 @@ class BrukernotifikasjonKafkaProducer(
             log.error("varselUrl for $varseltype is longer than 200 characters: $varselUrl UUID: $uuid")
         }
 
+        val isPersonAlive = pdlClient.isPersonAlive(fnr)
+        val smsVarslingEnabled = isPersonAlive && smsVarsling
+
         val opprettVarsel = VarselActionBuilder.opprett {
             type = varseltype
             varselId = uuid
@@ -111,7 +122,7 @@ class BrukernotifikasjonKafkaProducer(
             )
             link = varselUrl?.toString()
             aktivFremTil = dagerTilDeaktivering?.let { ZonedDateTime.now(ZoneId.of("Z")).plusDays(it) }
-            if (smsVarsling) {
+            if (smsVarslingEnabled) {
                 eksternVarsling {
                     smsVarslingstekst = smsTekst
                     preferertKanal = EksternKanal.SMS

@@ -361,7 +361,7 @@ class SenderFacade(
     ) {
         var isSendingSucceed = true
         try {
-            fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType)
+            fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType, arbeidstakerFnr = varselHendelse.arbeidstakerFnr)
         } catch (e: Exception) {
             isSendingSucceed = false
             log.warn("Error while sending brev til fysisk print: ${e.message}")
@@ -387,7 +387,7 @@ class SenderFacade(
         distribusjonsType: DistibusjonsType = DistibusjonsType.VIKTIG,
     ) {
         try {
-            fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType, tvingSentralPrint = true)
+            fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType, tvingSentralPrint = true, varselHendelse.arbeidstakerFnr)
             log.info(
                 "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sending direct sentral print letter with journalpostId $journalpostId succeded, storing in database"
             )
