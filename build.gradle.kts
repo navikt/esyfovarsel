@@ -136,6 +136,7 @@ dependencies {
     testImplementation("io.kotest:kotest-property:$kotestVersion")
     testImplementation("io.kotest.extensions:kotest-assertions-ktor:$kotestExtensionsVersion")
     testImplementation("com.h2database:h2:$h2Version")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinVersion")
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$detektVersion")
 
