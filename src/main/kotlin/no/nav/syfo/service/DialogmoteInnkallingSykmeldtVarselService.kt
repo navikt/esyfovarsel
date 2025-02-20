@@ -44,7 +44,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
         val arbeidstakerFnr = varselHendelse.arbeidstakerFnr
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerFnr)
 
-        if (true) {
+        if (userAccessStatus.canUserBeDigitallyNotified) {
             varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid)
         } else {
             val journalpostId = jounalpostData.id
