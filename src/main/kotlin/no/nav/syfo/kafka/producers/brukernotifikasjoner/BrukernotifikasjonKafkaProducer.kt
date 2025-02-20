@@ -108,6 +108,7 @@ class BrukernotifikasjonKafkaProducer(
         }
 
         val isPersonAlive = pdlClient.isPersonAlive(fnr)
+        log.info("isPersonAlive: $isPersonAlive")
         val smsVarslingEnabled = isPersonAlive && smsVarsling
 
         val opprettVarsel = VarselActionBuilder.opprett {
