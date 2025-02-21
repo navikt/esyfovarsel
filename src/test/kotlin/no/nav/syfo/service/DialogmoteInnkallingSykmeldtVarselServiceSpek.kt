@@ -158,6 +158,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                 )
             }
         }
+
         it("Reserved users should get brevpost") {
             coEvery { accessControlService.getUserAccessStatus(fnr3) } returns
                 UserAccessStatus(fnr3, canUserBeDigitallyNotified = false)
@@ -226,6 +227,94 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
             verify(exactly = 0) {
                 dittSykefravaerMeldingKafkaProducer.sendMelding(
                     getDittSykefravaerMelding(),
+                    any(),
+                )
+            }
+        }
+
+        it("Non-reserved users should not be notified externally if they passed away") {
+            coEvery { accessControlService.getUserAccessStatus(fnr1) } returns
+                    UserAccessStatus(fnr1, true)
+
+            coEvery { pdlClient.hentPerson(any()) } returns HentPersonData(
+                hentPerson = HentPerson(
+                    foedselsdato = listOf(Foedselsdato(foedselsdato = "1990-01-01")),
+                    navn = listOf(Navn(fornavn = "Test", mellomnavn = null, etternavn = "Testesen")),
+                    doedsfall = listOf(Doedsdato(doedsdato = "01-01-2025"))
+                )
+            )
+
+            val varselHendelse = ArbeidstakerHendelse(
+                hendelseType,
+                false,
+                varselData(journalpostUuid, journalpostId),
+                fnr1,
+                orgnummer,
+            )
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
+
+            coVerify (exactly = 1) {
+                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
+                    uuid = any(),
+                    mottakerFnr = fnr1,
+                    content = any(),
+                    url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
+                    smsContent = null,
+                    varseltype = any(),
+                    eksternVarsling = false,
+                )
+            }
+
+            coVerify(atLeast = 1) {
+                dittSykefravaerMeldingKafkaProducer.sendMelding(
+                    any(),
+                    any(),
+                )
+            }
+        }
+
+        it("Reserved users should NOT get brevpost if they passed away") {
+            coEvery { accessControlService.getUserAccessStatus(fnr3) } returns
+                    UserAccessStatus(fnr3, canUserBeDigitallyNotified = false)
+
+            coEvery { pdlClient.hentPerson(any()) } returns HentPersonData(
+                hentPerson = HentPerson(
+                    foedselsdato = listOf(Foedselsdato(foedselsdato = "1990-01-01")),
+                    navn = listOf(Navn(fornavn = "Test", mellomnavn = null, etternavn = "Testesen")),
+                    doedsfall = listOf(Doedsdato(doedsdato = "01-01-2025"))
+                )
+            )
+
+            val varselHendelse = ArbeidstakerHendelse(
+                hendelseType,
+                false,
+                varselData(journalpostUuidAddressProtection, journalpostIdAddressProtection),
+                fnr3,
+                orgnummer,
+            )
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
+            coVerify(exactly = 0) {
+                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
+                    uuid = any(),
+                    mottakerFnr = fnr3,
+                    content = any(),
+                    url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
+                    varseltype = any(),
+                    eksternVarsling = any(),
+                    smsContent = any()
+                )
+            }
+            coVerify(exactly = 0) {
+                fysiskBrevUtsendingService.sendBrev(
+                    journalpostUuidAddressProtection,
+                    journalpostIdAddressProtection,
+                    DistibusjonsType.ANNET,
+                    arbeidstakerFnr = fnr3,
+                )
+            }
+            verify(atLeast = 1) {
+                dittSykefravaerMeldingKafkaProducer.sendMelding(
+                    any(),
                     any(),
                 )
             }
