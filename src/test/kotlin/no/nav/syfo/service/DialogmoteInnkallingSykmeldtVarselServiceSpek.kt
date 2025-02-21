@@ -84,355 +84,355 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
             coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns "123"
         }
 
-//        it("Non-reserved users should be notified externally") {
-//             coEvery { accessControlService.getUserAccessStatus(fnr1) } returns
-//                     UserAccessStatus(fnr1, true)
-//
-//             val varselHendelse = ArbeidstakerHendelse(
-//                 hendelseType,
-//                 false,
-//                 varselData(journalpostUuid, journalpostId),
-//                 fnr1,
-//                 orgnummer,
-//             )
-//             dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
-//
-//             coVerify (exactly = 1) {
-//                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
-//                     uuid = any(),
-//                     mottakerFnr = fnr1,
-//                     content = any(),
-//                     url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
-//                     smsContent = null,
-//                     varseltype = any(),
-//                     eksternVarsling = any(),
-//                 )
-//             }
-//
-//             coVerify(atLeast = 1) {
-//                 dittSykefravaerMeldingKafkaProducer.sendMelding(
-//                     any(),
-//                     any(),
-//                 )
-//             }
-//        }
-//
-//        it("Reserved users should be notified physically") {
-//            coEvery { accessControlService.getUserAccessStatus(fnr2) } returns
-//                UserAccessStatus(fnr2, canUserBeDigitallyNotified = false)
-//
-//            val varselHendelse = ArbeidstakerHendelse(
-//                hendelseType,
-//                false,
-//                varselData(journalpostUuid, journalpostId),
-//                fnr2,
-//                orgnummer,
-//            )
-//            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
-//
-//            coVerify(exactly = 1) {
-//                fysiskBrevUtsendingService.sendBrev(
-//                    journalpostUuid,
-//                    journalpostId,
-//                    DistibusjonsType.ANNET,
-//                    arbeidstakerFnr = fnr2,
-//                )
-//            }
-//
-//            coVerify(exactly = 0) {
-//                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
-//                    uuid = any(),
-//                    mottakerFnr = fnr2,
-//                    content = any(),
-//                    url = any(),
-//                    varseltype = any(),
-//                    eksternVarsling = any(),
-//                    smsContent = any()
-//                )
-//            }
-//
-//            verify(atLeast = 1) {
-//                dittSykefravaerMeldingKafkaProducer.sendMelding(
-//                    any(),
-//                    any(),
-//                )
-//            }
-//        }
-//        it("Reserved users should get brevpost") {
-//            coEvery { accessControlService.getUserAccessStatus(fnr3) } returns
-//                UserAccessStatus(fnr3, canUserBeDigitallyNotified = false)
-//
-//            val varselHendelse = ArbeidstakerHendelse(
-//                hendelseType,
-//                false,
-//                varselData(journalpostUuidAddressProtection, journalpostIdAddressProtection),
-//                fnr3,
-//                orgnummer,
-//            )
-//            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
-//            coVerify(exactly = 0) {
-//                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
-//                    uuid = any(),
-//                    mottakerFnr = fnr3,
-//                    content = any(),
-//                    url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
-//                    varseltype = any(),
-//                    eksternVarsling = any(),
-//                    smsContent = any()
-//                )
-//            }
-//            coVerify(exactly = 1) {
-//                fysiskBrevUtsendingService.sendBrev(
-//                    journalpostUuidAddressProtection,
-//                    journalpostIdAddressProtection,
-//                    DistibusjonsType.ANNET,
-//                    arbeidstakerFnr = fnr3,
-//                )
-//            }
-//            verify(atLeast = 1) {
-//                dittSykefravaerMeldingKafkaProducer.sendMelding(
-//                    any(),
-//                    any(),
-//                )
-//            }
-//        }
-//
-//        it("Users should not be notified when lest hendelse is sent") {
-//            coEvery { accessControlService.getUserAccessStatus(arbeidstakerFnr1) } returns
-//                UserAccessStatus(arbeidstakerFnr1, true)
-//
-//            val varselHendelse = ArbeidstakerHendelse(
-//                type = HendelseType.SM_DIALOGMOTE_LEST,
-//                false,
-//                varselData(journalpostUuid, journalpostId),
-//                arbeidstakerFnr1,
-//                orgnummer,
-//            )
-//            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
-//
-//            coVerify(exactly = 1) {
-//                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
-//                    uuid = any(),
-//                    mottakerFnr = arbeidstakerFnr1,
-//                    content = any(),
-//                    url = any(),
-//                    varseltype = DONE,
-//                    eksternVarsling = true,
-//                )
-//            }
-//
-//            verify(exactly = 0) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(any(), any()) }
-//
-//            verify(exactly = 0) {
-//                dittSykefravaerMeldingKafkaProducer.sendMelding(
-//                    getDittSykefravaerMelding(),
-//                    any(),
-//                )
-//            }
-//        }
-//
-//        it("Endring hendelse skal ferdigstille tidligere innkalling") {
-//            coEvery { accessControlService.getUserAccessStatus("66666666666") } returns
-//                UserAccessStatus("66666666666", true)
-//            coEvery { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) } returns "123"
-//
-//            val varselHendelseInnkalling = ArbeidstakerHendelse(
-//                hendelseType,
-//                false,
-//                varselData(journalpostUuid, journalpostId),
-//                "66666666666",
-//                orgnummer,
-//            )
-//
-//            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseInnkalling)
-//
-//            verify(atLeast = 1) {
-//                dittSykefravaerMeldingKafkaProducer.sendMelding(
-//                    any(),
-//                    any(),
-//                )
-//            }
-//
-//            val utsendte = senderFacade.fetchUferdigstilteVarsler(
-//                arbeidstakerFnr = PersonIdent("66666666666"),
-//                kanal = Kanal.DITT_SYKEFRAVAER,
-//            )
-//
-//            val innkallinger =
-//                utsendte.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
-//            innkallinger shouldNotBeEqualTo null
-//
-//            val endringer =
-//                utsendte.find { it.type == HendelseType.SM_DIALOGMOTE_NYTT_TID_STED.name && it.fnr == "66666666666" }
-//            endringer shouldBeEqualTo null
-//
-//            val varselHendelseEndring = ArbeidstakerHendelse(
-//                HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
-//                false,
-//                varselData(journalpostUuid, journalpostId),
-//                "66666666666",
-//                orgnummer,
-//            )
-//
-//            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)
-//
-//            val utsendte2 = senderFacade.fetchUferdigstilteVarsler(
-//                arbeidstakerFnr = PersonIdent("66666666666"),
-//                kanal = Kanal.DITT_SYKEFRAVAER,
-//            )
-//            val innkallinger2 =
-//                utsendte2.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
-//            val endringer2 =
-//                utsendte2.find { it.type == HendelseType.SM_DIALOGMOTE_NYTT_TID_STED.name && it.fnr == "66666666666" }
-//
-//            innkallinger2 shouldBeEqualTo null
-//            endringer2 shouldNotBeEqualTo null
-//
-//            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)
-//
-//            val utsendte3 = senderFacade.fetchUferdigstilteVarsler(
-//                arbeidstakerFnr = PersonIdent("66666666666"),
-//                kanal = Kanal.DITT_SYKEFRAVAER,
-//            )
-//            val innkallinger3 =
-//                utsendte3.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
-//            val endringer3 =
-//                utsendte3.find { it.type == HendelseType.SM_DIALOGMOTE_NYTT_TID_STED.name && it.fnr == "66666666666" }
-//
-//            innkallinger3 shouldBeEqualTo null
-//            endringer3 shouldNotBeEqualTo null
-//
-//            verify(exactly = 2) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding("123", "66666666666") }
-//        }
-//
-//        it("Avlysning hendelse skal ferdigstille tidligere innkalling") {
-//            coEvery { accessControlService.getUserAccessStatus("66666666666") } returns
-//                UserAccessStatus("66666666666", true)
-//            coEvery { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) } returns "456"
-//
-//            val varselHendelseInnkalling = ArbeidstakerHendelse(
-//                hendelseType,
-//                false,
-//                varselData(journalpostUuid, journalpostId),
-//                "66666666666",
-//                orgnummer,
-//            )
-//
-//            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseInnkalling)
-//
-//            verify(atLeast = 1) {
-//                dittSykefravaerMeldingKafkaProducer.sendMelding(
-//                    any(),
-//                    any(),
-//                )
-//            }
-//
-//            val utsendte = senderFacade.fetchUferdigstilteVarsler(
-//                arbeidstakerFnr = PersonIdent("66666666666"),
-//                kanal = Kanal.DITT_SYKEFRAVAER,
-//            )
-//
-//            val innkallinger =
-//                utsendte.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
-//            innkallinger shouldNotBeEqualTo null
-//
-//            val avlysninger =
-//                utsendte.find { it.type == HendelseType.SM_DIALOGMOTE_AVLYST.name && it.fnr == "66666666666" }
-//            avlysninger shouldBeEqualTo null
-//
-//            val varselHendelseAvlyst = ArbeidstakerHendelse(
-//                HendelseType.SM_DIALOGMOTE_AVLYST,
-//                false,
-//                varselData(journalpostUuid, journalpostId),
-//                "66666666666",
-//                orgnummer,
-//            )
-//
-//            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseAvlyst)
-//
-//            val utsendte2 = senderFacade.fetchUferdigstilteVarsler(
-//                arbeidstakerFnr = PersonIdent("66666666666"),
-//                kanal = Kanal.DITT_SYKEFRAVAER,
-//            )
-//            val innkallinger2 =
-//                utsendte2.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
-//            val avlysninger2 =
-//                utsendte2.find { it.type == HendelseType.SM_DIALOGMOTE_AVLYST.name && it.fnr == "66666666666" }
-//
-//            innkallinger2 shouldBeEqualTo null
-//            avlysninger2 shouldNotBeEqualTo null
-//
-//            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseAvlyst)
-//
-//            val utsendte3 = senderFacade.fetchUferdigstilteVarsler(
-//                arbeidstakerFnr = PersonIdent("66666666666"),
-//                kanal = Kanal.DITT_SYKEFRAVAER,
-//            )
-//            val innkallinger3 =
-//                utsendte3.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
-//            val avlysninger3 =
-//                utsendte3.find { it.type == HendelseType.SM_DIALOGMOTE_AVLYST.name && it.fnr == "66666666666" }
-//
-//            innkallinger3 shouldBeEqualTo null
-//            avlysninger3 shouldNotBeEqualTo null
-//
-//            verify(exactly = 2) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding("456", "66666666666") }
-//        }
-//
-//        it("Ny innkalling hendelse skal ferdigstille tidligere innkalling") {
-//            coEvery { accessControlService.getUserAccessStatus("66666666666") } returns
-//                UserAccessStatus("66666666666", true)
-//            coEvery { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) } returns "789"
-//
-//            val varselHendelseInnkalling = ArbeidstakerHendelse(
-//                hendelseType,
-//                false,
-//                varselData(journalpostUuid, journalpostId),
-//                "66666666666",
-//                orgnummer,
-//            )
-//
-//            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseInnkalling)
-//
-//            verify(atLeast = 1) {
-//                dittSykefravaerMeldingKafkaProducer.sendMelding(
-//                    any(),
-//                    any(),
-//                )
-//            }
-//
-//            val utsendte = senderFacade.fetchUferdigstilteVarsler(
-//                arbeidstakerFnr = PersonIdent("66666666666"),
-//                kanal = Kanal.DITT_SYKEFRAVAER,
-//            )
-//
-//            val innkallinger =
-//                utsendte.filter { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
-//            innkallinger shouldNotBeEqualTo null
-//            innkallinger.size shouldBe 1
-//
-//            val varselHendelseEndring = ArbeidstakerHendelse(
-//                HendelseType.SM_DIALOGMOTE_INNKALT,
-//                false,
-//                varselData(journalpostUuid, journalpostId),
-//                "66666666666",
-//                orgnummer,
-//            )
-//
-//            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)
-//
-//            val utsendte2 = senderFacade.fetchUferdigstilteVarsler(
-//                arbeidstakerFnr = PersonIdent("66666666666"),
-//                kanal = Kanal.DITT_SYKEFRAVAER,
-//            )
-//            val innkallinger2 =
-//                utsendte2.filter { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
-//
-//            innkallinger2 shouldNotBeEqualTo null
-//            innkallinger2.size shouldBeEqualTo 1
-//
-//            verify(exactly = 1) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding("789", "66666666666") }
-//        }
+        it("Non-reserved users should be notified externally") {
+             coEvery { accessControlService.getUserAccessStatus(fnr1) } returns
+                     UserAccessStatus(fnr1, true)
+
+             val varselHendelse = ArbeidstakerHendelse(
+                 hendelseType,
+                 false,
+                 varselData(journalpostUuid, journalpostId),
+                 fnr1,
+                 orgnummer,
+             )
+             dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
+
+             coVerify (exactly = 1) {
+                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
+                     uuid = any(),
+                     mottakerFnr = fnr1,
+                     content = any(),
+                     url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
+                     smsContent = null,
+                     varseltype = any(),
+                     eksternVarsling = any(),
+                 )
+             }
+
+             coVerify(atLeast = 1) {
+                 dittSykefravaerMeldingKafkaProducer.sendMelding(
+                     any(),
+                     any(),
+                 )
+             }
+        }
+
+        it("Reserved users should be notified physically") {
+            coEvery { accessControlService.getUserAccessStatus(fnr2) } returns
+                UserAccessStatus(fnr2, canUserBeDigitallyNotified = false)
+
+            val varselHendelse = ArbeidstakerHendelse(
+                hendelseType,
+                false,
+                varselData(journalpostUuid, journalpostId),
+                fnr2,
+                orgnummer,
+            )
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
+
+            coVerify(exactly = 1) {
+                fysiskBrevUtsendingService.sendBrev(
+                    journalpostUuid,
+                    journalpostId,
+                    DistibusjonsType.ANNET,
+                    arbeidstakerFnr = fnr2,
+                )
+            }
+
+            coVerify(exactly = 0) {
+                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
+                    uuid = any(),
+                    mottakerFnr = fnr2,
+                    content = any(),
+                    url = any(),
+                    varseltype = any(),
+                    eksternVarsling = any(),
+                    smsContent = any()
+                )
+            }
+
+            verify(atLeast = 1) {
+                dittSykefravaerMeldingKafkaProducer.sendMelding(
+                    any(),
+                    any(),
+                )
+            }
+        }
+        it("Reserved users should get brevpost") {
+            coEvery { accessControlService.getUserAccessStatus(fnr3) } returns
+                UserAccessStatus(fnr3, canUserBeDigitallyNotified = false)
+
+            val varselHendelse = ArbeidstakerHendelse(
+                hendelseType,
+                false,
+                varselData(journalpostUuidAddressProtection, journalpostIdAddressProtection),
+                fnr3,
+                orgnummer,
+            )
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
+            coVerify(exactly = 0) {
+                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
+                    uuid = any(),
+                    mottakerFnr = fnr3,
+                    content = any(),
+                    url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
+                    varseltype = any(),
+                    eksternVarsling = any(),
+                    smsContent = any()
+                )
+            }
+            coVerify(exactly = 1) {
+                fysiskBrevUtsendingService.sendBrev(
+                    journalpostUuidAddressProtection,
+                    journalpostIdAddressProtection,
+                    DistibusjonsType.ANNET,
+                    arbeidstakerFnr = fnr3,
+                )
+            }
+            verify(atLeast = 1) {
+                dittSykefravaerMeldingKafkaProducer.sendMelding(
+                    any(),
+                    any(),
+                )
+            }
+        }
+
+        it("Users should not be notified when lest hendelse is sent") {
+            coEvery { accessControlService.getUserAccessStatus(arbeidstakerFnr1) } returns
+                UserAccessStatus(arbeidstakerFnr1, true)
+
+            val varselHendelse = ArbeidstakerHendelse(
+                type = HendelseType.SM_DIALOGMOTE_LEST,
+                false,
+                varselData(journalpostUuid, journalpostId),
+                arbeidstakerFnr1,
+                orgnummer,
+            )
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
+
+            coVerify(exactly = 1) {
+                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
+                    uuid = any(),
+                    mottakerFnr = arbeidstakerFnr1,
+                    content = any(),
+                    url = any(),
+                    varseltype = DONE,
+                    eksternVarsling = true,
+                )
+            }
+
+            verify(exactly = 0) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(any(), any()) }
+
+            verify(exactly = 0) {
+                dittSykefravaerMeldingKafkaProducer.sendMelding(
+                    getDittSykefravaerMelding(),
+                    any(),
+                )
+            }
+        }
+
+        it("Endring hendelse skal ferdigstille tidligere innkalling") {
+            coEvery { accessControlService.getUserAccessStatus("66666666666") } returns
+                UserAccessStatus("66666666666", true)
+            coEvery { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) } returns "123"
+
+            val varselHendelseInnkalling = ArbeidstakerHendelse(
+                hendelseType,
+                false,
+                varselData(journalpostUuid, journalpostId),
+                "66666666666",
+                orgnummer,
+            )
+
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseInnkalling)
+
+            verify(atLeast = 1) {
+                dittSykefravaerMeldingKafkaProducer.sendMelding(
+                    any(),
+                    any(),
+                )
+            }
+
+            val utsendte = senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent("66666666666"),
+                kanal = Kanal.DITT_SYKEFRAVAER,
+            )
+
+            val innkallinger =
+                utsendte.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
+            innkallinger shouldNotBeEqualTo null
+
+            val endringer =
+                utsendte.find { it.type == HendelseType.SM_DIALOGMOTE_NYTT_TID_STED.name && it.fnr == "66666666666" }
+            endringer shouldBeEqualTo null
+
+            val varselHendelseEndring = ArbeidstakerHendelse(
+                HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
+                false,
+                varselData(journalpostUuid, journalpostId),
+                "66666666666",
+                orgnummer,
+            )
+
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)
+
+            val utsendte2 = senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent("66666666666"),
+                kanal = Kanal.DITT_SYKEFRAVAER,
+            )
+            val innkallinger2 =
+                utsendte2.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
+            val endringer2 =
+                utsendte2.find { it.type == HendelseType.SM_DIALOGMOTE_NYTT_TID_STED.name && it.fnr == "66666666666" }
+
+            innkallinger2 shouldBeEqualTo null
+            endringer2 shouldNotBeEqualTo null
+
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)
+
+            val utsendte3 = senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent("66666666666"),
+                kanal = Kanal.DITT_SYKEFRAVAER,
+            )
+            val innkallinger3 =
+                utsendte3.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
+            val endringer3 =
+                utsendte3.find { it.type == HendelseType.SM_DIALOGMOTE_NYTT_TID_STED.name && it.fnr == "66666666666" }
+
+            innkallinger3 shouldBeEqualTo null
+            endringer3 shouldNotBeEqualTo null
+
+            verify(exactly = 2) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding("123", "66666666666") }
+        }
+
+        it("Avlysning hendelse skal ferdigstille tidligere innkalling") {
+            coEvery { accessControlService.getUserAccessStatus("66666666666") } returns
+                UserAccessStatus("66666666666", true)
+            coEvery { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) } returns "456"
+
+            val varselHendelseInnkalling = ArbeidstakerHendelse(
+                hendelseType,
+                false,
+                varselData(journalpostUuid, journalpostId),
+                "66666666666",
+                orgnummer,
+            )
+
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseInnkalling)
+
+            verify(atLeast = 1) {
+                dittSykefravaerMeldingKafkaProducer.sendMelding(
+                    any(),
+                    any(),
+                )
+            }
+
+            val utsendte = senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent("66666666666"),
+                kanal = Kanal.DITT_SYKEFRAVAER,
+            )
+
+            val innkallinger =
+                utsendte.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
+            innkallinger shouldNotBeEqualTo null
+
+            val avlysninger =
+                utsendte.find { it.type == HendelseType.SM_DIALOGMOTE_AVLYST.name && it.fnr == "66666666666" }
+            avlysninger shouldBeEqualTo null
+
+            val varselHendelseAvlyst = ArbeidstakerHendelse(
+                HendelseType.SM_DIALOGMOTE_AVLYST,
+                false,
+                varselData(journalpostUuid, journalpostId),
+                "66666666666",
+                orgnummer,
+            )
+
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseAvlyst)
+
+            val utsendte2 = senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent("66666666666"),
+                kanal = Kanal.DITT_SYKEFRAVAER,
+            )
+            val innkallinger2 =
+                utsendte2.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
+            val avlysninger2 =
+                utsendte2.find { it.type == HendelseType.SM_DIALOGMOTE_AVLYST.name && it.fnr == "66666666666" }
+
+            innkallinger2 shouldBeEqualTo null
+            avlysninger2 shouldNotBeEqualTo null
+
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseAvlyst)
+
+            val utsendte3 = senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent("66666666666"),
+                kanal = Kanal.DITT_SYKEFRAVAER,
+            )
+            val innkallinger3 =
+                utsendte3.find { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
+            val avlysninger3 =
+                utsendte3.find { it.type == HendelseType.SM_DIALOGMOTE_AVLYST.name && it.fnr == "66666666666" }
+
+            innkallinger3 shouldBeEqualTo null
+            avlysninger3 shouldNotBeEqualTo null
+
+            verify(exactly = 2) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding("456", "66666666666") }
+        }
+
+        it("Ny innkalling hendelse skal ferdigstille tidligere innkalling") {
+            coEvery { accessControlService.getUserAccessStatus("66666666666") } returns
+                UserAccessStatus("66666666666", true)
+            coEvery { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) } returns "789"
+
+            val varselHendelseInnkalling = ArbeidstakerHendelse(
+                hendelseType,
+                false,
+                varselData(journalpostUuid, journalpostId),
+                "66666666666",
+                orgnummer,
+            )
+
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseInnkalling)
+
+            verify(atLeast = 1) {
+                dittSykefravaerMeldingKafkaProducer.sendMelding(
+                    any(),
+                    any(),
+                )
+            }
+
+            val utsendte = senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent("66666666666"),
+                kanal = Kanal.DITT_SYKEFRAVAER,
+            )
+
+            val innkallinger =
+                utsendte.filter { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
+            innkallinger shouldNotBeEqualTo null
+            innkallinger.size shouldBe 1
+
+            val varselHendelseEndring = ArbeidstakerHendelse(
+                HendelseType.SM_DIALOGMOTE_INNKALT,
+                false,
+                varselData(journalpostUuid, journalpostId),
+                "66666666666",
+                orgnummer,
+            )
+
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)
+
+            val utsendte2 = senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent("66666666666"),
+                kanal = Kanal.DITT_SYKEFRAVAER,
+            )
+            val innkallinger2 =
+                utsendte2.filter { it.type == HendelseType.SM_DIALOGMOTE_INNKALT.name && it.fnr == "66666666666" }
+
+            innkallinger2 shouldNotBeEqualTo null
+            innkallinger2.size shouldBeEqualTo 1
+
+            verify(exactly = 1) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding("789", "66666666666") }
+        }
     }
 })
 
