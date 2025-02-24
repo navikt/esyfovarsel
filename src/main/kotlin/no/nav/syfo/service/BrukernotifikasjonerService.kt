@@ -13,7 +13,7 @@ class BrukernotifikasjonerService(
 ) {
     private val log: Logger = LoggerFactory.getLogger(BrukernotifikasjonerService::class.qualifiedName)
 
-    suspend fun sendBrukernotifikasjonVarsel( //HERE!
+    suspend fun sendBrukernotifikasjonVarsel(
         uuid: String,
         mottakerFnr: String,
         content: String,
