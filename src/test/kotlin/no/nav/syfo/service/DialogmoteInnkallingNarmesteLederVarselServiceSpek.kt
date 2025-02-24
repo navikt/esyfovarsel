@@ -50,6 +50,7 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek : DescribeSpec({
         arbeidsgiverNotifikasjonService,
         fysiskBrevUtsendingService,
         embeddedDatabase,
+        pdlClient,
     )
     val dialogmoteInnkallingNarmesteLederVarselService = DialogmoteInnkallingNarmesteLederVarselService(
         senderFacade,

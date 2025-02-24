@@ -36,7 +36,8 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
         brukernotifikasjonerService,
         arbeidsgiverNotifikasjonService,
         fysiskBrevUtsendingService,
-        embeddedDatabase
+        embeddedDatabase,
+        pdlClient,
     )
     val oppfolgingsplanVarselService = OppfolgingsplanVarselService(
         senderFacade,
@@ -47,10 +48,15 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
     )
 
     describe("OppfolgingsplanVarselServiceSpek") {
-        coJustRun { brukernotifikasjonerService.sendBrukernotifikasjonVarsel(any(), any(), any(), any(), any(), any()) }
+        coJustRun { brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
+            any(), any(), any(), any(), any(), any(), any(),
+            dagerTilDeaktivering = any(),
+            isPersonAlive = any()
+        ) }
 
         it("Non-reserved users should be notified externally") {
             coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(fnr1) } returns true
+            coEvery { pdlClient.isPersonAlive(fnr1) } returns true
             val varselHendelse = ArbeidstakerHendelse(
                 HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
                 false,
@@ -67,12 +73,16 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
                     URL(fakeOppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL),
                     any(),
                     true,
+                    any(),
+                    any(),
+                    any(),
                 )
             }
         }
 
         it("Reserved users should only be notified on 'Min side'") {
             coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(fnr2) } returns false
+            coEvery { pdlClient.isPersonAlive(fnr2) } returns true
             val varselHendelse = ArbeidstakerHendelse(
                 HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
                 false,
@@ -88,7 +98,10 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
                     any(),
                     URL(fakeOppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL),
                     any(),
-                    false
+                    false,
+                    any(),
+                    any(),
+                    any(),
                 )
             }
         }

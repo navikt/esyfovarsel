@@ -2,13 +2,23 @@ package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
-import io.mockk.*
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coJustRun
+import io.mockk.coVerify
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederRelasjon
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.narmesteLeder.Tilgang
-import no.nav.syfo.consumer.pdl.*
+import no.nav.syfo.consumer.pdl.Doedsdato
+import no.nav.syfo.consumer.pdl.Foedselsdato
+import no.nav.syfo.consumer.pdl.HentPerson
+import no.nav.syfo.consumer.pdl.HentPersonData
+import no.nav.syfo.consumer.pdl.Navn
+import no.nav.syfo.consumer.pdl.PdlClient
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.domain.PersonIdent
@@ -53,17 +63,18 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
         arbeidsgiverNotifikasjonService,
         fysiskBrevUtsendingService,
         embeddedDatabase,
+        pdlClient,
     )
     val dialogmoteInnkallingSykmeldtVarselService = DialogmoteInnkallingSykmeldtVarselService(
         senderFacade,
         fakeDialogmoterUrl,
         accessControlService,
-        database
+        database,
     )
     val hendelseType = HendelseType.SM_DIALOGMOTE_INNKALT
 
     describe("DialogmoteInnkallingVarselServiceSpek") {
-        coJustRun { fysiskBrevUtsendingService.sendBrev(any(), any(), DistibusjonsType.ANNET, arbeidstakerFnr = any()) }
+        coJustRun { fysiskBrevUtsendingService.sendBrev(any(), any(), DistibusjonsType.ANNET) }
 
         beforeTest {
             clearAllMocks()
@@ -87,6 +98,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
         it("Non-reserved users should be notified externally") {
              coEvery { accessControlService.getUserAccessStatus(fnr1) } returns
                      UserAccessStatus(fnr1, true)
+            coEvery { pdlClient.isPersonAlive(any()) } returns true
 
              val varselHendelse = ArbeidstakerHendelse(
                  hendelseType,
@@ -106,6 +118,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                      smsContent = null,
                      varseltype = any(),
                      eksternVarsling = any(),
+                     isPersonAlive = true,
                  )
              }
 
@@ -120,6 +133,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
         it("Reserved users should be notified physically") {
             coEvery { accessControlService.getUserAccessStatus(fnr2) } returns
                 UserAccessStatus(fnr2, canUserBeDigitallyNotified = false)
+            coEvery { pdlClient.isPersonAlive(fnr2) } returns true
 
             val varselHendelse = ArbeidstakerHendelse(
                 hendelseType,
@@ -135,7 +149,6 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                     journalpostUuid,
                     journalpostId,
                     DistibusjonsType.ANNET,
-                    arbeidstakerFnr = fnr2,
                 )
             }
 
@@ -147,7 +160,8 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                     url = any(),
                     varseltype = any(),
                     eksternVarsling = any(),
-                    smsContent = any()
+                    smsContent = any(),
+                    isPersonAlive = true,
                 )
             }
 
@@ -162,6 +176,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
         it("Reserved users should get brevpost") {
             coEvery { accessControlService.getUserAccessStatus(fnr3) } returns
                 UserAccessStatus(fnr3, canUserBeDigitallyNotified = false)
+            coEvery { pdlClient.isPersonAlive(fnr3) } returns true
 
             val varselHendelse = ArbeidstakerHendelse(
                 hendelseType,
@@ -179,7 +194,8 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                     url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
                     varseltype = any(),
                     eksternVarsling = any(),
-                    smsContent = any()
+                    smsContent = any(),
+                    isPersonAlive = true,
                 )
             }
             coVerify(exactly = 1) {
@@ -187,7 +203,6 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                     journalpostUuidAddressProtection,
                     journalpostIdAddressProtection,
                     DistibusjonsType.ANNET,
-                    arbeidstakerFnr = fnr3,
                 )
             }
             verify(atLeast = 1) {
@@ -201,6 +216,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
         it("Users should not be notified when lest hendelse is sent") {
             coEvery { accessControlService.getUserAccessStatus(arbeidstakerFnr1) } returns
                 UserAccessStatus(arbeidstakerFnr1, true)
+            coEvery { pdlClient.isPersonAlive(arbeidstakerFnr1) } returns true
 
             val varselHendelse = ArbeidstakerHendelse(
                 type = HendelseType.SM_DIALOGMOTE_LEST,
@@ -219,6 +235,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                     url = any(),
                     varseltype = DONE,
                     eksternVarsling = true,
+                    isPersonAlive = true,
                 )
             }
 
@@ -243,6 +260,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                     doedsfall = listOf(Doedsdato(doedsdato = "01-01-2025"))
                 )
             )
+            coEvery { pdlClient.isPersonAlive(any()) } returns false
 
             val varselHendelse = ArbeidstakerHendelse(
                 hendelseType,
@@ -262,6 +280,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                     smsContent = null,
                     varseltype = any(),
                     eksternVarsling = false,
+                    isPersonAlive = false,
                 )
             }
 
@@ -284,6 +303,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                     doedsfall = listOf(Doedsdato(doedsdato = "01-01-2025"))
                 )
             )
+            coEvery { pdlClient.isPersonAlive(any()) } returns false
 
             val varselHendelse = ArbeidstakerHendelse(
                 hendelseType,
@@ -301,7 +321,8 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                     url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
                     varseltype = any(),
                     eksternVarsling = any(),
-                    smsContent = any()
+                    smsContent = any(),
+                    isPersonAlive = false,
                 )
             }
             coVerify(exactly = 0) {
@@ -309,7 +330,6 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                     journalpostUuidAddressProtection,
                     journalpostIdAddressProtection,
                     DistibusjonsType.ANNET,
-                    arbeidstakerFnr = fnr3,
                 )
             }
             verify(atLeast = 1) {

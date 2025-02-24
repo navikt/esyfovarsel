@@ -1,19 +1,19 @@
 package no.nav.syfo.service
 
+import java.net.URL
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.BESKJED
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.DONE
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.URL
 
 class BrukernotifikasjonerService(
     val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,
 ) {
     private val log: Logger = LoggerFactory.getLogger(BrukernotifikasjonerService::class.qualifiedName)
 
-    suspend fun sendBrukernotifikasjonVarsel(
+    suspend fun sendBrukernotifikasjonVarsel( //HERE!
         uuid: String,
         mottakerFnr: String,
         content: String,
@@ -22,6 +22,7 @@ class BrukernotifikasjonerService(
         eksternVarsling: Boolean,
         smsContent: String? = null,
         dagerTilDeaktivering: Long? = null,
+        isPersonAlive: Boolean,
     ) {
         when (varseltype) {
             BESKJED -> {
@@ -30,17 +31,17 @@ class BrukernotifikasjonerService(
                     content,
                     uuid,
                     url,
-                    eksternVarsling,
+                    eksternVarsling && isPersonAlive,
                     dagerTilDeaktivering
                 )
                 log.info("Har sendt beskjed med uuid $uuid til brukernotifikasjoner: $content")
             }
 
             OPPGAVE -> {
-                url?.let {
-                    brukernotifikasjonKafkaProducer.sendOppgave(mottakerFnr, content, uuid, it, smsContent, dagerTilDeaktivering)
-                    log.info("Har sendt oppgave med uuid $uuid til brukernotifikasjoner: $content")
-                } ?: throw IllegalArgumentException("Url must be set")
+                    url?.let {
+                        brukernotifikasjonKafkaProducer.sendOppgave(mottakerFnr, content, uuid, it, smsContent, dagerTilDeaktivering, isPersonAlive)
+                        log.info("Har sendt oppgave med uuid $uuid til brukernotifikasjoner: $content")
+                    } ?: throw IllegalArgumentException("Url must be set")
             }
 
             DONE -> {

@@ -6,7 +6,6 @@ import java.time.ZonedDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.syfo.Environment
-import no.nav.syfo.consumer.pdl.PdlClient
 import no.nav.syfo.kafka.common.producerProperties
 import no.nav.tms.varsel.action.EksternKanal
 import no.nav.tms.varsel.action.Sensitivitet
@@ -22,7 +21,6 @@ import org.slf4j.LoggerFactory
 
 class BrukernotifikasjonKafkaProducer(
     val env: Environment,
-    val pdlClient: PdlClient,
 ) {
     val brukernotifikasjonerTopic = "min-side.aapen-brukervarsel-v1"
     val kafkaProducer = KafkaProducer<String, String>(
@@ -67,6 +65,7 @@ class BrukernotifikasjonKafkaProducer(
         varselUrl: URL,
         smsContent: String?,
         dagerTilDeaktivering: Long?,
+        isPersonAlive: Boolean,
     ) {
         val varsel = createVarsel(
             varseltype = Varseltype.Oppgave,
@@ -74,7 +73,7 @@ class BrukernotifikasjonKafkaProducer(
             fnr = fnr,
             content = content,
             varselUrl = varselUrl,
-            smsVarsling = true,
+            smsVarsling = isPersonAlive,
             smsTekst = smsContent,
             dagerTilDeaktivering = dagerTilDeaktivering,
         )
@@ -93,7 +92,7 @@ class BrukernotifikasjonKafkaProducer(
         kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, inaktiverVarsel)).get()
     }
 
-    private suspend fun createVarsel(
+    private fun createVarsel(
         varseltype: Varseltype,
         uuid: String,
         fnr: String,
@@ -107,10 +106,6 @@ class BrukernotifikasjonKafkaProducer(
             log.error("varselUrl for $varseltype is longer than 200 characters: $varselUrl UUID: $uuid")
         }
 
-        val isPersonAlive = pdlClient.isPersonAlive(fnr)
-        log.info("isPersonAlive: $isPersonAlive")
-        val smsVarslingEnabled = isPersonAlive && smsVarsling
-
         val opprettVarsel = VarselActionBuilder.opprett {
             type = varseltype
             varselId = uuid
@@ -123,7 +118,7 @@ class BrukernotifikasjonKafkaProducer(
             )
             link = varselUrl?.toString()
             aktivFremTil = dagerTilDeaktivering?.let { ZonedDateTime.now(ZoneId.of("Z")).plusDays(it) }
-            if (smsVarslingEnabled) {
+            if (smsVarsling) {
                 eksternVarsling {
                     smsVarslingstekst = smsTekst
                     preferertKanal = EksternKanal.SMS
