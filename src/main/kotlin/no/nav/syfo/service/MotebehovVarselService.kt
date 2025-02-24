@@ -1,5 +1,11 @@
 package no.nav.syfo.service
 
+import java.io.IOException
+import java.net.URI
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.util.*
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_TITLE
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
@@ -24,12 +30,6 @@ import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.BESKJED
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.io.IOException
-import java.net.URL
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.util.*
 
 const val DITT_SYKEFRAVAER_HENDELSE_TYPE_DIALOGMOTE_SVAR_MOTEBEHOV = "ESYFOVARSEL_DIALOGMOTE_SVAR_MOTEBEHOV"
 
@@ -108,7 +108,7 @@ class MotebehovVarselService(
             uuid = UUID.randomUUID().toString(),
             mottakerFnr = fnr,
             content = BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
-            url = URL(svarMotebehovUrl),
+            url = URI(svarMotebehovUrl).toURL(),
             varselHendelse = varselHendelse,
             varseltype = OPPGAVE,
             eksternVarsling = eksternVarsling
