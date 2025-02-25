@@ -4,7 +4,7 @@ group = "no.nav.syfo"
 version = "1.0"
 
 val kluentVersion = "1.73"
-val ktorVersion = "2.3.12"
+val ktorVersion = "3.1.1"
 val prometheusVersion = "0.16.0"
 val micrometerVersion = "1.14.4"
 val kotestVersion = "5.9.1"
