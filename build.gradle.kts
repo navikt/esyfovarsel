@@ -11,8 +11,8 @@ val kotestVersion = "5.9.1"
 val kotestExtensionsVersion = "2.0.0"
 val h2Version = "2.3.232"
 val mockkVersion = "1.13.16"
-val slf4jVersion = "2.0.16"
-val logbackVersion = "1.5.16"
+val slf4jVersion = "2.0.17"
+val logbackVersion = "1.5.17"
 val javaxVersion = "2.1.1"
 val logstashEncoderVersion = "8.0"
 val postgresVersion = "42.7.5"
@@ -24,7 +24,7 @@ val kafkaVersion = "3.9.0"
 val brukernotifikasjonerBuilderVersion = "2.1.1"
 val kotlinVersion = "2.1.10"
 val graphqlApolloVersion = "4.1.0"
-val detektVersion = "1.23.7"
+val detektVersion = "1.23.8"
 
 val githubUser: String by project
 val githubPassword: String by project
@@ -36,7 +36,7 @@ plugins {
     id("com.diffplug.spotless") version "6.25.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("com.apollographql.apollo") version "4.1.0"
-    id("io.gitlab.arturbosch.detekt") version "1.23.7"
+    id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
 
 java {

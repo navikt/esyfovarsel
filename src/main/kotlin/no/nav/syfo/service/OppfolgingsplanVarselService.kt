@@ -1,5 +1,12 @@
 package no.nav.syfo.service
 
+import java.net.URI
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.util.*
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_BODY
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_TITLE
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_MESSAGE_TEXT
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_TITLE
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT
@@ -7,9 +14,6 @@ import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL
 import no.nav.syfo.BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT
 import no.nav.syfo.DINE_SYKMELDTE_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_MESSAGE_TEXT
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_TITLE
-import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_BODY
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdl.PdlClient
 import no.nav.syfo.consumer.pdl.fullName
@@ -21,10 +25,6 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.BESKJED
 import org.slf4j.LoggerFactory
-import java.net.URL
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.util.*
 
 class OppfolgingsplanVarselService(
     private val senderFacade: SenderFacade,
@@ -141,7 +141,7 @@ class OppfolgingsplanVarselService(
             uuid = UUID.randomUUID().toString(),
             mottakerFnr = varselHendelse.arbeidstakerFnr,
             content = BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT,
-            url = URL(oppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL),
+            url = URI(oppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL).toURL(),
             varselHendelse = varselHendelse,
             eksternVarsling = eksternVarsling,
             varseltype = BESKJED

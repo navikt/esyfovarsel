@@ -5,7 +5,8 @@ import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
-import java.net.URL
+import io.mockk.verify
+import java.net.URI
 import no.nav.syfo.BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdl.PdlClient
@@ -70,7 +71,7 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
                     any(),
                     fnr1,
                     any(),
-                    URL(fakeOppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL),
+                    URI(fakeOppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL).toURL(),
                     any(),
                     true,
                     any(),
@@ -96,7 +97,7 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
                     any(),
                     fnr2,
                     any(),
-                    URL(fakeOppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL),
+                    URI(fakeOppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL).toURL(),
                     any(),
                     false,
                     any(),
