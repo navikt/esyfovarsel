@@ -3,6 +3,7 @@ package no.nav.syfo.service
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
@@ -54,7 +55,7 @@ class MotebehovVarselServiceSpek : DescribeSpec({
         it("sendVarselTilArbeidstaker should send oppgave to brukernotifikasjoner") {
             coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(any()) } returns true
             motebehovVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelseSvarMotebehov2)
-            verify(exactly = 1) {
+            coVerify(exactly = 1) {
                 senderFacade.sendTilBrukernotifikasjoner(
                     any(),
                     arbeidstakerFnr2,
@@ -70,7 +71,7 @@ class MotebehovVarselServiceSpek : DescribeSpec({
         it("Reserved users should not be notified digitally") {
             coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(any()) } returns false
             motebehovVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelseSvarMotebehov3)
-            verify(exactly = 1) {
+            coVerify(exactly = 1) {
                 senderFacade.sendTilBrukernotifikasjoner(
                     any(),
                     arbeidstakerFnr3,

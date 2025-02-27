@@ -1,12 +1,28 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.*
+import java.io.IOException
+import java.io.Serializable
+import java.net.URI
+import java.net.URL
+import java.time.OffsetDateTime
+import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST
+import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST
+import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST
+import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST
+import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_AVLYSNING_MESSAGE_TEXT
+import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_ENDRING_MESSAGE_TEXT
+import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_INNKALLING_MESSAGE_TEXT
+import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_REFERAT_MESSAGE_TEXT
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_AVLYST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_INNKALT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_LEST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_NYTT_TID_STED
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
 import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
@@ -15,11 +31,6 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType
 import org.slf4j.LoggerFactory
-import java.io.IOException
-import java.io.Serializable
-import java.net.URI
-import java.net.URL
-import java.time.OffsetDateTime
 
 enum class DittSykefravaerHendelsetypeDialogmoteInnkalling : Serializable {
     ESYFOVARSEL_DIALOGMOTE_INNKALT,
@@ -65,7 +76,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
         return URI(urlString).toURL()
     }
 
-    private fun varsleArbeidstakerViaBrukernotifkasjoner(
+    private suspend fun varsleArbeidstakerViaBrukernotifkasjoner(
         varselHendelse: ArbeidstakerHendelse,
         varselUuid: String,
     ) {
@@ -86,11 +97,11 @@ class DialogmoteInnkallingSykmeldtVarselService(
         journalpostId: String,
     ) {
         try {
-            senderFacade.sendBrevTilFysiskPrint(
-                uuid = uuid,
-                varselHendelse = arbeidstakerHendelse,
-                journalpostId = journalpostId
-            )
+                senderFacade.sendBrevTilFysiskPrint(
+                    uuid = uuid,
+                    varselHendelse = arbeidstakerHendelse,
+                    journalpostId = journalpostId
+                )
         } catch (e: RuntimeException) {
             log.info(
                 "Feil i sending av fysisk brev om dialogmote: ${e.message} for hendelsetype: ${arbeidstakerHendelse.type.name}"

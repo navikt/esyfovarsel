@@ -50,6 +50,7 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek : DescribeSpec({
         arbeidsgiverNotifikasjonService,
         fysiskBrevUtsendingService,
         embeddedDatabase,
+        pdlClient,
     )
     val dialogmoteInnkallingNarmesteLederVarselService = DialogmoteInnkallingNarmesteLederVarselService(
         senderFacade,
@@ -73,6 +74,7 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek : DescribeSpec({
                 hentPerson = HentPerson(
                     foedselsdato = listOf(Foedselsdato(foedselsdato = "1990-01-01")),
                     navn = listOf(Navn(fornavn = "Test", mellomnavn = null, etternavn = "Testesen")),
+                    doedsfall = listOf()
                 )
             )
             coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns UUID.randomUUID().toString()
