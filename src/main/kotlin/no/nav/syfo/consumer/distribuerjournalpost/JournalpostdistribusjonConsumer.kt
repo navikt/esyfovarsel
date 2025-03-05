@@ -31,7 +31,7 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
         val request = JournalpostdistribusjonRequest(
             journalpostId = journalpostId,
             distribusjonstype = distribusjonstype.name,
-            tvingSentralPrint = tvingSentralPrint,
+            tvingKanal = if (tvingSentralPrint) Kanal.PRINT else null,
         )
 
         return try {
