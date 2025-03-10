@@ -63,7 +63,11 @@ class DialogmoteInnkallingNarmestelederVarselServiceOLD(
                 epostTittel = emailTitle,
                 epostHtmlBody = emailBody,
                 hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
-                meldingstype = Meldingstype.BESKJED,
+                meldingstype = if (varselHendelse.type == NL_DIALOGMOTE_NYTT_TID_STED) {
+                    Meldingstype.OPPGAVE
+                } else {
+                    Meldingstype.BESKJED
+                },
                 grupperingsid = UUID.randomUUID().toString(),
             )
 
