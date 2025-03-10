@@ -63,7 +63,7 @@ class DialogmoteInnkallingNarmestelederVarselServiceOLD(
                 epostTittel = emailTitle,
                 epostHtmlBody = emailBody,
                 hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
-                meldingstype = Meldingstype.OPPGAVE,
+                meldingstype = Meldingstype.BESKJED,
                 grupperingsid = UUID.randomUUID().toString(),
             )
 
