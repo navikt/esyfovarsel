@@ -1,10 +1,5 @@
 package no.nav.syfo.kafka.producers.brukernotifikasjoner
 
-import java.net.URL
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.producerProperties
 import no.nav.tms.varsel.action.EksternKanal
@@ -18,6 +13,9 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.URL
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 class BrukernotifikasjonKafkaProducer(
     val env: Environment,
@@ -33,7 +31,7 @@ class BrukernotifikasjonKafkaProducer(
     )
     private val log: Logger = LoggerFactory.getLogger(BrukernotifikasjonKafkaProducer::class.java)
 
-    suspend fun sendBeskjed(
+    fun sendBeskjed(
         fnr: String,
         content: String,
         uuid: String,
@@ -52,20 +50,17 @@ class BrukernotifikasjonKafkaProducer(
             dagerTilDeaktivering = dagerTilDeaktivering,
         )
 
-        withContext(Dispatchers.IO) {
-            kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
-                .get()
-        } // Block until record has been sent
+        kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
+            .get() // Block until record has been sent
     }
 
-    suspend fun sendOppgave(
+    fun sendOppgave(
         fnr: String,
         content: String,
         uuid: String,
         varselUrl: URL,
         smsContent: String?,
         dagerTilDeaktivering: Long?,
-        isPersonAlive: Boolean,
     ) {
         val varsel = createVarsel(
             varseltype = Varseltype.Oppgave,
@@ -73,15 +68,13 @@ class BrukernotifikasjonKafkaProducer(
             fnr = fnr,
             content = content,
             varselUrl = varselUrl,
-            smsVarsling = isPersonAlive,
+            smsVarsling = true,
             smsTekst = smsContent,
             dagerTilDeaktivering = dagerTilDeaktivering,
         )
 
-        withContext(Dispatchers.IO) {
-            kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
-                .get()
-        } // Block until record has been sent
+        kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
+            .get() // Block until record has been sent
     }
 
     fun sendDone(uuid: String) {

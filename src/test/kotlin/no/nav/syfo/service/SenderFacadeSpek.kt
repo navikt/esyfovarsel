@@ -18,7 +18,6 @@ import no.nav.syfo.planner.arbeidstakerFnr1
 import no.nav.syfo.testutil.EmbeddedDatabase
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.syfo.consumer.pdl.PdlClient
 
 class SenderFacadeSpek : DescribeSpec({
     describe("SenderFacadeSpek") {
@@ -29,7 +28,6 @@ class SenderFacadeSpek : DescribeSpec({
         val brukernotifikasjonerService: BrukernotifikasjonerService = mockk(relaxed = true)
         val dittSykefravaerMeldingKafkaProducer: DittSykefravaerMeldingKafkaProducer = mockk(relaxed = true)
         val fysiskBrevUtsendingService: FysiskBrevUtsendingService = mockk(relaxed = true)
-        val pdlClient: PdlClient = mockk(relaxed = true)
 
         val senderFacade = SenderFacade(
             dineSykmeldteHendelseKafkaProducer,
@@ -37,8 +35,7 @@ class SenderFacadeSpek : DescribeSpec({
             brukernotifikasjonerService,
             arbeidsgiverNotifikasjonService,
             fysiskBrevUtsendingService,
-            embeddedDatabase,
-            pdlClient,
+            embeddedDatabase
         )
 
         val eksternRefArbeidsgiverNotifikasjoner = "arbeidsgivernotifikasjoner"

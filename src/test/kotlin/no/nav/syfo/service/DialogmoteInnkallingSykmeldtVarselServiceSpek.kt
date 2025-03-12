@@ -2,23 +2,13 @@ package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
-import io.mockk.clearAllMocks
-import io.mockk.coEvery
-import io.mockk.coJustRun
-import io.mockk.coVerify
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederRelasjon
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.narmesteLeder.Tilgang
-import no.nav.syfo.consumer.pdl.Doedsdato
-import no.nav.syfo.consumer.pdl.Foedselsdato
-import no.nav.syfo.consumer.pdl.HentPerson
-import no.nav.syfo.consumer.pdl.HentPersonData
-import no.nav.syfo.consumer.pdl.Navn
-import no.nav.syfo.consumer.pdl.PdlClient
+import no.nav.syfo.consumer.pdl.*
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.domain.PersonIdent
@@ -63,13 +53,12 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
         arbeidsgiverNotifikasjonService,
         fysiskBrevUtsendingService,
         embeddedDatabase,
-        pdlClient,
     )
     val dialogmoteInnkallingSykmeldtVarselService = DialogmoteInnkallingSykmeldtVarselService(
         senderFacade,
         fakeDialogmoterUrl,
         accessControlService,
-        database,
+        database
     )
     val hendelseType = HendelseType.SM_DIALOGMOTE_INNKALT
 
@@ -89,51 +78,47 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                 hentPerson = HentPerson(
                     foedselsdato = listOf(Foedselsdato(foedselsdato = "1990-01-01")),
                     navn = listOf(Navn(fornavn = "Test", mellomnavn = null, etternavn = "Testesen")),
-                    doedsfall = listOf()
                 )
             )
             coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns "123"
         }
 
         it("Non-reserved users should be notified externally") {
-             coEvery { accessControlService.getUserAccessStatus(fnr1) } returns
-                     UserAccessStatus(fnr1, true)
-            coEvery { pdlClient.isPersonAlive(any()) } returns true
+            coEvery { accessControlService.getUserAccessStatus(fnr1) } returns
+                UserAccessStatus(fnr1, true)
 
-             val varselHendelse = ArbeidstakerHendelse(
-                 hendelseType,
-                 false,
-                 varselData(journalpostUuid, journalpostId),
-                 fnr1,
-                 orgnummer,
-             )
-             dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
+            val varselHendelse = ArbeidstakerHendelse(
+                hendelseType,
+                false,
+                varselData(journalpostUuid, journalpostId),
+                fnr1,
+                orgnummer,
+            )
+            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
 
-             coVerify (exactly = 1) {
-                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
-                     uuid = any(),
-                     mottakerFnr = fnr1,
-                     content = any(),
-                     url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
-                     smsContent = null,
-                     varseltype = any(),
-                     eksternVarsling = any(),
-                     isPersonAlive = true,
-                 )
-             }
+            verify(exactly = 1) {
+                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
+                    uuid = any(),
+                    mottakerFnr = fnr1,
+                    content = any(),
+                    url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
+                    smsContent = null,
+                    varseltype = any(),
+                    eksternVarsling = any(),
+                )
+            }
 
-             coVerify(atLeast = 1) {
-                 dittSykefravaerMeldingKafkaProducer.sendMelding(
-                     any(),
-                     any(),
-                 )
-             }
+            verify(atLeast = 1) {
+                dittSykefravaerMeldingKafkaProducer.sendMelding(
+                    any(),
+                    any(),
+                )
+            }
         }
 
         it("Reserved users should be notified physically") {
             coEvery { accessControlService.getUserAccessStatus(fnr2) } returns
                 UserAccessStatus(fnr2, canUserBeDigitallyNotified = false)
-            coEvery { pdlClient.isPersonAlive(fnr2) } returns true
 
             val varselHendelse = ArbeidstakerHendelse(
                 hendelseType,
@@ -152,7 +137,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                 )
             }
 
-            coVerify(exactly = 0) {
+            verify(exactly = 0) {
                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     uuid = any(),
                     mottakerFnr = fnr2,
@@ -160,8 +145,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                     url = any(),
                     varseltype = any(),
                     eksternVarsling = any(),
-                    smsContent = any(),
-                    isPersonAlive = true,
+                    smsContent = any()
                 )
             }
 
@@ -172,11 +156,9 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                 )
             }
         }
-
         it("Reserved users should get brevpost") {
             coEvery { accessControlService.getUserAccessStatus(fnr3) } returns
                 UserAccessStatus(fnr3, canUserBeDigitallyNotified = false)
-            coEvery { pdlClient.isPersonAlive(fnr3) } returns true
 
             val varselHendelse = ArbeidstakerHendelse(
                 hendelseType,
@@ -186,7 +168,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                 orgnummer,
             )
             dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
-            coVerify(exactly = 0) {
+            verify(exactly = 0) {
                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     uuid = any(),
                     mottakerFnr = fnr3,
@@ -194,15 +176,14 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                     url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
                     varseltype = any(),
                     eksternVarsling = any(),
-                    smsContent = any(),
-                    isPersonAlive = true,
+                    smsContent = any()
                 )
             }
             coVerify(exactly = 1) {
                 fysiskBrevUtsendingService.sendBrev(
                     journalpostUuidAddressProtection,
                     journalpostIdAddressProtection,
-                    DistibusjonsType.ANNET,
+                    DistibusjonsType.ANNET
                 )
             }
             verify(atLeast = 1) {
@@ -216,7 +197,6 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
         it("Users should not be notified when lest hendelse is sent") {
             coEvery { accessControlService.getUserAccessStatus(arbeidstakerFnr1) } returns
                 UserAccessStatus(arbeidstakerFnr1, true)
-            coEvery { pdlClient.isPersonAlive(arbeidstakerFnr1) } returns true
 
             val varselHendelse = ArbeidstakerHendelse(
                 type = HendelseType.SM_DIALOGMOTE_LEST,
@@ -227,7 +207,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
             )
             dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
 
-            coVerify(exactly = 1) {
+            verify(exactly = 1) {
                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     uuid = any(),
                     mottakerFnr = arbeidstakerFnr1,
@@ -235,7 +215,6 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                     url = any(),
                     varseltype = DONE,
                     eksternVarsling = true,
-                    isPersonAlive = true,
                 )
             }
 
@@ -244,97 +223,6 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
             verify(exactly = 0) {
                 dittSykefravaerMeldingKafkaProducer.sendMelding(
                     getDittSykefravaerMelding(),
-                    any(),
-                )
-            }
-        }
-
-        it("Non-reserved users should not be notified externally if they passed away") {
-            coEvery { accessControlService.getUserAccessStatus(fnr1) } returns
-                    UserAccessStatus(fnr1, true)
-
-            coEvery { pdlClient.hentPerson(any()) } returns HentPersonData(
-                hentPerson = HentPerson(
-                    foedselsdato = listOf(Foedselsdato(foedselsdato = "1990-01-01")),
-                    navn = listOf(Navn(fornavn = "Test", mellomnavn = null, etternavn = "Testesen")),
-                    doedsfall = listOf(Doedsdato(doedsdato = "01-01-2025"))
-                )
-            )
-            coEvery { pdlClient.isPersonAlive(any()) } returns false
-
-            val varselHendelse = ArbeidstakerHendelse(
-                hendelseType,
-                false,
-                varselData(journalpostUuid, journalpostId),
-                fnr1,
-                orgnummer,
-            )
-            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
-
-            coVerify (exactly = 1) {
-                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
-                    uuid = any(),
-                    mottakerFnr = fnr1,
-                    content = any(),
-                    url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
-                    smsContent = null,
-                    varseltype = any(),
-                    eksternVarsling = false,
-                    isPersonAlive = false,
-                )
-            }
-
-            coVerify(atLeast = 1) {
-                dittSykefravaerMeldingKafkaProducer.sendMelding(
-                    any(),
-                    any(),
-                )
-            }
-        }
-
-        it("Reserved users should NOT get brevpost if they passed away") {
-            coEvery { accessControlService.getUserAccessStatus(fnr3) } returns
-                    UserAccessStatus(fnr3, canUserBeDigitallyNotified = false)
-
-            coEvery { pdlClient.hentPerson(any()) } returns HentPersonData(
-                hentPerson = HentPerson(
-                    foedselsdato = listOf(Foedselsdato(foedselsdato = "1990-01-01")),
-                    navn = listOf(Navn(fornavn = "Test", mellomnavn = null, etternavn = "Testesen")),
-                    doedsfall = listOf(Doedsdato(doedsdato = "01-01-2025"))
-                )
-            )
-            coEvery { pdlClient.isPersonAlive(any()) } returns false
-
-            val varselHendelse = ArbeidstakerHendelse(
-                hendelseType,
-                false,
-                varselData(journalpostUuidAddressProtection, journalpostIdAddressProtection),
-                fnr3,
-                orgnummer,
-            )
-            dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
-            coVerify(exactly = 0) {
-                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
-                    uuid = any(),
-                    mottakerFnr = fnr3,
-                    content = any(),
-                    url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
-                    varseltype = any(),
-                    eksternVarsling = any(),
-                    smsContent = any(),
-                    isPersonAlive = false,
-                )
-            }
-            coVerify(exactly = 0) {
-                fysiskBrevUtsendingService.sendBrev(
-                    journalpostUuidAddressProtection,
-                    journalpostIdAddressProtection,
-                    DistibusjonsType.ANNET,
-                )
-            }
-            verify(atLeast = 1) {
-                dittSykefravaerMeldingKafkaProducer.sendMelding(
-                    any(),
                     any(),
                 )
             }

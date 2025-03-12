@@ -56,13 +56,6 @@ open class PdlClient(private val urlEnv: UrlEnv, private val azureAdTokenConsume
         }
     }
 
-    suspend fun isPersonAlive(
-        personIdent: String,
-    ): Boolean {
-        val personStatus = hentPerson(personIdent)?.isPersonDod() ?: false
-        return !personStatus
-    }
-
     private fun getPdlQuery(graphQueryResourcePath: String): String {
         return this::class.java.getResource(graphQueryResourcePath)?.readText()?.replace("[\n\r]", "")
             ?: throw FileNotFoundException("Could not found resource: $graphQueryResourcePath")

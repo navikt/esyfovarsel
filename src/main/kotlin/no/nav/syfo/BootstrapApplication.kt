@@ -122,7 +122,6 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
         arbeidsgiverNotifikasjonService,
         fysiskBrevUtsendingService,
         database,
-        pdlClient
     )
     val motebehovVarselService = MotebehovVarselService(
         senderFacade,
@@ -134,7 +133,7 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
         senderFacade = senderFacade,
         dialogmoterUrl = env.urlEnv.dialogmoterUrl,
         accessControlService = accessControlService,
-        database = database,
+        database = database
     )
     val dialogmoteInnkallingNarmesteLederVarselService = DialogmoteInnkallingNarmesteLederVarselService(
         senderFacade = senderFacade,

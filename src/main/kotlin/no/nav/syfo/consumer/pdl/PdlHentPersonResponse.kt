@@ -15,18 +15,9 @@ fun HentPersonData.getFodselsdato(): String? {
     return this.hentPerson.foedselsdato.first().foedselsdato
 }
 
-fun HentPersonData.isPersonDod(): Boolean {
-    return this.hentPerson.doedsfall.first()?.doedsdato != null
-}
-
 data class HentPerson(
     val foedselsdato: List<Foedselsdato>,
-    val navn: List<Navn>,
-    val doedsfall: List<Doedsdato?>,
-)
-
-data class Doedsdato(
-    val doedsdato: String?,
+    val navn: List<Navn>
 )
 
 data class Foedselsdato(
