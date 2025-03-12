@@ -8,8 +8,5 @@ query($ident: ID!) {
             mellomnavn
             etternavn
         }
-        doedsfall {
-            doedsdato
-        }
     }
 }

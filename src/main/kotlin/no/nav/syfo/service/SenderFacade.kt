@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory
 import java.net.URL
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.syfo.consumer.pdl.PdlClient
 
 class SenderFacade(
     private val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
@@ -52,7 +51,6 @@ class SenderFacade(
     private val arbeidsgiverNotifikasjonService: ArbeidsgiverNotifikasjonService,
     private val fysiskBrevUtsendingService: FysiskBrevUtsendingService,
     val database: DatabaseInterface,
-    val pdlClient: PdlClient,
 ) {
     private val log: Logger = LoggerFactory.getLogger(SenderFacade::class.qualifiedName)
     fun sendTilDineSykmeldte(
@@ -95,7 +93,7 @@ class SenderFacade(
         }
     }
 
-    suspend fun sendTilBrukernotifikasjoner(
+    fun sendTilBrukernotifikasjoner(
         uuid: String,
         mottakerFnr: String,
         content: String,
@@ -108,18 +106,15 @@ class SenderFacade(
         journalpostId: String? = null,
     ) {
         try {
-           val isPersonAlive = pdlClient.isPersonAlive(mottakerFnr)
-
             brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                 uuid = uuid,
                 mottakerFnr = mottakerFnr,
                 content = content,
                 url = url,
                 varseltype = varseltype,
-                eksternVarsling = eksternVarsling && isPersonAlive,
+                eksternVarsling = eksternVarsling,
                 smsContent = smsContent,
                 dagerTilDeaktivering = dagerTilDeaktivering,
-                isPersonAlive = isPersonAlive
             )
             lagreUtsendtArbeidstakerVarsel(
                 kanal = BRUKERNOTIFIKASJON,
@@ -365,27 +360,21 @@ class SenderFacade(
         distribusjonsType: DistibusjonsType = DistibusjonsType.ANNET,
     ) {
         var isSendingSucceed = true
-
-            if (pdlClient.isPersonAlive(varselHendelse.arbeidstakerFnr)) {
-                try {
-                fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType)
-                } catch (e: Exception) {
-                    isSendingSucceed = false
-                    log.warn("Error while sending brev til fysisk print: ${e.message}")
-                    lagreIkkeUtsendtArbeidstakerVarsel(
-                        kanal = BREV,
-                        varselHendelse = varselHendelse,
-                        eksternReferanse = uuid,
-                        feilmelding = e.message,
-                        journalpostId = journalpostId,
-                        brukernotifikasjonerMeldingType = null,
-                        isForcedLetter = false,
-                    )
-                }
-            } else {
-                log.info("Sender ikke til print pga person er død. journalpostId: $journalpostId")
-            }
-
+        try {
+            fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType)
+        } catch (e: Exception) {
+            isSendingSucceed = false
+            log.warn("Error while sending brev til fysisk print: ${e.message}")
+            lagreIkkeUtsendtArbeidstakerVarsel(
+                kanal = BREV,
+                varselHendelse = varselHendelse,
+                eksternReferanse = uuid,
+                feilmelding = e.message,
+                journalpostId = journalpostId,
+                brukernotifikasjonerMeldingType = null,
+                isForcedLetter = false,
+            )
+        }
         if (isSendingSucceed) {
             lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid, journalpostId = journalpostId)
         }
@@ -397,30 +386,24 @@ class SenderFacade(
         journalpostId: String,
         distribusjonsType: DistibusjonsType = DistibusjonsType.VIKTIG,
     ) {
-
-            if (pdlClient.isPersonAlive(varselHendelse.arbeidstakerFnr)) {
-                try {
-
-                fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType, tvingSentralPrint = true)
-                log.info(
-                    "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sending direct sentral print letter with journalpostId $journalpostId succeded, storing in database"
-                )
-                lagreUtsendtArbeidstakerVarsel(
-                    BREV,
-                    varselHendelse,
-                    uuid,
-                    isForcedLetter = true,
-                    journalpostId = journalpostId
-                )
-                database.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef = uuid)
-                } catch (e: Exception) {
-                    log.warn(
-                        "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: Error while sending brev til direct sentral print: ${e.message}"
-                    )
-                }
-            } else {
-                log.info("Sender ikke til print pga person er død. journalpostId: $journalpostId")
-            }
+        try {
+            fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType, tvingSentralPrint = true)
+            log.info(
+                "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sending direct sentral print letter with journalpostId $journalpostId succeded, storing in database"
+            )
+            lagreUtsendtArbeidstakerVarsel(
+                BREV,
+                varselHendelse,
+                uuid,
+                isForcedLetter = true,
+                journalpostId = journalpostId
+            )
+            database.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef = uuid)
+        } catch (e: Exception) {
+            log.warn(
+                "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: Error while sending brev til direct sentral print: ${e.message}"
+            )
+        }
     }
 
     private fun lagreUtsendtNarmesteLederVarsel(

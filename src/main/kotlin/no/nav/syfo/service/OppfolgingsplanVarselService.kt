@@ -133,7 +133,7 @@ class OppfolgingsplanVarselService(
         )
     }
 
-    private suspend fun varsleArbeidstakerViaBrukernotifikasjoner(
+    private fun varsleArbeidstakerViaBrukernotifikasjoner(
         varselHendelse: ArbeidstakerHendelse,
         eksternVarsling: Boolean,
     ) {

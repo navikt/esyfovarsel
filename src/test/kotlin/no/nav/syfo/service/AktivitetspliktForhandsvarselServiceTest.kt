@@ -47,7 +47,7 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
                 )
             }
 
-            coVerify(exactly = 1) {
+            verify(exactly = 1) {
                 senderFacade.sendTilBrukernotifikasjoner(
                     any(),
                     any(),

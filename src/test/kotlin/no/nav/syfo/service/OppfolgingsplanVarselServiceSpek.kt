@@ -2,8 +2,7 @@ package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coEvery
-import io.mockk.coJustRun
-import io.mockk.coVerify
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 import java.net.URI
@@ -37,8 +36,7 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
         brukernotifikasjonerService,
         arbeidsgiverNotifikasjonService,
         fysiskBrevUtsendingService,
-        embeddedDatabase,
-        pdlClient,
+        embeddedDatabase
     )
     val oppfolgingsplanVarselService = OppfolgingsplanVarselService(
         senderFacade,
@@ -49,15 +47,10 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
     )
 
     describe("OppfolgingsplanVarselServiceSpek") {
-        coJustRun { brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
-            any(), any(), any(), any(), any(), any(), any(),
-            dagerTilDeaktivering = any(),
-            isPersonAlive = any()
-        ) }
+        justRun { brukernotifikasjonerService.sendBrukernotifikasjonVarsel(any(), any(), any(), any(), any(), any()) }
 
         it("Non-reserved users should be notified externally") {
             coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(fnr1) } returns true
-            coEvery { pdlClient.isPersonAlive(fnr1) } returns true
             val varselHendelse = ArbeidstakerHendelse(
                 HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
                 false,
@@ -66,7 +59,7 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
                 orgnummer
             )
             oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse)
-            coVerify(exactly = 1) {
+            verify(exactly = 1) {
                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     any(),
                     fnr1,
@@ -74,16 +67,12 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
                     URI(fakeOppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL).toURL(),
                     any(),
                     true,
-                    any(),
-                    any(),
-                    any(),
                 )
             }
         }
 
         it("Reserved users should only be notified on 'Min side'") {
             coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(fnr2) } returns false
-            coEvery { pdlClient.isPersonAlive(fnr2) } returns true
             val varselHendelse = ArbeidstakerHendelse(
                 HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
                 false,
@@ -92,17 +81,14 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
                 orgnummer
             )
             oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse)
-            coVerify(exactly = 1) {
+            verify(exactly = 1) {
                 brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                     any(),
                     fnr2,
                     any(),
                     URI(fakeOppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL).toURL(),
                     any(),
-                    false,
-                    any(),
-                    any(),
-                    any(),
+                    false
                 )
             }
         }
