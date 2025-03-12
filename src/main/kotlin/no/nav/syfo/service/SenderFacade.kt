@@ -61,7 +61,7 @@ class SenderFacade(
             dineSykmeldteHendelseKafkaProducer.sendVarsel(varsel)
             lagreUtsendtNarmesteLederVarsel(DINE_SYKMELDTE, varselHendelse, varsel.id.toString())
         } catch (e: Exception) {
-            log.warn("Error while sending varsel to DINE_SYKMELDTE: ${e.message}", e)
+            log.error("Error while sending varsel to DINE_SYKMELDTE: ${e.message}", e)
             lagreIkkeUtsendtNarmesteLederVarsel(
                 kanal = DINE_SYKMELDTE,
                 varselHendelse = varselHendelse,
@@ -80,7 +80,7 @@ class SenderFacade(
             val eksternUUID = dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding, varsel.uuid)
             lagreUtsendtArbeidstakerVarsel(DITT_SYKEFRAVAER, varselHendelse, eksternUUID)
         } catch (e: Exception) {
-            log.warn("Error while sending varsel to DITT_SYKEFRAVAER: ${e.message}")
+            log.error("Error while sending varsel to DITT_SYKEFRAVAER: ${e.message}")
             lagreIkkeUtsendtArbeidstakerVarsel(
                 kanal = DITT_SYKEFRAVAER,
                 varselHendelse = varselHendelse,
@@ -123,7 +123,7 @@ class SenderFacade(
                 journalpostId = journalpostId,
             )
         } catch (e: Exception) {
-            log.warn("Error while sending varsel to BRUKERNOTIFIKASJON: ${e.message}")
+            log.error("Error while sending varsel to BRUKERNOTIFIKASJON: ${e.message}")
             lagreIkkeUtsendtArbeidstakerVarsel(
                 kanal = BRUKERNOTIFIKASJON,
                 varselHendelse = varselHendelse,
@@ -144,7 +144,7 @@ class SenderFacade(
         try {
             arbeidsgiverNotifikasjonService.sendNotifikasjon(varsel)
         } catch (e: Exception) {
-            log.warn("Error while sending varsel to ARBEIDSGIVERNOTIFIKASJON: ${e.message}")
+            log.error("Error while sending varsel to ARBEIDSGIVERNOTIFIKASJON: ${e.message}")
             isSendingSucceed = false
             lagreIkkeUtsendtNarmesteLederVarsel(
                 kanal = ARBEIDSGIVERNOTIFIKASJON,
@@ -364,7 +364,7 @@ class SenderFacade(
             fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType)
         } catch (e: Exception) {
             isSendingSucceed = false
-            log.warn("Error while sending brev til fysisk print: ${e.message}")
+            log.error("Error while sending brev til fysisk print: ${e.message}")
             lagreIkkeUtsendtArbeidstakerVarsel(
                 kanal = BREV,
                 varselHendelse = varselHendelse,
@@ -400,7 +400,7 @@ class SenderFacade(
             )
             database.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef = uuid)
         } catch (e: Exception) {
-            log.warn(
+            log.error(
                 "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: Error while sending brev til direct sentral print: ${e.message}"
             )
         }
