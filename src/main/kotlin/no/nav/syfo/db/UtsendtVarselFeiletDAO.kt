@@ -5,6 +5,30 @@ import no.nav.syfo.domain.PersonIdent
 import java.sql.Timestamp
 import java.util.*
 
+fun DatabaseInterface.fetchUtsendtBrukernotifikasjonVarselFeilet(): List<PUtsendtVarselFeilet> {
+    val queryStatement = """SELECT *
+                            FROM UTSENDING_VARSEL_FEILET feilet
+                            WHERE feilet.KANAL = 'BRUKERNOTIFIKASJON'
+                            AND feilet.UTSENDT_FORSOK_TIDSPUNKT  >= '2025-02-27'
+                            AND feilet.is_resendt = FALSE
+                            AND feilet.hendelsetype_navn in 
+                            ('SM_DIALOGMOTE_SVAR_MOTEBEHOV', 'SM_DIALOGMOTE_INNKALT', 'SM_DIALOGMOTE_AVLYST', 'SM_DIALOGMOTE_NYTT_TID_STED', 'SM_MER_VEILEDNING')
+                            AND feilet.UUID_EKSTERN_REFERANSE NOT IN (
+                                SELECT EKSTERN_REF
+                                FROM UTSENDT_VARSEL UV
+                                WHERE KANAL = 'BRUKERNOTIFIKASJON'
+                                AND UTSENDT_TIDSPUNKT  >= '2025-02-27'
+                                )
+                            LIMIT 10
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.executeQuery().toList { toPUtsendtVarselFeilet() }
+        }
+    }
+}
+
 fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
     val insertStatement = """INSERT INTO UTSENDING_VARSEL_FEILET (
         uuid,
@@ -19,7 +43,8 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
         kanal,
         feilmelding,
         utsendt_forsok_tidspunkt,
-        is_forced_letter) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        is_forced_letter,
+        is_resendt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """.trimIndent()
 
     connection.use { connection ->
@@ -37,9 +62,25 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
             it.setString(11, varsel.feilmelding)
             it.setTimestamp(12, Timestamp.valueOf(varsel.utsendtForsokTidspunkt))
             it.setBoolean(13, varsel.isForcedLetter ?: false)
+            it.setBoolean(14, varsel.isResendt ?: false)
             it.executeUpdate()
         }
 
+        connection.commit()
+    }
+}
+
+fun DatabaseInterface.updateUtsendtVarselFeiletToResendt(uuid: String) {
+    val updateStatement = """UPDATE UTSENDING_VARSEL_FEILET
+                   SET is_resendt = TRUE
+                   WHERE uuid = ?
+    """.trimMargin()
+
+    return connection.use { connection ->
+        connection.prepareStatement(updateStatement).use {
+            it.setObject(1, UUID.fromString(uuid))
+            it.executeUpdate()
+        }
         connection.commit()
     }
 }

@@ -1,7 +1,11 @@
 package no.nav.syfo.service
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
-import io.mockk.*
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.kafka.common.createObjectMapper
@@ -49,6 +53,8 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
 
             verify(exactly = 1) {
                 senderFacade.sendTilBrukernotifikasjoner(
+                    any(),
+                    any(),
                     any(),
                     any(),
                     any(),

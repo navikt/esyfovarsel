@@ -1,12 +1,24 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.*
+import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST
+import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST
+import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST
+import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST
+import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_AVLYSNING_MESSAGE_TEXT
+import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_ENDRING_MESSAGE_TEXT
+import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_INNKALLING_MESSAGE_TEXT
+import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_REFERAT_MESSAGE_TEXT
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.Kanal
+import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_AVLYST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_INNKALT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_LEST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_NYTT_TID_STED
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
 import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
@@ -20,6 +32,7 @@ import java.io.Serializable
 import java.net.URI
 import java.net.URL
 import java.time.OffsetDateTime
+import java.util.*
 
 enum class DittSykefravaerHendelsetypeDialogmoteInnkalling : Serializable {
     ESYFOVARSEL_DIALOGMOTE_INNKALT,
@@ -45,7 +58,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerFnr)
 
         if (userAccessStatus.canUserBeDigitallyNotified) {
-            varsleArbeidstakerViaBrukernotifkasjoner(varselHendelse, varselUuid)
+            varsleArbeidstakerViaBrukernotifikasjoner(varselHendelse, varselUuid)
         } else {
             val journalpostId = jounalpostData.id
             journalpostId?.let {
@@ -56,8 +69,8 @@ class DialogmoteInnkallingSykmeldtVarselService(
         sendOppgaveTilDittSykefravaerOgFerdigstillTidligereMeldinger(varselHendelse, varselUuid)
     }
 
-    fun getVarselUrl(varselHendelse: ArbeidstakerHendelse, varselUuid: String): URL {
-        val urlString = if (SM_DIALOGMOTE_REFERAT === varselHendelse.type) {
+    fun getVarselUrl(hendelseType: HendelseType, varselUuid: String): URL {
+        val urlString = if (SM_DIALOGMOTE_REFERAT === hendelseType) {
             "$dialogmoterUrl/sykmeldt/referat/$varselUuid"
         } else {
             "$dialogmoterUrl/sykmeldt/moteinnkalling"
@@ -65,7 +78,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
         return URI(urlString).toURL()
     }
 
-    private fun varsleArbeidstakerViaBrukernotifkasjoner(
+    private fun varsleArbeidstakerViaBrukernotifikasjoner(
         varselHendelse: ArbeidstakerHendelse,
         varselUuid: String,
     ) {
@@ -73,9 +86,30 @@ class DialogmoteInnkallingSykmeldtVarselService(
             uuid = varselUuid,
             mottakerFnr = varselHendelse.arbeidstakerFnr,
             content = getArbeidstakerVarselText(varselHendelse.type),
-            url = getVarselUrl(varselHendelse, varselUuid),
-            varselHendelse = varselHendelse,
+            url = getVarselUrl(varselHendelse.type, varselUuid),
+            arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
+            orgnummer = varselHendelse.orgnummer,
+            hendelseType = varselHendelse.type.name,
             varseltype = getMeldingTypeForSykmeldtVarsling(varselHendelse.type),
+            eksternVarsling = true,
+        )
+    }
+
+    fun revarsleArbeidstakerViaBrukernotifikasjoner(
+        utsendtvarselFeilet: PUtsendtVarselFeilet,
+    ): Boolean {
+        val varselUuid = utsendtvarselFeilet.uuidEksternReferanse ?: UUID.randomUUID().toString()
+        val hendelseType = HendelseType.valueOf(utsendtvarselFeilet.hendelsetypeNavn)
+
+        return senderFacade.sendTilBrukernotifikasjoner(
+            uuid = varselUuid,
+            mottakerFnr = utsendtvarselFeilet.arbeidstakerFnr,
+            content = getArbeidstakerVarselText(hendelseType),
+            url = getVarselUrl(hendelseType, varselUuid),
+            arbeidstakerFnr = utsendtvarselFeilet.arbeidstakerFnr,
+            orgnummer = utsendtvarselFeilet.orgnummer,
+            hendelseType = hendelseType.name,
+            varseltype = getMeldingTypeForSykmeldtVarsling(hendelseType),
             eksternVarsling = true,
         )
     }
@@ -228,7 +262,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
             return DittSykefravaerMelding(
                 OpprettMelding(
                     messageText,
-                    getVarselUrl(arbeidstakerHendelse, varselUuid).toString(),
+                    getVarselUrl(arbeidstakerHendelse.type, varselUuid).toString(),
                     Variant.INFO,
                     true,
                     hendelseType,

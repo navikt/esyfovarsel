@@ -1,7 +1,32 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.kafka.consumers.varselbus.domain.*
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*
+import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_AVLYST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_INNKALT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_NYTT_TID_STED
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_REFERAT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_SVAR
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_SVAR_MOTEBEHOV
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_OPPFOLGINGSPLAN_FORESPORSEL
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_AKTIVITETSPLIKT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_ARBEIDSUFORHET_FORHANDSVARSEL
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_AVLYST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_INNKALT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_LEST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_NYTT_TID_STED
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_FORHANDSVARSEL_MANGLENDE_MEDVIRKNING
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_MER_VEILEDNING
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING
+import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.skalFerdigstilles
+import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.toNarmestelederHendelse
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -27,9 +52,11 @@ class VarselBusService(
             ferdigstillVarsel(varselHendelse)
         } else {
             when (varselHendelse.type) {
-                NL_OPPFOLGINGSPLAN_FORESPORSEL -> oppfolgingsplanVarselService.sendOppfolgingsplanForesporselVarselTilNarmesteLeder(
-                    varselHendelse.toNarmestelederHendelse()
-                )
+                NL_OPPFOLGINGSPLAN_FORESPORSEL ->
+                    oppfolgingsplanVarselService.sendOppfolgingsplanForesporselVarselTilNarmesteLeder(
+                        varselHendelse.toNarmestelederHendelse()
+                    )
+
                 NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilNarmesteLeder(
                     varselHendelse.toNarmestelederHendelse()
                 )
@@ -41,9 +68,11 @@ class VarselBusService(
                 NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilNarmesteLeder(
                     varselHendelse.toNarmestelederHendelse()
                 )
+
                 SM_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilArbeidstaker(
                     varselHendelse.toArbeidstakerHendelse()
                 )
+
                 NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING -> motebehovVarselService.sendMotebehovTilbakemeldingTilNarmesteLeder(
                     varselHendelse.toNarmestelederHendelse()
                 )

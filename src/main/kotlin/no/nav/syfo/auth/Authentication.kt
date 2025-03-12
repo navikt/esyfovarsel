@@ -15,6 +15,7 @@ import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.routing.routing
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.api.job.registerJobTriggerApi
+import no.nav.syfo.job.ResendFailedVarslerJob
 import no.nav.syfo.job.SendAktivitetspliktLetterToSentralPrintJob
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import org.slf4j.Logger
@@ -109,6 +110,7 @@ private fun JWTCredential.inExpectedAudience(expectedAudience: List<String>) = e
 fun Application.setupLocalRoutesWithAuthentication(
     mikrofrontendService: MikrofrontendService,
     sendAktivitetspliktLetterToSentralPrintJob: SendAktivitetspliktLetterToSentralPrintJob,
+    resendFailedVarslerJob: ResendFailedVarslerJob,
     authEnv: AuthEnv,
 ) {
     install(Authentication) {
@@ -125,7 +127,11 @@ fun Application.setupLocalRoutesWithAuthentication(
 
     routing {
         authenticate("auth-basic") {
-            registerJobTriggerApi(mikrofrontendService, sendAktivitetspliktLetterToSentralPrintJob)
+            registerJobTriggerApi(
+                mikrofrontendService,
+                sendAktivitetspliktLetterToSentralPrintJob,
+                resendFailedVarslerJob
+            )
         }
     }
 }
@@ -133,6 +139,7 @@ fun Application.setupLocalRoutesWithAuthentication(
 fun Application.setupRoutesWithAuthentication(
     mikrofrontendService: MikrofrontendService,
     sendAktivitetspliktLetterToSentralPrintJob: SendAktivitetspliktLetterToSentralPrintJob,
+    resendFailedVarslerJob: ResendFailedVarslerJob,
     authEnv: AuthEnv,
 ) {
     val wellKnownTokenX = getWellKnown(authEnv.tokenXWellKnownUrl)
@@ -145,7 +152,11 @@ fun Application.setupRoutesWithAuthentication(
 
     routing {
         authenticate("auth-basic") {
-            registerJobTriggerApi(mikrofrontendService, sendAktivitetspliktLetterToSentralPrintJob)
+            registerJobTriggerApi(
+                mikrofrontendService,
+                sendAktivitetspliktLetterToSentralPrintJob,
+                resendFailedVarslerJob
+            )
         }
     }
 }

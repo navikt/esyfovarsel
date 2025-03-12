@@ -60,7 +60,9 @@ class MotebehovVarselServiceSpek : DescribeSpec({
                     arbeidstakerFnr2,
                     BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
                     any(),
-                    arbeidstakerHendelseSvarMotebehov2,
+                    arbeidstakerFnr = arbeidstakerHendelseSvarMotebehov2.arbeidstakerFnr,
+                    orgnummer = arbeidstakerHendelseSvarMotebehov2.orgnummer,
+                    hendelseType = arbeidstakerHendelseSvarMotebehov2.type.name,
                     varseltype = OPPGAVE,
                     eksternVarsling = true,
                 )
@@ -76,7 +78,9 @@ class MotebehovVarselServiceSpek : DescribeSpec({
                     arbeidstakerFnr3,
                     BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
                     any(),
-                    arbeidstakerHendelseSvarMotebehov3,
+                    arbeidstakerFnr = arbeidstakerHendelseSvarMotebehov3.arbeidstakerFnr,
+                    orgnummer = arbeidstakerHendelseSvarMotebehov3.orgnummer,
+                    hendelseType = arbeidstakerHendelseSvarMotebehov3.type.name,
                     OPPGAVE,
                     eksternVarsling = false,
                 )

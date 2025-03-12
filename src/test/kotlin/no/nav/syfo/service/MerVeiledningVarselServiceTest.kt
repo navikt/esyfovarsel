@@ -52,7 +52,9 @@ class MerVeiledningVarselServiceTest : DescribeSpec({
                     mottakerFnr = SM_FNR,
                     content = any(),
                     url = any(),
-                    varselHendelse = hendelse,
+                    arbeidstakerFnr = hendelse.arbeidstakerFnr,
+                    orgnummer = hendelse.orgnummer,
+                    hendelseType = hendelse.type.name,
                     varseltype = SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
                 )
             }
@@ -101,7 +103,9 @@ class MerVeiledningVarselServiceTest : DescribeSpec({
                     mottakerFnr = SM_FNR,
                     content = BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT,
                     url = any(),
-                    varselHendelse = hendelse,
+                    arbeidstakerFnr = hendelse.arbeidstakerFnr,
+                    orgnummer = hendelse.orgnummer,
+                    hendelseType = hendelse.type.name,
                     varseltype = SenderFacade.InternalBrukernotifikasjonType.OPPGAVE,
                     dagerTilDeaktivering = 105,
                 )

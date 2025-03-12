@@ -1,0 +1,159 @@
+package no.nav.syfo.job
+
+import io.kotest.core.spec.style.DescribeSpec
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
+import no.nav.syfo.db.domain.PUtsendtVarselFeilet
+import no.nav.syfo.db.fetchUtsendtBrukernotifikasjonVarselFeilet
+import no.nav.syfo.db.storeUtsendtVarselFeilet
+import no.nav.syfo.service.DialogmoteInnkallingSykmeldtVarselService
+import no.nav.syfo.service.MerVeiledningVarselService
+import no.nav.syfo.service.MotebehovVarselService
+import no.nav.syfo.service.SenderFacade
+import no.nav.syfo.testutil.EmbeddedDatabase
+import org.amshove.kluent.shouldBeEqualTo
+import java.time.LocalDateTime
+import java.util.*
+
+class ResendFailedVarslerJobTest : DescribeSpec({
+
+    describe("ResendFailedVarslerJobTest") {
+
+        val embeddedDatabase = EmbeddedDatabase()
+        val motebehovVarselService = mockk<MotebehovVarselService>(relaxed = true)
+        val dialogmoteInnkallingSykmeldtVarselService = mockk<DialogmoteInnkallingSykmeldtVarselService>(relaxed = true)
+        val merVeiledningVarselService = mockk<MerVeiledningVarselService>(relaxed = true)
+
+        val job = ResendFailedVarslerJob(
+            db = embeddedDatabase,
+            motebehovVarselService = motebehovVarselService,
+            dialogmoteInnkallingSykmeldtVarselService = dialogmoteInnkallingSykmeldtVarselService,
+            merVeiledningVarselService = merVeiledningVarselService
+        )
+
+        beforeTest {
+            embeddedDatabase.dropData()
+            coEvery { motebehovVarselService.resendVarselTilBrukernotifikasjoner(any()) } returns true
+            every {
+                dialogmoteInnkallingSykmeldtVarselService.revarsleArbeidstakerViaBrukernotifikasjoner(any())
+            } returns true
+            coEvery { merVeiledningVarselService.resendDigitaltVarselTilArbeidstaker(any()) } returns true
+        }
+
+        it(
+            """Resends failed varsler to brukernotifikasjoner for dialogmote, 
+                     motebehov and mer veiledning"""
+        ) {
+            // Should not resend due to legal reasons
+            val aktivitetspliktVarselFeilet1 = PUtsendtVarselFeilet(
+                uuid = UUID.randomUUID().toString(),
+                uuidEksternReferanse = UUID.randomUUID().toString(),
+                arbeidstakerFnr = "12121212121",
+                orgnummer = null,
+                hendelsetypeNavn = "SM_AKTIVITETSPLIKT",
+                kanal = "BRUKERNOTIFIKASJON",
+                arbeidsgivernotifikasjonMerkelapp = null,
+                isForcedLetter = false,
+                journalpostId = "111",
+                narmesteLederFnr = null,
+                brukernotifikasjonerMeldingType = SenderFacade.InternalBrukernotifikasjonType.OPPGAVE.name,
+                feilmelding = "noe galt skjedde",
+                utsendtForsokTidspunkt = LocalDateTime.now().minusDays(1),
+            )
+
+            // Should resend
+            val svarMotebehovVarselFeilet1 = PUtsendtVarselFeilet(
+                uuid = UUID.randomUUID().toString(),
+                uuidEksternReferanse = UUID.randomUUID().toString(),
+                arbeidstakerFnr = "12121212121",
+                orgnummer = null,
+                hendelsetypeNavn = "SM_DIALOGMOTE_SVAR_MOTEBEHOV",
+                kanal = "BRUKERNOTIFIKASJON",
+                arbeidsgivernotifikasjonMerkelapp = null,
+                isForcedLetter = false,
+                journalpostId = "111",
+                narmesteLederFnr = null,
+                brukernotifikasjonerMeldingType = SenderFacade.InternalBrukernotifikasjonType.OPPGAVE.name,
+                feilmelding = "noe galt skjedde",
+                utsendtForsokTidspunkt = LocalDateTime.now().minusDays(1),
+            )
+
+            // Should resend
+            val svarMotebehovVarselFeilet2 = PUtsendtVarselFeilet(
+                uuid = UUID.randomUUID().toString(),
+                uuidEksternReferanse = UUID.randomUUID().toString(),
+                arbeidstakerFnr = "32121212121",
+                orgnummer = null,
+                hendelsetypeNavn = "SM_DIALOGMOTE_SVAR_MOTEBEHOV",
+                kanal = "BRUKERNOTIFIKASJON",
+                arbeidsgivernotifikasjonMerkelapp = null,
+                isForcedLetter = false,
+                journalpostId = "112",
+                narmesteLederFnr = null,
+                brukernotifikasjonerMeldingType = SenderFacade.InternalBrukernotifikasjonType.OPPGAVE.name,
+                feilmelding = "noe galt skjedde",
+                utsendtForsokTidspunkt = LocalDateTime.now().minusDays(1),
+            )
+
+            // Should not resend due to already resendt
+            val svarMotebehovVarselFeilet3 = PUtsendtVarselFeilet(
+                uuid = UUID.randomUUID().toString(),
+                uuidEksternReferanse = UUID.randomUUID().toString(),
+                arbeidstakerFnr = "32121212121",
+                orgnummer = null,
+                hendelsetypeNavn = "SM_DIALOGMOTE_SVAR_MOTEBEHOV",
+                kanal = "BRUKERNOTIFIKASJON",
+                arbeidsgivernotifikasjonMerkelapp = null,
+                isForcedLetter = false,
+                journalpostId = "112",
+                narmesteLederFnr = null,
+                brukernotifikasjonerMeldingType = SenderFacade.InternalBrukernotifikasjonType.OPPGAVE.name,
+                feilmelding = "noe galt skjedde",
+                utsendtForsokTidspunkt = LocalDateTime.now().minusDays(1),
+                isResendt = true
+            )
+
+            // Should resend
+            val merOppfolgingVarselFeilet = PUtsendtVarselFeilet(
+                uuid = UUID.randomUUID().toString(),
+                uuidEksternReferanse = UUID.randomUUID().toString(),
+                arbeidstakerFnr = "32121212121",
+                orgnummer = null,
+                hendelsetypeNavn = "SM_MER_VEILEDNING",
+                kanal = "BRUKERNOTIFIKASJON",
+                arbeidsgivernotifikasjonMerkelapp = null,
+                isForcedLetter = false,
+                journalpostId = "112",
+                narmesteLederFnr = null,
+                brukernotifikasjonerMeldingType = SenderFacade.InternalBrukernotifikasjonType.OPPGAVE.name,
+                feilmelding = "noe galt skjedde",
+                utsendtForsokTidspunkt = LocalDateTime.now().minusDays(1),
+            )
+
+            embeddedDatabase.storeUtsendtVarselFeilet(aktivitetspliktVarselFeilet1)
+            embeddedDatabase.storeUtsendtVarselFeilet(svarMotebehovVarselFeilet1)
+            embeddedDatabase.storeUtsendtVarselFeilet(svarMotebehovVarselFeilet2)
+            embeddedDatabase.storeUtsendtVarselFeilet(svarMotebehovVarselFeilet3)
+            embeddedDatabase.storeUtsendtVarselFeilet(merOppfolgingVarselFeilet)
+
+            val result = runBlocking { job.resendFailedBrukernotifikasjonVarsler() }
+
+            result shouldBeEqualTo 3
+
+            coVerify(exactly = 1) {
+                merVeiledningVarselService.resendDigitaltVarselTilArbeidstaker(
+                    any()
+                )
+            }
+            coVerify(exactly = 2) {
+                motebehovVarselService.resendVarselTilBrukernotifikasjoner(any())
+            }
+
+            val failedVarslerAfterResend = embeddedDatabase.fetchUtsendtBrukernotifikasjonVarselFeilet()
+            failedVarslerAfterResend.size shouldBeEqualTo 0
+        }
+    }
+})

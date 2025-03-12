@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <SmellBaseline>
-  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <ManuallySuppressedIssues>
+    <ID>LongMethod:VarselBusService.kt$VarselBusService$suspend fun processVarselHendelse( varselHendelse: EsyfovarselHendelse, )</ID>
+  </ManuallySuppressedIssues>
   <CurrentIssues>
     <ID>ConstructorParameterNaming:AzureAdTokenConsumer.kt$AzureAdAccessToken$val access_token: String</ID>
     <ID>ConstructorParameterNaming:AzureAdTokenConsumer.kt$AzureAdAccessToken$val expires_in: Long</ID>
@@ -21,6 +23,7 @@
     <ID>InvalidPackageDeclaration:TestServerUtil.kt$package no.nav.syfo.util</ID>
     <ID>LongMethod:BootstrapApplication.kt$fun createEngineEnvironment(): ApplicationEngineEnvironment</ID>
     <ID>LongMethod:Environment.kt$fun getEnv(): Environment</ID>
+    <ID>LongMethod:VarselBusService.kt$VarselBusService$suspend fun processVarselHendelse( varselHendelse: EsyfovarselHendelse, )</ID>
     <ID>MatchingDeclarationName:AktivitetspliktForhandsvarselService.kt$AktivitetspliktForhandsvarselVarselService</ID>
     <ID>MatchingDeclarationName:SyfosmDTO.kt$SykmeldingDTO : Serializable</ID>
     <ID>MatchingDeclarationName:VarselFunctions.kt$DialogmoteNarmesteLederTexts</ID>
@@ -65,16 +68,16 @@
     <ID>MaxLineLength:VarselBusService.kt$VarselBusService$NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING</ID>
     <ID>MaxLineLength:VarselBusService.kt$VarselBusService$SM_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING</ID>
     <ID>MaxLineLength:VarselBusService.kt$VarselBusService$SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING</ID>
-    <ID>MaxLineLength:VarselTexts.kt$"Du er innkalt til et dialogmøte med NAV i forbindelse med en av dine ansatte sitt sykefravær. Tidspunktet eller stedet for et dialogmøte har blitt endret.&lt;br&gt;\n"</ID>
+    <ID>MaxLineLength:VarselTexts.kt$"Du er innkalt til et dialogmøte med Nav i forbindelse med en av dine ansatte sitt sykefravær. Tidspunktet eller stedet for et dialogmøte har blitt endret.&lt;br&gt;\n"</ID>
     <ID>MaxLineLength:VarselTexts.kt$"Du finner oppfølgingsplanen ved å logge inn på \"Min side – arbeidsgiver\". I \"bjella\" ser du hvem det gjelder.&lt;br&gt;&lt;br&gt;\n"</ID>
     <ID>MaxLineLength:VarselTexts.kt$"Du kan lese avlysningen ved å logge inn på “Min side – arbeidsgiver” og trykke på “Sykmeldte”. Der kan du også lese begrunnelsen.&lt;br&gt;&lt;br&gt;\n"</ID>
     <ID>MaxLineLength:VarselTexts.kt$"Du kan lese og svare på endringen ved å logge inn på “Min side – arbeidsgiver” og trykke på “Sykmeldte”. Da vil du også se hvem det gjelder.&lt;br&gt;&lt;br&gt;\n"</ID>
     <ID>MaxLineLength:VarselTexts.kt$"Du kan lese og svare på møteinnkallingen ved å logge inn på “Min side - arbeidsgiver” og trykke på “Sykmeldte”. Da vil du også se hvem det gjelder.&lt;br&gt;&lt;br&gt;\n"</ID>
     <ID>MaxLineLength:VarselTexts.kt$"Du kan lese referatet ved å logge inn på \"Min side – arbeidsgiver\" og trykke på \"Sykmeldte\". Da vil du også se hvem det gjelder.&lt;br&gt;&lt;br&gt;\n"</ID>
     <ID>MaxLineLength:VarselTexts.kt$"Du svarer på behovet ved å logge deg inn på \"Min side - arbeidsgiver\". I \"bjella\" ser du hvem oppgaven gjelder. &lt;br&gt;\n"</ID>
-    <ID>MaxLineLength:VarselTexts.kt$"NAV innkaller deg til et dialogmøte i forbindelse med en av dine ansatte sitt sykefravær. Av hensyn til personvernet kan vi ikke oppgi navnet i e-posten.&lt;br&gt;\n"</ID>
-    <ID>MaxLineLength:VarselTexts.kt$"NAV trenger ditt svar på om du har behov for dialogmøte i forbindelse med en av dine ansatte sitt sykefravær.&lt;br&gt;\n"</ID>
-    <ID>MaxLineLength:VarselTexts.kt$"Vi har mottatt ditt ønske om dialogmøte med NAV. Vi vurderer at det på nåværende tidspunkt ikke er aktuelt at NAV kaller inn til et dialogmøte. "</ID>
+    <ID>MaxLineLength:VarselTexts.kt$"Nav innkaller deg til et dialogmøte i forbindelse med en av dine ansatte sitt sykefravær. Av hensyn til personvernet kan vi ikke oppgi navnet i e-posten.&lt;br&gt;\n"</ID>
+    <ID>MaxLineLength:VarselTexts.kt$"Nav trenger ditt svar på om du har behov for dialogmøte i forbindelse med en av dine ansatte sitt sykefravær.&lt;br&gt;\n"</ID>
+    <ID>MaxLineLength:VarselTexts.kt$"Vi har mottatt ditt ønske om dialogmøte med Nav. Vi vurderer at det på nåværende tidspunkt ikke er aktuelt at Nav kaller inn til et dialogmøte. "</ID>
     <ID>MaximumLineLength:ArbeidsgiverNotifikasjonProdusent.kt$ArbeidsgiverNotifikasjonProdusent$ </ID>
     <ID>MaximumLineLength:ArbeidsgiverNotifikasjonService.kt$ArbeidsgiverNotifikasjonService$ </ID>
     <ID>MaximumLineLength:ArbeidsrelatertArsakTypeDTO.kt$ArbeidsrelatertArsakTypeDTO$enum</ID>
@@ -97,10 +100,6 @@
     <ID>MaximumLineLength:VarselTexts.kt$ </ID>
     <ID>NestedBlockDepth:TestdataResetConsumer.kt$TestdataResetConsumer$override suspend fun listen(applicationState: ApplicationState)</ID>
     <ID>NoWildcardImports:AktivitetspliktForhandsvarselServiceTest.kt$import io.mockk.*</ID>
-    <ID>NoWildcardImports:BootstrapApplication.kt$import no.nav.syfo.service.*</ID>
-    <ID>NoWildcardImports:DialogmoteInnkallingNarmesteLederVarselServiceSpek.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.*</ID>
-    <ID>NoWildcardImports:DialogmoteInnkallingSykmeldtVarselService.kt$import no.nav.syfo.*</ID>
-    <ID>NoWildcardImports:DialogmoteInnkallingSykmeldtVarselService.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*</ID>
     <ID>NoWildcardImports:DialogmoteInnkallingSykmeldtVarselServiceSpek.kt$import io.mockk.*</ID>
     <ID>NoWildcardImports:DialogmoteInnkallingSykmeldtVarselServiceSpek.kt$import no.nav.syfo.consumer.pdl.*</ID>
     <ID>NoWildcardImports:DkifConsumer.kt$import io.ktor.client.call.*</ID>
@@ -111,13 +110,9 @@
     <ID>NoWildcardImports:FodselsdatoDAOSpek.kt$import org.amshove.kluent.*</ID>
     <ID>NoWildcardImports:FriskmeldingTilArbeidsformidlingVedtakServiceTest.kt$import io.mockk.*</ID>
     <ID>NoWildcardImports:HttpUtil.kt$import io.ktor.client.plugins.*</ID>
-    <ID>NoWildcardImports:Kalenderavtale.kt$import com.apollo.graphql.type.*</ID>
     <ID>NoWildcardImports:MikrofrontendDialogmoteService.kt$import no.nav.syfo.db.*</ID>
-    <ID>NoWildcardImports:MikrofrontendServiceSpek.kt$import no.nav.syfo.testutil.*</ID>
     <ID>NoWildcardImports:SyfosmDTO.kt$import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.*</ID>
     <ID>NoWildcardImports:TestdataResetConsumer.kt$import no.nav.syfo.kafka.common.*</ID>
-    <ID>NoWildcardImports:VarselBusService.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.*</ID>
-    <ID>NoWildcardImports:VarselBusService.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*</ID>
     <ID>PackageName:MikrofrontendSynlighet.kt$package no.nav.syfo.kafka.producers.mineside_microfrontend</ID>
     <ID>PackageName:MinSideMicrofrontendKafkaProducer.kt$package no.nav.syfo.kafka.producers.mineside_microfrontend</ID>
     <ID>PackageName:MinSideRecord.kt$package no.nav.syfo.kafka.producers.mineside_microfrontend</ID>
@@ -177,7 +172,6 @@
     <ID>TopLevelPropertyNaming:MockData.kt$const val fnr4 = "45678901234"</ID>
     <ID>TopLevelPropertyNaming:MockData.kt$const val fnr5 = "45678901230"</ID>
     <ID>TopLevelPropertyNaming:MockData.kt$const val orgnummer = "999888777"</ID>
-    <ID>UseCheckOrError:DialogmoteInnkallingNarmesteLederVarselService.kt$DialogmoteInnkallingNarmesteLederVarselService$throw IllegalStateException("Fant ikke sak for narmeste leder med id $narmesteLederId")</ID>
     <ID>UseRequire:EsyfovarselHendelse.kt$throw IllegalArgumentException("${eventType.name} er ikke gyldig hendelse for å hente ut 'synligTom'-felt")</ID>
     <ID>UseRequire:EsyfovarselHendelse.kt$throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type ArbeidstakerHendelse")</ID>
     <ID>UseRequire:EsyfovarselHendelse.kt$throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type NarmesteLederHendelse")</ID>
@@ -185,10 +179,6 @@
     <ID>VariableNaming:DialogmoteInnkallingSykmeldtVarselService.kt$DialogmoteInnkallingSykmeldtVarselService$val WEEKS_BEFORE_DELETE = 4L</ID>
     <ID>VariableNaming:MotebehovVarselService.kt$MotebehovVarselService$val WEEKS_BEFORE_DELETE = 4L</ID>
     <ID>WildcardImport:AktivitetspliktForhandsvarselServiceTest.kt$import io.mockk.*</ID>
-    <ID>WildcardImport:BootstrapApplication.kt$import no.nav.syfo.service.*</ID>
-    <ID>WildcardImport:DialogmoteInnkallingNarmesteLederVarselServiceSpek.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.*</ID>
-    <ID>WildcardImport:DialogmoteInnkallingSykmeldtVarselService.kt$import no.nav.syfo.*</ID>
-    <ID>WildcardImport:DialogmoteInnkallingSykmeldtVarselService.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*</ID>
     <ID>WildcardImport:DialogmoteInnkallingSykmeldtVarselServiceSpek.kt$import io.mockk.*</ID>
     <ID>WildcardImport:DialogmoteInnkallingSykmeldtVarselServiceSpek.kt$import no.nav.syfo.consumer.pdl.*</ID>
     <ID>WildcardImport:DkifConsumer.kt$import io.ktor.client.call.*</ID>
@@ -199,12 +189,8 @@
     <ID>WildcardImport:FodselsdatoDAOSpek.kt$import org.amshove.kluent.*</ID>
     <ID>WildcardImport:FriskmeldingTilArbeidsformidlingVedtakServiceTest.kt$import io.mockk.*</ID>
     <ID>WildcardImport:HttpUtil.kt$import io.ktor.client.plugins.*</ID>
-    <ID>WildcardImport:Kalenderavtale.kt$import com.apollo.graphql.type.*</ID>
     <ID>WildcardImport:MikrofrontendDialogmoteService.kt$import no.nav.syfo.db.*</ID>
-    <ID>WildcardImport:MikrofrontendServiceSpek.kt$import no.nav.syfo.testutil.*</ID>
     <ID>WildcardImport:SyfosmDTO.kt$import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.*</ID>
     <ID>WildcardImport:TestdataResetConsumer.kt$import no.nav.syfo.kafka.common.*</ID>
-    <ID>WildcardImport:VarselBusService.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.*</ID>
-    <ID>WildcardImport:VarselBusService.kt$import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.*</ID>
   </CurrentIssues>
 </SmellBaseline>
