@@ -19,6 +19,7 @@ fun DatabaseInterface.fetchUtsendtBrukernotifikasjonVarselFeilet(): List<PUtsend
                                 WHERE KANAL = 'BRUKERNOTIFIKASJON'
                                 AND UTSENDT_TIDSPUNKT  >= '2025-02-27'
                                 )
+                            ORDER BY feilet.utsendt_forsok_tidspunkt ASC
                             LIMIT 500
     """.trimIndent()
 
