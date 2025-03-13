@@ -81,6 +81,12 @@ class ResendFailedVarslerJob(
             }
         }
 
+        if (resentVarsler > 0) {
+            log.info("Successfully resent $resentVarsler brukernotifikasjon varsler")
+        } else {
+            log.info("No brukernotifikasjon varsler to resend")
+        }
+
         return resentVarsler
     }
 }
