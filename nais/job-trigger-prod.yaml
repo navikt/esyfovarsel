@@ -11,7 +11,7 @@ spec:
     outbound:
       rules:
         - application: esyfovarsel
-  schedule: "0,30 7-15 * * 1-5" # runs every 30 minutes between 07:00 and 15:00, Monday to Friday
+  schedule: "*/10 7-16 * * 1-5" # runs every 10 minutes between 07:00 and 16:00, Monday to Friday
   filesFrom:
     - secret: esyfovarsel-serviceuser
   env:
