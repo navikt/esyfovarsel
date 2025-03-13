@@ -19,7 +19,7 @@ fun DatabaseInterface.fetchUtsendtBrukernotifikasjonVarselFeilet(): List<PUtsend
                                 WHERE KANAL = 'BRUKERNOTIFIKASJON'
                                 AND UTSENDT_TIDSPUNKT  >= '2025-02-27'
                                 )
-                            LIMIT 10
+                            LIMIT 500
     """.trimIndent()
 
     return connection.use { connection ->
