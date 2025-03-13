@@ -1,9 +1,5 @@
 package no.nav.syfo.service
 
-import java.net.URI
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.util.*
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_TITLE
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_MESSAGE_TEXT
@@ -25,6 +21,10 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.BESKJED
 import org.slf4j.LoggerFactory
+import java.net.URI
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.util.*
 
 class OppfolgingsplanVarselService(
     private val senderFacade: SenderFacade,
@@ -107,7 +107,7 @@ class OppfolgingsplanVarselService(
             virksomhetsnummer = varselHendelse.orgnummer,
             narmesteLederFnr = varselHendelse.narmesteLederFnr,
             ansattFnr = varselHendelse.arbeidstakerFnr,
-            tittel = personData?.fullName()?.let { "Oppfølging av ${it}" } ?: "Oppfølging av sykmeldt",
+            tittel = personData?.fullName()?.let { "Oppfølging av $it" } ?: "Oppfølging av sykmeldt",
             lenke = url,
             initiellStatus = SakStatus.MOTTATT,
             hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
@@ -142,7 +142,9 @@ class OppfolgingsplanVarselService(
             mottakerFnr = varselHendelse.arbeidstakerFnr,
             content = BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT,
             url = URI(oppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL).toURL(),
-            varselHendelse = varselHendelse,
+            arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
+            orgnummer = varselHendelse.orgnummer,
+            hendelseType = varselHendelse.type.name,
             eksternVarsling = eksternVarsling,
             varseltype = BESKJED
         )

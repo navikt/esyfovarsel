@@ -78,12 +78,20 @@ class SenderFacade(
     ) {
         try {
             val eksternUUID = dittSykefravaerMeldingKafkaProducer.sendMelding(varsel.melding, varsel.uuid)
-            lagreUtsendtArbeidstakerVarsel(DITT_SYKEFRAVAER, varselHendelse, eksternUUID)
+            lagreUtsendtArbeidstakerVarsel(
+                kanal = DITT_SYKEFRAVAER,
+                arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
+                orgnummer = varselHendelse.orgnummer,
+                hendelseType = varselHendelse.type.name,
+                eksternReferanse = eksternUUID
+            )
         } catch (e: Exception) {
             log.error("Error while sending varsel to DITT_SYKEFRAVAER: ${e.message}")
             lagreIkkeUtsendtArbeidstakerVarsel(
                 kanal = DITT_SYKEFRAVAER,
-                varselHendelse = varselHendelse,
+                arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
+                orgnummer = varselHendelse.orgnummer,
+                hendelseType = varselHendelse.type.name,
                 eksternReferanse = varsel.uuid,
                 feilmelding = e.message,
                 journalpostId = null,
@@ -98,13 +106,15 @@ class SenderFacade(
         mottakerFnr: String,
         content: String,
         url: URL? = null,
-        varselHendelse: ArbeidstakerHendelse,
+        arbeidstakerFnr: String,
+        orgnummer: String?,
+        hendelseType: String,
         varseltype: InternalBrukernotifikasjonType,
         eksternVarsling: Boolean = true,
         smsContent: String? = null,
         dagerTilDeaktivering: Long? = null,
         journalpostId: String? = null,
-    ) {
+    ): Boolean {
         try {
             brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                 uuid = uuid,
@@ -118,21 +128,27 @@ class SenderFacade(
             )
             lagreUtsendtArbeidstakerVarsel(
                 kanal = BRUKERNOTIFIKASJON,
-                varselHendelse = varselHendelse,
+                arbeidstakerFnr = arbeidstakerFnr,
+                orgnummer = orgnummer,
+                hendelseType = hendelseType,
                 eksternReferanse = uuid,
                 journalpostId = journalpostId,
             )
+            return true
         } catch (e: Exception) {
             log.error("Error while sending varsel to BRUKERNOTIFIKASJON: ${e.message}")
             lagreIkkeUtsendtArbeidstakerVarsel(
                 kanal = BRUKERNOTIFIKASJON,
-                varselHendelse = varselHendelse,
+                arbeidstakerFnr = arbeidstakerFnr,
+                orgnummer = orgnummer,
+                hendelseType = hendelseType,
                 eksternReferanse = uuid,
                 feilmelding = e.message,
                 journalpostId = null,
                 brukernotifikasjonerMeldingType = varseltype.name,
                 isForcedLetter = false,
             )
+            return false
         }
     }
 
@@ -367,7 +383,9 @@ class SenderFacade(
             log.error("Error while sending brev til fysisk print: ${e.message}")
             lagreIkkeUtsendtArbeidstakerVarsel(
                 kanal = BREV,
-                varselHendelse = varselHendelse,
+                arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
+                orgnummer = varselHendelse.orgnummer,
+                hendelseType = varselHendelse.type.name,
                 eksternReferanse = uuid,
                 feilmelding = e.message,
                 journalpostId = journalpostId,
@@ -376,7 +394,14 @@ class SenderFacade(
             )
         }
         if (isSendingSucceed) {
-            lagreUtsendtArbeidstakerVarsel(BREV, varselHendelse, uuid, journalpostId = journalpostId)
+            lagreUtsendtArbeidstakerVarsel(
+                BREV,
+                arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
+                orgnummer = varselHendelse.orgnummer,
+                hendelseType = varselHendelse.type.name,
+                eksternReferanse = uuid,
+                journalpostId = journalpostId
+            )
         }
     }
 
@@ -392,9 +417,11 @@ class SenderFacade(
                 "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sending direct sentral print letter with journalpostId $journalpostId succeded, storing in database"
             )
             lagreUtsendtArbeidstakerVarsel(
-                BREV,
-                varselHendelse,
-                uuid,
+                kanal = BREV,
+                arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
+                orgnummer = varselHendelse.orgnummer,
+                hendelseType = varselHendelse.type.name,
+                eksternReferanse = uuid,
                 isForcedLetter = true,
                 journalpostId = journalpostId
             )
@@ -434,7 +461,9 @@ class SenderFacade(
 
     fun lagreUtsendtArbeidstakerVarsel(
         kanal: Kanal,
-        varselHendelse: ArbeidstakerHendelse,
+        arbeidstakerFnr: String,
+        orgnummer: String?,
+        hendelseType: String,
         eksternReferanse: String,
         isForcedLetter: Boolean = false,
         journalpostId: String? = null,
@@ -442,11 +471,11 @@ class SenderFacade(
         database.storeUtsendtVarsel(
             PUtsendtVarsel(
                 UUID.randomUUID().toString(),
-                varselHendelse.arbeidstakerFnr,
+                arbeidstakerFnr,
                 null,
                 null,
-                varselHendelse.orgnummer,
-                varselHendelse.type.name,
+                orgnummer,
+                hendelseType,
                 kanal.name,
                 LocalDateTime.now(),
                 null,
@@ -461,7 +490,9 @@ class SenderFacade(
 
     private fun lagreIkkeUtsendtArbeidstakerVarsel(
         kanal: Kanal,
-        varselHendelse: ArbeidstakerHendelse,
+        arbeidstakerFnr: String,
+        orgnummer: String?,
+        hendelseType: String,
         eksternReferanse: String,
         feilmelding: String?,
         journalpostId: String? = null,
@@ -472,10 +503,10 @@ class SenderFacade(
             PUtsendtVarselFeilet(
                 uuid = UUID.randomUUID().toString(),
                 uuidEksternReferanse = eksternReferanse,
-                arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
+                arbeidstakerFnr = arbeidstakerFnr,
                 narmesteLederFnr = null,
-                orgnummer = varselHendelse.orgnummer,
-                hendelsetypeNavn = varselHendelse.type.name,
+                orgnummer = orgnummer,
+                hendelsetypeNavn = hendelseType,
                 arbeidsgivernotifikasjonMerkelapp = null,
                 brukernotifikasjonerMeldingType = brukernotifikasjonerMeldingType,
                 journalpostId = journalpostId,

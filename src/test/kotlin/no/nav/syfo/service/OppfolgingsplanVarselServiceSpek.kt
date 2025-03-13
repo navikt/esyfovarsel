@@ -5,7 +5,6 @@ import io.mockk.coEvery
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
-import java.net.URI
 import no.nav.syfo.BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdl.PdlClient
@@ -17,6 +16,7 @@ import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.fnr1
 import no.nav.syfo.testutil.mocks.fnr2
 import no.nav.syfo.testutil.mocks.orgnummer
+import java.net.URI
 
 class OppfolgingsplanVarselServiceSpek : DescribeSpec({
     val accessControlService = mockk<AccessControlService>()

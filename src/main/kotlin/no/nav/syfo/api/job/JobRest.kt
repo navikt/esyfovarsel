@@ -8,6 +8,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.accept
 import io.ktor.server.routing.post
 import kotlinx.coroutines.launch
+import no.nav.syfo.job.ResendFailedVarslerJob
 import no.nav.syfo.job.SendAktivitetspliktLetterToSentralPrintJob
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 
@@ -16,6 +17,7 @@ const val urlPathJobTrigger = "/job/trigger"
 fun Route.registerJobTriggerApi(
     mikrofrontendService: MikrofrontendService,
     sendAktivitetspliktLetterToSentralPrintJob: SendAktivitetspliktLetterToSentralPrintJob,
+    resendFailedVarslerJob: ResendFailedVarslerJob
 ) {
     accept(ContentType.Application.Json) {
         post(urlPathJobTrigger) {
@@ -25,6 +27,9 @@ fun Route.registerJobTriggerApi(
             }
             launch {
                 sendAktivitetspliktLetterToSentralPrintJob.sendLetterToTvingSentralPrintFromJob()
+            }
+            launch {
+                resendFailedVarslerJob.resendFailedBrukernotifikasjonVarsler()
             }
         }
     }

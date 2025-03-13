@@ -97,7 +97,8 @@ const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_BODY =
         "Du kan ikke svare på denne meldingen.</body>"
 
 const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_MESSAGE_TEXT = "Vi trenger en oppfølgingsplan fra deg"
-const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_TITLE = "Nav ber om oppfølgingsplan fra arbeidsgiver"
+const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_TITLE =
+    "Nav ber om oppfølgingsplan fra arbeidsgiver"
 const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_BODY = """
     Hei,
     <br/><br/>

@@ -33,6 +33,7 @@ import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.grantAccessToIAMUsers
+import no.nav.syfo.job.ResendFailedVarslerJob
 import no.nav.syfo.job.SendAktivitetspliktLetterToSentralPrintJob
 import no.nav.syfo.job.closeExpiredMicrofrontendsJob
 import no.nav.syfo.kafka.common.launchKafkaListener
@@ -44,8 +45,23 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaPr
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
-import no.nav.syfo.service.*
+import no.nav.syfo.service.AccessControlService
+import no.nav.syfo.service.AktivitetspliktForhandsvarselVarselService
+import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
+import no.nav.syfo.service.ArbeidsuforhetForhandsvarselService
+import no.nav.syfo.service.BrukernotifikasjonerService
 import no.nav.syfo.service.DialogmoteInnkallingNarmesteLederVarselService
+import no.nav.syfo.service.DialogmoteInnkallingSykmeldtVarselService
+import no.nav.syfo.service.FriskmeldingTilArbeidsformidlingVedtakService
+import no.nav.syfo.service.FysiskBrevUtsendingService
+import no.nav.syfo.service.ManglendeMedvirkningVarselService
+import no.nav.syfo.service.MerVeiledningVarselService
+import no.nav.syfo.service.MotebehovVarselService
+import no.nav.syfo.service.OppfolgingsplanVarselService
+import no.nav.syfo.service.SenderFacade
+import no.nav.syfo.service.SykmeldingService
+import no.nav.syfo.service.TestdataResetService
+import no.nav.syfo.service.VarselBusService
 import no.nav.syfo.service.microfrontend.MikrofrontendAktivitetskravService
 import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
 import no.nav.syfo.service.microfrontend.MikrofrontendMerOppfolgingService
@@ -153,8 +169,11 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
     val manglendeMedvirkningVarselService = ManglendeMedvirkningVarselService(senderFacade)
     val oppfolgingsplanVarselService =
         OppfolgingsplanVarselService(
-            senderFacade, accessControlService,
-            env.urlEnv.oppfolgingsplanerUrl, narmesteLederService, pdlClient
+            senderFacade,
+            accessControlService,
+            env.urlEnv.oppfolgingsplanerUrl,
+            narmesteLederService,
+            pdlClient
         )
     val merVeiledningVarselService = MerVeiledningVarselService(
         senderFacade = senderFacade,
@@ -174,6 +193,13 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
         )
 
     val sendAktivitetspliktLetterToSentralPrintJob = SendAktivitetspliktLetterToSentralPrintJob(database, senderFacade)
+
+    val resendFailedVarslerJob = ResendFailedVarslerJob(
+        db = database,
+        motebehovVarselService = motebehovVarselService,
+        dialogmoteInnkallingSykmeldtVarselService = dialogmoteInnkallingSykmeldtVarselService,
+        merVeiledningVarselService = merVeiledningVarselService
+    )
 
     val varselBusService =
         VarselBusService(
@@ -203,6 +229,7 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
             env,
             mikrofrontendService,
             sendAktivitetspliktLetterToSentralPrintJob,
+            resendFailedVarslerJob
         )
 
         kafkaModule(
@@ -224,6 +251,7 @@ fun Application.serverModule(
     env: Environment,
     mikrofrontendService: MikrofrontendService,
     sendAktivitetspliktLetterToSentralPrintJob: SendAktivitetspliktLetterToSentralPrintJob,
+    resendFailedVarslerJob: ResendFailedVarslerJob
 ) {
     install(ContentNegotiation) {
         jackson {
@@ -248,6 +276,7 @@ fun Application.serverModule(
         setupRoutesWithAuthentication(
             mikrofrontendService,
             sendAktivitetspliktLetterToSentralPrintJob,
+            resendFailedVarslerJob,
             env.authEnv,
         )
     }
@@ -256,6 +285,7 @@ fun Application.serverModule(
         setupLocalRoutesWithAuthentication(
             mikrofrontendService,
             sendAktivitetspliktLetterToSentralPrintJob,
+            resendFailedVarslerJob,
             env.authEnv,
         )
     }

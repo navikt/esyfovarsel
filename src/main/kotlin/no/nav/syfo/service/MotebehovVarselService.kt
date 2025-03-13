@@ -1,11 +1,5 @@
 package no.nav.syfo.service
 
-import java.io.IOException
-import java.net.URI
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.util.*
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_TITLE
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
@@ -15,6 +9,7 @@ import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT
 import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
 import no.nav.syfo.DINE_SYKMELDTE_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
 import no.nav.syfo.DITT_SYKEFRAVAER_DIALOGMOTE_SVAR_MOTEBEHOV_MESSAGE_TEXT
+import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
@@ -30,6 +25,12 @@ import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.BESKJED
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.IOException
+import java.net.URI
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.util.*
 
 const val DITT_SYKEFRAVAER_HENDELSE_TYPE_DIALOGMOTE_SVAR_MOTEBEHOV = "ESYFOVARSEL_DIALOGMOTE_SVAR_MOTEBEHOV"
 
@@ -109,7 +110,25 @@ class MotebehovVarselService(
             mottakerFnr = fnr,
             content = BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
             url = URI(svarMotebehovUrl).toURL(),
-            varselHendelse = varselHendelse,
+            arbeidstakerFnr = fnr,
+            orgnummer = varselHendelse.orgnummer,
+            hendelseType = varselHendelse.type.name,
+            varseltype = OPPGAVE,
+            eksternVarsling = eksternVarsling
+        )
+    }
+
+    suspend fun resendVarselTilBrukernotifikasjoner(utsendtvarselFeilet: PUtsendtVarselFeilet): Boolean {
+        val fnr = utsendtvarselFeilet.arbeidstakerFnr
+        val eksternVarsling = accessControlService.canUserBeNotifiedByEmailOrSMS(fnr)
+        return senderFacade.sendTilBrukernotifikasjoner(
+            uuid = utsendtvarselFeilet.uuidEksternReferanse ?: UUID.randomUUID().toString(),
+            mottakerFnr = fnr,
+            content = BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
+            url = URI(svarMotebehovUrl).toURL(),
+            arbeidstakerFnr = fnr,
+            orgnummer = utsendtvarselFeilet.orgnummer,
+            hendelseType = utsendtvarselFeilet.hendelsetypeNavn,
             varseltype = OPPGAVE,
             eksternVarsling = eksternVarsling
         )
@@ -145,7 +164,9 @@ class MotebehovVarselService(
             uuid = UUID.randomUUID().toString(),
             mottakerFnr = varselHendelse.arbeidstakerFnr,
             content = data.tilbakemelding,
-            varselHendelse = varselHendelse,
+            arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
+            orgnummer = varselHendelse.orgnummer,
+            hendelseType = varselHendelse.type.name,
             eksternVarsling = false,
             varseltype = BESKJED
         )

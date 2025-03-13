@@ -2,13 +2,22 @@ package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
-import io.mockk.*
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coJustRun
+import io.mockk.coVerify
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederRelasjon
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.narmesteLeder.Tilgang
-import no.nav.syfo.consumer.pdl.*
+import no.nav.syfo.consumer.pdl.Foedselsdato
+import no.nav.syfo.consumer.pdl.HentPerson
+import no.nav.syfo.consumer.pdl.HentPersonData
+import no.nav.syfo.consumer.pdl.Navn
+import no.nav.syfo.consumer.pdl.PdlClient
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.domain.PersonIdent
@@ -101,7 +110,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                     uuid = any(),
                     mottakerFnr = fnr1,
                     content = any(),
-                    url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
+                    url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse.type, journalpostUuid),
                     smsContent = null,
                     varseltype = any(),
                     eksternVarsling = any(),
@@ -173,7 +182,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek : DescribeSpec({
                     uuid = any(),
                     mottakerFnr = fnr3,
                     content = any(),
-                    url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse, journalpostUuid),
+                    url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse.type, journalpostUuid),
                     varseltype = any(),
                     eksternVarsling = any(),
                     smsContent = any()

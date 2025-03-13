@@ -51,4 +51,5 @@ fun ResultSet.toPUtsendtVarselFeilet() = PUtsendtVarselFeilet(
     feilmelding = getString("feilmelding"),
     utsendtForsokTidspunkt = getTimestamp("utsendt_forsok_tidspunkt").toLocalDateTime(),
     isForcedLetter = getBoolean("is_forced_letter"),
+    isResendt = getBoolean("is_resendt"),
 )
