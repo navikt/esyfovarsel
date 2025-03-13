@@ -22,7 +22,7 @@ class ResendFailedVarslerJob(
         log.info(
             "Attempting to resend ${failedVarsler.size} failed brukernotifikasjon varsler"
         )
-        var resentVarsler = 0
+        var resentCount = 0
 
         failedVarsler.forEach { failedVarsel ->
             when (failedVarsel.hendelsetypeNavn) {
@@ -32,7 +32,7 @@ class ResendFailedVarslerJob(
                     )
                     if (isResendt) {
                         db.updateUtsendtVarselFeiletToResendt(failedVarsel.uuid)
-                        resentVarsler++
+                        resentCount++
                     }
                 }
 
@@ -43,7 +43,7 @@ class ResendFailedVarslerJob(
                         )
                     if (isResendt) {
                         db.updateUtsendtVarselFeiletToResendt(failedVarsel.uuid)
-                        resentVarsler++
+                        resentCount++
                     }
                 }
 
@@ -54,7 +54,7 @@ class ResendFailedVarslerJob(
                         )
                     if (isResendt) {
                         db.updateUtsendtVarselFeiletToResendt(failedVarsel.uuid)
-                        resentVarsler++
+                        resentCount++
                     }
                 }
 
@@ -65,7 +65,7 @@ class ResendFailedVarslerJob(
                         )
                     if (isResendt) {
                         db.updateUtsendtVarselFeiletToResendt(failedVarsel.uuid)
-                        resentVarsler++
+                        resentCount++
                     }
                 }
 
@@ -73,7 +73,7 @@ class ResendFailedVarslerJob(
                     val isResendt = merVeiledningVarselService.resendDigitaltVarselTilArbeidstaker(failedVarsel)
                     if (isResendt) {
                         db.updateUtsendtVarselFeiletToResendt(failedVarsel.uuid)
-                        resentVarsler++
+                        resentCount++
                     }
                 }
 
@@ -81,12 +81,15 @@ class ResendFailedVarslerJob(
             }
         }
 
-        if (resentVarsler > 0) {
-            log.info("Successfully resent $resentVarsler brukernotifikasjon varsler")
+        if (resentCount > 0) {
+            log.info(
+                "Successfully resent $resentCount " +
+                    "brukernotifikasjon varsler of ${failedVarsler.size} selected varsler"
+            )
         } else {
             log.info("No brukernotifikasjon varsler to resend")
         }
 
-        return resentVarsler
+        return resentCount
     }
 }
