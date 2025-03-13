@@ -44,7 +44,8 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
         feilmelding,
         utsendt_forsok_tidspunkt,
         is_forced_letter,
-        is_resendt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        is_resendt,
+        resendt_tidspunkt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """.trimIndent()
 
     connection.use { connection ->
@@ -63,6 +64,7 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
             it.setTimestamp(12, Timestamp.valueOf(varsel.utsendtForsokTidspunkt))
             it.setBoolean(13, varsel.isForcedLetter ?: false)
             it.setBoolean(14, varsel.isResendt ?: false)
+            it.setTimestamp(15, null)
             it.executeUpdate()
         }
 
@@ -72,7 +74,8 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
 
 fun DatabaseInterface.updateUtsendtVarselFeiletToResendt(uuid: String) {
     val updateStatement = """UPDATE UTSENDING_VARSEL_FEILET
-                   SET is_resendt = TRUE
+                   SET is_resendt = TRUE,
+                       resendt_tidspunkt = CURRENT_TIMESTAMP
                    WHERE uuid = ?
     """.trimMargin()
 
