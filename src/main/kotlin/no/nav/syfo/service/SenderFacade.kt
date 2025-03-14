@@ -374,7 +374,7 @@ class SenderFacade(
         varselHendelse: ArbeidstakerHendelse,
         journalpostId: String,
         distribusjonsType: DistibusjonsType = DistibusjonsType.ANNET,
-    ) {
+    ): Boolean {
         var isSendingSucceed = true
         try {
             fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType)
@@ -402,7 +402,9 @@ class SenderFacade(
                 eksternReferanse = uuid,
                 journalpostId = journalpostId
             )
+            return true
         }
+        return false
     }
 
     suspend fun sendBrevTilTvingSentralPrint(

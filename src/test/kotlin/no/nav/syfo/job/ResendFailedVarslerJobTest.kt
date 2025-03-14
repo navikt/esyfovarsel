@@ -6,8 +6,11 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
+import no.nav.syfo.db.domain.toArbeidstakerHendelse
 import no.nav.syfo.db.fetchUtsendtBrukernotifikasjonVarselFeilet
+import no.nav.syfo.db.fetchUtsendtDokDistVarselFeilet
 import no.nav.syfo.db.storeUtsendtVarselFeilet
 import no.nav.syfo.service.DialogmoteInnkallingSykmeldtVarselService
 import no.nav.syfo.service.MerVeiledningVarselService
@@ -19,30 +22,31 @@ import java.time.LocalDateTime
 import java.util.*
 
 class ResendFailedVarslerJobTest : DescribeSpec({
+    val embeddedDatabase = EmbeddedDatabase()
+    val motebehovVarselService = mockk<MotebehovVarselService>(relaxed = true)
+    val dialogmoteInnkallingSykmeldtVarselService = mockk<DialogmoteInnkallingSykmeldtVarselService>(relaxed = true)
+    val merVeiledningVarselService = mockk<MerVeiledningVarselService>(relaxed = true)
+    val senderFacade = mockk<SenderFacade>(relaxed = true)
 
-    describe("ResendFailedVarslerJobTest") {
+    beforeTest {
+        embeddedDatabase.dropData()
+        coEvery { motebehovVarselService.resendVarselTilBrukernotifikasjoner(any()) } returns true
+        every {
+            dialogmoteInnkallingSykmeldtVarselService.revarsleArbeidstakerViaBrukernotifikasjoner(any())
+        } returns true
+        coEvery { merVeiledningVarselService.resendDigitaltVarselTilArbeidstaker(any()) } returns true
+        coEvery { senderFacade.sendBrevTilFysiskPrint(any(), any(), any(), any()) } returns true
+    }
 
-        val embeddedDatabase = EmbeddedDatabase()
-        val motebehovVarselService = mockk<MotebehovVarselService>(relaxed = true)
-        val dialogmoteInnkallingSykmeldtVarselService = mockk<DialogmoteInnkallingSykmeldtVarselService>(relaxed = true)
-        val merVeiledningVarselService = mockk<MerVeiledningVarselService>(relaxed = true)
+    val job = ResendFailedVarslerJob(
+        db = embeddedDatabase,
+        motebehovVarselService = motebehovVarselService,
+        dialogmoteInnkallingSykmeldtVarselService = dialogmoteInnkallingSykmeldtVarselService,
+        merVeiledningVarselService = merVeiledningVarselService,
+        senderFacade = senderFacade,
+    )
 
-        val job = ResendFailedVarslerJob(
-            db = embeddedDatabase,
-            motebehovVarselService = motebehovVarselService,
-            dialogmoteInnkallingSykmeldtVarselService = dialogmoteInnkallingSykmeldtVarselService,
-            merVeiledningVarselService = merVeiledningVarselService
-        )
-
-        beforeTest {
-            embeddedDatabase.dropData()
-            coEvery { motebehovVarselService.resendVarselTilBrukernotifikasjoner(any()) } returns true
-            every {
-                dialogmoteInnkallingSykmeldtVarselService.revarsleArbeidstakerViaBrukernotifikasjoner(any())
-            } returns true
-            coEvery { merVeiledningVarselService.resendDigitaltVarselTilArbeidstaker(any()) } returns true
-        }
-
+    describe("Resend brukernotifikasjon varsler") {
         it(
             """Resends failed varsler to brukernotifikasjoner for dialogmote, 
                      motebehov and mer veiledning"""
@@ -153,6 +157,71 @@ class ResendFailedVarslerJobTest : DescribeSpec({
             }
 
             val failedVarslerAfterResend = embeddedDatabase.fetchUtsendtBrukernotifikasjonVarselFeilet()
+            failedVarslerAfterResend.size shouldBeEqualTo 0
+        }
+    }
+
+    describe("Resend dokdist varsler") {
+        it(
+            """Resends failed varsler to dokdist for all kinds of varsler"""
+        ) {
+            val merOppfolgingVarselFeilet = PUtsendtVarselFeilet(
+                uuid = UUID.randomUUID().toString(),
+                uuidEksternReferanse = UUID.randomUUID().toString(),
+                arbeidstakerFnr = "32121212121",
+                orgnummer = "32143242",
+                hendelsetypeNavn = "SM_MER_VEILEDNING",
+                kanal = "BREV",
+                arbeidsgivernotifikasjonMerkelapp = null,
+                isForcedLetter = false,
+                journalpostId = "112",
+                narmesteLederFnr = null,
+                brukernotifikasjonerMeldingType = null,
+                feilmelding = "noe galt skjedde",
+                utsendtForsokTidspunkt = LocalDateTime.now().minusHours(1),
+            )
+
+            val dialogmoteVarselFeilet = PUtsendtVarselFeilet(
+                uuid = UUID.randomUUID().toString(),
+                uuidEksternReferanse = UUID.randomUUID().toString(),
+                arbeidstakerFnr = "32121212121",
+                orgnummer = "123123",
+                hendelsetypeNavn = "SM_DIALOGMOTE_INNKALT",
+                kanal = "BREV",
+                arbeidsgivernotifikasjonMerkelapp = null,
+                isForcedLetter = false,
+                journalpostId = "113",
+                narmesteLederFnr = null,
+                brukernotifikasjonerMeldingType = null,
+                feilmelding = "noe galt skjedde",
+                utsendtForsokTidspunkt = LocalDateTime.now().minusHours(2),
+            )
+
+            embeddedDatabase.storeUtsendtVarselFeilet(merOppfolgingVarselFeilet)
+            embeddedDatabase.storeUtsendtVarselFeilet(dialogmoteVarselFeilet)
+
+            val result = runBlocking { job.resendFailedDokDistVarsler() }
+
+            result shouldBeEqualTo 2
+
+            coVerify(exactly = 1) {
+                senderFacade.sendBrevTilFysiskPrint(
+                    uuid = merOppfolgingVarselFeilet.uuidEksternReferanse!!,
+                    varselHendelse = merOppfolgingVarselFeilet.toArbeidstakerHendelse(),
+                    journalpostId = merOppfolgingVarselFeilet.journalpostId!!,
+                    distribusjonsType = DistibusjonsType.VIKTIG
+                )
+            }
+            coVerify(exactly = 1) {
+                senderFacade.sendBrevTilFysiskPrint(
+                    uuid = dialogmoteVarselFeilet.uuidEksternReferanse!!,
+                    varselHendelse = dialogmoteVarselFeilet.toArbeidstakerHendelse(),
+                    journalpostId = dialogmoteVarselFeilet.journalpostId!!,
+                    distribusjonsType = DistibusjonsType.ANNET
+                )
+            }
+
+            val failedVarslerAfterResend = embeddedDatabase.fetchUtsendtDokDistVarselFeilet()
             failedVarslerAfterResend.size shouldBeEqualTo 0
         }
     }

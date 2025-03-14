@@ -1,5 +1,7 @@
 package no.nav.syfo.db.domain
 
+import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import java.time.LocalDateTime
 
 data class PUtsendtVarselFeilet(
@@ -18,3 +20,13 @@ data class PUtsendtVarselFeilet(
     val isForcedLetter: Boolean? = false,
     val isResendt: Boolean? = false,
 )
+
+fun PUtsendtVarselFeilet.toArbeidstakerHendelse(): ArbeidstakerHendelse {
+    return ArbeidstakerHendelse(
+        arbeidstakerFnr = arbeidstakerFnr,
+        orgnummer = orgnummer,
+        type = HendelseType.valueOf(hendelsetypeNavn),
+        ferdigstill = false,
+        data = null,
+    )
+}

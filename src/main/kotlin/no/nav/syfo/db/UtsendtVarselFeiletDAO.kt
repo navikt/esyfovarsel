@@ -30,6 +30,23 @@ fun DatabaseInterface.fetchUtsendtBrukernotifikasjonVarselFeilet(): List<PUtsend
     }
 }
 
+fun DatabaseInterface.fetchUtsendtDokDistVarselFeilet(): List<PUtsendtVarselFeilet> {
+    val queryStatement = """SELECT *
+                            FROM UTSENDING_VARSEL_FEILET feilet
+                            WHERE feilet.KANAL = 'BREV'
+                            AND feilet.UTSENDT_FORSOK_TIDSPUNKT  >= '2025-03-14'
+                            AND feilet.is_resendt = FALSE
+                            ORDER BY feilet.utsendt_forsok_tidspunkt ASC
+                            LIMIT 500
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.executeQuery().toList { toPUtsendtVarselFeilet() }
+        }
+    }
+}
+
 fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
     val insertStatement = """INSERT INTO UTSENDING_VARSEL_FEILET (
         uuid,

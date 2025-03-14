@@ -198,7 +198,8 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
         db = database,
         motebehovVarselService = motebehovVarselService,
         dialogmoteInnkallingSykmeldtVarselService = dialogmoteInnkallingSykmeldtVarselService,
-        merVeiledningVarselService = merVeiledningVarselService
+        merVeiledningVarselService = merVeiledningVarselService,
+        senderFacade = senderFacade
     )
 
     val varselBusService =
