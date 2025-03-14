@@ -29,7 +29,7 @@ import org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG
 import java.time.Duration
 import java.util.*
 
-const val topicDineSykmeldteHendelse = "teamsykmelding.dinesykmeldte-hendelser-v2"
+const val topicDineSykmeldteHendelse = "team-esyfo.dinesykmeldte-hendelser-v2"
 const val topicVarselBus = "team-esyfo.varselbus"
 const val topicDittSykefravaerMelding = "flex.ditt-sykefravaer-melding"
 const val topicMinSideMicrofrontend = "min-side.aapen-microfrontend-v1"
