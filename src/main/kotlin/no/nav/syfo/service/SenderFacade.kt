@@ -144,7 +144,7 @@ class SenderFacade(
                 hendelseType = hendelseType,
                 eksternReferanse = uuid,
                 feilmelding = e.message,
-                journalpostId = null,
+                journalpostId = journalpostId,
                 brukernotifikasjonerMeldingType = varseltype.name,
                 isForcedLetter = false,
             )
