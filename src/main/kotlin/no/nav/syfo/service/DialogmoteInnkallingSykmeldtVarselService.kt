@@ -111,6 +111,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
             hendelseType = hendelseType.name,
             varseltype = getMeldingTypeForSykmeldtVarsling(hendelseType),
             eksternVarsling = true,
+            storeFailedUtsending = false,
         )
     }
 
