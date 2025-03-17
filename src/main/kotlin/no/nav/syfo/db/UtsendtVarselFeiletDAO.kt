@@ -34,8 +34,15 @@ fun DatabaseInterface.fetchUtsendtDokDistVarselFeilet(): List<PUtsendtVarselFeil
     val queryStatement = """SELECT *
                             FROM UTSENDING_VARSEL_FEILET feilet
                             WHERE feilet.KANAL = 'BREV'
-                            AND feilet.UTSENDT_FORSOK_TIDSPUNKT  >= '2025-03-14'
+                            AND feilet.UTSENDT_FORSOK_TIDSPUNKT  >= '2025-03-17'
                             AND feilet.is_resendt = FALSE
+                            and feilet.journalpost_id != '0'
+                            AND feilet.UUID_EKSTERN_REFERANSE NOT IN (
+                                SELECT EKSTERN_REF
+                                FROM UTSENDT_VARSEL UV
+                                WHERE KANAL = 'BREV'
+                                AND UTSENDT_TIDSPUNKT  >= '2025-03-17'
+                                )
                             ORDER BY feilet.utsendt_forsok_tidspunkt ASC
                             LIMIT 500
     """.trimIndent()
