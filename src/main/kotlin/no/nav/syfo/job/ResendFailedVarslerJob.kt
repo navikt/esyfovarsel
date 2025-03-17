@@ -130,6 +130,7 @@ class ResendFailedVarslerJob(
                 varselHendelse = varselHendelse,
                 journalpostId = failedVarsel.journalpostId,
                 distribusjonsType = HendelseType.valueOf(failedVarsel.hendelsetypeNavn).toDistribusjonsType(),
+                storeFailedUtsending = false,
             )
             if (isResendt) {
                 db.updateUtsendtVarselFeiletToResendt(failedVarsel.uuid)

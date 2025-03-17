@@ -35,7 +35,7 @@ class ResendFailedVarslerJobTest : DescribeSpec({
             dialogmoteInnkallingSykmeldtVarselService.revarsleArbeidstakerViaBrukernotifikasjoner(any())
         } returns true
         coEvery { merVeiledningVarselService.resendDigitaltVarselTilArbeidstaker(any()) } returns true
-        coEvery { senderFacade.sendBrevTilFysiskPrint(any(), any(), any(), any()) } returns true
+        coEvery { senderFacade.sendBrevTilFysiskPrint(any(), any(), any(), any(), any()) } returns true
     }
 
     val job = ResendFailedVarslerJob(
@@ -209,7 +209,8 @@ class ResendFailedVarslerJobTest : DescribeSpec({
                     uuid = merOppfolgingVarselFeilet.uuidEksternReferanse!!,
                     varselHendelse = merOppfolgingVarselFeilet.toArbeidstakerHendelse(),
                     journalpostId = merOppfolgingVarselFeilet.journalpostId!!,
-                    distribusjonsType = DistibusjonsType.VIKTIG
+                    distribusjonsType = DistibusjonsType.VIKTIG,
+                    storeFailedUtsending = false,
                 )
             }
             coVerify(exactly = 1) {
@@ -217,7 +218,8 @@ class ResendFailedVarslerJobTest : DescribeSpec({
                     uuid = dialogmoteVarselFeilet.uuidEksternReferanse!!,
                     varselHendelse = dialogmoteVarselFeilet.toArbeidstakerHendelse(),
                     journalpostId = dialogmoteVarselFeilet.journalpostId!!,
-                    distribusjonsType = DistibusjonsType.ANNET
+                    distribusjonsType = DistibusjonsType.ANNET,
+                    storeFailedUtsending = false,
                 )
             }
 

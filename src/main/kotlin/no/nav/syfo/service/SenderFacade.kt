@@ -374,6 +374,7 @@ class SenderFacade(
         varselHendelse: ArbeidstakerHendelse,
         journalpostId: String,
         distribusjonsType: DistibusjonsType = DistibusjonsType.ANNET,
+        storeFailedUtsending: Boolean = true,
     ): Boolean {
         var isSendingSucceed = true
         try {
@@ -381,17 +382,19 @@ class SenderFacade(
         } catch (e: Exception) {
             isSendingSucceed = false
             log.error("Error while sending brev til fysisk print: ${e.message}")
-            lagreIkkeUtsendtArbeidstakerVarsel(
-                kanal = BREV,
-                arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
-                orgnummer = varselHendelse.orgnummer,
-                hendelseType = varselHendelse.type.name,
-                eksternReferanse = uuid,
-                feilmelding = e.message,
-                journalpostId = journalpostId,
-                brukernotifikasjonerMeldingType = null,
-                isForcedLetter = false,
-            )
+            if (storeFailedUtsending) {
+                lagreIkkeUtsendtArbeidstakerVarsel(
+                    kanal = BREV,
+                    arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
+                    orgnummer = varselHendelse.orgnummer,
+                    hendelseType = varselHendelse.type.name,
+                    eksternReferanse = uuid,
+                    feilmelding = e.message,
+                    journalpostId = journalpostId,
+                    brukernotifikasjonerMeldingType = null,
+                    isForcedLetter = false,
+                )
+            }
         }
         if (isSendingSucceed) {
             lagreUtsendtArbeidstakerVarsel(
