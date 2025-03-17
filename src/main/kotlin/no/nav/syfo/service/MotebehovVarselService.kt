@@ -130,7 +130,8 @@ class MotebehovVarselService(
             orgnummer = utsendtvarselFeilet.orgnummer,
             hendelseType = utsendtvarselFeilet.hendelsetypeNavn,
             varseltype = OPPGAVE,
-            eksternVarsling = eksternVarsling
+            eksternVarsling = eksternVarsling,
+            storeFailedUtsending = false,
         )
     }
 

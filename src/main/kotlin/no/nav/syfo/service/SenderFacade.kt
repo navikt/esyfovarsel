@@ -114,6 +114,7 @@ class SenderFacade(
         smsContent: String? = null,
         dagerTilDeaktivering: Long? = null,
         journalpostId: String? = null,
+        storeFailedUtsending: Boolean = true,
     ): Boolean {
         try {
             brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
@@ -137,17 +138,19 @@ class SenderFacade(
             return true
         } catch (e: Exception) {
             log.error("Error while sending varsel to BRUKERNOTIFIKASJON: ${e.message}")
-            lagreIkkeUtsendtArbeidstakerVarsel(
-                kanal = BRUKERNOTIFIKASJON,
-                arbeidstakerFnr = arbeidstakerFnr,
-                orgnummer = orgnummer,
-                hendelseType = hendelseType,
-                eksternReferanse = uuid,
-                feilmelding = e.message,
-                journalpostId = journalpostId,
-                brukernotifikasjonerMeldingType = varseltype.name,
-                isForcedLetter = false,
-            )
+            if (storeFailedUtsending) {
+                lagreIkkeUtsendtArbeidstakerVarsel(
+                    kanal = BRUKERNOTIFIKASJON,
+                    arbeidstakerFnr = arbeidstakerFnr,
+                    orgnummer = orgnummer,
+                    hendelseType = hendelseType,
+                    eksternReferanse = uuid,
+                    feilmelding = e.message,
+                    journalpostId = journalpostId,
+                    brukernotifikasjonerMeldingType = varseltype.name,
+                    isForcedLetter = false,
+                )
+            }
             return false
         }
     }

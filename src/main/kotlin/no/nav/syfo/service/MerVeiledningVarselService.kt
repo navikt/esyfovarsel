@@ -85,6 +85,7 @@ class MerVeiledningVarselService(
             hendelseType = utsendtvarselFeilet.hendelsetypeNavn,
             varseltype = OPPGAVE,
             dagerTilDeaktivering = DAGER_TIL_DEAKTIVERING_AV_VARSEL,
+            storeFailedUtsending = false,
         )
     }
 
