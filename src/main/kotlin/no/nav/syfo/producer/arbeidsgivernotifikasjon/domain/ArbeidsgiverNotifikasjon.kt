@@ -96,7 +96,7 @@ private fun ArbeidsgiverNotifikasjon.createEksterneVarsler(): List<EksterntVarse
                             )
                         )
                     ),
-                    epostTittel = emailBody,
+                    epostTittel = emailTitle,
                     epostHtmlBody = emailBody,
                     sendetidspunkt = SendetidspunktInput(
                         tidspunkt = Optional.Absent,
