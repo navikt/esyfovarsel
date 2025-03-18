@@ -68,7 +68,8 @@ fun DatabaseInterface.fetchAlleUferdigstilteAktivitetspliktVarsler(): List<PUtse
                               AND journalpost_id IS NOT NULL
                               AND (is_forced_letter IS FALSE OR is_forced_letter IS NULL)
                               AND utsendt_tidspunkt >= CURRENT_DATE - 14
-                              AND utsendt_tidspunkt < CURRENT_DATE - 1;
+                              AND utsendt_tidspunkt < CURRENT_DATE - 1
+                              AND utsendt_tidspunkt NOT BETWEEN '2025-03-18 14:15:00' AND '2025-03-18 16:15:00';
     """.trimIndent()
 
     return connection.use { connection ->
