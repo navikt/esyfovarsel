@@ -44,13 +44,24 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
                 setBody(request)
             }
 
-            if (response.status == HttpStatusCode.OK) {
-                log.info("Sent document to print")
-                response.body()
-            } else {
-                throw RuntimeException(
-                    "Failed to send document with uuid $uuid to print. journalpostId: $journalpostId. Response status: ${response.status}. Response: $response"
-                )
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    log.info("Sent document to print")
+                    response.body()
+                }
+                HttpStatusCode.Conflict -> {
+                    log.info("""Document with uuid $uuid and journalpostId $journalpostId already sent to print.
+                        Response: ${response.status}
+                        """.trimIndent())
+                    response.body()
+                }
+                else -> {
+                    throw RuntimeException(
+                        """Failed to send document with uuid $uuid to print. journalpostId: $journalpostId.
+                            Response status: ${response.status}. Response: $response
+                        """.trimMargin()
+                    )
+                }
             }
         } catch (e: Exception) {
             throw RuntimeException(

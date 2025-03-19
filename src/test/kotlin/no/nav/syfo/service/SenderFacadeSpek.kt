@@ -1,7 +1,9 @@
 package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
@@ -12,6 +14,8 @@ import no.nav.syfo.db.domain.VarselType
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.domain.PersonIdent
+import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.planner.arbeidstakerFnr1
@@ -136,6 +140,20 @@ class SenderFacadeSpek : DescribeSpec({
             verify(exactly = 0) { dineSykmeldteHendelseKafkaProducer.ferdigstillVarsel(any()) }
             verify(exactly = 0) { brukernotifikasjonerService.ferdigstillVarsel(any()) }
             verify(exactly = 0) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(any(), any()) }
+        }
+        it("Will not logg error when conflicted from dokumentløsning") {
+            coEvery { fysiskBrevUtsendingService.sendBrev(any(), any(), any()) } throws IllegalStateException()
+            senderFacade.sendBrevTilFysiskPrint(
+                uuid = "1234",
+                varselHendelse = ArbeidstakerHendelse(
+                    type = HendelseType.SM_AKTIVITETSPLIKT,
+                    ferdigstill = false,
+                    data = "data",
+                    arbeidstakerFnr = arbeidstakerFnr1,
+                    orgnummer = "123456789",
+                ),
+                journalpostId = "1234"
+            ) shouldBe true
         }
     }
 })
