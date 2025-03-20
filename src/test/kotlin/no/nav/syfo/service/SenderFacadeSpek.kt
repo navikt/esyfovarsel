@@ -141,19 +141,5 @@ class SenderFacadeSpek : DescribeSpec({
             verify(exactly = 0) { brukernotifikasjonerService.ferdigstillVarsel(any()) }
             verify(exactly = 0) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(any(), any()) }
         }
-        it("Will not logg error when conflicted from dokumentløsning") {
-            coEvery { fysiskBrevUtsendingService.sendBrev(any(), any(), any()) } throws IllegalStateException()
-            senderFacade.sendBrevTilFysiskPrint(
-                uuid = "1234",
-                varselHendelse = ArbeidstakerHendelse(
-                    type = HendelseType.SM_AKTIVITETSPLIKT,
-                    ferdigstill = false,
-                    data = "data",
-                    arbeidstakerFnr = arbeidstakerFnr1,
-                    orgnummer = "123456789",
-                ),
-                journalpostId = "1234"
-            ) shouldBe true
-        }
     }
 })

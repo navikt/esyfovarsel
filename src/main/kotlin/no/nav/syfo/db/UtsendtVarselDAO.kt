@@ -129,20 +129,6 @@ fun DatabaseInterface.fetchUtsendtVarselByFnr(fnr: String): List<PUtsendtVarsel>
     }
 }
 
-fun DatabaseInterface.fetchUtsendtVarselByJournalpostId(journalpostId: String): List<PUtsendtVarsel> {
-    val queryStatement = """SELECT *
-                            FROM UTSENDT_VARSEL
-                            WHERE journalpost_id = ?
-    """.trimIndent()
-
-    return connection.use { connection ->
-        connection.prepareStatement(queryStatement).use {
-            it.setString(1, journalpostId)
-            it.executeQuery().toList { toPUtsendtVarsel() }
-        }
-    }
-}
-
 fun DatabaseInterface.setUtsendtVarselToFerdigstilt(eksternRef: String): Int {
     val now = Timestamp.valueOf(LocalDateTime.now())
     val updateStatement = """UPDATE UTSENDT_VARSEL

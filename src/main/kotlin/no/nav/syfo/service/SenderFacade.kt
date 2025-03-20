@@ -14,7 +14,6 @@ import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.db.fetchUferdigstilteNarmesteLederVarsler
 import no.nav.syfo.db.fetchUferdigstilteVarsler
-import no.nav.syfo.db.fetchUtsendtVarselByJournalpostId
 import no.nav.syfo.db.getArbeidsgivernotifikasjonerKalenderavtale
 import no.nav.syfo.db.getPaagaaendeArbeidsgivernotifikasjonerSak
 import no.nav.syfo.db.setUferdigstiltUtsendtVarselToForcedLetter
@@ -382,12 +381,8 @@ class SenderFacade(
         storeFailedUtsending: Boolean = true,
     ): Boolean {
         var isSendingSucceed = true
-        var isConflictedResponse = false
         try {
             fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType)
-        } catch (e: IllegalStateException) {
-            isConflictedResponse = true
-            log.error("Already sent journalPostId: ${e.message}")
         } catch (e: Exception) {
             isSendingSucceed = false
             log.error("Error while sending brev til fysisk print: ${e.message}")
@@ -405,17 +400,15 @@ class SenderFacade(
                 )
             }
         }
-        if (isSendingSucceed || isConflictedResponse) {
-            if (database.fetchUtsendtVarselByJournalpostId(journalpostId).isEmpty()) {
-                lagreUtsendtArbeidstakerVarsel(
-                    BREV,
-                    arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
-                    orgnummer = varselHendelse.orgnummer,
-                    hendelseType = varselHendelse.type.name,
-                    eksternReferanse = uuid,
-                    journalpostId = journalpostId
-                )
-            }
+        if (isSendingSucceed) {
+            lagreUtsendtArbeidstakerVarsel(
+                BREV,
+                arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
+                orgnummer = varselHendelse.orgnummer,
+                hendelseType = varselHendelse.type.name,
+                eksternReferanse = uuid,
+                journalpostId = journalpostId
+            )
             return true
         }
         return false
