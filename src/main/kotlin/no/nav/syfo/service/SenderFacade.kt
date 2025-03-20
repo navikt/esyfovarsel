@@ -251,7 +251,8 @@ class SenderFacade(
                 tekst = oppdaterKalenderInput.nyTekst ?: storedKalenderAvtale.tekst,
                 startTidspunkt = storedKalenderAvtale.startTidspunkt,
                 sluttTidspunkt = storedKalenderAvtale.sluttTidspunkt,
-                kalenderavtaleTilstand = oppdaterKalenderInput.nyTilstand ?: storedKalenderAvtale.kalenderavtaleTilstand,
+                kalenderavtaleTilstand = oppdaterKalenderInput.nyTilstand
+                    ?: storedKalenderAvtale.kalenderavtaleTilstand,
                 hardDeleteDate = oppdaterKalenderInput.hardDeleteTidspunkt
             )
         )
