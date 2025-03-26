@@ -9,7 +9,7 @@ val prometheusVersion = "0.16.0"
 val micrometerVersion = "1.14.5"
 val kotestVersion = "5.9.1"
 val kotestExtensionsVersion = "2.0.0"
-val h2Version = "2.3.232"
+val testcontainersVersion = "1.20.6"
 val mockkVersion = "1.13.17"
 val slf4jVersion = "2.0.17"
 val logbackVersion = "1.5.18"
@@ -135,7 +135,7 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
     testImplementation("io.kotest:kotest-property:$kotestVersion")
     testImplementation("io.kotest.extensions:kotest-assertions-ktor:$kotestExtensionsVersion")
-    testImplementation("com.h2database:h2:$h2Version")
+    testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$detektVersion")
 
