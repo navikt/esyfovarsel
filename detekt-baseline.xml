@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" ?>
 <SmellBaseline>
   <ManuallySuppressedIssues>
     <ID>LongMethod:VarselBusService.kt$VarselBusService$suspend fun processVarselHendelse( varselHendelse: EsyfovarselHendelse, )</ID>
@@ -24,6 +24,7 @@
     <ID>InvalidPackageDeclaration:TestServerUtil.kt$package no.nav.syfo.util</ID>
     <ID>LongMethod:BootstrapApplication.kt$fun createEngineEnvironment(): ApplicationEngineEnvironment</ID>
     <ID>LongMethod:Environment.kt$fun getEnv(): Environment</ID>
+    <ID>LongMethod:ResendFailedVarslerJob.kt$ResendFailedVarslerJob$suspend fun resendFailedBrukernotifikasjonVarsler(): Int</ID>
     <ID>LongMethod:VarselBusService.kt$VarselBusService$suspend fun processVarselHendelse( varselHendelse: EsyfovarselHendelse, )</ID>
     <ID>MatchingDeclarationName:AktivitetspliktForhandsvarselService.kt$AktivitetspliktForhandsvarselVarselService</ID>
     <ID>MatchingDeclarationName:SyfosmDTO.kt$SykmeldingDTO : Serializable</ID>
@@ -38,17 +39,16 @@
     <ID>MaxLineLength:DialogmoteInnkallingSykmeldtVarselService.kt$DialogmoteInnkallingSykmeldtVarselService$"Feil i sending av fysisk brev om dialogmote: ${e.message} for hendelsetype: ${arbeidstakerHendelse.type.name}"</ID>
     <ID>MaxLineLength:DialogmoteInnkallingSykmeldtVarselService.kt$DialogmoteInnkallingSykmeldtVarselService$"Klarte ikke mappe varsel av type ${arbeidstakerHendelse.type} ved mapping hendelsetype til ditt sykefravar hendelsetype"</ID>
     <ID>MaxLineLength:DialogmoteInnkallingSykmeldtVarselService.kt$DialogmoteInnkallingSykmeldtVarselService$"Klarte ikke mappe varsel av type ${arbeidstakerHendelse.type} ved mapping hendelsetype til ditt sykefravar melding tekst"</ID>
-    <ID>MaxLineLength:DialogmoteInnkallingSykmeldtVarselService.kt$DialogmoteInnkallingSykmeldtVarselService$SM_DIALOGMOTE_AVLYST -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_AVLYST.toString()</ID>
-    <ID>MaxLineLength:DialogmoteInnkallingSykmeldtVarselService.kt$DialogmoteInnkallingSykmeldtVarselService$SM_DIALOGMOTE_INNKALT -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_INNKALT.toString()</ID>
-    <ID>MaxLineLength:DialogmoteInnkallingSykmeldtVarselService.kt$DialogmoteInnkallingSykmeldtVarselService$SM_DIALOGMOTE_NYTT_TID_STED -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_NYTT_TID_STED.toString()</ID>
-    <ID>MaxLineLength:DialogmoteInnkallingSykmeldtVarselService.kt$DialogmoteInnkallingSykmeldtVarselService$SM_DIALOGMOTE_REFERAT -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_REFERAT.toString()</ID>
+    <ID>MaxLineLength:DialogmoteInnkallingSykmeldtVarselService.kt$DialogmoteInnkallingSykmeldtVarselService$SM_DIALOGMOTE_AVLYST -&gt; DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_AVLYST.toString()</ID>
+    <ID>MaxLineLength:DialogmoteInnkallingSykmeldtVarselService.kt$DialogmoteInnkallingSykmeldtVarselService$SM_DIALOGMOTE_INNKALT -&gt; DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_INNKALT.toString()</ID>
+    <ID>MaxLineLength:DialogmoteInnkallingSykmeldtVarselService.kt$DialogmoteInnkallingSykmeldtVarselService$SM_DIALOGMOTE_NYTT_TID_STED -&gt; DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_NYTT_TID_STED.toString()</ID>
+    <ID>MaxLineLength:DialogmoteInnkallingSykmeldtVarselService.kt$DialogmoteInnkallingSykmeldtVarselService$SM_DIALOGMOTE_REFERAT -&gt; DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_REFERAT.toString()</ID>
     <ID>MaxLineLength:DialogmoteInnkallingSykmeldtVarselService.kt$DialogmoteInnkallingSykmeldtVarselService$if</ID>
-    <ID>MaxLineLength:DineSykmeldteHendelseType.kt$HendelseType.NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> DineSykmeldteHendelseType.OPPFOLGINGSPLAN_TIL_GODKJENNING</ID>
+    <ID>MaxLineLength:DineSykmeldteHendelseType.kt$HendelseType.NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -&gt; DineSykmeldteHendelseType.OPPFOLGINGSPLAN_TIL_GODKJENNING</ID>
     <ID>MaxLineLength:EsyfovarselHendelse.kt$return this.notCorrectMikrofrontendType() or isAktivitetspliktWithFerdigstilling() or isMerOppfolgingWithFerdigstilling()</ID>
     <ID>MaxLineLength:JournalpostdistribusjonConsumer.kt$JournalpostdistribusjonConsumer$"Exception while calling distribuerjournalpost with uuid $uuid and journalpostId: $journalpostId. Error message: ${e.message}"</ID>
-    <ID>MaxLineLength:JournalpostdistribusjonConsumer.kt$JournalpostdistribusjonConsumer$"Failed to send document with uuid $uuid to print. journalpostId: $journalpostId. Response status: ${response.status}. Response: $response"</ID>
     <ID>MaxLineLength:MedisinskArsakTypeDTO.kt$MedisinskArsakTypeDTO$enum</ID>
-    <ID>MaxLineLength:MikrofrontendDialogmoteService.kt$MikrofrontendDialogmoteService$HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV -> if (!ferdigstill) throw MotebehovAfterBookingException() else return</ID>
+    <ID>MaxLineLength:MikrofrontendDialogmoteService.kt$MikrofrontendDialogmoteService$HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV -&gt; if (!ferdigstill) throw MotebehovAfterBookingException() else return</ID>
     <ID>MaxLineLength:MikrofrontendServiceSpek.kt$MikrofrontendServiceSpek$"Enabling MF with a dialogmote event should result in motetidspunkt storage in DB and publication on min-side topic"</ID>
     <ID>MaxLineLength:MikrofrontendServiceSpek.kt$MikrofrontendServiceSpek$"Enabling MF with a syfomotebehov event should result entry without synligTom in DB and publication on min-side topic"</ID>
     <ID>MaxLineLength:MotebehovVarselService.kt$MotebehovVarselService$"[MotebehovVarselService]: Sender ikke Svar møtebehov-varsel til NL fordi arbeidstaker ikke er sykmeldt fra bedriften"</ID>
@@ -58,7 +58,6 @@
     <ID>MaxLineLength:SendAktivitetspliktLetterToSentralPrintJob.kt$SendAktivitetspliktLetterToSentralPrintJob$class</ID>
     <ID>MaxLineLength:SenderFacade.kt$SenderFacade$"[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: Error while sending brev til direct sentral print: ${e.message}"</ID>
     <ID>MaxLineLength:SenderFacade.kt$SenderFacade$"[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sending direct sentral print letter with journalpostId $journalpostId succeded, storing in database"</ID>
-    <ID>MaxLineLength:SenderFacade.kt$SenderFacade$kalenderavtaleTilstand = oppdaterKalenderInput.nyTilstand ?: storedKalenderAvtale.kalenderavtaleTilstand</ID>
     <ID>MaxLineLength:SykmeldingService.kt$SykmeldingService$.</ID>
     <ID>MaxLineLength:SykmeldingService.kt$SykmeldingService$sykmeldingerConsumer.getSykmeldingerPaDato(varselDato, fnr) ?: return SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = false)</ID>
     <ID>MaxLineLength:SykmeldingService.kt$SykmeldingService$val</ID>
@@ -69,15 +68,15 @@
     <ID>MaxLineLength:VarselBusService.kt$VarselBusService$NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING</ID>
     <ID>MaxLineLength:VarselBusService.kt$VarselBusService$SM_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING</ID>
     <ID>MaxLineLength:VarselBusService.kt$VarselBusService$SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING</ID>
-    <ID>MaxLineLength:VarselTexts.kt$"Du er innkalt til et dialogmøte med Nav i forbindelse med en av dine ansatte sitt sykefravær. Tidspunktet eller stedet for et dialogmøte har blitt endret.&lt;br>\n"</ID>
-    <ID>MaxLineLength:VarselTexts.kt$"Du finner oppfølgingsplanen ved å logge inn på \"Min side – arbeidsgiver\". I \"bjella\" ser du hvem det gjelder.&lt;br>&lt;br>\n"</ID>
-    <ID>MaxLineLength:VarselTexts.kt$"Du kan lese avlysningen ved å logge inn på “Min side – arbeidsgiver” og trykke på “Sykmeldte”. Der kan du også lese begrunnelsen.&lt;br>&lt;br>\n"</ID>
-    <ID>MaxLineLength:VarselTexts.kt$"Du kan lese og svare på endringen ved å logge inn på “Min side – arbeidsgiver” og trykke på “Sykmeldte”. Da vil du også se hvem det gjelder.&lt;br>&lt;br>\n"</ID>
-    <ID>MaxLineLength:VarselTexts.kt$"Du kan lese og svare på møteinnkallingen ved å logge inn på “Min side - arbeidsgiver” og trykke på “Sykmeldte”. Da vil du også se hvem det gjelder.&lt;br>&lt;br>\n"</ID>
-    <ID>MaxLineLength:VarselTexts.kt$"Du kan lese referatet ved å logge inn på \"Min side – arbeidsgiver\" og trykke på \"Sykmeldte\". Da vil du også se hvem det gjelder.&lt;br>&lt;br>\n"</ID>
-    <ID>MaxLineLength:VarselTexts.kt$"Du svarer på behovet ved å logge deg inn på \"Min side - arbeidsgiver\". I \"bjella\" ser du hvem oppgaven gjelder. &lt;br>\n"</ID>
-    <ID>MaxLineLength:VarselTexts.kt$"Nav innkaller deg til et dialogmøte i forbindelse med en av dine ansatte sitt sykefravær. Av hensyn til personvernet kan vi ikke oppgi navnet i e-posten.&lt;br>\n"</ID>
-    <ID>MaxLineLength:VarselTexts.kt$"Nav trenger ditt svar på om du har behov for dialogmøte i forbindelse med en av dine ansatte sitt sykefravær.&lt;br>\n"</ID>
+    <ID>MaxLineLength:VarselTexts.kt$"Du er innkalt til et dialogmøte med Nav i forbindelse med en av dine ansatte sitt sykefravær. Tidspunktet eller stedet for et dialogmøte har blitt endret.&lt;br&gt;\n"</ID>
+    <ID>MaxLineLength:VarselTexts.kt$"Du finner oppfølgingsplanen ved å logge inn på \"Min side – arbeidsgiver\". I \"bjella\" ser du hvem det gjelder.&lt;br&gt;&lt;br&gt;\n"</ID>
+    <ID>MaxLineLength:VarselTexts.kt$"Du kan lese avlysningen ved å logge inn på “Min side – arbeidsgiver” og trykke på “Sykmeldte”. Der kan du også lese begrunnelsen.&lt;br&gt;&lt;br&gt;\n"</ID>
+    <ID>MaxLineLength:VarselTexts.kt$"Du kan lese og svare på endringen ved å logge inn på “Min side – arbeidsgiver” og trykke på “Sykmeldte”. Da vil du også se hvem det gjelder.&lt;br&gt;&lt;br&gt;\n"</ID>
+    <ID>MaxLineLength:VarselTexts.kt$"Du kan lese og svare på møteinnkallingen ved å logge inn på “Min side - arbeidsgiver” og trykke på “Sykmeldte”. Da vil du også se hvem det gjelder.&lt;br&gt;&lt;br&gt;\n"</ID>
+    <ID>MaxLineLength:VarselTexts.kt$"Du kan lese referatet ved å logge inn på \"Min side – arbeidsgiver\" og trykke på \"Sykmeldte\". Da vil du også se hvem det gjelder.&lt;br&gt;&lt;br&gt;\n"</ID>
+    <ID>MaxLineLength:VarselTexts.kt$"Du svarer på behovet ved å logge deg inn på \"Min side - arbeidsgiver\". I \"bjella\" ser du hvem oppgaven gjelder. &lt;br&gt;\n"</ID>
+    <ID>MaxLineLength:VarselTexts.kt$"Nav innkaller deg til et dialogmøte i forbindelse med en av dine ansatte sitt sykefravær. Av hensyn til personvernet kan vi ikke oppgi navnet i e-posten.&lt;br&gt;\n"</ID>
+    <ID>MaxLineLength:VarselTexts.kt$"Nav trenger ditt svar på om du har behov for dialogmøte i forbindelse med en av dine ansatte sitt sykefravær.&lt;br&gt;\n"</ID>
     <ID>MaxLineLength:VarselTexts.kt$"Vi har mottatt ditt ønske om dialogmøte med Nav. Vi vurderer at det på nåværende tidspunkt ikke er aktuelt at Nav kaller inn til et dialogmøte. "</ID>
     <ID>MaximumLineLength:ArbeidsgiverNotifikasjonProdusent.kt$ArbeidsgiverNotifikasjonProdusent$ </ID>
     <ID>MaximumLineLength:ArbeidsgiverNotifikasjonService.kt$ArbeidsgiverNotifikasjonService$ </ID>
@@ -100,9 +99,6 @@
     <ID>MaximumLineLength:VarselBusService.kt$VarselBusService$ </ID>
     <ID>MaximumLineLength:VarselTexts.kt$ </ID>
     <ID>NestedBlockDepth:TestdataResetConsumer.kt$TestdataResetConsumer$override suspend fun listen(applicationState: ApplicationState)</ID>
-    <ID>NoWildcardImports:AktivitetspliktForhandsvarselServiceTest.kt$import io.mockk.*</ID>
-    <ID>NoWildcardImports:DialogmoteInnkallingSykmeldtVarselServiceSpek.kt$import io.mockk.*</ID>
-    <ID>NoWildcardImports:DialogmoteInnkallingSykmeldtVarselServiceSpek.kt$import no.nav.syfo.consumer.pdl.*</ID>
     <ID>NoWildcardImports:DkifConsumer.kt$import io.ktor.client.call.*</ID>
     <ID>NoWildcardImports:DkifConsumer.kt$import io.ktor.client.request.*</ID>
     <ID>NoWildcardImports:DkifConsumer.kt$import io.ktor.client.statement.*</ID>
@@ -134,8 +130,8 @@
     <ID>TooGenericExceptionThrown:ArbeidsgiverNotifikasjonProdusent.kt$ArbeidsgiverNotifikasjonProdusent$throw RuntimeException( "Error while calling ag-notifikasjon-produsent-api ($mutationPath): ${e.message}", e, )</ID>
     <ID>TooGenericExceptionThrown:ArbeidsgiverNotifikasjonProdusent.kt$ArbeidsgiverNotifikasjonProdusent$throw RuntimeException(nyOppgave.feilmelding)</ID>
     <ID>TooGenericExceptionThrown:Environment.kt$throw RuntimeException("Missing required variable \"$varName\"")</ID>
+    <ID>TooGenericExceptionThrown:JournalpostdistribusjonConsumer.kt$JournalpostdistribusjonConsumer$throw RuntimeException( """Failed to send document with uuid $uuid to print. journalpostId: $journalpostId. Response status: ${response.status}. Response: $response """.trimMargin() )</ID>
     <ID>TooGenericExceptionThrown:JournalpostdistribusjonConsumer.kt$JournalpostdistribusjonConsumer$throw RuntimeException( "Exception while calling distribuerjournalpost with uuid $uuid and journalpostId: $journalpostId. Error message: ${e.message}", e, )</ID>
-    <ID>TooGenericExceptionThrown:JournalpostdistribusjonConsumer.kt$JournalpostdistribusjonConsumer$throw RuntimeException( "Failed to send document with uuid $uuid to print. journalpostId: $journalpostId. Response status: ${response.status}. Response: $response" )</ID>
     <ID>TooGenericExceptionThrown:VeilederTilgangskontrollConsumer.kt$VeilederTilgangskontrollConsumer$throw RuntimeException("Failed to request access to Person: Failed to get OBO token")</ID>
     <ID>TooManyFunctions:DialogmoteInnkallingNarmesteLederVarselService.kt$DialogmoteInnkallingNarmesteLederVarselService</ID>
     <ID>TooManyFunctions:DialogmoteInnkallingSykmeldtVarselService.kt$DialogmoteInnkallingSykmeldtVarselService</ID>
@@ -162,7 +158,7 @@
     <ID>TopLevelPropertyNaming:Environment.kt$const val localJobPropertiesPath = "./src/main/resources/localEnvJob.json"</ID>
     <ID>TopLevelPropertyNaming:Environment.kt$const val serviceuserMounthPath = "/var/run/secrets"</ID>
     <ID>TopLevelPropertyNaming:JobRest.kt$const val urlPathJobTrigger = "/job/trigger"</ID>
-    <ID>TopLevelPropertyNaming:KafkaCommon.kt$const val topicDineSykmeldteHendelse = "teamsykmelding.dinesykmeldte-hendelser-v2"</ID>
+    <ID>TopLevelPropertyNaming:KafkaCommon.kt$const val topicDineSykmeldteHendelse = "team-esyfo.dinesykmeldte-hendelser-v2"</ID>
     <ID>TopLevelPropertyNaming:KafkaCommon.kt$const val topicDittSykefravaerMelding = "flex.ditt-sykefravaer-melding"</ID>
     <ID>TopLevelPropertyNaming:KafkaCommon.kt$const val topicMinSideMicrofrontend = "min-side.aapen-microfrontend-v1"</ID>
     <ID>TopLevelPropertyNaming:KafkaCommon.kt$const val topicTestdataReset = "teamsykefravr.testdata-reset"</ID>
@@ -179,9 +175,6 @@
     <ID>UseRequire:PersonIdent.kt$PersonIdent$throw IllegalArgumentException("Value is not a valid PersonIdent")</ID>
     <ID>VariableNaming:DialogmoteInnkallingSykmeldtVarselService.kt$DialogmoteInnkallingSykmeldtVarselService$val WEEKS_BEFORE_DELETE = 4L</ID>
     <ID>VariableNaming:MotebehovVarselService.kt$MotebehovVarselService$val WEEKS_BEFORE_DELETE = 4L</ID>
-    <ID>WildcardImport:AktivitetspliktForhandsvarselServiceTest.kt$import io.mockk.*</ID>
-    <ID>WildcardImport:DialogmoteInnkallingSykmeldtVarselServiceSpek.kt$import io.mockk.*</ID>
-    <ID>WildcardImport:DialogmoteInnkallingSykmeldtVarselServiceSpek.kt$import no.nav.syfo.consumer.pdl.*</ID>
     <ID>WildcardImport:DkifConsumer.kt$import io.ktor.client.call.*</ID>
     <ID>WildcardImport:DkifConsumer.kt$import io.ktor.client.request.*</ID>
     <ID>WildcardImport:DkifConsumer.kt$import io.ktor.client.statement.*</ID>

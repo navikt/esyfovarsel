@@ -6,28 +6,50 @@ import no.nav.syfo.db.DatabaseInterface
 import org.flywaydb.core.Flyway
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.utility.DockerImageName
 import java.sql.Connection
+import java.time.Duration
 
 class EmbeddedDatabase : DatabaseInterface {
-    private val dataSource: HikariDataSource
-
-    init {
-        val config = HikariConfig().apply {
-            jdbcUrl = "jdbc:h2:mem:lps-db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;"
-            username = "sa"
-            password = ""
-            maximumPoolSize = 2
-            minimumIdle = 1
-            isAutoCommit = false
-            transactionIsolation = "TRANSACTION_REPEATABLE_READ"
-            validate()
+    companion object {
+        // Shared container for all test classes
+        private val postgresContainer = PostgreSQLContainer<Nothing>(DockerImageName.parse("postgres:13")).apply {
+            withDatabaseName("test")
+            withUsername("test")
+            withPassword("test")
+            withReuse(true)
+            withLabel("reuse.UUID", "esyfovarsel-test-db")
+            withStartupTimeout(Duration.ofSeconds(10))
+            withEnv("POSTGRES_HOST_AUTH_METHOD", "trust")
         }
 
-        dataSource = HikariDataSource(config)
+        init {
+            postgresContainer.start()
+        }
+    }
 
-        Flyway.configure().dataSource(dataSource).load().apply {
-            migrate()
-            validate()
+    private val dataSource: HikariDataSource by lazy {
+        val config = HikariConfig().apply {
+            jdbcUrl = postgresContainer.jdbcUrl
+            username = postgresContainer.username
+            password = postgresContainer.password
+            maximumPoolSize = 4
+            minimumIdle = 1
+            connectionTimeout = 10000
+            initializationFailTimeout = 30000
+            isAutoCommit = false
+            transactionIsolation = "TRANSACTION_REPEATABLE_READ"
+        }
+
+        HikariDataSource(config).also { ds ->
+            Flyway.configure()
+                .dataSource(ds)
+                .cleanDisabled(false)
+                .load().apply {
+                    clean()
+                    migrate()
+                }
         }
     }
 

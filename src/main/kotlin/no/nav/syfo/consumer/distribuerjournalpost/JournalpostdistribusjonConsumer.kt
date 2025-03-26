@@ -50,9 +50,11 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
                     response.body()
                 }
                 HttpStatusCode.Conflict -> {
-                    log.info("""Document with uuid $uuid and journalpostId $journalpostId already sent to print.
+                    log.info(
+                        """Document with uuid $uuid and journalpostId $journalpostId already sent to print.
                         Response: ${response.status}
-                        """.trimIndent())
+                        """.trimIndent()
+                    )
                     response.body()
                 }
                 else -> {
