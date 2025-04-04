@@ -4,7 +4,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerVarsel
 
 enum class Kanal {
     BRUKERNOTIFIKASJON,
-    BREV,
+    DOKUMENTDISTRIBUSJON,
     DITT_SYKEFRAVAER
 }
 
