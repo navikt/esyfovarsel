@@ -31,6 +31,7 @@ import java.util.*
 
 const val topicDineSykmeldteHendelse = "team-esyfo.dinesykmeldte-hendelser-v2"
 const val topicVarselBus = "team-esyfo.varselbus"
+const val topicArbeidstakerVarsel = "team-esyfo.arbeidstakervarsel"
 const val topicDittSykefravaerMelding = "flex.ditt-sykefravaer-melding"
 const val topicMinSideMicrofrontend = "min-side.aapen-microfrontend-v1"
 const val topicTestdataReset = "teamsykefravr.testdata-reset"
