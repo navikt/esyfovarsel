@@ -9,7 +9,7 @@ enum class Kanal {
 }
 
 class ArbeidstakervarselDao {
-    fun storeArbeidstakerVarselHendele(arbeidstakerVarsel: ArbeidstakerVarsel) {
+    fun storeArbeidstakerVarselHendelse(arbeidstakerVarsel: ArbeidstakerVarsel) {
         // Implement the logic to store the arbeidstakerVarsel in the database
         // This could involve using a database connection, preparing a statement, and executing it
     }
@@ -19,7 +19,7 @@ class ArbeidstakervarselDao {
         // This could involve using a database connection, preparing a statement, and executing it
     }
 
-    fun storeUtsendArbeidstakerVarselFeilet(uuid: String, kanal: Kanal) {
+    fun storeUtsendArbeidstakerVarselFeilet(uuid: String, kanal: Kanal, error: String) {
         // Implement the logic to store the utsendt arbeidstaker varsel feilet in the database
         // This could involve using a database connection, preparing a statement, and executing it
     }
