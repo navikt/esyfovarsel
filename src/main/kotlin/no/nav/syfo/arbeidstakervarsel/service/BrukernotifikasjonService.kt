@@ -1,6 +1,6 @@
 package no.nav.syfo.arbeidstakervarsel.service
 
-import no.nav.syfo.arbeidstakervarsel.dao.Kanal
+import no.nav.syfo.arbeidstakervarsel.dao.ArbeidstakerKanal
 import no.nav.syfo.arbeidstakervarsel.service.ArbeidstakervarselService.SendResult
 import no.nav.syfo.kafka.consumers.varselbus.domain.BrukernotifikasjonVarsel
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
@@ -43,10 +43,10 @@ class BrukernotifikasjonService(private val brukernotifikasjonKafkaProducer: Bru
                 }
             }
             log.info("Successfully sent brukernotifikasjon with uuid: $uuid")
-            SendResult(success = true, uuid = uuid, kanal = Kanal.BRUKERNOTIFIKASJON, exception = null)
+            SendResult(success = true, uuid = uuid, kanal = ArbeidstakerKanal.BRUKERNOTIFIKASJON, exception = null)
         } catch (e: Exception) {
             log.error("Failed to send brukernotifikasjon with uuid: $uuid", e)
-            SendResult(success = false, uuid = uuid, kanal = Kanal.BRUKERNOTIFIKASJON, exception = e)
+            SendResult(success = false, uuid = uuid, kanal = ArbeidstakerKanal.BRUKERNOTIFIKASJON, exception = e)
         }
     }
 }

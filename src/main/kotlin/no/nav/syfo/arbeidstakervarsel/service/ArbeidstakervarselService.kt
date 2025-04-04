@@ -1,7 +1,7 @@
 package no.nav.syfo.arbeidstakervarsel.service
 
 import no.nav.syfo.arbeidstakervarsel.dao.ArbeidstakervarselDao
-import no.nav.syfo.arbeidstakervarsel.dao.Kanal
+import no.nav.syfo.arbeidstakervarsel.dao.ArbeidstakerKanal
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerVarsel
 
 class ArbeidstakervarselService(
@@ -38,5 +38,5 @@ class ArbeidstakervarselService(
         }
     }
 
-    data class SendResult(val success: Boolean, val uuid: String, val kanal: Kanal, val exception: Exception? = null)
+    data class SendResult(val success: Boolean, val uuid: String, val kanal: ArbeidstakerKanal, val exception: Exception? = null)
 }
