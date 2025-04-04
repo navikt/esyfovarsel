@@ -10,17 +10,14 @@ enum class Kanal {
 
 class ArbeidstakervarselDao {
     fun storeArbeidstakerVarselHendelse(arbeidstakerVarsel: ArbeidstakerVarsel) {
-        // Implement the logic to store the arbeidstakerVarsel in the database
-        // This could involve using a database connection, preparing a statement, and executing it
+        //TODO: Lagre hendelsen som kom inn fra kafka
     }
 
     fun storeUtsendtArbeidstakerVarsel(uuid: String, kanal: Kanal) {
-        // Implement the logic to store the utsendt arbeidstaker varsel in the database
-        // This could involve using a database connection, preparing a statement, and executing it
+        // TODO: Lagre referanse til varsel/hendelse som gikk bra
     }
 
     fun storeUtsendtArbeidstakerVarselFeilet(uuid: String, kanal: Kanal, error: String) {
-        // Implement the logic to store the utsendt arbeidstaker varsel feilet in the database
-        // This could involve using a database connection, preparing a statement, and executing it
+        // TODO: Lagre referanse til varsel/hendelse som feilet
     }
 }
