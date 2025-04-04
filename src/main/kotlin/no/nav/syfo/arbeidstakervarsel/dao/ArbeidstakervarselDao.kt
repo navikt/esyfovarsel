@@ -19,7 +19,7 @@ class ArbeidstakervarselDao {
         // This could involve using a database connection, preparing a statement, and executing it
     }
 
-    fun storeUtsendArbeidstakerVarselFeilet(uuid: String, kanal: Kanal, error: String) {
+    fun storeUtsendtArbeidstakerVarselFeilet(uuid: String, kanal: Kanal, error: String) {
         // Implement the logic to store the utsendt arbeidstaker varsel feilet in the database
         // This could involve using a database connection, preparing a statement, and executing it
     }

@@ -29,7 +29,7 @@ class ArbeidstakervarselService(
                 kanal = sendResult.kanal
             )
         } else {
-            arbeidstakervarselDao.storeUtsendArbeidstakerVarselFeilet(
+            arbeidstakervarselDao.storeUtsendtArbeidstakerVarselFeilet(
                 uuid = sendResult.uuid,
                 kanal = sendResult.kanal,
                 error = sendResult.exception.toString()
