@@ -51,3 +51,6 @@ spec:
     - team: teamsykefravr
       application: isoppfolgingsplan
       access: write
+    - team: disykefravar
+      application: dvh-sykefravar-airflow-kafka
+      access: read
