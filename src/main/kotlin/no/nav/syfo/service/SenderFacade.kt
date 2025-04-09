@@ -434,7 +434,7 @@ class SenderFacade(
                 isForcedLetter = true,
                 journalpostId = journalpostId
             )
-            database.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef = uuid)
+            database.setUferdigstiltUtsendtVarselToForcedLetter(uuid = uuid)
         } catch (e: Exception) {
             log.error(
                 "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: Error while sending brev til direct sentral print: ${e.message}"

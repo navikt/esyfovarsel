@@ -79,16 +79,16 @@ fun DatabaseInterface.fetchAlleUferdigstilteAktivitetspliktVarsler(): List<PUtse
     }
 }
 
-fun DatabaseInterface.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef: String): Int {
+fun DatabaseInterface.setUferdigstiltUtsendtVarselToForcedLetter(uuid: String): Int {
     val updateStatement = """UPDATE UTSENDT_VARSEL
                    SET is_forced_letter = ?
-                   WHERE EKSTERN_REF = ?
+                   WHERE uuid = ?
     """.trimMargin()
 
     return connection.use { connection ->
         val rowsUpdated = connection.prepareStatement(updateStatement).use {
             it.setBoolean(1, true)
-            it.setString(2, eksternRef)
+            it.setString(2, uuid)
             it.executeUpdate()
         }
         connection.commit()
