@@ -117,7 +117,7 @@ class UtsendtVarselDAOSpek : DescribeSpec({
             result.size shouldBeEqualTo 2
 
             // Should not pick original uferdigstilt utsend varsel to notify user by physical letter for the second time
-            embeddedDatabase.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef = "123")
+            embeddedDatabase.setUferdigstiltUtsendtVarselToForcedLetter(uuid = "123")
             val result2 = embeddedDatabase.fetchAlleUferdigstilteAktivitetspliktVarsler()
             result2.size shouldBeEqualTo 1
 
