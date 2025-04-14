@@ -259,8 +259,7 @@ class SenderFacade(
     }
 
     suspend fun ferdigstillVarslerForFnr(fnr: PersonIdent) {
-        fetchUferdigstilteVarsler(fnr)
-            .forEach { ferdigstillVarsel(it) }
+        fetchUferdigstilteVarsler(fnr).forEach { ferdigstillVarsel(it) }
     }
 
     suspend fun ferdigstillArbeidstakerVarsler(varselHendelse: ArbeidstakerHendelse) {
@@ -268,8 +267,7 @@ class SenderFacade(
             PersonIdent(varselHendelse.arbeidstakerFnr),
             varselHendelse.orgnummer,
             setOf(varselHendelse.type),
-        )
-            .forEach { ferdigstillVarsel(it) }
+        ).forEach { ferdigstillVarsel(it) }
     }
 
     suspend fun ferdigstillNarmesteLederVarsler(varselHendelse: NarmesteLederHendelse) {
@@ -277,8 +275,7 @@ class SenderFacade(
             PersonIdent(varselHendelse.arbeidstakerFnr),
             varselHendelse.orgnummer,
             setOf(varselHendelse.type),
-        )
-            .forEach { ferdigstillVarsel(it) }
+        ).forEach { ferdigstillVarsel(it) }
     }
 
     suspend fun ferdigstillDittSykefravaerVarsler(varselHendelse: ArbeidstakerHendelse) {
@@ -287,8 +284,7 @@ class SenderFacade(
             varselHendelse.orgnummer,
             setOf(varselHendelse.type),
             DITT_SYKEFRAVAER,
-        )
-            .forEach { ferdigstillVarsel(it) }
+        ).forEach { ferdigstillVarsel(it) }
     }
 
     suspend fun ferdigstillDineSykmeldteVarsler(varselHendelse: NarmesteLederHendelse) {
@@ -297,8 +293,7 @@ class SenderFacade(
             narmesteLederFnr = PersonIdent(varselHendelse.narmesteLederFnr),
             orgnummer = varselHendelse.orgnummer,
             kanal = DINE_SYKMELDTE,
-        )
-            .forEach { ferdigstillVarsel(it) }
+        ).forEach { ferdigstillVarsel(it) }
     }
 
     suspend fun ferdigstillDittSykefravaerVarslerAvTyper(
@@ -310,8 +305,7 @@ class SenderFacade(
             varselHendelse.orgnummer,
             varselTyper,
             DITT_SYKEFRAVAER,
-        )
-            .forEach { ferdigstillVarsel(it) }
+        ).forEach { ferdigstillVarsel(it) }
     }
 
     fun fetchUferdigstilteVarsler(
@@ -336,8 +330,7 @@ class SenderFacade(
         return database.fetchUferdigstilteNarmesteLederVarsler(
             sykmeldtFnr = arbeidstakerFnr,
             narmesteLederFnr = narmesteLederFnr
-        )
-            .filter { orgnummer == null || it.orgnummer == orgnummer }
+        ).filter { orgnummer == null || it.orgnummer == orgnummer }
             .filter { types.isEmpty() || types.contains(enumValueOfOrNull<HendelseType>(it.type)) }
             .filter { kanal == null || it.kanal == kanal.name }
     }
@@ -415,13 +408,18 @@ class SenderFacade(
     }
 
     suspend fun sendBrevTilTvingSentralPrint(
-        uuid: String,
         varselHendelse: ArbeidstakerHendelse,
         journalpostId: String,
         distribusjonsType: DistibusjonsType = DistibusjonsType.VIKTIG,
+        eksternReferanse: String
     ) {
         try {
-            fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType, tvingSentralPrint = true)
+            fysiskBrevUtsendingService.sendBrev(
+                eksternReferanse,
+                journalpostId,
+                distribusjonsType,
+                tvingSentralPrint = true
+            )
             log.info(
                 "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sending direct sentral print letter with journalpostId $journalpostId succeded, storing in database"
             )
@@ -430,11 +428,11 @@ class SenderFacade(
                 arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
                 orgnummer = varselHendelse.orgnummer,
                 hendelseType = varselHendelse.type.name,
-                eksternReferanse = uuid,
+                eksternReferanse = eksternReferanse,
                 isForcedLetter = true,
                 journalpostId = journalpostId
             )
-            database.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef = uuid)
+            database.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef = eksternReferanse)
         } catch (e: Exception) {
             log.error(
                 "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: Error while sending brev til direct sentral print: ${e.message}"
@@ -554,8 +552,6 @@ class SenderFacade(
     }
 
     enum class InternalBrukernotifikasjonType {
-        OPPGAVE,
-        BESKJED,
-        DONE
+        OPPGAVE, BESKJED, DONE
     }
 }

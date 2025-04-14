@@ -38,7 +38,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
                 kanal = "BRUKERNOTIFIKASJON",
                 utsendtTidspunkt = LocalDateTime.now().minusDays(3),
                 planlagtVarselId = null,
-                eksternReferanse = null,
+                eksternReferanse = "eksternReferanse-1",
                 ferdigstiltTidspunkt = null,
                 arbeidsgivernotifikasjonMerkelapp = null,
                 isForcedLetter = false,
@@ -56,7 +56,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
                 kanal = "BRUKERNOTIFIKASJON",
                 utsendtTidspunkt = LocalDateTime.now().minusDays(3),
                 planlagtVarselId = null,
-                eksternReferanse = null,
+                eksternReferanse = "eksternReferanse-2",
                 ferdigstiltTidspunkt = null,
                 arbeidsgivernotifikasjonMerkelapp = null,
                 isForcedLetter = false,
@@ -74,7 +74,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
                 kanal = "BRUKERNOTIFIKASJON",
                 utsendtTidspunkt = LocalDateTime.now().minusDays(2),
                 planlagtVarselId = null,
-                eksternReferanse = null,
+                eksternReferanse = "eksternReferanse-3",
                 ferdigstiltTidspunkt = null,
                 arbeidsgivernotifikasjonMerkelapp = null,
                 isForcedLetter = false,
@@ -92,7 +92,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
                 kanal = "BRUKERNOTIFIKASJON",
                 utsendtTidspunkt = LocalDateTime.now().minusDays(3),
                 planlagtVarselId = null,
-                eksternReferanse = null,
+                eksternReferanse = "eksternReferanse-4",
                 ferdigstiltTidspunkt = null,
                 arbeidsgivernotifikasjonMerkelapp = null,
                 isForcedLetter = true,
@@ -110,7 +110,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
                 kanal = "BRUKERNOTIFIKASJON",
                 utsendtTidspunkt = LocalDateTime.now().minusDays(3),
                 planlagtVarselId = null,
-                eksternReferanse = null,
+                eksternReferanse = "eksternReferanse-5",
                 ferdigstiltTidspunkt = null,
                 arbeidsgivernotifikasjonMerkelapp = null,
                 isForcedLetter = false,
@@ -118,7 +118,7 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
             )
 
             // Should not send: utsendt varsel was ferdigstilt
-            val eksternReferanse = "123"
+            val eksternReferanse6 = "eksternReferanse-6"
             val utsendtVarsel6 = PUtsendtVarsel(
                 uuid = UUID.randomUUID().toString(),
                 fnr = "22121212121",
@@ -129,11 +129,28 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
                 kanal = "BRUKERNOTIFIKASJON",
                 utsendtTidspunkt = LocalDateTime.now().minusDays(3),
                 planlagtVarselId = null,
-                eksternReferanse = "123",
+                eksternReferanse = eksternReferanse6,
                 ferdigstiltTidspunkt = LocalDateTime.now(),
                 arbeidsgivernotifikasjonMerkelapp = null,
                 isForcedLetter = false,
                 journalpostId = "666"
+            )
+            // Should not send: missing eksternReferanse
+            val utsendtVarsel7 = PUtsendtVarsel(
+                uuid = UUID.randomUUID().toString(),
+                fnr = "22121212121",
+                aktorId = null,
+                narmesteLederFnr = null,
+                orgnummer = null,
+                type = "SM_AKTIVITETSPLIKT",
+                kanal = "BRUKERNOTIFIKASJON",
+                utsendtTidspunkt = LocalDateTime.now().minusDays(3),
+                planlagtVarselId = null,
+                eksternReferanse = null,
+                ferdigstiltTidspunkt = LocalDateTime.now(),
+                arbeidsgivernotifikasjonMerkelapp = null,
+                isForcedLetter = false,
+                journalpostId = "777"
             )
 
             embeddedDatabase.storeUtsendtVarsel(utsendtVarsel1)
@@ -142,7 +159,8 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
             embeddedDatabase.storeUtsendtVarsel(utsendtVarsel4)
             embeddedDatabase.storeUtsendtVarsel(utsendtVarsel5)
             embeddedDatabase.storeUtsendtVarsel(utsendtVarsel6)
-            embeddedDatabase.setUtsendtVarselToFerdigstilt(eksternReferanse)
+            embeddedDatabase.storeUtsendtVarsel(utsendtVarsel7)
+            embeddedDatabase.setUtsendtVarselToFerdigstilt(eksternReferanse6)
 
             val result = runBlocking { job.sendLetterToTvingSentralPrintFromJob() }
 
@@ -150,55 +168,63 @@ class SendForcedAktivitetspliktLetterJobSpek : DescribeSpec({
 
             coVerify(exactly = 1) {
                 senderFacade.sendBrevTilTvingSentralPrint(
-                    uuid = utsendtVarsel1.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
-                    journalpostId = "111"
+                    journalpostId = "111",
+                    eksternReferanse = "eksternReferanse-1"
                 )
             }
 
             coVerify(exactly = 1) {
                 senderFacade.sendBrevTilTvingSentralPrint(
-                    uuid = utsendtVarsel2.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
-                    journalpostId = "222"
+                    journalpostId = "222",
+                    eksternReferanse = "eksternReferanse-2"
                 )
             }
 
             coVerify(exactly = 1) {
                 senderFacade.sendBrevTilTvingSentralPrint(
-                    uuid = utsendtVarsel3.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
-                    journalpostId = "333"
+                    journalpostId = "333",
+                    eksternReferanse = "eksternReferanse-3"
                 )
             }
 
             coVerify(exactly = 0) {
                 senderFacade.sendBrevTilTvingSentralPrint(
-                    uuid = utsendtVarsel4.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
-                    journalpostId = "444"
+                    journalpostId = "444",
+                    eksternReferanse = "eksternReferanse-4"
                 )
             }
 
             coVerify(exactly = 0) {
                 senderFacade.sendBrevTilTvingSentralPrint(
-                    uuid = utsendtVarsel5.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
                     journalpostId = any(),
+                    eksternReferanse = "eksternReferanse-5"
                 )
             }
 
             coVerify(exactly = 0) {
                 senderFacade.sendBrevTilTvingSentralPrint(
-                    uuid = utsendtVarsel6.uuid,
                     varselHendelse = any<ArbeidstakerHendelse>(),
                     distribusjonsType = any(),
-                    journalpostId = "666"
+                    journalpostId = "666",
+                    eksternReferanse = "eksternReferanse-6"
+                )
+            }
+            coVerify(exactly = 0) {
+                senderFacade.sendBrevTilTvingSentralPrint(
+                    varselHendelse = any<ArbeidstakerHendelse>(),
+                    distribusjonsType = any(),
+                    journalpostId = "777",
+                    eksternReferanse = "eksternReferanse-7"
                 )
             }
         }
