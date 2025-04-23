@@ -5,7 +5,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.*
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.HttpRequestRetry
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.jackson.jackson
 
@@ -38,6 +40,8 @@ fun httpClientWithRetry(expectSuccess: Boolean = false): HttpClient {
         }
         install(HttpTimeout) {
             requestTimeoutMillis = 60000
+            connectTimeoutMillis = 15000
+            socketTimeoutMillis = 60000
         }
         this.expectSuccess = expectSuccess
     }

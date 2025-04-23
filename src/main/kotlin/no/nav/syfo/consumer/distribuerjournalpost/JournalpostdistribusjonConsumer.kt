@@ -10,11 +10,14 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.append
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
-import no.nav.syfo.utils.httpClient
+import no.nav.syfo.exceptions.JournalpostDistribusjonException
+import no.nav.syfo.exceptions.JournalpostNetworkException
+import no.nav.syfo.utils.httpClientWithRetry
 import org.slf4j.LoggerFactory
+import java.io.IOException
 
 class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
-    private val client = httpClient()
+    private val client = httpClientWithRetry(expectSuccess = false)
     private val dokdistfordelingUrl = urlEnv.dokdistfordelingUrl
     private val dokdistfordelingScope = urlEnv.dokdistfordelingScope
 
@@ -35,6 +38,7 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
         )
 
         return try {
+            log.debug("Attempting to distribute journalpost with ID: $journalpostId and UUID: $uuid")
             val response = client.post(requestURL) {
                 headers {
                     append(HttpHeaders.Accept, ContentType.Application.Json)
@@ -46,30 +50,29 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
 
             when (response.status) {
                 HttpStatusCode.OK -> {
-                    log.info("Sent document to print")
+                    log.info("Successfully sent document with ID: $journalpostId and UUID: $uuid to print")
                     response.body()
                 }
                 HttpStatusCode.Conflict -> {
-                    log.info(
-                        """Document with uuid $uuid and journalpostId $journalpostId already sent to print.
-                        Response: ${response.status}
-                        """.trimIndent()
-                    )
+                    log.info("Document with UUID: $uuid and journalpostId: $journalpostId already sent to print")
                     response.body()
                 }
                 else -> {
-                    throw RuntimeException(
-                        """Failed to send document with uuid $uuid to print. journalpostId: $journalpostId.
-                            Response status: ${response.status}. Response: $response
-                        """.trimMargin()
+                    log.error(
+                        "Failed to send document with UUID: $uuid to print. " +
+                            "JournalpostId: $journalpostId. Response status: ${response.status}"
+                    )
+                    throw JournalpostDistribusjonException(
+                        "Failed to send document to print. Status: ${response.status}"
                     )
                 }
             }
+        } catch (e: IOException) {
+            log.error("Network error while distributing journalpost $journalpostId: ${e.message}", e)
+            throw JournalpostNetworkException("Network error distributing journalpost", uuid, journalpostId, e)
         } catch (e: Exception) {
-            throw RuntimeException(
-                "Exception while calling distribuerjournalpost with uuid $uuid and journalpostId: $journalpostId. Error message: ${e.message}",
-                e,
-            )
+            log.error("Exception while distributing journalpost $journalpostId: ${e.javaClass.name}: ${e.message}", e)
+            throw JournalpostDistribusjonException("Failed to distribute journalpost", uuid, journalpostId, e)
         }
     }
 }
