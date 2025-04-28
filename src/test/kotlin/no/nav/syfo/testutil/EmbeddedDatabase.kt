@@ -14,7 +14,7 @@ import java.time.Duration
 class EmbeddedDatabase : DatabaseInterface {
     companion object {
         // Shared container for all test classes
-        private val postgresContainer = PostgreSQLContainer<Nothing>(DockerImageName.parse("postgres:13")).apply {
+        private val postgresContainer = PostgreSQLContainer<Nothing>(DockerImageName.parse("postgres:17")).apply {
             withDatabaseName("test")
             withUsername("test")
             withPassword("test")

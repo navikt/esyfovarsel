@@ -93,7 +93,7 @@ spec:
         name: esyfovarsel-instance
         pointInTimeRecovery: true
         tier: db-custom-4-15360
-        type: POSTGRES_13
+        type: POSTGRES_17
   ingresses:
     - "https://esyfovarsel.intern.nav.no"
   tokenx:
