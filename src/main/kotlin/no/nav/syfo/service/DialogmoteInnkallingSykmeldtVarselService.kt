@@ -73,7 +73,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
         val urlString = if (SM_DIALOGMOTE_REFERAT === hendelseType) {
             "$dialogmoterUrl/sykmeldt/referat/$varselUuid"
         } else {
-            "$dialogmoterUrl/sykmeldt/moteinnkalling"
+            "$dialogmoterUrl/sykmeldt"
         }
         return URI(urlString).toURL()
     }
