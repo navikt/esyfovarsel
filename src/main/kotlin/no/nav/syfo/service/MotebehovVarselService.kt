@@ -42,7 +42,7 @@ class MotebehovVarselService(
 ) {
     val WEEKS_BEFORE_DELETE = 4L
     private val log: Logger = LoggerFactory.getLogger(MotebehovVarselService::class.qualifiedName)
-    private val svarMotebehovUrl: String = "$dialogmoterUrl/sykmeldt/motebehov/svar"
+    private val svarMotebehovUrl: String = "$dialogmoterUrl/sykmeldt"
 
     suspend fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         // Quickfix for å unngå å sende varsel til bedrifter der bruker ikke er sykmeldt. Det kan skje når den
