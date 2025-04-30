@@ -22,7 +22,6 @@ class VarselBusKafkaConsumer(
     private val log: Logger = LoggerFactory.getLogger(VarselBusKafkaConsumer::class.qualifiedName)
     private val kafkaListener: KafkaConsumer<String, String>
     private val objectMapper = createObjectMapper()
-    private val kafkaListenerEnabled = false
 
     init {
         val kafkaConfig = consumerProperties(env)
@@ -35,10 +34,8 @@ class VarselBusKafkaConsumer(
 
         while (applicationState.running) {
             try {
-                if (kafkaListenerEnabled) {
-                    kafkaListener.poll(pollDurationInMillis).forEach { processVarselBusRecord(it) }
-                    kafkaListener.commitSync()
-                }
+                kafkaListener.poll(pollDurationInMillis).forEach { processVarselBusRecord(it) }
+                kafkaListener.commitSync()
             } catch (e: Exception) {
                 log.error(
                     "Exception in [$topicVarselBus]-listener: ${e.message}",
