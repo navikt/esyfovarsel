@@ -58,11 +58,11 @@ open class PdlClient(private val urlEnv: UrlEnv, private val azureAdTokenConsume
             }
         } catch (e: HttpRequestTimeoutException) {
             COUNT_CALL_PDL_FAIL.increment()
-            log.error("PDL request timed out: ${e.message}")
+            log.warn("PDL request timed out: ${e.message}")
             return null
         } catch (e: Exception) {
             COUNT_CALL_PDL_FAIL.increment()
-            log.error("Error calling PDL: ${e.message}")
+            log.warn("Error calling PDL: ${e.message}")
             return null
         }
     }
