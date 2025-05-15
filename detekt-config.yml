@@ -14,3 +14,8 @@ exceptions:
 complexity:
   LongParameterList:
     active: false
+  LongMethod:
+    active: false
+formatting:
+  MaximumLineLength:
+    active: false # MaxLineLength rule is already active in the detekt config

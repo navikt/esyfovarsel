@@ -7,13 +7,12 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.typesafe.config.ConfigFactory
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationEnvironment
 import io.ktor.server.application.install
 import io.ktor.server.config.HoconApplicationConfig
-import io.ktor.server.engine.ApplicationEngineEnvironment
-import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.applicationEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
-import io.ktor.server.engine.stop
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.routing.routing
@@ -80,14 +79,19 @@ fun main() {
         val env = getJobEnv()
         closeExpiredMicrofrontendsJob(env)
     } else {
+        val env = getEnv()
         val server = embeddedServer(
             factory = Netty,
-            environment = createEngineEnvironment(),
+            environment = createApplicationEnvironment(env),
             configure = {
+                connector {
+                    port = env.appEnv.applicationPort
+                }
                 connectionGroupSize = 8
                 workerGroupSize = 8
                 callGroupSize = 16
-            }
+            },
+            module = setModule(env)
         )
 
         Runtime.getRuntime().addShutdownHook(
@@ -100,12 +104,13 @@ fun main() {
     }
 }
 
-fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineEnvironment {
-    val env = getEnv()
+fun createApplicationEnvironment(env: Environment): ApplicationEnvironment = applicationEnvironment {
     config = HoconApplicationConfig(ConfigFactory.load())
     database = Database(env.dbEnv)
     database.grantAccessToIAMUsers()
+}
 
+fun setModule(env: Environment): Application.() -> Unit = {
     val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
     val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer)
     val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
@@ -219,26 +224,20 @@ fun createEngineEnvironment(): ApplicationEngineEnvironment = applicationEngineE
 
     val testdataResetService = TestdataResetService(database, mikrofrontendService, senderFacade)
 
-    connector {
-        port = env.appEnv.applicationPort
-    }
+    state.running = true
 
-    module {
-        state.running = true
+    serverModule(
+        env,
+        mikrofrontendService,
+        sendAktivitetspliktLetterToSentralPrintJob,
+        resendFailedVarslerJob
+    )
 
-        serverModule(
-            env,
-            mikrofrontendService,
-            sendAktivitetspliktLetterToSentralPrintJob,
-            resendFailedVarslerJob
-        )
-
-        kafkaModule(
-            env,
-            varselBusService,
-            testdataResetService,
-        )
-    }
+    kafkaModule(
+        env,
+        varselBusService,
+        testdataResetService,
+    )
 }
 
 private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsumer): DkifConsumer {
