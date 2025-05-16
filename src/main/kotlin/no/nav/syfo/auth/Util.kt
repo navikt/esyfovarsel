@@ -12,7 +12,6 @@ import io.ktor.client.engine.apache.ApacheEngineConfig
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.serialization.jackson.jackson
-import io.ktor.server.auth.Principal
 import io.ktor.server.auth.UserPasswordCredential
 import io.ktor.server.auth.jwt.JWTCredential
 import io.ktor.server.auth.jwt.JWTPrincipal
@@ -56,7 +55,7 @@ fun isNiva4(credentials: JWTCredential): Boolean {
     return "Level4" == credentials.payload.getClaim("acr").asString() || "idporten-loa-high" == credentials.payload.getClaim("acr").asString()
 }
 
-fun unauthorized(credentials: JWTCredential): Principal? {
+fun unauthorized(credentials: JWTCredential): BrukerPrincipal? {
     log.warn(
         "Auth: Unexpected audience for jwt {}, {}",
         StructuredArguments.keyValue("issuer", credentials.payload.issuer),
@@ -84,4 +83,4 @@ fun finnFnrFraToken(principal: JWTPrincipal): String {
 data class BrukerPrincipal(
     val fnr: String,
     val principal: JWTPrincipal,
-) : Principal
+)

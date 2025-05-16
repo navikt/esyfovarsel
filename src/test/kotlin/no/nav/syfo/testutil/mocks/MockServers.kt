@@ -6,8 +6,8 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.call
 import io.ktor.server.application.install
+import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.netty.NettyApplicationEngine
@@ -26,7 +26,7 @@ import no.nav.syfo.utils.NAV_PERSONIDENT_HEADER
 
 class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
 
-    fun mockDkifServer(): NettyApplicationEngine {
+    fun mockDkifServer(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> {
         return mockServer(urlEnv.dkifUrl) {
             get("/rest/v1/person") {
                 if (call.request.headers[NAV_PERSONIDENT_HEADER]?.isValidHeader() == true) {
@@ -41,7 +41,7 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
         }
     }
 
-    fun mockAADServer(): NettyApplicationEngine {
+    fun mockAADServer(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> {
         return mockServer(authEnv.aadAccessTokenUrl) {
             post {
                 call.respond(tokenFromAzureServer)
@@ -49,7 +49,8 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
         }
     }
 
-    fun mockArbeidsgiverNotifikasjonServer(): NettyApplicationEngine {
+    @Suppress("MaxLineLength")
+    fun mockArbeidsgiverNotifikasjonServer(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> {
         return mockServer(urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl) {
             val responseNyBeskjed = """
                 {
@@ -84,7 +85,10 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
         }
     }
 
-    fun mockServer(url: String, route: Route.() -> Unit): NettyApplicationEngine {
+    fun mockServer(
+        url: String,
+        route: Route.() -> Unit
+    ): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> {
         return embeddedServer(
             factory = Netty,
             port = url.extractPortFromUrl(),

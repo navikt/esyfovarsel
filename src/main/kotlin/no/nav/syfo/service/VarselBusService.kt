@@ -117,10 +117,6 @@ class VarselBusService(
 
                 SM_FORHANDSVARSEL_MANGLENDE_MEDVIRKNING ->
                     manglendeMedvirkningVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
-
-                else -> {
-                    log.warn("Klarte ikke mappe varsel av type ${varselHendelse.type} ved behandling forsøk")
-                }
             }
         }
     }
