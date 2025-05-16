@@ -110,6 +110,7 @@ fun createApplicationEnvironment(env: Environment): ApplicationEnvironment = app
     database.grantAccessToIAMUsers()
 }
 
+@Suppress("LongMethod")
 fun setModule(env: Environment): Application.() -> Unit = {
     val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
     val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer)
