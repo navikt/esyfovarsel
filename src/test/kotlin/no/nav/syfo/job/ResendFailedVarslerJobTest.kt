@@ -7,10 +7,12 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
+import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.db.domain.toArbeidstakerHendelse
 import no.nav.syfo.db.fetchUtsendtBrukernotifikasjonVarselFeilet
 import no.nav.syfo.db.fetchUtsendtDokDistVarselFeilet
+import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
 import no.nav.syfo.service.DialogmoteInnkallingSykmeldtVarselService
 import no.nav.syfo.service.MerVeiledningVarselService
@@ -31,6 +33,7 @@ class ResendFailedVarslerJobTest : DescribeSpec({
     beforeTest {
         embeddedDatabase.dropData()
         coEvery { motebehovVarselService.resendVarselTilBrukernotifikasjoner(any()) } returns true
+        coEvery { motebehovVarselService.resendVarselTilArbeidsgiverNotifikasjon(any()) } returns true
         every {
             dialogmoteInnkallingSykmeldtVarselService.revarsleArbeidstakerViaBrukernotifikasjoner(any())
         } returns true
@@ -225,6 +228,57 @@ class ResendFailedVarslerJobTest : DescribeSpec({
 
             val failedVarslerAfterResend = embeddedDatabase.fetchUtsendtDokDistVarselFeilet()
             failedVarslerAfterResend.size shouldBeEqualTo 0
+        }
+    }
+
+    describe("Resend arbeidsgivernotifikasjoner") {
+        it(
+            """Resends failed varsler to arbeidsgivernotifikasjoner for NL_DIALOGMOTE_SVAR_MOTEBEHOV,
+                when utsendtVarsel to DINE_SYKEMELDTE is not fedigstilt
+            """.trimMargin()
+        ) {
+            val arbeidstakerFnr = "12121212121"
+            val narmesteLederFnr = "32121212121"
+            val orgnummer = "32143242"
+
+            val dialogmoteVarselFeilet = PUtsendtVarselFeilet(
+                uuid = UUID.randomUUID().toString(),
+                uuidEksternReferanse = UUID.randomUUID().toString(),
+                arbeidstakerFnr = arbeidstakerFnr,
+                orgnummer = orgnummer,
+                hendelsetypeNavn = "NL_DIALOGMOTE_SVAR_MOTEBEHOV",
+                kanal = "ARBEIDSGIVERNOTIFIKASJON",
+                arbeidsgivernotifikasjonMerkelapp = null,
+                journalpostId = null,
+                narmesteLederFnr = narmesteLederFnr,
+                brukernotifikasjonerMeldingType = null,
+                feilmelding = "noe galt skjedde",
+                utsendtForsokTidspunkt = LocalDateTime.now().minusHours(2),
+            )
+
+            val utsendtVarsel = PUtsendtVarsel(
+                uuid = UUID.randomUUID().toString(),
+                fnr = arbeidstakerFnr,
+                aktorId = null,
+                narmesteLederFnr = narmesteLederFnr,
+                orgnummer = orgnummer,
+                type = "NL_DIALOGMOTE_SVAR_MOTEBEHOV",
+                kanal = "DINE_SYKMELDTE",
+                utsendtTidspunkt = LocalDateTime.now(),
+                planlagtVarselId = null,
+                eksternReferanse = UUID.randomUUID().toString(),
+                ferdigstiltTidspunkt = null,
+                arbeidsgivernotifikasjonMerkelapp = null,
+                isForcedLetter = false,
+                journalpostId = null
+            )
+
+            embeddedDatabase.storeUtsendtVarselFeilet(dialogmoteVarselFeilet)
+            embeddedDatabase.storeUtsendtVarsel(utsendtVarsel)
+
+            val result = runBlocking { job.resendFailedArbeidsgivernotifikasjonVarsler() }
+
+            result shouldBeEqualTo 1
         }
     }
 })
