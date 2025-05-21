@@ -156,30 +156,30 @@ class SenderFacade(
     }
 
     suspend fun sendTilArbeidsgiverNotifikasjon(
-        varselHendelse: NarmesteLederHendelse,
-        varsel: ArbeidsgiverNotifikasjonInput,
+        varselHendelse: NarmesteLederHendelse? = null,
+        notifikasjon: ArbeidsgiverNotifikasjonInput,
     ) {
-        var isSendingSucceed = true
         try {
-            arbeidsgiverNotifikasjonService.sendNotifikasjon(varsel)
+            arbeidsgiverNotifikasjonService.sendNotifikasjon(notifikasjon)
+            if (varselHendelse != null) {
+                lagreUtsendtNarmesteLederVarsel(
+                    ARBEIDSGIVERNOTIFIKASJON,
+                    varselHendelse,
+                    notifikasjon.uuid.toString(),
+                    notifikasjon.merkelapp,
+                )
+            }
         } catch (e: Exception) {
             log.error("Error while sending varsel to ARBEIDSGIVERNOTIFIKASJON: ${e.message}")
-            isSendingSucceed = false
-            lagreIkkeUtsendtNarmesteLederVarsel(
-                kanal = ARBEIDSGIVERNOTIFIKASJON,
-                varselHendelse = varselHendelse,
-                eksternReferanse = varsel.uuid.toString(),
-                feilmelding = e.message,
-                merkelapp = varsel.merkelapp,
-            )
-        }
-        if (isSendingSucceed) {
-            lagreUtsendtNarmesteLederVarsel(
-                ARBEIDSGIVERNOTIFIKASJON,
-                varselHendelse,
-                varsel.uuid.toString(),
-                varsel.merkelapp,
-            )
+            if (varselHendelse != null) {
+                lagreIkkeUtsendtNarmesteLederVarsel(
+                    kanal = ARBEIDSGIVERNOTIFIKASJON,
+                    varselHendelse = varselHendelse,
+                    eksternReferanse = notifikasjon.uuid.toString(),
+                    feilmelding = e.message,
+                    merkelapp = notifikasjon.merkelapp,
+                )
+            }
         }
     }
 

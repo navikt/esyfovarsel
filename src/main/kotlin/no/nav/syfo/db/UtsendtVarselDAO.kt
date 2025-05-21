@@ -161,3 +161,33 @@ fun DatabaseInterface.deleteUtsendtVarselByFnr(fnr: PersonIdent) {
         connection.commit()
     }
 }
+
+fun DatabaseInterface.fetchDineSykemeldteMotebehovOppgaverFor(
+    sykmeldtFnr: PersonIdent,
+    narmesteLederFnr: PersonIdent,
+    orgnummer: String,
+): PUtsendtVarsel? {
+    val queryStatement = """
+        SELECT *
+        FROM utsendt_varsel
+        INNER JOIN utsending_varsel_feilet
+        ON utsendt_varsel.orgnummer = utsending_varsel_feilet.orgnummer
+            AND utsendt_varsel.fnr = utsending_varsel_feilet.arbeidstaker_fnr
+            AND utsendt_varsel.narmesteleder_fnr = utsending_varsel_feilet.narmesteleder_fnr
+        WHERE utsendt_varsel.fnr = ?
+        AND utsendt_varsel.narmesteleder_fnr = ?
+        AND utsendt_varsel.orgnummer = ?
+        AND utsendt_varsel.utsendt_tidspunkt >= '2025-05-19'
+        AND utsendt_varsel.kanal = 'DINE_SYKMELDTE'
+        AND utsending_varsel_feilet.hendelsetype_navn = 'NL_DIALOGMOTE_SVAR_MOTEBEHOV';
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, sykmeldtFnr.value)
+            it.setString(2, narmesteLederFnr.value)
+            it.setString(3, orgnummer)
+            it.executeQuery().toList { toPUtsendtVarsel() }.firstOrNull()
+        }
+    }
+}
