@@ -179,25 +179,27 @@ class ResendFailedVarslerJob(
             PersonIdent(failedVarsel.narmesteLederFnr!!),
             failedVarsel.orgnummer!!
         )
-        var isResendt = false
         if (dineSykemeldteUtsendtVarsel == null) {
             log.error(
                 "Skip resending arbeidsgivernotifikasjon varsel:" +
                     " DineSykemeldteUtsendtVarsel is null for " +
                     "failedVarsel with uuid ${failedVarsel.uuid}"
             )
-        } else if (dineSykemeldteUtsendtVarsel.ferdigstiltTidspunkt != null) {
-            isResendt = true // mark as resendt, since we don't want to notify arbeidsgiver if it is already ferdigstilt
-            log.error(
+            return 0
+        }
+        if (dineSykemeldteUtsendtVarsel.ferdigstiltTidspunkt != null) {
+            // mark as resendt, since we don't want to notify arbeidsgiver if it is already ferdigstilt
+            db.updateUtsendtVarselFeiletToResendt(failedVarsel.uuid)
+            log.info(
                 "Skip resending arbeidsgivernotifikasjon varsel:" +
                     " DineSykemeldteUtsendtVarsel is already ferdigstilt" +
                     " for failedVarsel with uuid ${failedVarsel.uuid}"
             )
-        } else {
-            isResendt = motebehovVarselService.resendVarselTilArbeidsgiverNotifikasjon(
-                failedVarsel
-            )
+            return 0
         }
+        val isResendt = motebehovVarselService.resendVarselTilArbeidsgiverNotifikasjon(
+            failedVarsel
+        )
         if (isResendt) {
             db.updateUtsendtVarselFeiletToResendt(failedVarsel.uuid)
             return 1

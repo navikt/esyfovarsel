@@ -179,7 +179,8 @@ fun DatabaseInterface.fetchDineSykemeldteMotebehovOppgaverFor(
         AND utsendt_varsel.orgnummer = ?
         AND utsendt_varsel.utsendt_tidspunkt >= '2025-05-19'
         AND utsendt_varsel.kanal = 'DINE_SYKMELDTE'
-        AND utsending_varsel_feilet.hendelsetype_navn = 'NL_DIALOGMOTE_SVAR_MOTEBEHOV';
+        AND utsending_varsel_feilet.hendelsetype_navn = 'NL_DIALOGMOTE_SVAR_MOTEBEHOV'
+        ORDER BY utsendt_varsel.utsendt_tidspunkt DESC;
     """.trimIndent()
 
     return connection.use { connection ->
