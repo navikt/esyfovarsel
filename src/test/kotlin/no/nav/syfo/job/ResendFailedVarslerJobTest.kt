@@ -234,35 +234,54 @@ class ResendFailedVarslerJobTest : DescribeSpec({
 
     describe("Resend arbeidsgivernotifikasjoner") {
         it(
-            """Resends failed varsler to arbeidsgivernotifikasjoner for NL_DIALOGMOTE_SVAR_MOTEBEHOV,
+            """Resends multiple failed varsler to arbeidsgivernotifikasjoner for NL_DIALOGMOTE_SVAR_MOTEBEHOV,
                 when utsendtVarsel to DINE_SYKEMELDTE is not fedigstilt
             """.trimMargin()
         ) {
-            val arbeidstakerFnr = "12121212121"
-            val narmesteLederFnr = "32121212121"
-            val orgnummer = "32143242"
+            val arbeidstakerFnr1 = "12121212121"
+            val narmesteLederFnr1 = "32121212121"
+            val orgnummer1 = "32143242"
 
-            val dialogmoteVarselFeilet = PUtsendtVarselFeilet(
+            val arbeidstakerFnr2 = "22121212121"
+            val narmesteLederFnr2 = "42121212121"
+            val orgnummer2 = "42143242"
+
+            val dialogmoteVarselFeilet1 = PUtsendtVarselFeilet(
                 uuid = UUID.randomUUID().toString(),
                 uuidEksternReferanse = UUID.randomUUID().toString(),
-                arbeidstakerFnr = arbeidstakerFnr,
-                orgnummer = orgnummer,
+                arbeidstakerFnr = arbeidstakerFnr1,
+                orgnummer = orgnummer1,
                 hendelsetypeNavn = "NL_DIALOGMOTE_SVAR_MOTEBEHOV",
                 kanal = "ARBEIDSGIVERNOTIFIKASJON",
                 arbeidsgivernotifikasjonMerkelapp = null,
                 journalpostId = null,
-                narmesteLederFnr = narmesteLederFnr,
+                narmesteLederFnr = narmesteLederFnr1,
                 brukernotifikasjonerMeldingType = null,
                 feilmelding = "noe galt skjedde",
                 utsendtForsokTidspunkt = LocalDateTime.now().minusHours(2),
             )
 
-            val utsendtVarsel = PUtsendtVarsel(
+            val dialogmoteVarselFeilet2 = PUtsendtVarselFeilet(
                 uuid = UUID.randomUUID().toString(),
-                fnr = arbeidstakerFnr,
+                uuidEksternReferanse = UUID.randomUUID().toString(),
+                arbeidstakerFnr = arbeidstakerFnr2,
+                orgnummer = orgnummer2,
+                hendelsetypeNavn = "NL_DIALOGMOTE_SVAR_MOTEBEHOV",
+                kanal = "ARBEIDSGIVERNOTIFIKASJON",
+                arbeidsgivernotifikasjonMerkelapp = null,
+                journalpostId = null,
+                narmesteLederFnr = narmesteLederFnr2,
+                brukernotifikasjonerMeldingType = null,
+                feilmelding = "noe galt skjedde",
+                utsendtForsokTidspunkt = LocalDateTime.now().minusHours(2),
+            )
+
+            val utsendtVarsel1 = PUtsendtVarsel(
+                uuid = UUID.randomUUID().toString(),
+                fnr = arbeidstakerFnr1,
                 aktorId = null,
-                narmesteLederFnr = narmesteLederFnr,
-                orgnummer = orgnummer,
+                narmesteLederFnr = narmesteLederFnr1,
+                orgnummer = orgnummer1,
                 type = "NL_DIALOGMOTE_SVAR_MOTEBEHOV",
                 kanal = "DINE_SYKMELDTE",
                 utsendtTidspunkt = LocalDateTime.now(),
@@ -274,12 +293,32 @@ class ResendFailedVarslerJobTest : DescribeSpec({
                 journalpostId = null
             )
 
-            embeddedDatabase.storeUtsendtVarselFeilet(dialogmoteVarselFeilet)
-            embeddedDatabase.storeUtsendtVarsel(utsendtVarsel)
+            val utsendtVarsel2 = PUtsendtVarsel(
+                uuid = UUID.randomUUID().toString(),
+                fnr = arbeidstakerFnr2,
+                aktorId = null,
+                narmesteLederFnr = narmesteLederFnr2,
+                orgnummer = orgnummer2,
+                type = "NL_DIALOGMOTE_SVAR_MOTEBEHOV",
+                kanal = "DINE_SYKMELDTE",
+                utsendtTidspunkt = LocalDateTime.now(),
+                planlagtVarselId = null,
+                eksternReferanse = UUID.randomUUID().toString(),
+                ferdigstiltTidspunkt = null,
+                arbeidsgivernotifikasjonMerkelapp = null,
+                isForcedLetter = false,
+                journalpostId = null
+            )
+
+            embeddedDatabase.storeUtsendtVarselFeilet(dialogmoteVarselFeilet1)
+            embeddedDatabase.storeUtsendtVarselFeilet(dialogmoteVarselFeilet2)
+
+            embeddedDatabase.storeUtsendtVarsel(utsendtVarsel1)
+            embeddedDatabase.storeUtsendtVarsel(utsendtVarsel2)
 
             val result = runBlocking { job.resendFailedArbeidsgivernotifikasjonVarsler() }
 
-            result shouldBeEqualTo 1
+            result shouldBeEqualTo 2
         }
         it(
             """Does not resends failed varsler to arbeidsgivernotifikasjoner for NL_DIALOGMOTE_SVAR_MOTEBEHOV,
