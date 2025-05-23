@@ -112,7 +112,7 @@ class ResendFailedVarslerJob(
             when (failedVarsel.hendelsetypeNavn) {
                 "NL_DIALOGMOTE_SVAR_MOTEBEHOV" -> tryResendArbeidsgivernotifikasjonMoteBehov(failedVarsel)
                 else -> {
-                    log.warn("Not sending varsel for hendelsetypeNavn: ${failedVarsel.hendelsetypeNavn}")
+                    log.warn("Not resending varsel for hendelsetypeNavn: ${failedVarsel.hendelsetypeNavn}")
                     return 0
                 }
             }
@@ -174,10 +174,17 @@ class ResendFailedVarslerJob(
     }
 
     private suspend fun tryResendArbeidsgivernotifikasjonMoteBehov(failedVarsel: PUtsendtVarselFeilet): Int {
+        if (failedVarsel.narmesteLederFnr == null || failedVarsel.orgnummer == null) {
+            log.error(
+                "Skip resending arbeidsgivernotifikasjon varsel:" +
+                    " narmesteLederFnr or orgnummer is null for failedVarsel with uuid ${failedVarsel.uuid}"
+            )
+            return 0
+        }
         val dineSykemeldteUtsendtVarsel = db.fetchDineSykemeldteMotebehovOppgaverFor(
             PersonIdent(failedVarsel.arbeidstakerFnr),
-            PersonIdent(failedVarsel.narmesteLederFnr!!),
-            failedVarsel.orgnummer!!
+            PersonIdent(failedVarsel.narmesteLederFnr),
+            failedVarsel.orgnummer
         )
         if (dineSykemeldteUtsendtVarsel == null) {
             log.error(

@@ -137,9 +137,16 @@ class MotebehovVarselService(
     }
 
     suspend fun resendVarselTilArbeidsgiverNotifikasjon(utsendtvarselFeilet: PUtsendtVarselFeilet): Boolean {
+        if (utsendtvarselFeilet.orgnummer == null || utsendtvarselFeilet.narmesteLederFnr == null) {
+            log.error(
+                "Skip resending arbeidsgivernotifikasjon varsel:" +
+                    " narmesteLederFnr or orgnummer is null for failedVarsel with uuid ${utsendtvarselFeilet.uuid}"
+            )
+            return false
+        }
         val notifikasjon = ArbeidsgiverNotifikasjonInput(
             UUID.randomUUID(),
-            utsendtvarselFeilet.orgnummer!!,
+            utsendtvarselFeilet.orgnummer,
             utsendtvarselFeilet.narmesteLederFnr,
             utsendtvarselFeilet.arbeidstakerFnr,
             ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
@@ -151,7 +158,7 @@ class MotebehovVarselService(
             UUID.randomUUID().toString()
         )
         try {
-            senderFacade.sendTilArbeidsgiverNotifikasjon(notifikasjon = notifikasjon)
+            senderFacade.sendTilArbeidsgiverNotifikasjon(utsendtvarselFeilet, notifikasjon)
             return true
         } catch (e: Exception) {
             log.error(
