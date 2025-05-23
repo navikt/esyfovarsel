@@ -168,19 +168,20 @@ fun DatabaseInterface.fetchDineSykemeldteMotebehovOppgaverFor(
     orgnummer: String,
 ): PUtsendtVarsel? {
     val queryStatement = """
-        SELECT *
-        FROM utsendt_varsel
-        INNER JOIN utsending_varsel_feilet
-        ON utsendt_varsel.orgnummer = utsending_varsel_feilet.orgnummer
-            AND utsendt_varsel.fnr = utsending_varsel_feilet.arbeidstaker_fnr
-            AND utsendt_varsel.narmesteleder_fnr = utsending_varsel_feilet.narmesteleder_fnr
-        WHERE utsendt_varsel.fnr = ?
-        AND utsendt_varsel.narmesteleder_fnr = ?
-        AND utsendt_varsel.orgnummer = ?
-        AND utsendt_varsel.utsendt_tidspunkt >= '2025-05-19'
-        AND utsendt_varsel.kanal = 'DINE_SYKMELDTE'
-        AND utsending_varsel_feilet.hendelsetype_navn = 'NL_DIALOGMOTE_SVAR_MOTEBEHOV'
-        ORDER BY utsendt_varsel.utsendt_tidspunkt DESC;
+        SELECT * FROM utsendt_varsel 
+        WHERE fnr = ? 
+        AND narmesteleder_fnr = ? 
+        AND orgnummer = ? 
+        AND utsendt_tidspunkt >= '2025-05-19' 
+        AND kanal = 'DINE_SYKMELDTE' 
+        AND EXISTS ( 
+            SELECT 1 FROM utsending_varsel_feilet 
+            WHERE utsending_varsel_feilet.orgnummer = utsendt_varsel.orgnummer 
+            AND utsending_varsel_feilet.arbeidstaker_fnr = utsendt_varsel.fnr 
+            AND utsending_varsel_feilet.narmesteleder_fnr = utsendt_varsel.narmesteleder_fnr 
+            AND utsending_varsel_feilet.hendelsetype_navn = 'NL_DIALOGMOTE_SVAR_MOTEBEHOV' 
+        ) 
+        ORDER BY utsendt_tidspunkt DESC;
     """.trimIndent()
 
     return connection.use { connection ->
