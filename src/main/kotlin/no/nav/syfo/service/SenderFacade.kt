@@ -157,29 +157,41 @@ class SenderFacade(
 
     suspend fun sendTilArbeidsgiverNotifikasjon(
         varselHendelse: NarmesteLederHendelse,
-        varsel: ArbeidsgiverNotifikasjonInput,
+        notifikasjon: ArbeidsgiverNotifikasjonInput,
     ) {
-        var isSendingSucceed = true
         try {
-            arbeidsgiverNotifikasjonService.sendNotifikasjon(varsel)
-        } catch (e: Exception) {
-            log.error("Error while sending varsel to ARBEIDSGIVERNOTIFIKASJON: ${e.message}")
-            isSendingSucceed = false
-            lagreIkkeUtsendtNarmesteLederVarsel(
-                kanal = ARBEIDSGIVERNOTIFIKASJON,
-                varselHendelse = varselHendelse,
-                eksternReferanse = varsel.uuid.toString(),
-                feilmelding = e.message,
-                merkelapp = varsel.merkelapp,
-            )
-        }
-        if (isSendingSucceed) {
+            arbeidsgiverNotifikasjonService.sendNotifikasjon(notifikasjon)
             lagreUtsendtNarmesteLederVarsel(
                 ARBEIDSGIVERNOTIFIKASJON,
                 varselHendelse,
-                varsel.uuid.toString(),
-                varsel.merkelapp,
+                notifikasjon.uuid.toString(),
+                notifikasjon.merkelapp,
             )
+        } catch (e: Exception) {
+            log.error("Error while sending varsel to ARBEIDSGIVERNOTIFIKASJON: ${e.message}")
+            lagreIkkeUtsendtNarmesteLederVarsel(
+                kanal = ARBEIDSGIVERNOTIFIKASJON,
+                varselHendelse = varselHendelse,
+                eksternReferanse = notifikasjon.uuid.toString(),
+                feilmelding = e.message,
+                merkelapp = notifikasjon.merkelapp,
+            )
+        }
+    }
+
+    suspend fun sendTilArbeidsgiverNotifikasjon(
+        varselFeilet: PUtsendtVarselFeilet,
+        notifikasjon: ArbeidsgiverNotifikasjonInput,
+    ) {
+        try {
+            arbeidsgiverNotifikasjonService.sendNotifikasjon(notifikasjon)
+            lagreUtsendtNarmesteLederVarsel(
+                varselFeilet,
+                notifikasjon.uuid.toString(),
+                notifikasjon.merkelapp,
+            )
+        } catch (e: Exception) {
+            log.error("Error while resending varsel to ARBEIDSGIVERNOTIFIKASJON: ${e.message}")
         }
     }
 
@@ -455,6 +467,31 @@ class SenderFacade(
                 varselHendelse.orgnummer,
                 varselHendelse.type.name,
                 kanal.name,
+                LocalDateTime.now(),
+                null,
+                eksternReferanse,
+                null,
+                arbeidsgivernotifikasjonMerkelapp,
+                isForcedLetter = false,
+                null,
+            ),
+        )
+    }
+
+    private fun lagreUtsendtNarmesteLederVarsel(
+        feilet: PUtsendtVarselFeilet,
+        eksternReferanse: String,
+        arbeidsgivernotifikasjonMerkelapp: String? = null,
+    ) {
+        database.storeUtsendtVarsel(
+            PUtsendtVarsel(
+                UUID.randomUUID().toString(),
+                feilet.arbeidstakerFnr,
+                null,
+                feilet.narmesteLederFnr,
+                feilet.orgnummer,
+                feilet.hendelsetypeNavn,
+                feilet.kanal,
                 LocalDateTime.now(),
                 null,
                 eksternReferanse,

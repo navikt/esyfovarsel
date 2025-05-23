@@ -32,6 +32,9 @@ fun Route.registerJobTriggerApi(
                 resendFailedVarslerJob.resendFailedBrukernotifikasjonVarsler()
             }
             launch {
+                resendFailedVarslerJob.resendFailedArbeidsgivernotifikasjonVarsler()
+            }
+            launch {
                 resendFailedVarslerJob.resendFailedDokDistVarsler()
             }
         }

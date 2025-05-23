@@ -2,10 +2,14 @@ package no.nav.syfo.job
 
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.db.domain.toArbeidstakerHendelse
+import no.nav.syfo.db.fetchDineSykemeldteMotebehovOppgaverFor
+import no.nav.syfo.db.fetchUtsendtArbeidsgivernotifikasjonVarselFeilet
 import no.nav.syfo.db.fetchUtsendtBrukernotifikasjonVarselFeilet
 import no.nav.syfo.db.fetchUtsendtDokDistVarselFeilet
 import no.nav.syfo.db.updateUtsendtVarselFeiletToResendt
+import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.service.DialogmoteInnkallingSykmeldtVarselService
 import no.nav.syfo.service.MerVeiledningVarselService
@@ -99,6 +103,25 @@ class ResendFailedVarslerJob(
         return resentCount
     }
 
+    suspend fun resendFailedArbeidsgivernotifikasjonVarsler(): Int {
+        val failedVarsler = db.fetchUtsendtArbeidsgivernotifikasjonVarselFeilet()
+        log.info(
+            "Attempting to resend ${failedVarsler.size} failed arbeidsgivernotifikasjon varsler"
+        )
+        val resentCount: Int = failedVarsler.map { failedVarsel ->
+            when (failedVarsel.hendelsetypeNavn) {
+                "NL_DIALOGMOTE_SVAR_MOTEBEHOV" -> tryResendArbeidsgivernotifikasjonMoteBehov(failedVarsel)
+                else -> {
+                    log.warn("Not resending varsel for hendelsetypeNavn: ${failedVarsel.hendelsetypeNavn}")
+                    return 0
+                }
+            }
+        }.sum()
+
+        log.info("Resent $resentCount arbeidsgivernotifikasjon varsler of ${failedVarsler.size} failed varsler")
+        return resentCount
+    }
+
     suspend fun resendFailedDokDistVarsler(): Int {
         val failedVarsler = db.fetchUtsendtDokDistVarselFeilet()
         var resentCount = 0
@@ -148,6 +171,47 @@ class ResendFailedVarslerJob(
         }
 
         return resentCount
+    }
+
+    private suspend fun tryResendArbeidsgivernotifikasjonMoteBehov(failedVarsel: PUtsendtVarselFeilet): Int {
+        if (failedVarsel.narmesteLederFnr == null || failedVarsel.orgnummer == null) {
+            log.error(
+                "Skip resending arbeidsgivernotifikasjon varsel:" +
+                    " narmesteLederFnr or orgnummer is null for failedVarsel with uuid ${failedVarsel.uuid}"
+            )
+            return 0
+        }
+        val dineSykemeldteUtsendtVarsel = db.fetchDineSykemeldteMotebehovOppgaverFor(
+            PersonIdent(failedVarsel.arbeidstakerFnr),
+            PersonIdent(failedVarsel.narmesteLederFnr),
+            failedVarsel.orgnummer
+        )
+        if (dineSykemeldteUtsendtVarsel == null) {
+            log.error(
+                "Skip resending arbeidsgivernotifikasjon varsel:" +
+                    " DineSykemeldteUtsendtVarsel is null for " +
+                    "failedVarsel with uuid ${failedVarsel.uuid}"
+            )
+            return 0
+        }
+        if (dineSykemeldteUtsendtVarsel.ferdigstiltTidspunkt != null) {
+            // mark as resendt, since we don't want to notify arbeidsgiver if it is already ferdigstilt
+            db.updateUtsendtVarselFeiletToResendt(failedVarsel.uuid)
+            log.info(
+                "Skip resending arbeidsgivernotifikasjon varsel:" +
+                    " DineSykemeldteUtsendtVarsel is already ferdigstilt" +
+                    " for failedVarsel with uuid ${failedVarsel.uuid}"
+            )
+            return 0
+        }
+        val isResendt = motebehovVarselService.resendVarselTilArbeidsgiverNotifikasjon(
+            failedVarsel
+        )
+        if (isResendt) {
+            db.updateUtsendtVarselFeiletToResendt(failedVarsel.uuid)
+            return 1
+        }
+        return 0
     }
 }
 
