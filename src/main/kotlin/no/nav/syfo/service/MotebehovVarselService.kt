@@ -34,6 +34,7 @@ import java.util.*
 
 const val DITT_SYKEFRAVAER_HENDELSE_TYPE_DIALOGMOTE_SVAR_MOTEBEHOV = "ESYFOVARSEL_DIALOGMOTE_SVAR_MOTEBEHOV"
 
+@Suppress("TooManyFunctions")
 class MotebehovVarselService(
     val senderFacade: SenderFacade,
     val accessControlService: AccessControlService,
@@ -133,6 +134,39 @@ class MotebehovVarselService(
             eksternVarsling = eksternVarsling,
             storeFailedUtsending = false,
         )
+    }
+
+    suspend fun resendVarselTilArbeidsgiverNotifikasjon(utsendtvarselFeilet: PUtsendtVarselFeilet): Boolean {
+        if (utsendtvarselFeilet.orgnummer == null || utsendtvarselFeilet.narmesteLederFnr == null) {
+            log.error(
+                "Skip resending arbeidsgivernotifikasjon varsel:" +
+                    " narmesteLederFnr or orgnummer is null for failedVarsel with uuid ${utsendtvarselFeilet.uuid}"
+            )
+            return false
+        }
+        val notifikasjon = ArbeidsgiverNotifikasjonInput(
+            UUID.randomUUID(),
+            utsendtvarselFeilet.orgnummer,
+            utsendtvarselFeilet.narmesteLederFnr,
+            utsendtvarselFeilet.arbeidstakerFnr,
+            ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+            ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
+            ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
+            ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
+            LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+            Meldingstype.OPPGAVE,
+            UUID.randomUUID().toString()
+        )
+        try {
+            senderFacade.sendTilArbeidsgiverNotifikasjon(utsendtvarselFeilet, notifikasjon)
+            return true
+        } catch (e: Exception) {
+            log.error(
+                "Could not resend arbeidsgiver notifikasjon for feiletVarsel: ${utsendtvarselFeilet.uuid}",
+                e
+            )
+            return false
+        }
     }
 
     private fun sendOppgaveTilDittSykefravaer(

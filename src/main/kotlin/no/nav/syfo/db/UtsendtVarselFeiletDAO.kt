@@ -30,6 +30,25 @@ fun DatabaseInterface.fetchUtsendtBrukernotifikasjonVarselFeilet(): List<PUtsend
     }
 }
 
+fun DatabaseInterface.fetchUtsendtArbeidsgivernotifikasjonVarselFeilet(): List<PUtsendtVarselFeilet> {
+    val queryStatement = """SELECT *
+                            FROM UTSENDING_VARSEL_FEILET feilet
+                            WHERE feilet.KANAL = 'ARBEIDSGIVERNOTIFIKASJON'
+                            AND feilet.UTSENDT_FORSOK_TIDSPUNKT  >= '2025-05-19'
+                            AND feilet.is_resendt = FALSE
+                            AND feilet.hendelsetype_navn in 
+                            ('NL_DIALOGMOTE_SVAR_MOTEBEHOV', 'NL_DIALOGMOTE_NYTT_TID_STED', 'NL_DIALOGMOTE_REFERAT')
+                            ORDER BY feilet.utsendt_forsok_tidspunkt ASC
+                            LIMIT 1000
+    """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.executeQuery().toList { toPUtsendtVarselFeilet() }
+        }
+    }
+}
+
 fun DatabaseInterface.fetchUtsendtDokDistVarselFeilet(): List<PUtsendtVarselFeilet> {
     val queryStatement = """SELECT *
                             FROM UTSENDING_VARSEL_FEILET feilet

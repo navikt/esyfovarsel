@@ -41,11 +41,11 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toOppdaterKalenderav
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyOppgaveErrorResponse
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyOppgaveResponse
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyoppgaveMutationStatus.NY_OPPGAVE_VELLYKKET
-import no.nav.syfo.utils.httpClient
+import no.nav.syfo.utils.httpClientWithRetry
 import org.slf4j.LoggerFactory
 
 open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
-    private val client = httpClient()
+    private val httpClientWithRetry = httpClientWithRetry()
     private val arbeidsgiverNotifikasjonProdusentBasepath = urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl
     private val log = LoggerFactory.getLogger(ArbeidsgiverNotifikasjonProdusent::class.qualifiedName)
     private val scope = urlEnv.arbeidsgiverNotifikasjonProdusentApiScope
@@ -305,7 +305,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
         val requestBody = graphQuery?.let { NotificationAgRequest(it, variables) }
 
         try {
-            val response = client.post(arbeidsgiverNotifikasjonProdusentBasepath) {
+            val response = httpClientWithRetry.post(arbeidsgiverNotifikasjonProdusentBasepath) {
                 headers {
                     append(HttpHeaders.Accept, ContentType.Application.Json)
                     append(HttpHeaders.ContentType, ContentType.Application.Json)
