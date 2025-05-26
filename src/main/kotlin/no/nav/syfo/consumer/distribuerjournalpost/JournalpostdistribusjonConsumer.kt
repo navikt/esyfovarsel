@@ -57,6 +57,11 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
                     log.info("Document with UUID: $uuid and journalpostId: $journalpostId already sent to print")
                     response.body()
                 }
+                HttpStatusCode.Gone -> {
+                    log.info("Document with UUID: $uuid and journalpostId: $journalpostId  Will never be sent. " +
+                            "The receiver is dead.")
+                    response.body()
+                }
                 else -> {
                     log.error(
                         "Failed to send document with UUID: $uuid to print. " +
