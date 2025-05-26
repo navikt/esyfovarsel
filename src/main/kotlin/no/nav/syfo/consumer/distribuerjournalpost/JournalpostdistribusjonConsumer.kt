@@ -59,6 +59,11 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
                     response.body()
                 }
                 HttpStatusCode.Gone -> {
+                    log.info("Document with UUID: $uuid and journalpostId: $journalpostId  Will never be sent. " +
+                            "The receiver is dead.")
+                    response.body()
+                }
+                HttpStatusCode.Gone -> {
                     log.info(
                         "Document with UUID: $uuid and journalpostId: $journalpostId  will never be sent. " +
                             "The receiver is flagged as Gone."
