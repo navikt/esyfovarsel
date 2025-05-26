@@ -113,7 +113,7 @@ class ResendFailedVarslerJob(
                 "NL_DIALOGMOTE_SVAR_MOTEBEHOV" -> tryResendArbeidsgivernotifikasjonMoteBehov(failedVarsel)
                 else -> {
                     log.warn("Not resending varsel for hendelsetypeNavn: ${failedVarsel.hendelsetypeNavn}")
-                    return 0
+                    return@map 0
                 }
             }
         }.sum()

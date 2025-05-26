@@ -369,5 +369,53 @@ class ResendFailedVarslerJobTest : DescribeSpec({
 
             result shouldBeEqualTo 0
         }
+        it(
+            """Does not resends failed varsler to arbeidsgivernotifikasjoner for NL_DIALOGMOTE_NYTT_TID_STED,
+                since it is currently not supported for resending.
+            """.trimMargin()
+        ) {
+            val arbeidstakerFnr = "12121212121"
+            val narmesteLederFnr = "32121212121"
+            val orgnummer = "32143242"
+
+            val dialogmoteVarselFeilet = PUtsendtVarselFeilet(
+                uuid = UUID.randomUUID().toString(),
+                uuidEksternReferanse = UUID.randomUUID().toString(),
+                arbeidstakerFnr = arbeidstakerFnr,
+                orgnummer = orgnummer,
+                hendelsetypeNavn = "NL_DIALOGMOTE_NYTT_TID_STED",
+                kanal = "ARBEIDSGIVERNOTIFIKASJON",
+                arbeidsgivernotifikasjonMerkelapp = null,
+                journalpostId = null,
+                narmesteLederFnr = narmesteLederFnr,
+                brukernotifikasjonerMeldingType = null,
+                feilmelding = "noe galt skjedde",
+                utsendtForsokTidspunkt = LocalDateTime.now().minusHours(2),
+            )
+
+            val utsendtVarsel = PUtsendtVarsel(
+                uuid = UUID.randomUUID().toString(),
+                fnr = arbeidstakerFnr,
+                aktorId = null,
+                narmesteLederFnr = narmesteLederFnr,
+                orgnummer = orgnummer,
+                type = "NL_DIALOGMOTE_NYTT_TID_STED",
+                kanal = "DINE_SYKMELDTE",
+                utsendtTidspunkt = LocalDateTime.now(),
+                planlagtVarselId = null,
+                eksternReferanse = UUID.randomUUID().toString(),
+                ferdigstiltTidspunkt = null,
+                arbeidsgivernotifikasjonMerkelapp = null,
+                isForcedLetter = false,
+                journalpostId = null
+            )
+
+            embeddedDatabase.storeUtsendtVarselFeilet(dialogmoteVarselFeilet)
+            embeddedDatabase.storeUtsendtVarsel(utsendtVarsel)
+
+            val result = runBlocking { job.resendFailedArbeidsgivernotifikasjonVarsler() }
+
+            result shouldBeEqualTo 0
+        }
     }
 })

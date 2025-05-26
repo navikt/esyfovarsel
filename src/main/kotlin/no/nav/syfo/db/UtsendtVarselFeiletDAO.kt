@@ -37,7 +37,7 @@ fun DatabaseInterface.fetchUtsendtArbeidsgivernotifikasjonVarselFeilet(): List<P
                             AND feilet.UTSENDT_FORSOK_TIDSPUNKT  >= '2025-05-19'
                             AND feilet.is_resendt = FALSE
                             AND feilet.hendelsetype_navn in 
-                            ('NL_DIALOGMOTE_SVAR_MOTEBEHOV', 'NL_DIALOGMOTE_NYTT_TID_STED', 'NL_DIALOGMOTE_REFERAT')
+                            ('NL_DIALOGMOTE_SVAR_MOTEBEHOV')
                             ORDER BY feilet.utsendt_forsok_tidspunkt ASC
                             LIMIT 1000
     """.trimIndent()
