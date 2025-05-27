@@ -12,7 +12,7 @@ Bruker også til å planlegge 39-ukers varsel for sykmeldt.
 * Kafka
 
 ### Building the application
-Run `./gradlew build`
+Run `./gradlew build`    
 
 ### Running app locally
 
