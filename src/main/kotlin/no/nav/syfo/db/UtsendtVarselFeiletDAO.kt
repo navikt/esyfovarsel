@@ -11,7 +11,7 @@ fun DatabaseInterface.fetchUtsendtBrukernotifikasjonVarselFeilet(): List<PUtsend
                             WHERE feilet.KANAL = 'BRUKERNOTIFIKASJON'
                             AND feilet.UTSENDT_FORSOK_TIDSPUNKT  >= '2025-02-27'
                             AND feilet.is_resendt = FALSE
-                            AND feilet.resend_exhausted != TRUE
+                            AND feilet.resend_exhausted IS NOT TRUE
                             AND feilet.hendelsetype_navn in 
                             ('SM_DIALOGMOTE_SVAR_MOTEBEHOV', 'SM_DIALOGMOTE_INNKALT', 'SM_DIALOGMOTE_AVLYST', 'SM_DIALOGMOTE_NYTT_TID_STED', 'SM_MER_VEILEDNING')
                             AND feilet.UUID_EKSTERN_REFERANSE NOT IN (
@@ -37,7 +37,7 @@ fun DatabaseInterface.fetchUtsendtArbeidsgivernotifikasjonVarselFeilet(): List<P
                             WHERE feilet.KANAL = 'ARBEIDSGIVERNOTIFIKASJON'
                             AND feilet.UTSENDT_FORSOK_TIDSPUNKT  >= '2025-05-19'
                             AND feilet.is_resendt = FALSE
-                            AND feilet.resend_exhausted != TRUE
+                            AND feilet.resend_exhausted IS NOT TRUE
                             AND feilet.hendelsetype_navn in 
                             ('NL_DIALOGMOTE_SVAR_MOTEBEHOV')
                             ORDER BY feilet.utsendt_forsok_tidspunkt ASC
@@ -57,7 +57,7 @@ fun DatabaseInterface.fetchUtsendtDokDistVarselFeilet(): List<PUtsendtVarselFeil
                             WHERE feilet.KANAL = 'BREV'
                             AND feilet.UTSENDT_FORSOK_TIDSPUNKT  >= '2025-03-17'
                             AND feilet.is_resendt = FALSE
-                            AND feilet.resend_exhausted != TRUE
+                            AND feilet.resend_exhausted IS NOT TRUE
                             and feilet.journalpost_id != '0'
                             AND feilet.UUID_EKSTERN_REFERANSE NOT IN (
                                 SELECT EKSTERN_REF
