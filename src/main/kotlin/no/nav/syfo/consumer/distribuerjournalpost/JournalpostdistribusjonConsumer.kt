@@ -11,6 +11,7 @@ import io.ktor.http.append
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.exceptions.JournalpostDistribusjonException
+import no.nav.syfo.exceptions.JournalpostDistribusjonGoneException
 import no.nav.syfo.exceptions.JournalpostNetworkException
 import no.nav.syfo.utils.httpClientWithRetry
 import org.slf4j.LoggerFactory
@@ -58,9 +59,14 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
                     response.body()
                 }
                 HttpStatusCode.Gone -> {
-                    log.info("Document with UUID: $uuid and journalpostId: $journalpostId  Will never be sent. " +
-                            "The receiver is dead.")
-                    response.body()
+                    log.info(
+                        "Document with UUID: $uuid and journalpostId: $journalpostId  will never be sent. " +
+                            "The receiver is dead."
+                    )
+                    throw JournalpostDistribusjonGoneException(
+                        "Failed to distribution journalpostId $journalpostId. Resource is Gone. " +
+                            "Status: ${response.status}"
+                    )
                 }
                 else -> {
                     log.error(

@@ -23,7 +23,9 @@ import no.nav.syfo.db.storeArbeidsgivernotifikasjonerSak
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
 import no.nav.syfo.db.updateArbeidsgivernotifikasjonerSakStatus
+import no.nav.syfo.db.updateUtsendtVarselFeiletToResendExhausted
 import no.nav.syfo.domain.PersonIdent
+import no.nav.syfo.exceptions.JournalpostDistribusjonGoneException
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
@@ -390,9 +392,8 @@ class SenderFacade(
             fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType)
         } catch (e: Exception) {
             isSendingSucceed = false
-            log.error("Error while sending brev til fysisk print: ${e.message}")
             if (storeFailedUtsending) {
-                lagreIkkeUtsendtArbeidstakerVarsel(
+                val uuid = lagreIkkeUtsendtArbeidstakerVarsel(
                     kanal = BREV,
                     arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
                     orgnummer = varselHendelse.orgnummer,
@@ -403,6 +404,13 @@ class SenderFacade(
                     brukernotifikasjonerMeldingType = null,
                     isForcedLetter = false,
                 )
+                when (e) {
+                    is JournalpostDistribusjonGoneException -> {
+                        log.warn("Error while sending brev til fysisk print: ${e.message}")
+                        database.updateUtsendtVarselFeiletToResendExhausted(uuid.toString())
+                    }
+                    else -> log.error("Error while sending brev til fysisk print: ${e.message}")
+                }
             }
         }
         if (isSendingSucceed) {
@@ -542,10 +550,11 @@ class SenderFacade(
         journalpostId: String? = null,
         brukernotifikasjonerMeldingType: String? = null,
         isForcedLetter: Boolean,
-    ) {
+    ): UUID {
+        val uuid = UUID.randomUUID()
         database.storeUtsendtVarselFeilet(
             PUtsendtVarselFeilet(
-                uuid = UUID.randomUUID().toString(),
+                uuid = uuid.toString(),
                 uuidEksternReferanse = eksternReferanse,
                 arbeidstakerFnr = arbeidstakerFnr,
                 narmesteLederFnr = null,
@@ -560,6 +569,7 @@ class SenderFacade(
                 isForcedLetter = isForcedLetter,
             ),
         )
+        return uuid
     }
 
     private fun lagreIkkeUtsendtNarmesteLederVarsel(
@@ -568,10 +578,11 @@ class SenderFacade(
         eksternReferanse: String,
         feilmelding: String?,
         merkelapp: String?,
-    ) {
+    ): UUID {
+        val uuid = UUID.randomUUID()
         database.storeUtsendtVarselFeilet(
             PUtsendtVarselFeilet(
-                uuid = UUID.randomUUID().toString(),
+                uuid = uuid.toString(),
                 uuidEksternReferanse = eksternReferanse,
                 arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
                 narmesteLederFnr = varselHendelse.narmesteLederFnr,
@@ -586,6 +597,7 @@ class SenderFacade(
                 isForcedLetter = false,
             ),
         )
+        return uuid
     }
 
     enum class InternalBrukernotifikasjonType {

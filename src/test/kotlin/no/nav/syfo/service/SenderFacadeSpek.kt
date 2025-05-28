@@ -2,6 +2,7 @@ package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
@@ -9,15 +10,21 @@ import no.nav.syfo.db.arbeidstakerAktorId1
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.VarselType
+import no.nav.syfo.db.fetchUtsendtVarselFeiletByFnr
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.domain.PersonIdent
+import no.nav.syfo.exceptions.JournalpostDistribusjonGoneException
+import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.planner.arbeidstakerFnr1
 import no.nav.syfo.testutil.EmbeddedDatabase
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class SenderFacadeSpek : DescribeSpec({
     describe("SenderFacadeSpek") {
@@ -136,6 +143,31 @@ class SenderFacadeSpek : DescribeSpec({
             verify(exactly = 0) { dineSykmeldteHendelseKafkaProducer.ferdigstillVarsel(any()) }
             verify(exactly = 0) { brukernotifikasjonerService.ferdigstillVarsel(any()) }
             verify(exactly = 0) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(any(), any()) }
+        }
+
+        it("Set resend_avsluttet from sendBrevTilFysiskPrint when archive rejects with 410") {
+            val journalpostId = UUID.randomUUID().toString()
+            val uuid = UUID.randomUUID().toString()
+            val arbeidstakerHendelse = ArbeidstakerHendelse(
+                type = HendelseType.SM_DIALOGMOTE_INNKALT,
+                ferdigstill = true,
+                arbeidstakerFnr = arbeidstakerFnr1,
+                data = emptyMap<String, Any>(),
+                orgnummer = null,
+            )
+
+            coEvery {
+                fysiskBrevUtsendingService.sendBrev(
+                    eq(uuid),
+                    journalpostId = eq(journalpostId),
+                    any(),
+                    any()
+                )
+            } throws JournalpostDistribusjonGoneException("Recipient is Gone", uuid, journalpostId)
+            senderFacade.sendBrevTilFysiskPrint(uuid, arbeidstakerHendelse, journalpostId)
+            val feiletUtsending = embeddedDatabase.fetchUtsendtVarselFeiletByFnr(arbeidstakerFnr1)
+            assertEquals(1, feiletUtsending.size)
+            assertTrue(feiletUtsending.first().resendExhausted!!)
         }
     }
 })

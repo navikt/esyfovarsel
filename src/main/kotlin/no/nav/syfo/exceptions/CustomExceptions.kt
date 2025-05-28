@@ -28,6 +28,13 @@ class JournalpostDistribusjonException(
     cause: Throwable? = null
 ) : Exception(message, cause)
 
+class JournalpostDistribusjonGoneException(
+    message: String,
+    val uuid: String? = null,
+    val journalpostId: String? = null,
+    cause: Throwable? = null
+) : Exception(message, cause)
+
 class JournalpostNetworkException(
     message: String,
     val uuid: String,
