@@ -404,13 +404,14 @@ class SenderFacade(
                     brukernotifikasjonerMeldingType = null,
                     isForcedLetter = false,
                 )
-                when (e) {
-                    is JournalpostDistribusjonGoneException -> {
-                        log.warn("Error while sending brev til fysisk print: ${e.message}")
-                        database.updateUtsendtVarselFeiletToResendExhausted(uuid.toString())
-                    }
-                    else -> log.error("Error while sending brev til fysisk print: ${e.message}")
+            }
+            when (e) {
+                is JournalpostDistribusjonGoneException -> {
+                    log.warn("Error while sending brev til fysisk print: ${e.message}")
+                    database.updateUtsendtVarselFeiletToResendExhausted(uuid.toString())
                 }
+
+                else -> log.error("Error while sending brev til fysisk print: ${e.message}")
             }
         }
         if (isSendingSucceed) {
