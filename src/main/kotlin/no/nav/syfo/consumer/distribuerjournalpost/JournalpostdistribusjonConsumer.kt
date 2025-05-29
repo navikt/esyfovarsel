@@ -82,6 +82,7 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
             log.error("Network error while distributing journalpost $journalpostId: ${e.message}", e)
             throw JournalpostNetworkException("Network error distributing journalpost", uuid, journalpostId, e)
         } catch (e: Exception) {
+            if (e is JournalpostDistribusjonGoneException) throw e
             log.error("Exception while distributing journalpost $journalpostId: ${e.javaClass.name}: ${e.message}", e)
             throw JournalpostDistribusjonException("Failed to distribute journalpost", uuid, journalpostId, e)
         }
