@@ -385,36 +385,36 @@ class SenderFacade(
         varselHendelse: ArbeidstakerHendelse,
         journalpostId: String,
         distribusjonsType: DistibusjonsType = DistibusjonsType.ANNET,
-        storeFailedUtsending: Boolean = true,
+        failedUtsendingUUID: UUID? = null,
     ): Boolean {
-        var isSendingSucceed = true
-        try {
+        var isSendingSucceed = try {
             fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType)
+            true
         } catch (e: Exception) {
-            isSendingSucceed = false
-            if (storeFailedUtsending) {
-                val uuid = lagreIkkeUtsendtArbeidstakerVarsel(
-                    kanal = BREV,
-                    arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
-                    orgnummer = varselHendelse.orgnummer,
-                    hendelseType = varselHendelse.type.name,
-                    eksternReferanse = uuid,
-                    feilmelding = e.message,
-                    journalpostId = journalpostId,
-                    brukernotifikasjonerMeldingType = null,
-                    isForcedLetter = false,
-                )
-            }
+            val uuid = failedUtsendingUUID ?: lagreIkkeUtsendtArbeidstakerVarsel(
+                kanal = BREV,
+                arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
+                orgnummer = varselHendelse.orgnummer,
+                hendelseType = varselHendelse.type.name,
+                eksternReferanse = uuid,
+                feilmelding = e.message,
+                journalpostId = journalpostId,
+                brukernotifikasjonerMeldingType = null,
+                isForcedLetter = false,
+            )
             when (e) {
                 is JournalpostDistribusjonGoneException -> {
                     log.warn("Error while sending brev til fysisk print: ${e.message}")
                     database.updateUtsendtVarselFeiletToResendExhausted(uuid.toString())
                 }
 
-                else -> log.error("Error while sending brev til fysisk print: ${e.message}")
+                else -> {
+                    log.error("Error while sending brev til fysisk print: ${e.message}")
+                }
             }
+            false
         }
-        if (isSendingSucceed) {
+        return if (isSendingSucceed) {
             lagreUtsendtArbeidstakerVarsel(
                 BREV,
                 arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
@@ -424,8 +424,7 @@ class SenderFacade(
                 journalpostId = journalpostId
             )
             return true
-        }
-        return false
+        } else { false }
     }
 
     suspend fun sendBrevTilTvingSentralPrint(
