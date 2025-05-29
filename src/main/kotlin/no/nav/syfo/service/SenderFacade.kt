@@ -405,6 +405,7 @@ class SenderFacade(
             when (e) {
                 is JournalpostDistribusjonGoneException -> {
                     log.warn("Error while sending brev til fysisk print: ${e.message}")
+                    log.info("Trying to set UtsentVarselFeilet to resendExhausted for $uuid")
                     database.updateUtsendtVarselFeiletToResendExhausted(uuid.toString())
                 }
 
