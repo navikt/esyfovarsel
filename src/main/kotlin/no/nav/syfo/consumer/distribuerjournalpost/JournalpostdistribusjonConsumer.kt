@@ -61,7 +61,7 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
                 HttpStatusCode.Gone -> {
                     log.info(
                         "Document with UUID: $uuid and journalpostId: $journalpostId  will never be sent. " +
-                            "The receiver is dead."
+                            "The receiver is flagged as Gone."
                     )
                     throw JournalpostDistribusjonGoneException(
                         "Failed to distribution journalpostId $journalpostId. Resource is Gone. " +
