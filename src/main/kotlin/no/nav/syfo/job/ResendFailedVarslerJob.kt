@@ -16,6 +16,7 @@ import no.nav.syfo.service.MerVeiledningVarselService
 import no.nav.syfo.service.MotebehovVarselService
 import no.nav.syfo.service.SenderFacade
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class ResendFailedVarslerJob(
     private val db: DatabaseInterface,
@@ -153,7 +154,7 @@ class ResendFailedVarslerJob(
                 varselHendelse = varselHendelse,
                 journalpostId = failedVarsel.journalpostId,
                 distribusjonsType = HendelseType.valueOf(failedVarsel.hendelsetypeNavn).toDistribusjonsType(),
-                storeFailedUtsending = false,
+                failedUtsendingUUID = UUID.fromString(failedVarsel.uuid)
             )
             if (isResendt) {
                 db.updateUtsendtVarselFeiletToResendt(failedVarsel.uuid)

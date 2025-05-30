@@ -11,6 +11,7 @@ import io.ktor.http.append
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.exceptions.JournalpostDistribusjonException
+import no.nav.syfo.exceptions.JournalpostDistribusjonGoneException
 import no.nav.syfo.exceptions.JournalpostNetworkException
 import no.nav.syfo.utils.httpClientWithRetry
 import org.slf4j.LoggerFactory
@@ -57,6 +58,16 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
                     log.info("Document with UUID: $uuid and journalpostId: $journalpostId already sent to print")
                     response.body()
                 }
+                HttpStatusCode.Gone -> {
+                    log.info(
+                        "Document with UUID: $uuid and journalpostId: $journalpostId  will never be sent. " +
+                            "The receiver is flagged as Gone."
+                    )
+                    throw JournalpostDistribusjonGoneException(
+                        "Failed to distribution journalpostId $journalpostId. Resource is Gone. " +
+                            "Status: ${response.status}"
+                    )
+                }
                 else -> {
                     log.error(
                         "Failed to send document with UUID: $uuid to print. " +
@@ -67,6 +78,8 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
                     )
                 }
             }
+        } catch (e: JournalpostDistribusjonGoneException) {
+            throw e
         } catch (e: IOException) {
             log.error("Network error while distributing journalpost $journalpostId: ${e.message}", e)
             throw JournalpostNetworkException("Network error distributing journalpost", uuid, journalpostId, e)

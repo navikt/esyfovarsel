@@ -11,6 +11,7 @@ fun DatabaseInterface.fetchUtsendtBrukernotifikasjonVarselFeilet(): List<PUtsend
                             WHERE feilet.KANAL = 'BRUKERNOTIFIKASJON'
                             AND feilet.UTSENDT_FORSOK_TIDSPUNKT  >= '2025-02-27'
                             AND feilet.is_resendt = FALSE
+                            AND feilet.resend_exhausted IS NOT TRUE
                             AND feilet.hendelsetype_navn in 
                             ('SM_DIALOGMOTE_SVAR_MOTEBEHOV', 'SM_DIALOGMOTE_INNKALT', 'SM_DIALOGMOTE_AVLYST', 'SM_DIALOGMOTE_NYTT_TID_STED', 'SM_MER_VEILEDNING')
                             AND feilet.UUID_EKSTERN_REFERANSE NOT IN (
@@ -36,6 +37,7 @@ fun DatabaseInterface.fetchUtsendtArbeidsgivernotifikasjonVarselFeilet(): List<P
                             WHERE feilet.KANAL = 'ARBEIDSGIVERNOTIFIKASJON'
                             AND feilet.UTSENDT_FORSOK_TIDSPUNKT  >= '2025-05-19'
                             AND feilet.is_resendt = FALSE
+                            AND feilet.resend_exhausted IS NOT TRUE
                             AND feilet.hendelsetype_navn in 
                             ('NL_DIALOGMOTE_SVAR_MOTEBEHOV')
                             ORDER BY feilet.utsendt_forsok_tidspunkt ASC
@@ -55,6 +57,7 @@ fun DatabaseInterface.fetchUtsendtDokDistVarselFeilet(): List<PUtsendtVarselFeil
                             WHERE feilet.KANAL = 'BREV'
                             AND feilet.UTSENDT_FORSOK_TIDSPUNKT  >= '2025-03-17'
                             AND feilet.is_resendt = FALSE
+                            AND feilet.resend_exhausted IS NOT TRUE
                             and feilet.journalpost_id != '0'
                             AND feilet.UUID_EKSTERN_REFERANSE NOT IN (
                                 SELECT EKSTERN_REF
@@ -89,7 +92,8 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
         utsendt_forsok_tidspunkt,
         is_forced_letter,
         is_resendt,
-        resendt_tidspunkt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        resendt_tidspunkt,
+        resend_exhausted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """.trimIndent()
 
     connection.use { connection ->
@@ -109,6 +113,7 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
             it.setBoolean(13, varsel.isForcedLetter ?: false)
             it.setBoolean(14, varsel.isResendt ?: false)
             it.setTimestamp(15, null)
+            it.setBoolean(16, varsel.resendExhausted ?: false)
             it.executeUpdate()
         }
 
@@ -123,6 +128,20 @@ fun DatabaseInterface.updateUtsendtVarselFeiletToResendt(uuid: String) {
                    WHERE uuid = ?
     """.trimMargin()
 
+    return connection.use { connection ->
+        connection.prepareStatement(updateStatement).use {
+            it.setObject(1, UUID.fromString(uuid))
+            it.executeUpdate()
+        }
+        connection.commit()
+    }
+}
+
+fun DatabaseInterface.updateUtsendtVarselFeiletToResendExhausted(uuid: String) {
+    val updateStatement = """UPDATE UTSENDING_VARSEL_FEILET
+                   SET resend_exhausted = TRUE
+                   WHERE uuid = ?
+    """.trimMargin()
     return connection.use { connection ->
         connection.prepareStatement(updateStatement).use {
             it.setObject(1, UUID.fromString(uuid))

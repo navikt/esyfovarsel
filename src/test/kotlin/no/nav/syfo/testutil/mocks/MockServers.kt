@@ -85,6 +85,28 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
         }
     }
 
+    @Suppress("MaxLineLength")
+    fun mockJournalpostdistribusjonServer(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> {
+        return mockServer(urlEnv.dokdistfordelingUrl) {
+            val bestillingsId = """
+                {
+                  "bestillingsId": "1000"
+                }
+            """
+            post("/rest/v1/distribuerjournalpost") {
+                val body = call.receiveText()
+                if (body.contains("GONE")) {
+                    call.response.status(HttpStatusCode(410, "Recipient is gone"))
+                } else if (body.contains("CONFLICT")) {
+                    call.response.status(HttpStatusCode(410, "Recipient is gone"))
+                    call.respondText(bestillingsId, ContentType.Application.Json, HttpStatusCode.Conflict)
+                } else {
+                    call.respondText(bestillingsId, ContentType.Application.Json, HttpStatusCode.OK)
+                }
+            }
+        }
+    }
+
     fun mockServer(
         url: String,
         route: Route.() -> Unit

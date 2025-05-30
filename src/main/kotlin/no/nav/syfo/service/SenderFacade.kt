@@ -23,7 +23,9 @@ import no.nav.syfo.db.storeArbeidsgivernotifikasjonerSak
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
 import no.nav.syfo.db.updateArbeidsgivernotifikasjonerSakStatus
+import no.nav.syfo.db.updateUtsendtVarselFeiletToResendExhausted
 import no.nav.syfo.domain.PersonIdent
+import no.nav.syfo.exceptions.JournalpostDistribusjonGoneException
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
@@ -383,29 +385,36 @@ class SenderFacade(
         varselHendelse: ArbeidstakerHendelse,
         journalpostId: String,
         distribusjonsType: DistibusjonsType = DistibusjonsType.ANNET,
-        storeFailedUtsending: Boolean = true,
+        failedUtsendingUUID: UUID? = null,
     ): Boolean {
-        var isSendingSucceed = true
-        try {
+        var isSendingSucceed = try {
             fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType)
+            true
         } catch (e: Exception) {
-            isSendingSucceed = false
-            log.error("Error while sending brev til fysisk print: ${e.message}")
-            if (storeFailedUtsending) {
-                lagreIkkeUtsendtArbeidstakerVarsel(
-                    kanal = BREV,
-                    arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
-                    orgnummer = varselHendelse.orgnummer,
-                    hendelseType = varselHendelse.type.name,
-                    eksternReferanse = uuid,
-                    feilmelding = e.message,
-                    journalpostId = journalpostId,
-                    brukernotifikasjonerMeldingType = null,
-                    isForcedLetter = false,
-                )
+            val uuid = failedUtsendingUUID ?: lagreIkkeUtsendtArbeidstakerVarsel(
+                kanal = BREV,
+                arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
+                orgnummer = varselHendelse.orgnummer,
+                hendelseType = varselHendelse.type.name,
+                eksternReferanse = uuid,
+                feilmelding = e.message,
+                journalpostId = journalpostId,
+                brukernotifikasjonerMeldingType = null,
+                isForcedLetter = false,
+            )
+            when (e) {
+                is JournalpostDistribusjonGoneException -> {
+                    log.warn("Error while sending brev til fysisk print: ${e.message}")
+                    database.updateUtsendtVarselFeiletToResendExhausted(uuid.toString())
+                }
+
+                else -> {
+                    log.error("Error while sending brev til fysisk print: ${e.message}")
+                }
             }
+            false
         }
-        if (isSendingSucceed) {
+        return if (isSendingSucceed) {
             lagreUtsendtArbeidstakerVarsel(
                 BREV,
                 arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
@@ -415,8 +424,7 @@ class SenderFacade(
                 journalpostId = journalpostId
             )
             return true
-        }
-        return false
+        } else { false }
     }
 
     suspend fun sendBrevTilTvingSentralPrint(
@@ -542,10 +550,11 @@ class SenderFacade(
         journalpostId: String? = null,
         brukernotifikasjonerMeldingType: String? = null,
         isForcedLetter: Boolean,
-    ) {
+    ): UUID {
+        val uuid = UUID.randomUUID()
         database.storeUtsendtVarselFeilet(
             PUtsendtVarselFeilet(
-                uuid = UUID.randomUUID().toString(),
+                uuid = uuid.toString(),
                 uuidEksternReferanse = eksternReferanse,
                 arbeidstakerFnr = arbeidstakerFnr,
                 narmesteLederFnr = null,
@@ -560,6 +569,7 @@ class SenderFacade(
                 isForcedLetter = isForcedLetter,
             ),
         )
+        return uuid
     }
 
     private fun lagreIkkeUtsendtNarmesteLederVarsel(
@@ -568,10 +578,11 @@ class SenderFacade(
         eksternReferanse: String,
         feilmelding: String?,
         merkelapp: String?,
-    ) {
+    ): UUID {
+        val uuid = UUID.randomUUID()
         database.storeUtsendtVarselFeilet(
             PUtsendtVarselFeilet(
-                uuid = UUID.randomUUID().toString(),
+                uuid = uuid.toString(),
                 uuidEksternReferanse = eksternReferanse,
                 arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
                 narmesteLederFnr = varselHendelse.narmesteLederFnr,
@@ -586,6 +597,7 @@ class SenderFacade(
                 isForcedLetter = false,
             ),
         )
+        return uuid
     }
 
     enum class InternalBrukernotifikasjonType {

@@ -19,6 +19,7 @@ data class PUtsendtVarselFeilet(
     val utsendtForsokTidspunkt: LocalDateTime,
     val isForcedLetter: Boolean? = false,
     val isResendt: Boolean? = false,
+    val resendExhausted: Boolean? = null,
 )
 
 fun PUtsendtVarselFeilet.toArbeidstakerHendelse(): ArbeidstakerHendelse {

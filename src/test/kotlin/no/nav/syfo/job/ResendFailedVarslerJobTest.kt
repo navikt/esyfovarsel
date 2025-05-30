@@ -214,7 +214,7 @@ class ResendFailedVarslerJobTest : DescribeSpec({
                     varselHendelse = merOppfolgingVarselFeilet.toArbeidstakerHendelse(),
                     journalpostId = merOppfolgingVarselFeilet.journalpostId!!,
                     distribusjonsType = DistibusjonsType.VIKTIG,
-                    storeFailedUtsending = false,
+                    failedUtsendingUUID = UUID.fromString(merOppfolgingVarselFeilet.uuid),
                 )
             }
             coVerify(exactly = 1) {
@@ -223,7 +223,7 @@ class ResendFailedVarslerJobTest : DescribeSpec({
                     varselHendelse = dialogmoteVarselFeilet.toArbeidstakerHendelse(),
                     journalpostId = dialogmoteVarselFeilet.journalpostId!!,
                     distribusjonsType = DistibusjonsType.ANNET,
-                    storeFailedUtsending = false,
+                    failedUtsendingUUID = UUID.fromString(dialogmoteVarselFeilet.uuid),
                 )
             }
 
