@@ -28,7 +28,7 @@
     "narmestelederUrl": "http://localhost:9097",
     "narmestelederScope": "narmestelederScope",
     "baseUrlDineSykmeldte": "http://dine-sykmeldte:9099",
-    "dokdistfordelingUrl": "http://dokdistfordelingUrl:9099",
+    "dokdistfordelingUrl": "http://localhost:9099",
     "dokdistfordelingScope": "dokdistfordelingScope",
     "istilgangskontrollUrl": "http://istilgangskontrollUrl:9099",
     "istilgangskontrollScope": "istilgangskontrollScope",
