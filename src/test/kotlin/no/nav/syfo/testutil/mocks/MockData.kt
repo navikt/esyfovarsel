@@ -1,6 +1,8 @@
 package no.nav.syfo.testutil.mocks
 
 import no.nav.syfo.access.domain.UserAccessStatus
+import no.nav.syfo.consumer.dkif.Kontaktinfo
+import no.nav.syfo.consumer.dkif.PostPersonerResponse
 
 const val fnr1 = "12345678901"
 const val fnr2 = "23456789012"
@@ -15,23 +17,11 @@ val userAccessStatus3 = UserAccessStatus(fnr3, false)
 val userAccessStatus4 = UserAccessStatus(fnr4, false)
 val userAccessStatus5 = UserAccessStatus(fnr5, false)
 
-val dkifResponseSuccessKanVarslesResponseJSON = """
-    {
-        "kanVarsles": true,
-        "reservert": false
-    }
-""".trim()
-
-val dkifResponseSuccessReservertResponseJSON = """
-    {
-        "kanVarsles": false,
-        "reservert": true
-    }
-""".trim()
-
-val dkifResponseMap = mapOf(
-    fnr1 to dkifResponseSuccessKanVarslesResponseJSON,
-    fnr2 to dkifResponseSuccessReservertResponseJSON
+val dkifPostPersonerResponse = PostPersonerResponse(
+    personer = mapOf(
+        fnr1 to Kontaktinfo(kanVarsles = true, reservert = false),
+        fnr2 to Kontaktinfo(kanVarsles = false, reservert = true)
+    )
 )
 
 val tokenFromAzureServer = Token(

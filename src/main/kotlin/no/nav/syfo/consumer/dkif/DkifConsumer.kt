@@ -6,10 +6,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
-import no.nav.syfo.consumer.domain.Kontaktinfo
-import no.nav.syfo.consumer.domain.KontaktinfoMapper
 import no.nav.syfo.utils.NAV_CALL_ID_HEADER
-import no.nav.syfo.utils.NAV_PERSONIDENT_HEADER
 import no.nav.syfo.utils.createCallId
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
@@ -20,13 +17,13 @@ class DkifConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer:
     suspend fun person(fnr: String): Kontaktinfo? {
         val accessToken = "Bearer ${azureAdTokenConsumer.getToken(urlEnv.dkifScope)}"
         val response: HttpResponse? = try {
-            client.get(urlEnv.dkifUrl) {
+            client.post(urlEnv.dkifUrl) {
                 headers {
                     append(HttpHeaders.ContentType, ContentType.Application.Json)
                     append(HttpHeaders.Authorization, accessToken)
-                    append(NAV_PERSONIDENT_HEADER, fnr)
                     append(NAV_CALL_ID_HEADER, createCallId())
                 }
+                setBody(PostPersonerRequest.createForFnr(fnr))
             }
         } catch (e: Exception) {
             log.error("Error while calling DKIF: ${e.message}", e)
@@ -35,7 +32,8 @@ class DkifConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer:
         when (response?.status) {
             HttpStatusCode.OK -> {
                 val rawJson: String = response.body()
-                return KontaktinfoMapper.mapPerson(rawJson)
+                val kontaktinfo = PostPersonerResponse.mapFromJson(rawJson).personer.getOrDefault(fnr, null)
+                return kontaktinfo
             }
 
             HttpStatusCode.Unauthorized -> {

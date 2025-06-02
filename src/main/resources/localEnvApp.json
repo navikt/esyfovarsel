@@ -20,7 +20,7 @@
     "dkifScope": "dkifScope",
     "pdlScope": "pdlScope",
     "pdlUrl": "http://localhost:9091",
-    "dkifUrl": "http://localhost:9093/rest/v1/person",
+    "dkifUrl": "http://localhost:9093/rest/v1/personer",
     "dialogmoterUrl": "http://dialogmoter:8080",
     "oppfolgingsplanerUrl": "http://oppfolgingsplaner:8080",
     "arbeidsgiverNotifikasjonProdusentApiUrl": "http://localhost:9095",

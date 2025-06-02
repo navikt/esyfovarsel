@@ -2,6 +2,7 @@ package no.nav.syfo.testutil.mocks
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -16,26 +17,24 @@ import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.UrlEnv
+import no.nav.syfo.consumer.dkif.PostPersonerRequest
 import no.nav.syfo.testutil.extractPortFromUrl
-import no.nav.syfo.utils.NAV_PERSONIDENT_HEADER
 
 class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
 
     fun mockDkifServer(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> {
         return mockServer(urlEnv.dkifUrl) {
-            get("/rest/v1/person") {
-                if (call.request.headers[NAV_PERSONIDENT_HEADER]?.isValidHeader() == true) {
-                    call.respond(
-                        dkifResponseMap[call.request.headers[NAV_PERSONIDENT_HEADER]]
-                            ?: dkifResponseSuccessKanVarslesResponseJSON,
-                    )
-                } else {
+            val jsonMapper = jacksonObjectMapper()
+            post("/rest/v1/personer") {
+                val requestBody = jsonMapper.readValue(call.receiveText(), PostPersonerRequest::class.java)
+                if (requestBody.personidenter.contains("serverdown")) {
                     call.response.status(HttpStatusCode(500, "Server error"))
+                } else {
+                    call.respond(jsonMapper.writeValueAsString(dkifPostPersonerResponse))
                 }
             }
         }
@@ -127,8 +126,4 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
             }
         }
     }
-}
-
-fun String.isValidHeader(): Boolean {
-    return this.all { char -> char.isDigit() }
 }
