@@ -108,7 +108,7 @@ spec:
     - name: PDL_URL
       value: https://pdl-api.dev-fss-pub.nais.io/graphql
     - name: DKIF_URL
-      value: http://digdir-krr-proxy.team-rocket/rest/v1/person
+      value: http://digdir-krr-proxy.team-rocket/rest/v1/personer
     - name: SYFOSMREGISTER_URL
       value: http://syfosmregister.teamsykmelding
     - name: SYFOSMREGISTER_SCOPE
