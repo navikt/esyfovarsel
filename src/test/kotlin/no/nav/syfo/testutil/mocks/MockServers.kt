@@ -34,7 +34,11 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
                 if (requestBody.personidenter.contains("serverdown")) {
                     call.response.status(HttpStatusCode(500, "Server error"))
                 } else {
-                    call.respond(jsonMapper.writeValueAsString(dkifPostPersonerResponse))
+                    call.respondText(
+                        jsonMapper.writeValueAsString(dkifPostPersonerResponse),
+                        ContentType.Application.Json,
+                        HttpStatusCode.OK
+                    )
                 }
             }
         }

@@ -29,21 +29,19 @@ class DkifConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer:
             log.error("Error while calling DKIF: ${e.message}", e)
             return null
         }
-        when (response?.status) {
+        return when (response?.status) {
             HttpStatusCode.OK -> {
-                val rawJson: String = response.body()
-                val kontaktinfo = PostPersonerResponse.mapFromJson(rawJson).personer.getOrDefault(fnr, null)
-                return kontaktinfo
+                response.body<PostPersonerResponse>().personer.getOrDefault(fnr, null)
             }
 
             HttpStatusCode.Unauthorized -> {
                 log.error("Could not get kontaktinfo from DKIF: Unable to authorize")
-                return null
+                null
             }
 
             else -> {
                 log.error("Could not get kontaktinfo from DKIF: $response")
-                return null
+                null
             }
         }
     }
