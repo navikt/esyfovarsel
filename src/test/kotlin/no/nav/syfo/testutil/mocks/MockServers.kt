@@ -103,6 +103,13 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
                 } else if (body.contains("CONFLICT")) {
                     call.response.status(HttpStatusCode(410, "Recipient is gone"))
                     call.respondText(bestillingsId, ContentType.Application.Json, HttpStatusCode.Conflict)
+                } else if (body.contains("FEILREGISTRERT")) {
+                    call.response.status(HttpStatusCode(410, "Recipient is gone"))
+                    call.respondText(
+                        "Journalpostfeltet journalpoststatus er ikke som forventet, fikk: FEILREGISTRERT, men forventet FERDIGSTILT",
+                        ContentType.Application.Json,
+                        HttpStatusCode.BadRequest
+                    )
                 } else {
                     call.respondText(bestillingsId, ContentType.Application.Json, HttpStatusCode.OK)
                 }

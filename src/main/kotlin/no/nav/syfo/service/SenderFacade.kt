@@ -25,7 +25,7 @@ import no.nav.syfo.db.storeUtsendtVarselFeilet
 import no.nav.syfo.db.updateArbeidsgivernotifikasjonerSakStatus
 import no.nav.syfo.db.updateUtsendtVarselFeiletToResendExhausted
 import no.nav.syfo.domain.PersonIdent
-import no.nav.syfo.exceptions.JournalpostDistribusjonGoneException
+import no.nav.syfo.exceptions.JournalpostDistribusjonPermanentFailureException
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
@@ -403,7 +403,7 @@ class SenderFacade(
                 isForcedLetter = false,
             )
             when (e) {
-                is JournalpostDistribusjonGoneException -> {
+                is JournalpostDistribusjonPermanentFailureException -> {
                     log.warn("Error while sending brev til fysisk print: ${e.message}")
                     database.updateUtsendtVarselFeiletToResendExhausted(uuid.toString())
                 }

@@ -6,7 +6,7 @@ import io.kotest.core.spec.style.DescribeSpec
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
-import no.nav.syfo.exceptions.JournalpostDistribusjonGoneException
+import no.nav.syfo.exceptions.JournalpostDistribusjonPermanentFailureException
 import no.nav.syfo.getTestEnv
 import no.nav.syfo.testutil.mocks.MockServers
 import org.amshove.kluent.shouldBeEqualTo
@@ -44,8 +44,18 @@ class JournalpostdistribusjonConsumerSpec : DescribeSpec({
         }
 
         it("Throw exception when distribuerJournalpost respondes with 410 status") {
-            shouldThrow<JournalpostDistribusjonGoneException> {
+            shouldThrow<JournalpostDistribusjonPermanentFailureException> {
                 consumer.distribuerJournalpost("GONE", Uuid.randomUUID().toString(), DistibusjonsType.ANNET, true)
+            }
+        }
+        it("Throw exception when distribuerJournalpost respondes with 400 due to FEILREGISTRERT in journalpoststatus") {
+            shouldThrow<JournalpostDistribusjonPermanentFailureException> {
+                consumer.distribuerJournalpost(
+                    journalpostId = "FEILREGISTRERT",
+                    uuid = Uuid.randomUUID().toString(),
+                    distribusjonstype = DistibusjonsType.ANNET,
+                    tvingSentralPrint = true
+                )
             }
         }
     }
