@@ -4,6 +4,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -11,7 +12,7 @@ import io.ktor.http.append
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.exceptions.JournalpostDistribusjonException
-import no.nav.syfo.exceptions.JournalpostDistribusjonGoneException
+import no.nav.syfo.exceptions.JournalpostDistribusjonPermanentFailureException
 import no.nav.syfo.exceptions.JournalpostNetworkException
 import no.nav.syfo.utils.httpClientWithRetry
 import org.slf4j.LoggerFactory
@@ -54,31 +55,32 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
                     log.info("Successfully sent document with ID: $journalpostId and UUID: $uuid to print")
                     response.body()
                 }
+
                 HttpStatusCode.Conflict -> {
                     log.info("Document with UUID: $uuid and journalpostId: $journalpostId already sent to print")
                     response.body()
                 }
+
                 HttpStatusCode.Gone -> {
                     log.info(
                         "Document with UUID: $uuid and journalpostId: $journalpostId  will never be sent. " +
                             "The receiver is flagged as Gone."
                     )
-                    throw JournalpostDistribusjonGoneException(
+                    throw JournalpostDistribusjonPermanentFailureException(
                         "Failed to distribution journalpostId $journalpostId. Resource is Gone. " +
                             "Status: ${response.status}"
                     )
                 }
+
+                HttpStatusCode.BadRequest -> {
+                    throw handleBadRequest(journalpostId, uuid, response)
+                }
+
                 else -> {
-                    log.error(
-                        "Failed to send document with UUID: $uuid to print. " +
-                            "JournalpostId: $journalpostId. Response status: ${response.status}"
-                    )
-                    throw JournalpostDistribusjonException(
-                        "Failed to send document to print. Status: ${response.status}"
-                    )
+                    throw logAndCreateException(journalpostId, uuid, response)
                 }
             }
-        } catch (e: JournalpostDistribusjonGoneException) {
+        } catch (e: JournalpostDistribusjonPermanentFailureException) {
             throw e
         } catch (e: IOException) {
             log.error("Network error while distributing journalpost $journalpostId: ${e.message}", e)
@@ -87,5 +89,40 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
             log.error("Exception while distributing journalpost $journalpostId: ${e.javaClass.name}: ${e.message}", e)
             throw JournalpostDistribusjonException("Failed to distribute journalpost", uuid, journalpostId, e)
         }
+    }
+
+    suspend fun handleBadRequest(journalpostId: String, uuid: String, response: HttpResponse): Exception {
+        val message: String = response.body()
+        if (message.contains(JOURNALEPOST_FEILREGISTRERT_ERROR_MESSAGE)) {
+            log.info(
+                "Document with UUID: $uuid and journalpostId: $journalpostId  will never be sent. " +
+                    "It has been given status FEILREGISTRERT."
+            )
+            throw JournalpostDistribusjonPermanentFailureException(
+                "Failed to distribution journalpostId $journalpostId. " +
+                    "Journalpoststatus was FEILREGISTRERT. Status: ${response.status}"
+            )
+        } else {
+            throw logAndCreateException(journalpostId, uuid, response)
+        }
+    }
+
+    fun logAndCreateException(
+        journalpostId: String,
+        uuid: String,
+        response: HttpResponse
+    ): JournalpostDistribusjonException {
+        log.error(
+            "Failed to send document with UUID: $uuid to print. " +
+                "JournalpostId: $journalpostId. Response status: ${response.status}"
+        )
+        return JournalpostDistribusjonException(
+            "Failed to send document to print. Status: ${response.status}"
+        )
+    }
+
+    companion object {
+        const val JOURNALEPOST_FEILREGISTRERT_ERROR_MESSAGE =
+            "Journalpostfeltet journalpoststatus er ikke som forventet, fikk: FEILREGISTRERT"
     }
 }

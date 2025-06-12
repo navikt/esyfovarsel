@@ -14,7 +14,7 @@ import no.nav.syfo.db.fetchUtsendtVarselFeiletByFnr
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.domain.PersonIdent
-import no.nav.syfo.exceptions.JournalpostDistribusjonGoneException
+import no.nav.syfo.exceptions.JournalpostDistribusjonPermanentFailureException
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
@@ -163,7 +163,7 @@ class SenderFacadeSpek : DescribeSpec({
                     any(),
                     any()
                 )
-            } throws JournalpostDistribusjonGoneException("Recipient is Gone", uuid, journalpostId)
+            } throws JournalpostDistribusjonPermanentFailureException("Recipient is Gone", uuid, journalpostId)
             senderFacade.sendBrevTilFysiskPrint(uuid, arbeidstakerHendelse, journalpostId)
             val feiletUtsending = embeddedDatabase.fetchUtsendtVarselFeiletByFnr(arbeidstakerFnr1)
             assertEquals(1, feiletUtsending.size)

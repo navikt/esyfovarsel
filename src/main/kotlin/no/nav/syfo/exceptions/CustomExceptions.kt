@@ -28,7 +28,7 @@ class JournalpostDistribusjonException(
     cause: Throwable? = null
 ) : Exception(message, cause)
 
-class JournalpostDistribusjonGoneException(
+class JournalpostDistribusjonPermanentFailureException(
     message: String,
     val uuid: String? = null,
     val journalpostId: String? = null,
