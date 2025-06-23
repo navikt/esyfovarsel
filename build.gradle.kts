@@ -22,7 +22,7 @@ val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.19.1"
 val kafkaVersion = "3.9.0"
 val brukernotifikasjonerBuilderVersion = "2.1.1"
-val kotlinVersion = "2.1.21"
+val kotlinVersion = "2.2.0"
 val graphqlApolloVersion = "4.1.0"
 val detektVersion = "1.23.8"
 
