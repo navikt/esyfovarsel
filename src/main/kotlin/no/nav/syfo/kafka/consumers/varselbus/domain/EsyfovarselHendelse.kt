@@ -96,6 +96,7 @@ enum class HendelseType {
     SM_FORHANDSVARSEL_MANGLENDE_MEDVIRKNING,
     NL_DIALOGMOTE_SVAR,
     NL_OPPFOLGINGSPLAN_FORESPORSEL,
+    SM_OPPFOLGINGSPLAN_OPPRETTET,
 }
 
 fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
