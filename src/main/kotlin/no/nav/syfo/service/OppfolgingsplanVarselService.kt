@@ -15,7 +15,8 @@ import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdl.PdlClient
 import no.nav.syfo.consumer.pdl.fullName
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_OPPRETTET
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
@@ -142,11 +143,7 @@ class OppfolgingsplanVarselService(
         senderFacade.sendTilBrukernotifikasjoner(
             uuid = UUID.randomUUID().toString(),
             mottakerFnr = varselHendelse.arbeidstakerFnr,
-            content = if (varselHendelse.type == HendelseType.SM_OPPFOLGINGSPLAN_OPPRETTET) {
-                BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_OPPRETTET_MESSAGE_TEXT
-            } else {
-                BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT
-            },
+            content = getMessageText(varselHendelse) ?: BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT,
             url = URI(oppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL).toURL(),
             arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
             orgnummer = varselHendelse.orgnummer,
@@ -155,4 +152,17 @@ class OppfolgingsplanVarselService(
             varseltype = BESKJED
         )
     }
+
+    fun getMessageText(arbeidstakerHendelse: ArbeidstakerHendelse): String? =
+        when (arbeidstakerHendelse.type) {
+            SM_OPPFOLGINGSPLAN_OPPRETTET -> BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_OPPRETTET_MESSAGE_TEXT
+            SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT
+            else -> {
+                log.error(
+                    "Klarte ikke mappe varsel av type ${arbeidstakerHendelse.type} ved mapping av hendelsetype " +
+                        "til oppfolginsplanVarsel melding tekst"
+                )
+                null
+            }
+        }
 }
