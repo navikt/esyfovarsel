@@ -9,11 +9,13 @@ import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL
 import no.nav.syfo.BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT
+import no.nav.syfo.BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_OPPRETTET_MESSAGE_TEXT
 import no.nav.syfo.DINE_SYKMELDTE_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdl.PdlClient
 import no.nav.syfo.consumer.pdl.fullName
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
@@ -140,7 +142,11 @@ class OppfolgingsplanVarselService(
         senderFacade.sendTilBrukernotifikasjoner(
             uuid = UUID.randomUUID().toString(),
             mottakerFnr = varselHendelse.arbeidstakerFnr,
-            content = BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT,
+            content = if (varselHendelse.type == HendelseType.SM_OPPFOLGINGSPLAN_OPPRETTET) {
+                BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_OPPRETTET_MESSAGE_TEXT
+            } else {
+                BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT
+            },
             url = URI(oppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL).toURL(),
             arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
             orgnummer = varselHendelse.orgnummer,

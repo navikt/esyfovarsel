@@ -16,6 +16,8 @@ const val BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST = "Dialogmøtet me
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST = "Du har mottatt et referat fra dialogmøte"
 const val BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT =
     "Du har en oppfølgingsplan som venter på godkjenning av deg"
+const val BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_OPPRETTET_MESSAGE_TEXT =
+    "Din arbeidsgiver har laget en oppfølgingsplan for deg"
 const val BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_TEXT = "Mulig stans av sykepenger"
 const val BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_SMS_TEXT =
     "Hei! Du har fått en viktig oppgave fra Nav. Logg inn på Nav for å se hva oppgaven gjelder. Vennlig hilsen Nav"
