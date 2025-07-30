@@ -35,7 +35,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.allopen") version "2.2.0"
     id("com.diffplug.spotless") version "7.2.1"
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("com.apollographql.apollo") version "4.1.0"
+    id("com.apollographql.apollo") version "4.3.2"
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
 
