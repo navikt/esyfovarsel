@@ -23,7 +23,7 @@ val jacksonVersion = "2.19.2"
 val kafkaVersion = "3.9.0"
 val brukernotifikasjonerBuilderVersion = "2.1.1"
 val kotlinVersion = "2.2.0"
-val graphqlApolloVersion = "4.1.0"
+val graphqlApolloVersion = "4.3.2"
 val detektVersion = "1.23.8"
 
 val githubUser: String by project
