@@ -25,6 +25,9 @@ spec:
       application: syfooppfolgingsplanservice
       access: write
     - team: team-esyfo
+      application: syfo-oppfolgingsplan-backend
+      access: write
+    - team: team-esyfo
       application: syfomotebehov
       access: write
     - team: teamsykefravr
