@@ -19,10 +19,10 @@ spec:
       application: esyfovarsel
       access: read
     - team: team-esyfo
-      application: followupplan-backend
+      application: syfooppfolgingsplanservice
       access: write
     - team: team-esyfo
-      application: syfooppfolgingsplanservice
+      application: syfo-oppfolgingsplan-backend
       access: write
     - team: team-esyfo
       application: syfomotebehov
