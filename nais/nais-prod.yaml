@@ -141,7 +141,7 @@ spec:
     - name: DOKDIST_FORDELING_URL
       value: https://dokdistfordeling.prod-fss-pub.nais.io
     - name: DOKDIST_FORDELING_SCOPE
-      value: api://prod-fss.teamdokumenthandtering.saf/.default
+      value: api://prod-fss.teamdokumenthandtering.dokdistfordeling/.default
     - name: ISTILGANGSKONTROLL_URL
       value: http://istilgangskontroll.teamsykefravr
     - name: ISTILGANGSKONTROLL_SCOPE
