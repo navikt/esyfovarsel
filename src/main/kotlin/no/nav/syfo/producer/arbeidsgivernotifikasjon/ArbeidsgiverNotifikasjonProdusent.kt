@@ -279,6 +279,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
         emailBody,
         EpostSendevinduTypes.LOEPENDE,
         hardDeleteDate.toString(),
+        grupperingsid,
     )
 
     suspend fun deleteNotifikasjonForArbeidsgiver(arbeidsgiverDeleteNotifikasjon: ArbeidsgiverDeleteNotifikasjon) {

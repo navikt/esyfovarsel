@@ -24,6 +24,7 @@ data class VariablesCreate(
     val epostHtmlBody: String,
     val sendevindu: EpostSendevinduTypes,
     val hardDeleteDate: String,
+    val grupperingsid: String,
 ) : Variables
 
 data class VariablesDelete(
