@@ -11,6 +11,7 @@ mutation OpprettNyOppgave(
     $epostHtmlBody: String!
     $sendevindu: Sendevindu = LOEPENDE
     $hardDeleteDate: ISO8601LocalDateTime
+    $grupperingsid: String!
 ) {
     nyOppgave(nyOppgave: {
         metadata: {
@@ -19,6 +20,7 @@ mutation OpprettNyOppgave(
             hardDelete: {
                 den: $hardDeleteDate
             }
+            grupperingsid: $grupperingsid
         }
         mottakere: [
             {
