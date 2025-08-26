@@ -73,6 +73,11 @@ data class VarselDataDialogmoteSvar(
     val svar: DialogmoteSvarType,
 )
 
+/**
+ * Forskjellige typer hendelser som kan sendes til esyfovarsel.
+ * "SM_" forkortelse indikerer at det sendes til sykmeldt
+ * "NL_" forkortelse indikerer at det sendes til nærmeste leder
+ */
 enum class HendelseType {
     NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
     SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
@@ -94,6 +99,7 @@ enum class HendelseType {
     SM_ARBEIDSUFORHET_FORHANDSVARSEL,
     SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING,
     SM_FORHANDSVARSEL_MANGLENDE_MEDVIRKNING,
+    SM_KARTLEGGINGSPORSMAL,
     NL_DIALOGMOTE_SVAR,
     NL_OPPFOLGINGSPLAN_FORESPORSEL,
     SM_OPPFOLGINGSPLAN_OPPRETTET,
