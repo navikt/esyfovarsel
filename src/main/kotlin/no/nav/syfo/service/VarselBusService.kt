@@ -20,6 +20,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_N
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_FORHANDSVARSEL_MANGLENDE_MEDVIRKNING
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_KARTLEGGINGSPORSMAL
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_MER_VEILEDNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_OPPRETTET
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
@@ -43,7 +44,8 @@ class VarselBusService(
     private val mikrofrontendService: MikrofrontendService,
     private val friskmeldingTilArbeidsformidlingVedtakService: FriskmeldingTilArbeidsformidlingVedtakService,
     private val manglendeMedvirkningVarselService: ManglendeMedvirkningVarselService,
-    private val merVeiledningVarselService: MerVeiledningVarselService
+    private val merVeiledningVarselService: MerVeiledningVarselService,
+    private val kartleggingssporsmalVarselService: KartleggingssporsmalVarselService,
 ) {
     private val log: Logger = LoggerFactory.getLogger(VarselBusService::class.qualifiedName)
     suspend fun processVarselHendelse(
@@ -63,9 +65,8 @@ class VarselBusService(
                 )
 
                 SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
-                SM_OPPFOLGINGSPLAN_OPPRETTET -> oppfolgingsplanVarselService.sendVarselTilArbeidstaker(
-                    varselHendelse.toArbeidstakerHendelse()
-                )
+                SM_OPPFOLGINGSPLAN_OPPRETTET,
+                    -> oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
                 NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilNarmesteLeder(
                     varselHendelse.toNarmestelederHendelse()
@@ -87,19 +88,16 @@ class VarselBusService(
                 NL_DIALOGMOTE_AVLYST,
                 NL_DIALOGMOTE_REFERAT,
                 NL_DIALOGMOTE_NYTT_TID_STED,
-                NL_DIALOGMOTE_SVAR
-                -> dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(
-                    varselHendelse.toNarmestelederHendelse()
-                )
+                NL_DIALOGMOTE_SVAR,
+                    ->
+                    dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
 
                 SM_DIALOGMOTE_INNKALT,
                 SM_DIALOGMOTE_AVLYST,
                 SM_DIALOGMOTE_REFERAT,
                 SM_DIALOGMOTE_NYTT_TID_STED,
                 SM_DIALOGMOTE_LEST,
-                -> dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(
-                    varselHendelse.toArbeidstakerHendelse()
-                )
+                    -> dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
                 SM_AKTIVITETSPLIKT -> aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(
                     varselHendelse.toArbeidstakerHendelse()
@@ -119,6 +117,11 @@ class VarselBusService(
 
                 SM_FORHANDSVARSEL_MANGLENDE_MEDVIRKNING ->
                     manglendeMedvirkningVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+
+                SM_KARTLEGGINGSPORSMAL ->
+                    kartleggingssporsmalVarselService.sendKartleggingssporsmalTilArbeidstaker(
+                        varselHendelse.toArbeidstakerHendelse()
+                    )
             }
         }
     }
@@ -132,13 +135,11 @@ class VarselBusService(
     }
 
     fun processVarselHendelseAsMinSideMicrofrontendEvent(event: EsyfovarselHendelse) {
-        if (event.isArbeidstakerHendelse()) {
-            val arbeidstakerHendelse = event.toArbeidstakerHendelse()
-            try {
-                mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelse)
-            } catch (e: RuntimeException) {
-                log.error("Fikk feil under oppdatering av mikrofrontend state: ${e.message}", e)
-            }
+        val arbeidstakerHendelse = event.toArbeidstakerHendelse()
+        try {
+            mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelse)
+        } catch (e: RuntimeException) {
+            log.error("Fikk feil under oppdatering av mikrofrontend state: ${e.message}", e)
         }
     }
 }
