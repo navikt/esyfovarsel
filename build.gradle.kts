@@ -30,7 +30,7 @@ val githubUser: String by project
 val githubPassword: String by project
 
 plugins {
-    kotlin("jvm") version "1.9.24"
+    kotlin("jvm") version "2.2.10"
     id("java")
     id("org.jetbrains.kotlin.plugin.allopen") version "2.2.10"
     id("com.diffplug.spotless") version "7.2.1"
