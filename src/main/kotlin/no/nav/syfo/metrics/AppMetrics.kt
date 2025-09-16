@@ -1,6 +1,5 @@
 package no.nav.syfo.metrics
 
-import io.ktor.server.application.call
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
@@ -14,6 +13,7 @@ import io.prometheus.metrics.model.registry.PrometheusRegistry
 const val METRICS_NS = "esyfovarsel"
 
 const val MER_VEILEDNING_NOTICE_SENT = "${METRICS_NS}_mer_veiledning_notice_sent"
+const val KARTLEGGING_NOTICE_SENT = "${METRICS_NS}_kartlegging_notice_sent"
 const val SVAR_MOTEBEHOV_NOTICE_SENT = "${METRICS_NS}_svar_motebehov_notice_sent"
 const val NOTICE_SENT = "${METRICS_NS}_notice_sent"
 const val CALL_PDL_SUCCESS = "${METRICS_NS}_call_pdl_success_count"
@@ -23,6 +23,11 @@ val METRICS_REGISTRY =
     PrometheusMeterRegistry(PrometheusConfig.DEFAULT, PrometheusRegistry.defaultRegistry, Clock.SYSTEM)
 
 val COUNT_MER_VEILEDNING_NOTICE_SENT: Counter = Counter
+    .builder(KARTLEGGING_NOTICE_SENT)
+    .description("Counts the number of Kartlegging notice sent")
+    .register(METRICS_REGISTRY)
+
+val COUNT_KARTLEGGING_NOTICE_SENT: Counter = Counter
     .builder(MER_VEILEDNING_NOTICE_SENT)
     .description("Counts the number of Mer veiledning notice sent")
     .register(METRICS_REGISTRY)
@@ -48,6 +53,11 @@ val COUNT_CALL_PDL_FAIL: Counter = Counter.builder(CALL_PDL_FAIL)
 fun tellMerVeiledningVarselSendt() {
     COUNT_ALL_NOTICE_SENT.increment()
     COUNT_MER_VEILEDNING_NOTICE_SENT.increment()
+}
+
+fun tellKartleggingVarselSendt() {
+    COUNT_ALL_NOTICE_SENT.increment()
+    COUNT_KARTLEGGING_NOTICE_SENT.increment()
 }
 
 fun tellSvarMotebehovVarselSendt(varslerSendt: Int) {

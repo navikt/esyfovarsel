@@ -20,6 +20,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_N
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_FORHANDSVARSEL_MANGLENDE_MEDVIRKNING
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_KARTLEGGING
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_MER_VEILEDNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_OPPRETTET
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
@@ -43,7 +44,8 @@ class VarselBusService(
     private val mikrofrontendService: MikrofrontendService,
     private val friskmeldingTilArbeidsformidlingVedtakService: FriskmeldingTilArbeidsformidlingVedtakService,
     private val manglendeMedvirkningVarselService: ManglendeMedvirkningVarselService,
-    private val merVeiledningVarselService: MerVeiledningVarselService
+    private val merVeiledningVarselService: MerVeiledningVarselService,
+    private val kartleggingVarselService: KartleggingVarselService,
 ) {
     private val log: Logger = LoggerFactory.getLogger(VarselBusService::class.qualifiedName)
     suspend fun processVarselHendelse(
@@ -114,6 +116,10 @@ class VarselBusService(
                 )
 
                 SM_MER_VEILEDNING -> merVeiledningVarselService.sendVarselTilArbeidstaker(
+                    varselHendelse.toArbeidstakerHendelse()
+                )
+
+                SM_KARTLEGGING -> kartleggingVarselService.sendVarselTilArbeidstaker(
                     varselHendelse.toArbeidstakerHendelse()
                 )
 
