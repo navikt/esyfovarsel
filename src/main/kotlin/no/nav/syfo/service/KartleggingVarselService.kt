@@ -29,12 +29,12 @@ class KartleggingVarselService(
     val accessControlService: AccessControlService,
 ) {
 
-    private val log: Logger = LoggerFactory.getLogger(MerVeiledningVarselService::class.qualifiedName)
+    private val log: Logger = LoggerFactory.getLogger(KartleggingVarselService::class.qualifiedName)
 
     suspend fun sendVarselTilArbeidstaker(
         arbeidstakerHendelse: ArbeidstakerHendelse,
     ) {
-        val data = dataToVarselData(arbeidstakerHendelse.data)
+        dataToVarselData(arbeidstakerHendelse.data)
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerHendelse.arbeidstakerFnr)
 
         if (userAccessStatus.canUserBeDigitallyNotified) {
