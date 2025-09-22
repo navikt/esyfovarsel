@@ -10,6 +10,8 @@ const val DINE_SYKMELDTE_DIALOGMOTE_REFERAT_TEKST = "Referat fra dialogmøte"
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST = "Nav ønsker svar på om du trenger et dialogmøte"
 const val BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT =
     "Det nærmer seg datoen du ikke lenger kan få sykepenger. Vurder situasjonen din."
+const val BRUKERNOTIFIKASJONER_KARTLEGGING_MESSAGE_TEXT =
+    "TODO: Lag en tekst for kartlegging varsel"
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST = "Du er innkalt til dialogmøte - vi trenger svaret ditt"
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST = "Dialogmøtet med Nav er avlyst"
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST = "Dialogmøtet med Nav er flyttet"
@@ -23,6 +25,7 @@ const val BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_SMS_TEXT =
     "Hei! Du har fått en viktig oppgave fra Nav. Logg inn på Nav for å se hva oppgaven gjelder. Vennlig hilsen Nav"
 
 const val DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT = "Snart slutt på sykepengene"
+const val DITT_SYKEFRAVAER_KARTLEGGING_MESSAGE_TEXT = "TODO TODO"
 const val DITT_SYKEFRAVAER_DIALOGMOTE_SVAR_MOTEBEHOV_MESSAGE_TEXT = "Du har en ny forespørsel om behov for dialogmøte"
 const val DITT_SYKEFRAVAER_DIALOGMOTE_INNKALLING_MESSAGE_TEXT = "Du er innkalt til dialogmøte - vi trenger svaret ditt"
 const val DITT_SYKEFRAVAER_DIALOGMOTE_ENDRING_MESSAGE_TEXT = "Du har mottatt et brev om endret dialogmøte"
