@@ -16,6 +16,7 @@ import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
 import no.nav.syfo.service.DialogmoteInnkallingSykmeldtVarselService
+import no.nav.syfo.service.KartleggingssporsmalVarselService
 import no.nav.syfo.service.MerVeiledningVarselService
 import no.nav.syfo.service.MotebehovVarselService
 import no.nav.syfo.service.SenderFacade
@@ -29,6 +30,7 @@ class ResendFailedVarslerJobTest : DescribeSpec({
     val motebehovVarselService = mockk<MotebehovVarselService>(relaxed = true)
     val dialogmoteInnkallingSykmeldtVarselService = mockk<DialogmoteInnkallingSykmeldtVarselService>(relaxed = true)
     val merVeiledningVarselService = mockk<MerVeiledningVarselService>(relaxed = true)
+    val kartleggingVarselService = mockk<KartleggingssporsmalVarselService>(relaxed = true)
     val senderFacade = mockk<SenderFacade>(relaxed = true)
 
     beforeTest {
@@ -47,6 +49,7 @@ class ResendFailedVarslerJobTest : DescribeSpec({
         motebehovVarselService = motebehovVarselService,
         dialogmoteInnkallingSykmeldtVarselService = dialogmoteInnkallingSykmeldtVarselService,
         merVeiledningVarselService = merVeiledningVarselService,
+        kartleggingVarselService = kartleggingVarselService,
         senderFacade = senderFacade,
     )
 
