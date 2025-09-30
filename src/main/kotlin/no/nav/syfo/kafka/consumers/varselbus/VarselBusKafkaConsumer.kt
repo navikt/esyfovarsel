@@ -9,6 +9,8 @@ import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.common.pollDurationInMillis
 import no.nav.syfo.kafka.common.topicVarselBus
 import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidstakerHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidstakerHendelse
 import no.nav.syfo.service.VarselBusService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -17,7 +19,7 @@ import org.slf4j.LoggerFactory
 
 class VarselBusKafkaConsumer(
     val env: Environment,
-    val varselBusService: VarselBusService
+    val varselBusService: VarselBusService,
 ) : KafkaListener {
     private val log: Logger = LoggerFactory.getLogger(VarselBusKafkaConsumer::class.qualifiedName)
     private val kafkaListener: KafkaConsumer<String, String>
@@ -53,6 +55,8 @@ class VarselBusKafkaConsumer(
 
         varselBusService.processVarselHendelse(varselEvent)
 
-        varselBusService.processVarselHendelseAsMinSideMicrofrontendEvent(varselEvent)
+        if (varselEvent.isArbeidstakerHendelse()) {
+            varselBusService.processVarselHendelseAsMinSideMicrofrontendEvent(varselEvent.toArbeidstakerHendelse())
+        }
     }
 }
