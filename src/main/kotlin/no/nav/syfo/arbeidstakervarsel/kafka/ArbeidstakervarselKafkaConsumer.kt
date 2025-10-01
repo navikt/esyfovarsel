@@ -10,7 +10,7 @@ import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.common.pollDurationInMillis
 import no.nav.syfo.kafka.common.topicArbeidstakerVarsel
 import no.nav.syfo.kafka.common.topicVarselBus
-import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerVarsel
+import no.nav.syfo.kafka.consumers.arbeidstakervarsel.domain.ArbeidstakerVarsel
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger

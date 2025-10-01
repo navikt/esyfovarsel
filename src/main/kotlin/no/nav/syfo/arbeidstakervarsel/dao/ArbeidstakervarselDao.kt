@@ -1,6 +1,6 @@
 package no.nav.syfo.arbeidstakervarsel.dao
 
-import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerVarsel
+import no.nav.syfo.kafka.consumers.arbeidstakervarsel.domain.ArbeidstakerVarsel
 
 enum class ArbeidstakerKanal {
     BRUKERNOTIFIKASJON,
