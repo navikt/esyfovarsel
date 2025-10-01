@@ -1,12 +1,6 @@
-package no.nav.syfo.kafka.consumers.varselbus.domain
+package no.nav.syfo.kafka.consumers.arbeidstakervarsel.domain
 
 import java.net.URL
-
-data class ArbeidstakerVarsel(
-    val mottakerFnr: String,
-    val brukernotifikasjonVarsel: BrukernotifikasjonVarsel? = null,
-    val dinesykmeldteVarsel: //TODO
-)
 
 enum class BrukernotifikasjonType {
     OPPGAVE,
@@ -17,11 +11,13 @@ enum class BrukernotifikasjonType {
 sealed class BrukernotifikasjonVarsel {
     abstract val uuid: String
     abstract val varseltype: BrukernotifikasjonType
+    abstract val scheduledRetry: Boolean
 
     data class Done(
-        override val uuid: String,
+        override val uuid: String
     ) : BrukernotifikasjonVarsel() {
         override val varseltype = BrukernotifikasjonType.DONE
+        override val scheduledRetry: Boolean = true
     }
 
     data class Oppgave(
@@ -31,10 +27,9 @@ sealed class BrukernotifikasjonVarsel {
         val smsContent: String,
         val eksternVarsling: Boolean,
         val dagerTilDeaktivering: Long? = null,
-        val reservert: Reservert? = null,
-
     ) : BrukernotifikasjonVarsel() {
         override val varseltype = BrukernotifikasjonType.OPPGAVE
+        override val scheduledRetry: Boolean = true
     }
 
     data class Beskjed(
@@ -46,10 +41,6 @@ sealed class BrukernotifikasjonVarsel {
         val dagerTilDeaktivering: Long? = null
     ) : BrukernotifikasjonVarsel() {
         override val varseltype = BrukernotifikasjonType.BESKJED
+        override val scheduledRetry: Boolean = true
     }
-
-    data class Reservert(
-        val sendBrevHvisReservert: Boolean,
-        val journalpostId: String,
-    )
 }

@@ -2,7 +2,7 @@ package no.nav.syfo.arbeidstakervarsel.service
 
 import no.nav.syfo.arbeidstakervarsel.dao.ArbeidstakerKanal
 import no.nav.syfo.arbeidstakervarsel.service.ArbeidstakervarselService.SendResult
-import no.nav.syfo.kafka.consumers.varselbus.domain.BrukernotifikasjonVarsel
+import no.nav.syfo.kafka.consumers.arbeidstakervarsel.domain.BrukernotifikasjonVarsel
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import org.slf4j.LoggerFactory
 
