@@ -5,7 +5,7 @@
     <ID>LongMethod:ResendFailedVarslerJob.kt$ResendFailedVarslerJob$suspend fun resendFailedBrukernotifikasjonVarsler(): Int</ID>
     <ID>NestedBlockDepth:PdlClient.kt$PdlClient$suspend fun hentPerson( personIdent: String, ): HentPersonData?</ID>
     <ID>NestedBlockDepth:VarselBusKafkaConsumer.kt$VarselBusKafkaConsumer$override suspend fun listen(applicationState: ApplicationState)</ID>
-    <ID>MaxLineLength:VarselTexts.kt$"Hei! Nav har sendt deg noen spørsmål som vi ønsker at du skal svare på. Logg inn på Nav for å svare. Vennlig hilsen Nav"</ID>
+    <ID>TopLevelPropertyNaming:KafkaCommon.kt$const val topicArbeidstakerVarsel = "team-esyfo.arbeidstakervarsel"</ID>
   </ManuallySuppressedIssues>
   <CurrentIssues>
     <ID>ConstructorParameterNaming:AzureAdTokenConsumer.kt$AzureAdAccessToken$val access_token: String</ID>
