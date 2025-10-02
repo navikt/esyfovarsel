@@ -36,10 +36,10 @@ class ArbeidstakervarselService(
             ).also { arbeidstakervarselDao.storeSendResult(it) }
         }
 
-        if (arbeidstakerVarsel.microfrontend != null) {
-            mikrofrontendService.updateMikrofrontendForUserByHendelse(
+        if (arbeidstakerVarsel.microfrontendEvent != null) {
+            mikrofrontendService.handleMicrofrontendEvent(
                 mottakerFnr = arbeidstakerVarsel.mottakerFnr,
-                hendelse = arbeidstakerVarsel.microfrontend
+                event = arbeidstakerVarsel.microfrontendEvent
             )
         }
     }
