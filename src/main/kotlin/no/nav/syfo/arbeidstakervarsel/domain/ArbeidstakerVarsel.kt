@@ -1,9 +1,9 @@
-package no.nav.syfo.kafka.consumers.arbeidstakervarsel.domain
+package no.nav.syfo.arbeidstakervarsel.domain
 
 data class ArbeidstakerVarsel(
     val mottakerFnr: String,
     val brukernotifikasjonVarsel: BrukernotifikasjonVarsel? = null,
     val dokumentDistribusjonVarsel: DokumentdistribusjonVarsel? = null,
-    val dinesykmeldteVarsel: DineSykmeldteVarsel? = null,
+    val dittSykefravaerVarsel: DittSykefravaerVarsel? = null,
     val microfrontend: Microfrontend? = null,
 )

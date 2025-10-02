@@ -1,15 +1,17 @@
 package no.nav.syfo.arbeidstakervarsel.service
 
-import no.nav.syfo.arbeidstakervarsel.dao.ArbeidstakerKanal
 import no.nav.syfo.arbeidstakervarsel.dao.ArbeidstakervarselDao
-import no.nav.syfo.kafka.consumers.arbeidstakervarsel.domain.ArbeidstakerVarsel
+import no.nav.syfo.arbeidstakervarsel.domain.ArbeidstakerVarsel
 
 class ArbeidstakervarselService(
     private val brukernotifikasjonService: BrukernotifikasjonService,
     private val arbeidstakervarselDao: ArbeidstakervarselDao,
+    private val dokumentDistribusjonService: DokumentDistribusjonService,
+    private val dittSykefravaerVarselService: DittSykefravaerVarselService,
+    private val mikrofrontendService: MikrofrontendService
 
 ) {
-    fun processVarsel(arbeidstakerVarsel: ArbeidstakerVarsel) {
+    suspend fun processVarsel(arbeidstakerVarsel: ArbeidstakerVarsel) {
         arbeidstakervarselDao.storeArbeidstakerVarselHendelse(arbeidstakerVarsel)
 
         if (arbeidstakerVarsel.brukernotifikasjonVarsel != null) {
@@ -17,31 +19,28 @@ class ArbeidstakervarselService(
                 mottakerFnr = arbeidstakerVarsel.mottakerFnr,
                 brukernotifikasjonVarsel = arbeidstakerVarsel.brukernotifikasjonVarsel
             ).also {
-                storeSendResult(it)
+                arbeidstakervarselDao.storeSendResult(it)
             }
         }
-    }
 
-    private fun storeSendResult(sendResult: SendResult) {
-        if (sendResult.success) {
-            arbeidstakervarselDao.storeUtsendtArbeidstakerVarsel(
-                uuid = sendResult.uuid,
-                kanal = sendResult.kanal
-            )
-        } else {
-            arbeidstakervarselDao.storeUtsendtArbeidstakerVarselFeilet(
-                uuid = sendResult.uuid,
-                kanal = sendResult.kanal,
-                error = sendResult.exception.toString()
+        if (arbeidstakerVarsel.dokumentDistribusjonVarsel != null) {
+            dokumentDistribusjonService.distribuerJournalpost(
+                dokumentDistribusjonVarsel = arbeidstakerVarsel.dokumentDistribusjonVarsel
+            ).also { arbeidstakervarselDao.storeSendResult(it) }
+        }
 
+        if (arbeidstakerVarsel.dittSykefravaerVarsel != null) {
+            dittSykefravaerVarselService.sendVarsel(
+                arbeidstakerVarsel.mottakerFnr,
+                arbeidstakerVarsel.dittSykefravaerVarsel
+            ).also { arbeidstakervarselDao.storeSendResult(it) }
+        }
+
+        if (arbeidstakerVarsel.microfrontend != null) {
+            mikrofrontendService.updateMikrofrontendForUserByHendelse(
+                mottakerFnr = arbeidstakerVarsel.mottakerFnr,
+                hendelse = arbeidstakerVarsel.microfrontend
             )
         }
     }
-
-    data class SendResult(
-        val success: Boolean,
-        val uuid: String,
-        val kanal: ArbeidstakerKanal,
-        val exception: Exception? = null
-    )
 }
