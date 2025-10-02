@@ -3,14 +3,13 @@ package no.nav.syfo.arbeidstakervarsel.kafka
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
+import no.nav.syfo.arbeidstakervarsel.domain.ArbeidstakerVarsel
 import no.nav.syfo.arbeidstakervarsel.service.ArbeidstakervarselService
 import no.nav.syfo.kafka.common.KafkaListener
 import no.nav.syfo.kafka.common.consumerProperties
 import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.common.pollDurationInMillis
 import no.nav.syfo.kafka.common.topicArbeidstakerVarsel
-import no.nav.syfo.kafka.common.topicVarselBus
-import no.nav.syfo.kafka.consumers.arbeidstakervarsel.domain.ArbeidstakerVarsel
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
@@ -39,7 +38,7 @@ class ArbeidstakervarselKafkaConsumer(
                 kafkaListener.commitSync()
             } catch (e: Exception) {
                 log.error(
-                    "Exception in [$topicVarselBus]-listener: ${e.message}",
+                    "Exception in [$topicArbeidstakerVarsel]-listener: ${e.message}",
                     e
                 )
                 kafkaListener.commitSync()

@@ -1,15 +1,18 @@
 package no.nav.syfo.arbeidstakervarsel.service
 
 import no.nav.syfo.arbeidstakervarsel.dao.ArbeidstakerKanal
-import no.nav.syfo.arbeidstakervarsel.service.ArbeidstakervarselService.SendResult
-import no.nav.syfo.kafka.consumers.arbeidstakervarsel.domain.BrukernotifikasjonVarsel
+import no.nav.syfo.arbeidstakervarsel.domain.ArbeidstakerVarselSendResult
+import no.nav.syfo.arbeidstakervarsel.domain.BrukernotifikasjonVarsel
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import org.slf4j.LoggerFactory
 
 class BrukernotifikasjonService(private val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer) {
     private val log = LoggerFactory.getLogger(BrukernotifikasjonService::class.java)
 
-    fun sendBrukernotifikasjon(mottakerFnr: String, brukernotifikasjonVarsel: BrukernotifikasjonVarsel): SendResult {
+    fun sendBrukernotifikasjon(
+        mottakerFnr: String,
+        brukernotifikasjonVarsel: BrukernotifikasjonVarsel
+    ): ArbeidstakerVarselSendResult {
         val uuid = brukernotifikasjonVarsel.uuid
 
         return try {
@@ -43,10 +46,20 @@ class BrukernotifikasjonService(private val brukernotifikasjonKafkaProducer: Bru
                 }
             }
             log.info("Successfully sent brukernotifikasjon with uuid: $uuid")
-            SendResult(success = true, uuid = uuid, kanal = ArbeidstakerKanal.BRUKERNOTIFIKASJON, exception = null)
+            ArbeidstakerVarselSendResult(
+                success = true,
+                uuid = uuid,
+                kanal = ArbeidstakerKanal.BRUKERNOTIFIKASJON,
+                exception = null
+            )
         } catch (e: Exception) {
             log.error("Failed to send brukernotifikasjon with uuid: $uuid", e)
-            SendResult(success = false, uuid = uuid, kanal = ArbeidstakerKanal.BRUKERNOTIFIKASJON, exception = e)
+            ArbeidstakerVarselSendResult(
+                success = false,
+                uuid = uuid,
+                kanal = ArbeidstakerKanal.BRUKERNOTIFIKASJON,
+                exception = e
+            )
         }
     }
 }

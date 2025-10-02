@@ -1,4 +1,4 @@
-package no.nav.syfo.kafka.consumers.arbeidstakervarsel.domain
+package no.nav.syfo.arbeidstakervarsel.domain
 
 import java.net.URL
 
