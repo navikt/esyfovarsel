@@ -5,5 +5,5 @@ data class ArbeidstakerVarsel(
     val brukernotifikasjonVarsel: BrukernotifikasjonVarsel? = null,
     val dokumentDistribusjonVarsel: DokumentdistribusjonVarsel? = null,
     val dittSykefravaerVarsel: DittSykefravaerVarsel? = null,
-    val microfrontend: Microfrontend? = null,
+    val microfrontendEvent: MicrofrontendEvent? = null,
 )
