@@ -21,7 +21,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_N
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_REFERAT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_FORHANDSVARSEL_MANGLENDE_MEDVIRKNING
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_KARTLEGGINGSPORSMAL
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_KARTLEGGINGSSPORSMAL
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_MER_VEILEDNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_OPPRETTET
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
@@ -119,7 +119,7 @@ class VarselBusService(
                 SM_FORHANDSVARSEL_MANGLENDE_MEDVIRKNING ->
                     manglendeMedvirkningVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
-                SM_KARTLEGGINGSPORSMAL ->
+                SM_KARTLEGGINGSSPORSMAL ->
                     kartleggingssporsmalVarselService.sendKartleggingssporsmalTilArbeidstaker(
                         varselHendelse.toArbeidstakerHendelse()
                     )

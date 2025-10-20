@@ -90,7 +90,7 @@ class ResendFailedVarslerJob(
                     }
                 }
 
-                "SM_KARTLEGGINGSPORSMAL" -> {
+                "SM_KARTLEGGINGSSPORSMAL" -> {
                     val isResendt = kartleggingVarselService.resendDigitaltVarselTilArbeidstaker(failedVarsel)
                     if (isResendt) {
                         db.updateUtsendtVarselFeiletToResendt(failedVarsel.uuid)

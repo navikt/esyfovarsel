@@ -115,7 +115,7 @@ class MikrofrontendService(
             HendelseType.SM_AKTIVITETSPLIKT
             -> Tjeneste.AKTIVITETSKRAV
 
-            HendelseType.SM_MER_VEILEDNING, HendelseType.SM_KARTLEGGINGSPORSMAL
+            HendelseType.SM_MER_VEILEDNING, HendelseType.SM_KARTLEGGINGSSPORSMAL
             -> Tjeneste.MER_OPPFOLGING
 
             else -> throw IllegalArgumentException("$this is not a valid type for updating MF state")
