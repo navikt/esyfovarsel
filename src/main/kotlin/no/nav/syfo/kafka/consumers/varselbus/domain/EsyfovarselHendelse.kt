@@ -116,6 +116,9 @@ fun ArbeidstakerHendelse.getSynligTom(): LocalDateTime? {
     if (eventType.isSenOppfolgingType()) {
         return LocalDateTime.now().plusWeeks(13)
     }
+    if (eventType.isKartleggingssporsmalType()) {
+        return LocalDateTime.now().plusDays(30L)
+    }
     return if (eventType != HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV) this.motetidspunkt() else null
 }
 
@@ -158,7 +161,11 @@ fun EsyfovarselHendelse.skalFerdigstilles() =
     ferdigstill ?: false
 
 fun HendelseType.isAktivitetspliktType() = this == HendelseType.SM_AKTIVITETSPLIKT
+fun HendelseType.isMerOppfolgingType() =
+    this in listOf(HendelseType.SM_MER_VEILEDNING, HendelseType.SM_KARTLEGGINGSSPORSMAL)
+
 fun HendelseType.isSenOppfolgingType() = this == HendelseType.SM_MER_VEILEDNING
+
 fun HendelseType.isKartleggingssporsmalType() = this == HendelseType.SM_KARTLEGGINGSSPORSMAL
 
 fun HendelseType.isDialogmoteInnkallingType() = this in listOf(
@@ -180,24 +187,23 @@ fun ArbeidstakerHendelse.notCorrectMikrofrontendType() =
     !(
         this.type.isDialogmoteType() or
             this.type.isAktivitetspliktType() or
-            this.type.isSenOppfolgingType() or
-            this.type.isKartleggingssporsmalType()
+            this.type.isMerOppfolgingType()
         )
 
 fun ArbeidstakerHendelse.isAktivitetspliktWithFerdigstilling() =
     (this.type.isAktivitetspliktType() and (this.ferdigstill == true))
 
-fun ArbeidstakerHendelse.isSenOppfolgingWithFerdigstilling() =
-    (this.type.isSenOppfolgingType() and (this.ferdigstill == true))
+fun ArbeidstakerHendelse.isMerOppfolgingWithFerdigstilling() =
+    (this.type.isMerOppfolgingType() and (this.ferdigstill == true))
 
 fun ArbeidstakerHendelse.isNotEligibleForMikrofrontendProcessing(): Boolean {
     return this.notCorrectMikrofrontendType() or
         isAktivitetspliktWithFerdigstilling() or
-        isSenOppfolgingWithFerdigstilling()
+        isMerOppfolgingWithFerdigstilling()
 }
 
 fun HendelseType.isNotValidHendelseType() =
-    !this.isAktivitetspliktType() && !this.isDialogmoteInnkallingType() && !this.isSenOppfolgingType()
+    !this.isAktivitetspliktType() && !this.isDialogmoteInnkallingType() && !this.isMerOppfolgingType()
 
 fun VarselData.getMotetidspunkt(): LocalDateTime {
     val tidspunkt = motetidspunkt?.tidspunkt

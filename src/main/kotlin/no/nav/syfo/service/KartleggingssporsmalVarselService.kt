@@ -9,8 +9,6 @@ import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
 import java.net.URI
 import java.util.*
 
-// TODO
-// Definer tekst for `BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_MESSAGE_TEXT`
 class KartleggingssporsmalVarselService(
     val senderFacade: SenderFacade,
     val env: Environment,
@@ -20,13 +18,17 @@ class KartleggingssporsmalVarselService(
         arbeidstakerHendelse: ArbeidstakerHendelse,
     ) {
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerHendelse.arbeidstakerFnr)
-        if (userAccessStatus.canUserBeDigitallyNotified) {
-            sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
-            countKartleggingssporsmalVarselSendt()
-        }
+        sendDigitaltVarselTilArbeidstaker(
+            arbeidstakerHendelse = arbeidstakerHendelse,
+            eksternVarsling = userAccessStatus.canUserBeDigitallyNotified
+        )
+        countKartleggingssporsmalVarselSendt()
     }
 
-    private fun sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse: ArbeidstakerHendelse) {
+    private fun sendDigitaltVarselTilArbeidstaker(
+        arbeidstakerHendelse: ArbeidstakerHendelse,
+        eksternVarsling: Boolean
+    ) {
         val fnr = arbeidstakerHendelse.arbeidstakerFnr
         val url = URI(env.urlEnv.baseUrlNavEkstern + KARTLEGGINGSSPORSMAL_URL).toURL()
         senderFacade.sendTilBrukernotifikasjoner(
@@ -39,6 +41,8 @@ class KartleggingssporsmalVarselService(
             hendelseType = arbeidstakerHendelse.type.name,
             varseltype = OPPGAVE,
             dagerTilDeaktivering = DAGER_TIL_DEAKTIVERING_AV_VARSEL,
+            eksternVarsling = eksternVarsling,
+            storeFailedUtsending = eksternVarsling
         )
     }
 
@@ -61,7 +65,7 @@ class KartleggingssporsmalVarselService(
     }
 
     companion object {
-        private const val DAGER_TIL_DEAKTIVERING_AV_VARSEL: Long = 20
-        private const val KARTLEGGINGSSPORSMAL_URL = "/syk/kartlegging"
+        private const val DAGER_TIL_DEAKTIVERING_AV_VARSEL: Long = 30
+        private const val KARTLEGGINGSSPORSMAL_URL = "/syk/kartleggingssporsmal"
     }
 }
