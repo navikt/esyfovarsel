@@ -1,6 +1,7 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_MESSAGE_TEXT
+import no.nav.syfo.BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_SMS_TEXT
 import no.nav.syfo.Environment
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
@@ -34,6 +35,7 @@ class KartleggingssporsmalVarselService(
         senderFacade.sendTilBrukernotifikasjoner(
             uuid = UUID.randomUUID().toString(),
             mottakerFnr = fnr,
+            smsContent = BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_SMS_TEXT,
             content = BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_MESSAGE_TEXT,
             url = url,
             arbeidstakerFnr = arbeidstakerHendelse.arbeidstakerFnr,
@@ -53,6 +55,7 @@ class KartleggingssporsmalVarselService(
         return senderFacade.sendTilBrukernotifikasjoner(
             uuid = uuid,
             mottakerFnr = fnr,
+            smsContent = BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_SMS_TEXT,
             content = BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_MESSAGE_TEXT,
             url = url,
             arbeidstakerFnr = fnr,
