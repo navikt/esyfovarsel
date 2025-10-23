@@ -27,7 +27,6 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSP
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING
 import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidstakerHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.isKartleggingssporsmalType
 import no.nav.syfo.kafka.consumers.varselbus.domain.skalFerdigstilles
 import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toNarmestelederHendelse
@@ -142,10 +141,6 @@ class VarselBusService(
 
     fun processVarselHendelseAsMinSideMicrofrontendEvent(arbeidstakerhendelse: ArbeidstakerHendelse) {
         try {
-            if (arbeidstakerhendelse.type.isKartleggingssporsmalType()) {
-                // Debug log
-                log.info("Enabling microfrontend for kartleggingssporsmal")
-            }
             mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerhendelse)
         } catch (e: RuntimeException) {
             log.error("Fikk feil under oppdatering av mikrofrontend state: ${e.message}", e)
