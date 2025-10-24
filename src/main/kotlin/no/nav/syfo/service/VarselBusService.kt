@@ -67,7 +67,7 @@ class VarselBusService(
 
                 SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
                 SM_OPPFOLGINGSPLAN_OPPRETTET,
-                    -> oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+                -> oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
                 NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilNarmesteLeder(
                     varselHendelse.toNarmestelederHendelse()
@@ -90,15 +90,19 @@ class VarselBusService(
                 NL_DIALOGMOTE_REFERAT,
                 NL_DIALOGMOTE_NYTT_TID_STED,
                 NL_DIALOGMOTE_SVAR,
-                    ->
-                    dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelse.toNarmestelederHendelse())
+                ->
+                    dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(
+                        varselHendelse.toNarmestelederHendelse()
+                    )
 
                 SM_DIALOGMOTE_INNKALT,
                 SM_DIALOGMOTE_AVLYST,
                 SM_DIALOGMOTE_REFERAT,
                 SM_DIALOGMOTE_NYTT_TID_STED,
                 SM_DIALOGMOTE_LEST,
-                    -> dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+                -> dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(
+                    varselHendelse.toArbeidstakerHendelse()
+                )
 
                 SM_AKTIVITETSPLIKT -> aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(
                     varselHendelse.toArbeidstakerHendelse()

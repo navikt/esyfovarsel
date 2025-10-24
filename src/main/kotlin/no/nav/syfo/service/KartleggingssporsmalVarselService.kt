@@ -1,6 +1,7 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_MESSAGE_TEXT
+import no.nav.syfo.BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_SMS_TEXT
 import no.nav.syfo.Environment
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
@@ -9,8 +10,6 @@ import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
 import java.net.URI
 import java.util.*
 
-// TODO
-// Definer tekst for `BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_MESSAGE_TEXT`
 class KartleggingssporsmalVarselService(
     val senderFacade: SenderFacade,
     val env: Environment,
@@ -20,18 +19,23 @@ class KartleggingssporsmalVarselService(
         arbeidstakerHendelse: ArbeidstakerHendelse,
     ) {
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerHendelse.arbeidstakerFnr)
-        if (userAccessStatus.canUserBeDigitallyNotified) {
-            sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse)
-            countKartleggingssporsmalVarselSendt()
-        }
+        sendDigitaltVarselTilArbeidstaker(
+            arbeidstakerHendelse = arbeidstakerHendelse,
+            eksternVarsling = userAccessStatus.canUserBeDigitallyNotified
+        )
+        countKartleggingssporsmalVarselSendt()
     }
 
-    private fun sendDigitaltVarselTilArbeidstaker(arbeidstakerHendelse: ArbeidstakerHendelse) {
+    private fun sendDigitaltVarselTilArbeidstaker(
+        arbeidstakerHendelse: ArbeidstakerHendelse,
+        eksternVarsling: Boolean
+    ) {
         val fnr = arbeidstakerHendelse.arbeidstakerFnr
         val url = URI(env.urlEnv.baseUrlNavEkstern + KARTLEGGINGSSPORSMAL_URL).toURL()
         senderFacade.sendTilBrukernotifikasjoner(
             uuid = UUID.randomUUID().toString(),
             mottakerFnr = fnr,
+            smsContent = BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_SMS_TEXT,
             content = BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_MESSAGE_TEXT,
             url = url,
             arbeidstakerFnr = arbeidstakerHendelse.arbeidstakerFnr,
@@ -39,6 +43,8 @@ class KartleggingssporsmalVarselService(
             hendelseType = arbeidstakerHendelse.type.name,
             varseltype = OPPGAVE,
             dagerTilDeaktivering = DAGER_TIL_DEAKTIVERING_AV_VARSEL,
+            eksternVarsling = eksternVarsling,
+            storeFailedUtsending = eksternVarsling
         )
     }
 
@@ -49,6 +55,7 @@ class KartleggingssporsmalVarselService(
         return senderFacade.sendTilBrukernotifikasjoner(
             uuid = uuid,
             mottakerFnr = fnr,
+            smsContent = BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_SMS_TEXT,
             content = BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_MESSAGE_TEXT,
             url = url,
             arbeidstakerFnr = fnr,
@@ -61,7 +68,7 @@ class KartleggingssporsmalVarselService(
     }
 
     companion object {
-        private const val DAGER_TIL_DEAKTIVERING_AV_VARSEL: Long = 20
-        private const val KARTLEGGINGSSPORSMAL_URL = "/syk/kartlegging"
+        private const val DAGER_TIL_DEAKTIVERING_AV_VARSEL: Long = 30
+        private const val KARTLEGGINGSSPORSMAL_URL = "/syk/kartleggingssporsmal"
     }
 }
