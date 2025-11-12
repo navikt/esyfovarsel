@@ -22,7 +22,7 @@ class Database(val env: DbEnv) : DatabaseInterface {
             jdbcUrl = generateJdbcUrlFromEnv(env)
             username = env.dbUsername
             password = env.dbPassword
-            maximumPoolSize = 2
+            maximumPoolSize = 3
             minimumIdle = 1
             isAutoCommit = false
             transactionIsolation = "TRANSACTION_READ_COMMITTED"
