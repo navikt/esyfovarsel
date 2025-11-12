@@ -157,15 +157,20 @@ tasks {
     create("printVersion") {
         println(project.version)
     }
-
-    withType<ShadowJar> {
-        mergeServiceFiles {
-            setPath("META-INF/services/org.flywaydb.core.extensibility.Plugin")
-        }
+    shadowJar {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        mergeServiceFiles()
         setProperty("zip64", true)
         manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapApplicationKt"
     }
-
+//    withType<ShadowJar> {
+//        mergeServiceFiles {
+//            setPath("META-INF/services/org.flywaydb.core.extensibility.Plugin")
+//        }
+//        setProperty("zip64", true)
+//        manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapApplicationKt"
+//    }
+//
     withType<Test> {
         useJUnitPlatform()
     }
