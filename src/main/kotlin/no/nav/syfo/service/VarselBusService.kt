@@ -38,6 +38,7 @@ class VarselBusService(
     val senderFacade: SenderFacade,
     private val motebehovVarselService: MotebehovVarselService,
     private val oppfolgingsplanVarselService: OppfolgingsplanVarselService,
+    private val nyOppfolgingsplanVarselService: NyOppfolgingsplanVarselService,
     private val dialogmoteInnkallingSykmeldtVarselService: DialogmoteInnkallingSykmeldtVarselService,
     private val dialogmoteInnkallingNarmesteLederVarselService: DialogmoteInnkallingNarmesteLederVarselService,
     private val aktivitetspliktForhandsvarselVarselService: AktivitetspliktForhandsvarselVarselService,
@@ -65,9 +66,13 @@ class VarselBusService(
                     varselHendelse.toNarmestelederHendelse()
                 )
 
-                SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
-                SM_OPPFOLGINGSPLAN_OPPRETTET,
-                -> oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+                SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING ->
+                    oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
+
+                SM_OPPFOLGINGSPLAN_OPPRETTET ->
+                    nyOppfolgingsplanVarselService.sendVarselTilArbeidstaker(
+                        varselHendelse.toArbeidstakerHendelse()
+                    )
 
                 NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilNarmesteLeder(
                     varselHendelse.toNarmestelederHendelse()
@@ -90,7 +95,7 @@ class VarselBusService(
                 NL_DIALOGMOTE_REFERAT,
                 NL_DIALOGMOTE_NYTT_TID_STED,
                 NL_DIALOGMOTE_SVAR,
-                ->
+                    ->
                     dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(
                         varselHendelse.toNarmestelederHendelse()
                     )
@@ -100,7 +105,7 @@ class VarselBusService(
                 SM_DIALOGMOTE_REFERAT,
                 SM_DIALOGMOTE_NYTT_TID_STED,
                 SM_DIALOGMOTE_LEST,
-                -> dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(
+                    -> dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(
                     varselHendelse.toArbeidstakerHendelse()
                 )
 

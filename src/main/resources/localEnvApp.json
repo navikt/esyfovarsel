@@ -23,6 +23,7 @@
     "dkifUrl": "http://localhost:9093/rest/v1/personer",
     "dialogmoterUrl": "http://dialogmoter:8080",
     "oppfolgingsplanerUrl": "http://oppfolgingsplaner:8080",
+    "nyOppfolgingsplanUrl": "http://ny-oppfolgingsplan:8080",
     "arbeidsgiverNotifikasjonProdusentApiUrl": "http://localhost:9095",
     "arbeidsgiverNotifikasjonProdusentApiScope": "agNotifikasjonProdusentScope",
     "narmestelederUrl": "http://localhost:9097",

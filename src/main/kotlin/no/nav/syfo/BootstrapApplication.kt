@@ -57,6 +57,7 @@ import no.nav.syfo.service.KartleggingssporsmalVarselService
 import no.nav.syfo.service.ManglendeMedvirkningVarselService
 import no.nav.syfo.service.MerVeiledningVarselService
 import no.nav.syfo.service.MotebehovVarselService
+import no.nav.syfo.service.NyOppfolgingsplanVarselService
 import no.nav.syfo.service.OppfolgingsplanVarselService
 import no.nav.syfo.service.SenderFacade
 import no.nav.syfo.service.SykmeldingService
@@ -182,6 +183,11 @@ fun setModule(env: Environment): Application.() -> Unit = {
             narmesteLederService,
             pdlClient
         )
+    val nyOppfolgingsplanVarselService = NyOppfolgingsplanVarselService(
+        senderFacade = senderFacade,
+        accessControlService = accessControlService,
+        nyOppfolgingsplanUrl = env.urlEnv.nyOppfolgingsplanUrl,
+    )
     val merVeiledningVarselService = MerVeiledningVarselService(
         senderFacade = senderFacade,
         env = env,
@@ -220,6 +226,7 @@ fun setModule(env: Environment): Application.() -> Unit = {
             senderFacade,
             motebehovVarselService,
             oppfolgingsplanVarselService,
+            nyOppfolgingsplanVarselService,
             dialogmoteInnkallingSykmeldtVarselService,
             dialogmoteInnkallingNarmesteLederVarselService,
             aktivitetspliktForhandsvarselVarselService,
