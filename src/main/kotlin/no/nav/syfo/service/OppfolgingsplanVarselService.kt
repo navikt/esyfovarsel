@@ -9,13 +9,11 @@ import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL
 import no.nav.syfo.BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT
-import no.nav.syfo.BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_OPPRETTET_MESSAGE_TEXT
 import no.nav.syfo.DINE_SYKMELDTE_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdl.PdlClient
 import no.nav.syfo.consumer.pdl.fullName
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
-import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_OPPRETTET
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
@@ -38,14 +36,17 @@ class OppfolgingsplanVarselService(
 ) {
     companion object {
         private const val WEEKS_BEFORE_DELETE = 4L
-        private val log = LoggerFactory.getLogger(DialogmoteInnkallingNarmesteLederVarselService::class.qualifiedName)
+        private val log = LoggerFactory.getLogger(OppfolgingsplanVarselService::class.qualifiedName)
     }
 
     suspend fun sendVarselTilArbeidstaker(
         varselHendelse: ArbeidstakerHendelse
     ) {
         val eksternVarsling = accessControlService.canUserBeNotifiedByEmailOrSMS(varselHendelse.arbeidstakerFnr)
-        varsleArbeidstakerViaBrukernotifikasjoner(varselHendelse, eksternVarsling)
+        varsleArbeidstakerViaBrukernotifikasjoner(
+            varselHendelse = varselHendelse,
+            eksternVarsling = eksternVarsling,
+        )
     }
 
     suspend fun sendVarselTilNarmesteLeder(
@@ -155,12 +156,11 @@ class OppfolgingsplanVarselService(
 
     fun getMessageText(arbeidstakerHendelse: ArbeidstakerHendelse): String? =
         when (arbeidstakerHendelse.type) {
-            SM_OPPFOLGINGSPLAN_OPPRETTET -> BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_OPPRETTET_MESSAGE_TEXT
             SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT
             else -> {
                 log.error(
                     "Klarte ikke mappe varsel av type ${arbeidstakerHendelse.type} ved mapping av hendelsetype " +
-                        "til oppfolginsplanVarsel melding tekst"
+                            "til oppfolgingsplanVarsel melding tekst"
                 )
                 null
             }

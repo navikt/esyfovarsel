@@ -64,14 +64,14 @@ class OppfolgingsplanVarselServiceSpek : DescribeSpec({
                     any(),
                     fnr1,
                     any(),
-                    URI(fakeOppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL).toURL(),
+                    any(),
                     any(),
                     true,
                 )
             }
         }
 
-        it("Reserved users should only be notified on 'Min side'") {
+        it("Reserved users only notified on 'Min side'") {
             coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(fnr2) } returns false
             val varselHendelse = ArbeidstakerHendelse(
                 HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
