@@ -112,3 +112,8 @@ const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_BODY = """
     Vennlig hilsen Nav.
     <br/><br/>
     Du kan ikke svare på denne meldingen."""
+
+const val BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_MESSAGE_TEXT =
+    "Svar på tre spørsmål om ditt sykefravær"
+const val BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_SMS_TEXT =
+    "Hei! Nav har sendt deg noen spørsmål som vi ønsker at du skal svare på. Logg inn på Nav for å svare. Vennlig hilsen Nav"

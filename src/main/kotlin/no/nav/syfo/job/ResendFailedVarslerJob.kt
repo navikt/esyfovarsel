@@ -12,6 +12,7 @@ import no.nav.syfo.db.updateUtsendtVarselFeiletToResendt
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.service.DialogmoteInnkallingSykmeldtVarselService
+import no.nav.syfo.service.KartleggingssporsmalVarselService
 import no.nav.syfo.service.MerVeiledningVarselService
 import no.nav.syfo.service.MotebehovVarselService
 import no.nav.syfo.service.SenderFacade
@@ -23,6 +24,7 @@ class ResendFailedVarslerJob(
     private val motebehovVarselService: MotebehovVarselService,
     private val dialogmoteInnkallingSykmeldtVarselService: DialogmoteInnkallingSykmeldtVarselService,
     private val merVeiledningVarselService: MerVeiledningVarselService,
+    private val kartleggingVarselService: KartleggingssporsmalVarselService,
     private val senderFacade: SenderFacade
 ) {
     private val log = LoggerFactory.getLogger(ResendFailedVarslerJob::class.java)
@@ -82,6 +84,14 @@ class ResendFailedVarslerJob(
 
                 "SM_MER_VEILEDNING" -> {
                     val isResendt = merVeiledningVarselService.resendDigitaltVarselTilArbeidstaker(failedVarsel)
+                    if (isResendt) {
+                        db.updateUtsendtVarselFeiletToResendt(failedVarsel.uuid)
+                        resentCount++
+                    }
+                }
+
+                "SM_KARTLEGGINGSSPORSMAL" -> {
+                    val isResendt = kartleggingVarselService.resendDigitaltVarselTilArbeidstaker(failedVarsel)
                     if (isResendt) {
                         db.updateUtsendtVarselFeiletToResendt(failedVarsel.uuid)
                         resentCount++

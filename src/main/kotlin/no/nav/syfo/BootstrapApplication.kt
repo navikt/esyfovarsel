@@ -53,9 +53,11 @@ import no.nav.syfo.service.DialogmoteInnkallingNarmesteLederVarselService
 import no.nav.syfo.service.DialogmoteInnkallingSykmeldtVarselService
 import no.nav.syfo.service.FriskmeldingTilArbeidsformidlingVedtakService
 import no.nav.syfo.service.FysiskBrevUtsendingService
+import no.nav.syfo.service.KartleggingssporsmalVarselService
 import no.nav.syfo.service.ManglendeMedvirkningVarselService
 import no.nav.syfo.service.MerVeiledningVarselService
 import no.nav.syfo.service.MotebehovVarselService
+import no.nav.syfo.service.NyOppfolgingsplanVarselService
 import no.nav.syfo.service.OppfolgingsplanVarselService
 import no.nav.syfo.service.SenderFacade
 import no.nav.syfo.service.SykmeldingService
@@ -181,7 +183,17 @@ fun setModule(env: Environment): Application.() -> Unit = {
             narmesteLederService,
             pdlClient
         )
+    val nyOppfolgingsplanVarselService = NyOppfolgingsplanVarselService(
+        senderFacade = senderFacade,
+        accessControlService = accessControlService,
+        nyOppfolgingsplanUrl = env.urlEnv.nyOppfolgingsplanUrl,
+    )
     val merVeiledningVarselService = MerVeiledningVarselService(
+        senderFacade = senderFacade,
+        env = env,
+        accessControlService = accessControlService,
+    )
+    val kartleggingssporsmalVarselService = KartleggingssporsmalVarselService(
         senderFacade = senderFacade,
         env = env,
         accessControlService = accessControlService,
@@ -205,6 +217,7 @@ fun setModule(env: Environment): Application.() -> Unit = {
         motebehovVarselService = motebehovVarselService,
         dialogmoteInnkallingSykmeldtVarselService = dialogmoteInnkallingSykmeldtVarselService,
         merVeiledningVarselService = merVeiledningVarselService,
+        kartleggingVarselService = kartleggingssporsmalVarselService,
         senderFacade = senderFacade
     )
 
@@ -213,6 +226,7 @@ fun setModule(env: Environment): Application.() -> Unit = {
             senderFacade,
             motebehovVarselService,
             oppfolgingsplanVarselService,
+            nyOppfolgingsplanVarselService,
             dialogmoteInnkallingSykmeldtVarselService,
             dialogmoteInnkallingNarmesteLederVarselService,
             aktivitetspliktForhandsvarselVarselService,
@@ -220,7 +234,8 @@ fun setModule(env: Environment): Application.() -> Unit = {
             mikrofrontendService,
             friskmeldingTilArbeidsformidlingVedtakService,
             manglendeMedvirkningVarselService,
-            merVeiledningVarselService
+            merVeiledningVarselService,
+            kartleggingssporsmalVarselService
         )
 
     val testdataResetService = TestdataResetService(database, mikrofrontendService, senderFacade)
@@ -252,7 +267,7 @@ fun Application.serverModule(
     env: Environment,
     mikrofrontendService: MikrofrontendService,
     sendAktivitetspliktLetterToSentralPrintJob: SendAktivitetspliktLetterToSentralPrintJob,
-    resendFailedVarslerJob: ResendFailedVarslerJob
+    resendFailedVarslerJob: ResendFailedVarslerJob,
 ) {
     install(ContentNegotiation) {
         jackson {

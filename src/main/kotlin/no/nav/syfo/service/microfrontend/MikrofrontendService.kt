@@ -13,6 +13,8 @@ import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideEvent
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideRecord
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class MikrofrontendService(
     val minSideMicrofrontendKafkaProducer: MinSideMicrofrontendKafkaProducer,
@@ -21,6 +23,7 @@ class MikrofrontendService(
     val mikrofrontendMerOppfolgingService: MikrofrontendMerOppfolgingService,
     val database: DatabaseInterface
 ) {
+    private val log: Logger = LoggerFactory.getLogger(MikrofrontendService::class.qualifiedName)
 
     companion object {
         val actionEnabled = MinSideEvent.ENABLE.toString().lowercase()
@@ -29,6 +32,7 @@ class MikrofrontendService(
 
     fun updateMikrofrontendForUserByHendelse(hendelse: ArbeidstakerHendelse) {
         if (hendelse.isNotEligibleForMikrofrontendProcessing()) {
+            log.info("Skipping mikrofrontend processing for hendelse type=${hendelse.type}")
             return
         }
         val tjeneste = hendelse.type.toMikrofrontendTjenesteType()
@@ -115,7 +119,7 @@ class MikrofrontendService(
             HendelseType.SM_AKTIVITETSPLIKT
             -> Tjeneste.AKTIVITETSKRAV
 
-            HendelseType.SM_MER_VEILEDNING
+            HendelseType.SM_MER_VEILEDNING, HendelseType.SM_KARTLEGGINGSSPORSMAL
             -> Tjeneste.MER_OPPFOLGING
 
             else -> throw IllegalArgumentException("$this is not a valid type for updating MF state")

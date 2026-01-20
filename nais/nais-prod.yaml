@@ -6,7 +6,7 @@ metadata:
   labels:
     team: team-esyfo
 spec:
-  image: {{ image }}
+  image: {{image}}
   port: 8080
   liveness:
     path: /isAlive
@@ -128,6 +128,8 @@ spec:
       value: https://www.nav.no/syk/dialogmoter
     - name: BASE_URL_OPPFOLGINGSPLANER
       value: https://www.nav.no/syk/oppfolgingsplaner
+    - name: BASE_URL_NY_OPPFOLGINGSPLAN
+      value: https://www.nav.no/syk/oppfolgingsplan
     - name: AG_NOTIFIKASJON_PRODUSENT_API_URL
       value: http://notifikasjon-produsent-api.fager/api/graphql
     - name: AG_NOTIFIKASJON_PRODUSENT_API_SCOPE
