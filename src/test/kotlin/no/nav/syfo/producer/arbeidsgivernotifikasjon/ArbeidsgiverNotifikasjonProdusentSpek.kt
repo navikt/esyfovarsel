@@ -7,7 +7,7 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifika
 import no.nav.syfo.testutil.mocks.FNR_1
 import no.nav.syfo.testutil.mocks.FNR_2
 import no.nav.syfo.testutil.mocks.MockServers
-import no.nav.syfo.testutil.mocks.orgnummer
+import no.nav.syfo.testutil.mocks.ORGNUMMER
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -23,7 +23,7 @@ class ArbeidsgiverNotifikasjonProdusentSpek :
         val arbeidsgiverNotifikasjon =
             ArbeidsgiverNotifikasjon(
                 UUID.randomUUID().toString(),
-                orgnummer,
+                ORGNUMMER,
                 "",
                 FNR_1,
                 FNR_2,

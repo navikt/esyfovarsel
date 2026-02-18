@@ -15,7 +15,7 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaPr
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.FNR_1
 import no.nav.syfo.testutil.mocks.FNR_2
-import no.nav.syfo.testutil.mocks.orgnummer
+import no.nav.syfo.testutil.mocks.ORGNUMMER
 import java.net.URI
 
 class OppfolgingsplanVarselServiceSpek :
@@ -60,7 +60,7 @@ class OppfolgingsplanVarselServiceSpek :
                         false,
                         null,
                         FNR_1,
-                        orgnummer,
+                        ORGNUMMER,
                     )
                 oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse)
                 verify(exactly = 1) {
@@ -83,7 +83,7 @@ class OppfolgingsplanVarselServiceSpek :
                         false,
                         null,
                         FNR_2,
-                        orgnummer,
+                        ORGNUMMER,
                     )
                 oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse)
                 verify(exactly = 1) {

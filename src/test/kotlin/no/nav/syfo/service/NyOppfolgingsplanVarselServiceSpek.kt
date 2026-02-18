@@ -10,7 +10,7 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProdu
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.FNR_1
-import no.nav.syfo.testutil.mocks.orgnummer
+import no.nav.syfo.testutil.mocks.ORGNUMMER
 import java.net.URI
 
 class NyOppfolgingsplanVarselServiceSpek :
@@ -51,7 +51,7 @@ class NyOppfolgingsplanVarselServiceSpek :
                         ferdigstill = false,
                         data = null,
                         arbeidstakerFnr = FNR_1,
-                        orgnummer = orgnummer,
+                        orgnummer = ORGNUMMER,
                     )
 
                 service.sendVarselTilArbeidstaker(hendelse)

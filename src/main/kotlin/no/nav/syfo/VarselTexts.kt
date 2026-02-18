@@ -44,6 +44,8 @@ const val ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY =
         "Du kan ikke svare på denne meldingen.</body>"
 
 const val ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_TITLE = "Vurdering av ditt behov for dialogmøte"
+
+@Suppress("ktlint:standard:max-line-length")
 const val ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_BODY =
     "<body>Hei.<br>\n" +
         "Vi har mottatt ditt ønske om dialogmøte med Nav. Vi vurderer at det på nåværende tidspunkt ikke er aktuelt at Nav kaller inn til et dialogmøte. " +
@@ -55,6 +57,8 @@ const val ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_BODY =
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_MESSAGE_TEXT =
     "Du er innkalt til dialogmøte - vi trenger svaret ditt"
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_TITLE = "Innkalling til dialogmøte med Nav"
+
+@Suppress("ktlint:standard:max-line-length")
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_BODY =
     "Nav innkaller deg til et dialogmøte i forbindelse med en av dine ansatte sitt sykefravær. Av hensyn til personvernet kan vi ikke oppgi navnet i e-posten.<br>\n" +
         "Du kan lese og svare på møteinnkallingen ved å logge inn på “Min side - arbeidsgiver” og trykke på “Sykmeldte”. Da vil du også se hvem det gjelder.<br><br>\n" +
@@ -64,6 +68,8 @@ const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_BODY =
 
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_MESSAGE_TEXT = "Dialogmøtet med Nav er avlyst"
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_TITLE = "Dialogmøtet med Nav er avlyst"
+
+@Suppress("ktlint:standard:max-line-length")
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_BODY =
     "Dialogmøtet er avlyst.<br>" +
         "Du har tidligere fått en innkalling til et dialogmøte. Dette møtet vil likevel ikke bli avholdt. " +
@@ -74,6 +80,8 @@ const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_BODY =
 
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_MESSAGE_TEXT = "Dialogmøtet med Nav er flyttet"
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_TITLE = "Dialogmøtet med Nav er flyttet"
+
+@Suppress("ktlint:standard:max-line-length")
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_BODY =
     "Du er innkalt til et dialogmøte med Nav i forbindelse med en av dine ansatte sitt sykefravær. Tidspunktet eller stedet for et dialogmøte har blitt endret.<br>\n" +
         "Du kan lese og svare på endringen ved å logge inn på “Min side – arbeidsgiver” og trykke på “Sykmeldte”. Da vil du også se hvem det gjelder.<br><br>\n" +
@@ -84,6 +92,8 @@ const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_BODY =
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_MESSAGE_TEXT = "Du har mottatt et referat fra dialogmøte"
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_TITLE =
     "Referat fra dialogmøte med Nav er blitt tilgjengelig"
+
+@Suppress("ktlint:standard:max-line-length")
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_BODY =
     "Et referat fra dialogmøte med Nav er blitt tilgjengelig.<br>\n" +
         "Du finner oppfølgingsplanen ved å logge inn på \"Min side – arbeidsgiver\". I \"bjella\" ser du hvem det gjelder.<br><br>\n" +
@@ -94,6 +104,8 @@ const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_BODY =
 const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT = "Oppfølgingsplan til godkjenning"
 const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_TITLE =
     "En oppfølgingsplan venter på godkjenning fra deg"
+
+@Suppress("ktlint:standard:max-line-length")
 const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_BODY =
     "En av dine ansatte har sendt en oppfølgingsplan som venter på godkjenning fra deg.<br>\n" +
         "Du kan lese referatet ved å logge inn på \"Min side – arbeidsgiver\" og trykke på \"Sykmeldte\". Da vil du også se hvem det gjelder.<br><br>\n" +
@@ -118,5 +130,7 @@ const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_BODY = """
 
 const val BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_MESSAGE_TEXT =
     "Svar på tre spørsmål om ditt sykefravær"
+
+@Suppress("ktlint:standard:max-line-length")
 const val BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_SMS_TEXT =
     "Hei! Nav har sendt deg noen spørsmål som vi ønsker at du skal svare på. Logg inn på Nav for å svare. Vennlig hilsen Nav"

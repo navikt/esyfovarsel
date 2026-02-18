@@ -9,7 +9,7 @@ const val FNR_2 = "23456789012"
 const val FNR_3 = "34567890123"
 const val FNR_4 = "45678901234"
 const val FNR_5 = "45678901230"
-const val orgnummer = "999888777"
+const val ORGNUMMER = "999888777"
 
 val userAccessStatus1 = UserAccessStatus(FNR_1, true)
 val userAccessStatus2 = UserAccessStatus(FNR_2, true)

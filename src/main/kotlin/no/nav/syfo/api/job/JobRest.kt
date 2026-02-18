@@ -12,7 +12,7 @@ import no.nav.syfo.job.ResendFailedVarslerJob
 import no.nav.syfo.job.SendAktivitetspliktLetterToSentralPrintJob
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 
-const val urlPathJobTrigger = "/job/trigger"
+const val URL_PATH_JOB_TRIGGER = "/job/trigger"
 
 fun Route.registerJobTriggerApi(
     mikrofrontendService: MikrofrontendService,
@@ -20,7 +20,7 @@ fun Route.registerJobTriggerApi(
     resendFailedVarslerJob: ResendFailedVarslerJob,
 ) {
     accept(ContentType.Application.Json) {
-        post(urlPathJobTrigger) {
+        post(URL_PATH_JOB_TRIGGER) {
             call.respond(HttpStatusCode.OK)
             runBlocking {
                 launch {

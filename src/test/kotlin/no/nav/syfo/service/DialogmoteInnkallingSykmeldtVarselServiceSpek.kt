@@ -34,7 +34,7 @@ import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.FNR_1
 import no.nav.syfo.testutil.mocks.FNR_2
 import no.nav.syfo.testutil.mocks.FNR_3
-import no.nav.syfo.testutil.mocks.orgnummer
+import no.nav.syfo.testutil.mocks.ORGNUMMER
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
 
@@ -108,7 +108,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
                         false,
                         varselData(journalpostUuid, journalpostId),
                         FNR_1,
-                        orgnummer,
+                        ORGNUMMER,
                     )
                 dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
 
@@ -142,7 +142,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
                         false,
                         varselData(journalpostUuid, journalpostId),
                         FNR_2,
-                        orgnummer,
+                        ORGNUMMER,
                     )
                 dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
 
@@ -183,7 +183,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
                         false,
                         varselData(journalpostUuidAddressProtection, journalpostIdAddressProtection),
                         FNR_3,
-                        orgnummer,
+                        ORGNUMMER,
                     )
                 dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
                 verify(exactly = 0) {
@@ -222,7 +222,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
                         false,
                         varselData(journalpostUuid, journalpostId),
                         ARBEIDSTAKER_FNR_1,
-                        orgnummer,
+                        ORGNUMMER,
                     )
                 dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
 
@@ -258,7 +258,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
                         false,
                         varselData(journalpostUuid, journalpostId),
                         "66666666666",
-                        orgnummer,
+                        ORGNUMMER,
                     )
 
                 dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseInnkalling)
@@ -290,7 +290,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
                         false,
                         varselData(journalpostUuid, journalpostId),
                         "66666666666",
-                        orgnummer,
+                        ORGNUMMER,
                     )
 
                 dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)
@@ -337,7 +337,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
                         false,
                         varselData(journalpostUuid, journalpostId),
                         "66666666666",
-                        orgnummer,
+                        ORGNUMMER,
                     )
 
                 dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseInnkalling)
@@ -369,7 +369,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
                         false,
                         varselData(journalpostUuid, journalpostId),
                         "66666666666",
-                        orgnummer,
+                        ORGNUMMER,
                     )
 
                 dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseAvlyst)
@@ -416,7 +416,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
                         false,
                         varselData(journalpostUuid, journalpostId),
                         "66666666666",
-                        orgnummer,
+                        ORGNUMMER,
                     )
 
                 dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseInnkalling)
@@ -445,7 +445,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
                         false,
                         varselData(journalpostUuid, journalpostId),
                         "66666666666",
-                        orgnummer,
+                        ORGNUMMER,
                     )
 
                 dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseEndring)

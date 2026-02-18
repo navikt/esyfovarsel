@@ -166,6 +166,7 @@ tasks {
     withType<Test> {
         useJUnitPlatform()
     }
+
     named("check") {
         dependsOn("ktlintCheck")
     }
