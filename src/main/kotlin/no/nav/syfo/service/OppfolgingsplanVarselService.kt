@@ -160,7 +160,7 @@ class OppfolgingsplanVarselService(
             else -> {
                 log.error(
                     "Klarte ikke mappe varsel av type ${arbeidstakerHendelse.type} ved mapping av hendelsetype " +
-                            "til oppfolgingsplanVarsel melding tekst"
+                        "til oppfolgingsplanVarsel melding tekst"
                 )
                 null
             }
