@@ -2,7 +2,7 @@ package no.nav.syfo.db
 
 import java.sql.Timestamp
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 fun DatabaseInterface.storeFodselsdato(
     fnr: String,

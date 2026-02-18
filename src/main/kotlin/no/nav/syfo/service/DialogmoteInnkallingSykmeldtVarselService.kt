@@ -1,5 +1,11 @@
 package no.nav.syfo.service
 
+import java.io.IOException
+import java.io.Serializable
+import java.net.URI
+import java.net.URL
+import java.time.OffsetDateTime
+import java.util.UUID
 import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST
 import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST
 import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST
@@ -27,12 +33,6 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType
 import org.slf4j.LoggerFactory
-import java.io.IOException
-import java.io.Serializable
-import java.net.URI
-import java.net.URL
-import java.time.OffsetDateTime
-import java.util.*
 
 enum class DittSykefravaerHendelsetypeDialogmoteInnkalling : Serializable {
     ESYFOVARSEL_DIALOGMOTE_INNKALT,

@@ -1,7 +1,7 @@
 package no.nav.syfo.exceptions
 
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import java.io.IOException
+import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 
 class VeilederAlreadyBookedMeetingException :
     IllegalStateException(

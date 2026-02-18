@@ -1,7 +1,11 @@
 package no.nav.syfo.service.microfrontend
 
-import no.nav.syfo.db.*
+import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.toMikrofrontendSynlighet
+import no.nav.syfo.db.fetchFnrsWithExpiredMicrofrontendEntries
+import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
+import no.nav.syfo.db.updateMikrofrontendEntrySynligTomByExistingEntry
+import no.nav.syfo.db.updateMikrofrontendEntrySynligTomByFnrAndTjeneste
 import no.nav.syfo.exceptions.DuplicateMotebehovException
 import no.nav.syfo.exceptions.MotebehovAfterBookingException
 import no.nav.syfo.exceptions.VeilederAlreadyBookedMeetingException

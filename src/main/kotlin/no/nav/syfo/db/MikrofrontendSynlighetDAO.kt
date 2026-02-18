@@ -1,14 +1,14 @@
 package no.nav.syfo.db
 
-import no.nav.syfo.db.domain.PMikrofrontendSynlighet
-import no.nav.syfo.domain.PersonIdent
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import java.sql.Date
 import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
+import no.nav.syfo.db.domain.PMikrofrontendSynlighet
+import no.nav.syfo.domain.PersonIdent
+import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
+import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 
 fun DatabaseInterface.storeMikrofrontendSynlighetEntry(mikrofrontendSynlighet: MikrofrontendSynlighet) {
     val insertStatement =

@@ -5,6 +5,8 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederRelasjon
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.narmesteLeder.Tilgang
@@ -29,8 +31,6 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.KalenderTilstand
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.orgnummer
 import org.amshove.kluent.shouldBeEqualTo
-import java.time.LocalDateTime
-import java.util.*
 
 class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
     DescribeSpec({

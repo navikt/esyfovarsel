@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.verify
+import java.net.URI
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
@@ -11,7 +12,6 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaPr
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.fnr1
 import no.nav.syfo.testutil.mocks.orgnummer
-import java.net.URI
 
 class NyOppfolgingsplanVarselServiceSpek :
     DescribeSpec({

@@ -1,8 +1,8 @@
 package no.nav.syfo.db
 
 import io.kotest.core.spec.style.DescribeSpec
-import no.nav.syfo.testutil.*
-import org.amshove.kluent.*
+import no.nav.syfo.testutil.EmbeddedDatabase
+import org.amshove.kluent.shouldBeEqualTo
 
 class FodselsdatoDAOSpek :
     DescribeSpec({

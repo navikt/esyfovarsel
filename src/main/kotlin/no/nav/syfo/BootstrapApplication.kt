@@ -16,6 +16,8 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.routing.routing
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -69,8 +71,6 @@ import no.nav.syfo.service.microfrontend.MikrofrontendMerOppfolgingService
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.utils.LeaderElection
 import no.nav.syfo.utils.RunOnElection
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 val state: ApplicationState = ApplicationState()
 val backgroundTasksContext = Executors.newFixedThreadPool(4).asCoroutineDispatcher()

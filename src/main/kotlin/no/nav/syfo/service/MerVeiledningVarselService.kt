@@ -1,5 +1,9 @@
 package no.nav.syfo.service
 
+import java.net.URI
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.UUID
 import no.nav.syfo.BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT
 import no.nav.syfo.DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT
 import no.nav.syfo.Environment
@@ -14,10 +18,6 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
 import no.nav.syfo.metrics.tellMerVeiledningVarselSendt
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
 import no.nav.syfo.utils.dataToVarselData
-import java.net.URI
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.*
 
 const val DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING = "ESYFOVARSEL_MER_VEILEDNING"
 const val DAGER_TIL_DEAKTIVERING_AV_VARSEL: Long = 105

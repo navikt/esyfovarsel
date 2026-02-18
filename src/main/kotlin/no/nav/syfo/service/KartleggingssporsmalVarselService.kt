@@ -1,5 +1,7 @@
 package no.nav.syfo.service
 
+import java.net.URI
+import java.util.UUID
 import no.nav.syfo.BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_MESSAGE_TEXT
 import no.nav.syfo.BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_SMS_TEXT
 import no.nav.syfo.Environment
@@ -7,8 +9,6 @@ import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.metrics.countKartleggingssporsmalVarselSendt
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
-import java.net.URI
-import java.util.*
 
 class KartleggingssporsmalVarselService(
     val senderFacade: SenderFacade,

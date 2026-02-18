@@ -1,5 +1,6 @@
 package no.nav.syfo.job
 
+import java.util.UUID
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
@@ -17,7 +18,6 @@ import no.nav.syfo.service.MerVeiledningVarselService
 import no.nav.syfo.service.MotebehovVarselService
 import no.nav.syfo.service.SenderFacade
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 class ResendFailedVarslerJob(
     private val db: DatabaseInterface,

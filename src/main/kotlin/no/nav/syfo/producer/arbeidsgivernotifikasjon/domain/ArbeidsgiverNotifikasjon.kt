@@ -14,8 +14,8 @@ import com.apollo.graphql.type.NyBeskjedInput
 import com.apollo.graphql.type.SendetidspunktInput
 import com.apollo.graphql.type.Sendevindu
 import com.apollographql.apollo.api.Optional
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601DateTime
 import java.time.LocalDateTime
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601DateTime
 
 data class ArbeidsgiverNotifikasjon(
     val varselId: String,

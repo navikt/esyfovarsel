@@ -1,5 +1,8 @@
 package no.nav.syfo.service
 
+import java.net.URL
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.Kanal
@@ -42,9 +45,6 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toPKalenderInput
 import no.nav.syfo.utils.enumValueOfOrNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.URL
-import java.time.LocalDateTime
-import java.util.*
 
 class SenderFacade(
     private val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,

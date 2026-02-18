@@ -1,10 +1,10 @@
 package no.nav.syfo.kafka.consumers.varselbus.domain
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import no.nav.syfo.exceptions.MotetidspunktValidationException
-import no.nav.syfo.kafka.common.createObjectMapper
 import java.io.Serializable
 import java.time.LocalDateTime
+import no.nav.syfo.exceptions.MotetidspunktValidationException
+import no.nav.syfo.kafka.common.createObjectMapper
 
 private val objectMapper = createObjectMapper()
 

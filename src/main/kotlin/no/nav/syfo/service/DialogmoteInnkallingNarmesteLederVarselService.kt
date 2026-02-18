@@ -1,5 +1,8 @@
 package no.nav.syfo.service
 
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.util.UUID
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdl.HentPersonData
@@ -25,9 +28,6 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyStatusSakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toKalenderTilstand
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.util.*
 
 class DialogmoteInnkallingNarmesteLederVarselService(
     private val senderFacade: SenderFacade,

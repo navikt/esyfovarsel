@@ -1,14 +1,16 @@
 package no.nav.syfo.service
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
-import io.mockk.*
+import io.mockk.clearAllMocks
+import io.mockk.coVerify
+import io.mockk.mockk
+import java.io.IOException
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselData
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataJournalpost
 import org.amshove.kluent.shouldBeEqualTo
-import java.io.IOException
 
 class FriskmeldingTilArbeidsformidlingVedtakServiceTest :
     DescribeSpec({

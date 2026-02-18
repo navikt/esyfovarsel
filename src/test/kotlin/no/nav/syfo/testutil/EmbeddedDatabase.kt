@@ -2,14 +2,14 @@ package no.nav.syfo.testutil
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import java.sql.Connection
+import java.time.Duration
 import no.nav.syfo.db.DatabaseInterface
 import org.flywaydb.core.Flyway
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
-import java.sql.Connection
-import java.time.Duration
 
 class EmbeddedDatabase : DatabaseInterface {
     companion object {

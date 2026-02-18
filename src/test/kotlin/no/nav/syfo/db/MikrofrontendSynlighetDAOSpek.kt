@@ -1,6 +1,7 @@
 package no.nav.syfo.db
 
 import io.kotest.core.spec.style.DescribeSpec
+import java.time.LocalDate
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
 import no.nav.syfo.testutil.EmbeddedDatabase
@@ -8,7 +9,6 @@ import no.nav.syfo.testutil.shouldContainMikrofrontendEntry
 import no.nav.syfo.testutil.shouldNotContainMikrofrontendEntryForUser
 import org.amshove.kluent.should
 import org.amshove.kluent.shouldBeEqualTo
-import java.time.LocalDate
 
 class MikrofrontendSynlighetDAOSpek :
     DescribeSpec({

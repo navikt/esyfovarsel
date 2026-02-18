@@ -8,6 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.append
+import java.io.IOException
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.exceptions.JournalpostDistribusjonException
@@ -15,7 +16,6 @@ import no.nav.syfo.exceptions.JournalpostDistribusjonGoneException
 import no.nav.syfo.exceptions.JournalpostNetworkException
 import no.nav.syfo.utils.httpClientWithRetry
 import org.slf4j.LoggerFactory
-import java.io.IOException
 
 class JournalpostdistribusjonConsumer(
     urlEnv: UrlEnv,

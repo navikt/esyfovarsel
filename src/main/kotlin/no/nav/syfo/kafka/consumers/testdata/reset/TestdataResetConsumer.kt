@@ -1,15 +1,18 @@
 package no.nav.syfo.kafka.consumers.testdata.reset
 
+import java.util.Properties
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import no.nav.syfo.domain.PersonIdent
-import no.nav.syfo.kafka.common.*
+import no.nav.syfo.kafka.common.KafkaListener
+import no.nav.syfo.kafka.common.consumerProperties
+import no.nav.syfo.kafka.common.pollDurationInMillis
+import no.nav.syfo.kafka.common.topicTestdataReset
 import no.nav.syfo.service.TestdataResetService
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.*
 
 class TestdataResetConsumer(
     val env: Environment,

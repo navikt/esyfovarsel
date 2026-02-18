@@ -5,6 +5,9 @@ import io.mockk.clearAllMocks
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDateTime
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import no.nav.syfo.db.arbeidstakerFnr1
 import no.nav.syfo.db.arbeidstakerFnr2
 import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
@@ -26,9 +29,6 @@ import no.nav.syfo.testutil.shouldContainMikrofrontendEntry
 import no.nav.syfo.testutil.shouldContainMikrofrontendEntryWithSynligTom
 import no.nav.syfo.testutil.shouldContainMikrofrontendEntryWithoutSynligTom
 import no.nav.syfo.testutil.shouldNotContainMikrofrontendEntryForUser
-import java.time.LocalDateTime
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 class MikrofrontendServiceSpek :
     DescribeSpec({

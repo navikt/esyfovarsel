@@ -6,8 +6,8 @@ import com.apollo.graphql.type.HardDeleteUpdateInput
 import com.apollo.graphql.type.NyTidStrategi
 import com.apollo.graphql.type.SaksStatus
 import com.apollographql.apollo.api.Optional
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601DateTime
 import java.time.LocalDateTime
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601DateTime
 
 data class NyStatusSakInput(
     val grupperingsId: String,

@@ -1,5 +1,7 @@
 package no.nav.syfo.service
 
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
@@ -12,8 +14,6 @@ import no.nav.syfo.service.Meldingstype.BESKJED
 import no.nav.syfo.service.Meldingstype.OPPGAVE
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.util.*
 
 class ArbeidsgiverNotifikasjonService(
     private val arbeidsgiverNotifikasjonProdusent: ArbeidsgiverNotifikasjonProdusent,

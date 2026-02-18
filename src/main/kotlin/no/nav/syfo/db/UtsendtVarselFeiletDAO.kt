@@ -1,9 +1,9 @@
 package no.nav.syfo.db
 
+import java.sql.Timestamp
+import java.util.UUID
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.domain.PersonIdent
-import java.sql.Timestamp
-import java.util.*
 
 fun DatabaseInterface.fetchUtsendtBrukernotifikasjonVarselFeilet(): List<PUtsendtVarselFeilet> {
     val queryStatement =

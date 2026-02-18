@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import java.net.URI
 import no.nav.syfo.BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_SMS_TEXT
 import no.nav.syfo.BRUKERNOTIFIKASJON_AKTIVITETSKRAV_FORHANDSVARSEL_STANS_TEXT
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
@@ -7,7 +8,6 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
 import no.nav.syfo.utils.dataToVarselData
 import org.slf4j.LoggerFactory
-import java.net.URI
 
 class AktivitetspliktForhandsvarselVarselService(
     val senderFacade: SenderFacade,
