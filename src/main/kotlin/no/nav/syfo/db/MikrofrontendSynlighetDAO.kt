@@ -2,8 +2,8 @@ package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PMikrofrontendSynlighet
 import no.nav.syfo.domain.PersonIdent
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MikrofrontendSynlighet
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.Tjeneste
 import java.sql.Date
 import java.sql.Timestamp
 import java.time.LocalDate

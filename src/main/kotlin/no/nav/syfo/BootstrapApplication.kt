@@ -41,11 +41,11 @@ import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.service.AccessControlService
-import no.nav.syfo.service.AktivitetspliktForhandsvarselVarselService
+import no.nav.syfo.service.AktivitetspliktForhandsvarselService
 import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
 import no.nav.syfo.service.ArbeidsuforhetForhandsvarselService
 import no.nav.syfo.service.BrukernotifikasjonerService
@@ -174,8 +174,8 @@ fun setModule(env: Environment): Application.() -> Unit =
                 pdlClient = pdlClient,
             )
 
-        val aktivitetspliktForhandsvarselVarselService =
-            AktivitetspliktForhandsvarselVarselService(
+        val aktivitetspliktForhandsvarselService =
+            AktivitetspliktForhandsvarselService(
                 senderFacade,
                 accessControlService,
                 env.urlEnv.urlAktivitetskravInfoPage,
@@ -242,7 +242,7 @@ fun setModule(env: Environment): Application.() -> Unit =
                 nyOppfolgingsplanVarselService,
                 dialogmoteInnkallingSykmeldtVarselService,
                 dialogmoteInnkallingNarmesteLederVarselService,
-                aktivitetspliktForhandsvarselVarselService,
+                aktivitetspliktForhandsvarselService,
                 arbeidsuforhetForhandsvarselService,
                 mikrofrontendService,
                 friskmeldingTilArbeidsformidlingVedtakService,

@@ -16,8 +16,8 @@ import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MikrofrontendSynlighet
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.Tjeneste
 import no.nav.syfo.planner.ARBEIDSTAKER_FNR_1
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.testutil.EmbeddedDatabase

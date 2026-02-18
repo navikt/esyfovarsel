@@ -1,4 +1,4 @@
-package no.nav.syfo.kafka.producers.mineside_microfrontend
+package no.nav.syfo.kafka.producers.minesidemicrofrontend
 
 import java.time.LocalDate
 

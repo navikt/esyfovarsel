@@ -41,7 +41,7 @@ class VarselBusService(
     private val nyOppfolgingsplanVarselService: NyOppfolgingsplanVarselService,
     private val dialogmoteInnkallingSykmeldtVarselService: DialogmoteInnkallingSykmeldtVarselService,
     private val dialogmoteInnkallingNarmesteLederVarselService: DialogmoteInnkallingNarmesteLederVarselService,
-    private val aktivitetspliktForhandsvarselVarselService: AktivitetspliktForhandsvarselVarselService,
+    private val aktivitetspliktForhandsvarselService: AktivitetspliktForhandsvarselService,
     private val arbeidsuforhetForhandsvarselService: ArbeidsuforhetForhandsvarselService,
     private val mikrofrontendService: MikrofrontendService,
     private val friskmeldingTilArbeidsformidlingVedtakService: FriskmeldingTilArbeidsformidlingVedtakService,
@@ -115,7 +115,7 @@ class VarselBusService(
                     )
 
                 SM_AKTIVITETSPLIKT ->
-                    aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(
+                    aktivitetspliktForhandsvarselService.sendVarselTilArbeidstaker(
                         varselHendelse.toArbeidstakerHendelse(),
                     )
 

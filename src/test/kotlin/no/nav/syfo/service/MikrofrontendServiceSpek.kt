@@ -15,8 +15,8 @@ import no.nav.syfo.exceptions.MotebehovAfterBookingException
 import no.nav.syfo.exceptions.VeilederAlreadyBookedMeetingException
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MinSideMicrofrontendKafkaProducer
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.Tjeneste
 import no.nav.syfo.service.microfrontend.MikrofrontendAktivitetskravService
 import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
 import no.nav.syfo.service.microfrontend.MikrofrontendMerOppfolgingService

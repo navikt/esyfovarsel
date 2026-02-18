@@ -1,4 +1,4 @@
-package no.nav.syfo.kafka.producers.mineside_microfrontend
+package no.nav.syfo.kafka.producers.minesidemicrofrontend
 
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.TOPIC_MIN_SIDE_MICROFRONTEND

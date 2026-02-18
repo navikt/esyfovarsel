@@ -7,8 +7,8 @@ import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
 import no.nav.syfo.db.updateMikrofrontendEntrySynligTomByFnrAndTjeneste
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.getSynligTom
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideRecord
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MinSideRecord
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.Tjeneste
 import no.nav.syfo.service.microfrontend.MikrofrontendService.Companion.actionEnabled
 import no.nav.syfo.utils.dataToVarselData
 

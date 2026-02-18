@@ -1,6 +1,6 @@
 package no.nav.syfo.exceptions
 
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.Tjeneste
 import java.io.IOException
 
 class VeilederAlreadyBookedMeetingException :

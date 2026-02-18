@@ -8,11 +8,11 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.getSynligTom
 import no.nav.syfo.kafka.consumers.varselbus.domain.isNotEligibleForMikrofrontendProcessing
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideEvent
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideRecord
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MikrofrontendSynlighet
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MinSideEvent
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MinSideMicrofrontendKafkaProducer
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MinSideRecord
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.Tjeneste
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

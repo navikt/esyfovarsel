@@ -9,7 +9,7 @@ import no.nav.syfo.utils.dataToVarselData
 import org.slf4j.LoggerFactory
 import java.net.URI
 
-class AktivitetspliktForhandsvarselVarselService(
+class AktivitetspliktForhandsvarselService(
     val senderFacade: SenderFacade,
     val accessControlService: AccessControlService,
     val urlAktivitetskravInfoPage: String,
@@ -54,6 +54,6 @@ class AktivitetspliktForhandsvarselVarselService(
     }
 
     companion object {
-        private val log = LoggerFactory.getLogger(AktivitetspliktForhandsvarselVarselService::class.qualifiedName)
+        private val log = LoggerFactory.getLogger(AktivitetspliktForhandsvarselService::class.qualifiedName)
     }
 }

@@ -22,8 +22,8 @@ class AktivitetskravVarselServiceTest :
     DescribeSpec({
         val accessControlService = mockk<AccessControlService>()
         val senderFacade = mockk<SenderFacade>(relaxed = true)
-        val aktivitetspliktForhandsvarselVarselService =
-            AktivitetspliktForhandsvarselVarselService(
+        val aktivitetspliktForhandsvarselService =
+            AktivitetspliktForhandsvarselService(
                 senderFacade,
                 accessControlService,
                 "http://dokumentarkivOppfolgingDocumentsPageUrl",
@@ -44,7 +44,7 @@ class AktivitetskravVarselServiceTest :
                         canUserBeDigitallyNotified = true,
                     )
 
-                aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
+                aktivitetspliktForhandsvarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
 
                 coVerify(exactly = 0) {
                     senderFacade.sendBrevTilFysiskPrint(
@@ -83,7 +83,7 @@ class AktivitetskravVarselServiceTest :
 
                 val exception =
                     shouldThrow<IOException> {
-                        aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
+                        aktivitetspliktForhandsvarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
                     }
 
                 exception.message shouldBeEqualTo "ArbeidstakerHendelse har feil format"
@@ -119,7 +119,7 @@ class AktivitetskravVarselServiceTest :
                 val arbeidstakerHendelse = objectMapper.readValue(jsondata, ArbeidstakerHendelse::class.java)
                 arbeidstakerHendelse.data = objectMapper.readTree(jsondata)["data"]
 
-                aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelse)
+                aktivitetspliktForhandsvarselService.sendVarselTilArbeidstaker(arbeidstakerHendelse)
 
                 coVerify(exactly = 1) {
                     senderFacade.sendBrevTilFysiskPrint(

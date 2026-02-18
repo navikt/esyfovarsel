@@ -1,7 +1,7 @@
 package no.nav.syfo.db.domain
 
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MikrofrontendSynlighet
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.Tjeneste
 import java.time.LocalDate
 import java.time.LocalDateTime
 

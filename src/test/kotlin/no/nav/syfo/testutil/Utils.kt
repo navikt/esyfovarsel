@@ -2,7 +2,7 @@ package no.nav.syfo.testutil
 
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.Tjeneste
 import org.amshove.kluent.should
 
 fun String.extractPortFromUrl(): Int {
