@@ -23,14 +23,14 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataMotetidspunkt
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataNarmesteLeder
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
-import no.nav.syfo.planner.ARBEIDSTAKER_AKTOR_ID_1
-import no.nav.syfo.planner.ARBEIDSTAKER_FNR_1
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.KalenderTilstand
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.orgnummer
 import org.amshove.kluent.shouldBeEqualTo
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.syfo.planner.ARBEIDSTAKER_AKTOR_ID_1
+import no.nav.syfo.planner.ARBEIDSTAKER_FNR_1
 
 class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
     DescribeSpec({

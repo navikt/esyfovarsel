@@ -18,13 +18,14 @@ import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.minesidemicrofrontend.MikrofrontendSynlighet
 import no.nav.syfo.kafka.producers.minesidemicrofrontend.Tjeneste
-import no.nav.syfo.planner.ARBEIDSTAKER_FNR_1
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import org.amshove.kluent.shouldBeEqualTo
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.syfo.planner.ARBEIDSTAKER_AKTOR_ID_1
+import no.nav.syfo.planner.ARBEIDSTAKER_FNR_1
 
 class TestdataResetServiceSpek :
     DescribeSpec({
@@ -57,7 +58,7 @@ class TestdataResetServiceSpek :
                     UUID.randomUUID().toString(),
                     null,
                     ARBEIDSTAKER_FNR_1,
-                    no.nav.syfo.planner.ARBEIDSTAKER_AKTOR_ID_1,
+                    ARBEIDSTAKER_AKTOR_ID_1,
                     null,
                     HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV.name,
                     null,

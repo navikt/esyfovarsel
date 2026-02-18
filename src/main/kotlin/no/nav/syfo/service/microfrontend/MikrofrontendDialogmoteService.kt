@@ -24,7 +24,7 @@ class MikrofrontendDialogmoteService(
     private val log = LoggerFactory.getLogger(MikrofrontendDialogmoteService::class.qualifiedName)
 
     companion object {
-        const val dialogmoteMikrofrontendId = "syfo-dialog"
+        const val DIALOGMOTE_MIKROFRONTEND_ID = "syfo-dialog"
     }
 
     fun updateDialogmoteFrontendForUserByHendelse(hendelse: ArbeidstakerHendelse): MinSideRecord? =
@@ -42,7 +42,7 @@ class MikrofrontendDialogmoteService(
     fun findExpiredDialogmoteMikrofrontends(): List<Triple<String, String, Tjeneste>> =
         database
             .fetchFnrsWithExpiredMicrofrontendEntries(Tjeneste.DIALOGMOTE)
-            .map { Triple(it, dialogmoteMikrofrontendId, Tjeneste.DIALOGMOTE) }
+            .map { Triple(it, DIALOGMOTE_MIKROFRONTEND_ID, Tjeneste.DIALOGMOTE) }
 
     private fun setNewDateForMikrofrontendUser(hendelse: ArbeidstakerHendelse): MinSideRecord? {
         return database
@@ -144,13 +144,13 @@ class MikrofrontendDialogmoteService(
         MinSideRecord(
             eventType = actionEnabled,
             fnr = fnr,
-            microfrontendId = dialogmoteMikrofrontendId,
+            microfrontendId = DIALOGMOTE_MIKROFRONTEND_ID,
         )
 
     fun minSideRecordDisabled(fnr: String) =
         MinSideRecord(
             eventType = actionDisabled,
             fnr = fnr,
-            microfrontendId = dialogmoteMikrofrontendId,
+            microfrontendId = DIALOGMOTE_MIKROFRONTEND_ID,
         )
 }
