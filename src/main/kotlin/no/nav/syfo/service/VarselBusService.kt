@@ -95,7 +95,7 @@ class VarselBusService(
                 NL_DIALOGMOTE_REFERAT,
                 NL_DIALOGMOTE_NYTT_TID_STED,
                 NL_DIALOGMOTE_SVAR,
-                    ->
+                ->
                     dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(
                         varselHendelse.toNarmestelederHendelse()
                     )
@@ -105,7 +105,7 @@ class VarselBusService(
                 SM_DIALOGMOTE_REFERAT,
                 SM_DIALOGMOTE_NYTT_TID_STED,
                 SM_DIALOGMOTE_LEST,
-                    -> dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(
+                -> dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(
                     varselHendelse.toArbeidstakerHendelse()
                 )
 
