@@ -1,8 +1,8 @@
 package no.nav.syfo.utils
 
 import io.kotest.core.spec.style.DescribeSpec
-import java.time.LocalDate
 import org.amshove.kluent.shouldBe
+import java.time.LocalDate
 
 class DateUtilSpek :
     DescribeSpec({

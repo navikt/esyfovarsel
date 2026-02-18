@@ -1,9 +1,9 @@
 package no.nav.syfo.db.domain
 
-import java.time.LocalDate
-import java.time.LocalDateTime
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class PMikrofrontendSynlighet(
     val uuid: String,

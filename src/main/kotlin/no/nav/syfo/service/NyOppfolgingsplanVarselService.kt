@@ -1,12 +1,12 @@
 package no.nav.syfo.service
 
-import java.net.URI
-import java.util.UUID
 import no.nav.syfo.BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_OPPRETTET_MESSAGE_TEXT
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.BESKJED
 import org.slf4j.LoggerFactory
+import java.net.URI
+import java.util.UUID
 
 class NyOppfolgingsplanVarselService(
     private val senderFacade: SenderFacade,

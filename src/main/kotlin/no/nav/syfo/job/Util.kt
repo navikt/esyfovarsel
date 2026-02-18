@@ -4,12 +4,12 @@ import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
-import java.util.Base64
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.JobEnv
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 import org.slf4j.helpers.Util
+import java.util.Base64
 
 fun closeExpiredMicrofrontendsJob(env: JobEnv) {
     val logg = LoggerFactory.getLogger(Util::class.java)

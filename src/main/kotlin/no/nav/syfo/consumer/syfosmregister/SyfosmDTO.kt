@@ -1,8 +1,5 @@
 package no.nav.syfo.consumer.syfosmregister
 
-import java.io.Serializable
-import java.time.LocalDate
-import java.time.OffsetDateTime
 import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.ArbeidsgiverDTO
 import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.BehandlerDTO
 import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.BehandlingsutfallDTO
@@ -14,6 +11,9 @@ import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.PrognoseDTO
 import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.SporsmalSvarDTO
 import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.SykmeldingStatusDTO
 import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.SykmeldingsperiodeDTO
+import java.io.Serializable
+import java.time.LocalDate
+import java.time.OffsetDateTime
 
 data class SykmeldingDTO(
     val id: String,

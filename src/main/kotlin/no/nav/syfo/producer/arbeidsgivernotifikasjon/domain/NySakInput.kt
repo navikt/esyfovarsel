@@ -6,8 +6,8 @@ import com.apollo.graphql.type.MottakerInput
 import com.apollo.graphql.type.NaermesteLederMottakerInput
 import com.apollo.graphql.type.SaksStatus
 import com.apollographql.apollo.api.Optional
-import java.time.LocalDateTime
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601DateTime
+import java.time.LocalDateTime
 
 data class NySakInput(
     val grupperingsid: String,

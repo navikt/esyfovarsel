@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import java.time.Duration
-import java.util.Properties
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import org.apache.kafka.clients.CommonClientConfigs.GROUP_ID_CONFIG
@@ -28,6 +26,8 @@ import org.apache.kafka.common.config.SslConfigs.SSL_KEY_PASSWORD_CONFIG
 import org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG
 import org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG
 import org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG
+import java.time.Duration
+import java.util.Properties
 
 const val topicDineSykmeldteHendelse = "team-esyfo.dinesykmeldte-hendelser-v2"
 const val topicVarselBus = "team-esyfo.varselbus"

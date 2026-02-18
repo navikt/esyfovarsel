@@ -1,9 +1,9 @@
 package no.nav.syfo.db
 
-import java.sql.ResultSet
 import no.nav.syfo.db.domain.PMikrofrontendSynlighet
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
+import java.sql.ResultSet
 
 fun <T> ResultSet.toList(mapper: ResultSet.() -> T) =
     mutableListOf<T>().apply {

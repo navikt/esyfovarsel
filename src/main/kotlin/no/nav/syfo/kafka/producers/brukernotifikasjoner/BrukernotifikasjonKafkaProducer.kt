@@ -1,8 +1,5 @@
 package no.nav.syfo.kafka.producers.brukernotifikasjoner
 
-import java.net.URL
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.producerProperties
 import no.nav.tms.varsel.action.EksternKanal
@@ -16,6 +13,9 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.URL
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 class BrukernotifikasjonKafkaProducer(
     val env: Environment,

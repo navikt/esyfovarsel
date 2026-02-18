@@ -6,12 +6,12 @@ import io.ktor.client.request.headers
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.append
-import java.net.InetAddress
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.syfo.getEnvVar
 import no.nav.syfo.objectMapper
 import org.slf4j.LoggerFactory
+import java.net.InetAddress
 
 data class RunOnElection(
     val name: String,

@@ -1,6 +1,5 @@
 package no.nav.syfo.kafka.producers.dinesykmeldte
 
-import java.time.OffsetDateTime
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.producerProperties
 import no.nav.syfo.kafka.common.topicDineSykmeldteHendelse
@@ -11,6 +10,7 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.domain.OpprettHendelse
 import no.nav.syfo.utils.norwegianOffsetDateTime
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import java.time.OffsetDateTime
 
 class DineSykmeldteHendelseKafkaProducer(
     val env: Environment,

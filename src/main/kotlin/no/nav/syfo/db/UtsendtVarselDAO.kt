@@ -1,10 +1,10 @@
 package no.nav.syfo.db
 
+import no.nav.syfo.db.domain.PUtsendtVarsel
+import no.nav.syfo.domain.PersonIdent
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.syfo.db.domain.PUtsendtVarsel
-import no.nav.syfo.domain.PersonIdent
 
 fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
     val insertStatement =

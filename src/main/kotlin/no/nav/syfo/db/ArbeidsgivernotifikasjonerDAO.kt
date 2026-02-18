@@ -1,17 +1,17 @@
 package no.nav.syfo.db
 
 import com.apollo.graphql.type.SaksStatus
+import no.nav.syfo.db.domain.PKalenderInput
+import no.nav.syfo.db.domain.PSakInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.KalenderTilstand
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.SQLIntegrityConstraintViolationException
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.syfo.db.domain.PKalenderInput
-import no.nav.syfo.db.domain.PSakInput
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.KalenderTilstand
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
 
 fun DatabaseInterface.storeArbeidsgivernotifikasjonerSak(sakInput: NySakInput): String {
     val uuid = UUID.randomUUID()

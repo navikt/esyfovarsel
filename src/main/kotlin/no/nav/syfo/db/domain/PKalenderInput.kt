@@ -1,7 +1,7 @@
 package no.nav.syfo.db.domain
 
-import java.time.LocalDateTime
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.KalenderTilstand
+import java.time.LocalDateTime
 
 data class PKalenderInput(
     val sakId: String,

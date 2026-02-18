@@ -1,8 +1,8 @@
 package no.nav.syfo.db.domain
 
-import java.time.LocalDateTime
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import java.time.LocalDateTime
 
 data class PUtsendtVarselFeilet(
     val uuid: String,

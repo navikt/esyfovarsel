@@ -1,8 +1,5 @@
 package no.nav.syfo.service
 
-import java.io.IOException
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_TITLE
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_MESSAGE_TEXT
@@ -24,6 +21,9 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataNarmesteLeder
 import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
 import org.slf4j.LoggerFactory
+import java.io.IOException
+import java.time.LocalDateTime
+import java.util.UUID
 
 /**
  * This class handles dialogmøte-changes "the old way" (without kalenderavtale and sak).

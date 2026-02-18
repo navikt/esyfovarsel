@@ -2,11 +2,11 @@ package no.nav.syfo.db
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import java.sql.Connection
 import no.nav.syfo.DbEnv
 import org.flywaydb.core.Flyway
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.sql.Connection
 
 const val postgresJdbcPrefix = "jdbc:postgresql"
 

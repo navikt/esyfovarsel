@@ -1,12 +1,12 @@
 package no.nav.syfo.service
 
-import java.net.URL
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.BESKJED
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.DONE
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.URL
 
 class BrukernotifikasjonerService(
     val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,

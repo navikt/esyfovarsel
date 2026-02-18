@@ -5,8 +5,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import java.time.LocalDateTime
-import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.db.domain.PUtsendtVarsel
@@ -24,6 +22,8 @@ import no.nav.syfo.service.MotebehovVarselService
 import no.nav.syfo.service.SenderFacade
 import no.nav.syfo.testutil.EmbeddedDatabase
 import org.amshove.kluent.shouldBeEqualTo
+import java.time.LocalDateTime
+import java.util.UUID
 
 class ResendFailedVarslerJobTest :
     DescribeSpec({

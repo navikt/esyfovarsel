@@ -6,10 +6,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDateTime
-import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import no.nav.syfo.db.arbeidstakerAktorId1
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PUtsendtVarsel
@@ -25,6 +21,10 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProdu
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.planner.arbeidstakerFnr1
 import no.nav.syfo.testutil.EmbeddedDatabase
+import java.time.LocalDateTime
+import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class SenderFacadeSpek :
     DescribeSpec({

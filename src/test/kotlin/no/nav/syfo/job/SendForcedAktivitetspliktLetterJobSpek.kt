@@ -3,8 +3,6 @@ package no.nav.syfo.job
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coVerify
 import io.mockk.mockk
-import java.time.LocalDateTime
-import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
@@ -13,6 +11,8 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.service.SenderFacade
 import no.nav.syfo.testutil.EmbeddedDatabase
 import org.amshove.kluent.shouldBeEqualTo
+import java.time.LocalDateTime
+import java.util.UUID
 
 class SendForcedAktivitetspliktLetterJobSpek :
     DescribeSpec({

@@ -21,12 +21,12 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
 import io.ktor.serialization.jackson.jackson
-import java.net.ProxySelector
-import java.time.Instant
 import no.nav.syfo.AuthEnv
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.ProxySelector
+import java.time.Instant
 
 class AzureAdTokenConsumer(
     authEnv: AuthEnv,

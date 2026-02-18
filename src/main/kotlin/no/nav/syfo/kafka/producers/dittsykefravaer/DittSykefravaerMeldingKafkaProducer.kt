@@ -1,6 +1,5 @@
 package no.nav.syfo.kafka.producers.dittsykefravaer
 
-import java.time.Instant
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.producerProperties
 import no.nav.syfo.kafka.common.topicDittSykefravaerMelding
@@ -8,6 +7,7 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.LukkMelding
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import java.time.Instant
 
 class DittSykefravaerMeldingKafkaProducer(
     val env: Environment,

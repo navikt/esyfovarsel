@@ -1,9 +1,5 @@
 package no.nav.syfo.service
 
-import java.net.URI
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.util.UUID
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_TITLE
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_MESSAGE_TEXT
@@ -26,6 +22,10 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.BESKJED
 import org.slf4j.LoggerFactory
+import java.net.URI
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.util.UUID
 
 class OppfolgingsplanVarselService(
     private val senderFacade: SenderFacade,

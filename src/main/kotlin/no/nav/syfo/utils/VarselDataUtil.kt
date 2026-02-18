@@ -1,8 +1,8 @@
 package no.nav.syfo.utils
 
-import java.io.IOException
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselData
 import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
+import java.io.IOException
 
 fun dataToVarselData(data: Any?): VarselData {
     return data?.let {

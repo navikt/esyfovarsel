@@ -15,11 +15,11 @@ import io.ktor.serialization.jackson.jackson
 import io.ktor.server.auth.UserPasswordCredential
 import io.ktor.server.auth.jwt.JWTCredential
 import io.ktor.server.auth.jwt.JWTPrincipal
-import java.net.ProxySelector
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.syfo.AuthEnv
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
+import java.net.ProxySelector
 
 fun validBasicAuthCredentials(
     authEnv: AuthEnv,

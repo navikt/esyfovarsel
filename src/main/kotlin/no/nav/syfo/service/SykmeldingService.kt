@@ -1,8 +1,8 @@
 package no.nav.syfo.service
 
-import java.time.LocalDate
 import no.nav.syfo.consumer.syfosmregister.SykmeldingDTO
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
+import java.time.LocalDate
 
 data class SykmeldingStatus(
     val isSykmeldtIJobb: Boolean,
