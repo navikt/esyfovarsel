@@ -21,29 +21,29 @@ class MikrofrontendSynlighetDAOSpek :
 
             val mikrofrontendSynlighet1 =
                 MikrofrontendSynlighet(
-                    arbeidstakerFnr1,
+                    ARBEIDSTAKER_FNR_1,
                     Tjeneste.DIALOGMOTE,
                     null,
                 )
 
             val mikrofrontendSynlighet2 =
                 MikrofrontendSynlighet(
-                    arbeidstakerFnr2,
+                    ARBEIDSTAKER_FNR_2,
                     Tjeneste.DIALOGMOTE,
                     LocalDate.now().plusDays(1L),
                 )
 
             it("Store mikrofrontend entry") {
                 embeddedDatabase.storeMikrofrontendSynlighetEntry(mikrofrontendSynlighet1)
-                embeddedDatabase.shouldContainMikrofrontendEntry(arbeidstakerFnr1, Tjeneste.DIALOGMOTE)
+                embeddedDatabase.shouldContainMikrofrontendEntry(ARBEIDSTAKER_FNR_1, Tjeneste.DIALOGMOTE)
             }
 
             it("Delete mikrofrontend entry") {
                 embeddedDatabase.storeMikrofrontendSynlighetEntry(mikrofrontendSynlighet1)
                 embeddedDatabase.storeMikrofrontendSynlighetEntry(mikrofrontendSynlighet2)
-                embeddedDatabase.shouldContainMikrofrontendEntry(arbeidstakerFnr2, Tjeneste.DIALOGMOTE)
-                embeddedDatabase.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste(arbeidstakerFnr2, Tjeneste.DIALOGMOTE)
-                embeddedDatabase.shouldNotContainMikrofrontendEntryForUser(arbeidstakerFnr2)
+                embeddedDatabase.shouldContainMikrofrontendEntry(ARBEIDSTAKER_FNR_2, Tjeneste.DIALOGMOTE)
+                embeddedDatabase.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste(ARBEIDSTAKER_FNR_2, Tjeneste.DIALOGMOTE)
+                embeddedDatabase.shouldNotContainMikrofrontendEntryForUser(ARBEIDSTAKER_FNR_2)
             }
 
             it("Update miktrofrontend entry") {

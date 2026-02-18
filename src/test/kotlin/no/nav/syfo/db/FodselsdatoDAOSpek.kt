@@ -14,8 +14,8 @@ class FodselsdatoDAOSpek :
 
             it("Should fetch birthdate") {
                 val fodselsdato = "1988-01-01"
-                embeddedDatabase.storeFodselsdato(arbeidstakerFnr1, fodselsdato)
-                val fetchedFodselsdato = embeddedDatabase.fetchFodselsdatoByFnr(arbeidstakerFnr1).first()
+                embeddedDatabase.storeFodselsdato(ARBEIDSTAKER_FNR_1, fodselsdato)
+                val fetchedFodselsdato = embeddedDatabase.fetchFodselsdatoByFnr(ARBEIDSTAKER_FNR_1).first()
                 fetchedFodselsdato shouldBeEqualTo fodselsdato
             }
         }

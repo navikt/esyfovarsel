@@ -34,10 +34,10 @@ import java.util.UUID
 class DialogmoteInnkallingNarmestelederVarselServiceOLD(
     val senderFacade: SenderFacade,
 ) {
-    val WEEKS_BEFORE_DELETE = 4L
-    val SMS_KEY = "smsText"
-    val EMAIL_TITLE_KEY = "emailTitle"
-    val EMAIL_BODY_KEY = "emailBody"
+    val weeksBeforeDelete = 4L
+    val smsKey = "smsText"
+    val emailTitleKey = "emailTitle"
+    val emailBodyKey = "emailBody"
     private val log = LoggerFactory.getLogger(DialogmoteInnkallingNarmestelederVarselServiceOLD::class.qualifiedName)
 
     suspend fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
@@ -48,9 +48,9 @@ class DialogmoteInnkallingNarmestelederVarselServiceOLD(
 
     private suspend fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
         val texts = getArbeisgiverTexts(varselHendelse)
-        val sms = texts[SMS_KEY]
-        val emailTitle = texts[EMAIL_TITLE_KEY]
-        val emailBody = texts[EMAIL_BODY_KEY]
+        val sms = texts[smsKey]
+        val emailTitle = texts[emailTitleKey]
+        val emailBody = texts[emailBodyKey]
 
         if (!sms.isNullOrBlank() && !emailTitle.isNullOrBlank() && !emailBody.isNullOrBlank()) {
             val input =
@@ -63,7 +63,7 @@ class DialogmoteInnkallingNarmestelederVarselServiceOLD(
                     messageText = sms,
                     epostTittel = emailTitle,
                     epostHtmlBody = emailBody,
-                    hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+                    hardDeleteDate = LocalDateTime.now().plusWeeks(weeksBeforeDelete),
                     meldingstype = Meldingstype.OPPGAVE,
                     grupperingsid = UUID.randomUUID().toString(),
                 )
@@ -84,30 +84,30 @@ class DialogmoteInnkallingNarmestelederVarselServiceOLD(
         when (hendelse.type) {
             NL_DIALOGMOTE_INNKALT ->
                 hashMapOf(
-                    SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_MESSAGE_TEXT,
-                    EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_TITLE,
-                    EMAIL_BODY_KEY to getEmailBody(hendelse),
+                    smsKey to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_MESSAGE_TEXT,
+                    emailTitleKey to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_TITLE,
+                    emailBodyKey to getEmailBody(hendelse),
                 )
 
             NL_DIALOGMOTE_AVLYST ->
                 hashMapOf(
-                    SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_MESSAGE_TEXT,
-                    EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_TITLE,
-                    EMAIL_BODY_KEY to getEmailBody(hendelse),
+                    smsKey to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_MESSAGE_TEXT,
+                    emailTitleKey to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_TITLE,
+                    emailBodyKey to getEmailBody(hendelse),
                 )
 
             NL_DIALOGMOTE_NYTT_TID_STED ->
                 hashMapOf(
-                    SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_MESSAGE_TEXT,
-                    EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_TITLE,
-                    EMAIL_BODY_KEY to getEmailBody(hendelse),
+                    smsKey to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_MESSAGE_TEXT,
+                    emailTitleKey to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_TITLE,
+                    emailBodyKey to getEmailBody(hendelse),
                 )
 
             NL_DIALOGMOTE_REFERAT ->
                 hashMapOf(
-                    SMS_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_MESSAGE_TEXT,
-                    EMAIL_TITLE_KEY to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_TITLE,
-                    EMAIL_BODY_KEY to getEmailBody(hendelse),
+                    smsKey to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_MESSAGE_TEXT,
+                    emailTitleKey to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_TITLE,
+                    emailBodyKey to getEmailBody(hendelse),
                 )
 
             else -> hashMapOf()

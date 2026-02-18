@@ -1,8 +1,8 @@
 package no.nav.syfo.kafka.producers.dinesykmeldte
 
 import no.nav.syfo.Environment
+import no.nav.syfo.kafka.common.TOPIC_DINE_SYKMELDTE_HENDELSE
 import no.nav.syfo.kafka.common.producerProperties
-import no.nav.syfo.kafka.common.topicDineSykmeldteHendelse
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteHendelse
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.FerdigstillHendelse
@@ -52,7 +52,7 @@ class DineSykmeldteHendelseKafkaProducer(
         kafkaProducer
             .send(
                 ProducerRecord(
-                    topicDineSykmeldteHendelse,
+                    TOPIC_DINE_SYKMELDTE_HENDELSE,
                     dineSykmeldteHendelse.id,
                     dineSykmeldteHendelse,
                 ),

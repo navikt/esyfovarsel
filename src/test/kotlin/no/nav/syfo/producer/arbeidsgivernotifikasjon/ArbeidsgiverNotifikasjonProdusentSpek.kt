@@ -4,9 +4,9 @@ import io.kotest.core.spec.style.DescribeSpec
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.getTestEnv
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
+import no.nav.syfo.testutil.mocks.FNR_1
+import no.nav.syfo.testutil.mocks.FNR_2
 import no.nav.syfo.testutil.mocks.MockServers
-import no.nav.syfo.testutil.mocks.fnr1
-import no.nav.syfo.testutil.mocks.fnr2
 import no.nav.syfo.testutil.mocks.orgnummer
 import java.time.LocalDateTime
 import java.util.UUID
@@ -25,8 +25,8 @@ class ArbeidsgiverNotifikasjonProdusentSpek :
                 UUID.randomUUID().toString(),
                 orgnummer,
                 "",
-                fnr1,
-                fnr2,
+                FNR_1,
+                FNR_2,
                 "hei",
                 "test@test.no",
                 "Oppfølging",

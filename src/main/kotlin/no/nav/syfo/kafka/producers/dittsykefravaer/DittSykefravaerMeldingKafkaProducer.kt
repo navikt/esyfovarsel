@@ -1,8 +1,8 @@
 package no.nav.syfo.kafka.producers.dittsykefravaer
 
 import no.nav.syfo.Environment
+import no.nav.syfo.kafka.common.TOPIC_DITT_SYKEEFRAVAER_MELDING
 import no.nav.syfo.kafka.common.producerProperties
-import no.nav.syfo.kafka.common.topicDittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.LukkMelding
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -23,7 +23,7 @@ class DittSykefravaerMeldingKafkaProducer(
         kafkaProducer
             .send(
                 ProducerRecord(
-                    topicDittSykefravaerMelding,
+                    TOPIC_DITT_SYKEEFRAVAER_MELDING,
                     uuidEkstern,
                     melding,
                 ),
@@ -38,7 +38,7 @@ class DittSykefravaerMeldingKafkaProducer(
         kafkaProducer
             .send(
                 ProducerRecord(
-                    topicDittSykefravaerMelding,
+                    TOPIC_DITT_SYKEEFRAVAER_MELDING,
                     eksternReferanse,
                     DittSykefravaerMelding(
                         null,

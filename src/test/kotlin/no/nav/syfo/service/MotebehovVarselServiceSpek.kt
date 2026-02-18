@@ -6,10 +6,10 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
-import no.nav.syfo.db.arbeidstakerFnr1
-import no.nav.syfo.db.arbeidstakerFnr2
-import no.nav.syfo.db.arbeidstakerFnr3
-import no.nav.syfo.db.orgnummer1
+import no.nav.syfo.db.ARBEIDSTAKER_FNR_1
+import no.nav.syfo.db.ARBEIDSTAKER_FNR_2
+import no.nav.syfo.db.ARBEIDSTAKER_FNR_3
+import no.nav.syfo.db.ORGNUMMER_1
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
@@ -32,17 +32,17 @@ class MotebehovVarselServiceSpek :
                     type = HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
                     ferdigstill = false,
                     data = null,
-                    arbeidstakerFnr = arbeidstakerFnr1,
-                    orgnummer = orgnummer1,
+                    arbeidstakerFnr = ARBEIDSTAKER_FNR_1,
+                    orgnummer = ORGNUMMER_1,
                 )
 
             val arbeidstakerHendelseSvarMotebehov2 =
                 arbeidstakerHendelseSvarMotebehov1
-                    .copy(arbeidstakerFnr = arbeidstakerFnr2)
+                    .copy(arbeidstakerFnr = ARBEIDSTAKER_FNR_2)
 
             val arbeidstakerHendelseSvarMotebehov3 =
                 arbeidstakerHendelseSvarMotebehov1
-                    .copy(arbeidstakerFnr = arbeidstakerFnr3)
+                    .copy(arbeidstakerFnr = ARBEIDSTAKER_FNR_3)
 
             it("sendVarselTilArbeidstaker should send melding to Ditt sykefravær") {
                 coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(any()) } returns true
@@ -61,7 +61,7 @@ class MotebehovVarselServiceSpek :
                 verify(exactly = 1) {
                     senderFacade.sendTilBrukernotifikasjoner(
                         any(),
-                        arbeidstakerFnr2,
+                        ARBEIDSTAKER_FNR_2,
                         BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
                         any(),
                         arbeidstakerFnr = arbeidstakerHendelseSvarMotebehov2.arbeidstakerFnr,
@@ -79,7 +79,7 @@ class MotebehovVarselServiceSpek :
                 verify(exactly = 1) {
                     senderFacade.sendTilBrukernotifikasjoner(
                         any(),
-                        arbeidstakerFnr3,
+                        ARBEIDSTAKER_FNR_3,
                         BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST,
                         any(),
                         arbeidstakerFnr = arbeidstakerHendelseSvarMotebehov3.arbeidstakerFnr,

@@ -5,10 +5,10 @@ import io.mockk.clearAllMocks
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.syfo.db.arbeidstakerFnr1
-import no.nav.syfo.db.arbeidstakerFnr2
+import no.nav.syfo.db.ARBEIDSTAKER_FNR_1
+import no.nav.syfo.db.ARBEIDSTAKER_FNR_2
+import no.nav.syfo.db.ORGNUMMER_1
 import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
-import no.nav.syfo.db.orgnummer1
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.exceptions.DuplicateMotebehovException
 import no.nav.syfo.exceptions.MotebehovAfterBookingException
@@ -75,8 +75,8 @@ class MikrofrontendServiceSpek :
                     type = HendelseType.SM_DIALOGMOTE_INNKALT,
                     ferdigstill = false,
                     data = dataTidspunktTomorrow,
-                    arbeidstakerFnr = arbeidstakerFnr1,
-                    orgnummer = orgnummer1,
+                    arbeidstakerFnr = ARBEIDSTAKER_FNR_1,
+                    orgnummer = ORGNUMMER_1,
                 )
 
             val arbeidstakerHendelseDialogmoteNyttTidSted =
@@ -93,7 +93,7 @@ class MikrofrontendServiceSpek :
             val arbeidstakerHendelseDialogmoteInnkaltIdag =
                 arbeidstakerHendelseDialogmoteInnkalt.copy(
                     data = dataTidspunktToday,
-                    arbeidstakerFnr = arbeidstakerFnr2,
+                    arbeidstakerFnr = ARBEIDSTAKER_FNR_2,
                 )
 
             val arbeidstakerHendelseSvarMotebehov =
@@ -101,8 +101,8 @@ class MikrofrontendServiceSpek :
                     type = HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
                     ferdigstill = false,
                     data = null,
-                    arbeidstakerFnr = arbeidstakerFnr1,
-                    orgnummer = orgnummer1,
+                    arbeidstakerFnr = ARBEIDSTAKER_FNR_1,
+                    orgnummer = ORGNUMMER_1,
                 )
 
             val arbeidstakerHendelseSvarMotebehovFerdigstill =
@@ -194,12 +194,12 @@ class MikrofrontendServiceSpek :
                         type = HendelseType.SM_MER_VEILEDNING,
                         ferdigstill = false,
                         data = null,
-                        arbeidstakerFnr = arbeidstakerFnr1,
+                        arbeidstakerFnr = ARBEIDSTAKER_FNR_1,
                         orgnummer = null,
                     ),
                 )
                 embeddedDatabase.shouldContainMikrofrontendEntryWithSynligTom(
-                    arbeidstakerFnr1,
+                    ARBEIDSTAKER_FNR_1,
                     Tjeneste.MER_OPPFOLGING,
                 )
             }

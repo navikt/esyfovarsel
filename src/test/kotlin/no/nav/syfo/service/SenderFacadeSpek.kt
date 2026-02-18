@@ -6,7 +6,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.syfo.db.arbeidstakerAktorId1
+import no.nav.syfo.db.ARBEIDSTAKER_AKTOR_ID_1
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.VarselType
@@ -19,7 +19,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
-import no.nav.syfo.planner.arbeidstakerFnr1
+import no.nav.syfo.planner.ARBEIDSTAKER_FNR_1
 import no.nav.syfo.testutil.EmbeddedDatabase
 import java.time.LocalDateTime
 import java.util.UUID
@@ -56,8 +56,8 @@ class SenderFacadeSpek :
             val utsendtVarsel =
                 PUtsendtVarsel(
                     uuid = UUID.randomUUID().toString(),
-                    fnr = arbeidstakerFnr1,
-                    aktorId = arbeidstakerAktorId1,
+                    fnr = ARBEIDSTAKER_FNR_1,
+                    aktorId = ARBEIDSTAKER_AKTOR_ID_1,
                     narmesteLederFnr = null,
                     orgnummer = null,
                     type = VarselType.MER_VEILEDNING.name,
@@ -112,7 +112,7 @@ class SenderFacadeSpek :
                 embeddedDatabase.storeUtsendtVarsel(brukernotifikasjonUtsendtVarsel)
                 embeddedDatabase.storeUtsendtVarsel(dittSykefravaerUtsendtVarsel)
 
-                senderFacade.ferdigstillVarslerForFnr(PersonIdent(arbeidstakerFnr1))
+                senderFacade.ferdigstillVarslerForFnr(PersonIdent(ARBEIDSTAKER_FNR_1))
 
                 coVerify(exactly = 1) {
                     arbeidsgiverNotifikasjonService.deleteNotifikasjon(
@@ -127,7 +127,7 @@ class SenderFacadeSpek :
                 verify(exactly = 1) {
                     dittSykefravaerMeldingKafkaProducer.ferdigstillMelding(
                         eksternReferanse = eksternRefDittSykefravaer,
-                        fnr = arbeidstakerFnr1,
+                        fnr = ARBEIDSTAKER_FNR_1,
                     )
                 }
             }
@@ -143,7 +143,7 @@ class SenderFacadeSpek :
                 embeddedDatabase.setUtsendtVarselToFerdigstilt(eksternRefBrukernotifikasjoner)
                 embeddedDatabase.setUtsendtVarselToFerdigstilt(eksternRefDittSykefravaer)
 
-                senderFacade.ferdigstillVarslerForFnr(PersonIdent(arbeidstakerFnr1))
+                senderFacade.ferdigstillVarslerForFnr(PersonIdent(ARBEIDSTAKER_FNR_1))
 
                 coVerify(exactly = 0) { arbeidsgiverNotifikasjonService.deleteNotifikasjon(any(), any()) }
                 verify(exactly = 0) { dineSykmeldteHendelseKafkaProducer.ferdigstillVarsel(any()) }
@@ -158,7 +158,7 @@ class SenderFacadeSpek :
                     ArbeidstakerHendelse(
                         type = HendelseType.SM_DIALOGMOTE_INNKALT,
                         ferdigstill = true,
-                        arbeidstakerFnr = arbeidstakerFnr1,
+                        arbeidstakerFnr = ARBEIDSTAKER_FNR_1,
                         data = emptyMap<String, Any>(),
                         orgnummer = null,
                     )
@@ -172,7 +172,7 @@ class SenderFacadeSpek :
                     )
                 } throws JournalpostDistribusjonGoneException("Recipient is Gone", uuid, journalpostId)
                 senderFacade.sendBrevTilFysiskPrint(uuid, arbeidstakerHendelse, journalpostId)
-                val feiletUtsending = embeddedDatabase.fetchUtsendtVarselFeiletByFnr(arbeidstakerFnr1)
+                val feiletUtsending = embeddedDatabase.fetchUtsendtVarselFeiletByFnr(ARBEIDSTAKER_FNR_1)
                 assertEquals(1, feiletUtsending.size)
                 assertTrue(feiletUtsending.first().resendExhausted!!)
             }

@@ -29,11 +29,11 @@ import org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG
 import java.time.Duration
 import java.util.Properties
 
-const val topicDineSykmeldteHendelse = "team-esyfo.dinesykmeldte-hendelser-v2"
-const val topicVarselBus = "team-esyfo.varselbus"
-const val topicDittSykefravaerMelding = "flex.ditt-sykefravaer-melding"
-const val topicMinSideMicrofrontend = "min-side.aapen-microfrontend-v1"
-const val topicTestdataReset = "teamsykefravr.testdata-reset"
+const val TOPIC_DINE_SYKMELDTE_HENDELSE = "team-esyfo.dinesykmeldte-hendelser-v2"
+const val TOPIC_VARSEL_BUS = "team-esyfo.varselbus"
+const val TOPIC_DITT_SYKEEFRAVAER_MELDING = "flex.ditt-sykefravaer-melding"
+const val TOPIC_MIN_SIDE_MICROFRONTEND = "min-side.aapen-microfrontend-v1"
+const val TOPIC_TESTDATA_RESET = "teamsykefravr.testdata-reset"
 
 const val JAVA_KEYSTORE = "JKS"
 const val PKCS12 = "PKCS12"

@@ -48,7 +48,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
     val accessControlService: AccessControlService,
     val database: DatabaseInterface,
 ) {
-    val WEEKS_BEFORE_DELETE = 4L
+    val weeksBeforeDelete = 4L
     private val log = LoggerFactory.getLogger(DialogmoteInnkallingSykmeldtVarselService::class.qualifiedName)
 
     suspend fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
@@ -269,7 +269,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
                     Variant.INFO,
                     true,
                     hendelseType,
-                    OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE).toInstant(),
+                    OffsetDateTime.now().plusWeeks(weeksBeforeDelete).toInstant(),
                 ),
                 null,
                 arbeidstakerHendelse.arbeidstakerFnr,

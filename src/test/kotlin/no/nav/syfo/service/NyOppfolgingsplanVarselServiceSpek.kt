@@ -9,7 +9,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.testutil.EmbeddedDatabase
-import no.nav.syfo.testutil.mocks.fnr1
+import no.nav.syfo.testutil.mocks.FNR_1
 import no.nav.syfo.testutil.mocks.orgnummer
 import java.net.URI
 
@@ -43,14 +43,14 @@ class NyOppfolgingsplanVarselServiceSpek :
 
         describe("NyOppfolgingsplanVarselService") {
             it("Sender varsel til sykmeldte om ferdigstilt oppfolgingsplan, som lenker til ny oppfølgingsplan url") {
-                coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(fnr1) } returns true
+                coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(FNR_1) } returns true
 
                 val hendelse =
                     ArbeidstakerHendelse(
                         type = HendelseType.SM_OPPFOLGINGSPLAN_OPPRETTET,
                         ferdigstill = false,
                         data = null,
-                        arbeidstakerFnr = fnr1,
+                        arbeidstakerFnr = FNR_1,
                         orgnummer = orgnummer,
                     )
 
@@ -59,7 +59,7 @@ class NyOppfolgingsplanVarselServiceSpek :
                 verify(exactly = 1) {
                     brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                         any(),
-                        fnr1,
+                        FNR_1,
                         any(),
                         URI("$fakeNyOppfolgingsplanUrl/sykmeldt").toURL(),
                         any(),

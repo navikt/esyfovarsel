@@ -13,8 +13,8 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.testutil.EmbeddedDatabase
-import no.nav.syfo.testutil.mocks.fnr1
-import no.nav.syfo.testutil.mocks.fnr2
+import no.nav.syfo.testutil.mocks.FNR_1
+import no.nav.syfo.testutil.mocks.FNR_2
 import no.nav.syfo.testutil.mocks.orgnummer
 import java.net.URI
 
@@ -53,20 +53,20 @@ class OppfolgingsplanVarselServiceSpek :
             justRun { brukernotifikasjonerService.sendBrukernotifikasjonVarsel(any(), any(), any(), any(), any(), any()) }
 
             it("Non-reserved users should be notified externally") {
-                coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(fnr1) } returns true
+                coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(FNR_1) } returns true
                 val varselHendelse =
                     ArbeidstakerHendelse(
                         HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
                         false,
                         null,
-                        fnr1,
+                        FNR_1,
                         orgnummer,
                     )
                 oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse)
                 verify(exactly = 1) {
                     brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                         any(),
-                        fnr1,
+                        FNR_1,
                         any(),
                         any(),
                         any(),
@@ -76,20 +76,20 @@ class OppfolgingsplanVarselServiceSpek :
             }
 
             it("Reserved users only notified on 'Min side'") {
-                coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(fnr2) } returns false
+                coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(FNR_2) } returns false
                 val varselHendelse =
                     ArbeidstakerHendelse(
                         HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
                         false,
                         null,
-                        fnr2,
+                        FNR_2,
                         orgnummer,
                     )
                 oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse)
                 verify(exactly = 1) {
                     brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                         any(),
-                        fnr2,
+                        FNR_2,
                         any(),
                         URI(fakeOppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL).toURL(),
                         any(),

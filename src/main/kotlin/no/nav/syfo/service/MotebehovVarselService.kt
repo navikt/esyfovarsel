@@ -41,7 +41,7 @@ class MotebehovVarselService(
     val sykmeldingService: SykmeldingService,
     dialogmoterUrl: String,
 ) {
-    val WEEKS_BEFORE_DELETE = 4L
+    val weeksBeforeDelete = 4L
     private val log: Logger = LoggerFactory.getLogger(MotebehovVarselService::class.qualifiedName)
     private val svarMotebehovUrl: String = "$dialogmoterUrl/sykmeldt"
 
@@ -84,7 +84,7 @@ class MotebehovVarselService(
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
-                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+                LocalDateTime.now().plusWeeks(weeksBeforeDelete),
                 Meldingstype.OPPGAVE,
                 UUID.randomUUID().toString(),
             ),
@@ -100,7 +100,7 @@ class MotebehovVarselService(
                 oppgavetype = varselHendelse.type.toDineSykmeldteHendelseType().toString(),
                 lenke = null,
                 tekst = varseltekst,
-                utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+                utlopstidspunkt = OffsetDateTime.now().plusWeeks(weeksBeforeDelete),
             )
         senderFacade.sendTilDineSykmeldte(varselHendelse, dineSykmeldteVarsel)
     }
@@ -156,7 +156,7 @@ class MotebehovVarselService(
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
-                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+                LocalDateTime.now().plusWeeks(weeksBeforeDelete),
                 Meldingstype.OPPGAVE,
                 UUID.randomUUID().toString(),
             )
@@ -181,7 +181,7 @@ class MotebehovVarselService(
                     Variant.INFO,
                     true,
                     DITT_SYKEFRAVAER_HENDELSE_TYPE_DIALOGMOTE_SVAR_MOTEBEHOV,
-                    OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE).toInstant(),
+                    OffsetDateTime.now().plusWeeks(weeksBeforeDelete).toInstant(),
                 ),
                 null,
                 arbeidstakerHendelse.arbeidstakerFnr,
@@ -222,7 +222,7 @@ class MotebehovVarselService(
                 messageText = data.tilbakemelding,
                 epostTittel = ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_TITLE,
                 epostHtmlBody = ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_BODY,
-                hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+                hardDeleteDate = LocalDateTime.now().plusWeeks(weeksBeforeDelete),
                 meldingstype = Meldingstype.BESKJED,
                 grupperingsid = UUID.randomUUID().toString(),
             ),

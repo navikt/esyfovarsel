@@ -4,7 +4,6 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.syfo.db.arbeidstakerAktorId1
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
@@ -19,8 +18,7 @@ import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
 import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
-import no.nav.syfo.planner.arbeidstakerFnr1
-import no.nav.syfo.planner.narmesteLederFnr1
+import no.nav.syfo.planner.ARBEIDSTAKER_FNR_1
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import no.nav.syfo.testutil.EmbeddedDatabase
 import org.amshove.kluent.shouldBeEqualTo
@@ -39,8 +37,8 @@ class TestdataResetServiceSpek :
             val utsendtVarsel =
                 PUtsendtVarsel(
                     uuid = UUID.randomUUID().toString(),
-                    fnr = arbeidstakerFnr1,
-                    aktorId = arbeidstakerAktorId1,
+                    fnr = ARBEIDSTAKER_FNR_1,
+                    aktorId = no.nav.syfo.db.ARBEIDSTAKER_AKTOR_ID_1,
                     narmesteLederFnr = null,
                     orgnummer = null,
                     type = VarselType.MER_VEILEDNING.name,
@@ -58,8 +56,8 @@ class TestdataResetServiceSpek :
                 PUtsendtVarselFeilet(
                     UUID.randomUUID().toString(),
                     null,
-                    arbeidstakerFnr1,
-                    narmesteLederFnr1,
+                    ARBEIDSTAKER_FNR_1,
+                    no.nav.syfo.planner.ARBEIDSTAKER_AKTOR_ID_1,
                     null,
                     HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV.name,
                     null,
@@ -72,7 +70,7 @@ class TestdataResetServiceSpek :
                 )
 
             val mikrofrontendSynlighet =
-                MikrofrontendSynlighet(arbeidstakerFnr1, Tjeneste.DIALOGMOTE, LocalDate.now().plusWeeks(1))
+                MikrofrontendSynlighet(ARBEIDSTAKER_FNR_1, Tjeneste.DIALOGMOTE, LocalDate.now().plusWeeks(1))
 
             beforeTest {
                 embeddedDatabase.dropData()
@@ -84,21 +82,21 @@ class TestdataResetServiceSpek :
                 embeddedDatabase.storeMikrofrontendSynlighetEntry(mikrofrontendSynlighet)
 
                 // Verify that testdata exists
-                embeddedDatabase.fetchUtsendtVarselByFnr(arbeidstakerFnr1).size shouldBeEqualTo 1
-                embeddedDatabase.fetchUtsendtVarselFeiletByFnr(arbeidstakerFnr1).size shouldBeEqualTo 1
-                embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(arbeidstakerFnr1).size shouldBeEqualTo 1
+                embeddedDatabase.fetchUtsendtVarselByFnr(ARBEIDSTAKER_FNR_1).size shouldBeEqualTo 1
+                embeddedDatabase.fetchUtsendtVarselFeiletByFnr(ARBEIDSTAKER_FNR_1).size shouldBeEqualTo 1
+                embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(ARBEIDSTAKER_FNR_1).size shouldBeEqualTo 1
 
-                testdataResetService.resetTestdata(PersonIdent(arbeidstakerFnr1))
+                testdataResetService.resetTestdata(PersonIdent(ARBEIDSTAKER_FNR_1))
 
                 // Check that testdata is deleted
-                embeddedDatabase.fetchUtsendtVarselByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
-                embeddedDatabase.fetchUtsendtVarselFeiletByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
-                embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
+                embeddedDatabase.fetchUtsendtVarselByFnr(ARBEIDSTAKER_FNR_1).size shouldBeEqualTo 0
+                embeddedDatabase.fetchUtsendtVarselFeiletByFnr(ARBEIDSTAKER_FNR_1).size shouldBeEqualTo 0
+                embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(ARBEIDSTAKER_FNR_1).size shouldBeEqualTo 0
                 verify(exactly = 1) {
-                    mikrofrontendService.closeAllMikrofrontendForUser(PersonIdent(arbeidstakerFnr1))
+                    mikrofrontendService.closeAllMikrofrontendForUser(PersonIdent(ARBEIDSTAKER_FNR_1))
                 }
                 coVerify(exactly = 1) {
-                    senderFacade.ferdigstillVarslerForFnr(PersonIdent(arbeidstakerFnr1))
+                    senderFacade.ferdigstillVarslerForFnr(PersonIdent(ARBEIDSTAKER_FNR_1))
                 }
             }
         }

@@ -8,7 +8,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.sql.Connection
 
-const val postgresJdbcPrefix = "jdbc:postgresql"
+const val POSTGRES_JDBC_PREFIX = "jdbc:postgresql"
 
 interface DatabaseInterface {
     val connection: Connection
@@ -48,7 +48,7 @@ class Database(
         }
 }
 
-fun generateJdbcUrlFromEnv(env: DbEnv): String = "$postgresJdbcPrefix://${env.dbHost}:${env.dbPort}/${env.dbName}"
+fun generateJdbcUrlFromEnv(env: DbEnv): String = "$POSTGRES_JDBC_PREFIX://${env.dbHost}:${env.dbPort}/${env.dbName}"
 
 fun DatabaseInterface.grantAccessToIAMUsers() {
     val statement =

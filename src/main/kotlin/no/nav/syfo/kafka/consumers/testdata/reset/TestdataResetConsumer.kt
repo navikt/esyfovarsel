@@ -4,9 +4,9 @@ import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.common.KafkaListener
+import no.nav.syfo.kafka.common.TOPIC_TESTDATA_RESET
 import no.nav.syfo.kafka.common.consumerProperties
 import no.nav.syfo.kafka.common.pollDurationInMillis
-import no.nav.syfo.kafka.common.topicTestdataReset
 import no.nav.syfo.service.TestdataResetService
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -24,24 +24,24 @@ class TestdataResetConsumer(
     init {
         val kafkaConfig = testdataResetProperties(env)
         kafkaListener = KafkaConsumer(kafkaConfig)
-        kafkaListener.subscribe(listOf(topicTestdataReset))
+        kafkaListener.subscribe(listOf(TOPIC_TESTDATA_RESET))
     }
 
     override suspend fun listen(applicationState: ApplicationState) {
-        log.info("Started listening to topic $topicTestdataReset")
+        log.info("Started listening to topic $TOPIC_TESTDATA_RESET")
         while (applicationState.running) {
             kafkaListener.poll(pollDurationInMillis).forEach {
-                log.info("Received record from topic $topicTestdataReset")
+                log.info("Received record from topic $TOPIC_TESTDATA_RESET")
                 try {
                     if (it.value() != null) {
                         testdataResetService.resetTestdata(PersonIdent(it.value()))
                     } else {
                         log.warn(
-                            "TestdataResetConsumer: Value of ConsumerRecord from topic $topicTestdataReset is null",
+                            "TestdataResetConsumer: Value of ConsumerRecord from topic $TOPIC_TESTDATA_RESET is null",
                         )
                     }
                 } catch (e: Exception) {
-                    log.error("TestdataResetConsumer: Exception in [$topicTestdataReset]-listener: ${e.message}", e)
+                    log.error("TestdataResetConsumer: Exception in [$TOPIC_TESTDATA_RESET]-listener: ${e.message}", e)
                 }
                 kafkaListener.commitSync()
             }

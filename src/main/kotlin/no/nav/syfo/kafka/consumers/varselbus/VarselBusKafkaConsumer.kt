@@ -4,10 +4,10 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.common.KafkaListener
+import no.nav.syfo.kafka.common.TOPIC_VARSEL_BUS
 import no.nav.syfo.kafka.common.consumerProperties
 import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.common.pollDurationInMillis
-import no.nav.syfo.kafka.common.topicVarselBus
 import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidstakerHendelse
@@ -28,11 +28,11 @@ class VarselBusKafkaConsumer(
     init {
         val kafkaConfig = consumerProperties(env)
         kafkaListener = KafkaConsumer(kafkaConfig)
-        kafkaListener.subscribe(listOf(topicVarselBus))
+        kafkaListener.subscribe(listOf(TOPIC_VARSEL_BUS))
     }
 
     override suspend fun listen(applicationState: ApplicationState) {
-        log.info("Started listening to topic $topicVarselBus")
+        log.info("Started listening to topic $TOPIC_VARSEL_BUS")
 
         while (applicationState.running) {
             try {
@@ -40,7 +40,7 @@ class VarselBusKafkaConsumer(
                 kafkaListener.commitSync()
             } catch (e: Exception) {
                 log.error(
-                    "Exception in [$topicVarselBus]-listener: ${e.message}",
+                    "Exception in [$TOPIC_VARSEL_BUS]-listener: ${e.message}",
                     e,
                 )
                 kafkaListener.commitSync()

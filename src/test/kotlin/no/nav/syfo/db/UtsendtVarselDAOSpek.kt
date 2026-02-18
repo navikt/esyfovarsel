@@ -22,8 +22,8 @@ class UtsendtVarselDAOSpek :
                 val utsendtVarsel1 = // skal sendes
                     PUtsendtVarsel(
                         uuid = uuidToTest,
-                        fnr = no.nav.syfo.planner.arbeidstakerFnr1,
-                        aktorId = arbeidstakerAktorId1,
+                        fnr = no.nav.syfo.planner.ARBEIDSTAKER_FNR_1,
+                        aktorId = ARBEIDSTAKER_AKTOR_ID_1,
                         narmesteLederFnr = null,
                         orgnummer = null,
                         type = HendelseType.SM_AKTIVITETSPLIKT.name,
@@ -40,8 +40,8 @@ class UtsendtVarselDAOSpek :
                 val utsendtVarsel2 = // skal sendes
                     PUtsendtVarsel(
                         uuid = UUID.randomUUID().toString(),
-                        fnr = arbeidstakerFnr2,
-                        aktorId = arbeidstakerAktorId2,
+                        fnr = ARBEIDSTAKER_FNR_2,
+                        aktorId = ARBEIDSTAKER_AKTOR_ID_2,
                         narmesteLederFnr = null,
                         orgnummer = null,
                         type = HendelseType.SM_AKTIVITETSPLIKT.name,
@@ -58,8 +58,8 @@ class UtsendtVarselDAOSpek :
                 val utsendtVarsel3 = // skal ikke sendes: not overdue
                     PUtsendtVarsel(
                         uuid = UUID.randomUUID().toString(),
-                        fnr = arbeidstakerFnr2,
-                        aktorId = arbeidstakerAktorId2,
+                        fnr = ARBEIDSTAKER_FNR_2,
+                        aktorId = ARBEIDSTAKER_AKTOR_ID_2,
                         narmesteLederFnr = null,
                         orgnummer = null,
                         type = HendelseType.SM_AKTIVITETSPLIKT.name,
@@ -76,8 +76,8 @@ class UtsendtVarselDAOSpek :
                 val utsendtVarsel4 = // skal ikke sendes: Forced letter was sent before
                     PUtsendtVarsel(
                         uuid = UUID.randomUUID().toString(),
-                        fnr = arbeidstakerFnr2,
-                        aktorId = arbeidstakerAktorId2,
+                        fnr = ARBEIDSTAKER_FNR_2,
+                        aktorId = ARBEIDSTAKER_AKTOR_ID_2,
                         narmesteLederFnr = null,
                         orgnummer = null,
                         type = HendelseType.SM_AKTIVITETSPLIKT.name,
@@ -94,8 +94,8 @@ class UtsendtVarselDAOSpek :
                 val utsendtVarsel5 = // skal ikke sendes: not aktivitetskrav
                     PUtsendtVarsel(
                         uuid = UUID.randomUUID().toString(),
-                        fnr = arbeidstakerFnr2,
-                        aktorId = arbeidstakerAktorId2,
+                        fnr = ARBEIDSTAKER_FNR_2,
+                        aktorId = ARBEIDSTAKER_AKTOR_ID_2,
                         narmesteLederFnr = null,
                         orgnummer = null,
                         type = HendelseType.SM_MER_VEILEDNING.name,

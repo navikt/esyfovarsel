@@ -28,12 +28,12 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaPr
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.OpprettMelding
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.Variant
-import no.nav.syfo.planner.arbeidstakerFnr1
+import no.nav.syfo.planner.ARBEIDSTAKER_FNR_1
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.DONE
 import no.nav.syfo.testutil.EmbeddedDatabase
-import no.nav.syfo.testutil.mocks.fnr1
-import no.nav.syfo.testutil.mocks.fnr2
-import no.nav.syfo.testutil.mocks.fnr3
+import no.nav.syfo.testutil.mocks.FNR_1
+import no.nav.syfo.testutil.mocks.FNR_2
+import no.nav.syfo.testutil.mocks.FNR_3
 import no.nav.syfo.testutil.mocks.orgnummer
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
@@ -99,15 +99,15 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
             }
 
             it("Non-reserved users should be notified externally") {
-                coEvery { accessControlService.getUserAccessStatus(fnr1) } returns
-                    UserAccessStatus(fnr1, true)
+                coEvery { accessControlService.getUserAccessStatus(FNR_1) } returns
+                    UserAccessStatus(FNR_1, true)
 
                 val varselHendelse =
                     ArbeidstakerHendelse(
                         hendelseType,
                         false,
                         varselData(journalpostUuid, journalpostId),
-                        fnr1,
+                        FNR_1,
                         orgnummer,
                     )
                 dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
@@ -115,7 +115,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
                 verify(exactly = 1) {
                     brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                         uuid = any(),
-                        mottakerFnr = fnr1,
+                        mottakerFnr = FNR_1,
                         content = any(),
                         url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse.type, journalpostUuid),
                         smsContent = null,
@@ -133,15 +133,15 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
             }
 
             it("Reserved users should be notified physically") {
-                coEvery { accessControlService.getUserAccessStatus(fnr2) } returns
-                    UserAccessStatus(fnr2, canUserBeDigitallyNotified = false)
+                coEvery { accessControlService.getUserAccessStatus(FNR_2) } returns
+                    UserAccessStatus(FNR_2, canUserBeDigitallyNotified = false)
 
                 val varselHendelse =
                     ArbeidstakerHendelse(
                         hendelseType,
                         false,
                         varselData(journalpostUuid, journalpostId),
-                        fnr2,
+                        FNR_2,
                         orgnummer,
                     )
                 dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
@@ -157,7 +157,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
                 verify(exactly = 0) {
                     brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                         uuid = any(),
-                        mottakerFnr = fnr2,
+                        mottakerFnr = FNR_2,
                         content = any(),
                         url = any(),
                         varseltype = any(),
@@ -174,22 +174,22 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
                 }
             }
             it("Reserved users should get brevpost") {
-                coEvery { accessControlService.getUserAccessStatus(fnr3) } returns
-                    UserAccessStatus(fnr3, canUserBeDigitallyNotified = false)
+                coEvery { accessControlService.getUserAccessStatus(FNR_3) } returns
+                    UserAccessStatus(FNR_3, canUserBeDigitallyNotified = false)
 
                 val varselHendelse =
                     ArbeidstakerHendelse(
                         hendelseType,
                         false,
                         varselData(journalpostUuidAddressProtection, journalpostIdAddressProtection),
-                        fnr3,
+                        FNR_3,
                         orgnummer,
                     )
                 dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
                 verify(exactly = 0) {
                     brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                         uuid = any(),
-                        mottakerFnr = fnr3,
+                        mottakerFnr = FNR_3,
                         content = any(),
                         url = dialogmoteInnkallingSykmeldtVarselService.getVarselUrl(varselHendelse.type, journalpostUuid),
                         varseltype = any(),
@@ -213,15 +213,15 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
             }
 
             it("Users should not be notified when lest hendelse is sent") {
-                coEvery { accessControlService.getUserAccessStatus(arbeidstakerFnr1) } returns
-                    UserAccessStatus(arbeidstakerFnr1, true)
+                coEvery { accessControlService.getUserAccessStatus(ARBEIDSTAKER_FNR_1) } returns
+                    UserAccessStatus(ARBEIDSTAKER_FNR_1, true)
 
                 val varselHendelse =
                     ArbeidstakerHendelse(
                         type = HendelseType.SM_DIALOGMOTE_LEST,
                         false,
                         varselData(journalpostUuid, journalpostId),
-                        arbeidstakerFnr1,
+                        ARBEIDSTAKER_FNR_1,
                         orgnummer,
                     )
                 dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelse)
@@ -229,7 +229,7 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
                 verify(exactly = 1) {
                     brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
                         uuid = any(),
-                        mottakerFnr = arbeidstakerFnr1,
+                        mottakerFnr = ARBEIDSTAKER_FNR_1,
                         content = any(),
                         url = any(),
                         varseltype = DONE,
@@ -494,5 +494,5 @@ fun getDittSykefravaerMelding(): DittSykefravaerMelding =
             synligFremTil = null,
         ),
         lukkMelding = null,
-        fnr = fnr1,
+        fnr = FNR_1,
     )

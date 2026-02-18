@@ -23,8 +23,8 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataMotetidspunkt
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataNarmesteLeder
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
-import no.nav.syfo.planner.arbeidstakerFnr1
-import no.nav.syfo.planner.narmesteLederFnr1
+import no.nav.syfo.planner.ARBEIDSTAKER_AKTOR_ID_1
+import no.nav.syfo.planner.ARBEIDSTAKER_FNR_1
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.KalenderTilstand
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.orgnummer
@@ -196,7 +196,7 @@ fun createHendelse(type: HendelseType): NarmesteLederHendelse =
                     motetidspunkt = VarselDataMotetidspunkt(tidspunkt = LocalDateTime.now().plusWeeks(1)),
                 ),
             ),
-        narmesteLederFnr = narmesteLederFnr1,
-        arbeidstakerFnr = arbeidstakerFnr1,
+        narmesteLederFnr = ARBEIDSTAKER_AKTOR_ID_1,
+        arbeidstakerFnr = ARBEIDSTAKER_FNR_1,
         orgnummer = orgnummer,
     )
