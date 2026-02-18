@@ -17,83 +17,88 @@ import org.amshove.kluent.shouldBeEqualTo
 import java.io.IOException
 
 const val SM_FNR = "123456789"
-class AktivitetskravVarselServiceTest : DescribeSpec({
-    val accessControlService = mockk<AccessControlService>()
-    val senderFacade = mockk<SenderFacade>(relaxed = true)
-    val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(
-        senderFacade,
-        accessControlService,
-        "http://dokumentarkivOppfolgingDocumentsPageUrl",
-        true
-    )
 
-    beforeTest {
-        clearAllMocks()
-    }
-
-    describe("Forhåndsvarsel om stans av sykepenger") {
-        it("Sender alltid fysisk brev for forhåndsvarsel") {
-            val forhandsvarselEvent = createForhandsvarselHendelse()
-
-            coEvery { accessControlService.getUserAccessStatus(SM_FNR) } returns UserAccessStatus(
-                SM_FNR,
-                canUserBeDigitallyNotified = true,
+class AktivitetskravVarselServiceTest :
+    DescribeSpec({
+        val accessControlService = mockk<AccessControlService>()
+        val senderFacade = mockk<SenderFacade>(relaxed = true)
+        val aktivitetspliktForhandsvarselVarselService =
+            AktivitetspliktForhandsvarselVarselService(
+                senderFacade,
+                accessControlService,
+                "http://dokumentarkivOppfolgingDocumentsPageUrl",
+                true,
             )
 
-            aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
-
-            coVerify(exactly = 0) {
-                senderFacade.sendBrevTilFysiskPrint(
-                    any(),
-                    forhandsvarselEvent,
-                    any(),
-                    DistibusjonsType.VIKTIG,
-                )
-            }
-
-            verify(exactly = 1) {
-                senderFacade.sendTilBrukernotifikasjoner(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    true,
-                    any(),
-                    journalpostId = any(),
-                )
-            }
+        beforeTest {
+            clearAllMocks()
         }
 
-        it("Får IOException dersom mangende journalpostid") {
-            val forhandsvarselEvent = createForhandsvarselHendelse()
-            forhandsvarselEvent.data = VarselData(journalpost = VarselDataJournalpost(uuid = "something", id = null))
-            coEvery { accessControlService.getUserAccessStatus(SM_FNR) } returns
-                UserAccessStatus(
-                    SM_FNR,
-                    canUserBeDigitallyNotified = true,
-                )
+        describe("Forhåndsvarsel om stans av sykepenger") {
+            it("Sender alltid fysisk brev for forhåndsvarsel") {
+                val forhandsvarselEvent = createForhandsvarselHendelse()
 
-            val exception = shouldThrow<IOException> {
+                coEvery { accessControlService.getUserAccessStatus(SM_FNR) } returns
+                    UserAccessStatus(
+                        SM_FNR,
+                        canUserBeDigitallyNotified = true,
+                    )
+
                 aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
+
+                coVerify(exactly = 0) {
+                    senderFacade.sendBrevTilFysiskPrint(
+                        any(),
+                        forhandsvarselEvent,
+                        any(),
+                        DistibusjonsType.VIKTIG,
+                    )
+                }
+
+                verify(exactly = 1) {
+                    senderFacade.sendTilBrukernotifikasjoner(
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        true,
+                        any(),
+                        journalpostId = any(),
+                    )
+                }
             }
 
-            exception.message shouldBeEqualTo "ArbeidstakerHendelse har feil format"
-        }
+            it("Får IOException dersom mangende journalpostid") {
+                val forhandsvarselEvent = createForhandsvarselHendelse()
+                forhandsvarselEvent.data = VarselData(journalpost = VarselDataJournalpost(uuid = "something", id = null))
+                coEvery { accessControlService.getUserAccessStatus(SM_FNR) } returns
+                    UserAccessStatus(
+                        SM_FNR,
+                        canUserBeDigitallyNotified = true,
+                    )
 
-        it("Tester deserialisering av varseldata") {
-            val objectMapper = createObjectMapper()
+                val exception =
+                    shouldThrow<IOException> {
+                        aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(forhandsvarselEvent)
+                    }
 
-            coEvery { accessControlService.getUserAccessStatus(any()) } returns
-                UserAccessStatus(
-                    SM_FNR,
-                    canUserBeDigitallyNotified = false,
-                )
+                exception.message shouldBeEqualTo "ArbeidstakerHendelse har feil format"
+            }
 
-            val jsondata = """{
+            it("Tester deserialisering av varseldata") {
+                val objectMapper = createObjectMapper()
+
+                coEvery { accessControlService.getUserAccessStatus(any()) } returns
+                    UserAccessStatus(
+                        SM_FNR,
+                        canUserBeDigitallyNotified = false,
+                    )
+
+                val jsondata = """{
                 "@type": "ArbeidstakerHendelse",
                 "type": "SM_AKTIVITETSPLIKT",
                 "data": {
@@ -111,29 +116,28 @@ class AktivitetskravVarselServiceTest : DescribeSpec({
                 "orgnummer": null
             }"""
 
-            val arbeidstakerHendelse = objectMapper.readValue(jsondata, ArbeidstakerHendelse::class.java)
-            arbeidstakerHendelse.data = objectMapper.readTree(jsondata)["data"]
+                val arbeidstakerHendelse = objectMapper.readValue(jsondata, ArbeidstakerHendelse::class.java)
+                arbeidstakerHendelse.data = objectMapper.readTree(jsondata)["data"]
 
-            aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelse)
+                aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(arbeidstakerHendelse)
 
-            coVerify(exactly = 1) {
-                senderFacade.sendBrevTilFysiskPrint(
-                    any(),
-                    arbeidstakerHendelse,
-                    any(),
-                    DistibusjonsType.VIKTIG,
-                )
+                coVerify(exactly = 1) {
+                    senderFacade.sendBrevTilFysiskPrint(
+                        any(),
+                        arbeidstakerHendelse,
+                        any(),
+                        DistibusjonsType.VIKTIG,
+                    )
+                }
             }
         }
-    }
-})
+    })
 
-private fun createForhandsvarselHendelse(): ArbeidstakerHendelse {
-    return ArbeidstakerHendelse(
+private fun createForhandsvarselHendelse(): ArbeidstakerHendelse =
+    ArbeidstakerHendelse(
         type = HendelseType.SM_AKTIVITETSPLIKT,
         false,
         varselData(journalpostId = "620049753", journalpostUuid = "bda0b55a-df72-4888-a5a5-6bfa74cacafe"),
         SM_FNR,
         null,
     )
-}

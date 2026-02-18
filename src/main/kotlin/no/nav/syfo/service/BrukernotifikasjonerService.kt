@@ -31,7 +31,7 @@ class BrukernotifikasjonerService(
                     uuid,
                     url,
                     eksternVarsling,
-                    dagerTilDeaktivering
+                    dagerTilDeaktivering,
                 )
                 log.info("Har sendt beskjed med uuid $uuid til brukernotifikasjoner: $content")
             }
@@ -49,9 +49,7 @@ class BrukernotifikasjonerService(
         }
     }
 
-    fun ferdigstillVarsel(
-        uuid: String,
-    ) {
+    fun ferdigstillVarsel(uuid: String) {
         brukernotifikasjonKafkaProducer.sendDone(uuid)
         log.info("Har sendt done med uuid $uuid til brukernotifikasjoner")
     }

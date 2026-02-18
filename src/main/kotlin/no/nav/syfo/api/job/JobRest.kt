@@ -17,7 +17,7 @@ const val urlPathJobTrigger = "/job/trigger"
 fun Route.registerJobTriggerApi(
     mikrofrontendService: MikrofrontendService,
     sendAktivitetspliktLetterToSentralPrintJob: SendAktivitetspliktLetterToSentralPrintJob,
-    resendFailedVarslerJob: ResendFailedVarslerJob
+    resendFailedVarslerJob: ResendFailedVarslerJob,
 ) {
     accept(ContentType.Application.Json) {
         post(urlPathJobTrigger) {

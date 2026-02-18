@@ -17,21 +17,22 @@ data class NyStatusSakInput(
     val oppdatertHardDeleteDateTime: LocalDateTime? = null,
 )
 
-fun NyStatusSakInput.toNyStatusSakByGrupperingsidMutation(): NyStatusSakByGrupperingsidMutation {
-    return NyStatusSakByGrupperingsidMutation(
+fun NyStatusSakInput.toNyStatusSakByGrupperingsidMutation(): NyStatusSakByGrupperingsidMutation =
+    NyStatusSakByGrupperingsidMutation(
         grupperingsid = grupperingsId,
         merkelapp = merkelapp,
         nyStatus = SaksStatus.valueOf(sakStatus.name),
         tidspunkt = Optional.presentIfNotNull(oppdatertTidspunkt?.formatAsISO8601DateTime()),
-        hardDelete = oppdatertHardDeleteDateTime?.let {
-            Optional.present(
-                HardDeleteUpdateInput(
-                    nyTid = FutureTemporalInput(
-                        den = Optional.present(oppdatertHardDeleteDateTime.formatAsISO8601DateTime()),
+        hardDelete =
+            oppdatertHardDeleteDateTime?.let {
+                Optional.present(
+                    HardDeleteUpdateInput(
+                        nyTid =
+                            FutureTemporalInput(
+                                den = Optional.present(oppdatertHardDeleteDateTime.formatAsISO8601DateTime()),
+                            ),
+                        strategi = NyTidStrategi.OVERSKRIV,
                     ),
-                    strategi = NyTidStrategi.OVERSKRIV,
                 )
-            )
-        } ?: Optional.absent(),
+            } ?: Optional.absent(),
     )
-}

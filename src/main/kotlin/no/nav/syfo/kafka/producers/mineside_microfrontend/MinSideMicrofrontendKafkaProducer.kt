@@ -7,7 +7,7 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 
 class MinSideMicrofrontendKafkaProducer(
-    val env: Environment
+    val env: Environment,
 ) {
     private val kafkaConfig = producerProperties(env)
     private val kafkaProducer = KafkaProducer<String, MinSideRecord>(kafkaConfig)
@@ -17,8 +17,8 @@ class MinSideMicrofrontendKafkaProducer(
             ProducerRecord(
                 topicMinSideMicrofrontend,
                 minSideRecord.fnr,
-                minSideRecord
-            )
+                minSideRecord,
+            ),
         )
     }
 }

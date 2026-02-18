@@ -7,8 +7,8 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiationConfig
 
-fun contentNegotationFeature(): ContentNegotiationConfig.() -> Unit {
-    return {
+fun contentNegotationFeature(): ContentNegotiationConfig.() -> Unit =
+    {
         jackson {
             registerKotlinModule()
             registerModule(JavaTimeModule())
@@ -16,4 +16,3 @@ fun contentNegotationFeature(): ContentNegotiationConfig.() -> Unit {
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         }
     }
-}

@@ -20,7 +20,9 @@ data class RunOnElection(
     var ranOnce: Boolean = false,
 )
 
-class LeaderElection(private val blocksToRun: List<RunOnElection>) {
+class LeaderElection(
+    private val blocksToRun: List<RunOnElection>,
+) {
     private val log = LoggerFactory.getLogger("no.nav.syfo.utils.LeaderElection")
     private var podIsLeader = false
 
@@ -28,9 +30,10 @@ class LeaderElection(private val blocksToRun: List<RunOnElection>) {
         val electorPath = getEnvVar("ELECTOR_PATH")
         val electorPollUrl = "http://$electorPath"
         val leaderPod = getLeaderPod(electorPollUrl)
-        val podHostname: String = withContext(Dispatchers.IO) {
-            InetAddress.getLocalHost()
-        }.hostName
+        val podHostname: String =
+            withContext(Dispatchers.IO) {
+                InetAddress.getLocalHost()
+            }.hostName
         val isLeader = podHostname == leaderPod
 
         if (isLeader && !podIsLeader) {
@@ -54,11 +57,12 @@ class LeaderElection(private val blocksToRun: List<RunOnElection>) {
 
     private suspend fun callElectorPath(path: String): String {
         val client = httpClient()
-        val leaderResponse = client.get(path) {
-            headers {
-                append(HttpHeaders.Accept, ContentType.Application.Json)
+        val leaderResponse =
+            client.get(path) {
+                headers {
+                    append(HttpHeaders.Accept, ContentType.Application.Json)
+                }
             }
-        }
         return leaderResponse.body()
     }
 

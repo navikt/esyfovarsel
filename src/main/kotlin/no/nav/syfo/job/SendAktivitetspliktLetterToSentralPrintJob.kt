@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 
 class SendAktivitetspliktLetterToSentralPrintJob(
     private val db: DatabaseInterface,
-    private val senderFacade: SenderFacade
+    private val senderFacade: SenderFacade,
 ) {
     private val log = LoggerFactory.getLogger(SendAktivitetspliktLetterToSentralPrintJob::class.java)
 
@@ -18,28 +18,29 @@ class SendAktivitetspliktLetterToSentralPrintJob(
         val unreadVarslerOverdue = db.fetchAlleUferdigstilteAktivitetspliktVarsler()
 
         log.info(
-            "SendAktivitetspliktLetterToSentralPrintJob is about to send ${unreadVarslerOverdue.size} forced letters"
+            "SendAktivitetspliktLetterToSentralPrintJob is about to send ${unreadVarslerOverdue.size} forced letters",
         )
         var sentToTvingSentralPrintLettersAmount = 0
 
         unreadVarslerOverdue.forEach { pUtsendtVarsel ->
             if (pUtsendtVarsel.eksternReferanse.isNullOrBlank()) {
                 log.warn(
-                    "Skip varsel because eksternReferanse is null for varsel with uuid: ${pUtsendtVarsel.uuid}"
+                    "Skip varsel because eksternReferanse is null for varsel with uuid: ${pUtsendtVarsel.uuid}",
                 )
             } else if (pUtsendtVarsel.journalpostId.isNullOrBlank()) {
                 log.error(
-                    "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: User can not be notified by letter due to missing journalpostId in varsel with uuid: ${pUtsendtVarsel.uuid}"
+                    "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: User can not be notified by letter due to missing journalpostId in varsel with uuid: ${pUtsendtVarsel.uuid}",
                 )
             } else {
                 senderFacade.sendBrevTilTvingSentralPrint(
-                    varselHendelse = ArbeidstakerHendelse(
-                        type = HendelseType.SM_AKTIVITETSPLIKT,
-                        ferdigstill = null,
-                        data = null,
-                        arbeidstakerFnr = pUtsendtVarsel.fnr,
-                        orgnummer = pUtsendtVarsel.orgnummer,
-                    ),
+                    varselHendelse =
+                        ArbeidstakerHendelse(
+                            type = HendelseType.SM_AKTIVITETSPLIKT,
+                            ferdigstill = null,
+                            data = null,
+                            arbeidstakerFnr = pUtsendtVarsel.fnr,
+                            orgnummer = pUtsendtVarsel.orgnummer,
+                        ),
                     distribusjonsType = DistibusjonsType.VIKTIG,
                     journalpostId = pUtsendtVarsel.journalpostId,
                     eksternReferanse = pUtsendtVarsel.eksternReferanse,
@@ -48,7 +49,7 @@ class SendAktivitetspliktLetterToSentralPrintJob(
             }
         }
         log.info(
-            "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sendLetterToTvingSentralPrintFromJob sent $sentToTvingSentralPrintLettersAmount letters"
+            "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sendLetterToTvingSentralPrintFromJob sent $sentToTvingSentralPrintLettersAmount letters",
         )
         return sentToTvingSentralPrintLettersAmount
     }

@@ -24,10 +24,12 @@ import no.nav.syfo.UrlEnv
 import no.nav.syfo.consumer.dkif.PostPersonerRequest
 import no.nav.syfo.testutil.extractPortFromUrl
 
-class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
-
-    fun mockDkifServer(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> {
-        return mockServer(urlEnv.dkifUrl) {
+class MockServers(
+    val urlEnv: UrlEnv,
+    val authEnv: AuthEnv,
+) {
+    fun mockDkifServer(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> =
+        mockServer(urlEnv.dkifUrl) {
             val jsonMapper = jacksonObjectMapper()
             post("/rest/v1/personer") {
                 val requestBody = jsonMapper.readValue(call.receiveText(), PostPersonerRequest::class.java)
@@ -37,24 +39,22 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
                     call.respondText(
                         jsonMapper.writeValueAsString(dkifPostPersonerResponse),
                         ContentType.Application.Json,
-                        HttpStatusCode.OK
+                        HttpStatusCode.OK,
                     )
                 }
             }
         }
-    }
 
-    fun mockAADServer(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> {
-        return mockServer(authEnv.aadAccessTokenUrl) {
+    fun mockAADServer(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> =
+        mockServer(authEnv.aadAccessTokenUrl) {
             post {
                 call.respond(tokenFromAzureServer)
             }
         }
-    }
 
     @Suppress("MaxLineLength")
-    fun mockArbeidsgiverNotifikasjonServer(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> {
-        return mockServer(urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl) {
+    fun mockArbeidsgiverNotifikasjonServer(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> =
+        mockServer(urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl) {
             val responseNyBeskjed = """
                 {
                   "data": {
@@ -86,11 +86,10 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
                 }
             }
         }
-    }
 
     @Suppress("MaxLineLength")
-    fun mockJournalpostdistribusjonServer(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> {
-        return mockServer(urlEnv.dokdistfordelingUrl) {
+    fun mockJournalpostdistribusjonServer(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> =
+        mockServer(urlEnv.dokdistfordelingUrl) {
             val bestillingsId = """
                 {
                   "bestillingsId": "1000"
@@ -108,13 +107,12 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
                 }
             }
         }
-    }
 
     fun mockServer(
         url: String,
-        route: Route.() -> Unit
-    ): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> {
-        return embeddedServer(
+        route: Route.() -> Unit,
+    ): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> =
+        embeddedServer(
             factory = Netty,
             port = url.extractPortFromUrl(),
         ) {
@@ -129,5 +127,4 @@ class MockServers(val urlEnv: UrlEnv, val authEnv: AuthEnv) {
                 route(this)
             }
         }
-    }
 }

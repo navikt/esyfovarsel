@@ -21,14 +21,15 @@ class BrukernotifikasjonKafkaProducer(
     val env: Environment,
 ) {
     val brukernotifikasjonerTopic = "min-side.aapen-brukervarsel-v1"
-    val kafkaProducer = KafkaProducer<String, String>(
-        producerProperties(env).apply {
-            put(
-                put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java),
-                put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java)
-            )
-        }
-    )
+    val kafkaProducer =
+        KafkaProducer<String, String>(
+            producerProperties(env).apply {
+                put(
+                    put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java),
+                    put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java),
+                )
+            },
+        )
     private val log: Logger = LoggerFactory.getLogger(BrukernotifikasjonKafkaProducer::class.java)
 
     fun sendBeskjed(
@@ -39,18 +40,20 @@ class BrukernotifikasjonKafkaProducer(
         eksternVarsling: Boolean,
         dagerTilDeaktivering: Long?,
     ) {
-        val varsel = createVarsel(
-            varseltype = Varseltype.Beskjed,
-            uuid = uuid,
-            fnr = fnr,
-            content = content,
-            varselUrl = varselUrl,
-            smsVarsling = eksternVarsling,
-            smsTekst = null,
-            dagerTilDeaktivering = dagerTilDeaktivering,
-        )
+        val varsel =
+            createVarsel(
+                varseltype = Varseltype.Beskjed,
+                uuid = uuid,
+                fnr = fnr,
+                content = content,
+                varselUrl = varselUrl,
+                smsVarsling = eksternVarsling,
+                smsTekst = null,
+                dagerTilDeaktivering = dagerTilDeaktivering,
+            )
 
-        kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
+        kafkaProducer
+            .send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
             .get() // Block until record has been sent
     }
 
@@ -62,25 +65,28 @@ class BrukernotifikasjonKafkaProducer(
         smsContent: String?,
         dagerTilDeaktivering: Long?,
     ) {
-        val varsel = createVarsel(
-            varseltype = Varseltype.Oppgave,
-            uuid = uuid,
-            fnr = fnr,
-            content = content,
-            varselUrl = varselUrl,
-            smsVarsling = true,
-            smsTekst = smsContent,
-            dagerTilDeaktivering = dagerTilDeaktivering,
-        )
+        val varsel =
+            createVarsel(
+                varseltype = Varseltype.Oppgave,
+                uuid = uuid,
+                fnr = fnr,
+                content = content,
+                varselUrl = varselUrl,
+                smsVarsling = true,
+                smsTekst = smsContent,
+                dagerTilDeaktivering = dagerTilDeaktivering,
+            )
 
-        kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
+        kafkaProducer
+            .send(ProducerRecord(brukernotifikasjonerTopic, uuid, varsel))
             .get() // Block until record has been sent
     }
 
     fun sendDone(uuid: String) {
-        val inaktiverVarsel = VarselActionBuilder.inaktiver {
-            varselId = uuid
-        }
+        val inaktiverVarsel =
+            VarselActionBuilder.inaktiver {
+                varselId = uuid
+            }
 
         kafkaProducer.send(ProducerRecord(brukernotifikasjonerTopic, uuid, inaktiverVarsel)).get()
     }
@@ -99,25 +105,27 @@ class BrukernotifikasjonKafkaProducer(
             log.error("varselUrl for $varseltype is longer than 200 characters: $varselUrl UUID: $uuid")
         }
 
-        val opprettVarsel = VarselActionBuilder.opprett {
-            type = varseltype
-            varselId = uuid
-            sensitivitet = Sensitivitet.High
-            ident = fnr
-            tekst = Tekst(
-                spraakkode = "nb",
-                tekst = content,
-                default = true
-            )
-            link = varselUrl?.toString()
-            aktivFremTil = dagerTilDeaktivering?.let { ZonedDateTime.now(ZoneId.of("Z")).plusDays(it) }
-            if (smsVarsling) {
-                eksternVarsling {
-                    smsVarslingstekst = smsTekst
-                    preferertKanal = EksternKanal.SMS
+        val opprettVarsel =
+            VarselActionBuilder.opprett {
+                type = varseltype
+                varselId = uuid
+                sensitivitet = Sensitivitet.High
+                ident = fnr
+                tekst =
+                    Tekst(
+                        spraakkode = "nb",
+                        tekst = content,
+                        default = true,
+                    )
+                link = varselUrl?.toString()
+                aktivFremTil = dagerTilDeaktivering?.let { ZonedDateTime.now(ZoneId.of("Z")).plusDays(it) }
+                if (smsVarsling) {
+                    eksternVarsling {
+                        smsVarslingstekst = smsTekst
+                        preferertKanal = EksternKanal.SMS
+                    }
                 }
             }
-        }
         return opprettVarsel
     }
 }

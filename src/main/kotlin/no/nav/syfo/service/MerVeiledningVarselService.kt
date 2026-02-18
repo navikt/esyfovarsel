@@ -27,10 +27,7 @@ class MerVeiledningVarselService(
     val env: Environment,
     val accessControlService: AccessControlService,
 ) {
-
-    suspend fun sendVarselTilArbeidstaker(
-        arbeidstakerHendelse: ArbeidstakerHendelse,
-    ) {
+    suspend fun sendVarselTilArbeidstaker(arbeidstakerHendelse: ArbeidstakerHendelse) {
         val data = dataToVarselData(arbeidstakerHendelse.data)
         requireNotNull(data.journalpost)
         requireNotNull(data.journalpost.id)
@@ -49,7 +46,7 @@ class MerVeiledningVarselService(
         sendOppgaveTilDittSykefravaer(
             arbeidstakerHendelse.arbeidstakerFnr,
             UUID.randomUUID().toString(),
-            arbeidstakerHendelse
+            arbeidstakerHendelse,
         )
         tellMerVeiledningVarselSendt()
     }
@@ -94,18 +91,19 @@ class MerVeiledningVarselService(
         uuid: String,
         arbeidstakerHendelse: ArbeidstakerHendelse,
     ) {
-        val melding = DittSykefravaerMelding(
-            OpprettMelding(
-                DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT,
-                MER_VEILEDNING_URL,
-                Variant.INFO,
-                true,
-                DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING,
-                LocalDateTime.now().plusWeeks(13).toInstant(ZoneOffset.UTC),
-            ),
-            null,
-            fnr,
-        )
+        val melding =
+            DittSykefravaerMelding(
+                OpprettMelding(
+                    DITT_SYKEFRAVAER_MER_VEILEDNING_MESSAGE_TEXT,
+                    MER_VEILEDNING_URL,
+                    Variant.INFO,
+                    true,
+                    DITT_SYKEFRAVAER_HENDELSE_TYPE_MER_VEILEDNING,
+                    LocalDateTime.now().plusWeeks(13).toInstant(ZoneOffset.UTC),
+                ),
+                null,
+                fnr,
+            )
         senderFacade.sendTilDittSykefravaer(
             arbeidstakerHendelse,
             DittSykefravaerVarsel(

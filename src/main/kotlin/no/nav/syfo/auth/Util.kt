@@ -21,11 +21,14 @@ import no.nav.syfo.AuthEnv
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import java.net.ProxySelector
 
-fun validBasicAuthCredentials(authEnv: AuthEnv, credentials: UserPasswordCredential): Boolean {
+fun validBasicAuthCredentials(
+    authEnv: AuthEnv,
+    credentials: UserPasswordCredential,
+): Boolean {
     val isValid = credentials.name == authEnv.serviceuserUsername && credentials.password == authEnv.serviceuserPassword
     if (!isValid) {
         log.error(
-            "System call attempting to authenticate with invalid credentials: ${credentials.name}/${credentials.password}"
+            "System call attempting to authenticate with invalid credentials: ${credentials.name}/${credentials.password}",
         )
     }
     return isValid
@@ -48,12 +51,11 @@ val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
     }
 }
 
-fun getWellKnown(wellKnownUrl: String) =
-    runBlocking { HttpClient(Apache, proxyConfig).get(wellKnownUrl).body<WellKnown>() }
+fun getWellKnown(wellKnownUrl: String) = runBlocking { HttpClient(Apache, proxyConfig).get(wellKnownUrl).body<WellKnown>() }
 
-fun isNiva4(credentials: JWTCredential): Boolean {
-    return "Level4" == credentials.payload.getClaim("acr").asString() || "idporten-loa-high" == credentials.payload.getClaim("acr").asString()
-}
+fun isNiva4(credentials: JWTCredential): Boolean =
+    "Level4" == credentials.payload.getClaim("acr").asString() ||
+        "idporten-loa-high" == credentials.payload.getClaim("acr").asString()
 
 fun unauthorized(credentials: JWTCredential): BrukerPrincipal? {
     log.warn(
@@ -64,12 +66,16 @@ fun unauthorized(credentials: JWTCredential): BrukerPrincipal? {
     return null
 }
 
-fun hasClientIdAudience(credentials: JWTCredential, clientId: String): Boolean {
-    return credentials.payload.audience.contains(clientId)
-}
+fun hasClientIdAudience(
+    credentials: JWTCredential,
+    clientId: String,
+): Boolean = credentials.payload.audience.contains(clientId)
 
-fun finnFnrFraToken(principal: JWTPrincipal): String {
-    return if (principal.payload.getClaim("pid") != null && !principal.payload.getClaim("pid").asString()
+fun finnFnrFraToken(principal: JWTPrincipal): String =
+    if (principal.payload.getClaim("pid") != null &&
+        !principal.payload
+            .getClaim("pid")
+            .asString()
             .isNullOrEmpty()
     ) {
         log.debug("Bruker fnr fra pid-claim")
@@ -78,7 +84,6 @@ fun finnFnrFraToken(principal: JWTPrincipal): String {
         log.debug("Bruker fnr fra subject")
         principal.payload.subject
     }
-}
 
 data class BrukerPrincipal(
     val fnr: String,

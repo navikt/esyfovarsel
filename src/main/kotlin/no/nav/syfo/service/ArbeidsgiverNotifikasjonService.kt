@@ -20,45 +20,46 @@ class ArbeidsgiverNotifikasjonService(
     private val narmesteLederService: NarmesteLederService,
     private val dineSykmeldteUrl: String,
 ) {
-
     private val log: Logger = LoggerFactory.getLogger(ArbeidsgiverNotifikasjonService::class.qualifiedName)
 
-    suspend fun sendNotifikasjon(
-        arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonInput,
-    ) {
-        val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(
-            arbeidsgiverNotifikasjon.ansattFnr,
-            arbeidsgiverNotifikasjon.virksomhetsnummer
-        )
+    suspend fun sendNotifikasjon(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonInput) {
+        val narmesteLederRelasjon =
+            narmesteLederService.getNarmesteLederRelasjon(
+                arbeidsgiverNotifikasjon.ansattFnr,
+                arbeidsgiverNotifikasjon.virksomhetsnummer,
+            )
 
         if (narmesteLederRelasjon == null || !narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
             log.warn("Sender ikke varsel til ag-notifikasjon: narmesteLederRelasjon er null eller har ikke kontaktinfo")
             return
         }
 
-        if (arbeidsgiverNotifikasjon.narmesteLederFnr !== null && arbeidsgiverNotifikasjon.narmesteLederFnr != narmesteLederRelasjon.narmesteLederFnr) {
+        if (arbeidsgiverNotifikasjon.narmesteLederFnr !== null &&
+            arbeidsgiverNotifikasjon.narmesteLederFnr != narmesteLederRelasjon.narmesteLederFnr
+        ) {
             log.warn(
-                "Sender ikke varsel til ag-notifikasjon: den ansatte har nærmeste leder med annet fnr enn mottaker i varselHendelse"
+                "Sender ikke varsel til ag-notifikasjon: den ansatte har nærmeste leder med annet fnr enn mottaker i varselHendelse",
             )
             return
         }
 
         val url = arbeidsgiverNotifikasjon.link ?: "$dineSykmeldteUrl/${narmesteLederRelasjon.narmesteLederId}"
 
-        val arbeidsgiverNotifikasjonen = ArbeidsgiverNotifikasjon(
-            varselId = arbeidsgiverNotifikasjon.uuid.toString(),
-            virksomhetsnummer = arbeidsgiverNotifikasjon.virksomhetsnummer,
-            url = url,
-            narmesteLederFnr = narmesteLederRelasjon.narmesteLederFnr!!,
-            ansattFnr = arbeidsgiverNotifikasjon.ansattFnr,
-            messageText = arbeidsgiverNotifikasjon.messageText,
-            narmesteLederEpostadresse = narmesteLederRelasjon.narmesteLederEpost!!,
-            merkelapp = arbeidsgiverNotifikasjon.merkelapp,
-            emailTitle = arbeidsgiverNotifikasjon.epostTittel,
-            emailBody = arbeidsgiverNotifikasjon.epostHtmlBody,
-            hardDeleteDate = arbeidsgiverNotifikasjon.hardDeleteDate,
-            grupperingsid = arbeidsgiverNotifikasjon.grupperingsid
-        )
+        val arbeidsgiverNotifikasjonen =
+            ArbeidsgiverNotifikasjon(
+                varselId = arbeidsgiverNotifikasjon.uuid.toString(),
+                virksomhetsnummer = arbeidsgiverNotifikasjon.virksomhetsnummer,
+                url = url,
+                narmesteLederFnr = narmesteLederRelasjon.narmesteLederFnr!!,
+                ansattFnr = arbeidsgiverNotifikasjon.ansattFnr,
+                messageText = arbeidsgiverNotifikasjon.messageText,
+                narmesteLederEpostadresse = narmesteLederRelasjon.narmesteLederEpost!!,
+                merkelapp = arbeidsgiverNotifikasjon.merkelapp,
+                emailTitle = arbeidsgiverNotifikasjon.epostTittel,
+                emailBody = arbeidsgiverNotifikasjon.epostHtmlBody,
+                hardDeleteDate = arbeidsgiverNotifikasjon.hardDeleteDate,
+                grupperingsid = arbeidsgiverNotifikasjon.grupperingsid,
+            )
 
         when (arbeidsgiverNotifikasjon.meldingstype) {
             BESKJED -> arbeidsgiverNotifikasjonProdusent.createNewBeskjedForArbeidsgiver(arbeidsgiverNotifikasjonen)
@@ -66,7 +67,10 @@ class ArbeidsgiverNotifikasjonService(
         }
     }
 
-    suspend fun deleteNotifikasjon(merkelapp: String, eksternReferanse: String) {
+    suspend fun deleteNotifikasjon(
+        merkelapp: String,
+        eksternReferanse: String,
+    ) {
         arbeidsgiverNotifikasjonProdusent.deleteNotifikasjonForArbeidsgiver(
             ArbeidsgiverDeleteNotifikasjon(
                 merkelapp,
@@ -75,29 +79,17 @@ class ArbeidsgiverNotifikasjonService(
         )
     }
 
-    suspend fun createNewKalenderavtale(
-        nyKalenderInput: NyKalenderInput
-    ): String? {
-        return arbeidsgiverNotifikasjonProdusent.createNewKalenderavtale(
+    suspend fun createNewKalenderavtale(nyKalenderInput: NyKalenderInput): String? =
+        arbeidsgiverNotifikasjonProdusent.createNewKalenderavtale(
             nyKalenderInput = nyKalenderInput,
         )
-    }
 
-    suspend fun createNewSak(sakInput: NySakInput): String? {
-        return arbeidsgiverNotifikasjonProdusent.createNewSak(sakInput)
-    }
+    suspend fun createNewSak(sakInput: NySakInput): String? = arbeidsgiverNotifikasjonProdusent.createNewSak(sakInput)
 
-    suspend fun nyStatusSak(
-        nyStatusSakInput: NyStatusSakInput
-    ): String? {
-        return arbeidsgiverNotifikasjonProdusent.nyStatusSak(nyStatusSakInput)
-    }
+    suspend fun nyStatusSak(nyStatusSakInput: NyStatusSakInput): String? = arbeidsgiverNotifikasjonProdusent.nyStatusSak(nyStatusSakInput)
 
-    suspend fun updateKalenderavtale(
-        oppdaterKalenderInput: OppdaterKalenderInput
-    ): String? {
-        return arbeidsgiverNotifikasjonProdusent.updateKalenderavtale(oppdaterKalenderInput)
-    }
+    suspend fun updateKalenderavtale(oppdaterKalenderInput: OppdaterKalenderInput): String? =
+        arbeidsgiverNotifikasjonProdusent.updateKalenderavtale(oppdaterKalenderInput)
 }
 
 data class ArbeidsgiverNotifikasjonInput(

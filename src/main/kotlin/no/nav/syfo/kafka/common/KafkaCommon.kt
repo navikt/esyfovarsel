@@ -45,8 +45,8 @@ interface KafkaListener {
     suspend fun listen(applicationState: ApplicationState)
 }
 
-fun commonProperties(env: Environment): Properties {
-    return Properties().apply {
+fun commonProperties(env: Environment): Properties =
+    Properties().apply {
         put(SECURITY_PROTOCOL_CONFIG, SSL)
         put(BOOTSTRAP_SERVERS_CONFIG, env.kafkaEnv.aivenBroker)
         put(SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "") // Disable server host name verification
@@ -61,10 +61,9 @@ fun commonProperties(env: Environment): Properties {
             remove(SECURITY_PROTOCOL_CONFIG)
         }
     }
-}
 
-fun consumerProperties(env: Environment): Properties {
-    return commonProperties(env).apply {
+fun consumerProperties(env: Environment): Properties =
+    commonProperties(env).apply {
         put(GROUP_ID_CONFIG, "esyfovarsel-group-v04-gcp-v03")
         put(AUTO_OFFSET_RESET_CONFIG, "earliest")
         put(MAX_POLL_RECORDS_CONFIG, "1")
@@ -72,24 +71,26 @@ fun consumerProperties(env: Environment): Properties {
         put(KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer")
         put(VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer")
     }
-}
 
-fun producerProperties(env: Environment): Properties {
-    return commonProperties(env).apply {
+fun producerProperties(env: Environment): Properties =
+    commonProperties(env).apply {
         put(ACKS_CONFIG, "all")
         put(KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
         put(VALUE_SERIALIZER_CLASS_CONFIG, JacksonKafkaSerializer::class.java)
     }
-}
 
-fun createObjectMapper() = ObjectMapper().apply {
-    registerKotlinModule()
-    registerModule(JavaTimeModule())
-    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-    configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-}
+fun createObjectMapper() =
+    ObjectMapper().apply {
+        registerKotlinModule()
+        registerModule(JavaTimeModule())
+        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+    }
 
-suspend fun launchKafkaListener(applicationState: ApplicationState, kafkaListener: KafkaListener) {
+suspend fun launchKafkaListener(
+    applicationState: ApplicationState,
+    kafkaListener: KafkaListener,
+) {
     try {
         kafkaListener.listen(applicationState)
     } finally {

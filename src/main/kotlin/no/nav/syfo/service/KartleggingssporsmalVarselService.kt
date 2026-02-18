@@ -15,20 +15,18 @@ class KartleggingssporsmalVarselService(
     val env: Environment,
     val accessControlService: AccessControlService,
 ) {
-    suspend fun sendKartleggingssporsmalTilArbeidstaker(
-        arbeidstakerHendelse: ArbeidstakerHendelse,
-    ) {
+    suspend fun sendKartleggingssporsmalTilArbeidstaker(arbeidstakerHendelse: ArbeidstakerHendelse) {
         val userAccessStatus = accessControlService.getUserAccessStatus(arbeidstakerHendelse.arbeidstakerFnr)
         sendDigitaltVarselTilArbeidstaker(
             arbeidstakerHendelse = arbeidstakerHendelse,
-            eksternVarsling = userAccessStatus.canUserBeDigitallyNotified
+            eksternVarsling = userAccessStatus.canUserBeDigitallyNotified,
         )
         countKartleggingssporsmalVarselSendt()
     }
 
     private fun sendDigitaltVarselTilArbeidstaker(
         arbeidstakerHendelse: ArbeidstakerHendelse,
-        eksternVarsling: Boolean
+        eksternVarsling: Boolean,
     ) {
         val fnr = arbeidstakerHendelse.arbeidstakerFnr
         val url = URI(env.urlEnv.baseUrlNavEkstern + KARTLEGGINGSSPORSMAL_URL).toURL()
@@ -44,7 +42,7 @@ class KartleggingssporsmalVarselService(
             varseltype = OPPGAVE,
             dagerTilDeaktivering = DAGER_TIL_DEAKTIVERING_AV_VARSEL,
             eksternVarsling = eksternVarsling,
-            storeFailedUtsending = eksternVarsling
+            storeFailedUtsending = eksternVarsling,
         )
     }
 

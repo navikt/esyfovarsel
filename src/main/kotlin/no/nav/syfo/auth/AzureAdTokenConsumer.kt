@@ -29,7 +29,9 @@ import java.net.ProxySelector
 import java.time.Instant
 import kotlin.collections.set
 
-class AzureAdTokenConsumer(authEnv: AuthEnv) {
+class AzureAdTokenConsumer(
+    authEnv: AuthEnv,
+) {
     private val aadAccessTokenUrl = authEnv.aadAccessTokenUrl
     private val clientId = authEnv.clientId
     private val clientSecret = authEnv.clientSecret
@@ -74,20 +76,21 @@ class AzureAdTokenConsumer(authEnv: AuthEnv) {
         if (token == null || token.issuedOn!!.plusSeconds(token.expires_in).isBefore(omToMinutter)) {
             log.info("Henter nytt token fra Azure AD for scope : $resource")
 
-            val response = httpClientWithProxy.post(aadAccessTokenUrl) {
-                accept(ContentType.Application.Json)
+            val response =
+                httpClientWithProxy.post(aadAccessTokenUrl) {
+                    accept(ContentType.Application.Json)
 
-                setBody(
-                    FormDataContent(
-                        Parameters.build {
-                            append("client_id", clientId)
-                            append("scope", resource)
-                            append("grant_type", "client_credentials")
-                            append("client_secret", clientSecret)
-                        },
-                    ),
-                )
-            }
+                    setBody(
+                        FormDataContent(
+                            Parameters.build {
+                                append("client_id", clientId)
+                                append("scope", resource)
+                                append("grant_type", "client_credentials")
+                                append("client_secret", clientSecret)
+                            },
+                        ),
+                    )
+                }
             if (response.status == HttpStatusCode.OK) {
                 tokenMap[resource] = response.body()
             } else {
@@ -97,26 +100,30 @@ class AzureAdTokenConsumer(authEnv: AuthEnv) {
         return tokenMap[resource]!!.access_token
     }
 
-    suspend fun getOnBehalfOfToken(resource: String, token: String): String? {
+    suspend fun getOnBehalfOfToken(
+        resource: String,
+        token: String,
+    ): String? {
         log.info("Henter nytt obo-token fra Azure AD for scope : $resource")
 
-        val response = httpClientWithProxy.post(aadAccessTokenUrl) {
-            accept(ContentType.Application.Json)
+        val response =
+            httpClientWithProxy.post(aadAccessTokenUrl) {
+                accept(ContentType.Application.Json)
 
-            setBody(
-                FormDataContent(
-                    Parameters.build {
-                        append("client_id", clientId)
-                        append("scope", resource)
-                        append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
-                        append("client_secret", clientSecret)
-                        append("assertion", token)
-                        append("client_assertion_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
-                        append("requested_token_use", "on_behalf_of")
-                    },
-                ),
-            )
-        }
+                setBody(
+                    FormDataContent(
+                        Parameters.build {
+                            append("client_id", clientId)
+                            append("scope", resource)
+                            append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
+                            append("client_secret", clientSecret)
+                            append("assertion", token)
+                            append("client_assertion_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
+                            append("requested_token_use", "on_behalf_of")
+                        },
+                    ),
+                )
+            }
 
         return if (response.status == HttpStatusCode.OK) {
             response.body<AzureAdAccessToken>().access_token

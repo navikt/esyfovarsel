@@ -41,7 +41,7 @@ class VarselBusKafkaConsumer(
             } catch (e: Exception) {
                 log.error(
                     "Exception in [$topicVarselBus]-listener: ${e.message}",
-                    e
+                    e,
                 )
                 kafkaListener.commitSync()
             }

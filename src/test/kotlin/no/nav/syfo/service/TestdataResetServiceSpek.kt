@@ -28,76 +28,78 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class TestdataResetServiceSpek : DescribeSpec({
-    describe("TestdataResetServiceSpek") {
-        val embeddedDatabase = EmbeddedDatabase()
-        val mikrofrontendService: MikrofrontendService = mockk(relaxed = true)
-        val senderFacade: SenderFacade = mockk(relaxed = true)
-        val testdataResetService = TestdataResetService(embeddedDatabase, mikrofrontendService, senderFacade)
+class TestdataResetServiceSpek :
+    DescribeSpec({
+        describe("TestdataResetServiceSpek") {
+            val embeddedDatabase = EmbeddedDatabase()
+            val mikrofrontendService: MikrofrontendService = mockk(relaxed = true)
+            val senderFacade: SenderFacade = mockk(relaxed = true)
+            val testdataResetService = TestdataResetService(embeddedDatabase, mikrofrontendService, senderFacade)
 
-        val utsendtVarsel =
-            PUtsendtVarsel(
-                uuid = UUID.randomUUID().toString(),
-                fnr = arbeidstakerFnr1,
-                aktorId = arbeidstakerAktorId1,
-                narmesteLederFnr = null,
-                orgnummer = null,
-                type = VarselType.MER_VEILEDNING.name,
-                kanal = null,
-                utsendtTidspunkt = LocalDateTime.now(),
-                planlagtVarselId = null,
-                eksternReferanse = null,
-                ferdigstiltTidspunkt = null,
-                arbeidsgivernotifikasjonMerkelapp = null,
-                isForcedLetter = false,
-                journalpostId = null,
-            )
+            val utsendtVarsel =
+                PUtsendtVarsel(
+                    uuid = UUID.randomUUID().toString(),
+                    fnr = arbeidstakerFnr1,
+                    aktorId = arbeidstakerAktorId1,
+                    narmesteLederFnr = null,
+                    orgnummer = null,
+                    type = VarselType.MER_VEILEDNING.name,
+                    kanal = null,
+                    utsendtTidspunkt = LocalDateTime.now(),
+                    planlagtVarselId = null,
+                    eksternReferanse = null,
+                    ferdigstiltTidspunkt = null,
+                    arbeidsgivernotifikasjonMerkelapp = null,
+                    isForcedLetter = false,
+                    journalpostId = null,
+                )
 
-        val pUtsendtVarselFeilet = PUtsendtVarselFeilet(
-            UUID.randomUUID().toString(),
-            null,
-            arbeidstakerFnr1,
-            narmesteLederFnr1,
-            null,
-            HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV.name,
-            null,
-            null,
-            null,
-            Kanal.BRUKERNOTIFIKASJON.name,
-            null,
-            LocalDateTime.now(),
-            false
-        )
+            val pUtsendtVarselFeilet =
+                PUtsendtVarselFeilet(
+                    UUID.randomUUID().toString(),
+                    null,
+                    arbeidstakerFnr1,
+                    narmesteLederFnr1,
+                    null,
+                    HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV.name,
+                    null,
+                    null,
+                    null,
+                    Kanal.BRUKERNOTIFIKASJON.name,
+                    null,
+                    LocalDateTime.now(),
+                    false,
+                )
 
-        val mikrofrontendSynlighet =
-            MikrofrontendSynlighet(arbeidstakerFnr1, Tjeneste.DIALOGMOTE, LocalDate.now().plusWeeks(1))
+            val mikrofrontendSynlighet =
+                MikrofrontendSynlighet(arbeidstakerFnr1, Tjeneste.DIALOGMOTE, LocalDate.now().plusWeeks(1))
 
-        beforeTest {
-            embeddedDatabase.dropData()
-        }
-
-        it("Reset all testdata") {
-            embeddedDatabase.storeUtsendtVarsel(utsendtVarsel)
-            embeddedDatabase.storeUtsendtVarselFeilet(pUtsendtVarselFeilet)
-            embeddedDatabase.storeMikrofrontendSynlighetEntry(mikrofrontendSynlighet)
-
-            // Verify that testdata exists
-            embeddedDatabase.fetchUtsendtVarselByFnr(arbeidstakerFnr1).size shouldBeEqualTo 1
-            embeddedDatabase.fetchUtsendtVarselFeiletByFnr(arbeidstakerFnr1).size shouldBeEqualTo 1
-            embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(arbeidstakerFnr1).size shouldBeEqualTo 1
-
-            testdataResetService.resetTestdata(PersonIdent(arbeidstakerFnr1))
-
-            // Check that testdata is deleted
-            embeddedDatabase.fetchUtsendtVarselByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
-            embeddedDatabase.fetchUtsendtVarselFeiletByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
-            embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
-            verify(exactly = 1) {
-                mikrofrontendService.closeAllMikrofrontendForUser(PersonIdent(arbeidstakerFnr1))
+            beforeTest {
+                embeddedDatabase.dropData()
             }
-            coVerify(exactly = 1) {
-                senderFacade.ferdigstillVarslerForFnr(PersonIdent(arbeidstakerFnr1))
+
+            it("Reset all testdata") {
+                embeddedDatabase.storeUtsendtVarsel(utsendtVarsel)
+                embeddedDatabase.storeUtsendtVarselFeilet(pUtsendtVarselFeilet)
+                embeddedDatabase.storeMikrofrontendSynlighetEntry(mikrofrontendSynlighet)
+
+                // Verify that testdata exists
+                embeddedDatabase.fetchUtsendtVarselByFnr(arbeidstakerFnr1).size shouldBeEqualTo 1
+                embeddedDatabase.fetchUtsendtVarselFeiletByFnr(arbeidstakerFnr1).size shouldBeEqualTo 1
+                embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(arbeidstakerFnr1).size shouldBeEqualTo 1
+
+                testdataResetService.resetTestdata(PersonIdent(arbeidstakerFnr1))
+
+                // Check that testdata is deleted
+                embeddedDatabase.fetchUtsendtVarselByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
+                embeddedDatabase.fetchUtsendtVarselFeiletByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
+                embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(arbeidstakerFnr1).size shouldBeEqualTo 0
+                verify(exactly = 1) {
+                    mikrofrontendService.closeAllMikrofrontendForUser(PersonIdent(arbeidstakerFnr1))
+                }
+                coVerify(exactly = 1) {
+                    senderFacade.ferdigstillVarslerForFnr(PersonIdent(arbeidstakerFnr1))
+                }
             }
         }
-    }
-})
+    })

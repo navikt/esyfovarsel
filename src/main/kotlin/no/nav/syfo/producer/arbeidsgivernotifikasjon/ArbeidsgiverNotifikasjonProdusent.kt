@@ -44,29 +44,35 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.Nyoppgav
 import no.nav.syfo.utils.httpClientWithRetry
 import org.slf4j.LoggerFactory
 
-open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
+open class ArbeidsgiverNotifikasjonProdusent(
+    urlEnv: UrlEnv,
+    private val azureAdTokenConsumer: AzureAdTokenConsumer,
+) {
     private val httpClientWithRetry = httpClientWithRetry()
     private val arbeidsgiverNotifikasjonProdusentBasepath = urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl
     private val log = LoggerFactory.getLogger(ArbeidsgiverNotifikasjonProdusent::class.qualifiedName)
     private val scope = urlEnv.arbeidsgiverNotifikasjonProdusentApiScope
-    private val apolloClient = ApolloClient.Builder()
-        .serverUrl(arbeidsgiverNotifikasjonProdusentBasepath)
-        .addInterceptor(BearerTokenInterceptor { azureAdTokenConsumer.getToken(scope) })
-        .build()
+    private val apolloClient =
+        ApolloClient
+            .Builder()
+            .serverUrl(arbeidsgiverNotifikasjonProdusentBasepath)
+            .addInterceptor(BearerTokenInterceptor { azureAdTokenConsumer.getToken(scope) })
+            .build()
 
     suspend fun createNewOppgaveForArbeidsgiver(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? {
         log.info(
-            "About to send new task with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api"
+            "About to send new task with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api",
         )
-        val response: HttpResponse = callArbeidsgiverNotifikasjonProdusent(
-            CREATE_TASK_AG_MUTATION,
-            arbeidsgiverNotifikasjon.createVariables(),
-        )
+        val response: HttpResponse =
+            callArbeidsgiverNotifikasjonProdusent(
+                CREATE_TASK_AG_MUTATION,
+                arbeidsgiverNotifikasjon.createVariables(),
+            )
         val nyOppgave = response.body<NyOppgaveResponse>().data?.nyOppgave
         val resultat = nyOppgave?.__typename
         if (resultat == NY_OPPGAVE_VELLYKKET.status) {
             log.info(
-                "Have send new task with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api"
+                "Have send new task with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api",
             )
             return nyOppgave.id
         } else {
@@ -75,7 +81,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
             }
             val errors = response.body<NyOppgaveErrorResponse>().errors
             throw RuntimeException(
-                "Could not send task to arbeidsgiver. because of error: ${errors[0].message}, data was null"
+                "Could not send task to arbeidsgiver. because of error: ${errors[0].message}, data was null",
             )
         }
     }
@@ -108,7 +114,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
             }
             result?.onDuplikatEksternIdOgMerkelapp?.let {
                 log.error(
-                    "createNewBeskjed - Duplikat ekstern id og merkelapp: ${it.feilmelding}, Existing ID: ${it.idTilEksisterende}"
+                    "createNewBeskjed - Duplikat ekstern id og merkelapp: ${it.feilmelding}, Existing ID: ${it.idTilEksisterende}",
                 )
                 return it.idTilEksisterende
             }
@@ -116,9 +122,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
         }
     }
 
-    suspend fun createNewSak(
-        nySakInput: NySakInput
-    ): String? {
+    suspend fun createNewSak(nySakInput: NySakInput): String? {
         log.info("About to create new sak in ag-notifikasjon-produsent-api")
         val response: ApolloResponse<NySakMutation.Data> = apolloClient.mutation(nySakInput.toNySakMutation()).execute()
         val result = response.data?.nySak
@@ -154,9 +158,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
         }
     }
 
-    suspend fun nyStatusSak(
-        nyStatusSakInput: NyStatusSakInput
-    ): String? {
+    suspend fun nyStatusSak(nyStatusSakInput: NyStatusSakInput): String? {
         log.info("About to update sakstatus in ag-notifikasjon-produsent-api")
         val response: ApolloResponse<NyStatusSakByGrupperingsidMutation.Data> =
             apolloClient.mutation(nyStatusSakInput.toNyStatusSakByGrupperingsidMutation()).execute()
@@ -186,9 +188,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
         }
     }
 
-    suspend fun createNewKalenderavtale(
-        nyKalenderInput: NyKalenderInput,
-    ): String? {
+    suspend fun createNewKalenderavtale(nyKalenderInput: NyKalenderInput): String? {
         log.info("Forsøker å opprette ny kalenderavtale")
 
         val response: ApolloResponse<NyKalenderavtaleMutation.Data> =
@@ -216,7 +216,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
             }
             result?.onDuplikatEksternIdOgMerkelapp?.let {
                 log.error(
-                    "createNewKalenderavtale - Duplikat ekstern id og merkelapp: ${it.feilmelding}, Existing ID: ${it.idTilEksisterende}"
+                    "createNewKalenderavtale - Duplikat ekstern id og merkelapp: ${it.feilmelding}, Existing ID: ${it.idTilEksisterende}",
                 )
                 return it.idTilEksisterende
             }
@@ -230,9 +230,7 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
         }
     }
 
-    suspend fun updateKalenderavtale(
-        oppdaterKalenderInput: OppdaterKalenderInput
-    ): String? {
+    suspend fun updateKalenderavtale(oppdaterKalenderInput: OppdaterKalenderInput): String? {
         val response: ApolloResponse<OppdaterKalenderavtaleMutation.Data> =
             apolloClient.mutation(oppdaterKalenderInput.toOppdaterKalenderavtaleMutation()).execute()
         val result = response.data?.oppdaterKalenderavtale
@@ -266,25 +264,26 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
         }
     }
 
-    private fun ArbeidsgiverNotifikasjon.createVariables() = VariablesCreate(
-        varselId,
-        virksomhetsnummer,
-        url,
-        narmesteLederFnr,
-        ansattFnr,
-        merkelapp,
-        messageText,
-        narmesteLederEpostadresse,
-        emailTitle,
-        emailBody,
-        EpostSendevinduTypes.LOEPENDE,
-        hardDeleteDate.toString(),
-        grupperingsid,
-    )
+    private fun ArbeidsgiverNotifikasjon.createVariables() =
+        VariablesCreate(
+            varselId,
+            virksomhetsnummer,
+            url,
+            narmesteLederFnr,
+            ansattFnr,
+            merkelapp,
+            messageText,
+            narmesteLederEpostadresse,
+            emailTitle,
+            emailBody,
+            EpostSendevinduTypes.LOEPENDE,
+            hardDeleteDate.toString(),
+            grupperingsid,
+        )
 
     suspend fun deleteNotifikasjonForArbeidsgiver(arbeidsgiverDeleteNotifikasjon: ArbeidsgiverDeleteNotifikasjon) {
         log.info(
-            "About to delete notification with uuid ${arbeidsgiverDeleteNotifikasjon.eksternReferanse} and merkelapp ${arbeidsgiverDeleteNotifikasjon.merkelapp} from ag-notifikasjon-produsent-api"
+            "About to delete notification with uuid ${arbeidsgiverDeleteNotifikasjon.eksternReferanse} and merkelapp ${arbeidsgiverDeleteNotifikasjon.merkelapp} from ag-notifikasjon-produsent-api",
         )
         callArbeidsgiverNotifikasjonProdusent(
             DELETE_NOTIFICATION_AG_MUTATION,
@@ -301,24 +300,28 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
     ): HttpResponse {
         val token = azureAdTokenConsumer.getToken(scope)
         val graphQuery =
-            this::class.java.getResource("$MUTATION_PATH_PREFIX/$mutationPath")?.readText()?.replace("[\n\r]", "")
+            this::class.java
+                .getResource("$MUTATION_PATH_PREFIX/$mutationPath")
+                ?.readText()
+                ?.replace("[\n\r]", "")
 
         val requestBody = graphQuery?.let { NotificationAgRequest(it, variables) }
 
         try {
-            val response = httpClientWithRetry.post(arbeidsgiverNotifikasjonProdusentBasepath) {
-                headers {
-                    append(HttpHeaders.Accept, ContentType.Application.Json)
-                    append(HttpHeaders.ContentType, ContentType.Application.Json)
-                    append(HttpHeaders.Authorization, "Bearer $token")
+            val response =
+                httpClientWithRetry.post(arbeidsgiverNotifikasjonProdusentBasepath) {
+                    headers {
+                        append(HttpHeaders.Accept, ContentType.Application.Json)
+                        append(HttpHeaders.ContentType, ContentType.Application.Json)
+                        append(HttpHeaders.Authorization, "Bearer $token")
+                    }
+                    if (requestBody != null) {
+                        setBody(requestBody)
+                    }
                 }
-                if (requestBody != null) {
-                    setBody(requestBody)
-                }
-            }
             if (response.status != HttpStatusCode.OK) {
                 throw RuntimeException(
-                    "Could not send to arbeidsgiver. Status code: ${response.status.value}. Response: $response"
+                    "Could not send to arbeidsgiver. Status code: ${response.status.value}. Response: $response",
                 )
             }
             return response
@@ -332,17 +335,22 @@ open class ArbeidsgiverNotifikasjonProdusent(urlEnv: UrlEnv, private val azureAd
     }
 }
 
-class BearerTokenInterceptor(private val tokenProvider: suspend () -> String) : ApolloInterceptor {
+class BearerTokenInterceptor(
+    private val tokenProvider: suspend () -> String,
+) : ApolloInterceptor {
     override fun <D : Operation.Data> intercept(
         request: ApolloRequest<D>,
-        chain: ApolloInterceptorChain
-    ): Flow<ApolloResponse<D>> = flow {
-        val token = withContext(Dispatchers.IO) { tokenProvider() }
-        val newRequest = request.newBuilder()
-            .addHttpHeader("Authorization", "Bearer $token")
-            .addHttpHeader("Content-Type", "application/json")
-            .addHttpHeader("Accept", "application/json")
-            .build()
-        emitAll(chain.proceed(newRequest))
-    }
+        chain: ApolloInterceptorChain,
+    ): Flow<ApolloResponse<D>> =
+        flow {
+            val token = withContext(Dispatchers.IO) { tokenProvider() }
+            val newRequest =
+                request
+                    .newBuilder()
+                    .addHttpHeader("Authorization", "Bearer $token")
+                    .addHttpHeader("Content-Type", "application/json")
+                    .addHttpHeader("Accept", "application/json")
+                    .build()
+            emitAll(chain.proceed(newRequest))
+        }
 }

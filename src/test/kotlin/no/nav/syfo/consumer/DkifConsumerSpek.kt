@@ -13,42 +13,43 @@ import org.amshove.kluent.shouldNotBe
 const val fnrNonReservedUser = fnr1
 const val fnrReservedUser = fnr2
 
-class DkifConsumerSpek : DescribeSpec({
+class DkifConsumerSpek :
+    DescribeSpec({
 
-    val testEnv = getTestEnv()
-    val mockServers = MockServers(testEnv.urlEnv, testEnv.authEnv)
-    val azureAdMockServer = mockServers.mockAADServer()
-    val dkifMockServer = mockServers.mockDkifServer()
+        val testEnv = getTestEnv()
+        val mockServers = MockServers(testEnv.urlEnv, testEnv.authEnv)
+        val azureAdMockServer = mockServers.mockAADServer()
+        val dkifMockServer = mockServers.mockDkifServer()
 
-    val azureAdConsumer = AzureAdTokenConsumer(testEnv.authEnv)
-    val dkifConsumer = DkifConsumer(testEnv.urlEnv, azureAdConsumer)
+        val azureAdConsumer = AzureAdTokenConsumer(testEnv.authEnv)
+        val dkifConsumer = DkifConsumer(testEnv.urlEnv, azureAdConsumer)
 
-    beforeSpec {
-        azureAdMockServer.start()
-        dkifMockServer.start()
-    }
-
-    afterSpec {
-        azureAdMockServer.stop(1L, 10L)
-        dkifMockServer.stop(1L, 10L)
-    }
-
-    describe("DkifConsumerSpek") {
-        it("Call DKIF for non-reserved user") {
-            val dkifResponse = dkifConsumer.person(fnrNonReservedUser)
-            dkifResponse shouldNotBe null
-            dkifResponse!!.kanVarsles shouldBeEqualTo true
+        beforeSpec {
+            azureAdMockServer.start()
+            dkifMockServer.start()
         }
 
-        it("Call DKIF for reserved user") {
-            val dkifResponse = dkifConsumer.person(fnrReservedUser)
-            dkifResponse shouldNotBe null
-            dkifResponse!!.kanVarsles shouldBeEqualTo false
+        afterSpec {
+            azureAdMockServer.stop(1L, 10L)
+            dkifMockServer.stop(1L, 10L)
         }
 
-        it("DKIF consumer should return null on invalid aktorid") {
-            val dkifResponse = dkifConsumer.person("serverdown")
-            dkifResponse shouldBeEqualTo null
+        describe("DkifConsumerSpek") {
+            it("Call DKIF for non-reserved user") {
+                val dkifResponse = dkifConsumer.person(fnrNonReservedUser)
+                dkifResponse shouldNotBe null
+                dkifResponse!!.kanVarsles shouldBeEqualTo true
+            }
+
+            it("Call DKIF for reserved user") {
+                val dkifResponse = dkifConsumer.person(fnrReservedUser)
+                dkifResponse shouldNotBe null
+                dkifResponse!!.kanVarsles shouldBeEqualTo false
+            }
+
+            it("DKIF consumer should return null on invalid aktorid") {
+                val dkifResponse = dkifConsumer.person("serverdown")
+                dkifResponse shouldBeEqualTo null
+            }
         }
-    }
-})
+    })

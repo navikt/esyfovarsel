@@ -7,7 +7,9 @@ import java.time.LocalDateTime
 import java.util.*
 
 fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
-    val insertStatement = """INSERT INTO UTSENDT_VARSEL (
+    val insertStatement =
+        """
+        INSERT INTO UTSENDT_VARSEL (
         uuid,
         narmesteLeder_fnr,
         fnr,   
@@ -20,7 +22,7 @@ fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
         is_forced_letter,
         journalpost_id
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """.trimIndent()
+        """.trimIndent()
 
     connection.use { connection ->
         connection.prepareStatement(insertStatement).use {
@@ -42,14 +44,14 @@ fun DatabaseInterface.storeUtsendtVarsel(PUtsendtVarsel: PUtsendtVarsel) {
     }
 }
 
-fun DatabaseInterface.fetchUferdigstilteVarsler(
-    fnr: PersonIdent,
-): List<PUtsendtVarsel> {
-    val queryStatement = """SELECT *
-                            FROM UTSENDT_VARSEL
-                            WHERE fnr = ?
-                            AND ferdigstilt_tidspunkt is null
-    """.trimIndent()
+fun DatabaseInterface.fetchUferdigstilteVarsler(fnr: PersonIdent): List<PUtsendtVarsel> {
+    val queryStatement =
+        """
+        SELECT *
+        FROM UTSENDT_VARSEL
+        WHERE fnr = ?
+        AND ferdigstilt_tidspunkt is null
+        """.trimIndent()
 
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
@@ -60,17 +62,19 @@ fun DatabaseInterface.fetchUferdigstilteVarsler(
 }
 
 fun DatabaseInterface.fetchAlleUferdigstilteAktivitetspliktVarsler(): List<PUtsendtVarsel> {
-    val queryStatement = """SELECT *
-                            FROM UTSENDT_VARSEL
-                            WHERE type = 'SM_AKTIVITETSPLIKT'
-                              AND kanal = 'BRUKERNOTIFIKASJON'
-                              AND ferdigstilt_tidspunkt IS NULL
-                              AND journalpost_id IS NOT NULL
-                              AND (is_forced_letter IS FALSE OR is_forced_letter IS NULL)
-                              AND utsendt_tidspunkt >= CURRENT_DATE - 14
-                              AND utsendt_tidspunkt < CURRENT_DATE - 1
-                              AND utsendt_tidspunkt NOT BETWEEN '2025-03-19 12:36:00' AND '2025-03-19 12:38:00';
-    """.trimIndent()
+    val queryStatement =
+        """
+        SELECT *
+        FROM UTSENDT_VARSEL
+        WHERE type = 'SM_AKTIVITETSPLIKT'
+          AND kanal = 'BRUKERNOTIFIKASJON'
+          AND ferdigstilt_tidspunkt IS NULL
+          AND journalpost_id IS NOT NULL
+          AND (is_forced_letter IS FALSE OR is_forced_letter IS NULL)
+          AND utsendt_tidspunkt >= CURRENT_DATE - 14
+          AND utsendt_tidspunkt < CURRENT_DATE - 1
+          AND utsendt_tidspunkt NOT BETWEEN '2025-03-19 12:36:00' AND '2025-03-19 12:38:00';
+        """.trimIndent()
 
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
@@ -80,17 +84,19 @@ fun DatabaseInterface.fetchAlleUferdigstilteAktivitetspliktVarsler(): List<PUtse
 }
 
 fun DatabaseInterface.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef: String): Int {
-    val updateStatement = """UPDATE UTSENDT_VARSEL
+    val updateStatement =
+        """UPDATE UTSENDT_VARSEL
                    SET is_forced_letter = ?
                    WHERE EKSTERN_REF = ?
-    """.trimMargin()
+        """.trimMargin()
 
     return connection.use { connection ->
-        val rowsUpdated = connection.prepareStatement(updateStatement).use {
-            it.setBoolean(1, true)
-            it.setString(2, eksternRef)
-            it.executeUpdate()
-        }
+        val rowsUpdated =
+            connection.prepareStatement(updateStatement).use {
+                it.setBoolean(1, true)
+                it.setString(2, eksternRef)
+                it.executeUpdate()
+            }
         connection.commit()
         rowsUpdated
     }
@@ -100,12 +106,14 @@ fun DatabaseInterface.fetchUferdigstilteNarmesteLederVarsler(
     sykmeldtFnr: PersonIdent,
     narmesteLederFnr: PersonIdent,
 ): List<PUtsendtVarsel> {
-    val queryStatement = """SELECT *
-                            FROM UTSENDT_VARSEL
-                            WHERE fnr = ?
-                            AND narmesteLeder_fnr = ?
-                            AND ferdigstilt_tidspunkt is null
-    """.trimIndent()
+    val queryStatement =
+        """
+        SELECT *
+        FROM UTSENDT_VARSEL
+        WHERE fnr = ?
+        AND narmesteLeder_fnr = ?
+        AND ferdigstilt_tidspunkt is null
+        """.trimIndent()
 
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
@@ -117,10 +125,12 @@ fun DatabaseInterface.fetchUferdigstilteNarmesteLederVarsler(
 }
 
 fun DatabaseInterface.fetchUtsendtVarselByFnr(fnr: String): List<PUtsendtVarsel> {
-    val queryStatement = """SELECT *
-                            FROM UTSENDT_VARSEL
-                            WHERE fnr = ?
-    """.trimIndent()
+    val queryStatement =
+        """
+        SELECT *
+        FROM UTSENDT_VARSEL
+        WHERE fnr = ?
+        """.trimIndent()
 
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
@@ -132,26 +142,29 @@ fun DatabaseInterface.fetchUtsendtVarselByFnr(fnr: String): List<PUtsendtVarsel>
 
 fun DatabaseInterface.setUtsendtVarselToFerdigstilt(eksternRef: String): Int {
     val now = Timestamp.valueOf(LocalDateTime.now())
-    val updateStatement = """UPDATE UTSENDT_VARSEL
+    val updateStatement =
+        """UPDATE UTSENDT_VARSEL
                    SET ferdigstilt_tidspunkt = ?
                    WHERE EKSTERN_REF = ?
-    """.trimMargin()
+        """.trimMargin()
 
     return connection.use { connection ->
-        val rowsUpdated = connection.prepareStatement(updateStatement).use {
-            it.setTimestamp(1, now)
-            it.setString(2, eksternRef)
-            it.executeUpdate()
-        }
+        val rowsUpdated =
+            connection.prepareStatement(updateStatement).use {
+                it.setTimestamp(1, now)
+                it.setString(2, eksternRef)
+                it.executeUpdate()
+            }
         connection.commit()
         rowsUpdated
     }
 }
 
 fun DatabaseInterface.deleteUtsendtVarselByFnr(fnr: PersonIdent) {
-    val updateStatement = """DELETE FROM UTSENDT_VARSEL
+    val updateStatement =
+        """DELETE FROM UTSENDT_VARSEL
                    WHERE fnr = ?
-    """.trimMargin()
+        """.trimMargin()
 
     return connection.use { connection ->
         connection.prepareStatement(updateStatement).use {
@@ -167,7 +180,8 @@ fun DatabaseInterface.fetchDineSykemeldteMotebehovOppgaverFor(
     narmesteLederFnr: PersonIdent,
     orgnummer: String,
 ): PUtsendtVarsel? {
-    val queryStatement = """
+    val queryStatement =
+        """
         SELECT * FROM utsendt_varsel 
         WHERE fnr = ? 
         AND narmesteleder_fnr = ? 
@@ -182,7 +196,7 @@ fun DatabaseInterface.fetchDineSykemeldteMotebehovOppgaverFor(
             AND utsending_varsel_feilet.hendelsetype_navn = 'NL_DIALOGMOTE_SVAR_MOTEBEHOV' 
         ) 
         ORDER BY utsendt_tidspunkt DESC;
-    """.trimIndent()
+        """.trimIndent()
 
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {

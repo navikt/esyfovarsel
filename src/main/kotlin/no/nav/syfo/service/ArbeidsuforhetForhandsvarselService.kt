@@ -5,8 +5,9 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.utils.dataToVarselData
 import org.slf4j.LoggerFactory
 
-class ArbeidsuforhetForhandsvarselService(private val senderFacade: SenderFacade) {
-
+class ArbeidsuforhetForhandsvarselService(
+    private val senderFacade: SenderFacade,
+) {
     suspend fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         log.info("[ARBEIDSUFORHET_FORHANDSVARSEL] sending enabled")
         val data = dataToVarselData(varselHendelse.data)

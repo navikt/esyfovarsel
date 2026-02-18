@@ -15,7 +15,8 @@ import java.util.*
 
 fun DatabaseInterface.storeArbeidsgivernotifikasjonerSak(sakInput: NySakInput): String {
     val uuid = UUID.randomUUID()
-    val insertStatement = """
+    val insertStatement =
+        """
         INSERT INTO ARBEIDSGIVERNOTIFIKASJONER_SAK (
             id,
             narmestelederId,
@@ -33,7 +34,7 @@ fun DatabaseInterface.storeArbeidsgivernotifikasjonerSak(sakInput: NySakInput): 
             hardDeleteDate,
             opprettet
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """.trimIndent()
+        """.trimIndent()
 
     return try {
         connection.use { connection ->
@@ -72,13 +73,14 @@ fun DatabaseInterface.storeArbeidsgivernotifikasjonerSak(sakInput: NySakInput): 
 
 fun DatabaseInterface.updateArbeidsgivernotifikasjonerSakStatus(
     sakId: String,
-    sakStatus: SakStatus
+    sakStatus: SakStatus,
 ) {
-    val updateStatement = """
+    val updateStatement =
+        """
         UPDATE ARBEIDSGIVERNOTIFIKASJONER_SAK
         SET initiellStatus = ?
         WHERE id = ?
-    """.trimIndent()
+        """.trimIndent()
 
     connection.use { connection ->
         connection.prepareStatement(updateStatement).use { preparedStatement ->
@@ -94,49 +96,52 @@ fun DatabaseInterface.updateArbeidsgivernotifikasjonerSakStatus(
 
 fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSak(
     narmestelederId: String,
-    merkelapp: String
+    merkelapp: String,
 ): PSakInput? {
-    val queryStatement = """SELECT *
-                            FROM ARBEIDSGIVERNOTIFIKASJONER_SAK
-                            WHERE narmestelederId = ?
-                            AND merkelapp = ?
-                            AND hardDeleteDate > CURRENT_TIMESTAMP
-                            AND initiellStatus not in ('FERDIG', 'AVHOLDT')
-                            ORDER BY opprettet DESC
-    """.trimIndent()
+    val queryStatement =
+        """
+        SELECT *
+        FROM ARBEIDSGIVERNOTIFIKASJONER_SAK
+        WHERE narmestelederId = ?
+        AND merkelapp = ?
+        AND hardDeleteDate > CURRENT_TIMESTAMP
+        AND initiellStatus not in ('FERDIG', 'AVHOLDT')
+        ORDER BY opprettet DESC
+        """.trimIndent()
 
-    val listOfSak = connection.use { connection ->
-        connection.prepareStatement(queryStatement).use {
-            it.setString(1, narmestelederId)
-            it.setString(2, merkelapp)
-            it.executeQuery().toList { toPSakInput() }
+    val listOfSak =
+        connection.use { connection ->
+            connection.prepareStatement(queryStatement).use {
+                it.setString(1, narmestelederId)
+                it.setString(2, merkelapp)
+                it.executeQuery().toList { toPSakInput() }
+            }
         }
-    }
     return listOfSak.firstOrNull()
 }
 
-fun ResultSet.toPSakInput() = PSakInput(
-    id = getString("id"),
-    narmestelederId = getString("narmestelederId"),
-    grupperingsid = getString("grupperingsid"),
-    merkelapp = getString("merkelapp"),
-    virksomhetsnummer = getString("virksomhetsnummer"),
-    narmesteLederFnr = getString("narmesteLederFnr"),
-    ansattFnr = getString("ansattFnr"),
-    tittel = getString("tittel"),
-    tilleggsinformasjon = getString("tilleggsinformasjon"),
-    lenke = getString("lenke"),
-    initiellStatus = SaksStatus.valueOf(getString("initiellStatus")),
-    nesteSteg = getString("nesteSteg"),
-    overstyrStatustekstMed = getString("overstyrStatustekstMed"),
-    hardDeleteDate = getTimestamp("hardDeleteDate").toLocalDateTime(),
-)
+fun ResultSet.toPSakInput() =
+    PSakInput(
+        id = getString("id"),
+        narmestelederId = getString("narmestelederId"),
+        grupperingsid = getString("grupperingsid"),
+        merkelapp = getString("merkelapp"),
+        virksomhetsnummer = getString("virksomhetsnummer"),
+        narmesteLederFnr = getString("narmesteLederFnr"),
+        ansattFnr = getString("ansattFnr"),
+        tittel = getString("tittel"),
+        tilleggsinformasjon = getString("tilleggsinformasjon"),
+        lenke = getString("lenke"),
+        initiellStatus = SaksStatus.valueOf(getString("initiellStatus")),
+        nesteSteg = getString("nesteSteg"),
+        overstyrStatustekstMed = getString("overstyrStatustekstMed"),
+        hardDeleteDate = getTimestamp("hardDeleteDate").toLocalDateTime(),
+    )
 
-fun DatabaseInterface.storeArbeidsgivernotifikasjonerKalenderavtale(
-    kalenderInput: PKalenderInput
-): String {
+fun DatabaseInterface.storeArbeidsgivernotifikasjonerKalenderavtale(kalenderInput: PKalenderInput): String {
     val uuid = UUID.randomUUID()
-    val insertStatement = """
+    val insertStatement =
+        """
         INSERT INTO ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE (
             id,
             eksternId,
@@ -151,7 +156,7 @@ fun DatabaseInterface.storeArbeidsgivernotifikasjonerKalenderavtale(
             hardDeleteDate,
             opprettet
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """.trimIndent()
+        """.trimIndent()
 
     connection.use { connection ->
         connection.prepareStatement(insertStatement).use { preparedStatement ->
@@ -176,21 +181,22 @@ fun DatabaseInterface.storeArbeidsgivernotifikasjonerKalenderavtale(
     }
 }
 
-fun DatabaseInterface.getArbeidsgivernotifikasjonerKalenderavtale(
-    sakId: String,
-): PKalenderInput? {
-    val queryStatement = """SELECT *
-                            FROM ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE
-                            WHERE sakId = ?
-                            ORDER BY opprettet DESC
-    """.trimIndent()
+fun DatabaseInterface.getArbeidsgivernotifikasjonerKalenderavtale(sakId: String): PKalenderInput? {
+    val queryStatement =
+        """
+        SELECT *
+        FROM ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE
+        WHERE sakId = ?
+        ORDER BY opprettet DESC
+        """.trimIndent()
 
-    val listOfSak = connection.use { connection ->
-        connection.prepareStatement(queryStatement).use {
-            it.setString(1, sakId)
-            it.executeQuery().toList { toPKalenderInput() }
+    val listOfSak =
+        connection.use { connection ->
+            connection.prepareStatement(queryStatement).use {
+                it.setString(1, sakId)
+                it.executeQuery().toList { toPKalenderInput() }
+            }
         }
-    }
     return if (listOfSak.isNotEmpty()) {
         listOfSak.first()
     } else {
@@ -198,15 +204,16 @@ fun DatabaseInterface.getArbeidsgivernotifikasjonerKalenderavtale(
     }
 }
 
-fun ResultSet.toPKalenderInput() = PKalenderInput(
-    sakId = getString("sakId"),
-    eksternId = getString("eksternId"),
-    grupperingsid = getString("grupperingsid"),
-    merkelapp = getString("merkelapp"),
-    kalenderId = getString("kalenderId"),
-    tekst = getString("tekst"),
-    startTidspunkt = getTimestamp("startTidspunkt").toLocalDateTime(),
-    sluttTidspunkt = getTimestamp("sluttTidspunkt")?.toLocalDateTime(),
-    kalenderavtaleTilstand = KalenderTilstand.valueOf(getString("kalenderavtaleTilstand")),
-    hardDeleteDate = getTimestamp("hardDeleteDate")?.toLocalDateTime()
-)
+fun ResultSet.toPKalenderInput() =
+    PKalenderInput(
+        sakId = getString("sakId"),
+        eksternId = getString("eksternId"),
+        grupperingsid = getString("grupperingsid"),
+        merkelapp = getString("merkelapp"),
+        kalenderId = getString("kalenderId"),
+        tekst = getString("tekst"),
+        startTidspunkt = getTimestamp("startTidspunkt").toLocalDateTime(),
+        sluttTidspunkt = getTimestamp("sluttTidspunkt")?.toLocalDateTime(),
+        kalenderavtaleTilstand = KalenderTilstand.valueOf(getString("kalenderavtaleTilstand")),
+        hardDeleteDate = getTimestamp("hardDeleteDate")?.toLocalDateTime(),
+    )

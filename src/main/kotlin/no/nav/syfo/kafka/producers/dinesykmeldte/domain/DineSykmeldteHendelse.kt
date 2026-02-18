@@ -5,7 +5,7 @@ import java.time.OffsetDateTime
 data class DineSykmeldteHendelse(
     val id: String,
     val opprettHendelse: OpprettHendelse?,
-    val ferdigstillHendelse: FerdigstillHendelse?
+    val ferdigstillHendelse: FerdigstillHendelse?,
 )
 
 data class OpprettHendelse(
@@ -15,9 +15,9 @@ data class OpprettHendelse(
     val lenke: String?,
     val tekst: String?,
     val timestamp: OffsetDateTime,
-    val utlopstidspunkt: OffsetDateTime?
+    val utlopstidspunkt: OffsetDateTime?,
 )
 
 data class FerdigstillHendelse(
-    val timestamp: OffsetDateTime
+    val timestamp: OffsetDateTime,
 )

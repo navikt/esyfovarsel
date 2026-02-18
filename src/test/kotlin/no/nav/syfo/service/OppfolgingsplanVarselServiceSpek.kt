@@ -18,79 +18,84 @@ import no.nav.syfo.testutil.mocks.fnr2
 import no.nav.syfo.testutil.mocks.orgnummer
 import java.net.URI
 
-class OppfolgingsplanVarselServiceSpek : DescribeSpec({
-    val accessControlService = mockk<AccessControlService>()
-    val dineSykmeldteHendelseKafkaProducer = mockk<DineSykmeldteHendelseKafkaProducer>()
-    val dittSykefravaerMeldingKafkaProducer = mockk<DittSykefravaerMeldingKafkaProducer>()
-    val brukernotifikasjonerService = mockk<BrukernotifikasjonerService>()
-    val arbeidsgiverNotifikasjonService = mockk<ArbeidsgiverNotifikasjonService>()
-    val fysiskBrevUtsendingService = mockk<FysiskBrevUtsendingService>()
-    val embeddedDatabase = EmbeddedDatabase()
-    val fakeOppfolgingsplanerUrl = "http://localhost/oppfolgingsplaner"
-    val narmesteLederService = mockk<NarmesteLederService>()
-    val pdlClient = mockk<PdlClient>()
+class OppfolgingsplanVarselServiceSpek :
+    DescribeSpec({
+        val accessControlService = mockk<AccessControlService>()
+        val dineSykmeldteHendelseKafkaProducer = mockk<DineSykmeldteHendelseKafkaProducer>()
+        val dittSykefravaerMeldingKafkaProducer = mockk<DittSykefravaerMeldingKafkaProducer>()
+        val brukernotifikasjonerService = mockk<BrukernotifikasjonerService>()
+        val arbeidsgiverNotifikasjonService = mockk<ArbeidsgiverNotifikasjonService>()
+        val fysiskBrevUtsendingService = mockk<FysiskBrevUtsendingService>()
+        val embeddedDatabase = EmbeddedDatabase()
+        val fakeOppfolgingsplanerUrl = "http://localhost/oppfolgingsplaner"
+        val narmesteLederService = mockk<NarmesteLederService>()
+        val pdlClient = mockk<PdlClient>()
 
-    val senderFacade = SenderFacade(
-        dineSykmeldteHendelseKafkaProducer,
-        dittSykefravaerMeldingKafkaProducer,
-        brukernotifikasjonerService,
-        arbeidsgiverNotifikasjonService,
-        fysiskBrevUtsendingService,
-        embeddedDatabase
-    )
-    val oppfolgingsplanVarselService = OppfolgingsplanVarselService(
-        senderFacade,
-        accessControlService,
-        fakeOppfolgingsplanerUrl,
-        narmesteLederService,
-        pdlClient,
-    )
-
-    describe("OppfolgingsplanVarselServiceSpek") {
-        justRun { brukernotifikasjonerService.sendBrukernotifikasjonVarsel(any(), any(), any(), any(), any(), any()) }
-
-        it("Non-reserved users should be notified externally") {
-            coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(fnr1) } returns true
-            val varselHendelse = ArbeidstakerHendelse(
-                HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
-                false,
-                null,
-                fnr1,
-                orgnummer
+        val senderFacade =
+            SenderFacade(
+                dineSykmeldteHendelseKafkaProducer,
+                dittSykefravaerMeldingKafkaProducer,
+                brukernotifikasjonerService,
+                arbeidsgiverNotifikasjonService,
+                fysiskBrevUtsendingService,
+                embeddedDatabase,
             )
-            oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse)
-            verify(exactly = 1) {
-                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
-                    any(),
-                    fnr1,
-                    any(),
-                    any(),
-                    any(),
-                    true,
-                )
+        val oppfolgingsplanVarselService =
+            OppfolgingsplanVarselService(
+                senderFacade,
+                accessControlService,
+                fakeOppfolgingsplanerUrl,
+                narmesteLederService,
+                pdlClient,
+            )
+
+        describe("OppfolgingsplanVarselServiceSpek") {
+            justRun { brukernotifikasjonerService.sendBrukernotifikasjonVarsel(any(), any(), any(), any(), any(), any()) }
+
+            it("Non-reserved users should be notified externally") {
+                coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(fnr1) } returns true
+                val varselHendelse =
+                    ArbeidstakerHendelse(
+                        HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
+                        false,
+                        null,
+                        fnr1,
+                        orgnummer,
+                    )
+                oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse)
+                verify(exactly = 1) {
+                    brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
+                        any(),
+                        fnr1,
+                        any(),
+                        any(),
+                        any(),
+                        true,
+                    )
+                }
+            }
+
+            it("Reserved users only notified on 'Min side'") {
+                coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(fnr2) } returns false
+                val varselHendelse =
+                    ArbeidstakerHendelse(
+                        HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
+                        false,
+                        null,
+                        fnr2,
+                        orgnummer,
+                    )
+                oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse)
+                verify(exactly = 1) {
+                    brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
+                        any(),
+                        fnr2,
+                        any(),
+                        URI(fakeOppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL).toURL(),
+                        any(),
+                        false,
+                    )
+                }
             }
         }
-
-        it("Reserved users only notified on 'Min side'") {
-            coEvery { accessControlService.canUserBeNotifiedByEmailOrSMS(fnr2) } returns false
-            val varselHendelse = ArbeidstakerHendelse(
-                HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
-                false,
-                null,
-                fnr2,
-                orgnummer
-            )
-            oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse)
-            verify(exactly = 1) {
-                brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
-                    any(),
-                    fnr2,
-                    any(),
-                    URI(fakeOppfolgingsplanerUrl + BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL).toURL(),
-                    any(),
-                    false
-                )
-            }
-        }
-    }
-})
+    })

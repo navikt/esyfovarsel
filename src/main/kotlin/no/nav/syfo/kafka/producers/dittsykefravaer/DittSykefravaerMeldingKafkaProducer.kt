@@ -15,29 +15,37 @@ class DittSykefravaerMeldingKafkaProducer(
     private val kafkaConfig = producerProperties(env)
     private val kafkaProducer = KafkaProducer<String, DittSykefravaerMelding>(kafkaConfig)
 
-    fun sendMelding(melding: DittSykefravaerMelding, uuid: String): String {
+    fun sendMelding(
+        melding: DittSykefravaerMelding,
+        uuid: String,
+    ): String {
         val uuidEkstern = "esyfovarsel-$uuid"
-        kafkaProducer.send(
-            ProducerRecord(
-                topicDittSykefravaerMelding,
-                uuidEkstern,
-                melding,
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    topicDittSykefravaerMelding,
+                    uuidEkstern,
+                    melding,
+                ),
+            ).get()
         return uuidEkstern
     }
 
-    fun ferdigstillMelding(eksternReferanse: String, fnr: String) {
-        kafkaProducer.send(
-            ProducerRecord(
-                topicDittSykefravaerMelding,
-                eksternReferanse,
-                DittSykefravaerMelding(
-                    null,
-                    LukkMelding(Instant.now()),
-                    fnr,
+    fun ferdigstillMelding(
+        eksternReferanse: String,
+        fnr: String,
+    ) {
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    topicDittSykefravaerMelding,
+                    eksternReferanse,
+                    DittSykefravaerMelding(
+                        null,
+                        LukkMelding(Instant.now()),
+                        fnr,
+                    ),
                 ),
-            ),
-        ).get()
+            ).get()
     }
 }

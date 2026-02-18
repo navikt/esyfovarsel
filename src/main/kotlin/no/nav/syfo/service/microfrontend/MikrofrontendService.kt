@@ -21,7 +21,7 @@ class MikrofrontendService(
     val mikrofrontendDialogmoteService: MikrofrontendDialogmoteService,
     val mikrofrontendAktivitetskravService: MikrofrontendAktivitetskravService,
     val mikrofrontendMerOppfolgingService: MikrofrontendMerOppfolgingService,
-    val database: DatabaseInterface
+    val database: DatabaseInterface,
 ) {
     private val log: Logger = LoggerFactory.getLogger(MikrofrontendService::class.qualifiedName)
 
@@ -37,15 +37,16 @@ class MikrofrontendService(
         }
         val tjeneste = hendelse.type.toMikrofrontendTjenesteType()
 
-        val recordToSend = when (tjeneste) {
-            Tjeneste.DIALOGMOTE
-            -> mikrofrontendDialogmoteService.updateDialogmoteFrontendForUserByHendelse(hendelse)
+        val recordToSend =
+            when (tjeneste) {
+                Tjeneste.DIALOGMOTE,
+                -> mikrofrontendDialogmoteService.updateDialogmoteFrontendForUserByHendelse(hendelse)
 
-            Tjeneste.AKTIVITETSKRAV
-            -> mikrofrontendAktivitetskravService.createOrUpdateAktivitetskravMicrofrontendByHendelse(hendelse)
+                Tjeneste.AKTIVITETSKRAV,
+                -> mikrofrontendAktivitetskravService.createOrUpdateAktivitetskravMicrofrontendByHendelse(hendelse)
 
-            Tjeneste.MER_OPPFOLGING -> mikrofrontendMerOppfolgingService.createEnableMerOppfolgingRecord(hendelse)
-        }
+                Tjeneste.MER_OPPFOLGING -> mikrofrontendMerOppfolgingService.createEnableMerOppfolgingRecord(hendelse)
+            }
 
         recordToSend?.let { record ->
             when (record.eventType) {
@@ -65,7 +66,7 @@ class MikrofrontendService(
             disableMikrofrontendForUser(
                 fnr,
                 MinSideRecord(actionDisabled, fnr, mikrofrontendId),
-                tjeneste
+                tjeneste,
             )
         }
     }
@@ -74,14 +75,14 @@ class MikrofrontendService(
         disableMikrofrontendForUser(
             fnr.value,
             mikrofrontendDialogmoteService.minSideRecordDisabled(fnr.value),
-            Tjeneste.DIALOGMOTE
+            Tjeneste.DIALOGMOTE,
         )
     }
 
     private fun enableMikrofrontendForUser(
         hendelse: ArbeidstakerHendelse,
         minSideRecord: MinSideRecord,
-        tjeneste: Tjeneste
+        tjeneste: Tjeneste,
     ) {
         storeMikrofrontendSynlighetEntryInDb(hendelse, tjeneste)
         minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(minSideRecord)
@@ -90,19 +91,22 @@ class MikrofrontendService(
     private fun disableMikrofrontendForUser(
         fnr: String,
         minSideRecord: MinSideRecord,
-        tjeneste: Tjeneste
+        tjeneste: Tjeneste,
     ) {
         minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(minSideRecord)
         database.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste(fnr, tjeneste)
     }
 
-    private fun storeMikrofrontendSynlighetEntryInDb(hendelse: ArbeidstakerHendelse, tjeneste: Tjeneste) {
+    private fun storeMikrofrontendSynlighetEntryInDb(
+        hendelse: ArbeidstakerHendelse,
+        tjeneste: Tjeneste,
+    ) {
         database.storeMikrofrontendSynlighetEntry(
             MikrofrontendSynlighet(
                 synligFor = hendelse.arbeidstakerFnr,
                 tjeneste = tjeneste,
-                synligTom = hendelse.getSynligTom()?.toLocalDate()
-            )
+                synligTom = hendelse.getSynligTom()?.toLocalDate(),
+            ),
         )
     }
 
@@ -113,13 +117,13 @@ class MikrofrontendService(
             HendelseType.SM_DIALOGMOTE_LEST,
             HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
             HendelseType.SM_DIALOGMOTE_REFERAT,
-            HendelseType.SM_DIALOGMOTE_AVLYST
+            HendelseType.SM_DIALOGMOTE_AVLYST,
             -> Tjeneste.DIALOGMOTE
 
-            HendelseType.SM_AKTIVITETSPLIKT
+            HendelseType.SM_AKTIVITETSPLIKT,
             -> Tjeneste.AKTIVITETSKRAV
 
-            HendelseType.SM_MER_VEILEDNING, HendelseType.SM_KARTLEGGINGSSPORSMAL
+            HendelseType.SM_MER_VEILEDNING, HendelseType.SM_KARTLEGGINGSSPORSMAL,
             -> Tjeneste.MER_OPPFOLGING
 
             else -> throw IllegalArgumentException("$this is not a valid type for updating MF state")

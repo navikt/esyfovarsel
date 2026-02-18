@@ -22,17 +22,18 @@ class NyOppfolgingsplanVarselService(
         val eksternVarsling = accessControlService.canUserBeNotifiedByEmailOrSMS(varselHendelse.arbeidstakerFnr)
 
         when (varselHendelse.type) {
-            HendelseType.SM_OPPFOLGINGSPLAN_OPPRETTET -> senderFacade.sendTilBrukernotifikasjoner(
-                uuid = UUID.randomUUID().toString(),
-                mottakerFnr = varselHendelse.arbeidstakerFnr,
-                content = BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_OPPRETTET_MESSAGE_TEXT,
-                url = sykmeldtUrl(),
-                arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
-                orgnummer = varselHendelse.orgnummer,
-                hendelseType = varselHendelse.type.name,
-                eksternVarsling = eksternVarsling,
-                varseltype = BESKJED
-            )
+            HendelseType.SM_OPPFOLGINGSPLAN_OPPRETTET ->
+                senderFacade.sendTilBrukernotifikasjoner(
+                    uuid = UUID.randomUUID().toString(),
+                    mottakerFnr = varselHendelse.arbeidstakerFnr,
+                    content = BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_OPPRETTET_MESSAGE_TEXT,
+                    url = sykmeldtUrl(),
+                    arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
+                    orgnummer = varselHendelse.orgnummer,
+                    hendelseType = varselHendelse.type.name,
+                    eksternVarsling = eksternVarsling,
+                    varseltype = BESKJED,
+                )
 
             else -> {
                 log.error("NyOppfolgingsplanVarselService støtter ikke hendelsetype ${varselHendelse.type}")

@@ -30,5 +30,5 @@ data class SykmeldingDTO(
     val egenmeldt: Boolean?,
     val papirsykmelding: Boolean?,
     val harRedusertArbeidsgiverperiode: Boolean?,
-    val merknader: List<MerknadDTO>?
+    val merknader: List<MerknadDTO>?,
 ) : Serializable

@@ -15,7 +15,7 @@ data class NarmesteLederRelasjon(
     val arbeidsgiverForskutterer: Boolean = false,
     val skrivetilgang: Boolean = false,
     val tilganger: List<Tilgang>,
-    val navn: String?
+    val navn: String?,
 ) : Serializable
 
 enum class Tilgang : Serializable {

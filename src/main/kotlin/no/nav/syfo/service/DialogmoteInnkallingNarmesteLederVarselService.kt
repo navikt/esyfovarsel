@@ -44,10 +44,11 @@ class DialogmoteInnkallingNarmesteLederVarselService(
 
     suspend fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         log.info("[DialogmoteInnkallingNarmesteLederVarselService]: sender ${varselHendelse.type}")
-        val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(
-            varselHendelse.arbeidstakerFnr,
-            varselHendelse.orgnummer
-        )
+        val narmesteLederRelasjon =
+            narmesteLederService.getNarmesteLederRelasjon(
+                varselHendelse.arbeidstakerFnr,
+                varselHendelse.orgnummer,
+            )
 
         if (narmesteLederRelasjon?.narmesteLederId == null) {
             log.error("Sender ikke varsel: narmesteLederRelasjon er null, eller mangler narmesteLederId")
@@ -67,7 +68,7 @@ class DialogmoteInnkallingNarmesteLederVarselService(
             personData = personData,
             lenkeTilDialogmoteLanding = lenkeTilDialogmoteLanding,
             ledersEpost = narmesteLederRelasjon.narmesteLederEpost,
-            narmesteLederId = narmesteLederRelasjon.narmesteLederId
+            narmesteLederId = narmesteLederRelasjon.narmesteLederId,
         )
     }
 
@@ -79,39 +80,44 @@ class DialogmoteInnkallingNarmesteLederVarselService(
         narmesteLederId: String,
     ) {
         when (varselHendelse.type) {
-            NL_DIALOGMOTE_INNKALT -> handleInnkalt(
-                varselHendelse = varselHendelse,
-                personData = personData,
-                lenkeTilDialogmoteLanding = lenkeTilDialogmoteLanding,
-                ledersEpost = ledersEpost,
-                narmesteLederId = narmesteLederId
-            )
+            NL_DIALOGMOTE_INNKALT ->
+                handleInnkalt(
+                    varselHendelse = varselHendelse,
+                    personData = personData,
+                    lenkeTilDialogmoteLanding = lenkeTilDialogmoteLanding,
+                    ledersEpost = ledersEpost,
+                    narmesteLederId = narmesteLederId,
+                )
 
-            NL_DIALOGMOTE_NYTT_TID_STED -> handleNyttTidSted(
-                varselHendelse = varselHendelse,
-                personData = personData,
-                lenkeTilDialogmoteLanding = lenkeTilDialogmoteLanding,
-                ledersEpost = ledersEpost,
-                narmesteLederId = narmesteLederId
-            )
+            NL_DIALOGMOTE_NYTT_TID_STED ->
+                handleNyttTidSted(
+                    varselHendelse = varselHendelse,
+                    personData = personData,
+                    lenkeTilDialogmoteLanding = lenkeTilDialogmoteLanding,
+                    ledersEpost = ledersEpost,
+                    narmesteLederId = narmesteLederId,
+                )
 
-            NL_DIALOGMOTE_AVLYST -> handleAvlyst(
-                varselHendelse = varselHendelse,
-                personData = personData,
-                ledersEpost = ledersEpost,
-                narmesteLederId = narmesteLederId
-            )
+            NL_DIALOGMOTE_AVLYST ->
+                handleAvlyst(
+                    varselHendelse = varselHendelse,
+                    personData = personData,
+                    ledersEpost = ledersEpost,
+                    narmesteLederId = narmesteLederId,
+                )
 
-            NL_DIALOGMOTE_REFERAT -> handleReferat(
-                varselHendelse = varselHendelse,
-                personData = personData,
-                narmesteLederId = narmesteLederId
-            )
+            NL_DIALOGMOTE_REFERAT ->
+                handleReferat(
+                    varselHendelse = varselHendelse,
+                    personData = personData,
+                    narmesteLederId = narmesteLederId,
+                )
 
-            NL_DIALOGMOTE_SVAR -> handleSvar(
-                varselHendelse = varselHendelse,
-                narmesteLederId = narmesteLederId
-            )
+            NL_DIALOGMOTE_SVAR ->
+                handleSvar(
+                    varselHendelse = varselHendelse,
+                    narmesteLederId = narmesteLederId,
+                )
 
             else -> log.error("Forsøkte å sende nærmeste leder dialogmøtevarsel for type: ${varselHendelse.type.name}")
         }
@@ -129,13 +135,14 @@ class DialogmoteInnkallingNarmesteLederVarselService(
         require(varselData != null) { "DialogmoteInnkalt mangler varselData" }
         val motetidspunkt = varselData.getMotetidspunkt()
         val texts = varselHendelse.dialogmoteNarmesteLederTexts()
-        val (sakId, grupperingsId) = createNewSak(
-            narmestelederId = narmesteLederId,
-            varselHendelse = varselHendelse,
-            personData = personData,
-            lenkeTilDialogmoteLanding = lenkeTilDialogmoteLanding,
-            motetidspunkt = motetidspunkt
-        )
+        val (sakId, grupperingsId) =
+            createNewSak(
+                narmestelederId = narmesteLederId,
+                varselHendelse = varselHendelse,
+                personData = personData,
+                lenkeTilDialogmoteLanding = lenkeTilDialogmoteLanding,
+                motetidspunkt = motetidspunkt,
+            )
         createNewKalenderavtale(
             sakId = sakId,
             grupperingsId = grupperingsId,
@@ -145,7 +152,7 @@ class DialogmoteInnkallingNarmesteLederVarselService(
             ledersEpost = ledersEpost,
             epostTittel = texts.epostTittel,
             epostHtmlBody = texts.emailBody,
-            motetidspunkt = motetidspunkt
+            motetidspunkt = motetidspunkt,
         )
     }
 
@@ -175,25 +182,26 @@ class DialogmoteInnkallingNarmesteLederVarselService(
             nyTekst = personData?.let { "Dialogmøte med ${it.firstName()} er avlyst" } ?: "Dialogmøtet er avlyst",
             ledersEpost = ledersEpost,
             epostTittel = texts.epostTittel,
-            epostHtmlBody = texts.emailBody
+            epostHtmlBody = texts.emailBody,
         )
         createNewKalenderavtale(
             sakId = sak.id,
             grupperingsId = sak.grupperingsid,
             varselHendelse = varselHendelse,
-            innkallingTekst = personData?.let { "Dialogmøte med ${it.firstName()} er flyttet" }
-                ?: "Dialogmøtet er flyttet",
+            innkallingTekst =
+                personData?.let { "Dialogmøte med ${it.firstName()} er flyttet" }
+                    ?: "Dialogmøtet er flyttet",
             lenkeTilDialogmoteLanding = lenkeTilDialogmoteLanding,
             ledersEpost = ledersEpost,
             epostTittel = texts.epostTittel,
             epostHtmlBody = texts.emailBody,
-            motetidspunkt = motetidspunkt
+            motetidspunkt = motetidspunkt,
         )
         updateSakStatus(
             sakId = sak.id,
             grupperingsId = sak.grupperingsid,
             nyStatus = SakStatus.MOTTATT,
-            nyttMotetidspunkt = motetidspunkt
+            nyttMotetidspunkt = motetidspunkt,
         )
     }
 
@@ -218,7 +226,7 @@ class DialogmoteInnkallingNarmesteLederVarselService(
             nyTekst = personData?.let { "Dialogmøte med ${it.firstName()} er avlyst" } ?: "Dialogmøtet er avlyst",
             ledersEpost = ledersEpost,
             epostTittel = texts.epostTittel,
-            epostHtmlBody = texts.emailBody
+            epostHtmlBody = texts.emailBody,
         )
         updateSakStatus(sakId = sak.id, grupperingsId = sak.grupperingsid, nyStatus = SakStatus.FERDIG)
     }
@@ -232,7 +240,11 @@ class DialogmoteInnkallingNarmesteLederVarselService(
             log.warn("handleSvar: Fant ikke sak for narmesteLederId: $narmesteLederId. Skipper")
             return
         }
-        val svar = varselHendelse.data?.toVarselData()?.dialogmoteSvar?.svar
+        val svar =
+            varselHendelse.data
+                ?.toVarselData()
+                ?.dialogmoteSvar
+                ?.svar
         require(svar != null) { "DialogmoteSvar-data mangler svar" }
         senderFacade.updateKalenderavtale(
             sakId = sak.id,
@@ -261,18 +273,19 @@ class DialogmoteInnkallingNarmesteLederVarselService(
             nyTilstand = KalenderTilstand.AVHOLDT,
             nyTekst = personData?.let { "Dialogmøte med ${it.firstName()} er avholdt" } ?: "Dialogmøtet er avholdt",
         )
-        val input = ArbeidsgiverNotifikasjonInput(
-            uuid = UUID.randomUUID(),
-            virksomhetsnummer = varselHendelse.orgnummer,
-            narmesteLederFnr = varselHendelse.narmesteLederFnr,
-            ansattFnr = varselHendelse.arbeidstakerFnr,
-            merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
-            messageText = texts.messageText,
-            epostTittel = texts.epostTittel,
-            epostHtmlBody = texts.emailBody,
-            meldingstype = Meldingstype.BESKJED,
-            grupperingsid = sak.grupperingsid
-        )
+        val input =
+            ArbeidsgiverNotifikasjonInput(
+                uuid = UUID.randomUUID(),
+                virksomhetsnummer = varselHendelse.orgnummer,
+                narmesteLederFnr = varselHendelse.narmesteLederFnr,
+                ansattFnr = varselHendelse.arbeidstakerFnr,
+                merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
+                messageText = texts.messageText,
+                epostTittel = texts.epostTittel,
+                epostHtmlBody = texts.emailBody,
+                meldingstype = Meldingstype.BESKJED,
+                grupperingsid = sak.grupperingsid,
+            )
         senderFacade.sendTilArbeidsgiverNotifikasjon(varselHendelse, input)
     }
 
@@ -281,22 +294,23 @@ class DialogmoteInnkallingNarmesteLederVarselService(
         personData: HentPersonData?,
         lenkeTilDialogmoteLanding: String,
         narmestelederId: String,
-        motetidspunkt: LocalDateTime
+        motetidspunkt: LocalDateTime,
     ): Pair<String, String> {
         val grupperingsid = UUID.randomUUID().toString()
 
-        val sakInput = NySakInput(
-            grupperingsid = grupperingsid,
-            narmestelederId = narmestelederId,
-            merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
-            virksomhetsnummer = varselHendelse.orgnummer,
-            narmesteLederFnr = varselHendelse.narmesteLederFnr,
-            ansattFnr = varselHendelse.arbeidstakerFnr,
-            tittel = personData?.let { "Dialogmøte med ${it.fullName()}" } ?: "Innkalling til dialogmøte",
-            lenke = lenkeTilDialogmoteLanding,
-            initiellStatus = SakStatus.MOTTATT,
-            hardDeleteDate = motetidspunkt.plusWeeks(WEEKS_BEFORE_DELETE)
-        )
+        val sakInput =
+            NySakInput(
+                grupperingsid = grupperingsid,
+                narmestelederId = narmestelederId,
+                merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
+                virksomhetsnummer = varselHendelse.orgnummer,
+                narmesteLederFnr = varselHendelse.narmesteLederFnr,
+                ansattFnr = varselHendelse.arbeidstakerFnr,
+                tittel = personData?.let { "Dialogmøte med ${it.fullName()}" } ?: "Innkalling til dialogmøte",
+                lenke = lenkeTilDialogmoteLanding,
+                initiellStatus = SakStatus.MOTTATT,
+                hardDeleteDate = motetidspunkt.plusWeeks(WEEKS_BEFORE_DELETE),
+            )
         val sakId = senderFacade.createNewSak(sakInput)
 
         return Pair(sakId, grupperingsid)
@@ -311,24 +325,25 @@ class DialogmoteInnkallingNarmesteLederVarselService(
         ledersEpost: String,
         epostTittel: String,
         epostHtmlBody: String,
-        motetidspunkt: LocalDateTime
+        motetidspunkt: LocalDateTime,
     ) {
-        val kalenderInput = NyKalenderInput(
-            sakId = sakId,
-            virksomhetsnummer = varselHendelse.orgnummer,
-            grupperingsId = grupperingsId,
-            merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
-            eksternId = UUID.randomUUID().toString(),
-            tekst = innkallingTekst,
-            ansattFnr = varselHendelse.arbeidstakerFnr,
-            narmesteLederFnr = varselHendelse.narmesteLederFnr,
-            startTidspunkt = motetidspunkt,
-            lenke = lenkeTilDialogmoteLanding,
-            kalenderavtaleTilstand = KalenderTilstand.VENTER_SVAR_FRA_ARBEIDSGIVER,
-            ledersEpost = ledersEpost,
-            epostTittel = epostTittel,
-            epostHtmlBody = epostHtmlBody,
-        )
+        val kalenderInput =
+            NyKalenderInput(
+                sakId = sakId,
+                virksomhetsnummer = varselHendelse.orgnummer,
+                grupperingsId = grupperingsId,
+                merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
+                eksternId = UUID.randomUUID().toString(),
+                tekst = innkallingTekst,
+                ansattFnr = varselHendelse.arbeidstakerFnr,
+                narmesteLederFnr = varselHendelse.narmesteLederFnr,
+                startTidspunkt = motetidspunkt,
+                lenke = lenkeTilDialogmoteLanding,
+                kalenderavtaleTilstand = KalenderTilstand.VENTER_SVAR_FRA_ARBEIDSGIVER,
+                ledersEpost = ledersEpost,
+                epostTittel = epostTittel,
+                epostHtmlBody = epostHtmlBody,
+            )
         senderFacade.createNewKalenderavtale(kalenderInput)
     }
 
@@ -336,7 +351,7 @@ class DialogmoteInnkallingNarmesteLederVarselService(
         sakId: String,
         grupperingsId: String,
         nyStatus: SakStatus,
-        nyttMotetidspunkt: LocalDateTime? = null
+        nyttMotetidspunkt: LocalDateTime? = null,
     ) {
         senderFacade.nyStatusSak(
             sakId = sakId,
@@ -345,30 +360,28 @@ class DialogmoteInnkallingNarmesteLederVarselService(
                 merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
                 sakStatus = nyStatus,
                 oppdatertTidspunkt = nyttMotetidspunkt,
-                oppdatertHardDeleteDateTime = nyttMotetidspunkt?.plusWeeks(WEEKS_BEFORE_DELETE)
-            )
+                oppdatertHardDeleteDateTime = nyttMotetidspunkt?.plusWeeks(WEEKS_BEFORE_DELETE),
+            ),
         )
     }
 
-    private fun getPaagaaendeSak(
-        narmesteLederId: String,
-    ): PSakInput? {
-        return senderFacade.getPaagaaendeSak(
+    private fun getPaagaaendeSak(narmesteLederId: String): PSakInput? =
+        senderFacade.getPaagaaendeSak(
             narmesteLederId = narmesteLederId,
-            merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP
+            merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
         )
-    }
 
     private fun sendVarselTilDineSykmeldte(varselHendelse: NarmesteLederHendelse) {
         val varselText = varselHendelse.dialogmoteNarmesteLederTexts().dineSykmeldteText
-        val dineSykmeldteVarsel = DineSykmeldteVarsel(
-            ansattFnr = varselHendelse.arbeidstakerFnr,
-            orgnr = varselHendelse.orgnummer,
-            oppgavetype = varselHendelse.type.toDineSykmeldteHendelseType().toString(),
-            lenke = null,
-            tekst = varselText,
-            utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
-        )
+        val dineSykmeldteVarsel =
+            DineSykmeldteVarsel(
+                ansattFnr = varselHendelse.arbeidstakerFnr,
+                orgnr = varselHendelse.orgnummer,
+                oppgavetype = varselHendelse.type.toDineSykmeldteHendelseType().toString(),
+                lenke = null,
+                tekst = varselText,
+                utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+            )
         senderFacade.sendTilDineSykmeldte(varselHendelse, dineSykmeldteVarsel)
     }
 }

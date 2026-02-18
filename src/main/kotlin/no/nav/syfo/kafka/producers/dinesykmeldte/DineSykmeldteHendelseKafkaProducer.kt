@@ -13,46 +13,49 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import java.time.OffsetDateTime
 
 class DineSykmeldteHendelseKafkaProducer(
-    val env: Environment
+    val env: Environment,
 ) {
     private val kafkaConfig = producerProperties(env)
     private val kafkaProducer = KafkaProducer<String, DineSykmeldteHendelse>(kafkaConfig)
 
     fun sendVarsel(varsel: DineSykmeldteVarsel) {
-        val dineSykmeldteHendelse = DineSykmeldteHendelse(
-            varsel.id.toString(),
-            OpprettHendelse(
-                varsel.ansattFnr,
-                varsel.orgnr,
-                varsel.oppgavetype,
-                varsel.lenke,
-                varsel.tekst,
-                OffsetDateTime.now(),
-                varsel.utlopstidspunkt
-            ),
-            null
-        )
+        val dineSykmeldteHendelse =
+            DineSykmeldteHendelse(
+                varsel.id.toString(),
+                OpprettHendelse(
+                    varsel.ansattFnr,
+                    varsel.orgnr,
+                    varsel.oppgavetype,
+                    varsel.lenke,
+                    varsel.tekst,
+                    OffsetDateTime.now(),
+                    varsel.utlopstidspunkt,
+                ),
+                null,
+            )
 
         publishHendelseOnTopic(dineSykmeldteHendelse)
     }
 
     fun ferdigstillVarsel(eksternReferanse: String) {
-        val dineSykmeldteHendelse = DineSykmeldteHendelse(
-            eksternReferanse,
-            null,
-            FerdigstillHendelse(norwegianOffsetDateTime())
-        )
+        val dineSykmeldteHendelse =
+            DineSykmeldteHendelse(
+                eksternReferanse,
+                null,
+                FerdigstillHendelse(norwegianOffsetDateTime()),
+            )
 
         publishHendelseOnTopic(dineSykmeldteHendelse)
     }
 
     private fun publishHendelseOnTopic(dineSykmeldteHendelse: DineSykmeldteHendelse) {
-        kafkaProducer.send(
-            ProducerRecord(
-                topicDineSykmeldteHendelse,
-                dineSykmeldteHendelse.id,
-                dineSykmeldteHendelse
-            )
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    topicDineSykmeldteHendelse,
+                    dineSykmeldteHendelse.id,
+                    dineSykmeldteHendelse,
+                ),
+            ).get()
     }
 }

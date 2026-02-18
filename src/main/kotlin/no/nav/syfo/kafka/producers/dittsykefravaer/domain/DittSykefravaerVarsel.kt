@@ -4,5 +4,5 @@ import java.util.*
 
 data class DittSykefravaerVarsel(
     val uuid: String = "${UUID.randomUUID()}",
-    val melding: DittSykefravaerMelding
+    val melding: DittSykefravaerMelding,
 )

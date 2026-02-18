@@ -2,7 +2,7 @@ package no.nav.syfo.consumer.distribuerjournalpost
 
 enum class Kanal {
     PRINT,
-    TRYGDERETTEN
+    TRYGDERETTEN,
 }
 
 data class JournalpostdistribusjonRequest(

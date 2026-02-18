@@ -18,17 +18,18 @@ fun closeExpiredMicrofrontendsJob(env: JobEnv) {
         val credentials = "${env.serviceuserUsername}:${env.serviceuserPassword}"
         val encodededCredentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
         val httpClient = httpClient()
-        val response: HttpResponse = httpClient.post(env.jobTriggerUrl) {
-            headers {
-                append("Authorization", "Basic $encodededCredentials")
+        val response: HttpResponse =
+            httpClient.post(env.jobTriggerUrl) {
+                headers {
+                    append("Authorization", "Basic $encodededCredentials")
+                }
             }
-        }
         val status = response.status
         if (status == HttpStatusCode.OK) {
             logg.info("Jobb closeExpiredMicrofrontendsJob startet")
         } else {
             logg.error(
-                "Feil i closeExpiredMicrofrontendsJob: Klarte ikke kalle trigger-API i esyfovarsel. Fikk svar med status: $status"
+                "Feil i closeExpiredMicrofrontendsJob: Klarte ikke kalle trigger-API i esyfovarsel. Fikk svar med status: $status",
             )
         }
         httpClient.close()
@@ -43,11 +44,12 @@ fun sendSentralPrintAktivitetspliktLetterJob(env: JobEnv) {
             val credentials = "${env.serviceuserUsername}:${env.serviceuserPassword}"
             val encodededCredentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
             val httpClient = httpClient()
-            val response: HttpResponse = httpClient.post(env.jobTriggerUrl) {
-                headers {
-                    append("Authorization", "Basic $encodededCredentials")
+            val response: HttpResponse =
+                httpClient.post(env.jobTriggerUrl) {
+                    headers {
+                        append("Authorization", "Basic $encodededCredentials")
+                    }
                 }
-            }
             val status = response.status
             if (status == HttpStatusCode.OK) {
                 logg.info("Triggered sendSentralPrintAktivitetspliktLetterJob")

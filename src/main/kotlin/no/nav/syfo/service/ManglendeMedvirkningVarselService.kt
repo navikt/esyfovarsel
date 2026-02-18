@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory
 class ManglendeMedvirkningVarselService(
     private val senderFacade: SenderFacade,
 ) {
-
     suspend fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         val data = dataToVarselData(varselHendelse.data)
         requireNotNull(data.journalpost)

@@ -13,7 +13,7 @@ import java.util.*
 
 class TestdataResetConsumer(
     val env: Environment,
-    private val testdataResetService: TestdataResetService
+    private val testdataResetService: TestdataResetService,
 ) : KafkaListener {
     private val log: Logger = LoggerFactory.getLogger(TestdataResetConsumer::class.java)
     private val kafkaListener: KafkaConsumer<String, String>
@@ -34,7 +34,7 @@ class TestdataResetConsumer(
                         testdataResetService.resetTestdata(PersonIdent(it.value()))
                     } else {
                         log.warn(
-                            "TestdataResetConsumer: Value of ConsumerRecord from topic $topicTestdataReset is null"
+                            "TestdataResetConsumer: Value of ConsumerRecord from topic $topicTestdataReset is null",
                         )
                     }
                 } catch (e: Exception) {

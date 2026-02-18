@@ -22,33 +22,41 @@ const val CALL_PDL_FAIL = "${METRICS_NS}_call_pdl_fail_count"
 val METRICS_REGISTRY =
     PrometheusMeterRegistry(PrometheusConfig.DEFAULT, PrometheusRegistry.defaultRegistry, Clock.SYSTEM)
 
-val COUNT_MER_VEILEDNING_NOTICE_SENT: Counter = Counter
-    .builder(MER_VEILEDNING_NOTICE_SENT)
-    .description("Counts the number of Mer veiledning notice sent")
-    .register(METRICS_REGISTRY)
+val COUNT_MER_VEILEDNING_NOTICE_SENT: Counter =
+    Counter
+        .builder(MER_VEILEDNING_NOTICE_SENT)
+        .description("Counts the number of Mer veiledning notice sent")
+        .register(METRICS_REGISTRY)
 
-val COUNT_KARTLEGGINGSSPORSMAL_NOTICE_SENT: Counter = Counter
-    .builder(KARTLEGGINGSSPORSMAL_NOTICE_SENT)
-    .description("Counts the number of kartleggingssporsmal notice sent")
-    .register(METRICS_REGISTRY)
+val COUNT_KARTLEGGINGSSPORSMAL_NOTICE_SENT: Counter =
+    Counter
+        .builder(KARTLEGGINGSSPORSMAL_NOTICE_SENT)
+        .description("Counts the number of kartleggingssporsmal notice sent")
+        .register(METRICS_REGISTRY)
 
-val COUNT_SVAR_MOTEBEHOV_NOTICE_SENT: Counter = Counter
-    .builder(SVAR_MOTEBEHOV_NOTICE_SENT)
-    .description("Counts the number of Svar møtebehov notice sent")
-    .register(METRICS_REGISTRY)
+val COUNT_SVAR_MOTEBEHOV_NOTICE_SENT: Counter =
+    Counter
+        .builder(SVAR_MOTEBEHOV_NOTICE_SENT)
+        .description("Counts the number of Svar møtebehov notice sent")
+        .register(METRICS_REGISTRY)
 
-val COUNT_ALL_NOTICE_SENT: Counter = Counter
-    .builder(NOTICE_SENT)
-    .description("Counts the number of all types of notice sent")
-    .register(METRICS_REGISTRY)
+val COUNT_ALL_NOTICE_SENT: Counter =
+    Counter
+        .builder(NOTICE_SENT)
+        .description("Counts the number of all types of notice sent")
+        .register(METRICS_REGISTRY)
 
-val COUNT_CALL_PDL_SUCCESS: Counter = Counter.builder(CALL_PDL_SUCCESS)
-    .description("Counts the number of successful calls to pdl")
-    .register(METRICS_REGISTRY)
+val COUNT_CALL_PDL_SUCCESS: Counter =
+    Counter
+        .builder(CALL_PDL_SUCCESS)
+        .description("Counts the number of successful calls to pdl")
+        .register(METRICS_REGISTRY)
 
-val COUNT_CALL_PDL_FAIL: Counter = Counter.builder(CALL_PDL_FAIL)
-    .description("Counts the number of failed calls to pdl")
-    .register(METRICS_REGISTRY)
+val COUNT_CALL_PDL_FAIL: Counter =
+    Counter
+        .builder(CALL_PDL_FAIL)
+        .description("Counts the number of failed calls to pdl")
+        .register(METRICS_REGISTRY)
 
 fun tellMerVeiledningVarselSendt() {
     COUNT_ALL_NOTICE_SENT.increment()

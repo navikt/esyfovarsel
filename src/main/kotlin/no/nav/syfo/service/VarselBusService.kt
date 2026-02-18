@@ -50,45 +50,49 @@ class VarselBusService(
     private val kartleggingssporsmalVarselService: KartleggingssporsmalVarselService,
 ) {
     private val log: Logger = LoggerFactory.getLogger(VarselBusService::class.qualifiedName)
-    suspend fun processVarselHendelse(
-        varselHendelse: EsyfovarselHendelse,
-    ) {
+
+    suspend fun processVarselHendelse(varselHendelse: EsyfovarselHendelse) {
         if (varselHendelse.skalFerdigstilles()) {
             ferdigstillVarsel(varselHendelse)
         } else {
             when (varselHendelse.type) {
                 NL_OPPFOLGINGSPLAN_FORESPORSEL ->
                     oppfolgingsplanVarselService.sendOppfolgingsplanForesporselVarselTilNarmesteLeder(
-                        varselHendelse.toNarmestelederHendelse()
+                        varselHendelse.toNarmestelederHendelse(),
                     )
 
-                NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> oppfolgingsplanVarselService.sendVarselTilNarmesteLeder(
-                    varselHendelse.toNarmestelederHendelse()
-                )
+                NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING ->
+                    oppfolgingsplanVarselService.sendVarselTilNarmesteLeder(
+                        varselHendelse.toNarmestelederHendelse(),
+                    )
 
                 SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING ->
                     oppfolgingsplanVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
                 SM_OPPFOLGINGSPLAN_OPPRETTET ->
                     nyOppfolgingsplanVarselService.sendVarselTilArbeidstaker(
-                        varselHendelse.toArbeidstakerHendelse()
+                        varselHendelse.toArbeidstakerHendelse(),
                     )
 
-                NL_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilNarmesteLeder(
-                    varselHendelse.toNarmestelederHendelse()
-                )
+                NL_DIALOGMOTE_SVAR_MOTEBEHOV ->
+                    motebehovVarselService.sendVarselTilNarmesteLeder(
+                        varselHendelse.toNarmestelederHendelse(),
+                    )
 
-                SM_DIALOGMOTE_SVAR_MOTEBEHOV -> motebehovVarselService.sendVarselTilArbeidstaker(
-                    varselHendelse.toArbeidstakerHendelse()
-                )
+                SM_DIALOGMOTE_SVAR_MOTEBEHOV ->
+                    motebehovVarselService.sendVarselTilArbeidstaker(
+                        varselHendelse.toArbeidstakerHendelse(),
+                    )
 
-                NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING -> motebehovVarselService.sendMotebehovTilbakemeldingTilNarmesteLeder(
-                    varselHendelse.toNarmestelederHendelse()
-                )
+                NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING ->
+                    motebehovVarselService.sendMotebehovTilbakemeldingTilNarmesteLeder(
+                        varselHendelse.toNarmestelederHendelse(),
+                    )
 
-                SM_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING -> motebehovVarselService.sendMotebehovTilbakemeldingTilArbeidstaker(
-                    varselHendelse.toArbeidstakerHendelse()
-                )
+                SM_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING ->
+                    motebehovVarselService.sendMotebehovTilbakemeldingTilArbeidstaker(
+                        varselHendelse.toArbeidstakerHendelse(),
+                    )
 
                 NL_DIALOGMOTE_INNKALT,
                 NL_DIALOGMOTE_AVLYST,
@@ -97,7 +101,7 @@ class VarselBusService(
                 NL_DIALOGMOTE_SVAR,
                 ->
                     dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(
-                        varselHendelse.toNarmestelederHendelse()
+                        varselHendelse.toNarmestelederHendelse(),
                     )
 
                 SM_DIALOGMOTE_INNKALT,
@@ -105,32 +109,37 @@ class VarselBusService(
                 SM_DIALOGMOTE_REFERAT,
                 SM_DIALOGMOTE_NYTT_TID_STED,
                 SM_DIALOGMOTE_LEST,
-                -> dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(
-                    varselHendelse.toArbeidstakerHendelse()
-                )
+                ->
+                    dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(
+                        varselHendelse.toArbeidstakerHendelse(),
+                    )
 
-                SM_AKTIVITETSPLIKT -> aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(
-                    varselHendelse.toArbeidstakerHendelse()
-                )
+                SM_AKTIVITETSPLIKT ->
+                    aktivitetspliktForhandsvarselVarselService.sendVarselTilArbeidstaker(
+                        varselHendelse.toArbeidstakerHendelse(),
+                    )
 
-                SM_ARBEIDSUFORHET_FORHANDSVARSEL -> arbeidsuforhetForhandsvarselService.sendVarselTilArbeidstaker(
-                    varselHendelse.toArbeidstakerHendelse()
-                )
+                SM_ARBEIDSUFORHET_FORHANDSVARSEL ->
+                    arbeidsuforhetForhandsvarselService.sendVarselTilArbeidstaker(
+                        varselHendelse.toArbeidstakerHendelse(),
+                    )
 
-                SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING -> friskmeldingTilArbeidsformidlingVedtakService.sendVarselTilArbeidstaker(
-                    varselHendelse.toArbeidstakerHendelse()
-                )
+                SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING ->
+                    friskmeldingTilArbeidsformidlingVedtakService.sendVarselTilArbeidstaker(
+                        varselHendelse.toArbeidstakerHendelse(),
+                    )
 
-                SM_MER_VEILEDNING -> merVeiledningVarselService.sendVarselTilArbeidstaker(
-                    varselHendelse.toArbeidstakerHendelse()
-                )
+                SM_MER_VEILEDNING ->
+                    merVeiledningVarselService.sendVarselTilArbeidstaker(
+                        varselHendelse.toArbeidstakerHendelse(),
+                    )
 
                 SM_FORHANDSVARSEL_MANGLENDE_MEDVIRKNING ->
                     manglendeMedvirkningVarselService.sendVarselTilArbeidstaker(varselHendelse.toArbeidstakerHendelse())
 
                 SM_KARTLEGGINGSSPORSMAL ->
                     kartleggingssporsmalVarselService.sendKartleggingssporsmalTilArbeidstaker(
-                        varselHendelse.toArbeidstakerHendelse()
+                        varselHendelse.toArbeidstakerHendelse(),
                     )
             }
         }

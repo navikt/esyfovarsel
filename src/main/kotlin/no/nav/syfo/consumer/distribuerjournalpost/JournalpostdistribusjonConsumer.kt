@@ -17,7 +17,10 @@ import no.nav.syfo.utils.httpClientWithRetry
 import org.slf4j.LoggerFactory
 import java.io.IOException
 
-class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
+class JournalpostdistribusjonConsumer(
+    urlEnv: UrlEnv,
+    private val azureAdTokenConsumer: AzureAdTokenConsumer,
+) {
     private val client = httpClientWithRetry(expectSuccess = false)
     private val dokdistfordelingUrl = urlEnv.dokdistfordelingUrl
     private val dokdistfordelingScope = urlEnv.dokdistfordelingScope
@@ -32,22 +35,24 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
     ): JournalpostdistribusjonResponse {
         val requestURL = "$dokdistfordelingUrl/rest/v1/distribuerjournalpost"
         val token = azureAdTokenConsumer.getToken(dokdistfordelingScope)
-        val request = JournalpostdistribusjonRequest(
-            journalpostId = journalpostId,
-            distribusjonstype = distribusjonstype.name,
-            tvingKanal = if (tvingSentralPrint) Kanal.PRINT else null,
-        )
+        val request =
+            JournalpostdistribusjonRequest(
+                journalpostId = journalpostId,
+                distribusjonstype = distribusjonstype.name,
+                tvingKanal = if (tvingSentralPrint) Kanal.PRINT else null,
+            )
 
         return try {
             log.debug("Attempting to distribute journalpost with ID: $journalpostId and UUID: $uuid")
-            val response = client.post(requestURL) {
-                headers {
-                    append(HttpHeaders.Accept, ContentType.Application.Json)
-                    append(HttpHeaders.ContentType, ContentType.Application.Json)
-                    append(HttpHeaders.Authorization, "Bearer $token")
+            val response =
+                client.post(requestURL) {
+                    headers {
+                        append(HttpHeaders.Accept, ContentType.Application.Json)
+                        append(HttpHeaders.ContentType, ContentType.Application.Json)
+                        append(HttpHeaders.Authorization, "Bearer $token")
+                    }
+                    setBody(request)
                 }
-                setBody(request)
-            }
 
             when (response.status) {
                 HttpStatusCode.OK -> {
@@ -61,20 +66,20 @@ class JournalpostdistribusjonConsumer(urlEnv: UrlEnv, private val azureAdTokenCo
                 HttpStatusCode.Gone -> {
                     log.info(
                         "Document with UUID: $uuid and journalpostId: $journalpostId  will never be sent. " +
-                            "The receiver is flagged as Gone."
+                            "The receiver is flagged as Gone.",
                     )
                     throw JournalpostDistribusjonGoneException(
                         "Failed to distribution journalpostId $journalpostId. Resource is Gone. " +
-                            "Status: ${response.status}"
+                            "Status: ${response.status}",
                     )
                 }
                 else -> {
                     log.error(
                         "Failed to send document with UUID: $uuid to print. " +
-                            "JournalpostId: $journalpostId. Response status: ${response.status}"
+                            "JournalpostId: $journalpostId. Response status: ${response.status}",
                     )
                     throw JournalpostDistribusjonException(
-                        "Failed to send document to print. Status: ${response.status}"
+                        "Failed to send document to print. Status: ${response.status}",
                     )
                 }
             }

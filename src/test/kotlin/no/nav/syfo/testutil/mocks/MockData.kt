@@ -17,21 +17,24 @@ val userAccessStatus3 = UserAccessStatus(fnr3, false)
 val userAccessStatus4 = UserAccessStatus(fnr4, false)
 val userAccessStatus5 = UserAccessStatus(fnr5, false)
 
-val dkifPostPersonerResponse = PostPersonerResponse(
-    personer = mapOf(
-        fnr1 to Kontaktinfo(kanVarsles = true, reservert = false),
-        fnr2 to Kontaktinfo(kanVarsles = false, reservert = true)
+val dkifPostPersonerResponse =
+    PostPersonerResponse(
+        personer =
+            mapOf(
+                fnr1 to Kontaktinfo(kanVarsles = true, reservert = false),
+                fnr2 to Kontaktinfo(kanVarsles = false, reservert = true),
+            ),
     )
-)
 
-val tokenFromAzureServer = Token(
-    access_token = "AAD access token",
-    token_type = "Bearer",
-    expires_in = 3600
-)
+val tokenFromAzureServer =
+    Token(
+        access_token = "AAD access token",
+        token_type = "Bearer",
+        expires_in = 3600,
+    )
 
 data class Token(
     val access_token: String,
     val token_type: String,
-    val expires_in: Long
+    val expires_in: Long,
 )

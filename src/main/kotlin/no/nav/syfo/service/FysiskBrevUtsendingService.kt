@@ -15,12 +15,14 @@ class FysiskBrevUtsendingService(
         distribusjonsType: DistibusjonsType,
         tvingSentralPrint: Boolean = false,
     ) {
-        val bestillingsId = journalpostdistribusjonConsumer.distribuerJournalpost(
-            journalpostId,
-            uuid,
-            distribusjonsType,
-            tvingSentralPrint = tvingSentralPrint
-        ).bestillingsId
+        val bestillingsId =
+            journalpostdistribusjonConsumer
+                .distribuerJournalpost(
+                    journalpostId,
+                    uuid,
+                    distribusjonsType,
+                    tvingSentralPrint = tvingSentralPrint,
+                ).bestillingsId
         log.info("Sendte til print, bestillingsId er $bestillingsId, varsel med UUID: $uuid")
     }
 }

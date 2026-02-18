@@ -8,6 +8,7 @@ const val localAppPropertiesPath = "./src/main/resources/localEnvApp.json"
 const val localJobPropertiesPath = "./src/main/resources/localEnvJob.json"
 const val serviceuserMounthPath = "/var/run/secrets"
 val objectMapper = ObjectMapper().registerKotlinModule()
+
 fun getJobEnv() =
     if (isLocal()) {
         objectMapper.readValue(File(localJobPropertiesPath), JobEnv::class.java)
@@ -20,8 +21,8 @@ fun getJobEnv() =
         )
     }
 
-fun getEnv(): Environment {
-    return if (isLocal()) {
+fun getEnv(): Environment =
+    if (isLocal()) {
         getTestEnv()
     } else {
         Environment(
@@ -62,15 +63,16 @@ fun getEnv(): Environment {
                 istilgangskontrollScope = getEnvVar("ISTILGANGSKONTROLL_SCOPE"),
                 dokumentarkivOppfolgingDocumentsPageUrl = getEnvVar("BASE_URL_DOKUMENTARKIV_OPPFOLGING_DOCUMENTS_PAGE"),
                 urlAktivitetskravInfoPage = getEnvVar("URL_AKTIVITETSKRAV_INFO_PAGE"),
-                baseUrlNavEkstern = getEnvVar("BASE_URL_NAV_EKSTERN")
+                baseUrlNavEkstern = getEnvVar("BASE_URL_NAV_EKSTERN"),
             ),
             KafkaEnv(
                 bootstrapServersUrl = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
-                schemaRegistry = KafkaSchemaRegistryEnv(
-                    url = getEnvVar("KAFKA_SCHEMA_REGISTRY"),
-                    username = getEnvVar("KAFKA_SCHEMA_REGISTRY_USER"),
-                    password = getEnvVar("KAFKA_SCHEMA_REGISTRY_PASSWORD"),
-                ),
+                schemaRegistry =
+                    KafkaSchemaRegistryEnv(
+                        url = getEnvVar("KAFKA_SCHEMA_REGISTRY"),
+                        username = getEnvVar("KAFKA_SCHEMA_REGISTRY_USER"),
+                        password = getEnvVar("KAFKA_SCHEMA_REGISTRY_PASSWORD"),
+                    ),
                 aivenBroker = getEnvVar("KAFKA_BROKERS"),
                 KafkaSslEnv(
                     truststoreLocation = getEnvVar("KAFKA_TRUSTSTORE_PATH"),
@@ -90,10 +92,8 @@ fun getEnv(): Environment {
             ),
         )
     }
-}
 
-fun getTestEnv() =
-    objectMapper.readValue(File(localAppPropertiesPath), Environment::class.java)
+fun getTestEnv() = objectMapper.readValue(File(localAppPropertiesPath), Environment::class.java)
 
 data class Environment(
     val appEnv: AppEnv,
@@ -184,8 +184,10 @@ data class JobEnv(
     val serviceuserPassword: String,
 )
 
-fun getEnvVar(varName: String, defaultValue: String? = null) =
-    System.getenv(varName) ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
+fun getEnvVar(
+    varName: String,
+    defaultValue: String? = null,
+) = System.getenv(varName) ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
 
 fun isLocal(): Boolean = getEnvVar("KTOR_ENV", "local") == "local"
 
