@@ -1,13 +1,15 @@
-package no.nav.syfo.kafka.producers.mineside_microfrontend
+package no.nav.syfo.kafka.producers.minesidemicrofrontend
 
 import java.time.LocalDate
 
 data class MikrofrontendSynlighet(
     val synligFor: String,
     val tjeneste: Tjeneste,
-    val synligTom: LocalDate?
+    val synligTom: LocalDate?,
 )
 
 enum class Tjeneste {
-    DIALOGMOTE, AKTIVITETSKRAV, MER_OPPFOLGING
+    DIALOGMOTE,
+    AKTIVITETSKRAV,
+    MER_OPPFOLGING,
 }

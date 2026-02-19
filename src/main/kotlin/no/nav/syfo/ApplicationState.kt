@@ -2,7 +2,7 @@ package no.nav.syfo
 
 data class ApplicationState(
     var running: Boolean = false,
-    var initialized: Boolean = false
+    var initialized: Boolean = false,
 )
 
 fun ApplicationState.shutdownApplication() {

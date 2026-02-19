@@ -8,9 +8,7 @@ import java.time.format.DateTimeFormatter
 
 private const val BREV_DATE_FORMAT_PATTERN = "dd. MMMM yyyy"
 
-fun LocalDate.isEqualOrBefore(other: LocalDate): Boolean {
-    return this == other || this.isBefore(other)
-}
+fun LocalDate.isEqualOrBefore(other: LocalDate): Boolean = this == other || this.isBefore(other)
 
 fun parseDate(date: String): LocalDate {
     val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
@@ -22,11 +20,12 @@ fun parsePDLDate(date: String): LocalDate {
     return LocalDate.parse(date, formatter)
 }
 
-fun formatDateForLetter(date: LocalDate): String {
-    return date.format(DateTimeFormatter.ofPattern(BREV_DATE_FORMAT_PATTERN))
-}
+fun formatDateForLetter(date: LocalDate): String = date.format(DateTimeFormatter.ofPattern(BREV_DATE_FORMAT_PATTERN))
 
-fun isAlderMindreEnnGittAr(fodselsdato: String, maxAlder: Int): Boolean {
+fun isAlderMindreEnnGittAr(
+    fodselsdato: String,
+    maxAlder: Int,
+): Boolean {
     val parsedFodselsdato = fodselsdato.let { parsePDLDate(it) }
 
     return Period.between(parsedFodselsdato, LocalDate.now()).years < maxAlder

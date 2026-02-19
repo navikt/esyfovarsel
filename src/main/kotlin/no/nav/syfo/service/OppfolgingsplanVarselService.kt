@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 
 class OppfolgingsplanVarselService(
     private val senderFacade: SenderFacade,
@@ -39,9 +39,7 @@ class OppfolgingsplanVarselService(
         private val log = LoggerFactory.getLogger(OppfolgingsplanVarselService::class.qualifiedName)
     }
 
-    suspend fun sendVarselTilArbeidstaker(
-        varselHendelse: ArbeidstakerHendelse
-    ) {
+    suspend fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
         val eksternVarsling = accessControlService.canUserBeNotifiedByEmailOrSMS(varselHendelse.arbeidstakerFnr)
         varsleArbeidstakerViaBrukernotifikasjoner(
             varselHendelse = varselHendelse,
@@ -49,9 +47,7 @@ class OppfolgingsplanVarselService(
         )
     }
 
-    suspend fun sendVarselTilNarmesteLeder(
-        varselHendelse: NarmesteLederHendelse
-    ) {
+    suspend fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         senderFacade.sendTilDineSykmeldte(
             varselHendelse,
             DineSykmeldteVarsel(
@@ -60,8 +56,8 @@ class OppfolgingsplanVarselService(
                 oppgavetype = varselHendelse.type.toDineSykmeldteHendelseType().toString(),
                 lenke = null,
                 tekst = DINE_SYKMELDTE_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST,
-                utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
-            )
+                utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+            ),
         )
         senderFacade.sendTilArbeidsgiverNotifikasjon(
             varselHendelse,
@@ -77,18 +73,17 @@ class OppfolgingsplanVarselService(
                 LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
                 meldingstype = Meldingstype.BESKJED,
                 grupperingsid = UUID.randomUUID().toString(),
-            )
+            ),
         )
     }
 
-    suspend fun sendOppfolgingsplanForesporselVarselTilNarmesteLeder(
-        varselHendelse: NarmesteLederHendelse
-    ) {
+    suspend fun sendOppfolgingsplanForesporselVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         log.info("Send oppfolgingsplan foresporsel-varsel til narmeste leder")
-        val narmesteLederRelasjon = narmesteLederService.getNarmesteLederRelasjon(
-            varselHendelse.arbeidstakerFnr,
-            varselHendelse.orgnummer
-        )
+        val narmesteLederRelasjon =
+            narmesteLederService.getNarmesteLederRelasjon(
+                varselHendelse.arbeidstakerFnr,
+                varselHendelse.orgnummer,
+            )
 
         if (narmesteLederRelasjon?.narmesteLederId == null) {
             log.error("Sender ikke varsel: narmesteLederRelasjon er null, eller mangler narmesteLederId")
@@ -104,18 +99,19 @@ class OppfolgingsplanVarselService(
         val personData = pdlClient.hentPerson(personIdent = varselHendelse.arbeidstakerFnr)
         val grupperingsid = UUID.randomUUID().toString()
 
-        val sakInput = NySakInput(
-            grupperingsid = grupperingsid,
-            narmestelederId = narmesteLederRelasjon.narmesteLederId,
-            merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
-            virksomhetsnummer = varselHendelse.orgnummer,
-            narmesteLederFnr = varselHendelse.narmesteLederFnr,
-            ansattFnr = varselHendelse.arbeidstakerFnr,
-            tittel = personData?.fullName()?.let { "Oppfølging av $it" } ?: "Oppfølging av sykmeldt",
-            lenke = url,
-            initiellStatus = SakStatus.MOTTATT,
-            hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
-        )
+        val sakInput =
+            NySakInput(
+                grupperingsid = grupperingsid,
+                narmestelederId = narmesteLederRelasjon.narmesteLederId,
+                merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                virksomhetsnummer = varselHendelse.orgnummer,
+                narmesteLederFnr = varselHendelse.narmesteLederFnr,
+                ansattFnr = varselHendelse.arbeidstakerFnr,
+                tittel = personData?.fullName()?.let { "Oppfølging av $it" } ?: "Oppfølging av sykmeldt",
+                lenke = url,
+                initiellStatus = SakStatus.MOTTATT,
+                hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+            )
 
         senderFacade.createNewSak(sakInput)
         senderFacade.sendTilArbeidsgiverNotifikasjon(
@@ -132,8 +128,8 @@ class OppfolgingsplanVarselService(
                 LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
                 Meldingstype.BESKJED,
                 grupperingsid,
-                url
-            )
+                url,
+            ),
         )
     }
 
@@ -150,7 +146,7 @@ class OppfolgingsplanVarselService(
             orgnummer = varselHendelse.orgnummer,
             hendelseType = varselHendelse.type.name,
             eksternVarsling = eksternVarsling,
-            varseltype = BESKJED
+            varseltype = BESKJED,
         )
     }
 
@@ -160,7 +156,7 @@ class OppfolgingsplanVarselService(
             else -> {
                 log.error(
                     "Klarte ikke mappe varsel av type ${arbeidstakerHendelse.type} ved mapping av hendelsetype " +
-                        "til oppfolgingsplanVarsel melding tekst"
+                        "til oppfolgingsplanVarsel melding tekst",
                 )
                 null
             }

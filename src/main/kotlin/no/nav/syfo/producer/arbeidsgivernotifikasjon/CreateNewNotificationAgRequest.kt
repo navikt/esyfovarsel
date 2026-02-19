@@ -2,14 +2,15 @@ package no.nav.syfo.producer.arbeidsgivernotifikasjon
 
 data class NotificationAgRequest(
     val query: String,
-    val variables: Variables
+    val variables: Variables,
 )
 
 enum class EpostSendevinduTypes {
-    LOEPENDE
+    LOEPENDE,
 }
 
 sealed interface Variables
+
 data class VariablesCreate(
     val eksternId: String,
     val virksomhetsnummer: String,
@@ -18,7 +19,6 @@ data class VariablesCreate(
     val ansattFnr: String,
     val merkelapp: String,
     val tekst: String,
-
     val epostadresse: String,
     val epostTittel: String,
     val epostHtmlBody: String,
@@ -29,5 +29,5 @@ data class VariablesCreate(
 
 data class VariablesDelete(
     val merkelapp: String,
-    val eksternId: String
+    val eksternId: String,
 ) : Variables

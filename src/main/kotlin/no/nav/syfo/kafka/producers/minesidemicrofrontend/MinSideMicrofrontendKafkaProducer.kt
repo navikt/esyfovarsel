@@ -1,13 +1,13 @@
-package no.nav.syfo.kafka.producers.mineside_microfrontend
+package no.nav.syfo.kafka.producers.minesidemicrofrontend
 
 import no.nav.syfo.Environment
+import no.nav.syfo.kafka.common.TOPIC_MIN_SIDE_MICROFRONTEND
 import no.nav.syfo.kafka.common.producerProperties
-import no.nav.syfo.kafka.common.topicMinSideMicrofrontend
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 
 class MinSideMicrofrontendKafkaProducer(
-    val env: Environment
+    val env: Environment,
 ) {
     private val kafkaConfig = producerProperties(env)
     private val kafkaProducer = KafkaProducer<String, MinSideRecord>(kafkaConfig)
@@ -15,10 +15,10 @@ class MinSideMicrofrontendKafkaProducer(
     fun sendRecordToMinSideTopic(minSideRecord: MinSideRecord) {
         kafkaProducer.send(
             ProducerRecord(
-                topicMinSideMicrofrontend,
+                TOPIC_MIN_SIDE_MICROFRONTEND,
                 minSideRecord.fnr,
-                minSideRecord
-            )
+                minSideRecord,
+            ),
         )
     }
 }

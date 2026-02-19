@@ -1,6 +1,16 @@
 package no.nav.syfo.consumer.syfosmregister
 
-import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.*
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.ArbeidsgiverDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.BehandlerDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.BehandlingsutfallDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.KontaktMedPasientDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.MedisinskVurderingDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.MeldingTilNavDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.MerknadDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.PrognoseDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.SporsmalSvarDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.SykmeldingStatusDTO
+import no.nav.syfo.consumer.syfosmregister.sykmeldingModel.SykmeldingsperiodeDTO
 import java.io.Serializable
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -30,5 +40,5 @@ data class SykmeldingDTO(
     val egenmeldt: Boolean?,
     val papirsykmelding: Boolean?,
     val harRedusertArbeidsgiverperiode: Boolean?,
-    val merknader: List<MerknadDTO>?
+    val merknader: List<MerknadDTO>?,
 ) : Serializable

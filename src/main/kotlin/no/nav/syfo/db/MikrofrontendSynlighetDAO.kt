@@ -2,23 +2,25 @@ package no.nav.syfo.db
 
 import no.nav.syfo.db.domain.PMikrofrontendSynlighet
 import no.nav.syfo.domain.PersonIdent
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MikrofrontendSynlighet
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MikrofrontendSynlighet
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.Tjeneste
 import java.sql.Date
 import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 fun DatabaseInterface.storeMikrofrontendSynlighetEntry(mikrofrontendSynlighet: MikrofrontendSynlighet) {
-    val insertStatement = """INSERT INTO MIKROFRONTEND_SYNLIGHET (
+    val insertStatement =
+        """
+        INSERT INTO MIKROFRONTEND_SYNLIGHET (
         uuid,
         synlig_for,
         tjeneste,
         synlig_tom,
         sist_endret,
         opprettet) VALUES (?, ?, ?, ?, ?, ?)
-    """.trimIndent()
+        """.trimIndent()
 
     val now = Timestamp.valueOf(LocalDateTime.now())
     val varselUUID = UUID.randomUUID()
@@ -39,20 +41,21 @@ fun DatabaseInterface.storeMikrofrontendSynlighetEntry(mikrofrontendSynlighet: M
 
 fun DatabaseInterface.updateMikrofrontendEntrySynligTomByExistingEntry(
     entry: MikrofrontendSynlighet,
-    newSynligTom: LocalDate
+    newSynligTom: LocalDate,
 ) = updateMikrofrontendEntrySynligTomByFnrAndTjeneste(entry.synligFor, entry.tjeneste, newSynligTom)
 
 fun DatabaseInterface.updateMikrofrontendEntrySynligTomByFnrAndTjeneste(
     fnr: String,
     tjeneste: Tjeneste,
-    newSynligTom: LocalDate
+    newSynligTom: LocalDate,
 ) {
     val now = LocalDateTime.now()
-    val updateStatement = """UPDATE MIKROFRONTEND_SYNLIGHET
+    val updateStatement =
+        """UPDATE MIKROFRONTEND_SYNLIGHET
                              SET synlig_tom = ?,
                                  sist_endret = ?
                              WHERE synlig_for = ? AND tjeneste = ?
-    """.trimMargin()
+        """.trimMargin()
 
     connection.use { connection ->
         connection.prepareStatement(updateStatement).use {
@@ -66,11 +69,16 @@ fun DatabaseInterface.updateMikrofrontendEntrySynligTomByFnrAndTjeneste(
     }
 }
 
-fun DatabaseInterface.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste(fnr: String, tjeneste: Tjeneste) {
-    val updateStatement = """DELETE
-                             FROM MIKROFRONTEND_SYNLIGHET
-                             WHERE synlig_for = ? AND tjeneste = ?
-    """.trimIndent()
+fun DatabaseInterface.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste(
+    fnr: String,
+    tjeneste: Tjeneste,
+) {
+    val updateStatement =
+        """
+        DELETE
+        FROM MIKROFRONTEND_SYNLIGHET
+        WHERE synlig_for = ? AND tjeneste = ?
+        """.trimIndent()
 
     connection.use { connection ->
         connection.prepareStatement(updateStatement).use {
@@ -83,10 +91,12 @@ fun DatabaseInterface.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste(fnr: Str
 }
 
 fun DatabaseInterface.fetchMikrofrontendSynlighetEntriesByFnr(fnr: String): List<PMikrofrontendSynlighet> {
-    val queryStatement = """SELECT *
-                            FROM MIKROFRONTEND_SYNLIGHET
-                            WHERE synlig_for = ?
-    """.trimIndent()
+    val queryStatement =
+        """
+        SELECT *
+        FROM MIKROFRONTEND_SYNLIGHET
+        WHERE synlig_for = ?
+        """.trimIndent()
 
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
@@ -98,10 +108,12 @@ fun DatabaseInterface.fetchMikrofrontendSynlighetEntriesByFnr(fnr: String): List
 
 fun DatabaseInterface.fetchFnrsWithExpiredMicrofrontendEntries(tjeneste: Tjeneste): List<String> {
     val today = LocalDate.now()
-    val queryStatement = """SELECT synlig_for
-                            FROM MIKROFRONTEND_SYNLIGHET
-                            WHERE tjeneste = ? AND synlig_tom <= ?
-    """.trimIndent()
+    val queryStatement =
+        """
+        SELECT synlig_for
+        FROM MIKROFRONTEND_SYNLIGHET
+        WHERE tjeneste = ? AND synlig_tom <= ?
+        """.trimIndent()
 
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {
@@ -113,10 +125,11 @@ fun DatabaseInterface.fetchFnrsWithExpiredMicrofrontendEntries(tjeneste: Tjenest
 }
 
 fun DatabaseInterface.deleteMikrofrontendSynlighetByFnr(fnr: PersonIdent) {
-    val updateStatement = """DELETE 
+    val updateStatement =
+        """DELETE 
         FROM MIKROFRONTEND_SYNLIGHET
                    WHERE synlig_for = ?
-    """.trimMargin()
+        """.trimMargin()
 
     return connection.use { connection ->
         connection.prepareStatement(updateStatement).use {

@@ -137,77 +137,73 @@ fun Any.toVarselData(): VarselData =
         VarselData::class.java,
     )
 
-fun EsyfovarselHendelse.isArbeidstakerHendelse(): Boolean {
-    return this is ArbeidstakerHendelse
-}
+fun EsyfovarselHendelse.isArbeidstakerHendelse(): Boolean = this is ArbeidstakerHendelse
 
-fun EsyfovarselHendelse.toNarmestelederHendelse(): NarmesteLederHendelse {
-    return if (this is NarmesteLederHendelse) {
+fun EsyfovarselHendelse.toNarmestelederHendelse(): NarmesteLederHendelse =
+    if (this is NarmesteLederHendelse) {
         this
     } else {
         throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type NarmesteLederHendelse")
     }
-}
 
-fun EsyfovarselHendelse.toArbeidstakerHendelse(): ArbeidstakerHendelse {
-    return if (this is ArbeidstakerHendelse) {
+fun EsyfovarselHendelse.toArbeidstakerHendelse(): ArbeidstakerHendelse =
+    if (this is ArbeidstakerHendelse) {
         this
     } else {
         throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type ArbeidstakerHendelse")
     }
-}
 
-fun EsyfovarselHendelse.skalFerdigstilles() =
-    ferdigstill ?: false
+fun EsyfovarselHendelse.skalFerdigstilles() = ferdigstill ?: false
 
 fun HendelseType.isAktivitetspliktType() = this == HendelseType.SM_AKTIVITETSPLIKT
-fun HendelseType.isMerOppfolgingType() =
-    this in listOf(HendelseType.SM_MER_VEILEDNING, HendelseType.SM_KARTLEGGINGSSPORSMAL)
+
+fun HendelseType.isMerOppfolgingType() = this in listOf(HendelseType.SM_MER_VEILEDNING, HendelseType.SM_KARTLEGGINGSSPORSMAL)
 
 fun HendelseType.isSenOppfolgingType() = this == HendelseType.SM_MER_VEILEDNING
 
 fun HendelseType.isKartleggingssporsmalType() = this == HendelseType.SM_KARTLEGGINGSSPORSMAL
 
-fun HendelseType.isDialogmoteInnkallingType() = this in listOf(
-    HendelseType.SM_DIALOGMOTE_INNKALT,
-    HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
-    HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
-)
+fun HendelseType.isDialogmoteInnkallingType() =
+    this in
+        listOf(
+            HendelseType.SM_DIALOGMOTE_INNKALT,
+            HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
+            HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
+        )
 
 fun HendelseType.isDialogmoteType() =
     this.isDialogmoteInnkallingType() or (
-        this in listOf(
-            HendelseType.SM_DIALOGMOTE_AVLYST,
-            HendelseType.SM_DIALOGMOTE_REFERAT,
-            HendelseType.SM_DIALOGMOTE_LEST,
-        )
-        )
+        this in
+            listOf(
+                HendelseType.SM_DIALOGMOTE_AVLYST,
+                HendelseType.SM_DIALOGMOTE_REFERAT,
+                HendelseType.SM_DIALOGMOTE_LEST,
+            )
+    )
 
 fun ArbeidstakerHendelse.notCorrectMikrofrontendType() =
     !(
         this.type.isDialogmoteType() or
             this.type.isAktivitetspliktType() or
             this.type.isMerOppfolgingType()
-        )
+    )
 
-fun ArbeidstakerHendelse.isAktivitetspliktWithFerdigstilling() =
-    (this.type.isAktivitetspliktType() and (this.ferdigstill == true))
+fun ArbeidstakerHendelse.isAktivitetspliktWithFerdigstilling() = (this.type.isAktivitetspliktType() and (this.ferdigstill == true))
 
-fun ArbeidstakerHendelse.isMerOppfolgingWithFerdigstilling() =
-    (this.type.isMerOppfolgingType() and (this.ferdigstill == true))
+fun ArbeidstakerHendelse.isMerOppfolgingWithFerdigstilling() = (this.type.isMerOppfolgingType() and (this.ferdigstill == true))
 
-fun ArbeidstakerHendelse.isNotEligibleForMikrofrontendProcessing(): Boolean {
-    return this.notCorrectMikrofrontendType() or
+fun ArbeidstakerHendelse.isNotEligibleForMikrofrontendProcessing(): Boolean =
+    this.notCorrectMikrofrontendType() or
         isAktivitetspliktWithFerdigstilling() or
         isMerOppfolgingWithFerdigstilling()
-}
 
 fun HendelseType.isNotValidHendelseType() =
     !this.isAktivitetspliktType() && !this.isDialogmoteInnkallingType() && !this.isMerOppfolgingType()
 
 fun VarselData.getMotetidspunkt(): LocalDateTime {
-    val tidspunkt = motetidspunkt?.tidspunkt
-        ?: throw MotetidspunktValidationException("Varseldata mangler motetidspunkt")
+    val tidspunkt =
+        motetidspunkt?.tidspunkt
+            ?: throw MotetidspunktValidationException("Varseldata mangler motetidspunkt")
     if (tidspunkt.isBefore(LocalDateTime.now())) {
         throw MotetidspunktValidationException("Varseldata har motetidspunkt i fortiden")
     }

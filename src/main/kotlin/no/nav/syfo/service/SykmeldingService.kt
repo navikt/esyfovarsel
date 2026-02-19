@@ -4,36 +4,43 @@ import no.nav.syfo.consumer.syfosmregister.SykmeldingDTO
 import no.nav.syfo.consumer.syfosmregister.SykmeldingerConsumer
 import java.time.LocalDate
 
-data class SykmeldingStatus(val isSykmeldtIJobb: Boolean, val sendtArbeidsgiver: Boolean)
+data class SykmeldingStatus(
+    val isSykmeldtIJobb: Boolean,
+    val sendtArbeidsgiver: Boolean,
+)
 
-class SykmeldingService constructor(private val sykmeldingerConsumer: SykmeldingerConsumer) {
+class SykmeldingService constructor(
+    private val sykmeldingerConsumer: SykmeldingerConsumer,
+) {
     private fun isSendtAG(
         sykmeldingerPaaVarseldato: List<SykmeldingDTO>,
         virksomhetsnummer: String?,
     ): Boolean {
         if (virksomhetsnummer == null) return false
 
-        val sendtSykmelding: SykmeldingDTO? = sykmeldingerPaaVarseldato.filter { sykmelding -> sykmelding.sykmeldingStatus.statusEvent == "SENDT" }
-            .firstOrNull { sykmeldingDTO -> sykmeldingDTO.sykmeldingStatus.arbeidsgiver?.orgnummer == virksomhetsnummer }
+        val sendtSykmelding: SykmeldingDTO? =
+            sykmeldingerPaaVarseldato
+                .filter { sykmelding ->
+                    sykmelding.sykmeldingStatus.statusEvent ==
+                        "SENDT"
+                }.firstOrNull { sykmeldingDTO -> sykmeldingDTO.sykmeldingStatus.arbeidsgiver?.orgnummer == virksomhetsnummer }
 
         return sendtSykmelding !== null
     }
 
-    private fun isSykmeldtIJobb(
-        sykmeldingerPaaVarseldato: List<SykmeldingDTO>,
-    ): Boolean {
-        return sykmeldingerPaaVarseldato.any { sykmeldingDTO ->
+    private fun isSykmeldtIJobb(sykmeldingerPaaVarseldato: List<SykmeldingDTO>): Boolean =
+        sykmeldingerPaaVarseldato.any { sykmeldingDTO ->
             sykmeldingDTO.sykmeldingsperioder.firstOrNull { it.gradert != null }?.gradert != null
         }
-    }
 
     suspend fun checkSykmeldingStatusForVirksomhet(
         varselDato: LocalDate,
         fnr: String,
-        virksomhetsnummer: String?
+        virksomhetsnummer: String?,
     ): SykmeldingStatus {
         val sykmeldingerPaVarseldato: List<SykmeldingDTO> =
-            sykmeldingerConsumer.getSykmeldingerPaDato(varselDato, fnr) ?: return SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = false)
+            sykmeldingerConsumer.getSykmeldingerPaDato(varselDato, fnr)
+                ?: return SykmeldingStatus(isSykmeldtIJobb = false, sendtArbeidsgiver = false)
 
         val isSendtAG = isSendtAG(sykmeldingerPaVarseldato, virksomhetsnummer)
 
@@ -42,7 +49,10 @@ class SykmeldingService constructor(private val sykmeldingerConsumer: Sykmelding
         return SykmeldingStatus(isSykmeldtIJobb = isSykmeldtIJobb, sendtArbeidsgiver = isSendtAG)
     }
 
-    suspend fun isPersonSykmeldtPaDato(varselDato: LocalDate, fnr: String): Boolean {
+    suspend fun isPersonSykmeldtPaDato(
+        varselDato: LocalDate,
+        fnr: String,
+    ): Boolean {
         val sykmeldtStatusPaVarseldato = sykmeldingerConsumer.getSykmeldtStatusPaDato(varselDato, fnr)
         return sykmeldtStatusPaVarseldato != null && sykmeldtStatusPaVarseldato.erSykmeldt
     }

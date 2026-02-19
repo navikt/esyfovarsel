@@ -1,8 +1,8 @@
 package no.nav.syfo.db
 
-const val arbeidstakerFnr1 = "12345678901"
-const val arbeidstakerFnr2 = "23456789012"
-const val arbeidstakerFnr3 = "34567890123"
-const val arbeidstakerAktorId1 = "1234567890123"
-const val arbeidstakerAktorId2 = "2345678901234"
-const val orgnummer1 = "123456789"
+const val ARBEIDSTAKER_FNR_1 = "12345678901"
+const val ARBEIDSTAKER_FNR_2 = "23456789012"
+const val ARBEIDSTAKER_FNR_3 = "34567890123"
+const val ARBEIDSTAKER_AKTOR_ID_1 = "1234567890123"
+const val ARBEIDSTAKER_AKTOR_ID_2 = "2345678901234"
+const val ORGNUMMER_1 = "123456789"

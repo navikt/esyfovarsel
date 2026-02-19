@@ -14,15 +14,16 @@ import java.time.Duration
 class EmbeddedDatabase : DatabaseInterface {
     companion object {
         // Shared container for all test classes
-        private val postgresContainer = PostgreSQLContainer<Nothing>(DockerImageName.parse("postgres:17")).apply {
-            withDatabaseName("test")
-            withUsername("test")
-            withPassword("test")
-            withReuse(true)
-            withLabel("reuse.UUID", "esyfovarsel-test-db")
-            withStartupTimeout(Duration.ofSeconds(10))
-            withEnv("POSTGRES_HOST_AUTH_METHOD", "trust")
-        }
+        private val postgresContainer =
+            PostgreSQLContainer<Nothing>(DockerImageName.parse("postgres:17")).apply {
+                withDatabaseName("test")
+                withUsername("test")
+                withPassword("test")
+                withReuse(true)
+                withLabel("reuse.UUID", "esyfovarsel-test-db")
+                withStartupTimeout(Duration.ofSeconds(10))
+                withEnv("POSTGRES_HOST_AUTH_METHOD", "trust")
+            }
 
         init {
             postgresContainer.start()
@@ -30,23 +31,26 @@ class EmbeddedDatabase : DatabaseInterface {
     }
 
     private val dataSource: HikariDataSource by lazy {
-        val config = HikariConfig().apply {
-            jdbcUrl = postgresContainer.jdbcUrl
-            username = postgresContainer.username
-            password = postgresContainer.password
-            maximumPoolSize = 4
-            minimumIdle = 1
-            connectionTimeout = 10000
-            initializationFailTimeout = 30000
-            isAutoCommit = false
-            transactionIsolation = "TRANSACTION_REPEATABLE_READ"
-        }
+        val config =
+            HikariConfig().apply {
+                jdbcUrl = postgresContainer.jdbcUrl
+                username = postgresContainer.username
+                password = postgresContainer.password
+                maximumPoolSize = 4
+                minimumIdle = 1
+                connectionTimeout = 10000
+                initializationFailTimeout = 30000
+                isAutoCommit = false
+                transactionIsolation = "TRANSACTION_REPEATABLE_READ"
+            }
 
         HikariDataSource(config).also { ds ->
-            Flyway.configure()
+            Flyway
+                .configure()
                 .dataSource(ds)
                 .cleanDisabled(false)
-                .load().apply {
+                .load()
+                .apply {
                     clean()
                     migrate()
                 }
@@ -54,14 +58,15 @@ class EmbeddedDatabase : DatabaseInterface {
     }
 
     fun dropData() {
-        val tables = listOf(
-            "SYKMELDING_IDS",
-            "UTSENDT_VARSEL",
-            "MIKROFRONTEND_SYNLIGHET",
-            "UTSENDING_VARSEL_FEILET",
-            "ARBEIDSGIVERNOTIFIKASJONER_SAK",
-            "ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE"
-        )
+        val tables =
+            listOf(
+                "SYKMELDING_IDS",
+                "UTSENDT_VARSEL",
+                "MIKROFRONTEND_SYNLIGHET",
+                "UTSENDING_VARSEL_FEILET",
+                "ARBEIDSGIVERNOTIFIKASJONER_SAK",
+                "ARBEIDSGIVERNOTIFIKASJONER_KALENDERAVTALE",
+            )
 
         connection.use { connection ->
             tables.forEach { table ->

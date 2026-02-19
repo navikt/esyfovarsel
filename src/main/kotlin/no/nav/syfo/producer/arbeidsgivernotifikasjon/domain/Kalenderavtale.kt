@@ -39,8 +39,8 @@ data class NyKalenderInput(
     val epostHtmlBody: String,
 )
 
-fun NyKalenderInput.toNyKalenderavtaleMutation(): NyKalenderavtaleMutation {
-    return NyKalenderavtaleMutation(
+fun NyKalenderInput.toNyKalenderavtaleMutation(): NyKalenderavtaleMutation =
+    NyKalenderavtaleMutation(
         virksomhetsnummer = virksomhetsnummer,
         grupperingsid = grupperingsId,
         merkelapp = merkelapp,
@@ -55,59 +55,60 @@ fun NyKalenderInput.toNyKalenderavtaleMutation(): NyKalenderavtaleMutation {
         tilstand = Optional.present(KalenderavtaleTilstand.valueOf(kalenderavtaleTilstand.name)),
         eksterneVarsler = createEksterneVarsler(),
         paaminnelse = Optional.absent(),
-        hardDelete = createHardDelete()
+        hardDelete = createHardDelete(),
     )
-}
 
-private fun NyKalenderInput.createMottakere(): List<MottakerInput> {
-    return listOf(
+private fun NyKalenderInput.createMottakere(): List<MottakerInput> =
+    listOf(
         MottakerInput(
-            naermesteLeder = Optional.present(
-                NaermesteLederMottakerInput(
-                    naermesteLederFnr = narmesteLederFnr,
-                    ansattFnr = ansattFnr
-                )
-            )
-        )
-    )
-}
-
-private fun NyKalenderInput.createEksterneVarsler(): List<EksterntVarselInput> {
-    return listOf(
-        EksterntVarselInput(
-            epost = Optional.presentIfNotNull(
-                EksterntVarselEpostInput(
-                    mottaker = EpostMottakerInput(
-                        kontaktinfo = Optional.present(
-                            EpostKontaktInfoInput(
-                                epostadresse = ledersEpost
-                            )
-                        )
+            naermesteLeder =
+                Optional.present(
+                    NaermesteLederMottakerInput(
+                        naermesteLederFnr = narmesteLederFnr,
+                        ansattFnr = ansattFnr,
                     ),
-                    epostTittel = epostTittel,
-                    epostHtmlBody = epostHtmlBody,
-                    sendetidspunkt = SendetidspunktInput(
-                        tidspunkt = Optional.Absent,
-                        sendevindu = Optional.present(Sendevindu.NKS_AAPNINGSTID)
-                    )
-                )
-            )
-        )
+                ),
+        ),
     )
-}
 
-private fun NyKalenderInput.createHardDelete(): Optional<FutureTemporalInput> {
-    return hardDeleteDate?.let {
+private fun NyKalenderInput.createEksterneVarsler(): List<EksterntVarselInput> =
+    listOf(
+        EksterntVarselInput(
+            epost =
+                Optional.presentIfNotNull(
+                    EksterntVarselEpostInput(
+                        mottaker =
+                            EpostMottakerInput(
+                                kontaktinfo =
+                                    Optional.present(
+                                        EpostKontaktInfoInput(
+                                            epostadresse = ledersEpost,
+                                        ),
+                                    ),
+                            ),
+                        epostTittel = epostTittel,
+                        epostHtmlBody = epostHtmlBody,
+                        sendetidspunkt =
+                            SendetidspunktInput(
+                                tidspunkt = Optional.Absent,
+                                sendevindu = Optional.present(Sendevindu.NKS_AAPNINGSTID),
+                            ),
+                    ),
+                ),
+        ),
+    )
+
+private fun NyKalenderInput.createHardDelete(): Optional<FutureTemporalInput> =
+    hardDeleteDate?.let {
         Optional.present(
             FutureTemporalInput(
-                den = Optional.present(it.formatAsISO8601DateTime())
-            )
+                den = Optional.present(it.formatAsISO8601DateTime()),
+            ),
         )
     } ?: Optional.absent()
-}
 
-fun NyKalenderInput.toPKalenderInput(kalenderId: String): PKalenderInput {
-    return PKalenderInput(
+fun NyKalenderInput.toPKalenderInput(kalenderId: String): PKalenderInput =
+    PKalenderInput(
         sakId = sakId,
         eksternId = eksternId,
         grupperingsid = grupperingsId,
@@ -119,7 +120,6 @@ fun NyKalenderInput.toPKalenderInput(kalenderId: String): PKalenderInput {
         hardDeleteDate = hardDeleteDate,
         merkelapp = merkelapp,
     )
-}
 
 data class OppdaterKalenderInput(
     val id: String,
@@ -133,31 +133,36 @@ data class OppdaterKalenderInput(
 )
 
 fun OppdaterKalenderInput.toOppdaterKalenderavtaleMutation(): OppdaterKalenderavtaleMutation {
-    val eksterneVarslerData = if (ledersEpost != null && epostTittel != null && epostHtmlBody != null) {
-        listOf(
-            EksterntVarselInput(
-                epost = Optional.present(
-                    EksterntVarselEpostInput(
-                        mottaker = EpostMottakerInput(
-                            kontaktinfo = Optional.present(
-                                EpostKontaktInfoInput(
-                                    epostadresse = ledersEpost
-                                )
-                            )
+    val eksterneVarslerData =
+        if (ledersEpost != null && epostTittel != null && epostHtmlBody != null) {
+            listOf(
+                EksterntVarselInput(
+                    epost =
+                        Optional.present(
+                            EksterntVarselEpostInput(
+                                mottaker =
+                                    EpostMottakerInput(
+                                        kontaktinfo =
+                                            Optional.present(
+                                                EpostKontaktInfoInput(
+                                                    epostadresse = ledersEpost,
+                                                ),
+                                            ),
+                                    ),
+                                epostTittel = epostTittel,
+                                epostHtmlBody = epostHtmlBody,
+                                sendetidspunkt =
+                                    SendetidspunktInput(
+                                        tidspunkt = Optional.Absent,
+                                        sendevindu = Optional.present(Sendevindu.NKS_AAPNINGSTID),
+                                    ),
+                            ),
                         ),
-                        epostTittel = epostTittel,
-                        epostHtmlBody = epostHtmlBody,
-                        sendetidspunkt = SendetidspunktInput(
-                            tidspunkt = Optional.Absent,
-                            sendevindu = Optional.present(Sendevindu.NKS_AAPNINGSTID)
-                        )
-                    )
-                )
+                ),
             )
-        )
-    } else {
-        emptyList()
-    }
+        } else {
+            emptyList()
+        }
 
     return OppdaterKalenderavtaleMutation(
         id = id,
@@ -168,16 +173,18 @@ fun OppdaterKalenderInput.toOppdaterKalenderavtaleMutation(): OppdaterKalenderav
         nyLenke = Optional.presentIfNotNull(nyLenke),
         nyTekst = Optional.presentIfNotNull(nyTekst),
         nyErDigitalt = Optional.absent(),
-        hardDelete = hardDeleteTidspunkt?.let {
-            Optional.present(
-                HardDeleteUpdateInput(
-                    nyTid = FutureTemporalInput(
-                        den = Optional.present(hardDeleteTidspunkt.formatAsISO8601DateTime()),
+        hardDelete =
+            hardDeleteTidspunkt?.let {
+                Optional.present(
+                    HardDeleteUpdateInput(
+                        nyTid =
+                            FutureTemporalInput(
+                                den = Optional.present(hardDeleteTidspunkt.formatAsISO8601DateTime()),
+                            ),
+                        strategi = NyTidStrategi.OVERSKRIV,
                     ),
-                    strategi = NyTidStrategi.OVERSKRIV,
                 )
-            )
-        } ?: Optional.absent(),
+            } ?: Optional.absent(),
     )
 }
 
@@ -190,10 +197,9 @@ enum class KalenderTilstand {
     AVHOLDT,
 }
 
-fun DialogmoteSvarType.toKalenderTilstand(): KalenderTilstand {
-    return when (this) {
+fun DialogmoteSvarType.toKalenderTilstand(): KalenderTilstand =
+    when (this) {
         DialogmoteSvarType.KOMMER -> KalenderTilstand.ARBEIDSGIVER_HAR_GODTATT
         DialogmoteSvarType.KOMMER_IKKE -> KalenderTilstand.ARBEIDSGIVER_VIL_AVLYSE
         DialogmoteSvarType.NYTT_TID_STED -> KalenderTilstand.ARBEIDSGIVER_VIL_ENDRE_TID_ELLER_STED
     }
-}

@@ -2,9 +2,9 @@ package no.nav.syfo.consumer.pdl
 
 data class PdlRequest(
     val query: String,
-    val variables: Variables
+    val variables: Variables,
 )
 
 data class Variables(
-    val ident: String
+    val ident: String,
 )

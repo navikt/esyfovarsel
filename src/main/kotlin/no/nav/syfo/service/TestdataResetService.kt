@@ -14,14 +14,14 @@ class TestdataResetService(
     private val mikrofrontendService: MikrofrontendService,
     private val senderFacade: SenderFacade,
 ) {
-
     private val log: Logger = LoggerFactory.getLogger(TestdataResetService::class.qualifiedName)
+
     suspend fun resetTestdata(fnr: PersonIdent) {
         log.info(
             "Nullstiller testdata for arbeidstaker ${fnr.value}. Ferdigstiller varsler " +
                 "som er sendt til Min side - arbeidsgiver, Dine sykmeldte, Min side (personbruker), " +
                 "Ditt sykefravær. Fjerner mikrofrontend på Min side. " +
-                "Sletter planlagte og utsendte varsler, feilede varsler."
+                "Sletter planlagte og utsendte varsler, feilede varsler.",
         )
 
         // Ferdigstille varsler

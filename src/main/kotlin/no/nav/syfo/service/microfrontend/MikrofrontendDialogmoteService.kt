@@ -1,58 +1,64 @@
 package no.nav.syfo.service.microfrontend
 
-import no.nav.syfo.db.*
+import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.domain.toMikrofrontendSynlighet
+import no.nav.syfo.db.fetchFnrsWithExpiredMicrofrontendEntries
+import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
+import no.nav.syfo.db.updateMikrofrontendEntrySynligTomByExistingEntry
+import no.nav.syfo.db.updateMikrofrontendEntrySynligTomByFnrAndTjeneste
 import no.nav.syfo.exceptions.DuplicateMotebehovException
 import no.nav.syfo.exceptions.MotebehovAfterBookingException
 import no.nav.syfo.exceptions.VeilederAlreadyBookedMeetingException
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.getSynligTom
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideRecord
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MinSideRecord
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.Tjeneste
 import no.nav.syfo.service.microfrontend.MikrofrontendService.Companion.actionDisabled
 import no.nav.syfo.service.microfrontend.MikrofrontendService.Companion.actionEnabled
 import org.slf4j.LoggerFactory
 
 class MikrofrontendDialogmoteService(
-    val database: DatabaseInterface
+    val database: DatabaseInterface,
 ) {
     private val log = LoggerFactory.getLogger(MikrofrontendDialogmoteService::class.qualifiedName)
 
     companion object {
-        const val dialogmoteMikrofrontendId = "syfo-dialog"
+        const val DIALOGMOTE_MIKROFRONTEND_ID = "syfo-dialog"
     }
 
-    fun updateDialogmoteFrontendForUserByHendelse(hendelse: ArbeidstakerHendelse): MinSideRecord? {
-        return when (hendelse.type) {
+    fun updateDialogmoteFrontendForUserByHendelse(hendelse: ArbeidstakerHendelse): MinSideRecord? =
+        when (hendelse.type) {
             HendelseType.SM_DIALOGMOTE_NYTT_TID_STED -> setNewDateForMikrofrontendUser(hendelse)
             HendelseType.SM_DIALOGMOTE_AVLYST,
-            HendelseType.SM_DIALOGMOTE_REFERAT -> minSideRecordDisabled(hendelse.arbeidstakerFnr)
+            HendelseType.SM_DIALOGMOTE_REFERAT,
+            -> minSideRecordDisabled(hendelse.arbeidstakerFnr)
             HendelseType.SM_DIALOGMOTE_INNKALT,
-            HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV -> setMikrofrontendSynlighet(hendelse)
+            HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
+            -> setMikrofrontendSynlighet(hendelse)
             else -> null
         }
-    }
 
-    fun findExpiredDialogmoteMikrofrontends(): List<Triple<String, String, Tjeneste>> {
-        return database.fetchFnrsWithExpiredMicrofrontendEntries(Tjeneste.DIALOGMOTE)
-            .map { Triple(it, dialogmoteMikrofrontendId, Tjeneste.DIALOGMOTE) }
-    }
+    fun findExpiredDialogmoteMikrofrontends(): List<Triple<String, String, Tjeneste>> =
+        database
+            .fetchFnrsWithExpiredMicrofrontendEntries(Tjeneste.DIALOGMOTE)
+            .map { Triple(it, DIALOGMOTE_MIKROFRONTEND_ID, Tjeneste.DIALOGMOTE) }
 
     private fun setNewDateForMikrofrontendUser(hendelse: ArbeidstakerHendelse): MinSideRecord? {
-        return database.fetchMikrofrontendSynlighetEntriesByFnr(hendelse.arbeidstakerFnr)
+        return database
+            .fetchMikrofrontendSynlighetEntriesByFnr(hendelse.arbeidstakerFnr)
             .lastOrNull { entry -> entry.tjeneste == Tjeneste.DIALOGMOTE.name }
             ?.let {
                 database.updateMikrofrontendEntrySynligTomByExistingEntry(
                     it.toMikrofrontendSynlighet(),
-                    hendelse.getSynligTom()!!.toLocalDate()
+                    hendelse.getSynligTom()!!.toLocalDate(),
                 )
                 return null
             }
             ?: run {
                 log.warn(
                     "[MIKROFRONTEND_SERVICE]: Received ${hendelse.type} from VarselBus without corresponding entry " +
-                        "in MIKROFRONTEND_SYNLIGHET DB-table. Creating new entry ..."
+                        "in MIKROFRONTEND_SYNLIGHET DB-table. Creating new entry ...",
                 )
                 minSideRecordEnabled(hendelse.arbeidstakerFnr)
             }
@@ -68,7 +74,7 @@ class MikrofrontendDialogmoteService(
             userHasExistingDMEntries,
             userHasExistingMBEntries,
             ferdigstill,
-            hendelse.type
+            hendelse.type,
         )
 
         if (hendelse.type == HendelseType.SM_DIALOGMOTE_INNKALT) {
@@ -91,7 +97,7 @@ class MikrofrontendDialogmoteService(
         database.updateMikrofrontendEntrySynligTomByFnrAndTjeneste(
             hendelse.arbeidstakerFnr,
             Tjeneste.DIALOGMOTE,
-            hendelse.getSynligTom()!!.toLocalDate()
+            hendelse.getSynligTom()!!.toLocalDate(),
         )
     }
 
@@ -99,7 +105,7 @@ class MikrofrontendDialogmoteService(
         existingDM: Boolean,
         existingMB: Boolean,
         ferdigstill: Boolean,
-        hendelseType: HendelseType
+        hendelseType: HendelseType,
     ) {
         if (existingDM) {
             when (hendelseType) {
@@ -127,21 +133,24 @@ class MikrofrontendDialogmoteService(
         existingMikrofrontendEntries(fnr, Tjeneste.DIALOGMOTE)
             .any { it.synligTom != null }
 
-    private fun existingMikrofrontendEntries(fnr: String, tjeneste: Tjeneste) =
-        database.fetchMikrofrontendSynlighetEntriesByFnr(fnr)
-            .filter { it.tjeneste == tjeneste.name }
+    private fun existingMikrofrontendEntries(
+        fnr: String,
+        tjeneste: Tjeneste,
+    ) = database
+        .fetchMikrofrontendSynlighetEntriesByFnr(fnr)
+        .filter { it.tjeneste == tjeneste.name }
 
     private fun minSideRecordEnabled(fnr: String) =
         MinSideRecord(
             eventType = actionEnabled,
             fnr = fnr,
-            microfrontendId = dialogmoteMikrofrontendId
+            microfrontendId = DIALOGMOTE_MIKROFRONTEND_ID,
         )
 
     fun minSideRecordDisabled(fnr: String) =
         MinSideRecord(
             eventType = actionDisabled,
             fnr = fnr,
-            microfrontendId = dialogmoteMikrofrontendId
+            microfrontendId = DIALOGMOTE_MIKROFRONTEND_ID,
         )
 }

@@ -22,12 +22,11 @@ data class PUtsendtVarselFeilet(
     val resendExhausted: Boolean? = null,
 )
 
-fun PUtsendtVarselFeilet.toArbeidstakerHendelse(): ArbeidstakerHendelse {
-    return ArbeidstakerHendelse(
+fun PUtsendtVarselFeilet.toArbeidstakerHendelse(): ArbeidstakerHendelse =
+    ArbeidstakerHendelse(
         arbeidstakerFnr = arbeidstakerFnr,
         orgnummer = orgnummer,
         type = HendelseType.valueOf(hendelsetypeNavn),
         ferdigstill = false,
         data = null,
     )
-}

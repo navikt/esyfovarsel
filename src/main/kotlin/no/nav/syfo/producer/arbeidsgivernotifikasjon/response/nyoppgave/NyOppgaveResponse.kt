@@ -16,7 +16,9 @@ data class Data(
     val nyOppgave: NyOppgave,
 )
 
-enum class NyoppgaveMutationStatus(val status: String) {
+enum class NyoppgaveMutationStatus(
+    val status: String,
+) {
     NY_OPPGAVE_VELLYKKET("NyOppgaveVellykket"),
     UGYLDIG_MERKELAPP("UgyldigMerkelapp"),
     UGYLDIG_MOTTAKER("UgyldigMottaker"),

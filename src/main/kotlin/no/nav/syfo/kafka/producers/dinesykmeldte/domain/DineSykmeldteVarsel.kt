@@ -10,5 +10,5 @@ data class DineSykmeldteVarsel(
     val oppgavetype: String,
     val lenke: String?,
     val tekst: String,
-    val utlopstidspunkt: OffsetDateTime? = null
+    val utlopstidspunkt: OffsetDateTime? = null,
 )

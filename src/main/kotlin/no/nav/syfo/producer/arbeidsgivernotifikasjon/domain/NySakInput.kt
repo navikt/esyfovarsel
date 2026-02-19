@@ -25,39 +25,42 @@ data class NySakInput(
     val hardDeleteDate: LocalDateTime,
 )
 
-fun NySakInput.toNySakMutation(): NySakMutation {
-    return NySakMutation(
+fun NySakInput.toNySakMutation(): NySakMutation =
+    NySakMutation(
         grupperingsid = grupperingsid,
         merkelapp = merkelapp,
         virksomhetsnummer = virksomhetsnummer,
-        mottakere = listOf(
-            MottakerInput(
-                naermesteLeder = Optional.present(
-                    NaermesteLederMottakerInput(
-                        naermesteLederFnr = narmesteLederFnr,
-                        ansattFnr = ansattFnr
-                    )
-                )
-            )
-        ),
+        mottakere =
+            listOf(
+                MottakerInput(
+                    naermesteLeder =
+                        Optional.present(
+                            NaermesteLederMottakerInput(
+                                naermesteLederFnr = narmesteLederFnr,
+                                ansattFnr = ansattFnr,
+                            ),
+                        ),
+                ),
+            ),
         tittel = tittel,
         tilleggsinformasjon = Optional.presentIfNotNull(tilleggsinformasjon),
         lenke = Optional.present(lenke),
         initiellStatus = SaksStatus.valueOf(initiellStatus.name),
         nesteSteg = Optional.presentIfNotNull(nesteSteg),
         overstyrStatustekstMed = Optional.presentIfNotNull(overstyrStatustekstMed),
-        hardDelete = Optional.present(
-            FutureTemporalInput(
-                den = Optional.present(
-                    hardDeleteDate.formatAsISO8601DateTime()
-                )
-            )
-        ),
+        hardDelete =
+            Optional.present(
+                FutureTemporalInput(
+                    den =
+                        Optional.present(
+                            hardDeleteDate.formatAsISO8601DateTime(),
+                        ),
+                ),
+            ),
     )
-}
 
 enum class SakStatus {
     MOTTATT,
     UNDER_BEHANDLING,
-    FERDIG
+    FERDIG,
 }

@@ -34,76 +34,78 @@ data class ArbeidsgiverNotifikasjon(
 
 data class ArbeidsgiverDeleteNotifikasjon(
     val merkelapp: String,
-    val eksternReferanse: String
+    val eksternReferanse: String,
 )
 
-fun ArbeidsgiverNotifikasjon.toNyBeskjedMutation(): NyBeskjedMutation {
-    return NyBeskjedMutation(
-        nyBeskjed = NyBeskjedInput(
-            mottakere = Optional.present(createMottakere()),
-            notifikasjon = createNotifikasjon(),
-            metadata = createMetadata(),
-            eksterneVarsler = Optional.present(createEksterneVarsler())
-        )
+fun ArbeidsgiverNotifikasjon.toNyBeskjedMutation(): NyBeskjedMutation =
+    NyBeskjedMutation(
+        nyBeskjed =
+            NyBeskjedInput(
+                mottakere = Optional.present(createMottakere()),
+                notifikasjon = createNotifikasjon(),
+                metadata = createMetadata(),
+                eksterneVarsler = Optional.present(createEksterneVarsler()),
+            ),
     )
-}
 
-private fun ArbeidsgiverNotifikasjon.createMottakere(): List<MottakerInput> {
-    return listOf(
+private fun ArbeidsgiverNotifikasjon.createMottakere(): List<MottakerInput> =
+    listOf(
         MottakerInput(
-            naermesteLeder = Optional.present(
-                NaermesteLederMottakerInput(
-                    naermesteLederFnr = narmesteLederFnr,
-                    ansattFnr = ansattFnr
-                )
-            )
-        )
+            naermesteLeder =
+                Optional.present(
+                    NaermesteLederMottakerInput(
+                        naermesteLederFnr = narmesteLederFnr,
+                        ansattFnr = ansattFnr,
+                    ),
+                ),
+        ),
     )
-}
 
-private fun ArbeidsgiverNotifikasjon.createNotifikasjon(): NotifikasjonInput {
-    return NotifikasjonInput(
+private fun ArbeidsgiverNotifikasjon.createNotifikasjon(): NotifikasjonInput =
+    NotifikasjonInput(
         merkelapp = merkelapp,
         tekst = messageText,
-        lenke = url
+        lenke = url,
     )
-}
 
-private fun ArbeidsgiverNotifikasjon.createMetadata(): MetadataInput {
-    return MetadataInput(
+private fun ArbeidsgiverNotifikasjon.createMetadata(): MetadataInput =
+    MetadataInput(
         virksomhetsnummer = virksomhetsnummer,
         eksternId = varselId,
         grupperingsid = Optional.present(grupperingsid),
-        hardDelete = hardDeleteDate?.let {
-            Optional.present(
-                FutureTemporalInput(
-                    den = Optional.present(it.formatAsISO8601DateTime())
-                )
-            )
-        } ?: Optional.Absent,
-    )
-}
-
-private fun ArbeidsgiverNotifikasjon.createEksterneVarsler(): List<EksterntVarselInput> {
-    return listOf(
-        EksterntVarselInput(
-            epost = Optional.presentIfNotNull(
-                EksterntVarselEpostInput(
-                    mottaker = EpostMottakerInput(
-                        kontaktinfo = Optional.present(
-                            EpostKontaktInfoInput(
-                                epostadresse = narmesteLederEpostadresse
-                            )
-                        )
+        hardDelete =
+            hardDeleteDate?.let {
+                Optional.present(
+                    FutureTemporalInput(
+                        den = Optional.present(it.formatAsISO8601DateTime()),
                     ),
-                    epostTittel = emailTitle,
-                    epostHtmlBody = emailBody,
-                    sendetidspunkt = SendetidspunktInput(
-                        tidspunkt = Optional.Absent,
-                        sendevindu = Optional.present(Sendevindu.NKS_AAPNINGSTID)
-                    )
                 )
-            )
-        )
+            } ?: Optional.Absent,
     )
-}
+
+private fun ArbeidsgiverNotifikasjon.createEksterneVarsler(): List<EksterntVarselInput> =
+    listOf(
+        EksterntVarselInput(
+            epost =
+                Optional.presentIfNotNull(
+                    EksterntVarselEpostInput(
+                        mottaker =
+                            EpostMottakerInput(
+                                kontaktinfo =
+                                    Optional.present(
+                                        EpostKontaktInfoInput(
+                                            epostadresse = narmesteLederEpostadresse,
+                                        ),
+                                    ),
+                            ),
+                        epostTittel = emailTitle,
+                        epostHtmlBody = emailBody,
+                        sendetidspunkt =
+                            SendetidspunktInput(
+                                tidspunkt = Optional.Absent,
+                                sendevindu = Optional.present(Sendevindu.NKS_AAPNINGSTID),
+                            ),
+                    ),
+                ),
+        ),
+    )

@@ -3,7 +3,7 @@ package no.nav.syfo.db.domain
 import java.time.LocalDate
 
 enum class VarselType {
-    MER_VEILEDNING
+    MER_VEILEDNING,
 }
 
 data class PlanlagtVarsel(
@@ -12,5 +12,5 @@ data class PlanlagtVarsel(
     val orgnummer: String?,
     val sykmeldingerId: Set<String>,
     val type: VarselType,
-    val utsendingsdato: LocalDate = LocalDate.now()
+    val utsendingsdato: LocalDate = LocalDate.now(),
 )

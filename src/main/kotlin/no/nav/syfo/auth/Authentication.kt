@@ -30,15 +30,17 @@ fun Application.setupAuthentication(
     jwkProviderTokenX: JwkProvider,
     tokenXIssuer: String,
 ) {
-    val jwtIssuerList = listOf(
-        JwtIssuer(
-            acceptedAudienceList = listOf(authEnv.clientId),
-            jwtIssuerType = JwtIssuerType.INTERNAL_AZUREAD,
-            wellKnown = getWellKnown(
-                wellKnownUrl = authEnv.aadAppWellKnownUrl,
+    val jwtIssuerList =
+        listOf(
+            JwtIssuer(
+                acceptedAudienceList = listOf(authEnv.clientId),
+                jwtIssuerType = JwtIssuerType.INTERNAL_AZUREAD,
+                wellKnown =
+                    getWellKnown(
+                        wellKnownUrl = authEnv.aadAppWellKnownUrl,
+                    ),
             ),
-        ),
-    )
+        )
 
     install(Authentication) {
         basic("auth-basic") {
@@ -75,27 +77,27 @@ fun Application.setupAuthentication(
     }
 }
 
-private fun AuthenticationConfig.configureJwt(
-    jwtIssuer: JwtIssuer,
-) {
-    val jwkProvider = JwkProviderBuilder(URL(jwtIssuer.wellKnown.jwks_uri))
-        .cached(10, 24, TimeUnit.HOURS)
-        .rateLimited(10, 1, TimeUnit.MINUTES)
-        .build()
+private fun AuthenticationConfig.configureJwt(jwtIssuer: JwtIssuer) {
+    val jwkProvider =
+        JwkProviderBuilder(URL(jwtIssuer.wellKnown.jwks_uri))
+            .cached(10, 24, TimeUnit.HOURS)
+            .rateLimited(10, 1, TimeUnit.MINUTES)
+            .build()
     jwt(name = jwtIssuer.jwtIssuerType.name) {
         verifier(
             jwkProvider = jwkProvider,
             issuer = jwtIssuer.wellKnown.issuer,
         )
         validate { credential ->
-            val credentialsHasExpectedAudience = credential.inExpectedAudience(
-                expectedAudience = jwtIssuer.acceptedAudienceList,
-            )
+            val credentialsHasExpectedAudience =
+                credential.inExpectedAudience(
+                    expectedAudience = jwtIssuer.acceptedAudienceList,
+                )
             if (credentialsHasExpectedAudience) {
                 JWTPrincipal(credential.payload)
             } else {
                 log.warn(
-                    "Auth: Unexpected audience for jwt ${credential.payload.issuer}, ${credential.payload.audience}"
+                    "Auth: Unexpected audience for jwt ${credential.payload.issuer}, ${credential.payload.audience}",
                 )
                 null
             }
@@ -103,9 +105,10 @@ private fun AuthenticationConfig.configureJwt(
     }
 }
 
-private fun JWTCredential.inExpectedAudience(expectedAudience: List<String>) = expectedAudience.any {
-    this.payload.audience.contains(it)
-}
+private fun JWTCredential.inExpectedAudience(expectedAudience: List<String>) =
+    expectedAudience.any {
+        this.payload.audience.contains(it)
+    }
 
 fun Application.setupLocalRoutesWithAuthentication(
     mikrofrontendService: MikrofrontendService,
@@ -130,7 +133,7 @@ fun Application.setupLocalRoutesWithAuthentication(
             registerJobTriggerApi(
                 mikrofrontendService,
                 sendAktivitetspliktLetterToSentralPrintJob,
-                resendFailedVarslerJob
+                resendFailedVarslerJob,
             )
         }
     }
@@ -143,10 +146,11 @@ fun Application.setupRoutesWithAuthentication(
     authEnv: AuthEnv,
 ) {
     val wellKnownTokenX = getWellKnown(authEnv.tokenXWellKnownUrl)
-    val jwkProviderTokenX = JwkProviderBuilder(URL(wellKnownTokenX.jwks_uri))
-        .cached(10, 24, TimeUnit.HOURS)
-        .rateLimited(10, 1, TimeUnit.MINUTES)
-        .build()
+    val jwkProviderTokenX =
+        JwkProviderBuilder(URL(wellKnownTokenX.jwks_uri))
+            .cached(10, 24, TimeUnit.HOURS)
+            .rateLimited(10, 1, TimeUnit.MINUTES)
+            .build()
 
     setupAuthentication(authEnv, jwkProviderTokenX, wellKnownTokenX.issuer)
 
@@ -155,7 +159,7 @@ fun Application.setupRoutesWithAuthentication(
             registerJobTriggerApi(
                 mikrofrontendService,
                 sendAktivitetspliktLetterToSentralPrintJob,
-                resendFailedVarslerJob
+                resendFailedVarslerJob,
             )
         }
     }

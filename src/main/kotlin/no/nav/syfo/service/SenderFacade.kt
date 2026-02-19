@@ -44,7 +44,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class SenderFacade(
     private val dineSykmeldteHendelseKafkaProducer: DineSykmeldteHendelseKafkaProducer,
@@ -55,6 +55,7 @@ class SenderFacade(
     val database: DatabaseInterface,
 ) {
     private val log: Logger = LoggerFactory.getLogger(SenderFacade::class.qualifiedName)
+
     fun sendTilDineSykmeldte(
         varselHendelse: NarmesteLederHendelse,
         varsel: DineSykmeldteVarsel,
@@ -85,7 +86,7 @@ class SenderFacade(
                 arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
                 orgnummer = varselHendelse.orgnummer,
                 hendelseType = varselHendelse.type.name,
-                eksternReferanse = eksternUUID
+                eksternReferanse = eksternUUID,
             )
         } catch (e: Exception) {
             log.error("Error while sending varsel to DITT_SYKEFRAVAER: ${e.message}")
@@ -197,9 +198,7 @@ class SenderFacade(
         }
     }
 
-    suspend fun createNewKalenderavtale(
-        kalenderInput: NyKalenderInput
-    ) {
+    suspend fun createNewKalenderavtale(kalenderInput: NyKalenderInput) {
         val kalenderId = arbeidsgiverNotifikasjonService.createNewKalenderavtale(kalenderInput)
         require(kalenderId != null) { "Failed to create new kalenderavtale" }
 
@@ -213,16 +212,18 @@ class SenderFacade(
         return database.storeArbeidsgivernotifikasjonerSak(sakInput)
     }
 
-    fun getPaagaaendeSak(narmesteLederId: String, merkelapp: String): PSakInput? {
-        return database.getPaagaaendeArbeidsgivernotifikasjonerSak(
+    fun getPaagaaendeSak(
+        narmesteLederId: String,
+        merkelapp: String,
+    ): PSakInput? =
+        database.getPaagaaendeArbeidsgivernotifikasjonerSak(
             narmestelederId = narmesteLederId,
-            merkelapp = merkelapp
+            merkelapp = merkelapp,
         )
-    }
 
     suspend fun nyStatusSak(
         sakId: String,
-        nyStatusSakInput: NyStatusSakInput
+        nyStatusSakInput: NyStatusSakInput,
     ) {
         val oppdatertSak = arbeidsgiverNotifikasjonService.nyStatusSak(nyStatusSakInput)
         require(oppdatertSak != null) { "Failed to update sak" }
@@ -242,15 +243,16 @@ class SenderFacade(
         val storedKalenderAvtale = database.getArbeidsgivernotifikasjonerKalenderavtale(sakId)
         require(storedKalenderAvtale != null) { "Kalenderavtale not found for sakId: $sakId" }
 
-        val oppdaterKalenderInput = OppdaterKalenderInput(
-            id = storedKalenderAvtale.kalenderId,
-            nyTilstand = nyTilstand,
-            nyTekst = nyTekst,
-            hardDeleteTidspunkt = hardDeleteTidspunkt,
-            ledersEpost = ledersEpost,
-            epostTittel = epostTittel,
-            epostHtmlBody = epostHtmlBody
-        )
+        val oppdaterKalenderInput =
+            OppdaterKalenderInput(
+                id = storedKalenderAvtale.kalenderId,
+                nyTilstand = nyTilstand,
+                nyTekst = nyTekst,
+                hardDeleteTidspunkt = hardDeleteTidspunkt,
+                ledersEpost = ledersEpost,
+                epostTittel = epostTittel,
+                epostHtmlBody = epostHtmlBody,
+            )
 
         val kalenderId = arbeidsgiverNotifikasjonService.updateKalenderavtale(oppdaterKalenderInput)
         require(kalenderId != null) { "Failed to update kalenderavtale" }
@@ -265,10 +267,11 @@ class SenderFacade(
                 tekst = oppdaterKalenderInput.nyTekst ?: storedKalenderAvtale.tekst,
                 startTidspunkt = storedKalenderAvtale.startTidspunkt,
                 sluttTidspunkt = storedKalenderAvtale.sluttTidspunkt,
-                kalenderavtaleTilstand = oppdaterKalenderInput.nyTilstand
-                    ?: storedKalenderAvtale.kalenderavtaleTilstand,
-                hardDeleteDate = oppdaterKalenderInput.hardDeleteTidspunkt
-            )
+                kalenderavtaleTilstand =
+                    oppdaterKalenderInput.nyTilstand
+                        ?: storedKalenderAvtale.kalenderavtaleTilstand,
+                hardDeleteDate = oppdaterKalenderInput.hardDeleteTidspunkt,
+            ),
         )
     }
 
@@ -327,12 +330,12 @@ class SenderFacade(
         orgnummer: String? = null,
         types: Set<HendelseType> = emptySet(),
         kanal: Kanal? = null,
-    ): List<PUtsendtVarsel> {
-        return database.fetchUferdigstilteVarsler(arbeidstakerFnr)
+    ): List<PUtsendtVarsel> =
+        database
+            .fetchUferdigstilteVarsler(arbeidstakerFnr)
             .filter { orgnummer == null || it.orgnummer == orgnummer }
             .filter { types.isEmpty() || types.contains(enumValueOfOrNull<HendelseType>(it.type)) }
             .filter { kanal == null || it.kanal == kanal.name }
-    }
 
     fun fetchUferdigstilteNarmesteLederVarsler(
         arbeidstakerFnr: PersonIdent,
@@ -340,14 +343,14 @@ class SenderFacade(
         orgnummer: String? = null,
         types: Set<HendelseType> = emptySet(),
         kanal: Kanal? = null,
-    ): List<PUtsendtVarsel> {
-        return database.fetchUferdigstilteNarmesteLederVarsler(
-            sykmeldtFnr = arbeidstakerFnr,
-            narmesteLederFnr = narmesteLederFnr
-        ).filter { orgnummer == null || it.orgnummer == orgnummer }
+    ): List<PUtsendtVarsel> =
+        database
+            .fetchUferdigstilteNarmesteLederVarsler(
+                sykmeldtFnr = arbeidstakerFnr,
+                narmesteLederFnr = narmesteLederFnr,
+            ).filter { orgnummer == null || it.orgnummer == orgnummer }
             .filter { types.isEmpty() || types.contains(enumValueOfOrNull<HendelseType>(it.type)) }
             .filter { kanal == null || it.kanal == kanal.name }
-    }
 
     private suspend fun ferdigstillVarsel(utsendtVarsel: PUtsendtVarsel) {
         if (utsendtVarsel.eksternReferanse != null && utsendtVarsel.ferdigstiltTidspunkt == null) {
@@ -387,33 +390,35 @@ class SenderFacade(
         distribusjonsType: DistibusjonsType = DistibusjonsType.ANNET,
         failedUtsendingUUID: UUID? = null,
     ): Boolean {
-        var isSendingSucceed = try {
-            fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType)
-            true
-        } catch (e: Exception) {
-            val uuid = failedUtsendingUUID ?: lagreIkkeUtsendtArbeidstakerVarsel(
-                kanal = BREV,
-                arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
-                orgnummer = varselHendelse.orgnummer,
-                hendelseType = varselHendelse.type.name,
-                eksternReferanse = uuid,
-                feilmelding = e.message,
-                journalpostId = journalpostId,
-                brukernotifikasjonerMeldingType = null,
-                isForcedLetter = false,
-            )
-            when (e) {
-                is JournalpostDistribusjonGoneException -> {
-                    log.warn("Error while sending brev til fysisk print: ${e.message}")
-                    database.updateUtsendtVarselFeiletToResendExhausted(uuid.toString())
-                }
+        var isSendingSucceed =
+            try {
+                fysiskBrevUtsendingService.sendBrev(uuid, journalpostId, distribusjonsType)
+                true
+            } catch (e: Exception) {
+                val uuid =
+                    failedUtsendingUUID ?: lagreIkkeUtsendtArbeidstakerVarsel(
+                        kanal = BREV,
+                        arbeidstakerFnr = varselHendelse.arbeidstakerFnr,
+                        orgnummer = varselHendelse.orgnummer,
+                        hendelseType = varselHendelse.type.name,
+                        eksternReferanse = uuid,
+                        feilmelding = e.message,
+                        journalpostId = journalpostId,
+                        brukernotifikasjonerMeldingType = null,
+                        isForcedLetter = false,
+                    )
+                when (e) {
+                    is JournalpostDistribusjonGoneException -> {
+                        log.warn("Error while sending brev til fysisk print: ${e.message}")
+                        database.updateUtsendtVarselFeiletToResendExhausted(uuid.toString())
+                    }
 
-                else -> {
-                    log.error("Error while sending brev til fysisk print: ${e.message}")
+                    else -> {
+                        log.error("Error while sending brev til fysisk print: ${e.message}")
+                    }
                 }
+                false
             }
-            false
-        }
         return if (isSendingSucceed) {
             lagreUtsendtArbeidstakerVarsel(
                 BREV,
@@ -421,27 +426,29 @@ class SenderFacade(
                 orgnummer = varselHendelse.orgnummer,
                 hendelseType = varselHendelse.type.name,
                 eksternReferanse = uuid,
-                journalpostId = journalpostId
+                journalpostId = journalpostId,
             )
             return true
-        } else { false }
+        } else {
+            false
+        }
     }
 
     suspend fun sendBrevTilTvingSentralPrint(
         varselHendelse: ArbeidstakerHendelse,
         journalpostId: String,
         distribusjonsType: DistibusjonsType = DistibusjonsType.VIKTIG,
-        eksternReferanse: String
+        eksternReferanse: String,
     ) {
         try {
             fysiskBrevUtsendingService.sendBrev(
                 eksternReferanse,
                 journalpostId,
                 distribusjonsType,
-                tvingSentralPrint = true
+                tvingSentralPrint = true,
             )
             log.info(
-                "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sending direct sentral print letter with journalpostId $journalpostId succeded, storing in database"
+                "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: sending direct sentral print letter with journalpostId $journalpostId succeded, storing in database",
             )
             lagreUtsendtArbeidstakerVarsel(
                 kanal = BREV,
@@ -450,12 +457,12 @@ class SenderFacade(
                 hendelseType = varselHendelse.type.name,
                 eksternReferanse = eksternReferanse,
                 isForcedLetter = true,
-                journalpostId = journalpostId
+                journalpostId = journalpostId,
             )
             database.setUferdigstiltUtsendtVarselToForcedLetter(eksternRef = eksternReferanse)
         } catch (e: Exception) {
             log.error(
-                "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: Error while sending brev til direct sentral print: ${e.message}"
+                "[RENOTIFICATE VIA SENTRAL PRINT DIRECTLY]: Error while sending brev til direct sentral print: ${e.message}",
             )
         }
     }
@@ -601,6 +608,8 @@ class SenderFacade(
     }
 
     enum class InternalBrukernotifikasjonType {
-        OPPGAVE, BESKJED, DONE
+        OPPGAVE,
+        BESKJED,
+        DONE,
     }
 }

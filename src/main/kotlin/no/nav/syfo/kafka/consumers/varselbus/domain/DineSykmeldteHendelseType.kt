@@ -9,8 +9,8 @@ enum class DineSykmeldteHendelseType {
     DIALOGMOTE_REFERAT,
 }
 
-fun HendelseType.toDineSykmeldteHendelseType(): DineSykmeldteHendelseType {
-    return when (this) {
+fun HendelseType.toDineSykmeldteHendelseType(): DineSykmeldteHendelseType =
+    when (this) {
         HendelseType.NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> DineSykmeldteHendelseType.OPPFOLGINGSPLAN_TIL_GODKJENNING
         HendelseType.NL_DIALOGMOTE_SVAR_MOTEBEHOV -> DineSykmeldteHendelseType.DIALOGMOTE_SVAR_BEHOV
         HendelseType.NL_DIALOGMOTE_INNKALT -> DineSykmeldteHendelseType.DIALOGMOTE_INNKALLING
@@ -21,4 +21,3 @@ fun HendelseType.toDineSykmeldteHendelseType(): DineSykmeldteHendelseType {
             throw IllegalArgumentException("Kan ikke mappe ${this.name} til en DineSykmeldteHendelsesType")
         }
     }
-}

@@ -8,27 +8,29 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.sql.Connection
 
-const val postgresJdbcPrefix = "jdbc:postgresql"
+const val POSTGRES_JDBC_PREFIX = "jdbc:postgresql"
 
 interface DatabaseInterface {
     val connection: Connection
     val log: Logger
 }
 
-class Database(val env: DbEnv) : DatabaseInterface {
-
-    val hikariDataSource = HikariDataSource(
-        HikariConfig().apply {
-            jdbcUrl = generateJdbcUrlFromEnv(env)
-            username = env.dbUsername
-            password = env.dbPassword
-            maximumPoolSize = 3
-            minimumIdle = 1
-            isAutoCommit = false
-            transactionIsolation = "TRANSACTION_READ_COMMITTED"
-            validate()
-        },
-    )
+class Database(
+    val env: DbEnv,
+) : DatabaseInterface {
+    val hikariDataSource =
+        HikariDataSource(
+            HikariConfig().apply {
+                jdbcUrl = generateJdbcUrlFromEnv(env)
+                username = env.dbUsername
+                password = env.dbPassword
+                maximumPoolSize = 3
+                minimumIdle = 1
+                isAutoCommit = false
+                transactionIsolation = "TRANSACTION_READ_COMMITTED"
+                validate()
+            },
+        )
 
     init {
         runFlywayMigrations(hikariDataSource)
@@ -46,14 +48,13 @@ class Database(val env: DbEnv) : DatabaseInterface {
         }
 }
 
-fun generateJdbcUrlFromEnv(env: DbEnv): String {
-    return "$postgresJdbcPrefix://${env.dbHost}:${env.dbPort}/${env.dbName}"
-}
+fun generateJdbcUrlFromEnv(env: DbEnv): String = "$POSTGRES_JDBC_PREFIX://${env.dbHost}:${env.dbPort}/${env.dbName}"
 
 fun DatabaseInterface.grantAccessToIAMUsers() {
-    val statement = """
+    val statement =
+        """
         GRANT ALL ON ALL TABLES IN SCHEMA PUBLIC TO CLOUDSQLIAMUSER
-    """.trimIndent()
+        """.trimIndent()
 
     connection.use { conn ->
         conn.prepareStatement(statement).use {

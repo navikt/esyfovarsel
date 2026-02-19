@@ -12,25 +12,32 @@ import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 
-class NarmesteLederConsumer(urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
+class NarmesteLederConsumer(
+    urlEnv: UrlEnv,
+    private val azureAdTokenConsumer: AzureAdTokenConsumer,
+) {
     private val client = httpClient()
     private val basepath = urlEnv.narmestelederUrl
     private val log = LoggerFactory.getLogger(NarmesteLederConsumer::class.qualifiedName)
     private val scope = urlEnv.narmestelederScope
 
-    suspend fun getNarmesteLeder(ansattFnr: String, orgnummer: String): NarmestelederResponse? {
+    suspend fun getNarmesteLeder(
+        ansattFnr: String,
+        orgnummer: String,
+    ): NarmestelederResponse? {
         log.info("Kaller narmesteleder for orgnummer: $orgnummer")
         val requestURL = "$basepath/sykmeldt/narmesteleder?orgnummer=$orgnummer"
         try {
             val token = azureAdTokenConsumer.getToken(scope)
-            val response = client.get(requestURL) {
-                headers {
-                    append(HttpHeaders.Accept, ContentType.Application.Json)
-                    append(HttpHeaders.ContentType, ContentType.Application.Json)
-                    append(HttpHeaders.Authorization, "Bearer $token")
-                    append("Sykmeldt-Fnr", ansattFnr)
+            val response =
+                client.get(requestURL) {
+                    headers {
+                        append(HttpHeaders.Accept, ContentType.Application.Json)
+                        append(HttpHeaders.ContentType, ContentType.Application.Json)
+                        append(HttpHeaders.Authorization, "Bearer $token")
+                        append("Sykmeldt-Fnr", ansattFnr)
+                    }
                 }
-            }
 
             return when (response.status) {
                 HttpStatusCode.OK -> {

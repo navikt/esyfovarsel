@@ -4,52 +4,51 @@ import capitalizeFirstLetter
 
 data class HentPersonResponse(
     val errors: List<PdlError>?,
-    val data: HentPersonData
+    val data: HentPersonData,
 )
 
 data class HentPersonData(
-    val hentPerson: HentPerson
+    val hentPerson: HentPerson,
 )
 
-fun HentPersonData.getFodselsdato(): String? {
-    return this.hentPerson.foedselsdato.first().foedselsdato
-}
+fun HentPersonData.getFodselsdato(): String? =
+    this.hentPerson.foedselsdato
+        .first()
+        .foedselsdato
 
 data class HentPerson(
     val foedselsdato: List<Foedselsdato>,
-    val navn: List<Navn>
+    val navn: List<Navn>,
 )
 
 data class Foedselsdato(
-    val foedselsdato: String?
+    val foedselsdato: String?,
 )
 
 data class Navn(
     val fornavn: String,
     val mellomnavn: String?,
-    val etternavn: String
+    val etternavn: String,
 )
 
 data class PdlError(
     val message: String,
     val locations: List<PdlErrorLocation>,
     val path: List<String>?,
-    val extensions: PdlErrorExtension
+    val extensions: PdlErrorExtension,
 )
 
 data class PdlErrorLocation(
     val line: Int?,
-    val column: Int?
+    val column: Int?,
 )
 
 data class PdlErrorExtension(
     val code: String?,
-    val classification: String
+    val classification: String,
 )
 
-fun PdlError.errorMessage(): String {
-    return "${this.message} with code: ${extensions.code} and classification: ${extensions.classification}"
-}
+fun PdlError.errorMessage(): String = "${this.message} with code: ${extensions.code} and classification: ${extensions.classification}"
 
 fun HentPersonData.firstName(): String? {
     val nameList = this.hentPerson.navn

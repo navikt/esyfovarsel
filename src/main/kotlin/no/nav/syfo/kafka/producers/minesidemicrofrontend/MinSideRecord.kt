@@ -1,10 +1,10 @@
-package no.nav.syfo.kafka.producers.mineside_microfrontend
+package no.nav.syfo.kafka.producers.minesidemicrofrontend
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
 enum class MinSideEvent {
     ENABLE,
-    DISABLE
+    DISABLE,
 }
 
 data class MinSideRecord(
@@ -12,5 +12,5 @@ data class MinSideRecord(
     @JsonProperty("ident") val fnr: String,
     @JsonProperty("microfrontend_id") val microfrontendId: String,
     @JsonProperty("sensitivitet") val sensitivitet: String = "high",
-    @JsonProperty("@initiated_by") val initiatedBy: String = "team-esyfo"
+    @JsonProperty("@initiated_by") val initiatedBy: String = "team-esyfo",
 )

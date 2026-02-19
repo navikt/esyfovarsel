@@ -5,12 +5,12 @@ import java.time.LocalDate
 
 data class SykmeldtStatusRequest(
     val fnr: String,
-    val dato: LocalDate
+    val dato: LocalDate,
 ) : Serializable
 
 data class SykmeldtStatus(
     val erSykmeldt: Boolean,
     val gradert: Boolean?,
     val fom: LocalDate?,
-    val tom: LocalDate?
+    val tom: LocalDate?,
 ) : Serializable

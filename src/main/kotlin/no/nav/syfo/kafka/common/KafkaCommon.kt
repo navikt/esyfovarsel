@@ -27,13 +27,13 @@ import org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG
 import org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG
 import org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG
 import java.time.Duration
-import java.util.*
+import java.util.Properties
 
-const val topicDineSykmeldteHendelse = "team-esyfo.dinesykmeldte-hendelser-v2"
-const val topicVarselBus = "team-esyfo.varselbus"
-const val topicDittSykefravaerMelding = "flex.ditt-sykefravaer-melding"
-const val topicMinSideMicrofrontend = "min-side.aapen-microfrontend-v1"
-const val topicTestdataReset = "teamsykefravr.testdata-reset"
+const val TOPIC_DINE_SYKMELDTE_HENDELSE = "team-esyfo.dinesykmeldte-hendelser-v2"
+const val TOPIC_VARSEL_BUS = "team-esyfo.varselbus"
+const val TOPIC_DITT_SYKEEFRAVAER_MELDING = "flex.ditt-sykefravaer-melding"
+const val TOPIC_MIN_SIDE_MICROFRONTEND = "min-side.aapen-microfrontend-v1"
+const val TOPIC_TESTDATA_RESET = "teamsykefravr.testdata-reset"
 
 const val JAVA_KEYSTORE = "JKS"
 const val PKCS12 = "PKCS12"
@@ -45,8 +45,8 @@ interface KafkaListener {
     suspend fun listen(applicationState: ApplicationState)
 }
 
-fun commonProperties(env: Environment): Properties {
-    return Properties().apply {
+fun commonProperties(env: Environment): Properties =
+    Properties().apply {
         put(SECURITY_PROTOCOL_CONFIG, SSL)
         put(BOOTSTRAP_SERVERS_CONFIG, env.kafkaEnv.aivenBroker)
         put(SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "") // Disable server host name verification
@@ -61,10 +61,9 @@ fun commonProperties(env: Environment): Properties {
             remove(SECURITY_PROTOCOL_CONFIG)
         }
     }
-}
 
-fun consumerProperties(env: Environment): Properties {
-    return commonProperties(env).apply {
+fun consumerProperties(env: Environment): Properties =
+    commonProperties(env).apply {
         put(GROUP_ID_CONFIG, "esyfovarsel-group-v04-gcp-v03")
         put(AUTO_OFFSET_RESET_CONFIG, "earliest")
         put(MAX_POLL_RECORDS_CONFIG, "1")
@@ -72,24 +71,26 @@ fun consumerProperties(env: Environment): Properties {
         put(KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer")
         put(VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer")
     }
-}
 
-fun producerProperties(env: Environment): Properties {
-    return commonProperties(env).apply {
+fun producerProperties(env: Environment): Properties =
+    commonProperties(env).apply {
         put(ACKS_CONFIG, "all")
         put(KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
         put(VALUE_SERIALIZER_CLASS_CONFIG, JacksonKafkaSerializer::class.java)
     }
-}
 
-fun createObjectMapper() = ObjectMapper().apply {
-    registerKotlinModule()
-    registerModule(JavaTimeModule())
-    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-    configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-}
+fun createObjectMapper() =
+    ObjectMapper().apply {
+        registerKotlinModule()
+        registerModule(JavaTimeModule())
+        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+    }
 
-suspend fun launchKafkaListener(applicationState: ApplicationState, kafkaListener: KafkaListener) {
+suspend fun launchKafkaListener(
+    applicationState: ApplicationState,
+    kafkaListener: KafkaListener,
+) {
     try {
         kafkaListener.listen(applicationState)
     } finally {

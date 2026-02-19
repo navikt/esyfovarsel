@@ -1,8 +1,8 @@
 package no.nav.syfo.kafka.producers.dinesykmeldte
 
 import no.nav.syfo.Environment
+import no.nav.syfo.kafka.common.TOPIC_DINE_SYKMELDTE_HENDELSE
 import no.nav.syfo.kafka.common.producerProperties
-import no.nav.syfo.kafka.common.topicDineSykmeldteHendelse
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteHendelse
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.FerdigstillHendelse
@@ -13,46 +13,49 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import java.time.OffsetDateTime
 
 class DineSykmeldteHendelseKafkaProducer(
-    val env: Environment
+    val env: Environment,
 ) {
     private val kafkaConfig = producerProperties(env)
     private val kafkaProducer = KafkaProducer<String, DineSykmeldteHendelse>(kafkaConfig)
 
     fun sendVarsel(varsel: DineSykmeldteVarsel) {
-        val dineSykmeldteHendelse = DineSykmeldteHendelse(
-            varsel.id.toString(),
-            OpprettHendelse(
-                varsel.ansattFnr,
-                varsel.orgnr,
-                varsel.oppgavetype,
-                varsel.lenke,
-                varsel.tekst,
-                OffsetDateTime.now(),
-                varsel.utlopstidspunkt
-            ),
-            null
-        )
+        val dineSykmeldteHendelse =
+            DineSykmeldteHendelse(
+                varsel.id.toString(),
+                OpprettHendelse(
+                    varsel.ansattFnr,
+                    varsel.orgnr,
+                    varsel.oppgavetype,
+                    varsel.lenke,
+                    varsel.tekst,
+                    OffsetDateTime.now(),
+                    varsel.utlopstidspunkt,
+                ),
+                null,
+            )
 
         publishHendelseOnTopic(dineSykmeldteHendelse)
     }
 
     fun ferdigstillVarsel(eksternReferanse: String) {
-        val dineSykmeldteHendelse = DineSykmeldteHendelse(
-            eksternReferanse,
-            null,
-            FerdigstillHendelse(norwegianOffsetDateTime())
-        )
+        val dineSykmeldteHendelse =
+            DineSykmeldteHendelse(
+                eksternReferanse,
+                null,
+                FerdigstillHendelse(norwegianOffsetDateTime()),
+            )
 
         publishHendelseOnTopic(dineSykmeldteHendelse)
     }
 
     private fun publishHendelseOnTopic(dineSykmeldteHendelse: DineSykmeldteHendelse) {
-        kafkaProducer.send(
-            ProducerRecord(
-                topicDineSykmeldteHendelse,
-                dineSykmeldteHendelse.id,
-                dineSykmeldteHendelse
-            )
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    TOPIC_DINE_SYKMELDTE_HENDELSE,
+                    dineSykmeldteHendelse.id,
+                    dineSykmeldteHendelse,
+                ),
+            ).get()
     }
 }

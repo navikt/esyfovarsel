@@ -4,16 +4,20 @@ import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.fetchFnrsWithExpiredMicrofrontendEntries
 import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideRecord
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MinSideRecord
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.Tjeneste
 import no.nav.syfo.service.microfrontend.MikrofrontendService.Companion.actionEnabled
 
-class MikrofrontendMerOppfolgingService(val database: DatabaseInterface) {
+class MikrofrontendMerOppfolgingService(
+    val database: DatabaseInterface,
+) {
     private val mikrofrontendId = "syfo-meroppfolging"
 
     fun createEnableMerOppfolgingRecord(hendelse: ArbeidstakerHendelse): MinSideRecord? {
-        val isMikrofrontendActiveForUser = database.fetchMikrofrontendSynlighetEntriesByFnr(hendelse.arbeidstakerFnr)
-            .any { it.tjeneste == Tjeneste.MER_OPPFOLGING.name }
+        val isMikrofrontendActiveForUser =
+            database
+                .fetchMikrofrontendSynlighetEntriesByFnr(hendelse.arbeidstakerFnr)
+                .any { it.tjeneste == Tjeneste.MER_OPPFOLGING.name }
 
         if (!isMikrofrontendActiveForUser) {
             return MinSideRecord(
@@ -26,8 +30,8 @@ class MikrofrontendMerOppfolgingService(val database: DatabaseInterface) {
         return null
     }
 
-    fun findExpiredAktivitetskravMikrofrontends(): List<Triple<String, String, Tjeneste>> {
-        return database.fetchFnrsWithExpiredMicrofrontendEntries(Tjeneste.MER_OPPFOLGING)
+    fun findExpiredAktivitetskravMikrofrontends(): List<Triple<String, String, Tjeneste>> =
+        database
+            .fetchFnrsWithExpiredMicrofrontendEntries(Tjeneste.MER_OPPFOLGING)
             .map { Triple(it, mikrofrontendId, Tjeneste.MER_OPPFOLGING) }
-    }
 }

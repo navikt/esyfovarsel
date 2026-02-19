@@ -32,7 +32,7 @@ import java.io.Serializable
 import java.net.URI
 import java.net.URL
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 
 enum class DittSykefravaerHendelsetypeDialogmoteInnkalling : Serializable {
     ESYFOVARSEL_DIALOGMOTE_INNKALT,
@@ -48,7 +48,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
     val accessControlService: AccessControlService,
     val database: DatabaseInterface,
 ) {
-    val WEEKS_BEFORE_DELETE = 4L
+    val weeksBeforeDelete = 4L
     private val log = LoggerFactory.getLogger(DialogmoteInnkallingSykmeldtVarselService::class.qualifiedName)
 
     suspend fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
@@ -69,12 +69,16 @@ class DialogmoteInnkallingSykmeldtVarselService(
         sendOppgaveTilDittSykefravaerOgFerdigstillTidligereMeldinger(varselHendelse, varselUuid)
     }
 
-    fun getVarselUrl(hendelseType: HendelseType, varselUuid: String): URL {
-        val urlString = if (SM_DIALOGMOTE_REFERAT === hendelseType) {
-            "$dialogmoterUrl/sykmeldt/referat/$varselUuid"
-        } else {
-            "$dialogmoterUrl/sykmeldt"
-        }
+    fun getVarselUrl(
+        hendelseType: HendelseType,
+        varselUuid: String,
+    ): URL {
+        val urlString =
+            if (SM_DIALOGMOTE_REFERAT === hendelseType) {
+                "$dialogmoterUrl/sykmeldt/referat/$varselUuid"
+            } else {
+                "$dialogmoterUrl/sykmeldt"
+            }
         return URI(urlString).toURL()
     }
 
@@ -95,9 +99,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
         )
     }
 
-    fun revarsleArbeidstakerViaBrukernotifikasjoner(
-        utsendtvarselFeilet: PUtsendtVarselFeilet,
-    ): Boolean {
+    fun revarsleArbeidstakerViaBrukernotifikasjoner(utsendtvarselFeilet: PUtsendtVarselFeilet): Boolean {
         val varselUuid = utsendtvarselFeilet.uuidEksternReferanse ?: UUID.randomUUID().toString()
         val hendelseType = HendelseType.valueOf(utsendtvarselFeilet.hendelsetypeNavn)
 
@@ -124,17 +126,17 @@ class DialogmoteInnkallingSykmeldtVarselService(
             senderFacade.sendBrevTilFysiskPrint(
                 uuid = uuid,
                 varselHendelse = arbeidstakerHendelse,
-                journalpostId = journalpostId
+                journalpostId = journalpostId,
             )
         } catch (e: RuntimeException) {
             log.info(
-                "Feil i sending av fysisk brev om dialogmote: ${e.message} for hendelsetype: ${arbeidstakerHendelse.type.name}"
+                "Feil i sending av fysisk brev om dialogmote: ${e.message} for hendelsetype: ${arbeidstakerHendelse.type.name}",
             )
         }
     }
 
-    private fun getArbeidstakerVarselText(hendelseType: HendelseType): String {
-        return when (hendelseType) {
+    private fun getArbeidstakerVarselText(hendelseType: HendelseType): String =
+        when (hendelseType) {
             SM_DIALOGMOTE_INNKALT -> BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST
             SM_DIALOGMOTE_AVLYST -> BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST
             SM_DIALOGMOTE_NYTT_TID_STED -> BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST
@@ -144,10 +146,9 @@ class DialogmoteInnkallingSykmeldtVarselService(
                 throw IllegalArgumentException("Kan ikke mappe $hendelseType til arbeidstaker varsel text")
             }
         }
-    }
 
-    fun getMeldingTypeForSykmeldtVarsling(hendelseType: HendelseType): InternalBrukernotifikasjonType {
-        return when (hendelseType) {
+    fun getMeldingTypeForSykmeldtVarsling(hendelseType: HendelseType): InternalBrukernotifikasjonType =
+        when (hendelseType) {
             SM_DIALOGMOTE_INNKALT -> InternalBrukernotifikasjonType.OPPGAVE
             SM_DIALOGMOTE_AVLYST -> InternalBrukernotifikasjonType.BESKJED
             SM_DIALOGMOTE_NYTT_TID_STED -> InternalBrukernotifikasjonType.OPPGAVE
@@ -157,7 +158,6 @@ class DialogmoteInnkallingSykmeldtVarselService(
                 throw IllegalArgumentException("Kan ikke mappe $hendelseType")
             }
         }
-    }
 
     fun dataToVarselDataJournalpost(data: Any?): VarselDataJournalpost {
         return data?.let {
@@ -172,8 +172,8 @@ class DialogmoteInnkallingSykmeldtVarselService(
         } ?: throw IllegalArgumentException("EsyfovarselHendelse mangler 'data'-felt")
     }
 
-    fun getMessageText(arbeidstakerHendelse: ArbeidstakerHendelse): String? {
-        return when (arbeidstakerHendelse.type) {
+    fun getMessageText(arbeidstakerHendelse: ArbeidstakerHendelse): String? =
+        when (arbeidstakerHendelse.type) {
             SM_DIALOGMOTE_INNKALT -> DITT_SYKEFRAVAER_DIALOGMOTE_INNKALLING_MESSAGE_TEXT
             SM_DIALOGMOTE_AVLYST -> DITT_SYKEFRAVAER_DIALOGMOTE_AVLYSNING_MESSAGE_TEXT
             SM_DIALOGMOTE_REFERAT -> DITT_SYKEFRAVAER_DIALOGMOTE_REFERAT_MESSAGE_TEXT
@@ -181,15 +181,14 @@ class DialogmoteInnkallingSykmeldtVarselService(
             SM_DIALOGMOTE_LEST -> ""
             else -> {
                 log.error(
-                    "Klarte ikke mappe varsel av type ${arbeidstakerHendelse.type} ved mapping hendelsetype til ditt sykefravar melding tekst"
+                    "Klarte ikke mappe varsel av type ${arbeidstakerHendelse.type} ved mapping hendelsetype til ditt sykefravar melding tekst",
                 )
                 null
             }
         }
-    }
 
-    fun getDittSykefravarHendelseType(arbeidstakerHendelse: ArbeidstakerHendelse): String? {
-        return when (arbeidstakerHendelse.type) {
+    fun getDittSykefravarHendelseType(arbeidstakerHendelse: ArbeidstakerHendelse): String? =
+        when (arbeidstakerHendelse.type) {
             SM_DIALOGMOTE_INNKALT -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_INNKALT.toString()
             SM_DIALOGMOTE_AVLYST -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_AVLYST.toString()
             SM_DIALOGMOTE_REFERAT -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_REFERAT.toString()
@@ -197,21 +196,21 @@ class DialogmoteInnkallingSykmeldtVarselService(
             SM_DIALOGMOTE_LEST -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_LEST.toString()
             else -> {
                 log.error(
-                    "Klarte ikke mappe varsel av type ${arbeidstakerHendelse.type} ved mapping hendelsetype til ditt sykefravar hendelsetype"
+                    "Klarte ikke mappe varsel av type ${arbeidstakerHendelse.type} ved mapping hendelsetype til ditt sykefravar hendelsetype",
                 )
                 null
             }
         }
-    }
 
     private suspend fun sendOppgaveTilDittSykefravaerOgFerdigstillTidligereMeldinger(
         arbeidstakerHendelse: ArbeidstakerHendelse,
         varselUuid: String,
     ) {
-        val utsendteVarsler = senderFacade.fetchUferdigstilteVarsler(
-            arbeidstakerFnr = PersonIdent(arbeidstakerHendelse.arbeidstakerFnr),
-            kanal = Kanal.DITT_SYKEFRAVAER,
-        )
+        val utsendteVarsler =
+            senderFacade.fetchUferdigstilteVarsler(
+                arbeidstakerFnr = PersonIdent(arbeidstakerHendelse.arbeidstakerFnr),
+                kanal = Kanal.DITT_SYKEFRAVAER,
+            )
         val melding = opprettDittSykefravaerMelding(arbeidstakerHendelse, varselUuid)
 
         if (utsendteVarsler.isNotEmpty() &&
@@ -259,7 +258,10 @@ class DialogmoteInnkallingSykmeldtVarselService(
         val messageText = getMessageText(arbeidstakerHendelse)
         val hendelseType = getDittSykefravarHendelseType(arbeidstakerHendelse)
 
-        if (messageText != null && hendelseType != null && hendelseType != DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_LEST.name) {
+        if (messageText != null &&
+            hendelseType != null &&
+            hendelseType != DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_LEST.name
+        ) {
             return DittSykefravaerMelding(
                 OpprettMelding(
                     messageText,
@@ -267,7 +269,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
                     Variant.INFO,
                     true,
                     hendelseType,
-                    OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE).toInstant(),
+                    OffsetDateTime.now().plusWeeks(weeksBeforeDelete).toInstant(),
                 ),
                 null,
                 arbeidstakerHendelse.arbeidstakerFnr,

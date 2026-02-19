@@ -30,7 +30,7 @@ import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 
 const val DITT_SYKEFRAVAER_HENDELSE_TYPE_DIALOGMOTE_SVAR_MOTEBEHOV = "ESYFOVARSEL_DIALOGMOTE_SVAR_MOTEBEHOV"
 
@@ -41,18 +41,19 @@ class MotebehovVarselService(
     val sykmeldingService: SykmeldingService,
     dialogmoterUrl: String,
 ) {
-    val WEEKS_BEFORE_DELETE = 4L
+    val weeksBeforeDelete = 4L
     private val log: Logger = LoggerFactory.getLogger(MotebehovVarselService::class.qualifiedName)
     private val svarMotebehovUrl: String = "$dialogmoterUrl/sykmeldt"
 
     suspend fun sendVarselTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
         // Quickfix for å unngå å sende varsel til bedrifter der bruker ikke er sykmeldt. Det kan skje når den
         // sykmeldte har vært sykmeldt fra flere arbeidsforhold, men bare er sykmeldt ved én av dem nå
-        val sykmeldingStatusForVirksomhet = sykmeldingService.checkSykmeldingStatusForVirksomhet(
-            LocalDate.now(),
-            varselHendelse.arbeidstakerFnr,
-            varselHendelse.orgnummer
-        )
+        val sykmeldingStatusForVirksomhet =
+            sykmeldingService.checkSykmeldingStatusForVirksomhet(
+                LocalDate.now(),
+                varselHendelse.arbeidstakerFnr,
+                varselHendelse.orgnummer,
+            )
 
         if (sykmeldingStatusForVirksomhet.sendtArbeidsgiver) {
             sendVarselTilDineSykmeldte(varselHendelse)
@@ -60,7 +61,7 @@ class MotebehovVarselService(
             tellSvarMotebehovVarselSendt(1)
         } else {
             log.info(
-                "[MotebehovVarselService]: Sender ikke Svar møtebehov-varsel til NL fordi arbeidstaker ikke er sykmeldt fra bedriften"
+                "[MotebehovVarselService]: Sender ikke Svar møtebehov-varsel til NL fordi arbeidstaker ikke er sykmeldt fra bedriften",
             )
         }
     }
@@ -83,23 +84,24 @@ class MotebehovVarselService(
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
                 ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
-                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+                LocalDateTime.now().plusWeeks(weeksBeforeDelete),
                 Meldingstype.OPPGAVE,
-                UUID.randomUUID().toString()
+                UUID.randomUUID().toString(),
             ),
         )
     }
 
     private fun sendVarselTilDineSykmeldte(varselHendelse: NarmesteLederHendelse) {
         val varseltekst = DINE_SYKMELDTE_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST
-        val dineSykmeldteVarsel = DineSykmeldteVarsel(
-            ansattFnr = varselHendelse.arbeidstakerFnr,
-            orgnr = varselHendelse.orgnummer,
-            oppgavetype = varselHendelse.type.toDineSykmeldteHendelseType().toString(),
-            lenke = null,
-            tekst = varseltekst,
-            utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
-        )
+        val dineSykmeldteVarsel =
+            DineSykmeldteVarsel(
+                ansattFnr = varselHendelse.arbeidstakerFnr,
+                orgnr = varselHendelse.orgnummer,
+                oppgavetype = varselHendelse.type.toDineSykmeldteHendelseType().toString(),
+                lenke = null,
+                tekst = varseltekst,
+                utlopstidspunkt = OffsetDateTime.now().plusWeeks(weeksBeforeDelete),
+            )
         senderFacade.sendTilDineSykmeldte(varselHendelse, dineSykmeldteVarsel)
     }
 
@@ -115,7 +117,7 @@ class MotebehovVarselService(
             orgnummer = varselHendelse.orgnummer,
             hendelseType = varselHendelse.type.name,
             varseltype = OPPGAVE,
-            eksternVarsling = eksternVarsling
+            eksternVarsling = eksternVarsling,
         )
     }
 
@@ -140,50 +142,50 @@ class MotebehovVarselService(
         if (utsendtvarselFeilet.orgnummer == null || utsendtvarselFeilet.narmesteLederFnr == null) {
             log.error(
                 "Skip resending arbeidsgivernotifikasjon varsel:" +
-                    " narmesteLederFnr or orgnummer is null for failedVarsel with uuid ${utsendtvarselFeilet.uuid}"
+                    " narmesteLederFnr or orgnummer is null for failedVarsel with uuid ${utsendtvarselFeilet.uuid}",
             )
             return false
         }
-        val notifikasjon = ArbeidsgiverNotifikasjonInput(
-            UUID.randomUUID(),
-            utsendtvarselFeilet.orgnummer,
-            utsendtvarselFeilet.narmesteLederFnr,
-            utsendtvarselFeilet.arbeidstakerFnr,
-            ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
-            ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
-            ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
-            ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
-            LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
-            Meldingstype.OPPGAVE,
-            UUID.randomUUID().toString()
-        )
+        val notifikasjon =
+            ArbeidsgiverNotifikasjonInput(
+                UUID.randomUUID(),
+                utsendtvarselFeilet.orgnummer,
+                utsendtvarselFeilet.narmesteLederFnr,
+                utsendtvarselFeilet.arbeidstakerFnr,
+                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
+                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
+                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
+                LocalDateTime.now().plusWeeks(weeksBeforeDelete),
+                Meldingstype.OPPGAVE,
+                UUID.randomUUID().toString(),
+            )
         try {
             senderFacade.sendTilArbeidsgiverNotifikasjon(utsendtvarselFeilet, notifikasjon)
             return true
         } catch (e: Exception) {
             log.error(
                 "Could not resend arbeidsgiver notifikasjon for feiletVarsel: ${utsendtvarselFeilet.uuid}",
-                e
+                e,
             )
             return false
         }
     }
 
-    private fun sendOppgaveTilDittSykefravaer(
-        arbeidstakerHendelse: ArbeidstakerHendelse,
-    ) {
-        val melding = DittSykefravaerMelding(
-            OpprettMelding(
-                DITT_SYKEFRAVAER_DIALOGMOTE_SVAR_MOTEBEHOV_MESSAGE_TEXT,
-                svarMotebehovUrl,
-                Variant.INFO,
-                true,
-                DITT_SYKEFRAVAER_HENDELSE_TYPE_DIALOGMOTE_SVAR_MOTEBEHOV,
-                OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE).toInstant(),
-            ),
-            null,
-            arbeidstakerHendelse.arbeidstakerFnr,
-        )
+    private fun sendOppgaveTilDittSykefravaer(arbeidstakerHendelse: ArbeidstakerHendelse) {
+        val melding =
+            DittSykefravaerMelding(
+                OpprettMelding(
+                    DITT_SYKEFRAVAER_DIALOGMOTE_SVAR_MOTEBEHOV_MESSAGE_TEXT,
+                    svarMotebehovUrl,
+                    Variant.INFO,
+                    true,
+                    DITT_SYKEFRAVAER_HENDELSE_TYPE_DIALOGMOTE_SVAR_MOTEBEHOV,
+                    OffsetDateTime.now().plusWeeks(weeksBeforeDelete).toInstant(),
+                ),
+                null,
+                arbeidstakerHendelse.arbeidstakerFnr,
+            )
         senderFacade.sendTilDittSykefravaer(
             arbeidstakerHendelse,
             DittSykefravaerVarsel(
@@ -203,7 +205,7 @@ class MotebehovVarselService(
             orgnummer = varselHendelse.orgnummer,
             hendelseType = varselHendelse.type.name,
             eksternVarsling = false,
-            varseltype = BESKJED
+            varseltype = BESKJED,
         )
     }
 
@@ -220,21 +222,21 @@ class MotebehovVarselService(
                 messageText = data.tilbakemelding,
                 epostTittel = ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_TITLE,
                 epostHtmlBody = ARBEIDSGIVERNOTIFIKASJON_MOTEBEHOV_TILBAKEMELDING_EMAIL_BODY,
-                hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+                hardDeleteDate = LocalDateTime.now().plusWeeks(weeksBeforeDelete),
                 meldingstype = Meldingstype.BESKJED,
-                grupperingsid = UUID.randomUUID().toString()
+                grupperingsid = UUID.randomUUID().toString(),
             ),
         )
     }
 
-    fun dataToVarselDataMotebehovTilbakemelding(data: Any?): VarselDataMotebehovTilbakemelding {
-        return data?.let {
-            val varselData = createObjectMapper().readValue(
-                it.toString(),
-                VarselDataMotebehovTilbakemelding::class.java,
-            )
+    fun dataToVarselDataMotebehovTilbakemelding(data: Any?): VarselDataMotebehovTilbakemelding =
+        data?.let {
+            val varselData =
+                createObjectMapper().readValue(
+                    it.toString(),
+                    VarselDataMotebehovTilbakemelding::class.java,
+                )
             varselData
                 ?: throw IOException("VarselDataMotebehovBeskjed har feil format")
         } ?: throw IllegalArgumentException("EsyfovarselHendelse mangler 'data'-felt")
-    }
 }

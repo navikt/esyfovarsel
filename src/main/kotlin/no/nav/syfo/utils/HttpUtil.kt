@@ -11,8 +11,8 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.jackson.jackson
 
-fun httpClient(): HttpClient {
-    return HttpClient(CIO) {
+fun httpClient(): HttpClient =
+    HttpClient(CIO) {
         install(ContentNegotiation) {
             jackson {
                 registerKotlinModule()
@@ -21,10 +21,9 @@ fun httpClient(): HttpClient {
             }
         }
     }
-}
 
-fun httpClientWithRetry(expectSuccess: Boolean = false): HttpClient {
-    return HttpClient(CIO) {
+fun httpClientWithRetry(expectSuccess: Boolean = false): HttpClient =
+    HttpClient(CIO) {
         install(HttpRequestRetry) {
             retryOnExceptionIf(2) { _, cause ->
                 cause !is ClientRequestException
@@ -45,4 +44,3 @@ fun httpClientWithRetry(expectSuccess: Boolean = false): HttpClient {
         }
         this.expectSuccess = expectSuccess
     }
-}

@@ -16,24 +16,26 @@ import no.nav.syfo.utils.httpClientWithRetry
 import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
 
-open class PdlClient(private val urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
+open class PdlClient(
+    private val urlEnv: UrlEnv,
+    private val azureAdTokenConsumer: AzureAdTokenConsumer,
+) {
     private val httpClient = httpClientWithRetry(expectSuccess = true)
     private val log = LoggerFactory.getLogger(PdlClient::class.qualifiedName)
 
-    suspend fun hentPerson(
-        personIdent: String,
-    ): HentPersonData? {
+    suspend fun hentPerson(personIdent: String): HentPersonData? {
         val token = azureAdTokenConsumer.getToken(urlEnv.pdlScope)
         val query = getPdlQuery("/pdl/hentPerson.graphql")
         val request = PdlRequest(query, Variables(personIdent))
 
         try {
-            val response: HttpResponse = httpClient.post(urlEnv.pdlUrl) {
-                setBody(request)
-                header(HttpHeaders.ContentType, "application/json")
-                header(HttpHeaders.Authorization, "Bearer $token")
-                header(PDL_BEHANDLINGSNUMMER_HEADER, BEHANDLINGSNUMMER_VURDERE_RETT_TIL_SYKEPENGER)
-            }
+            val response: HttpResponse =
+                httpClient.post(urlEnv.pdlUrl) {
+                    setBody(request)
+                    header(HttpHeaders.ContentType, "application/json")
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(PDL_BEHANDLINGSNUMMER_HEADER, BEHANDLINGSNUMMER_VURDERE_RETT_TIL_SYKEPENGER)
+                }
 
             when (response.status) {
                 HttpStatusCode.OK -> {
@@ -67,8 +69,10 @@ open class PdlClient(private val urlEnv: UrlEnv, private val azureAdTokenConsume
         }
     }
 
-    private fun getPdlQuery(graphQueryResourcePath: String): String {
-        return this::class.java.getResource(graphQueryResourcePath)?.readText()?.replace("[\n\r]", "")
+    private fun getPdlQuery(graphQueryResourcePath: String): String =
+        this::class.java
+            .getResource(graphQueryResourcePath)
+            ?.readText()
+            ?.replace("[\n\r]", "")
             ?: throw FileNotFoundException("Could not found resource: $graphQueryResourcePath")
-    }
 }

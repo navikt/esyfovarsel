@@ -7,17 +7,18 @@ import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
 import no.nav.syfo.db.updateMikrofrontendEntrySynligTomByFnrAndTjeneste
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.getSynligTom
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideRecord
-import no.nav.syfo.kafka.producers.mineside_microfrontend.Tjeneste
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MinSideRecord
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.Tjeneste
 import no.nav.syfo.service.microfrontend.MikrofrontendService.Companion.actionEnabled
 import no.nav.syfo.utils.dataToVarselData
 
-class MikrofrontendAktivitetskravService(val database: DatabaseInterface) {
+class MikrofrontendAktivitetskravService(
+    val database: DatabaseInterface,
+) {
     private val mikrofrontendId = "syfo-aktivitetskrav"
 
-    fun createOrUpdateAktivitetskravMicrofrontendByHendelse(hendelse: ArbeidstakerHendelse): MinSideRecord? {
-        return createOrUpdateMinSideRecord(hendelse)
-    }
+    fun createOrUpdateAktivitetskravMicrofrontendByHendelse(hendelse: ArbeidstakerHendelse): MinSideRecord? =
+        createOrUpdateMinSideRecord(hendelse)
 
     private fun createOrUpdateMinSideRecord(hendelse: ArbeidstakerHendelse): MinSideRecord? {
         val isMikrofrontendActiveForUser =
@@ -49,13 +50,13 @@ class MikrofrontendAktivitetskravService(val database: DatabaseInterface) {
             microfrontendId = mikrofrontendId,
         )
 
-    fun findExpiredAktivitetskravMikrofrontends(): List<Triple<String, String, Tjeneste>> {
-        return database.fetchFnrsWithExpiredMicrofrontendEntries(Tjeneste.AKTIVITETSKRAV)
+    fun findExpiredAktivitetskravMikrofrontends(): List<Triple<String, String, Tjeneste>> =
+        database
+            .fetchFnrsWithExpiredMicrofrontendEntries(Tjeneste.AKTIVITETSKRAV)
             .map { Triple(it, mikrofrontendId, Tjeneste.AKTIVITETSKRAV) }
-    }
 
-    private fun existingMikrofrontendEntries(fnr: String): List<PMikrofrontendSynlighet> {
-        return database.fetchMikrofrontendSynlighetEntriesByFnr(fnr)
+    private fun existingMikrofrontendEntries(fnr: String): List<PMikrofrontendSynlighet> =
+        database
+            .fetchMikrofrontendSynlighetEntriesByFnr(fnr)
             .filter { it.tjeneste == Tjeneste.AKTIVITETSKRAV.name }
-    }
 }

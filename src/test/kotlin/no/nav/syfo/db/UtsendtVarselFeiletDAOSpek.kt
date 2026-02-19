@@ -8,59 +8,64 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.testutil.EmbeddedDatabase
 import org.amshove.kluent.should
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
-class UtsendtVarselFeiletDAOSpek : DescribeSpec({
-    describe("UtsendtVarselFeiletDAOSpek") {
-        val embeddedDatabase = EmbeddedDatabase()
+class UtsendtVarselFeiletDAOSpek :
+    DescribeSpec({
+        describe("UtsendtVarselFeiletDAOSpek") {
+            val embeddedDatabase = EmbeddedDatabase()
 
-        beforeTest {
-            embeddedDatabase.dropData()
+            beforeTest {
+                embeddedDatabase.dropData()
+            }
+
+            it("Store ikke-utsendt varsel til NL i database") {
+                val fnr = "12121212121"
+                embeddedDatabase.storeUtsendtVarselFeilet(ikkeUtsendtVarsel(fnr))
+                embeddedDatabase.skalHaLagretIkkeUtsendtVarsel(
+                    HendelseType.NL_DIALOGMOTE_NYTT_TID_STED,
+                    Kanal.DINE_SYKMELDTE,
+                    fnr,
+                )
+            }
         }
+    })
 
-        it("Store ikke-utsendt varsel til NL i database") {
-            val fnr = "12121212121"
-            embeddedDatabase.storeUtsendtVarselFeilet(ikkeUtsendtVarsel(fnr))
-            embeddedDatabase.skalHaLagretIkkeUtsendtVarsel(
-                HendelseType.NL_DIALOGMOTE_NYTT_TID_STED,
-                Kanal.DINE_SYKMELDTE,
-                fnr
-            )
-        }
-    }
-})
-
-private fun ikkeUtsendtVarsel(fnr: String) = PUtsendtVarselFeilet(
-    uuid = UUID.randomUUID().toString(),
-    uuidEksternReferanse = "00000",
-    arbeidstakerFnr = fnr,
-    narmesteLederFnr = "01010101010",
-    orgnummer = null,
-    hendelsetypeNavn = HendelseType.NL_DIALOGMOTE_NYTT_TID_STED.name,
-    arbeidsgivernotifikasjonMerkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
-    brukernotifikasjonerMeldingType = null,
-    journalpostId = null,
-    kanal = Kanal.DINE_SYKMELDTE.name,
-    feilmelding = "Achtung!",
-    utsendtForsokTidspunkt = LocalDateTime.now(),
-    isForcedLetter = false
-)
+private fun ikkeUtsendtVarsel(fnr: String) =
+    PUtsendtVarselFeilet(
+        uuid = UUID.randomUUID().toString(),
+        uuidEksternReferanse = "00000",
+        arbeidstakerFnr = fnr,
+        narmesteLederFnr = "01010101010",
+        orgnummer = null,
+        hendelsetypeNavn = HendelseType.NL_DIALOGMOTE_NYTT_TID_STED.name,
+        arbeidsgivernotifikasjonMerkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+        brukernotifikasjonerMeldingType = null,
+        journalpostId = null,
+        kanal = Kanal.DINE_SYKMELDTE.name,
+        feilmelding = "Achtung!",
+        utsendtForsokTidspunkt = LocalDateTime.now(),
+        isForcedLetter = false,
+    )
 
 private fun DatabaseInterface.skalHaLagretIkkeUtsendtVarsel(
     type: HendelseType,
     kanal: Kanal,
     fnr: String,
-) =
-    this.should("Skal ha lagret ikke-utsendt varsel av type ${type.name} ") {
-        this.fetchUtsendtVarselFeiletByFnr(fnr)
-            .filter { it.hendelsetypeNavn == type.name }.any { it.kanal.equals(kanal.name) }
-    }
+) = this.should("Skal ha lagret ikke-utsendt varsel av type ${type.name} ") {
+    this
+        .fetchUtsendtVarselFeiletByFnr(fnr)
+        .filter { it.hendelsetypeNavn == type.name }
+        .any { it.kanal.equals(kanal.name) }
+}
 
 fun DatabaseInterface.fetchUtsendtVarselFeiletByFnr(fnr: String): List<PUtsendtVarselFeilet> {
-    val queryStatement = """SELECT *
-                            FROM UTSENDING_VARSEL_FEILET
-                            WHERE arbeidstaker_fnr = ?
-    """.trimIndent()
+    val queryStatement =
+        """
+        SELECT *
+        FROM UTSENDING_VARSEL_FEILET
+        WHERE arbeidstaker_fnr = ?
+        """.trimIndent()
 
     return connection.use { connection ->
         connection.prepareStatement(queryStatement).use {

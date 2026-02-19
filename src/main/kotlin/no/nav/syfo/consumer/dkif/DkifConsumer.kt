@@ -1,9 +1,14 @@
 package no.nav.syfo.consumer.dkif
 
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.call.body
+import io.ktor.client.request.headers
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.append
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.utils.NAV_CALL_ID_HEADER
@@ -11,24 +16,28 @@ import no.nav.syfo.utils.createCallId
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 
-class DkifConsumer(private val urlEnv: UrlEnv, private val azureAdTokenConsumer: AzureAdTokenConsumer) {
+class DkifConsumer(
+    private val urlEnv: UrlEnv,
+    private val azureAdTokenConsumer: AzureAdTokenConsumer,
+) {
     private val client = httpClient()
 
     suspend fun person(fnr: String): Kontaktinfo? {
         val accessToken = "Bearer ${azureAdTokenConsumer.getToken(urlEnv.dkifScope)}"
-        val response: HttpResponse? = try {
-            client.post(urlEnv.dkifUrl) {
-                headers {
-                    append(HttpHeaders.ContentType, ContentType.Application.Json)
-                    append(HttpHeaders.Authorization, accessToken)
-                    append(NAV_CALL_ID_HEADER, createCallId())
+        val response: HttpResponse? =
+            try {
+                client.post(urlEnv.dkifUrl) {
+                    headers {
+                        append(HttpHeaders.ContentType, ContentType.Application.Json)
+                        append(HttpHeaders.Authorization, accessToken)
+                        append(NAV_CALL_ID_HEADER, createCallId())
+                    }
+                    setBody(PostPersonerRequest.createForFnr(fnr))
                 }
-                setBody(PostPersonerRequest.createForFnr(fnr))
+            } catch (e: Exception) {
+                log.error("Error while calling DKIF: ${e.message}", e)
+                return null
             }
-        } catch (e: Exception) {
-            log.error("Error while calling DKIF: ${e.message}", e)
-            return null
-        }
         return when (response?.status) {
             HttpStatusCode.OK -> {
                 response.body<PostPersonerResponse>().personer.getOrDefault(fnr, null)

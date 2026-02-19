@@ -41,11 +41,11 @@ import no.nav.syfo.kafka.consumers.varselbus.VarselBusKafkaConsumer
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
-import no.nav.syfo.kafka.producers.mineside_microfrontend.MinSideMicrofrontendKafkaProducer
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.service.AccessControlService
-import no.nav.syfo.service.AktivitetspliktForhandsvarselVarselService
+import no.nav.syfo.service.AktivitetspliktForhandsvarselService
 import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
 import no.nav.syfo.service.ArbeidsuforhetForhandsvarselService
 import no.nav.syfo.service.BrukernotifikasjonerService
@@ -82,19 +82,20 @@ fun main() {
         closeExpiredMicrofrontendsJob(env)
     } else {
         val env = getEnv()
-        val server = embeddedServer(
-            factory = Netty,
-            environment = createApplicationEnvironment(env),
-            configure = {
-                connector {
-                    port = env.appEnv.applicationPort
-                }
-                connectionGroupSize = 8
-                workerGroupSize = 8
-                callGroupSize = 16
-            },
-            module = setModule(env)
-        )
+        val server =
+            embeddedServer(
+                factory = Netty,
+                environment = createApplicationEnvironment(env),
+                configure = {
+                    connector {
+                        port = env.appEnv.applicationPort
+                    }
+                    connectionGroupSize = 8
+                    workerGroupSize = 8
+                    callGroupSize = 16
+                },
+                module = setModule(env),
+            )
 
         Runtime.getRuntime().addShutdownHook(
             Thread {
@@ -106,162 +107,176 @@ fun main() {
     }
 }
 
-fun createApplicationEnvironment(env: Environment): ApplicationEnvironment = applicationEnvironment {
-    config = HoconApplicationConfig(ConfigFactory.load())
-    database = Database(env.dbEnv)
-    database.grantAccessToIAMUsers()
-}
+fun createApplicationEnvironment(env: Environment): ApplicationEnvironment =
+    applicationEnvironment {
+        config = HoconApplicationConfig(ConfigFactory.load())
+        database = Database(env.dbEnv)
+        database.grantAccessToIAMUsers()
+    }
 
 @Suppress("LongMethod")
-fun setModule(env: Environment): Application.() -> Unit = {
-    val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
-    val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer)
-    val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
-    val narmesteLederConsumer = NarmesteLederConsumer(env.urlEnv, azureAdTokenConsumer)
-    val narmesteLederService = NarmesteLederService(narmesteLederConsumer)
-    val arbeidsgiverNotifikasjonProdusent =
-        ArbeidsgiverNotifikasjonProdusent(env.urlEnv, azureAdTokenConsumer)
-    val arbeidsgiverNotifikasjonService = ArbeidsgiverNotifikasjonService(
-        arbeidsgiverNotifikasjonProdusent,
-        narmesteLederService,
-        env.urlEnv.baseUrlDineSykmeldte,
-    )
-    val pdlClient = PdlClient(env.urlEnv, azureAdTokenConsumer)
-    val journalpostdistribusjonConsumer = JournalpostdistribusjonConsumer(env.urlEnv, azureAdTokenConsumer)
+fun setModule(env: Environment): Application.() -> Unit =
+    {
+        val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
+        val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer)
+        val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
+        val narmesteLederConsumer = NarmesteLederConsumer(env.urlEnv, azureAdTokenConsumer)
+        val narmesteLederService = NarmesteLederService(narmesteLederConsumer)
+        val arbeidsgiverNotifikasjonProdusent =
+            ArbeidsgiverNotifikasjonProdusent(env.urlEnv, azureAdTokenConsumer)
+        val arbeidsgiverNotifikasjonService =
+            ArbeidsgiverNotifikasjonService(
+                arbeidsgiverNotifikasjonProdusent,
+                narmesteLederService,
+                env.urlEnv.baseUrlDineSykmeldte,
+            )
+        val pdlClient = PdlClient(env.urlEnv, azureAdTokenConsumer)
+        val journalpostdistribusjonConsumer = JournalpostdistribusjonConsumer(env.urlEnv, azureAdTokenConsumer)
 
-    val brukernotifikasjonKafkaProducer = BrukernotifikasjonKafkaProducer(env)
-    val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
-    val dittSykefravaerMeldingKafkaProducer = DittSykefravaerMeldingKafkaProducer(env)
-    val minSideMicrofrontendKafkaProducer = MinSideMicrofrontendKafkaProducer(env)
+        val brukernotifikasjonKafkaProducer = BrukernotifikasjonKafkaProducer(env)
+        val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
+        val dittSykefravaerMeldingKafkaProducer = DittSykefravaerMeldingKafkaProducer(env)
+        val minSideMicrofrontendKafkaProducer = MinSideMicrofrontendKafkaProducer(env)
 
-    val accessControlService = AccessControlService(dkifConsumer)
-    val fysiskBrevUtsendingService = FysiskBrevUtsendingService(journalpostdistribusjonConsumer)
-    val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
-    val brukernotifikasjonerService =
-        BrukernotifikasjonerService(brukernotifikasjonKafkaProducer)
-    val senderFacade = SenderFacade(
-        dineSykmeldteHendelseKafkaProducer,
-        dittSykefravaerMeldingKafkaProducer,
-        brukernotifikasjonerService,
-        arbeidsgiverNotifikasjonService,
-        fysiskBrevUtsendingService,
-        database,
-    )
-    val motebehovVarselService = MotebehovVarselService(
-        senderFacade,
-        accessControlService,
-        sykmeldingService,
-        env.urlEnv.dialogmoterUrl,
-    )
-    val dialogmoteInnkallingSykmeldtVarselService = DialogmoteInnkallingSykmeldtVarselService(
-        senderFacade = senderFacade,
-        dialogmoterUrl = env.urlEnv.dialogmoterUrl,
-        accessControlService = accessControlService,
-        database = database
-    )
-    val dialogmoteInnkallingNarmesteLederVarselService = DialogmoteInnkallingNarmesteLederVarselService(
-        senderFacade = senderFacade,
-        dialogmoterUrl = env.urlEnv.dialogmoterUrl,
-        narmesteLederService = narmesteLederService,
-        pdlClient = pdlClient,
-    )
+        val accessControlService = AccessControlService(dkifConsumer)
+        val fysiskBrevUtsendingService = FysiskBrevUtsendingService(journalpostdistribusjonConsumer)
+        val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
+        val brukernotifikasjonerService =
+            BrukernotifikasjonerService(brukernotifikasjonKafkaProducer)
+        val senderFacade =
+            SenderFacade(
+                dineSykmeldteHendelseKafkaProducer,
+                dittSykefravaerMeldingKafkaProducer,
+                brukernotifikasjonerService,
+                arbeidsgiverNotifikasjonService,
+                fysiskBrevUtsendingService,
+                database,
+            )
+        val motebehovVarselService =
+            MotebehovVarselService(
+                senderFacade,
+                accessControlService,
+                sykmeldingService,
+                env.urlEnv.dialogmoterUrl,
+            )
+        val dialogmoteInnkallingSykmeldtVarselService =
+            DialogmoteInnkallingSykmeldtVarselService(
+                senderFacade = senderFacade,
+                dialogmoterUrl = env.urlEnv.dialogmoterUrl,
+                accessControlService = accessControlService,
+                database = database,
+            )
+        val dialogmoteInnkallingNarmesteLederVarselService =
+            DialogmoteInnkallingNarmesteLederVarselService(
+                senderFacade = senderFacade,
+                dialogmoterUrl = env.urlEnv.dialogmoterUrl,
+                narmesteLederService = narmesteLederService,
+                pdlClient = pdlClient,
+            )
 
-    val aktivitetspliktForhandsvarselVarselService = AktivitetspliktForhandsvarselVarselService(
-        senderFacade,
-        accessControlService,
-        env.urlEnv.urlAktivitetskravInfoPage,
-        env.toggleEnv.sendAktivitetspliktForhandsvarsel,
-    )
-    val arbeidsuforhetForhandsvarselService = ArbeidsuforhetForhandsvarselService(senderFacade)
-    val friskmeldingTilArbeidsformidlingVedtakService = FriskmeldingTilArbeidsformidlingVedtakService(senderFacade)
-    val manglendeMedvirkningVarselService = ManglendeMedvirkningVarselService(senderFacade)
-    val oppfolgingsplanVarselService =
-        OppfolgingsplanVarselService(
-            senderFacade,
-            accessControlService,
-            env.urlEnv.oppfolgingsplanerUrl,
-            narmesteLederService,
-            pdlClient
-        )
-    val nyOppfolgingsplanVarselService = NyOppfolgingsplanVarselService(
-        senderFacade = senderFacade,
-        accessControlService = accessControlService,
-        nyOppfolgingsplanUrl = env.urlEnv.nyOppfolgingsplanUrl,
-    )
-    val merVeiledningVarselService = MerVeiledningVarselService(
-        senderFacade = senderFacade,
-        env = env,
-        accessControlService = accessControlService,
-    )
-    val kartleggingssporsmalVarselService = KartleggingssporsmalVarselService(
-        senderFacade = senderFacade,
-        env = env,
-        accessControlService = accessControlService,
-    )
-    val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(database)
-    val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(database)
-    val mikrofrontendMerOppfolgingService = MikrofrontendMerOppfolgingService(database)
-    val mikrofrontendService =
-        MikrofrontendService(
-            minSideMicrofrontendKafkaProducer = minSideMicrofrontendKafkaProducer,
-            mikrofrontendDialogmoteService = mikrofrontendDialogmoteService,
-            mikrofrontendAktivitetskravService = mikrofrontendAktivitetskravService,
-            mikrofrontendMerOppfolgingService = mikrofrontendMerOppfolgingService,
-            database = database,
-        )
+        val aktivitetspliktForhandsvarselService =
+            AktivitetspliktForhandsvarselService(
+                senderFacade,
+                accessControlService,
+                env.urlEnv.urlAktivitetskravInfoPage,
+                env.toggleEnv.sendAktivitetspliktForhandsvarsel,
+            )
+        val arbeidsuforhetForhandsvarselService = ArbeidsuforhetForhandsvarselService(senderFacade)
+        val friskmeldingTilArbeidsformidlingVedtakService = FriskmeldingTilArbeidsformidlingVedtakService(senderFacade)
+        val manglendeMedvirkningVarselService = ManglendeMedvirkningVarselService(senderFacade)
+        val oppfolgingsplanVarselService =
+            OppfolgingsplanVarselService(
+                senderFacade,
+                accessControlService,
+                env.urlEnv.oppfolgingsplanerUrl,
+                narmesteLederService,
+                pdlClient,
+            )
+        val nyOppfolgingsplanVarselService =
+            NyOppfolgingsplanVarselService(
+                senderFacade = senderFacade,
+                accessControlService = accessControlService,
+                nyOppfolgingsplanUrl = env.urlEnv.nyOppfolgingsplanUrl,
+            )
+        val merVeiledningVarselService =
+            MerVeiledningVarselService(
+                senderFacade = senderFacade,
+                env = env,
+                accessControlService = accessControlService,
+            )
+        val kartleggingssporsmalVarselService =
+            KartleggingssporsmalVarselService(
+                senderFacade = senderFacade,
+                env = env,
+                accessControlService = accessControlService,
+            )
+        val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(database)
+        val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(database)
+        val mikrofrontendMerOppfolgingService = MikrofrontendMerOppfolgingService(database)
+        val mikrofrontendService =
+            MikrofrontendService(
+                minSideMicrofrontendKafkaProducer = minSideMicrofrontendKafkaProducer,
+                mikrofrontendDialogmoteService = mikrofrontendDialogmoteService,
+                mikrofrontendAktivitetskravService = mikrofrontendAktivitetskravService,
+                mikrofrontendMerOppfolgingService = mikrofrontendMerOppfolgingService,
+                database = database,
+            )
 
-    val sendAktivitetspliktLetterToSentralPrintJob = SendAktivitetspliktLetterToSentralPrintJob(database, senderFacade)
+        val sendAktivitetspliktLetterToSentralPrintJob = SendAktivitetspliktLetterToSentralPrintJob(database, senderFacade)
 
-    val resendFailedVarslerJob = ResendFailedVarslerJob(
-        db = database,
-        motebehovVarselService = motebehovVarselService,
-        dialogmoteInnkallingSykmeldtVarselService = dialogmoteInnkallingSykmeldtVarselService,
-        merVeiledningVarselService = merVeiledningVarselService,
-        kartleggingVarselService = kartleggingssporsmalVarselService,
-        senderFacade = senderFacade
-    )
+        val resendFailedVarslerJob =
+            ResendFailedVarslerJob(
+                db = database,
+                motebehovVarselService = motebehovVarselService,
+                dialogmoteInnkallingSykmeldtVarselService = dialogmoteInnkallingSykmeldtVarselService,
+                merVeiledningVarselService = merVeiledningVarselService,
+                kartleggingVarselService = kartleggingssporsmalVarselService,
+                senderFacade = senderFacade,
+            )
 
-    val varselBusService =
-        VarselBusService(
-            senderFacade,
-            motebehovVarselService,
-            oppfolgingsplanVarselService,
-            nyOppfolgingsplanVarselService,
-            dialogmoteInnkallingSykmeldtVarselService,
-            dialogmoteInnkallingNarmesteLederVarselService,
-            aktivitetspliktForhandsvarselVarselService,
-            arbeidsuforhetForhandsvarselService,
+        val varselBusService =
+            VarselBusService(
+                senderFacade,
+                motebehovVarselService,
+                oppfolgingsplanVarselService,
+                nyOppfolgingsplanVarselService,
+                dialogmoteInnkallingSykmeldtVarselService,
+                dialogmoteInnkallingNarmesteLederVarselService,
+                aktivitetspliktForhandsvarselService,
+                arbeidsuforhetForhandsvarselService,
+                mikrofrontendService,
+                friskmeldingTilArbeidsformidlingVedtakService,
+                manglendeMedvirkningVarselService,
+                merVeiledningVarselService,
+                kartleggingssporsmalVarselService,
+            )
+
+        val testdataResetService = TestdataResetService(database, mikrofrontendService, senderFacade)
+
+        state.running = true
+
+        serverModule(
+            env,
             mikrofrontendService,
-            friskmeldingTilArbeidsformidlingVedtakService,
-            manglendeMedvirkningVarselService,
-            merVeiledningVarselService,
-            kartleggingssporsmalVarselService
+            sendAktivitetspliktLetterToSentralPrintJob,
+            resendFailedVarslerJob,
         )
 
-    val testdataResetService = TestdataResetService(database, mikrofrontendService, senderFacade)
+        kafkaModule(
+            env,
+            varselBusService,
+            testdataResetService,
+        )
+    }
 
-    state.running = true
-
-    serverModule(
-        env,
-        mikrofrontendService,
-        sendAktivitetspliktLetterToSentralPrintJob,
-        resendFailedVarslerJob
-    )
-
-    kafkaModule(
-        env,
-        varselBusService,
-        testdataResetService,
-    )
-}
-
-private fun getDkifConsumer(urlEnv: UrlEnv, azureADConsumer: AzureAdTokenConsumer): DkifConsumer {
-    return when {
+private fun getDkifConsumer(
+    urlEnv: UrlEnv,
+    azureADConsumer: AzureAdTokenConsumer,
+): DkifConsumer =
+    when {
         isLocal() -> DkifConsumer(urlEnv, azureADConsumer)
         else -> DkifConsumer(urlEnv, azureADConsumer)
     }
-}
 
 fun Application.serverModule(
     env: Environment,
