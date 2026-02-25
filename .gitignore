@@ -10,5 +10,8 @@ build/
 # Generated sources
 src/generated
 
+# Local working notes (not for version control)
+.local-notes/
+
 # OS specific
 .DS_Store
