@@ -268,6 +268,21 @@ Helper functions `isLocal()` and `isDevGcp()` control environment-specific behav
 
 NAIS platform (Kubernetes). Config in `nais/` directory with separate dev/prod manifests. CI via shared GitHub Actions workflow (`navikt/teamesyfo-github-actions-workflows`).
 
+## Keeping Copilot Config in Sync
+
+When making changes that affect the patterns described in `.github/` config files (agents, instructions, skills), **suggest** updating the relevant files — but do not update them automatically.
+
+Examples of changes that should trigger a suggestion:
+- Upgrading or replacing frameworks (e.g., Ktor version bump, switching libraries)
+- Changing test framework or patterns
+- Adding/removing authentication mechanisms
+- Changing database access patterns
+- Adding new Kafka topics or changing consumer setup
+- Modifying build tooling or commands
+- Adding new HendelseType or output channels
+
+Format the suggestion as: *"This change affects patterns documented in `.github/instructions/<file>` — want me to update it?"*
+
 ## Boundaries
 
 ### ✅ Always
