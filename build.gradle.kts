@@ -21,7 +21,7 @@ val flywayVersion = "12.0.3"
 val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.21.1"
 val kafkaVersion = "4.2.0"
-val brukernotifikasjonerBuilderVersion = "2.1.1"
+val brukernotifikasjonerBuilderVersion = "2.2.0"
 val kotlinVersion = "2.3.10"
 val graphqlApolloVersion = "4.4.1"
 
