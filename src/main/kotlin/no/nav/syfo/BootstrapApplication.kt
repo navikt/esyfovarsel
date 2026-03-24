@@ -186,11 +186,12 @@ fun setModule(env: Environment): Application.() -> Unit =
         val manglendeMedvirkningVarselService = ManglendeMedvirkningVarselService(senderFacade)
         val oppfolgingsplanVarselService =
             OppfolgingsplanVarselService(
-                senderFacade,
-                accessControlService,
-                env.urlEnv.oppfolgingsplanerUrl,
-                narmesteLederService,
-                pdlClient,
+                senderFacade = senderFacade,
+                accessControlService = accessControlService,
+                oppfolgingsplanerUrl = env.urlEnv.oppfolgingsplanerUrl,
+                dinesykmeldteUrl = env.urlEnv.baseUrlDineSykmeldte,
+                narmesteLederService = narmesteLederService,
+                pdlClient = pdlClient,
             )
         val nyOppfolgingsplanVarselService =
             NyOppfolgingsplanVarselService(
@@ -222,7 +223,8 @@ fun setModule(env: Environment): Application.() -> Unit =
                 database = database,
             )
 
-        val sendAktivitetspliktLetterToSentralPrintJob = SendAktivitetspliktLetterToSentralPrintJob(database, senderFacade)
+        val sendAktivitetspliktLetterToSentralPrintJob =
+            SendAktivitetspliktLetterToSentralPrintJob(database, senderFacade)
 
         val resendFailedVarslerJob =
             ResendFailedVarslerJob(
