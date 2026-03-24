@@ -22,16 +22,16 @@ val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.21.1"
 val kafkaVersion = "4.2.0"
 val brukernotifikasjonerBuilderVersion = "2.1.1"
-val kotlinVersion = "2.3.20"
+val kotlinVersion = "2.3.10"
 val graphqlApolloVersion = "4.4.1"
 
 val githubUser: String by project
 val githubPassword: String by project
 
 plugins {
-    kotlin("jvm") version "2.3.20"
+    kotlin("jvm") version "2.3.10"
     id("java")
-    id("org.jetbrains.kotlin.plugin.allopen") version "2.3.20"
+    id("org.jetbrains.kotlin.plugin.allopen") version "2.3.10"
     id("com.gradleup.shadow") version "9.4.0"
     id("com.apollographql.apollo") version "4.4.1"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
