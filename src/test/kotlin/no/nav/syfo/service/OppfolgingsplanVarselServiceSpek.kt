@@ -26,6 +26,7 @@ import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.FNR_1
 import no.nav.syfo.testutil.mocks.FNR_2
 import no.nav.syfo.testutil.mocks.ORGNUMMER
+import org.amshove.kluent.shouldBeEqualTo
 import java.net.URI
 import java.util.UUID
 
@@ -163,8 +164,8 @@ class OppfolgingsplanVarselServiceSpek :
                     arbeidsgiverNotifikasjonService.createNewSak(capture(sakInputSlot))
                 }
 
-                check(notifikasjonInputSlot.captured.link?.contains(expectedUrl) == true)
-                check(sakInputSlot.captured.lenke.contains(expectedUrl))
+                notifikasjonInputSlot.captured.link shouldBeEqualTo expectedUrl
+                sakInputSlot.captured.lenke shouldBeEqualTo expectedUrl
             }
         }
     })
