@@ -31,6 +31,7 @@ class OppfolgingsplanVarselService(
     private val senderFacade: SenderFacade,
     private val accessControlService: AccessControlService,
     private val oppfolgingsplanerUrl: String,
+    private val dinesykmeldteUrl: String,
     private val narmesteLederService: NarmesteLederService,
     private val pdlClient: PdlClient,
 ) {
@@ -95,7 +96,7 @@ class OppfolgingsplanVarselService(
             return
         }
 
-        val url = "$oppfolgingsplanerUrl/arbeidsgiver/${narmesteLederRelasjon.narmesteLederId}"
+        val url = "$dinesykmeldteUrl/${narmesteLederRelasjon.narmesteLederId}"
         val personData = pdlClient.hentPerson(personIdent = varselHendelse.arbeidstakerFnr)
         val grupperingsid = UUID.randomUUID().toString()
 
