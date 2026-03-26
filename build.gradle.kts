@@ -37,12 +37,9 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(19))
-    }
+kotlin {
+    jvmToolchain(21)
 }
-
 allOpen {
     annotation("no.nav.syfo.annotation.Mockable")
 }
