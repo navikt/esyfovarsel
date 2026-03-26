@@ -21,7 +21,7 @@ val flywayVersion = "12.1.1"
 val vaultJdbcVersion = "1.3.9"
 val jacksonVersion = "2.21.1"
 val kafkaVersion = "4.2.0"
-val brukernotifikasjonerBuilderVersion = "2.1.1"
+val brukernotifikasjonerBuilderVersion = "2.2.0"
 val kotlinVersion = "2.3.20"
 val graphqlApolloVersion = "4.4.1"
 
@@ -37,12 +37,9 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(19))
-    }
+kotlin {
+    jvmToolchain(21)
 }
-
 allOpen {
     annotation("no.nav.syfo.annotation.Mockable")
 }
