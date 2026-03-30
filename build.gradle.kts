@@ -23,7 +23,7 @@ val jacksonVersion = "2.21.1"
 val kafkaVersion = "4.2.0"
 val brukernotifikasjonerBuilderVersion = "2.2.0"
 val kotlinVersion = "2.3.20"
-val graphqlApolloVersion = "4.4.1"
+val graphqlApolloVersion = "4.4.2"
 
 val githubUser: String by project
 val githubPassword: String by project
@@ -118,7 +118,7 @@ dependencies {
     implementation("no.nav.tms.varsel:kotlin-builder:$brukernotifikasjonerBuilderVersion")
 
     // GraphQL
-    implementation("com.apollographql.apollo", "apollo-runtime", graphqlApolloVersion)
+    implementation("com.apollographql.apollo:apollo-runtime:$graphqlApolloVersion")
 
     // Test
     testImplementation(kotlin("test"))
