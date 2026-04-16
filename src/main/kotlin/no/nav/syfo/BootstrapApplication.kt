@@ -47,6 +47,7 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonPro
 import no.nav.syfo.service.AccessControlService
 import no.nav.syfo.service.AktivitetspliktForhandsvarselService
 import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
+import no.nav.syfo.service.ArbeidsgiverVarselService
 import no.nav.syfo.service.ArbeidsuforhetForhandsvarselService
 import no.nav.syfo.service.BrukernotifikasjonerService
 import no.nav.syfo.service.DialogmoteInnkallingNarmesteLederVarselService
@@ -143,6 +144,7 @@ fun setModule(env: Environment): Application.() -> Unit =
         val sykmeldingService = SykmeldingService(sykmeldingerConsumer)
         val brukernotifikasjonerService =
             BrukernotifikasjonerService(brukernotifikasjonKafkaProducer)
+        val arbeidsgiverVarselService = ArbeidsgiverVarselService()
         val senderFacade =
             SenderFacade(
                 dineSykmeldteHendelseKafkaProducer,
@@ -251,6 +253,7 @@ fun setModule(env: Environment): Application.() -> Unit =
                 manglendeMedvirkningVarselService,
                 merVeiledningVarselService,
                 kartleggingssporsmalVarselService,
+                arbeidsgiverVarselService,
             )
 
         val testdataResetService = TestdataResetService(database, mikrofrontendService, senderFacade)

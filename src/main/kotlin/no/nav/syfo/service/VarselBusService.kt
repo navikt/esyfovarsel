@@ -2,6 +2,10 @@ package no.nav.syfo.service
 
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.AG_DIALOGMOTE_AVLYST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.AG_DIALOGMOTE_INNKALT
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.AG_DIALOGMOTE_NYTT_TID_STED
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.AG_DIALOGMOTE_REFERAT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_AVLYST
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_INNKALT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING
@@ -26,8 +30,11 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_MER_VEILEDNI
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_OPPRETTET
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING
+import no.nav.syfo.kafka.consumers.varselbus.domain.getArbeidsgiverAltinnRessurs
+import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidsgiverHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.skalFerdigstilles
+import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidsgiverHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toNarmestelederHendelse
 import no.nav.syfo.service.microfrontend.MikrofrontendService
@@ -48,6 +55,7 @@ class VarselBusService(
     private val manglendeMedvirkningVarselService: ManglendeMedvirkningVarselService,
     private val merVeiledningVarselService: MerVeiledningVarselService,
     private val kartleggingssporsmalVarselService: KartleggingssporsmalVarselService,
+    private val arbeidsgiverVarselService: ArbeidsgiverVarselService,
 ) {
     private val log: Logger = LoggerFactory.getLogger(VarselBusService::class.qualifiedName)
 
@@ -114,6 +122,15 @@ class VarselBusService(
                         varselHendelse.toArbeidstakerHendelse(),
                     )
 
+                AG_DIALOGMOTE_INNKALT,
+                AG_DIALOGMOTE_AVLYST,
+                AG_DIALOGMOTE_REFERAT,
+                AG_DIALOGMOTE_NYTT_TID_STED,
+                ->
+                    arbeidsgiverVarselService.sendVarselTilArbeidsgiver(
+                        varselHendelse.toArbeidsgiverHendelse(),
+                    )
+
                 SM_AKTIVITETSPLIKT ->
                     aktivitetspliktForhandsvarselService.sendVarselTilArbeidstaker(
                         varselHendelse.toArbeidstakerHendelse(),
@@ -146,7 +163,16 @@ class VarselBusService(
     }
 
     suspend fun ferdigstillVarsel(varselHendelse: EsyfovarselHendelse) {
-        if (varselHendelse.isArbeidstakerHendelse()) {
+        if (varselHendelse.isArbeidsgiverHendelse()) {
+            val arbeidsgiverHendelse = varselHendelse.toArbeidsgiverHendelse()
+            val altinnRessurs = arbeidsgiverHendelse.getArbeidsgiverAltinnRessurs()
+            log.info(
+                "Ignorerer ferdigstilling for stubbet arbeidsgiverhendelse: type={}, orgnummer={}, altinnRessursId={}",
+                arbeidsgiverHendelse.type,
+                arbeidsgiverHendelse.orgnummer,
+                altinnRessurs.id,
+            )
+        } else if (varselHendelse.isArbeidstakerHendelse()) {
             senderFacade.ferdigstillArbeidstakerVarsler(varselHendelse.toArbeidstakerHendelse())
         } else {
             senderFacade.ferdigstillNarmesteLederVarsler(varselHendelse.toNarmestelederHendelse())
