@@ -1,6 +1,7 @@
 package no.nav.syfo.kafka.consumers.varselbus.domain
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.syfo.exceptions.MotetidspunktValidationException
 import no.nav.syfo.kafka.common.createObjectMapper
 import java.io.Serializable
@@ -32,12 +33,26 @@ data class ArbeidstakerHendelse(
     val orgnummer: String?,
 ) : EsyfovarselHendelse
 
+data class ArbeidsgiverHendelse(
+    override val type: HendelseType,
+    override val ferdigstill: Boolean?,
+    override var data: Any?,
+    val arbeidstakerFnr: String,
+    val orgnummer: String,
+) : EsyfovarselHendelse
+
 data class VarselData(
     val journalpost: VarselDataJournalpost? = null,
     val narmesteLeder: VarselDataNarmesteLeder? = null,
     val motetidspunkt: VarselDataMotetidspunkt? = null,
     val aktivitetskrav: VarselDataAktivitetskrav? = null,
     val dialogmoteSvar: VarselDataDialogmoteSvar? = null,
+    val altinnRessurs: VarselDataAltinnRessurs? = null,
+)
+
+data class VarselDataAltinnRessurs(
+    val id: String,
+    val url: String,
 )
 
 data class VarselDataJournalpost(
@@ -94,6 +109,10 @@ enum class HendelseType {
     SM_DIALOGMOTE_REFERAT,
     NL_DIALOGMOTE_NYTT_TID_STED,
     SM_DIALOGMOTE_NYTT_TID_STED,
+    AG_DIALOGMOTE_INNKALT,
+    AG_DIALOGMOTE_AVLYST,
+    AG_DIALOGMOTE_NYTT_TID_STED,
+    AG_DIALOGMOTE_REFERAT,
     SM_DIALOGMOTE_LEST,
     SM_AKTIVITETSPLIKT,
     SM_ARBEIDSUFORHET_FORHANDSVARSEL,
@@ -137,6 +156,42 @@ fun Any.toVarselData(): VarselData =
         VarselData::class.java,
     )
 
+fun ArbeidsgiverHendelse.getArbeidsgiverAltinnRessurs(): VarselDataAltinnRessurs {
+    val dataNode =
+        data.toJsonNode()
+            ?: throw IllegalArgumentException("ArbeidsgiverHendelse mangler påkrevd 'data'")
+    val altinnRessursNode =
+        dataNode.get("altinnRessurs")
+            ?: throw IllegalArgumentException("ArbeidsgiverHendelse mangler påkrevd 'altinnRessurs' i data")
+    if (altinnRessursNode.isNull) {
+        throw IllegalArgumentException("ArbeidsgiverHendelse mangler påkrevd 'altinnRessurs' i data")
+    }
+
+    return VarselDataAltinnRessurs(
+        id = altinnRessursNode.getRequiredText("id"),
+        url = altinnRessursNode.getRequiredText("url"),
+    )
+}
+
+private fun Any?.toJsonNode(): JsonNode? =
+    when (this) {
+        null -> null
+        is JsonNode -> this
+        else -> objectMapper.valueToTree(this)
+    }
+
+private fun JsonNode?.getRequiredText(fieldName: String): String {
+    val fieldNode = this?.get(fieldName)
+
+    return fieldNode
+        ?.takeUnless(JsonNode::isNull)
+        ?.asText()
+        ?.takeUnless(String::isBlank)
+        ?: throw IllegalArgumentException("ArbeidsgiverHendelse mangler påkrevd 'altinnRessurs.$fieldName' i data")
+}
+
+fun EsyfovarselHendelse.isArbeidsgiverHendelse(): Boolean = this is ArbeidsgiverHendelse
+
 fun EsyfovarselHendelse.isArbeidstakerHendelse(): Boolean = this is ArbeidstakerHendelse
 
 fun EsyfovarselHendelse.toNarmestelederHendelse(): NarmesteLederHendelse =
@@ -144,6 +199,13 @@ fun EsyfovarselHendelse.toNarmestelederHendelse(): NarmesteLederHendelse =
         this
     } else {
         throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type NarmesteLederHendelse")
+    }
+
+fun EsyfovarselHendelse.toArbeidsgiverHendelse(): ArbeidsgiverHendelse =
+    if (this is ArbeidsgiverHendelse) {
+        this
+    } else {
+        throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type ArbeidsgiverHendelse")
     }
 
 fun EsyfovarselHendelse.toArbeidstakerHendelse(): ArbeidstakerHendelse =
