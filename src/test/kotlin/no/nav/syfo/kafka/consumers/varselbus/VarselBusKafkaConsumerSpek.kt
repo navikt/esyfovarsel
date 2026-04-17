@@ -9,7 +9,6 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import kotlinx.coroutines.runBlocking
 import no.nav.syfo.getTestEnv
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
@@ -45,9 +44,7 @@ class VarselBusKafkaConsumerSpek :
                             arbeidsgiverHendelseJson,
                         )
 
-                    runBlocking {
-                        consumer.invokeProcessVarselBusRecord(record)
-                    }
+                    consumer.invokeProcessVarselBusRecord(record)
 
                     coVerify(exactly = 1) { varselBusService.processVarselHendelse(any()) }
                     verify(exactly = 0) { varselBusService.processVarselHendelseAsMinSideMicrofrontendEvent(any()) }

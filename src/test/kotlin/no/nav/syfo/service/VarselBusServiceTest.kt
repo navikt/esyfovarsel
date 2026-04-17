@@ -5,7 +5,6 @@ import io.mockk.clearAllMocks
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.runBlocking
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselData
@@ -19,11 +18,13 @@ class VarselBusServiceTest :
         val oppfolgingsplanVarselService = mockk<OppfolgingsplanVarselService>(relaxed = true)
         val nyOppfolgingsplanVarselService = mockk<NyOppfolgingsplanVarselService>(relaxed = true)
         val dialogmoteInnkallingSykmeldtVarselService = mockk<DialogmoteInnkallingSykmeldtVarselService>(relaxed = true)
-        val dialogmoteInnkallingNarmesteLederVarselService = mockk<DialogmoteInnkallingNarmesteLederVarselService>(relaxed = true)
+        val dialogmoteInnkallingNarmesteLederVarselService =
+            mockk<DialogmoteInnkallingNarmesteLederVarselService>(relaxed = true)
         val aktivitetspliktForhandsvarselService = mockk<AktivitetspliktForhandsvarselService>(relaxed = true)
         val arbeidsuforhetForhandsvarselService = mockk<ArbeidsuforhetForhandsvarselService>(relaxed = true)
         val mikrofrontendService = mockk<MikrofrontendService>(relaxed = true)
-        val friskmeldingTilArbeidsformidlingVedtakService = mockk<FriskmeldingTilArbeidsformidlingVedtakService>(relaxed = true)
+        val friskmeldingTilArbeidsformidlingVedtakService =
+            mockk<FriskmeldingTilArbeidsformidlingVedtakService>(relaxed = true)
         val manglendeMedvirkningVarselService = mockk<ManglendeMedvirkningVarselService>(relaxed = true)
         val merVeiledningVarselService = mockk<MerVeiledningVarselService>(relaxed = true)
         val kartleggingssporsmalVarselService = mockk<KartleggingssporsmalVarselService>(relaxed = true)
@@ -62,9 +63,7 @@ class VarselBusServiceTest :
                     it("delegates $hendelseType to arbeidsgiverVarselService") {
                         val hendelse = createArbeidsgiverHendelse(hendelseType = hendelseType, ferdigstill = false)
 
-                        runBlocking {
-                            varselBusService.processVarselHendelse(hendelse)
-                        }
+                        varselBusService.processVarselHendelse(hendelse)
 
                         verify(exactly = 1) { arbeidsgiverVarselService.sendVarselTilArbeidsgiver(hendelse) }
                         coVerify(exactly = 0) { senderFacade.ferdigstillArbeidstakerVarsler(any()) }
@@ -79,9 +78,7 @@ class VarselBusServiceTest :
                             ferdigstill = true,
                         )
 
-                    runBlocking {
-                        varselBusService.processVarselHendelse(hendelse)
-                    }
+                    varselBusService.processVarselHendelse(hendelse)
 
                     verify(exactly = 0) { arbeidsgiverVarselService.sendVarselTilArbeidsgiver(any()) }
                     coVerify(exactly = 0) { senderFacade.ferdigstillArbeidstakerVarsler(any()) }
