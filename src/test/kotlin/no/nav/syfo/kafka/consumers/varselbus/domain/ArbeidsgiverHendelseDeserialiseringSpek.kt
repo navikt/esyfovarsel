@@ -35,34 +35,20 @@ class ArbeidsgiverHendelseDeserialiseringSpek :
                     }
                     """.trimIndent()
 
-                val hendelse = objectMapper.readValue<EsyfovarselHendelse>(json)
+                val varselEvent: EsyfovarselHendelse = objectMapper.readValue(json)
+                varselEvent.data = objectMapper.readTree(json)["data"]
+                val hendelse = varselEvent.toArbeidsgiverHendelse()
 
                 val arbeidsgiverHendelse = hendelse.shouldBeTypeOf<ArbeidsgiverHendelse>()
-
                 arbeidsgiverHendelse.type shouldBe HendelseType.AG_DIALOGMOTE_INNKALT
                 arbeidsgiverHendelse.arbeidstakerFnr shouldBe "12345678910"
                 arbeidsgiverHendelse.orgnummer shouldBe "999999999"
-                arbeidsgiverHendelse.getArbeidsgiverAltinnRessurs() shouldBe
+                arbeidsgiverHendelse.dataToVarselDataAltinnRessurs() shouldBe
                     VarselDataAltinnRessurs(
                         id = "urn:altinn:resource:dialogmote",
                         url = "https://www.nav.no/arbeidsgiver/dialogmote",
                     )
-
-                arbeidsgiverHendelse.data shouldBe
-                    mapOf(
-                        "altinnRessurs" to
-                            mapOf(
-                                "id" to "urn:altinn:resource:dialogmote",
-                                "url" to "https://www.nav.no/arbeidsgiver/dialogmote",
-                            ),
-                        "journalpost" to
-                            mapOf(
-                                "uuid" to "bda0b55a-df72-4888-a5a5-6bfa74cacafe",
-                                "id" to "620049753",
-                            ),
-                    )
             }
-
             it("feiler tydelig når arbeidstakerFnr mangler for arbeidsgiverhendelse") {
                 val json =
                     """
@@ -88,34 +74,6 @@ class ArbeidsgiverHendelseDeserialiseringSpek :
                 exception.message shouldContain "arbeidstakerFnr"
             }
 
-            it("feiler tydelig når altinnRessurs.id mangler for arbeidsgiverhendelse") {
-                val json =
-                    """
-                    {
-                      "@type": "ArbeidsgiverHendelse",
-                      "type": "AG_DIALOGMOTE_INNKALT",
-                      "ferdigstill": false,
-                      "arbeidstakerFnr": "12345678910",
-                      "data": {
-                        "altinnRessurs": {
-                          "url": "https://www.nav.no/arbeidsgiver/dialogmote"
-                        }
-                      },
-                      "orgnummer": "999999999"
-                    }
-                    """.trimIndent()
-
-                val exception =
-                    shouldThrow<IllegalArgumentException> {
-                        objectMapper
-                            .readValue<EsyfovarselHendelse>(json)
-                            .shouldBeTypeOf<ArbeidsgiverHendelse>()
-                            .getArbeidsgiverAltinnRessurs()
-                    }
-
-                exception.message shouldContain "altinnRessurs.id"
-            }
-
             it("feiler tydelig når data mangler for arbeidsgiverhendelse") {
                 val json =
                     """
@@ -133,13 +91,13 @@ class ArbeidsgiverHendelseDeserialiseringSpek :
                         objectMapper
                             .readValue<EsyfovarselHendelse>(json)
                             .shouldBeTypeOf<ArbeidsgiverHendelse>()
-                            .getArbeidsgiverAltinnRessurs()
+                            .dataToVarselDataAltinnRessurs()
                     }
 
-                exception.message shouldContain "'data'"
+                exception.message shouldContain "EsyfovarselHendelse mangler 'data'-felt"
             }
 
-            it("feiler tydelig når altinnRessurs mangler i data for arbeidsgiverhendelse") {
+            it("feiler når altinnRessurs mangler i data for arbeidsgiverhendelse") {
                 val json =
                     """
                     {
@@ -157,18 +115,45 @@ class ArbeidsgiverHendelseDeserialiseringSpek :
                     }
                     """.trimIndent()
 
+                val varselEvent: EsyfovarselHendelse = objectMapper.readValue(json)
+                varselEvent.data = objectMapper.readTree(json)["data"]
+                val arbeidstakerHendelse = varselEvent.toArbeidsgiverHendelse()
                 val exception =
                     shouldThrow<IllegalArgumentException> {
-                        objectMapper
-                            .readValue<EsyfovarselHendelse>(json)
-                            .shouldBeTypeOf<ArbeidsgiverHendelse>()
-                            .getArbeidsgiverAltinnRessurs()
+                        arbeidstakerHendelse.dataToVarselDataAltinnRessurs()
                     }
 
-                exception.message shouldContain "'altinnRessurs'"
+                exception.message shouldContain "EsyfovarselHendelse mangler 'altinnRessurs'-felt"
             }
 
-            it("feiler tydelig når altinnRessurs.url mangler for arbeidsgiverhendelse") {
+            it("feiler tydelig når altinnRessurs id mangler for arbeidsgiverhendelse") {
+                val json =
+                    """
+                    {
+                      "@type": "ArbeidsgiverHendelse",
+                      "type": "AG_DIALOGMOTE_INNKALT",
+                      "ferdigstill": false,
+                      "arbeidstakerFnr": "12345678910",
+                      "data": {
+                        "altinnRessurs": {
+                          "url": "https://www.nav.no/arbeidsgiver/dialogmote"
+                        }
+                      },
+                      "orgnummer": "999999999"
+                    }
+                    """.trimIndent()
+
+                val varselEvent: EsyfovarselHendelse = objectMapper.readValue(json)
+                varselEvent.data = objectMapper.readTree(json)["data"]
+                val arbeidstakerHendelse = varselEvent.toArbeidsgiverHendelse()
+                val exception =
+                    shouldThrow<IllegalArgumentException> {
+                        arbeidstakerHendelse.dataToVarselDataAltinnRessurs()
+                    }
+
+                exception.message shouldContain "ArbeidsgiverHendelse.data har feil format"
+            }
+            it("feiler når altinnRessurs url mangler for arbeidsgiverhendelse") {
                 val json =
                     """
                     {
@@ -185,15 +170,15 @@ class ArbeidsgiverHendelseDeserialiseringSpek :
                     }
                     """.trimIndent()
 
+                val varselEvent: EsyfovarselHendelse = objectMapper.readValue(json)
+                varselEvent.data = objectMapper.readTree(json)["data"]
+                val arbeidstakerHendelse = varselEvent.toArbeidsgiverHendelse()
                 val exception =
                     shouldThrow<IllegalArgumentException> {
-                        objectMapper
-                            .readValue<EsyfovarselHendelse>(json)
-                            .shouldBeTypeOf<ArbeidsgiverHendelse>()
-                            .getArbeidsgiverAltinnRessurs()
+                        arbeidstakerHendelse.dataToVarselDataAltinnRessurs()
                     }
 
-                exception.message shouldContain "altinnRessurs.url"
+                exception.message shouldContain "ArbeidsgiverHendelse.data har feil format"
             }
         }
     })

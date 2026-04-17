@@ -1,7 +1,7 @@
 package no.nav.syfo.kafka.consumers.varselbus.domain
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.JsonMappingException
 import no.nav.syfo.exceptions.MotetidspunktValidationException
 import no.nav.syfo.kafka.common.createObjectMapper
 import java.io.Serializable
@@ -39,7 +39,22 @@ data class ArbeidsgiverHendelse(
     override var data: Any?,
     val arbeidstakerFnr: String,
     val orgnummer: String,
-) : EsyfovarselHendelse
+) : EsyfovarselHendelse {
+    fun dataToVarselDataAltinnRessurs(): VarselDataAltinnRessurs {
+        val nonNullData =
+            data
+                ?: throw IllegalArgumentException("EsyfovarselHendelse mangler 'data'-felt")
+
+        val altinnRessurs =
+            try {
+                nonNullData.toVarselData().altinnRessurs
+                    ?: throw IllegalArgumentException("EsyfovarselHendelse mangler 'altinnRessurs'-felt")
+            } catch (e: JsonMappingException) {
+                throw IllegalArgumentException("ArbeidsgiverHendelse.data har feil format", e)
+            }
+        return altinnRessurs
+    }
+}
 
 data class VarselData(
     val journalpost: VarselDataJournalpost? = null,
@@ -155,40 +170,6 @@ fun Any.toVarselData(): VarselData =
         this.toString(),
         VarselData::class.java,
     )
-
-fun ArbeidsgiverHendelse.getArbeidsgiverAltinnRessurs(): VarselDataAltinnRessurs {
-    val dataNode =
-        data.toJsonNode()
-            ?: throw IllegalArgumentException("ArbeidsgiverHendelse mangler påkrevd 'data'")
-    val altinnRessursNode =
-        dataNode.get("altinnRessurs")
-            ?: throw IllegalArgumentException("ArbeidsgiverHendelse mangler påkrevd 'altinnRessurs' i data")
-    if (altinnRessursNode.isNull) {
-        throw IllegalArgumentException("ArbeidsgiverHendelse mangler påkrevd 'altinnRessurs' i data")
-    }
-
-    return VarselDataAltinnRessurs(
-        id = altinnRessursNode.getRequiredText("id"),
-        url = altinnRessursNode.getRequiredText("url"),
-    )
-}
-
-private fun Any?.toJsonNode(): JsonNode? =
-    when (this) {
-        null -> null
-        is JsonNode -> this
-        else -> objectMapper.valueToTree(this)
-    }
-
-private fun JsonNode?.getRequiredText(fieldName: String): String {
-    val fieldNode = this?.get(fieldName)
-
-    return fieldNode
-        ?.takeUnless(JsonNode::isNull)
-        ?.asText()
-        ?.takeUnless(String::isBlank)
-        ?: throw IllegalArgumentException("ArbeidsgiverHendelse mangler påkrevd 'altinnRessurs.$fieldName' i data")
-}
 
 fun EsyfovarselHendelse.isArbeidsgiverHendelse(): Boolean = this is ArbeidsgiverHendelse
 

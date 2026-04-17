@@ -30,7 +30,6 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_MER_VEILEDNI
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_OPPRETTET
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING
-import no.nav.syfo.kafka.consumers.varselbus.domain.getArbeidsgiverAltinnRessurs
 import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidsgiverHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.skalFerdigstilles
@@ -165,12 +164,19 @@ class VarselBusService(
     suspend fun ferdigstillVarsel(varselHendelse: EsyfovarselHendelse) {
         if (varselHendelse.isArbeidsgiverHendelse()) {
             val arbeidsgiverHendelse = varselHendelse.toArbeidsgiverHendelse()
-            val altinnRessurs = arbeidsgiverHendelse.getArbeidsgiverAltinnRessurs()
+            val altinnRessurs =
+                try {
+                    arbeidsgiverHendelse.dataToVarselDataAltinnRessurs()
+                } catch (e: Exception) {
+                    log.error("Feil ved konvertering av ArbeidsgiverHendelse til VarselDataAltinnRessurs", e)
+                    null
+                }
             log.info(
                 "Ignorerer ferdigstilling for stubbet arbeidsgiverhendelse: type={}, orgnummer={}, altinnRessursId={}",
                 arbeidsgiverHendelse.type,
                 arbeidsgiverHendelse.orgnummer,
-                altinnRessurs.id,
+                altinnRessurs?.id ?: "null",
+                altinnRessurs?.url ?: "null",
             )
         } else if (varselHendelse.isArbeidstakerHendelse()) {
             senderFacade.ferdigstillArbeidstakerVarsler(varselHendelse.toArbeidstakerHendelse())

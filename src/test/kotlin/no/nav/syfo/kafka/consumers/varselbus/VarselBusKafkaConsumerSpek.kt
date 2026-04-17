@@ -13,7 +13,6 @@ import no.nav.syfo.getTestEnv
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataAltinnRessurs
-import no.nav.syfo.kafka.consumers.varselbus.domain.getArbeidsgiverAltinnRessurs
 import no.nav.syfo.service.VarselBusService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import kotlin.coroutines.Continuation
@@ -51,7 +50,7 @@ class VarselBusKafkaConsumerSpek :
 
                     val hendelse = capturedHendelse.captured
                     hendelse.shouldBeTypeOf<ArbeidsgiverHendelse>()
-                    hendelse.getArbeidsgiverAltinnRessurs() shouldBe
+                    hendelse.dataToVarselDataAltinnRessurs() shouldBe
                         VarselDataAltinnRessurs(
                             id = "urn:altinn:resource:dialogmote",
                             url = "https://www.nav.no/arbeidsgiver/dialogmote",
