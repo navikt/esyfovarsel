@@ -28,7 +28,7 @@ class VarselBusServiceTest :
         val manglendeMedvirkningVarselService = mockk<ManglendeMedvirkningVarselService>(relaxed = true)
         val merVeiledningVarselService = mockk<MerVeiledningVarselService>(relaxed = true)
         val kartleggingssporsmalVarselService = mockk<KartleggingssporsmalVarselService>(relaxed = true)
-        val arbeidsgiverVarselService = mockk<ArbeidsgiverVarselService>(relaxed = true)
+        val dialogmoteInnkallingArbeidsgiverVarselService = mockk<DialogmoteInnkallingArbeidsgiverVarselService>(relaxed = true)
 
         val varselBusService =
             VarselBusService(
@@ -45,7 +45,7 @@ class VarselBusServiceTest :
                 manglendeMedvirkningVarselService = manglendeMedvirkningVarselService,
                 merVeiledningVarselService = merVeiledningVarselService,
                 kartleggingssporsmalVarselService = kartleggingssporsmalVarselService,
-                arbeidsgiverVarselService = arbeidsgiverVarselService,
+                dialogmoteInnkallingArbeidsgiverVarselService = dialogmoteInnkallingArbeidsgiverVarselService,
             )
 
         beforeTest {
@@ -65,7 +65,7 @@ class VarselBusServiceTest :
 
                         varselBusService.processVarselHendelse(hendelse)
 
-                        verify(exactly = 1) { arbeidsgiverVarselService.sendVarselTilArbeidsgiver(hendelse) }
+                        verify(exactly = 1) { dialogmoteInnkallingArbeidsgiverVarselService.sendVarselTilArbeidsgiver(hendelse) }
                         coVerify(exactly = 0) { senderFacade.ferdigstillArbeidstakerVarsler(any()) }
                         coVerify(exactly = 0) { senderFacade.ferdigstillNarmesteLederVarsler(any()) }
                     }
@@ -80,7 +80,7 @@ class VarselBusServiceTest :
 
                     varselBusService.processVarselHendelse(hendelse)
 
-                    verify(exactly = 0) { arbeidsgiverVarselService.sendVarselTilArbeidsgiver(any()) }
+                    verify(exactly = 0) { dialogmoteInnkallingArbeidsgiverVarselService.sendVarselTilArbeidsgiver(any()) }
                     coVerify(exactly = 0) { senderFacade.ferdigstillArbeidstakerVarsler(any()) }
                     coVerify(exactly = 0) { senderFacade.ferdigstillNarmesteLederVarsler(any()) }
                 }

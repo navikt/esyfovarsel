@@ -54,7 +54,7 @@ class VarselBusService(
     private val manglendeMedvirkningVarselService: ManglendeMedvirkningVarselService,
     private val merVeiledningVarselService: MerVeiledningVarselService,
     private val kartleggingssporsmalVarselService: KartleggingssporsmalVarselService,
-    private val arbeidsgiverVarselService: ArbeidsgiverVarselService,
+    private val dialogmoteInnkallingArbeidsgiverVarselService: DialogmoteInnkallingArbeidsgiverVarselService,
 ) {
     private val log: Logger = LoggerFactory.getLogger(VarselBusService::class.qualifiedName)
 
@@ -126,7 +126,7 @@ class VarselBusService(
                 AG_DIALOGMOTE_REFERAT,
                 AG_DIALOGMOTE_NYTT_TID_STED,
                 ->
-                    arbeidsgiverVarselService.sendVarselTilArbeidsgiver(
+                    dialogmoteInnkallingArbeidsgiverVarselService.sendVarselTilArbeidsgiver(
                         varselHendelse.toArbeidsgiverHendelse(),
                     )
 

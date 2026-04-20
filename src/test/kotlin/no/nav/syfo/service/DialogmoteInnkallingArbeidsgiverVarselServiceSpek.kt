@@ -15,10 +15,10 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidsgiverHendelse
 import org.slf4j.LoggerFactory
 
-class ArbeidsgiverVarselServiceSpek :
+class DialogmoteInnkallingArbeidsgiverVarselServiceSpek :
     DescribeSpec({
-        val service = ArbeidsgiverVarselService()
-        val logger = LoggerFactory.getLogger(ArbeidsgiverVarselService::class.qualifiedName) as Logger
+        val service = DialogmoteInnkallingArbeidsgiverVarselService()
+        val logger = LoggerFactory.getLogger(DialogmoteInnkallingArbeidsgiverVarselService::class.qualifiedName) as Logger
         val objectMapper = createObjectMapper()
 
         lateinit var listAppender: ListAppender<ILoggingEvent>
@@ -53,7 +53,7 @@ class ArbeidsgiverVarselServiceSpek :
             listAppender.stop()
         }
 
-        describe("ArbeidsgiverVarselService") {
+        describe("DialogmoteInnkallingArbeidsgiverVarselService") {
             it("logger stubbet arbeidsgiverhendelse med bare trygge eksplisitte felter") {
                 service.sendVarselTilArbeidsgiver(
                     arbeidsgiverHendelseFraJson(

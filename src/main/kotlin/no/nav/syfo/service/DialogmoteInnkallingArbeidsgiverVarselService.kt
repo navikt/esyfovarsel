@@ -4,8 +4,8 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverHendelse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class ArbeidsgiverVarselService {
-    private val log: Logger = LoggerFactory.getLogger(ArbeidsgiverVarselService::class.qualifiedName)
+class DialogmoteInnkallingArbeidsgiverVarselService {
+    private val log: Logger = LoggerFactory.getLogger(DialogmoteInnkallingArbeidsgiverVarselService::class.qualifiedName)
 
     fun sendVarselTilArbeidsgiver(arbeidsgiverHendelse: ArbeidsgiverHendelse) {
         val altinnRessurs =
