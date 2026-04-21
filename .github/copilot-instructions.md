@@ -290,7 +290,7 @@ If it's genuinely unclear whether the user wants a permanent doc or a working no
 
 ## Keeping Copilot Config in Sync
 
-When making changes that affect the patterns described in `.github/` config files (agents, instructions, skills), **suggest** updating the relevant files — but do not update them automatically.
+When making changes that affect patterns described in `.github/` config files, **suggest** updating the source of truth — but do not update managed files here automatically.
 
 Examples of changes that should trigger a suggestion:
 - Upgrading or replacing frameworks (e.g., Ktor version bump, switching libraries)
@@ -301,7 +301,13 @@ Examples of changes that should trigger a suggestion:
 - Modifying build tooling or commands
 - Adding new HendelseType or output channels
 
-Format the suggestion as: *"This change affects patterns documented in `.github/instructions/<file>` — want me to update it?"*
+**Check ownership first:**
+
+- **Hovmester-managed files** — files listed in `.github/.hovmester-manifest.json` are synced from `navikt/hovmester`. Do not edit them locally; changes will be overwritten by the next sync PR.
+  Format: *"This change affects `.github/<path>`, which is synced from `navikt/hovmester`. The source should be updated there and then synced into this repo."*
+
+- **Locally owned files** — files not listed in `.github/.hovmester-manifest.json` (for example workflows and this `copilot-instructions.md`) are owned by this repo and can be updated here.
+  Format: *"This change affects `.github/<path>` in this repo — want me to update it here?"*
 
 ## Boundaries
 
