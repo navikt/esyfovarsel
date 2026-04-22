@@ -16,12 +16,12 @@ import com.apollo.graphql.type.NyBeskjedInput
 import com.apollo.graphql.type.SendetidspunktInput
 import com.apollo.graphql.type.Sendevindu
 import com.apollographql.apollo.api.Optional
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601DateTime
-import java.time.LocalDateTime
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.AltinnRessursVariablesCreate
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.EpostSendevinduTypes
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.NarmestelederVariablesCreate
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.Variables
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601DateTime
+import java.time.LocalDateTime
 
 sealed class ArbeidsgiverNotifikasjon {
     abstract val varselId: String
@@ -33,7 +33,9 @@ sealed class ArbeidsgiverNotifikasjon {
     abstract val emailBody: String
     abstract val hardDeleteDate: LocalDateTime
     abstract val grupperingsid: String
+
     abstract fun createVariables(): Variables
+
     fun toNyBeskjedMutation(): NyBeskjedMutation =
         NyBeskjedMutation(
             nyBeskjed =
@@ -199,7 +201,7 @@ data class ArbeidsgiverNotifikasjonAltinnRessurs(
             sendevindu = EpostSendevinduTypes.LOEPENDE,
             hardDeleteDate = hardDeleteDate.formatAsISO8601DateTime(),
             grupperingsid = grupperingsid,
-            ressursId = ressursId
+            ressursId = ressursId,
         )
 }
 

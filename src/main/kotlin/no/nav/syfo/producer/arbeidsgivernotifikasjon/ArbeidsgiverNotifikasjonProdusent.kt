@@ -29,8 +29,6 @@ import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjonAltinnRessurs
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjonNarmesteLeder
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyKalenderInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyStatusSakInput
