@@ -94,6 +94,7 @@ data class VarselDataDialogmoteSvar(
  * Forskjellige typer hendelser som kan sendes til esyfovarsel.
  * "SM_" forkortelse indikerer at det sendes til sykmeldt
  * "NL_" forkortelse indikerer at det sendes til nærmeste leder
+ * "AG_" forkortelse indikerer at det sendes til arbeidsgiver (virksomheten)
  */
 enum class HendelseType {
     AG_VARSEL_ALTINN_RESSURS,
