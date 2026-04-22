@@ -3,7 +3,7 @@ package no.nav.syfo.service
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjonNarmesteLeder
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyKalenderInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyStatusSakInput
@@ -45,8 +45,8 @@ class ArbeidsgiverNotifikasjonService(
 
         val url = arbeidsgiverNotifikasjon.link ?: "$dineSykmeldteUrl/${narmesteLederRelasjon.narmesteLederId}"
 
-        val arbeidsgiverNotifikasjonen =
-            ArbeidsgiverNotifikasjon(
+        val arbeidsgiverNotifikasjonNarmesteLeder =
+            ArbeidsgiverNotifikasjonNarmesteLeder(
                 varselId = arbeidsgiverNotifikasjon.uuid.toString(),
                 virksomhetsnummer = arbeidsgiverNotifikasjon.virksomhetsnummer,
                 url = url,
@@ -62,8 +62,8 @@ class ArbeidsgiverNotifikasjonService(
             )
 
         when (arbeidsgiverNotifikasjon.meldingstype) {
-            BESKJED -> arbeidsgiverNotifikasjonProdusent.createNewBeskjedForArbeidsgiver(arbeidsgiverNotifikasjonen)
-            OPPGAVE -> arbeidsgiverNotifikasjonProdusent.createNewOppgaveForArbeidsgiver(arbeidsgiverNotifikasjonen)
+            BESKJED -> arbeidsgiverNotifikasjonProdusent.createNewBeskjedForArbeidsgiver(arbeidsgiverNotifikasjonNarmesteLeder)
+            OPPGAVE -> arbeidsgiverNotifikasjonProdusent.createNewOppgaveForArbeidsgiver(arbeidsgiverNotifikasjonNarmesteLeder)
         }
     }
 
@@ -101,7 +101,7 @@ data class ArbeidsgiverNotifikasjonInput(
     val messageText: String,
     val epostTittel: String,
     val epostHtmlBody: String,
-    val hardDeleteDate: LocalDateTime? = null,
+    val hardDeleteDate: LocalDateTime,
     val meldingstype: Meldingstype = BESKJED,
     val grupperingsid: String,
     val link: String? = null,

@@ -99,15 +99,48 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
                 }
             }
 
-            it("Referat should send notifikasjon") {
+            it("Referat should send notifikasjon with motetidspunkt-based hardDeleteDate for historical motetidspunkt within 4 weeks") {
                 val varselHendelseInnkalling = createHendelse(type = HendelseType.NL_DIALOGMOTE_INNKALT)
                 dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelseInnkalling)
 
-                val varselHendelseReferat = createHendelse(type = HendelseType.NL_DIALOGMOTE_REFERAT)
+                val historiskMotetidspunkt = LocalDateTime.now().minusWeeks(1)
+                val varselHendelseReferat =
+                    createHendelse(
+                        type = HendelseType.NL_DIALOGMOTE_REFERAT,
+                        motetidspunkt = historiskMotetidspunkt,
+                    )
                 dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelseReferat)
 
                 coVerify(exactly = 1) {
-                    arbeidsgiverNotifikasjonService.sendNotifikasjon(any())
+                    arbeidsgiverNotifikasjonService.sendNotifikasjon(
+                        withArg { input ->
+                            input.hardDeleteDate shouldBeEqualTo historiskMotetidspunkt.plusWeeks(4)
+                        },
+                    )
+                }
+            }
+
+            it("Referat should send notifikasjon with future hardDeleteDate for motetidspunkt older than 4 weeks") {
+                val varselHendelseInnkalling = createHendelse(type = HendelseType.NL_DIALOGMOTE_INNKALT)
+                dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelseInnkalling)
+
+                val historiskMotetidspunkt = LocalDateTime.now().minusWeeks(5)
+                val expectedLowerBound = LocalDateTime.now().plusWeeks(4)
+                val varselHendelseReferat =
+                    createHendelse(
+                        type = HendelseType.NL_DIALOGMOTE_REFERAT,
+                        motetidspunkt = historiskMotetidspunkt,
+                    )
+                dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelseReferat)
+                val expectedUpperBound = LocalDateTime.now().plusWeeks(4)
+
+                coVerify(exactly = 1) {
+                    arbeidsgiverNotifikasjonService.sendNotifikasjon(
+                        withArg { input ->
+                            input.hardDeleteDate.isBefore(expectedLowerBound) shouldBeEqualTo false
+                            input.hardDeleteDate.isAfter(expectedUpperBound) shouldBeEqualTo false
+                        },
+                    )
                 }
             }
 
@@ -185,7 +218,10 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
         }
     })
 
-fun createHendelse(type: HendelseType): NarmesteLederHendelse =
+fun createHendelse(
+    type: HendelseType,
+    motetidspunkt: LocalDateTime = LocalDateTime.now().plusWeeks(1),
+): NarmesteLederHendelse =
     NarmesteLederHendelse(
         type = type,
         ferdigstill = false,
@@ -193,7 +229,7 @@ fun createHendelse(type: HendelseType): NarmesteLederHendelse =
             createObjectMapper().writeValueAsString(
                 VarselData(
                     narmesteLeder = VarselDataNarmesteLeder(navn = "Test Testesen"),
-                    motetidspunkt = VarselDataMotetidspunkt(tidspunkt = LocalDateTime.now().plusWeeks(1)),
+                    motetidspunkt = VarselDataMotetidspunkt(tidspunkt = motetidspunkt),
                 ),
             ),
         narmesteLederFnr = ARBEIDSTAKER_AKTOR_ID_1,

@@ -265,6 +265,11 @@ class DialogmoteInnkallingNarmesteLederVarselService(
             oldVarselService.sendVarselTilNarmesteLeder(varselHendelse)
             return
         }
+        val varselData = varselHendelse.data?.toVarselData()
+        require(varselData != null) { "DialogmoteReferat mangler varselData" }
+        val motetidspunkt =
+            varselData.motetidspunkt?.tidspunkt
+                ?: throw IllegalArgumentException("DialogmoteReferat mangler motetidspunkt")
         val texts = varselHendelse.dialogmoteNarmesteLederTexts()
         updateSakStatus(sakId = sak.id, grupperingsId = sak.grupperingsid, nyStatus = SakStatus.FERDIG)
         senderFacade.updateKalenderavtale(
@@ -283,10 +288,22 @@ class DialogmoteInnkallingNarmesteLederVarselService(
                 messageText = texts.messageText,
                 epostTittel = texts.epostTittel,
                 epostHtmlBody = texts.emailBody,
+                hardDeleteDate = getReferatHardDeleteDate(motetidspunkt),
                 meldingstype = Meldingstype.BESKJED,
                 grupperingsid = sak.grupperingsid,
             )
         senderFacade.sendTilArbeidsgiverNotifikasjon(varselHendelse, input)
+    }
+
+    private fun getReferatHardDeleteDate(motetidspunkt: LocalDateTime): LocalDateTime {
+        val now = LocalDateTime.now()
+        val hardDeleteDate = motetidspunkt.plusWeeks(WEEKS_BEFORE_DELETE)
+
+        return if (hardDeleteDate.isAfter(now)) {
+            hardDeleteDate
+        } else {
+            now.plusWeeks(WEEKS_BEFORE_DELETE)
+        }
     }
 
     private suspend fun createNewSak(
