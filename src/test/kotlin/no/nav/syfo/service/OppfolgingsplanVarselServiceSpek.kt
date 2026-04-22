@@ -124,7 +124,7 @@ class OppfolgingsplanVarselServiceSpek :
             it("Oppfolgingsplan foresporsel should use dinesykmeldte url for arbeidsgivernotifikasjon and sak") {
                 val narmesteLederId = "1234"
                 val expectedUrl = "$fakeDinesykmeldteUrl/$narmesteLederId"
-                val notifikasjonInputSlot = slot<ArbeidsgiverNotifikasjonInput>()
+                val notifikasjonInputSlot = slot<ArbeidsgiverNotifikasjonNarmestelederInput>()
                 val sakInputSlot = slot<NySakInput>()
 
                 coEvery { narmesteLederService.getNarmesteLederRelasjon(FNR_1, ORGNUMMER) } returns
@@ -143,7 +143,7 @@ class OppfolgingsplanVarselServiceSpek :
                             ),
                     )
                 coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns UUID.randomUUID().toString()
-                coEvery { arbeidsgiverNotifikasjonService.sendNotifikasjon(any<ArbeidsgiverNotifikasjonInput>()) } returns Unit
+                coEvery { arbeidsgiverNotifikasjonService.sendNotifikasjon(any<ArbeidsgiverNotifikasjonNarmestelederInput>()) } returns Unit
 
                 val varselHendelse =
                     NarmesteLederHendelse(

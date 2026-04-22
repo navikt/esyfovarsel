@@ -21,7 +21,7 @@ class ArbeidsgiverNotifikasjonService(
 ) {
     private val log: Logger = LoggerFactory.getLogger(ArbeidsgiverNotifikasjonService::class.qualifiedName)
 
-    suspend fun sendNotifikasjon(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonInput) {
+    suspend fun sendNotifikasjon(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonNarmestelederInput) {
         val narmesteLederRelasjon =
             narmesteLederService.getNarmesteLederRelasjon(
                 arbeidsgiverNotifikasjon.ansattFnr,
