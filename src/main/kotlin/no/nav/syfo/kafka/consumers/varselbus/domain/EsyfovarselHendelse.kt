@@ -32,12 +32,29 @@ data class ArbeidstakerHendelse(
     val orgnummer: String?,
 ) : EsyfovarselHendelse
 
+data class ArbeidsgiverHendelse(
+    override val type: HendelseType,
+    override val ferdigstill: Boolean?,
+    override var data: Any?,
+    val orgnummer: String,
+    /** Altinn 3 ressurs-id, for eksempel nav_syfo_dialogmote. */
+    val ressursId: String,
+    val ressursUrl: String,
+) : EsyfovarselHendelse
+
 data class VarselData(
     val journalpost: VarselDataJournalpost? = null,
     val narmesteLeder: VarselDataNarmesteLeder? = null,
     val motetidspunkt: VarselDataMotetidspunkt? = null,
     val aktivitetskrav: VarselDataAktivitetskrav? = null,
     val dialogmoteSvar: VarselDataDialogmoteSvar? = null,
+    val notifikasjonInnhold: VarselDataNotifikasjonInnhold? = null,
+)
+
+data class VarselDataNotifikasjonInnhold(
+    val epostTittel: String,
+    val epostBody: String,
+    val smsTekst: String,
 )
 
 data class VarselDataJournalpost(
@@ -79,6 +96,7 @@ data class VarselDataDialogmoteSvar(
  * "NL_" forkortelse indikerer at det sendes til nærmeste leder
  */
 enum class HendelseType {
+    AG_VARSEL_ALTINN_RESSURS,
     NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
     SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
     NL_DIALOGMOTE_SVAR_MOTEBEHOV,
@@ -139,6 +157,8 @@ fun Any.toVarselData(): VarselData =
 
 fun EsyfovarselHendelse.isArbeidstakerHendelse(): Boolean = this is ArbeidstakerHendelse
 
+fun EsyfovarselHendelse.isArbeidsgiverHendelse(): Boolean = this is ArbeidsgiverHendelse
+
 fun EsyfovarselHendelse.toNarmestelederHendelse(): NarmesteLederHendelse =
     if (this is NarmesteLederHendelse) {
         this
@@ -153,7 +173,21 @@ fun EsyfovarselHendelse.toArbeidstakerHendelse(): ArbeidstakerHendelse =
         throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type ArbeidstakerHendelse")
     }
 
-fun EsyfovarselHendelse.skalFerdigstilles() = ferdigstill ?: false
+fun EsyfovarselHendelse.toArbeidsgiverHendelse(): ArbeidsgiverHendelse =
+    if (this is ArbeidsgiverHendelse) {
+        this
+    } else {
+        throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type ArbeidsgiverHendelse")
+    }
+
+fun EsyfovarselHendelse.skalFerdigstilles(): Boolean =
+    when (this) {
+        is ArbeidstakerHendelse,
+        is NarmesteLederHendelse,
+        -> ferdigstill ?: false
+        // Arbeidsgiverhendelser i V1 skal ikke ferdigstilles via eksisterende arbeidstaker/narmeste-leder-spor.
+        is ArbeidsgiverHendelse -> false
+    }
 
 fun HendelseType.isAktivitetspliktType() = this == HendelseType.SM_AKTIVITETSPLIKT
 

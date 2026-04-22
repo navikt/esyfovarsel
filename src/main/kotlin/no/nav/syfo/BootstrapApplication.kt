@@ -47,6 +47,7 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonPro
 import no.nav.syfo.service.AccessControlService
 import no.nav.syfo.service.AktivitetspliktForhandsvarselService
 import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
+import no.nav.syfo.service.ArbeidsgiverVarselService
 import no.nav.syfo.service.ArbeidsuforhetForhandsvarselService
 import no.nav.syfo.service.BrukernotifikasjonerService
 import no.nav.syfo.service.DialogmoteInnkallingNarmesteLederVarselService
@@ -152,6 +153,7 @@ fun setModule(env: Environment): Application.() -> Unit =
                 fysiskBrevUtsendingService,
                 database,
             )
+        val arbeidsgiverVarselService = ArbeidsgiverVarselService()
         val motebehovVarselService =
             MotebehovVarselService(
                 senderFacade,
@@ -239,6 +241,7 @@ fun setModule(env: Environment): Application.() -> Unit =
         val varselBusService =
             VarselBusService(
                 senderFacade,
+                arbeidsgiverVarselService,
                 motebehovVarselService,
                 oppfolgingsplanVarselService,
                 nyOppfolgingsplanVarselService,
