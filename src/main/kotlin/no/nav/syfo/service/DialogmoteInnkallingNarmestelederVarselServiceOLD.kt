@@ -54,7 +54,7 @@ class DialogmoteInnkallingNarmestelederVarselServiceOLD(
 
         if (!sms.isNullOrBlank() && !emailTitle.isNullOrBlank() && !emailBody.isNullOrBlank()) {
             val input =
-                ArbeidsgiverNotifikasjonInput(
+                ArbeidsgiverNotifikasjonNarmestelederInput(
                     uuid = UUID.randomUUID(),
                     virksomhetsnummer = varselHendelse.orgnummer,
                     narmesteLederFnr = varselHendelse.narmesteLederFnr,

@@ -160,7 +160,7 @@ class SenderFacade(
 
     suspend fun sendTilArbeidsgiverNotifikasjon(
         varselHendelse: NarmesteLederHendelse,
-        notifikasjon: ArbeidsgiverNotifikasjonInput,
+        notifikasjon: ArbeidsgiverNotifikasjonNarmestelederInput,
     ) {
         try {
             arbeidsgiverNotifikasjonService.sendNotifikasjon(notifikasjon)
@@ -184,7 +184,7 @@ class SenderFacade(
 
     suspend fun sendTilArbeidsgiverNotifikasjon(
         varselFeilet: PUtsendtVarselFeilet,
-        notifikasjon: ArbeidsgiverNotifikasjonInput,
+        notifikasjon: ArbeidsgiverNotifikasjonNarmestelederInput,
     ) {
         try {
             arbeidsgiverNotifikasjonService.sendNotifikasjon(notifikasjon)

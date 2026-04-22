@@ -17,7 +17,7 @@ sealed class IArbeidsgiverNotifikasjonInput {
     abstract val link: String?
 }
 
-data class ArbeidsgiverNotifikasjonInput(
+data class ArbeidsgiverNotifikasjonNarmestelederInput(
     override val uuid: UUID,
     override val virksomhetsnummer: String,
     val narmesteLederFnr: String?,

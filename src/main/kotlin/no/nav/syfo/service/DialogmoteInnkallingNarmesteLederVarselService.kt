@@ -279,7 +279,7 @@ class DialogmoteInnkallingNarmesteLederVarselService(
             nyTekst = personData?.let { "Dialogmøte med ${it.firstName()} er avholdt" } ?: "Dialogmøtet er avholdt",
         )
         val input =
-            ArbeidsgiverNotifikasjonInput(
+            ArbeidsgiverNotifikasjonNarmestelederInput(
                 uuid = UUID.randomUUID(),
                 virksomhetsnummer = varselHendelse.orgnummer,
                 narmesteLederFnr = varselHendelse.narmesteLederFnr,
