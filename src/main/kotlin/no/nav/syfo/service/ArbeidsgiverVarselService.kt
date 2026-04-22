@@ -23,12 +23,11 @@ class ArbeidsgiverVarselService {
                     hendelse.type,
                     hendelse.orgnummer,
                     hendelse.ressursId,
-                    exception,
+                    exception.toVarselDataPath(),
                 )
             }.getOrElse { exception ->
                 throw IllegalArgumentException(
                     "ArbeidsgiverHendelse har ugyldig format i feltet: ${exception.toVarselDataPath()}",
-                    exception,
                 )
             }
         val notifikasjonInnhold =
