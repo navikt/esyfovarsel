@@ -18,6 +18,10 @@ import com.apollo.graphql.type.Sendevindu
 import com.apollographql.apollo.api.Optional
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601DateTime
 import java.time.LocalDateTime
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.AltinnRessursVariablesCreate
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.EpostSendevinduTypes
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.NarmestelederVariablesCreate
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.Variables
 
 sealed class ArbeidsgiverNotifikasjon {
     abstract val varselId: String
@@ -29,7 +33,7 @@ sealed class ArbeidsgiverNotifikasjon {
     abstract val emailBody: String
     abstract val hardDeleteDate: LocalDateTime
     abstract val grupperingsid: String
-
+    abstract fun createVariables(): Variables
     fun toNyBeskjedMutation(): NyBeskjedMutation =
         NyBeskjedMutation(
             nyBeskjed =
@@ -121,6 +125,23 @@ data class ArbeidsgiverNotifikasjonNarmesteLeder(
                     ),
             ),
         )
+
+    override fun createVariables() =
+        NarmestelederVariablesCreate(
+            varselId,
+            virksomhetsnummer,
+            url,
+            narmesteLederFnr,
+            ansattFnr,
+            merkelapp,
+            messageText,
+            narmesteLederEpostadresse,
+            emailTitle,
+            emailBody,
+            EpostSendevinduTypes.LOEPENDE,
+            hardDeleteDate.formatAsISO8601DateTime(),
+            grupperingsid,
+        )
 }
 
 data class ArbeidsgiverNotifikasjonAltinnRessurs(
@@ -164,6 +185,21 @@ data class ArbeidsgiverNotifikasjonAltinnRessurs(
                         ),
                     ),
             ),
+        )
+
+    override fun createVariables() =
+        AltinnRessursVariablesCreate(
+            eksternId = varselId,
+            virksomhetsnummer = virksomhetsnummer,
+            lenke = url,
+            merkelapp = merkelapp,
+            tekst = messageText,
+            epostTittel = emailTitle,
+            epostHtmlBody = emailBody,
+            sendevindu = EpostSendevinduTypes.LOEPENDE,
+            hardDeleteDate = hardDeleteDate.formatAsISO8601DateTime(),
+            grupperingsid = grupperingsid,
+            ressursId = ressursId
         )
 }
 

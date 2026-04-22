@@ -31,6 +31,7 @@ import no.nav.syfo.testutil.mocks.ORGNUMMER
 import org.amshove.kluent.shouldBeEqualTo
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjonNarmesteLeder
 
 class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
     DescribeSpec({
@@ -95,7 +96,7 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
                     arbeidsgiverNotifikasjonService.createNewKalenderavtale(any())
                 }
                 coVerify(exactly = 0) {
-                    arbeidsgiverNotifikasjonService.sendNotifikasjon(any())
+                    arbeidsgiverNotifikasjonService.sendNotifikasjon(any<ArbeidsgiverNotifikasjonInput>())
                 }
             }
 
@@ -113,7 +114,7 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
 
                 coVerify(exactly = 1) {
                     arbeidsgiverNotifikasjonService.sendNotifikasjon(
-                        withArg { input ->
+                        withArg { input: ArbeidsgiverNotifikasjonInput ->
                             input.hardDeleteDate shouldBeEqualTo historiskMotetidspunkt.plusWeeks(4)
                         },
                     )
@@ -136,7 +137,7 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
 
                 coVerify(exactly = 1) {
                     arbeidsgiverNotifikasjonService.sendNotifikasjon(
-                        withArg { input ->
+                        withArg { input: ArbeidsgiverNotifikasjonInput ->
                             input.hardDeleteDate.isBefore(expectedLowerBound) shouldBeEqualTo false
                             input.hardDeleteDate.isAfter(expectedUpperBound) shouldBeEqualTo false
                         },
@@ -198,7 +199,7 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
                     arbeidsgiverNotifikasjonService.updateKalenderavtale(any())
                 }
                 coVerify(exactly = 0) {
-                    arbeidsgiverNotifikasjonService.sendNotifikasjon(any())
+                    arbeidsgiverNotifikasjonService.sendNotifikasjon(any<ArbeidsgiverNotifikasjonInput>())
                 }
             }
 
@@ -209,7 +210,7 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
                 dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelseInnkalling)
 
                 coVerify(exactly = 1) {
-                    arbeidsgiverNotifikasjonService.sendNotifikasjon(any())
+                    arbeidsgiverNotifikasjonService.sendNotifikasjon(any<ArbeidsgiverNotifikasjonInput>())
                 }
                 coVerify(exactly = 0) {
                     arbeidsgiverNotifikasjonService.createNewKalenderavtale(any())

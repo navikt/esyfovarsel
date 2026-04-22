@@ -143,7 +143,7 @@ class OppfolgingsplanVarselServiceSpek :
                             ),
                     )
                 coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns UUID.randomUUID().toString()
-                coEvery { arbeidsgiverNotifikasjonService.sendNotifikasjon(any()) } returns Unit
+                coEvery { arbeidsgiverNotifikasjonService.sendNotifikasjon(any<ArbeidsgiverNotifikasjonInput>()) } returns Unit
 
                 val varselHendelse =
                     NarmesteLederHendelse(

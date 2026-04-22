@@ -75,7 +75,7 @@ class ArbeidsgiverNotifikasjonProdusentSpek :
                 val hardDeleteDate = LocalDateTime.of(2024, 1, 2, 3, 4, 5)
                 val requestBody =
                     jacksonObjectMapper().writeValueAsString(
-                        VariablesCreate(
+                        NarmestelederVariablesCreate(
                             eksternId = UUID.randomUUID().toString(),
                             virksomhetsnummer = ORGNUMMER,
                             lenke = "",
