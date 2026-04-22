@@ -64,7 +64,7 @@ class ArbeidsgiverNotifikasjonProdusentSpek :
                     }
 
                 exception.message shouldBe
-                    "Could not send task to arbeidsgiver. because of error: Simulert feil fra arbeidsgiver notifikasjon API, data was null"
+                    "Could not send task to arbeidsgiver: httpStatus=200, errorsEmpty=false, firstError=Simulert feil fra arbeidsgiver notifikasjon API, dataWasNull=true"
             }
 
             it("Should send beskjed") {
