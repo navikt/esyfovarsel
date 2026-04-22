@@ -60,7 +60,12 @@ class MockServers(
                   "data": {
                     "nyBeskjed": {
                       "__typename": "NyBeskjedVellykket",
-                      "id": "d69f8c4f-8d34-47b0-9539-d3c2e54115da"
+                      "id": "d69f8c4f-8d34-47b0-9539-d3c2e54115da",
+                      "eksterneVarsler": [
+                        {
+                          "id": "d69f8c4f-8d34-47b0-9539-d3c2e54115db"
+                        }
+                      ]
                     }
                   }
                 }
@@ -75,11 +80,25 @@ class MockServers(
                   }
                 }
             """
+            val responseNyOppgaveMedFeil = """
+                {
+                  "data": null,
+                  "errors": [
+                    {
+                      "message": "Simulert feil fra arbeidsgiver notifikasjon API"
+                    }
+                  ]
+                }
+            """
             post("/") {
                 val body = call.receiveText()
                 if (body.contains("OpprettNyOppgave")) {
-                    call.respondText(responseNyOppgave, ContentType.Application.Json)
-                } else if (body.contains("OpprettNyBeskjed")) {
+                    if (body.contains("force-error")) {
+                        call.respondText(responseNyOppgaveMedFeil, ContentType.Application.Json)
+                    } else {
+                        call.respondText(responseNyOppgave, ContentType.Application.Json)
+                    }
+                } else if (body.contains("OpprettNyBeskjed") || body.contains("\"operationName\":\"nyBeskjed\"")) {
                     call.respondText(responseNyBeskjed, ContentType.Application.Json)
                 } else {
                     call.respond(HttpStatusCode.InternalServerError)

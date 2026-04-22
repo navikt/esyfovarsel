@@ -4,6 +4,7 @@ import java.io.Serializable
 
 data class NyOppgaveResponse(
     val data: Data?,
+    val errors: List<Error>? = null,
 )
 
 data class NyOppgave(
