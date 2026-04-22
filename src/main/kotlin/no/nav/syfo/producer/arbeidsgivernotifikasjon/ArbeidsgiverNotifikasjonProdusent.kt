@@ -29,6 +29,7 @@ import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjonAltinnRessurs
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjonNarmesteLeder
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyKalenderInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
@@ -58,7 +59,7 @@ open class ArbeidsgiverNotifikasjonProdusent(
             .addInterceptor(BearerTokenInterceptor { azureAdTokenConsumer.getToken(scope) })
             .build()
 
-    suspend fun createNewOppgaveForArbeidsgiver(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonNarmesteLeder): String? {
+    suspend fun createNewOppgaveForArbeidsgiver(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? {
         log.info(
             "About to send new task with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api",
         )
@@ -262,23 +263,6 @@ open class ArbeidsgiverNotifikasjonProdusent(
             return null
         }
     }
-
-    private fun ArbeidsgiverNotifikasjonNarmesteLeder.createVariables() =
-        VariablesCreate(
-            varselId,
-            virksomhetsnummer,
-            url,
-            narmesteLederFnr,
-            ansattFnr,
-            merkelapp,
-            messageText,
-            narmesteLederEpostadresse,
-            emailTitle,
-            emailBody,
-            EpostSendevinduTypes.LOEPENDE,
-            hardDeleteDate.formatAsISO8601DateTime(),
-            grupperingsid,
-        )
 
     suspend fun deleteNotifikasjonForArbeidsgiver(arbeidsgiverDeleteNotifikasjon: ArbeidsgiverDeleteNotifikasjon) {
         log.info(
