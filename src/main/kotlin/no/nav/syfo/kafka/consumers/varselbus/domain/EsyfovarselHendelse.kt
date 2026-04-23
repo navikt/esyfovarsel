@@ -32,10 +32,13 @@ data class ArbeidstakerHendelse(
     val orgnummer: String?,
 ) : EsyfovarselHendelse
 
-data class ArbeidsgiverHendelse(
+data class ArbeidsgiverNotifikasjonTilAltinnRessursHendelse(
     override val type: HendelseType,
     override val ferdigstill: Boolean?,
     override var data: Any?,
+    val arbeidstakerFnr: String? = null,
+    val eksternReferanseId: String,
+    val kilde: String,
     val orgnummer: String,
     /** Altinn 3 ressurs-id, for eksempel nav_syfo_dialogmote. */
     val ressursId: String,
@@ -158,7 +161,7 @@ fun Any.toVarselData(): VarselData =
 
 fun EsyfovarselHendelse.isArbeidstakerHendelse(): Boolean = this is ArbeidstakerHendelse
 
-fun EsyfovarselHendelse.isArbeidsgiverHendelse(): Boolean = this is ArbeidsgiverHendelse
+fun EsyfovarselHendelse.isArbeidsgiverHendelse(): Boolean = this is ArbeidsgiverNotifikasjonTilAltinnRessursHendelse
 
 fun EsyfovarselHendelse.toNarmestelederHendelse(): NarmesteLederHendelse =
     if (this is NarmesteLederHendelse) {
@@ -174,8 +177,8 @@ fun EsyfovarselHendelse.toArbeidstakerHendelse(): ArbeidstakerHendelse =
         throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type ArbeidstakerHendelse")
     }
 
-fun EsyfovarselHendelse.toArbeidsgiverHendelse(): ArbeidsgiverHendelse =
-    if (this is ArbeidsgiverHendelse) {
+fun EsyfovarselHendelse.toArbeidsgiverNotifikasjonTilAltinnRessursHendelse(): ArbeidsgiverNotifikasjonTilAltinnRessursHendelse =
+    if (this is ArbeidsgiverNotifikasjonTilAltinnRessursHendelse) {
         this
     } else {
         throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type ArbeidsgiverHendelse")
@@ -185,9 +188,8 @@ fun EsyfovarselHendelse.skalFerdigstilles(): Boolean =
     when (this) {
         is ArbeidstakerHendelse,
         is NarmesteLederHendelse,
+        is ArbeidsgiverNotifikasjonTilAltinnRessursHendelse,
         -> ferdigstill ?: false
-        // Arbeidsgiverhendelser i V1 skal ikke ferdigstilles via eksisterende arbeidstaker/narmeste-leder-spor.
-        is ArbeidsgiverHendelse -> false
     }
 
 fun HendelseType.isAktivitetspliktType() = this == HendelseType.SM_AKTIVITETSPLIKT

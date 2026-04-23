@@ -30,7 +30,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_VEDTAK_FRISK
 import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidsgiverHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.skalFerdigstilles
-import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidsgiverHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidsgiverNotifikasjonTilAltinnRessursHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toNarmestelederHendelse
 import no.nav.syfo.service.microfrontend.MikrofrontendService
@@ -62,7 +62,7 @@ class VarselBusService(
             when (varselHendelse.type) {
                 AG_VARSEL_ALTINN_RESSURS ->
                     arbeidsgiverVarselService.sendVarselTilArbeidsgiver(
-                        varselHendelse.toArbeidsgiverHendelse(),
+                        varselHendelse.toArbeidsgiverNotifikasjonTilAltinnRessursHendelse(),
                     )
 
                 NL_OPPFOLGINGSPLAN_FORESPORSEL ->
