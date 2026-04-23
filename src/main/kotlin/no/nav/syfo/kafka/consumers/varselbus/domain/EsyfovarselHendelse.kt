@@ -8,6 +8,12 @@ import java.time.LocalDateTime
 
 private val objectMapper = createObjectMapper()
 
+/**
+ * Denne annotasjonen vil legge til et felt "@type" i JSON-representasjonen av EsyfovarselHendelse,
+ * som vil inneholde navnet på den konkrete implementasjonen (for eksempel NarmesteLederHendelse).
+ * Den vil også brukes ved deserialisering fra json til object,
+ * så vi får en NarmesteLederHendelse kun med objectMapper.readValue(hendelseAsJson).
+ */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
 sealed interface EsyfovarselHendelse : Serializable {
     val type: HendelseType
