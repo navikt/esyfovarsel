@@ -4,7 +4,7 @@ import no.nav.syfo.service.Meldingstype.BESKJED
 import java.time.LocalDateTime
 import java.util.UUID
 
-sealed class IArbeidsgiverNotifikasjonInput {
+sealed class ArbeidsgiverNotifikasjonInput {
     abstract val uuid: UUID
     abstract val virksomhetsnummer: String
     abstract val merkelapp: String
@@ -30,7 +30,7 @@ data class ArbeidsgiverNotifikasjonNarmestelederInput(
     override val meldingstype: Meldingstype = BESKJED,
     override val grupperingsid: String,
     override val link: String? = null,
-) : IArbeidsgiverNotifikasjonInput()
+) : ArbeidsgiverNotifikasjonInput()
 
 data class ArbeidsgiverNotifikasjonAltinnRessursInput(
     override val uuid: UUID,
@@ -45,4 +45,4 @@ data class ArbeidsgiverNotifikasjonAltinnRessursInput(
     override val link: String? = null,
     val ressursId: String,
     val ressursUrl: String,
-) : IArbeidsgiverNotifikasjonInput()
+) : ArbeidsgiverNotifikasjonInput()
