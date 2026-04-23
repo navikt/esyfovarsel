@@ -5,8 +5,9 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.syfo.kafka.common.createObjectMapper
-import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverNotifikasjonTilAltinnRessursHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import java.util.UUID
 
 class ArbeidsgiverVarselServiceTest :
     DescribeSpec({
@@ -14,13 +15,16 @@ class ArbeidsgiverVarselServiceTest :
         val objectMapper = createObjectMapper()
 
         val grunnHendelse =
-            ArbeidsgiverHendelse(
+            ArbeidsgiverNotifikasjonTilAltinnRessursHendelse(
                 type = HendelseType.AG_VARSEL_ALTINN_RESSURS,
                 ferdigstill = false,
                 data = null,
                 orgnummer = "999888777",
                 ressursId = "nav_syfo_dialogmote",
                 ressursUrl = "https://www.altinn.no",
+                arbeidstakerFnr = "012345678901",
+                kilde = "tjeneste.type",
+                eksternReferanseId = UUID.randomUUID().toString(),
             )
 
         describe("ArbeidsgiverVarselService stub") {

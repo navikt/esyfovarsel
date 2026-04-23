@@ -5,8 +5,9 @@ import io.mockk.clearAllMocks
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverNotifikasjonTilAltinnRessursHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import java.util.UUID
 
 class VarselBusServiceTest :
     DescribeSpec({
@@ -43,14 +44,17 @@ class VarselBusServiceTest :
                 kartleggingssporsmalVarselService = kartleggingssporsmalVarselService,
             )
 
-        val arbeidsgiverHendelse =
-            ArbeidsgiverHendelse(
+        val arbeidsgiverNotifikasjonTilAltinnRessursHendelse =
+            ArbeidsgiverNotifikasjonTilAltinnRessursHendelse(
                 type = HendelseType.AG_VARSEL_ALTINN_RESSURS,
                 ferdigstill = false,
                 data = """{"notifikasjonInnhold":{"epostTittel":"Tittel","epostBody":"Body","smsTekst":"SMS"}}""",
                 orgnummer = "999888777",
                 ressursId = "nav_syfo_dialogmote",
                 ressursUrl = "https://www.altinn.no",
+                arbeidstakerFnr = "012345678901",
+                kilde = "tjeneste.type",
+                eksternReferanseId = UUID.randomUUID().toString(),
             )
 
         beforeTest {
@@ -59,14 +63,16 @@ class VarselBusServiceTest :
 
         describe("VarselBusService for arbeidsgiverhendelser") {
             it("ruter AG_VARSEL_ALTINN_RESSURS til ArbeidsgiverVarselService") {
-                varselBusService.processVarselHendelse(arbeidsgiverHendelse)
+                varselBusService.processVarselHendelse(arbeidsgiverNotifikasjonTilAltinnRessursHendelse)
 
-                coVerify(exactly = 1) { arbeidsgiverVarselService.sendVarselTilArbeidsgiver(arbeidsgiverHendelse) }
+                coVerify(
+                    exactly = 1,
+                ) { arbeidsgiverVarselService.sendVarselTilArbeidsgiver(arbeidsgiverNotifikasjonTilAltinnRessursHendelse) }
                 verify(exactly = 0) { mikrofrontendService.updateMikrofrontendForUserByHendelse(any()) }
             }
 
             it("ferdigstiller ikke arbeidsgiverhendelser i arbeidstaker/narmeste-leder-spor") {
-                varselBusService.ferdigstillVarsel(arbeidsgiverHendelse.copy(ferdigstill = true))
+                varselBusService.ferdigstillVarsel(arbeidsgiverNotifikasjonTilAltinnRessursHendelse.copy(ferdigstill = true))
 
                 coVerify(exactly = 0) { senderFacade.ferdigstillArbeidstakerVarsler(any()) }
                 coVerify(exactly = 0) { senderFacade.ferdigstillNarmesteLederVarsler(any()) }

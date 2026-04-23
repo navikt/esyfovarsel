@@ -1,7 +1,7 @@
 package no.nav.syfo.service
 
 import com.fasterxml.jackson.databind.JsonMappingException
-import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverNotifikasjonTilAltinnRessursHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 class ArbeidsgiverVarselService {
     private val log: Logger = LoggerFactory.getLogger(ArbeidsgiverVarselService::class.qualifiedName)
 
-    suspend fun sendVarselTilArbeidsgiver(hendelse: ArbeidsgiverHendelse) {
+    suspend fun sendVarselTilArbeidsgiver(hendelse: ArbeidsgiverNotifikasjonTilAltinnRessursHendelse) {
         val data =
             requireNotNull(hendelse.data) {
                 "ArbeidsgiverHendelse mangler feltet: data"

@@ -11,7 +11,7 @@ class EsyfovarselHendelseTest :
         val arbeidsgiverHendelseJson =
             """
             {
-              "@type": "ArbeidsgiverHendelse",
+              "@type": "ArbeidsgiverNotifikasjonTilAltinnRessursHendelse",
               "type": "AG_VARSEL_ALTINN_RESSURS",
               "ferdigstill": false,
               "data": {
@@ -23,7 +23,10 @@ class EsyfovarselHendelseTest :
               },
               "orgnummer": "999888777",
               "ressursId": "nav_syfo_dialogmote",
-              "ressursUrl": "https://www.altinn.no"
+              "ressursUrl": "https://www.altinn.no",
+              "kilde": "dokumentporten.dialogmote",
+              "arbeidstakerFnr": "012345678901",
+              "eksternReferanseId": "123e4567-e89b-12d3-a456-426614174000"
             }
             """.trimIndent()
 
@@ -33,7 +36,7 @@ class EsyfovarselHendelseTest :
                 hendelse.data = objectMapper.readTree(arbeidsgiverHendelseJson)["data"]
                 val varselData = requireNotNull(hendelse.data).toVarselData()
 
-                (hendelse is ArbeidsgiverHendelse) shouldBe true
+                (hendelse is ArbeidsgiverNotifikasjonTilAltinnRessursHendelse) shouldBe true
                 hendelse.type shouldBe HendelseType.AG_VARSEL_ALTINN_RESSURS
                 varselData.notifikasjonInnhold?.epostTittel shouldBe "Du har fått en ny melding"
                 varselData.notifikasjonInnhold?.epostBody shouldBe "Les meldingen i Altinn"
