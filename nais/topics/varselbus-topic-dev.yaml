@@ -27,6 +27,9 @@ spec:
     - team: team-esyfo
       application: syfomotebehov
       access: write
+    - team: team-esyfo
+      application: syfo-dokumentporten
+      access: write
     - team: teamsykefravr
       application: isdialogmote
       access: write
