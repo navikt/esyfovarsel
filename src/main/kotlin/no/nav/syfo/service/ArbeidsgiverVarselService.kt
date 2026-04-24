@@ -36,11 +36,13 @@ class ArbeidsgiverVarselService {
             }
         with(notifikasjonInnhold) {
             log.info(
-                "ArbeidsgiverVarselService stub kalt: type={}, orgnummer={}, ressursId={}, ressursUrl={}, harEpostTittel={}, epostTittelLengde={}, harEpostBody={}, epostBodyLengde={}, harSmsTekst={}, smsTekstLengde={}",
+                "ArbeidsgiverVarselService stub kalt: type={}, orgnummer={}, kilde={}, ressursId={}, ressursUrl={}, eksternRefereanseId={}, harEpostTittel={}, epostTittelLengde={}, harEpostBody={}, epostBodyLengde={}, harSmsTekst={}, smsTekstLengde={}",
                 hendelse.type,
                 hendelse.orgnummer,
+                hendelse.kilde,
                 hendelse.ressursId,
                 hendelse.ressursUrl,
+                hendelse.eksternReferanseId,
                 epostTittel.isNotBlank(),
                 epostTittel.length,
                 epostBody.isNotBlank(),
