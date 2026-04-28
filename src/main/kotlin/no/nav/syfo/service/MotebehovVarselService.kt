@@ -75,7 +75,7 @@ class MotebehovVarselService(
     private suspend fun sendVarselTilArbeidsgiverNotifikasjon(varselHendelse: NarmesteLederHendelse) {
         senderFacade.sendTilArbeidsgiverNotifikasjon(
             varselHendelse,
-            ArbeidsgiverNotifikasjonInput(
+            ArbeidsgiverNotifikasjonNarmestelederInput(
                 UUID.randomUUID(),
                 varselHendelse.orgnummer,
                 varselHendelse.narmesteLederFnr,
@@ -147,7 +147,7 @@ class MotebehovVarselService(
             return false
         }
         val notifikasjon =
-            ArbeidsgiverNotifikasjonInput(
+            ArbeidsgiverNotifikasjonNarmestelederInput(
                 UUID.randomUUID(),
                 utsendtvarselFeilet.orgnummer,
                 utsendtvarselFeilet.narmesteLederFnr,
@@ -213,7 +213,7 @@ class MotebehovVarselService(
         val data = dataToVarselDataMotebehovTilbakemelding(varselHendelse.data)
         senderFacade.sendTilArbeidsgiverNotifikasjon(
             varselHendelse,
-            ArbeidsgiverNotifikasjonInput(
+            ArbeidsgiverNotifikasjonNarmestelederInput(
                 uuid = UUID.randomUUID(),
                 virksomhetsnummer = varselHendelse.orgnummer,
                 narmesteLederFnr = varselHendelse.narmesteLederFnr,

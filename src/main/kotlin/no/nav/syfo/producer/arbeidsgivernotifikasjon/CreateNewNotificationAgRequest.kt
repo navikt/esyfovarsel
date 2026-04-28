@@ -11,7 +11,7 @@ enum class EpostSendevinduTypes {
 
 sealed interface Variables
 
-data class VariablesCreate(
+data class NarmestelederVariablesCreate(
     val eksternId: String,
     val virksomhetsnummer: String,
     val lenke: String,
@@ -25,6 +25,20 @@ data class VariablesCreate(
     val sendevindu: EpostSendevinduTypes,
     val hardDeleteDate: String,
     val grupperingsid: String,
+) : Variables
+
+data class AltinnRessursVariablesCreate(
+    val eksternId: String,
+    val virksomhetsnummer: String,
+    val lenke: String,
+    val merkelapp: String,
+    val tekst: String,
+    val epostTittel: String,
+    val epostHtmlBody: String,
+    val sendevindu: EpostSendevinduTypes,
+    val hardDeleteDate: String,
+    val grupperingsid: String,
+    val ressursId: String,
 ) : Variables
 
 data class VariablesDelete(
