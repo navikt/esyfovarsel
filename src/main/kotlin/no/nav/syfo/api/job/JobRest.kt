@@ -6,6 +6,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.accept
 import io.ktor.server.routing.post
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.job.ResendFailedVarslerJob
@@ -22,7 +23,7 @@ fun Route.registerJobTriggerApi(
     accept(ContentType.Application.Json) {
         post(URL_PATH_JOB_TRIGGER) {
             call.respond(HttpStatusCode.OK)
-            runBlocking {
+            coroutineScope {
                 launch {
                     mikrofrontendService.findAndCloseExpiredMikrofrontends()
                 }
