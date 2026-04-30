@@ -288,22 +288,11 @@ class DialogmoteInnkallingNarmesteLederVarselService(
                 messageText = texts.messageText,
                 epostTittel = texts.epostTittel,
                 epostHtmlBody = texts.emailBody,
-                hardDeleteDate = getReferatHardDeleteDate(motetidspunkt),
+                hardDeleteDate = null,
                 meldingstype = Meldingstype.BESKJED,
                 grupperingsid = sak.grupperingsid,
             )
         senderFacade.sendTilArbeidsgiverNotifikasjon(varselHendelse, input)
-    }
-
-    private fun getReferatHardDeleteDate(motetidspunkt: LocalDateTime): LocalDateTime {
-        val now = LocalDateTime.now()
-        val hardDeleteDate = motetidspunkt.plusWeeks(WEEKS_BEFORE_DELETE)
-
-        return if (hardDeleteDate.isAfter(now)) {
-            hardDeleteDate
-        } else {
-            now.plusWeeks(WEEKS_BEFORE_DELETE)
-        }
     }
 
     private suspend fun createNewSak(

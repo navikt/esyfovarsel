@@ -31,7 +31,7 @@ sealed class ArbeidsgiverNotifikasjon {
     abstract val merkelapp: String
     abstract val emailTitle: String
     abstract val emailBody: String
-    abstract val hardDeleteDate: LocalDateTime
+    abstract val hardDeleteDate: LocalDateTime?
     abstract val grupperingsid: String
 
     abstract fun createVariables(): Variables
@@ -72,7 +72,7 @@ sealed class ArbeidsgiverNotifikasjon {
             hardDelete =
                 Optional.present(
                     FutureTemporalInput(
-                        den = Optional.present(hardDeleteDate.formatAsISO8601DateTime()),
+                        den = Optional.present(hardDeleteDate?.formatAsISO8601DateTime()),
                     ),
                 ),
         )
@@ -89,7 +89,7 @@ data class ArbeidsgiverNotifikasjonNarmesteLeder(
     override val merkelapp: String,
     override val emailTitle: String,
     override val emailBody: String,
-    override val hardDeleteDate: LocalDateTime,
+    override val hardDeleteDate: LocalDateTime?,
     override val grupperingsid: String,
 ) : ArbeidsgiverNotifikasjon() {
     override fun createMottakere(): List<MottakerInput> =
@@ -141,7 +141,7 @@ data class ArbeidsgiverNotifikasjonNarmesteLeder(
             emailTitle,
             emailBody,
             EpostSendevinduTypes.LOEPENDE,
-            hardDeleteDate.formatAsISO8601DateTime(),
+            hardDeleteDate?.formatAsISO8601DateTime(),
             grupperingsid,
         )
 }
@@ -154,7 +154,7 @@ data class ArbeidsgiverNotifikasjonAltinnRessurs(
     override val merkelapp: String,
     override val emailTitle: String,
     override val emailBody: String,
-    override val hardDeleteDate: LocalDateTime,
+    override val hardDeleteDate: LocalDateTime?,
     override val grupperingsid: String,
     val ressursId: String,
 ) : ArbeidsgiverNotifikasjon() {
@@ -199,7 +199,7 @@ data class ArbeidsgiverNotifikasjonAltinnRessurs(
             epostTittel = emailTitle,
             epostHtmlBody = emailBody,
             sendevindu = EpostSendevinduTypes.LOEPENDE,
-            hardDeleteDate = hardDeleteDate.formatAsISO8601DateTime(),
+            hardDeleteDate = hardDeleteDate?.formatAsISO8601DateTime(),
             grupperingsid = grupperingsid,
             ressursId = ressursId,
         )

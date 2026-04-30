@@ -1,6 +1,7 @@
 package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -99,7 +100,7 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
                 }
             }
 
-            it("Referat should send notifikasjon with motetidspunkt-based hardDeleteDate for historical motetidspunkt within 4 weeks") {
+            it("Referat should send notifikasjon with referat with hardDeleteDate as null") {
                 val varselHendelseInnkalling = createHendelse(type = HendelseType.NL_DIALOGMOTE_INNKALT)
                 dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelseInnkalling)
 
@@ -114,31 +115,7 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
                 coVerify(exactly = 1) {
                     arbeidsgiverNotifikasjonService.sendNotifikasjon(
                         withArg { input: ArbeidsgiverNotifikasjonNarmestelederInput ->
-                            input.hardDeleteDate shouldBeEqualTo historiskMotetidspunkt.plusWeeks(4)
-                        },
-                    )
-                }
-            }
-
-            it("Referat should send notifikasjon with future hardDeleteDate for motetidspunkt older than 4 weeks") {
-                val varselHendelseInnkalling = createHendelse(type = HendelseType.NL_DIALOGMOTE_INNKALT)
-                dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelseInnkalling)
-
-                val historiskMotetidspunkt = LocalDateTime.now().minusWeeks(5)
-                val expectedLowerBound = LocalDateTime.now().plusWeeks(4)
-                val varselHendelseReferat =
-                    createHendelse(
-                        type = HendelseType.NL_DIALOGMOTE_REFERAT,
-                        motetidspunkt = historiskMotetidspunkt,
-                    )
-                dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelseReferat)
-                val expectedUpperBound = LocalDateTime.now().plusWeeks(4)
-
-                coVerify(exactly = 1) {
-                    arbeidsgiverNotifikasjonService.sendNotifikasjon(
-                        withArg { input: ArbeidsgiverNotifikasjonNarmestelederInput ->
-                            input.hardDeleteDate.isBefore(expectedLowerBound) shouldBeEqualTo false
-                            input.hardDeleteDate.isAfter(expectedUpperBound) shouldBeEqualTo false
+                            input.hardDeleteDate shouldBe null
                         },
                     )
                 }

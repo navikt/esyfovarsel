@@ -23,7 +23,7 @@ data class NarmestelederVariablesCreate(
     val epostTittel: String,
     val epostHtmlBody: String,
     val sendevindu: EpostSendevinduTypes,
-    val hardDeleteDate: String,
+    val hardDeleteDate: String?,
     val grupperingsid: String,
 ) : Variables
 
@@ -36,7 +36,7 @@ data class AltinnRessursVariablesCreate(
     val epostTittel: String,
     val epostHtmlBody: String,
     val sendevindu: EpostSendevinduTypes,
-    val hardDeleteDate: String,
+    val hardDeleteDate: String?,
     val grupperingsid: String,
     val ressursId: String,
 ) : Variables
