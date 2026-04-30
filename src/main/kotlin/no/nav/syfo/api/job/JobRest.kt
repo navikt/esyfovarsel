@@ -7,12 +7,15 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.accept
 import io.ktor.server.routing.post
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.supervisorScope
 import no.nav.syfo.job.ResendFailedVarslerJob
 import no.nav.syfo.job.SendAktivitetspliktLetterToSentralPrintJob
 import no.nav.syfo.service.microfrontend.MikrofrontendService
+import java.util.concurrent.atomic.AtomicBoolean
 
 const val URL_PATH_JOB_TRIGGER = "/job/trigger"
+
+private val isRunning = AtomicBoolean(false)
 
 fun Route.registerJobTriggerApi(
     mikrofrontendService: MikrofrontendService,
@@ -21,24 +24,25 @@ fun Route.registerJobTriggerApi(
 ) {
     accept(ContentType.Application.Json) {
         post(URL_PATH_JOB_TRIGGER) {
-            call.respond(HttpStatusCode.OK)
-            runBlocking {
-                launch {
-                    mikrofrontendService.findAndCloseExpiredMikrofrontends()
-                }
-                launch {
-                    sendAktivitetspliktLetterToSentralPrintJob.sendLetterToTvingSentralPrintFromJob()
-                }
-                launch {
-                    resendFailedVarslerJob.resendFailedBrukernotifikasjonVarsler()
-                }
-                launch {
-                    resendFailedVarslerJob.resendFailedArbeidsgivernotifikasjonVarsler()
-                }
-                launch {
-                    resendFailedVarslerJob.resendFailedDokDistVarsler()
+            if (!isRunning.compareAndSet(false, true)) {
+                return@post call.respond(HttpStatusCode.OK)
+            }
+
+            call.application.launch {
+                try {
+                    supervisorScope {
+                        launch { mikrofrontendService.findAndCloseExpiredMikrofrontends() }
+                        launch { sendAktivitetspliktLetterToSentralPrintJob.sendLetterToTvingSentralPrintFromJob() }
+                        launch { resendFailedVarslerJob.resendFailedBrukernotifikasjonVarsler() }
+                        launch { resendFailedVarslerJob.resendFailedArbeidsgivernotifikasjonVarsler() }
+                        launch { resendFailedVarslerJob.resendFailedDokDistVarsler() }
+                    }
+                } finally {
+                    isRunning.set(false)
                 }
             }
+
+            call.respond(HttpStatusCode.OK)
         }
     }
 }
