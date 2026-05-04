@@ -20,7 +20,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.KalenderTilstand
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyKalenderInput
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakNarmesteLederInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyStatusSakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toKalenderTilstand
@@ -305,7 +305,7 @@ class DialogmoteInnkallingNarmesteLederVarselService(
         val grupperingsid = UUID.randomUUID().toString()
 
         val sakInput =
-            NySakInput(
+            NySakNarmesteLederInput(
                 grupperingsid = grupperingsid,
                 narmestelederId = narmestelederId,
                 merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,

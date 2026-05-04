@@ -1,12 +1,12 @@
 package no.nav.syfo.service
 
+import com.apollo.graphql.NySakMutation
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjonAltinnRessurs
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjonNarmesteLeder
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyKalenderInput
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyStatusSakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.OppdaterKalenderInput
 import no.nav.syfo.service.Meldingstype.BESKJED
@@ -117,7 +117,7 @@ class ArbeidsgiverNotifikasjonService(
             nyKalenderInput = nyKalenderInput,
         )
 
-    suspend fun createNewSak(sakInput: NySakInput): String? = arbeidsgiverNotifikasjonProdusent.createNewSak(sakInput)
+    suspend fun createNewSak(mutation: NySakMutation): String? = arbeidsgiverNotifikasjonProdusent.createNewSak(mutation)
 
     suspend fun nyStatusSak(nyStatusSakInput: NyStatusSakInput): String? = arbeidsgiverNotifikasjonProdusent.nyStatusSak(nyStatusSakInput)
 
