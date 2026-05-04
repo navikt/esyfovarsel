@@ -25,7 +25,7 @@ private val isRunning = AtomicBoolean(false)
 
 private val jobExceptionHandler =
     CoroutineExceptionHandler { ctx: CoroutineContext, throwable: Throwable ->
-        log.warn("Error running job in ${ctx[CoroutineName]}:", throwable)
+        log.error("Error running job in ${ctx[CoroutineName]}:", throwable)
     }
 
 fun Route.registerJobTriggerApi(
