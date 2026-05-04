@@ -6,6 +6,8 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.accept
 import io.ktor.server.routing.post
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -14,11 +16,17 @@ import no.nav.syfo.job.SendAktivitetspliktLetterToSentralPrintJob
 import no.nav.syfo.service.microfrontend.MikrofrontendService
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.CoroutineContext
 
 const val URL_PATH_JOB_TRIGGER = "/job/trigger"
 
 private val log = LoggerFactory.getLogger("no.nav.syfo.api.job.JobRest")
 private val isRunning = AtomicBoolean(false)
+
+private val jobExceptionHandler =
+    CoroutineExceptionHandler { ctx: CoroutineContext, throwable: Throwable ->
+        log.warn("Error running job in ${ctx[CoroutineName]}:", throwable)
+    }
 
 fun Route.registerJobTriggerApi(
     mikrofrontendService: MikrofrontendService,
@@ -35,18 +43,27 @@ fun Route.registerJobTriggerApi(
             call.application.launch(Dispatchers.IO) {
                 try {
                     supervisorScope {
-                        launch { mikrofrontendService.findAndCloseExpiredMikrofrontends() }
-                        launch { sendAktivitetspliktLetterToSentralPrintJob.sendLetterToTvingSentralPrintFromJob() }
-                        launch { resendFailedVarslerJob.resendFailedBrukernotifikasjonVarsler() }
-                        launch { resendFailedVarslerJob.resendFailedArbeidsgivernotifikasjonVarsler() }
-                        launch { resendFailedVarslerJob.resendFailedDokDistVarsler() }
+                        launch(jobExceptionHandler + CoroutineName("FindAndCloseExpiredMikrofrontendsJob")) {
+                            mikrofrontendService.findAndCloseExpiredMikrofrontends()
+                        }
+                        launch(jobExceptionHandler + CoroutineName("SendLetterToTvingSentralPrintFromJob")) {
+                            sendAktivitetspliktLetterToSentralPrintJob.sendLetterToTvingSentralPrintFromJob()
+                        }
+                        launch(jobExceptionHandler + CoroutineName("ResendFailedBrukernotifikasjonVarslerJob")) {
+                            resendFailedVarslerJob.resendFailedBrukernotifikasjonVarsler()
+                        }
+                        launch(jobExceptionHandler + CoroutineName("ResendFailedArbeidsgivernotifikasjonVarslerJob")) {
+                            resendFailedVarslerJob.resendFailedArbeidsgivernotifikasjonVarsler()
+                        }
+                        launch(jobExceptionHandler + CoroutineName("ResendFailedDokDistVarslerJob")) {
+                            resendFailedVarslerJob.resendFailedDokDistVarsler()
+                        }
                     }
                 } finally {
                     isRunning.set(false)
                 }
             }
-
-            call.respond(HttpStatusCode.OK)
+            call.respond(HttpStatusCode.Accepted)
         }
     }
 }

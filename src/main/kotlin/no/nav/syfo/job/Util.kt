@@ -3,7 +3,7 @@ package no.nav.syfo.job
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.JobEnv
 import no.nav.syfo.utils.httpClient
@@ -24,13 +24,10 @@ fun closeExpiredMicrofrontendsJob(env: JobEnv) {
                     append("Authorization", "Basic $encodededCredentials")
                 }
             }
-        val status = response.status
-        if (status == HttpStatusCode.OK) {
-            logg.info("Jobb closeExpiredMicrofrontendsJob startet")
+        if (response.status.isSuccess()) {
+            logg.info("jobb startet")
         } else {
-            logg.error(
-                "Feil i closeExpiredMicrofrontendsJob: Klarte ikke kalle trigger-API i esyfovarsel. Fikk svar med status: $status",
-            )
+            logg.error("Feil: fikk status ${response.status}")
         }
         httpClient.close()
     }
@@ -50,11 +47,10 @@ fun sendSentralPrintAktivitetspliktLetterJob(env: JobEnv) {
                         append("Authorization", "Basic $encodededCredentials")
                     }
                 }
-            val status = response.status
-            if (status == HttpStatusCode.OK) {
+            if (response.status.isSuccess()) {
                 logg.info("Triggered sendSentralPrintAktivitetspliktLetterJob")
             } else {
-                logg.error("Error in sendSentralPrintAktivitetspliktLetterJob: got status: $status")
+                logg.error("Error in sendSentralPrintAktivitetspliktLetterJob: got status: ${response.status}")
             }
             httpClient.close()
         }
