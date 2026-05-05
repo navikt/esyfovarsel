@@ -101,7 +101,8 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
         is_forced_letter,
         is_resendt,
         resendt_tidspunkt,
-        resend_exhausted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        resend_exhausted,
+        hendelse_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """.trimIndent()
 
     connection.use { connection ->
@@ -122,6 +123,7 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
             it.setBoolean(14, varsel.isResendt ?: false)
             it.setTimestamp(15, null)
             it.setBoolean(16, varsel.resendExhausted ?: false)
+            it.setString(17, varsel.hendelseJson)
             it.executeUpdate()
         }
 

@@ -20,6 +20,7 @@ data class PUtsendtVarselFeilet(
     val isForcedLetter: Boolean? = false,
     val isResendt: Boolean? = false,
     val resendExhausted: Boolean? = null,
+    val hendelseJson: String? = null,
 )
 
 fun PUtsendtVarselFeilet.toArbeidstakerHendelse(): ArbeidstakerHendelse =
