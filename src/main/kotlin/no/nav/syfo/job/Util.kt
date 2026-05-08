@@ -26,7 +26,9 @@ fun closeExpiredMicrofrontendsJob(env: JobEnv) {
         if (response.status.isSuccess()) {
             logg.info("jobb startet")
         } else {
-            logg.error("Feil i closeExpiredMicrofrontendsJob: Klarte ikke kalle trigger-API i esyfovarsel. Fikk svar med status: ${response.status}")
+            logg.error(
+                "Feil i closeExpiredMicrofrontendsJob: Klarte ikke kalle trigger-API i esyfovarsel. Fikk svar med status: ${response.status}",
+            )
         }
         httpClient.close()
     }
