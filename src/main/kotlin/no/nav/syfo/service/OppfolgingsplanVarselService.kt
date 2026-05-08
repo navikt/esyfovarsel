@@ -62,7 +62,7 @@ class OppfolgingsplanVarselService(
         )
         senderFacade.sendTilArbeidsgiverNotifikasjon(
             varselHendelse,
-            ArbeidsgiverNotifikasjonInput(
+            ArbeidsgiverNotifikasjonNarmestelederInput(
                 UUID.randomUUID(),
                 varselHendelse.orgnummer,
                 varselHendelse.narmesteLederFnr,
@@ -117,7 +117,7 @@ class OppfolgingsplanVarselService(
         senderFacade.createNewSak(sakInput)
         senderFacade.sendTilArbeidsgiverNotifikasjon(
             varselHendelse,
-            ArbeidsgiverNotifikasjonInput(
+            ArbeidsgiverNotifikasjonNarmestelederInput(
                 UUID.randomUUID(),
                 varselHendelse.orgnummer,
                 varselHendelse.narmesteLederFnr,

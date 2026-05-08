@@ -33,12 +33,10 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyKalenderInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyStatusSakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.OppdaterKalenderInput
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toNyBeskjedMutation
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toNyKalenderavtaleMutation
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toNySakMutation
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toNyStatusSakByGrupperingsidMutation
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toOppdaterKalenderavtaleMutation
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyOppgaveErrorResponse
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyOppgaveResponse
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyoppgaveMutationStatus.NY_OPPGAVE_VELLYKKET
 import no.nav.syfo.utils.httpClientWithRetry
@@ -68,7 +66,8 @@ open class ArbeidsgiverNotifikasjonProdusent(
                 CREATE_TASK_AG_MUTATION,
                 arbeidsgiverNotifikasjon.createVariables(),
             )
-        val nyOppgave = response.body<NyOppgaveResponse>().data?.nyOppgave
+        val nyOppgaveResponse = response.body<NyOppgaveResponse>()
+        val nyOppgave = nyOppgaveResponse.data?.nyOppgave
         val resultat = nyOppgave?.__typename
         if (resultat == NY_OPPGAVE_VELLYKKET.status) {
             log.info(
@@ -79,9 +78,8 @@ open class ArbeidsgiverNotifikasjonProdusent(
             if (resultat != null) {
                 throw RuntimeException(nyOppgave.feilmelding)
             }
-            val errors = response.body<NyOppgaveErrorResponse>().errors
             throw RuntimeException(
-                "Could not send task to arbeidsgiver. because of error: ${errors[0].message}, data was null",
+                "Could not send task to arbeidsgiver: httpStatus=${response.status.value}, errorsEmpty=${nyOppgaveResponse.errors.isNullOrEmpty()}, firstError=${nyOppgaveResponse.errors?.firstOrNull()?.message ?: "unknown error"}, dataWasNull=${nyOppgaveResponse.data == null}",
             )
         }
     }
@@ -263,23 +261,6 @@ open class ArbeidsgiverNotifikasjonProdusent(
             return null
         }
     }
-
-    private fun ArbeidsgiverNotifikasjon.createVariables() =
-        VariablesCreate(
-            varselId,
-            virksomhetsnummer,
-            url,
-            narmesteLederFnr,
-            ansattFnr,
-            merkelapp,
-            messageText,
-            narmesteLederEpostadresse,
-            emailTitle,
-            emailBody,
-            EpostSendevinduTypes.LOEPENDE,
-            hardDeleteDate.toString(),
-            grupperingsid,
-        )
 
     suspend fun deleteNotifikasjonForArbeidsgiver(arbeidsgiverDeleteNotifikasjon: ArbeidsgiverDeleteNotifikasjon) {
         log.info(

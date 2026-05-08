@@ -1,6 +1,7 @@
 package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -95,19 +96,28 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
                     arbeidsgiverNotifikasjonService.createNewKalenderavtale(any())
                 }
                 coVerify(exactly = 0) {
-                    arbeidsgiverNotifikasjonService.sendNotifikasjon(any())
+                    arbeidsgiverNotifikasjonService.sendNotifikasjon(any<ArbeidsgiverNotifikasjonNarmestelederInput>())
                 }
             }
 
-            it("Referat should send notifikasjon") {
+            it("Referat should send notifikasjon with referat with hardDeleteDate as null") {
                 val varselHendelseInnkalling = createHendelse(type = HendelseType.NL_DIALOGMOTE_INNKALT)
                 dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelseInnkalling)
 
-                val varselHendelseReferat = createHendelse(type = HendelseType.NL_DIALOGMOTE_REFERAT)
+                val historiskMotetidspunkt = LocalDateTime.now().minusWeeks(1)
+                val varselHendelseReferat =
+                    createHendelse(
+                        type = HendelseType.NL_DIALOGMOTE_REFERAT,
+                        motetidspunkt = historiskMotetidspunkt,
+                    )
                 dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelseReferat)
 
                 coVerify(exactly = 1) {
-                    arbeidsgiverNotifikasjonService.sendNotifikasjon(any())
+                    arbeidsgiverNotifikasjonService.sendNotifikasjon(
+                        withArg { input: ArbeidsgiverNotifikasjonNarmestelederInput ->
+                            input.hardDeleteDate shouldBe null
+                        },
+                    )
                 }
             }
 
@@ -165,7 +175,7 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
                     arbeidsgiverNotifikasjonService.updateKalenderavtale(any())
                 }
                 coVerify(exactly = 0) {
-                    arbeidsgiverNotifikasjonService.sendNotifikasjon(any())
+                    arbeidsgiverNotifikasjonService.sendNotifikasjon(any<ArbeidsgiverNotifikasjonNarmestelederInput>())
                 }
             }
 
@@ -176,7 +186,7 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
                 dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelseInnkalling)
 
                 coVerify(exactly = 1) {
-                    arbeidsgiverNotifikasjonService.sendNotifikasjon(any())
+                    arbeidsgiverNotifikasjonService.sendNotifikasjon(any<ArbeidsgiverNotifikasjonNarmestelederInput>())
                 }
                 coVerify(exactly = 0) {
                     arbeidsgiverNotifikasjonService.createNewKalenderavtale(any())
@@ -185,7 +195,10 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
         }
     })
 
-fun createHendelse(type: HendelseType): NarmesteLederHendelse =
+fun createHendelse(
+    type: HendelseType,
+    motetidspunkt: LocalDateTime = LocalDateTime.now().plusWeeks(1),
+): NarmesteLederHendelse =
     NarmesteLederHendelse(
         type = type,
         ferdigstill = false,
@@ -193,7 +206,7 @@ fun createHendelse(type: HendelseType): NarmesteLederHendelse =
             createObjectMapper().writeValueAsString(
                 VarselData(
                     narmesteLeder = VarselDataNarmesteLeder(navn = "Test Testesen"),
-                    motetidspunkt = VarselDataMotetidspunkt(tidspunkt = LocalDateTime.now().plusWeeks(1)),
+                    motetidspunkt = VarselDataMotetidspunkt(tidspunkt = motetidspunkt),
                 ),
             ),
         narmesteLederFnr = ARBEIDSTAKER_AKTOR_ID_1,
