@@ -1,11 +1,13 @@
 package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.db.ARBEIDSTAKER_AKTOR_ID_1
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PUtsendtVarsel
@@ -20,6 +22,11 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.planner.ARBEIDSTAKER_FNR_1
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakAltinnInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakNarmesteLederInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SAK_TYPE_DIALOGMOTE_UTEN_LEDER
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SAK_TYPE_OPPFOLGING_MED_LEDER
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
 import no.nav.syfo.testutil.EmbeddedDatabase
 import java.time.LocalDateTime
 import java.util.UUID
@@ -175,6 +182,70 @@ class SenderFacadeSpek :
                 val feiletUtsending = embeddedDatabase.fetchUtsendtVarselFeiletByFnr(ARBEIDSTAKER_FNR_1)
                 assertEquals(1, feiletUtsending.size)
                 assertTrue(feiletUtsending.first().resendExhausted!!)
+            }
+
+            it("Stores eksternSakId from API and fetches ongoing sak by type") {
+                val createdSakId = UUID.randomUUID().toString()
+                coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns createdSakId
+
+                val sakInput =
+                    NySakNarmesteLederInput(
+                        grupperingsid = UUID.randomUUID().toString(),
+                        narmestelederId = "narmeste-leder-id",
+                        merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                        virksomhetsnummer = "999999999",
+                        narmesteLederFnr = "12345678910",
+                        ansattFnr = ARBEIDSTAKER_FNR_1,
+                        tittel = "Oppfølging av sykmeldt",
+                        lenke = "https://www.nav.no",
+                        initiellStatus = SakStatus.MOTTATT,
+                        hardDeleteDate = LocalDateTime.now().plusDays(1),
+                    )
+
+                val storedId = senderFacade.createNewSak(sakInput)
+                val storedSak =
+                    senderFacade.getPaagaaendeSakByType(
+                        ansattFnr = sakInput.ansattFnr,
+                        virksomhetsnummer = sakInput.virksomhetsnummer,
+                        type = SAK_TYPE_OPPFOLGING_MED_LEDER,
+                    )
+
+                storedSak?.id shouldBe storedId
+                storedSak?.eksternSakId shouldBe createdSakId
+                storedSak?.type shouldBe SAK_TYPE_OPPFOLGING_MED_LEDER
+            }
+
+            it("Stores NySakAltinnInput with ressursId and correct type") {
+                val createdSakId = UUID.randomUUID().toString()
+                coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns createdSakId
+
+                val sakInput =
+                    NySakAltinnInput(
+                        grupperingsid = UUID.randomUUID().toString(),
+                        merkelapp = "Dialogmøte",
+                        virksomhetsnummer = "999999999",
+                        ansattFnr = ARBEIDSTAKER_FNR_1,
+                        tittel = "Dialogmøte",
+                        lenke = "https://www.nav.no",
+                        initiellStatus = SakStatus.MOTTATT,
+                        hardDeleteDate = LocalDateTime.now().plusDays(1),
+                        ressursId = "nav_sykefravarsoppfolging_arbeidsgiver",
+                    )
+
+                val storedId = senderFacade.createNewSak(sakInput)
+                val storedSak =
+                    senderFacade.getPaagaaendeSakByType(
+                        ansattFnr = sakInput.ansattFnr,
+                        virksomhetsnummer = sakInput.virksomhetsnummer,
+                        type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
+                    )
+
+                storedSak?.id shouldBe storedId
+                storedSak?.eksternSakId shouldBe createdSakId
+                storedSak?.type shouldBe SAK_TYPE_DIALOGMOTE_UTEN_LEDER
+                storedSak?.ressursId shouldBe "nav_sykefravarsoppfolging_arbeidsgiver"
+                storedSak?.narmestelederId shouldBe null
+                storedSak?.narmesteLederFnr shouldBe null
             }
         }
     })

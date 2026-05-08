@@ -16,6 +16,7 @@ import no.nav.syfo.db.fetchUferdigstilteNarmesteLederVarsler
 import no.nav.syfo.db.fetchUferdigstilteVarsler
 import no.nav.syfo.db.getArbeidsgivernotifikasjonerKalenderavtale
 import no.nav.syfo.db.getPaagaaendeArbeidsgivernotifikasjonerSak
+import no.nav.syfo.db.getPaagaaendeArbeidsgivernotifikasjonerSakByType
 import no.nav.syfo.db.setUferdigstiltUtsendtVarselToForcedLetter
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
 import no.nav.syfo.db.storeArbeidsgivernotifikasjonerKalenderavtale
@@ -206,10 +207,13 @@ class SenderFacade(
     }
 
     suspend fun createNewSak(sakInput: NySakInput): String {
-        val createdSak = arbeidsgiverNotifikasjonService.createNewSak(sakInput)
+        val createdSak = arbeidsgiverNotifikasjonService.createNewSak(sakInput.toNySakMutation())
         require(createdSak != null) { "Failed to create new sak" }
 
-        return database.storeArbeidsgivernotifikasjonerSak(sakInput)
+        return database.storeArbeidsgivernotifikasjonerSak(
+            sakInput = sakInput,
+            eksternSakId = createdSak,
+        )
     }
 
     fun getPaagaaendeSak(
@@ -219,6 +223,17 @@ class SenderFacade(
         database.getPaagaaendeArbeidsgivernotifikasjonerSak(
             narmestelederId = narmesteLederId,
             merkelapp = merkelapp,
+        )
+
+    fun getPaagaaendeSakByType(
+        ansattFnr: String,
+        virksomhetsnummer: String,
+        type: String,
+    ): PSakInput? =
+        database.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
+            ansattFnr = ansattFnr,
+            virksomhetsnummer = virksomhetsnummer,
+            type = type,
         )
 
     suspend fun nyStatusSak(

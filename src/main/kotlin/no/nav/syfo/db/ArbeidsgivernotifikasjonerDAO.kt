@@ -4,7 +4,9 @@ import com.apollo.graphql.type.SaksStatus
 import no.nav.syfo.db.domain.PKalenderInput
 import no.nav.syfo.db.domain.PSakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.KalenderTilstand
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakAltinnInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakNarmesteLederInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
 import java.sql.ResultSet
 import java.sql.SQLException
@@ -13,8 +15,13 @@ import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.UUID
 
-fun DatabaseInterface.storeArbeidsgivernotifikasjonerSak(sakInput: NySakInput): String {
+fun DatabaseInterface.storeArbeidsgivernotifikasjonerSak(
+    sakInput: NySakInput,
+    eksternSakId: String? = null,
+): String {
     val uuid = UUID.randomUUID()
+    val narmesteLederInput = sakInput as? NySakNarmesteLederInput
+    val altinnInput = sakInput as? NySakAltinnInput
     val insertStatement =
         """
         INSERT INTO ARBEIDSGIVERNOTIFIKASJONER_SAK (
@@ -25,6 +32,9 @@ fun DatabaseInterface.storeArbeidsgivernotifikasjonerSak(sakInput: NySakInput): 
             virksomhetsnummer,
             narmesteLederFnr,
             ansattFnr,
+            type,
+            eksternSakId,
+            ressursId,
             tittel,
             tilleggsinformasjon,
             lenke,
@@ -33,27 +43,30 @@ fun DatabaseInterface.storeArbeidsgivernotifikasjonerSak(sakInput: NySakInput): 
             overstyrStatustekstMed,
             hardDeleteDate,
             opprettet
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """.trimIndent()
 
     return try {
         connection.use { connection ->
             connection.prepareStatement(insertStatement).use { preparedStatement ->
                 preparedStatement.setObject(1, uuid)
-                preparedStatement.setString(2, sakInput.narmestelederId)
+                preparedStatement.setString(2, narmesteLederInput?.narmestelederId)
                 preparedStatement.setString(3, sakInput.grupperingsid)
                 preparedStatement.setString(4, sakInput.merkelapp)
                 preparedStatement.setString(5, sakInput.virksomhetsnummer)
-                preparedStatement.setString(6, sakInput.narmesteLederFnr)
+                preparedStatement.setString(6, narmesteLederInput?.narmesteLederFnr)
                 preparedStatement.setString(7, sakInput.ansattFnr)
-                preparedStatement.setString(8, sakInput.tittel)
-                preparedStatement.setString(9, sakInput.tilleggsinformasjon)
-                preparedStatement.setString(10, sakInput.lenke)
-                preparedStatement.setString(11, sakInput.initiellStatus.name)
-                preparedStatement.setString(12, sakInput.nesteSteg)
-                preparedStatement.setString(13, sakInput.overstyrStatustekstMed)
-                preparedStatement.setTimestamp(14, Timestamp.valueOf(sakInput.hardDeleteDate))
-                preparedStatement.setTimestamp(15, Timestamp.valueOf(LocalDateTime.now()))
+                preparedStatement.setString(8, sakInput.toSakType())
+                preparedStatement.setString(9, eksternSakId)
+                preparedStatement.setString(10, altinnInput?.ressursId)
+                preparedStatement.setString(11, sakInput.tittel)
+                preparedStatement.setString(12, sakInput.tilleggsinformasjon)
+                preparedStatement.setString(13, sakInput.lenke)
+                preparedStatement.setString(14, sakInput.initiellStatus.name)
+                preparedStatement.setString(15, sakInput.nesteSteg)
+                preparedStatement.setString(16, sakInput.overstyrStatustekstMed)
+                preparedStatement.setTimestamp(17, Timestamp.valueOf(sakInput.hardDeleteDate))
+                preparedStatement.setTimestamp(18, Timestamp.valueOf(LocalDateTime.now()))
 
                 preparedStatement.executeUpdate()
             }
@@ -107,17 +120,44 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSak(
         AND hardDeleteDate > CURRENT_TIMESTAMP
         AND initiellStatus not in ('FERDIG', 'AVHOLDT')
         ORDER BY opprettet DESC
+        LIMIT 1
         """.trimIndent()
 
-    val listOfSak =
-        connection.use { connection ->
-            connection.prepareStatement(queryStatement).use {
-                it.setString(1, narmestelederId)
-                it.setString(2, merkelapp)
-                it.executeQuery().toList { toPSakInput() }
-            }
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, narmestelederId)
+            it.setString(2, merkelapp)
+            it.executeQuery().toList { toPSakInput() }.firstOrNull()
         }
-    return listOfSak.firstOrNull()
+    }
+}
+
+fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
+    ansattFnr: String,
+    virksomhetsnummer: String,
+    type: String,
+): PSakInput? {
+    val queryStatement =
+        """
+        SELECT *
+        FROM ARBEIDSGIVERNOTIFIKASJONER_SAK
+        WHERE ansattFnr = ?
+        AND virksomhetsnummer = ?
+        AND type = ?
+        AND hardDeleteDate > CURRENT_TIMESTAMP
+        AND initiellStatus not in ('FERDIG', 'AVHOLDT')
+        ORDER BY opprettet DESC
+        LIMIT 1
+        """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, ansattFnr)
+            it.setString(2, virksomhetsnummer)
+            it.setString(3, type)
+            it.executeQuery().toList { toPSakInput() }.firstOrNull()
+        }
+    }
 }
 
 fun ResultSet.toPSakInput() =
@@ -129,6 +169,9 @@ fun ResultSet.toPSakInput() =
         virksomhetsnummer = getString("virksomhetsnummer"),
         narmesteLederFnr = getString("narmesteLederFnr"),
         ansattFnr = getString("ansattFnr"),
+        type = getString("type"),
+        eksternSakId = getString("eksternSakId"),
+        ressursId = getString("ressursId"),
         tittel = getString("tittel"),
         tilleggsinformasjon = getString("tilleggsinformasjon"),
         lenke = getString("lenke"),

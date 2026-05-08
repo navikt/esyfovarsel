@@ -30,11 +30,9 @@ import no.nav.syfo.auth.AzureAdTokenConsumer
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyKalenderInput
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyStatusSakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.OppdaterKalenderInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toNyKalenderavtaleMutation
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toNySakMutation
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toNyStatusSakByGrupperingsidMutation
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toOppdaterKalenderavtaleMutation
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyOppgaveResponse
@@ -120,9 +118,9 @@ open class ArbeidsgiverNotifikasjonProdusent(
         }
     }
 
-    suspend fun createNewSak(nySakInput: NySakInput): String? {
+    suspend fun createNewSak(mutation: NySakMutation): String? {
         log.info("About to create new sak in ag-notifikasjon-produsent-api")
-        val response: ApolloResponse<NySakMutation.Data> = apolloClient.mutation(nySakInput.toNySakMutation()).execute()
+        val response: ApolloResponse<NySakMutation.Data> = apolloClient.mutation(mutation).execute()
         val result = response.data?.nySak
 
         if (result?.onNySakVellykket != null) {

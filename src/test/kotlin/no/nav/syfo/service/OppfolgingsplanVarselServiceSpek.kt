@@ -7,6 +7,7 @@ import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederRelasjon
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
@@ -21,7 +22,6 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.FNR_1
 import no.nav.syfo.testutil.mocks.FNR_2
@@ -125,7 +125,6 @@ class OppfolgingsplanVarselServiceSpek :
                 val narmesteLederId = "1234"
                 val expectedUrl = "$fakeDinesykmeldteUrl/$narmesteLederId"
                 val notifikasjonInputSlot = slot<ArbeidsgiverNotifikasjonNarmestelederInput>()
-                val sakInputSlot = slot<NySakInput>()
 
                 coEvery { narmesteLederService.getNarmesteLederRelasjon(FNR_1, ORGNUMMER) } returns
                     NarmesteLederRelasjon(
@@ -161,11 +160,17 @@ class OppfolgingsplanVarselServiceSpek :
                     arbeidsgiverNotifikasjonService.sendNotifikasjon(capture(notifikasjonInputSlot))
                 }
                 coVerify(exactly = 1) {
-                    arbeidsgiverNotifikasjonService.createNewSak(capture(sakInputSlot))
+                    arbeidsgiverNotifikasjonService.createNewSak(any())
                 }
 
+                val storedSak =
+                    senderFacade.getPaagaaendeSak(
+                        narmesteLederId = narmesteLederId,
+                        merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                    )
+
                 notifikasjonInputSlot.captured.link shouldBeEqualTo expectedUrl
-                sakInputSlot.captured.lenke shouldBeEqualTo expectedUrl
+                storedSak?.lenke shouldBeEqualTo expectedUrl
             }
         }
     })
