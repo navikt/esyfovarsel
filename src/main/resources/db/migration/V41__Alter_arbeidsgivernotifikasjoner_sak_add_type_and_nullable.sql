@@ -14,5 +14,5 @@ SET type =
             END
 WHERE merkelapp IN ('Dialogmøte', 'Oppfølging');
 
-CREATE INDEX idx_arbeidsgivernotifikasjoner_sak_ansatt_virksomhet_type
+CREATE INDEX IF NOT EXISTS idx_arbeidsgivernotifikasjoner_sak_ansatt_virksomhet_type
     ON ARBEIDSGIVERNOTIFIKASJONER_SAK (ansattFnr, virksomhetsnummer, type);
