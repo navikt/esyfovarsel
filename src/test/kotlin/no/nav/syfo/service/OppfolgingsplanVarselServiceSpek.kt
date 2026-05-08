@@ -22,7 +22,6 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.FNR_1
 import no.nav.syfo.testutil.mocks.FNR_2
@@ -125,7 +124,7 @@ class OppfolgingsplanVarselServiceSpek :
             it("Oppfolgingsplan foresporsel should use dinesykmeldte url for arbeidsgivernotifikasjon and sak") {
                 val narmesteLederId = "1234"
                 val expectedUrl = "$fakeDinesykmeldteUrl/$narmesteLederId"
-                val notifikasjonInputSlot = slot<ArbeidsgiverNotifikasjonInput>()
+                val notifikasjonInputSlot = slot<ArbeidsgiverNotifikasjonNarmestelederInput>()
 
                 coEvery { narmesteLederService.getNarmesteLederRelasjon(FNR_1, ORGNUMMER) } returns
                     NarmesteLederRelasjon(
