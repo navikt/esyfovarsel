@@ -57,4 +57,5 @@ fun ResultSet.toPUtsendtVarselFeilet() =
         isForcedLetter = getBoolean("is_forced_letter"),
         isResendt = getBoolean("is_resendt"),
         resendExhausted = getBoolean("resend_exhausted"),
+        hendelseJson = getString("hendelse_json"),
     )

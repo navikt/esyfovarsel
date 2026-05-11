@@ -21,17 +21,22 @@ class UtsendtVarselFeiletDAOSpek :
 
             it("Store ikke-utsendt varsel til NL i database") {
                 val fnr = "12121212121"
-                embeddedDatabase.storeUtsendtVarselFeilet(ikkeUtsendtVarsel(fnr))
+                val hendelseJson = """{"type":"NL_DIALOGMOTE_NYTT_TID_STED","data":{"foo":"bar"}}"""
+                embeddedDatabase.storeUtsendtVarselFeilet(ikkeUtsendtVarsel(fnr, hendelseJson))
                 embeddedDatabase.skalHaLagretIkkeUtsendtVarsel(
                     HendelseType.NL_DIALOGMOTE_NYTT_TID_STED,
                     Kanal.DINE_SYKMELDTE,
                     fnr,
+                    hendelseJson,
                 )
             }
         }
     })
 
-private fun ikkeUtsendtVarsel(fnr: String) =
+private fun ikkeUtsendtVarsel(
+    fnr: String,
+    hendelseJson: String? = null,
+): PUtsendtVarselFeilet =
     PUtsendtVarselFeilet(
         uuid = UUID.randomUUID().toString(),
         uuidEksternReferanse = "00000",
@@ -46,17 +51,19 @@ private fun ikkeUtsendtVarsel(fnr: String) =
         feilmelding = "Achtung!",
         utsendtForsokTidspunkt = LocalDateTime.now(),
         isForcedLetter = false,
+        hendelseJson = hendelseJson,
     )
 
 private fun DatabaseInterface.skalHaLagretIkkeUtsendtVarsel(
     type: HendelseType,
     kanal: Kanal,
     fnr: String,
+    hendelseJson: String?,
 ) = this.should("Skal ha lagret ikke-utsendt varsel av type ${type.name} ") {
     this
         .fetchUtsendtVarselFeiletByFnr(fnr)
         .filter { it.hendelsetypeNavn == type.name }
-        .any { it.kanal.equals(kanal.name) }
+        .any { it.kanal.equals(kanal.name) && it.hendelseJson == hendelseJson }
 }
 
 fun DatabaseInterface.fetchUtsendtVarselFeiletByFnr(fnr: String): List<PUtsendtVarselFeilet> {
