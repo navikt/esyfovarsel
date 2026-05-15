@@ -12,14 +12,14 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.syfo.UrlEnv
-import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.auth.ITokenConsumer
 import no.nav.syfo.utils.httpClient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class SykmeldingerConsumer(
     urlEnv: UrlEnv,
-    private val azureAdTokenConsumer: AzureAdTokenConsumer,
+    private val azureAdTokenConsumer: ITokenConsumer,
 ) {
     private val client = httpClient()
     private val basepath = urlEnv.syfosmregisterUrl

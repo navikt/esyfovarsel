@@ -1,7 +1,7 @@
 package no.nav.syfo.consumer.narmesteLeder
 
 class NarmesteLederService(
-    val narmesteLederConsumer: NarmesteLederConsumer,
+    val narmesteLederConsumer: INarmesteLederConsumer,
 ) {
     suspend fun getNarmesteLederRelasjon(
         fnr: String,

@@ -1,5 +1,6 @@
 {
   "jobTriggerUrl": "http://localhost:8080/job/trigger",
+  "revarsleUnreadAktivitetskrav": false,
   "serviceuserUsername": "srvesyfovarsel",
   "serviceuserPassword": "password"
 }

@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import no.nav.syfo.UrlEnv
-import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.auth.ITokenConsumer
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyKalenderInput
@@ -40,10 +40,10 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.Nyoppgav
 import no.nav.syfo.utils.httpClientWithRetry
 import org.slf4j.LoggerFactory
 
-open class ArbeidsgiverNotifikasjonProdusent(
+class ArbeidsgiverNotifikasjonProdusent(
     urlEnv: UrlEnv,
-    private val azureAdTokenConsumer: AzureAdTokenConsumer,
-) {
+    private val azureAdTokenConsumer: ITokenConsumer,
+) : IArbeidsgiverNotifikasjonProdusent {
     private val httpClientWithRetry = httpClientWithRetry()
     private val arbeidsgiverNotifikasjonProdusentBasepath = urlEnv.arbeidsgiverNotifikasjonProdusentApiUrl
     private val log = LoggerFactory.getLogger(ArbeidsgiverNotifikasjonProdusent::class.qualifiedName)
@@ -55,7 +55,7 @@ open class ArbeidsgiverNotifikasjonProdusent(
             .addInterceptor(BearerTokenInterceptor { azureAdTokenConsumer.getToken(scope) })
             .build()
 
-    suspend fun createNewOppgaveForArbeidsgiver(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? {
+    override suspend fun createNewOppgaveForArbeidsgiver(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? {
         log.info(
             "About to send new task with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api",
         )
@@ -82,7 +82,7 @@ open class ArbeidsgiverNotifikasjonProdusent(
         }
     }
 
-    suspend fun createNewBeskjedForArbeidsgiver(arbeidsgiverNotifikasjonInput: ArbeidsgiverNotifikasjon): String? {
+    override suspend fun createNewBeskjedForArbeidsgiver(arbeidsgiverNotifikasjonInput: ArbeidsgiverNotifikasjon): String? {
         log.info("About to send new beskjed to ag-notifikasjon-produsent-api")
         val response: ApolloResponse<NyBeskjedMutation.Data> =
             apolloClient.mutation(arbeidsgiverNotifikasjonInput.toNyBeskjedMutation()).execute()
@@ -118,7 +118,7 @@ open class ArbeidsgiverNotifikasjonProdusent(
         }
     }
 
-    suspend fun createNewSak(mutation: NySakMutation): String? {
+    override suspend fun createNewSak(mutation: NySakMutation): String? {
         log.info("About to create new sak in ag-notifikasjon-produsent-api")
         val response: ApolloResponse<NySakMutation.Data> = apolloClient.mutation(mutation).execute()
         val result = response.data?.nySak
@@ -154,7 +154,7 @@ open class ArbeidsgiverNotifikasjonProdusent(
         }
     }
 
-    suspend fun nyStatusSak(nyStatusSakInput: NyStatusSakInput): String? {
+    override suspend fun nyStatusSak(nyStatusSakInput: NyStatusSakInput): String? {
         log.info("About to update sakstatus in ag-notifikasjon-produsent-api")
         val response: ApolloResponse<NyStatusSakByGrupperingsidMutation.Data> =
             apolloClient.mutation(nyStatusSakInput.toNyStatusSakByGrupperingsidMutation()).execute()
@@ -184,7 +184,7 @@ open class ArbeidsgiverNotifikasjonProdusent(
         }
     }
 
-    suspend fun createNewKalenderavtale(nyKalenderInput: NyKalenderInput): String? {
+    override suspend fun createNewKalenderavtale(nyKalenderInput: NyKalenderInput): String? {
         log.info("Forsøker å opprette ny kalenderavtale")
 
         val response: ApolloResponse<NyKalenderavtaleMutation.Data> =
@@ -226,7 +226,7 @@ open class ArbeidsgiverNotifikasjonProdusent(
         }
     }
 
-    suspend fun updateKalenderavtale(oppdaterKalenderInput: OppdaterKalenderInput): String? {
+    override suspend fun updateKalenderavtale(oppdaterKalenderInput: OppdaterKalenderInput): String? {
         val response: ApolloResponse<OppdaterKalenderavtaleMutation.Data> =
             apolloClient.mutation(oppdaterKalenderInput.toOppdaterKalenderavtaleMutation()).execute()
         val result = response.data?.oppdaterKalenderavtale
@@ -260,7 +260,7 @@ open class ArbeidsgiverNotifikasjonProdusent(
         }
     }
 
-    suspend fun deleteNotifikasjonForArbeidsgiver(arbeidsgiverDeleteNotifikasjon: ArbeidsgiverDeleteNotifikasjon) {
+    override suspend fun deleteNotifikasjonForArbeidsgiver(arbeidsgiverDeleteNotifikasjon: ArbeidsgiverDeleteNotifikasjon) {
         log.info(
             "About to delete notification with uuid ${arbeidsgiverDeleteNotifikasjon.eksternReferanse} and merkelapp ${arbeidsgiverDeleteNotifikasjon.merkelapp} from ag-notifikasjon-produsent-api",
         )

@@ -10,7 +10,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.append
 import no.nav.syfo.UrlEnv
-import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.auth.ITokenConsumer
 import no.nav.syfo.utils.NAV_CALL_ID_HEADER
 import no.nav.syfo.utils.createCallId
 import no.nav.syfo.utils.httpClient
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory
 
 class DkifConsumer(
     private val urlEnv: UrlEnv,
-    private val azureAdTokenConsumer: AzureAdTokenConsumer,
+    private val azureAdTokenConsumer: ITokenConsumer,
 ) {
     private val client = httpClient()
 

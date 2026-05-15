@@ -9,7 +9,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import no.nav.syfo.UrlEnv
-import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.auth.ITokenConsumer
 import no.nav.syfo.metrics.COUNT_CALL_PDL_FAIL
 import no.nav.syfo.metrics.COUNT_CALL_PDL_SUCCESS
 import no.nav.syfo.utils.httpClientWithRetry
@@ -18,7 +18,7 @@ import java.io.FileNotFoundException
 
 open class PdlClient(
     private val urlEnv: UrlEnv,
-    private val azureAdTokenConsumer: AzureAdTokenConsumer,
+    private val azureAdTokenConsumer: ITokenConsumer,
 ) {
     private val httpClient = httpClientWithRetry(expectSuccess = true)
     private val log = LoggerFactory.getLogger(PdlClient::class.qualifiedName)

@@ -9,7 +9,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.append
 import no.nav.syfo.UrlEnv
-import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.auth.ITokenConsumer
 import no.nav.syfo.exceptions.JournalpostDistribusjonException
 import no.nav.syfo.exceptions.JournalpostDistribusjonGoneException
 import no.nav.syfo.exceptions.JournalpostNetworkException
@@ -19,7 +19,7 @@ import java.io.IOException
 
 class JournalpostdistribusjonConsumer(
     urlEnv: UrlEnv,
-    private val azureAdTokenConsumer: AzureAdTokenConsumer,
+    private val azureAdTokenConsumer: ITokenConsumer,
 ) {
     private val client = httpClientWithRetry(expectSuccess = false)
     private val dokdistfordelingUrl = urlEnv.dokdistfordelingUrl
