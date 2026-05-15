@@ -22,7 +22,6 @@ description = "Run check with gradle"
 run = './gradlew ktlintCheck'
 
 [tasks.format]
-
 description = "Run ktlintFormat with gradle"
 run = './gradlew ktlintFormat'
 
