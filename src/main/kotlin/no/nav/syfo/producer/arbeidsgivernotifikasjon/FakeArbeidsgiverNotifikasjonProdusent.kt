@@ -28,7 +28,9 @@ class FakeArbeidsgiverNotifikasjonProdusent : IArbeidsgiverNotifikasjonProdusent
 
     override suspend fun createNewSak(mutation: NySakMutation): String =
         UUID.randomUUID().toString().also { id ->
-            log.info("Lokal arbeidsgivernotifikasjon sak opprettet: metode=${mutation.name()}, id=$id")
+            log.info(
+                "Lokal arbeidsgivernotifikasjon sak opprettet: grupperingsid=${mutation.grupperingsid}, merkelapp=${mutation.merkelapp}, virksomhetsnummer=${mutation.virksomhetsnummer}, id=$id",
+            )
         }
 
     override suspend fun nyStatusSak(nyStatusSakInput: NyStatusSakInput): String =
