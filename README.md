@@ -59,10 +59,6 @@ Dette starter appen med `JOB=true` og leser `src/main/resources/localEnvJob.json
   ```bash
   ./gradlew build
   ```
-- Flyway-info mot lokal database:
-  ```bash
-  mise run flyway-info
-  ```
 - Stopp lokale avhengigheter:
   ```bash
   mise run docker-down
