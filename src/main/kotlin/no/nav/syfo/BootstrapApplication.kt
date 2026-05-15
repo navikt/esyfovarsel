@@ -364,7 +364,7 @@ fun Application.kafkaModule(
         )
     }
 
-    if (env.appEnv.remote && env.isDevGcp()) {
+    if (env.isDevGcp()) {
         launch(backgroundTasksContext) {
             launchKafkaListener(
                 state,
