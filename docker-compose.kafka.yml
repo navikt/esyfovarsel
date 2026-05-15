@@ -53,22 +53,6 @@ services:
     volumes:
       - schema-registry-data:/var/lib/confluent-schema-registry
 
-# rest-proxy could be useful, but it is a big image so we can skip itunless/until we find a use for it,
-  rest-proxy:
-    image: confluentinc/cp-kafka-rest:8.0.0
-    depends_on:
-      - broker
-      - schema-registry
-    ports:
-      - 8082:8082
-    hostname: rest-proxy
-    container_name: rest-proxy
-    environment:
-      KAFKA_REST_HOST_NAME: rest-proxy
-      KAFKA_REST_BOOTSTRAP_SERVERS: 'broker:29092'
-      KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
-      KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
-
   # Kafka-UI
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
