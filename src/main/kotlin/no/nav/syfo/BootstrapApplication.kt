@@ -118,9 +118,7 @@ fun createApplicationEnvironment(env: Environment): ApplicationEnvironment =
     applicationEnvironment {
         config = HoconApplicationConfig(ConfigFactory.load())
         database = Database(env.dbEnv)
-        if (env.appEnv.remote) {
-            database.grantAccessToIAMUsers()
-        }
+        database.grantAccessToIAMUsers()
     }
 
 @Suppress("LongMethod")
