@@ -130,7 +130,7 @@ fun setModule(env: Environment): Application.() -> Unit =
             } else {
                 AzureAdTokenConsumer(env.authEnv)
             }
-        val dkifConsumer = getDkifConsumer(env.urlEnv, tokenConsumer)
+        val dkifConsumer = DkifConsumer(env.urlEnv, tokenConsumer)
         val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, tokenConsumer)
         val narmesteLederConsumer: INarmesteLederConsumer =
             if (isLocal()) {
@@ -293,11 +293,6 @@ fun setModule(env: Environment): Application.() -> Unit =
             testdataResetService,
         )
     }
-
-private fun getDkifConsumer(
-    urlEnv: UrlEnv,
-    azureADConsumer: ITokenConsumer,
-): DkifConsumer = DkifConsumer(urlEnv, azureADConsumer)
 
 fun Application.serverModule(
     env: Environment,
