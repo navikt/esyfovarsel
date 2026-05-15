@@ -8,6 +8,12 @@ import java.time.LocalDateTime
 
 private val objectMapper = createObjectMapper()
 
+/**
+ * Denne annotasjonen vil legge til et felt "@type" i JSON-representasjonen av EsyfovarselHendelse,
+ * som vil inneholde navnet på den konkrete implementasjonen (for eksempel NarmesteLederHendelse).
+ * Den vil også brukes ved deserialisering fra json til object,
+ * så vi får en NarmesteLederHendelse kun med objectMapper.readValue(hendelseAsJson).
+ */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
 sealed interface EsyfovarselHendelse : Serializable {
     val type: HendelseType
@@ -32,12 +38,32 @@ data class ArbeidstakerHendelse(
     val orgnummer: String?,
 ) : EsyfovarselHendelse
 
+data class ArbeidsgiverNotifikasjonTilAltinnRessursHendelse(
+    override val type: HendelseType,
+    override val ferdigstill: Boolean?,
+    override var data: Any?,
+    val arbeidstakerFnr: String? = null,
+    val eksternReferanseId: String,
+    val kilde: String,
+    val orgnummer: String,
+    /** Altinn 3 ressurs-id, for eksempel nav_syfo_dialogmote. */
+    val ressursId: String,
+    val ressursUrl: String,
+) : EsyfovarselHendelse
+
 data class VarselData(
     val journalpost: VarselDataJournalpost? = null,
     val narmesteLeder: VarselDataNarmesteLeder? = null,
     val motetidspunkt: VarselDataMotetidspunkt? = null,
     val aktivitetskrav: VarselDataAktivitetskrav? = null,
     val dialogmoteSvar: VarselDataDialogmoteSvar? = null,
+    val notifikasjonInnhold: VarselDataNotifikasjonInnhold? = null,
+)
+
+data class VarselDataNotifikasjonInnhold(
+    val epostTittel: String,
+    val epostBody: String,
+    val smsTekst: String,
 )
 
 data class VarselDataJournalpost(
@@ -77,8 +103,10 @@ data class VarselDataDialogmoteSvar(
  * Forskjellige typer hendelser som kan sendes til esyfovarsel.
  * "SM_" forkortelse indikerer at det sendes til sykmeldt
  * "NL_" forkortelse indikerer at det sendes til nærmeste leder
+ * "AG_" forkortelse indikerer at det sendes til arbeidsgiver (virksomheten)
  */
 enum class HendelseType {
+    AG_VARSEL_ALTINN_RESSURS,
     NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
     SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
     NL_DIALOGMOTE_SVAR_MOTEBEHOV,
@@ -139,6 +167,8 @@ fun Any.toVarselData(): VarselData =
 
 fun EsyfovarselHendelse.isArbeidstakerHendelse(): Boolean = this is ArbeidstakerHendelse
 
+fun EsyfovarselHendelse.isArbeidsgiverHendelse(): Boolean = this is ArbeidsgiverNotifikasjonTilAltinnRessursHendelse
+
 fun EsyfovarselHendelse.toNarmestelederHendelse(): NarmesteLederHendelse =
     if (this is NarmesteLederHendelse) {
         this
@@ -153,7 +183,20 @@ fun EsyfovarselHendelse.toArbeidstakerHendelse(): ArbeidstakerHendelse =
         throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type ArbeidstakerHendelse")
     }
 
-fun EsyfovarselHendelse.skalFerdigstilles() = ferdigstill ?: false
+fun EsyfovarselHendelse.toArbeidsgiverNotifikasjonTilAltinnRessursHendelse(): ArbeidsgiverNotifikasjonTilAltinnRessursHendelse =
+    if (this is ArbeidsgiverNotifikasjonTilAltinnRessursHendelse) {
+        this
+    } else {
+        throw IllegalArgumentException("Wrong type of EsyfovarselHendelse, should be of type ArbeidsgiverHendelse")
+    }
+
+fun EsyfovarselHendelse.skalFerdigstilles(): Boolean =
+    when (this) {
+        is ArbeidstakerHendelse,
+        is NarmesteLederHendelse,
+        is ArbeidsgiverNotifikasjonTilAltinnRessursHendelse,
+        -> ferdigstill ?: false
+    }
 
 fun HendelseType.isAktivitetspliktType() = this == HendelseType.SM_AKTIVITETSPLIKT
 

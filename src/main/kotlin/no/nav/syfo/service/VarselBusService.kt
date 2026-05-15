@@ -2,6 +2,7 @@ package no.nav.syfo.service
 
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.EsyfovarselHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.AG_VARSEL_ALTINN_RESSURS
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_AVLYST
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_INNKALT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING
@@ -26,8 +27,10 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_MER_VEILEDNI
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_OPPRETTET
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING
+import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidsgiverHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.isArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.skalFerdigstilles
+import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidsgiverNotifikasjonTilAltinnRessursHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.toNarmestelederHendelse
 import no.nav.syfo.service.microfrontend.MikrofrontendService
@@ -36,6 +39,7 @@ import org.slf4j.LoggerFactory
 
 class VarselBusService(
     val senderFacade: SenderFacade,
+    private val arbeidsgiverVarselService: ArbeidsgiverVarselService,
     private val motebehovVarselService: MotebehovVarselService,
     private val oppfolgingsplanVarselService: OppfolgingsplanVarselService,
     private val nyOppfolgingsplanVarselService: NyOppfolgingsplanVarselService,
@@ -56,6 +60,11 @@ class VarselBusService(
             ferdigstillVarsel(varselHendelse)
         } else {
             when (varselHendelse.type) {
+                AG_VARSEL_ALTINN_RESSURS ->
+                    arbeidsgiverVarselService.sendVarselTilArbeidsgiver(
+                        varselHendelse.toArbeidsgiverNotifikasjonTilAltinnRessursHendelse(),
+                    )
+
                 NL_OPPFOLGINGSPLAN_FORESPORSEL ->
                     oppfolgingsplanVarselService.sendOppfolgingsplanForesporselVarselTilNarmesteLeder(
                         varselHendelse.toNarmestelederHendelse(),
@@ -148,6 +157,8 @@ class VarselBusService(
     suspend fun ferdigstillVarsel(varselHendelse: EsyfovarselHendelse) {
         if (varselHendelse.isArbeidstakerHendelse()) {
             senderFacade.ferdigstillArbeidstakerVarsler(varselHendelse.toArbeidstakerHendelse())
+        } else if (varselHendelse.isArbeidsgiverHendelse()) {
+            log.warn("Forsøkte å ferdigstille arbeidsgiverhendelse, ignorerer ferdigstilling")
         } else {
             senderFacade.ferdigstillNarmesteLederVarsler(varselHendelse.toNarmestelederHendelse())
         }
