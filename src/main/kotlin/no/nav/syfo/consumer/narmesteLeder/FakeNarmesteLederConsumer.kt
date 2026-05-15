@@ -9,9 +9,9 @@ class FakeNarmesteLederConsumer : INarmesteLederConsumer {
             narmesteLederRelasjon =
                 NarmesteLederRelasjon(
                     narmesteLederId = "local-narmeste-leder",
-                    fnr = LOCAL_SYNTHETIC_FNR,
+                    fnr = ansattFnr,
                     orgnummer = orgnummer,
-                    narmesteLederFnr = LOCAL_SYNTHETIC_FNR,
+                    narmesteLederFnr = ansattFnr.reversed(),
                     narmesteLederTelefonnummer = "00000000",
                     narmesteLederEpost = "narmeste.leder@example.invalid",
                     arbeidsgiverForskutterer = true,
@@ -20,8 +20,4 @@ class FakeNarmesteLederConsumer : INarmesteLederConsumer {
                     navn = "Lokal Nærmeste Leder",
                 ),
         )
-
-    companion object {
-        const val LOCAL_SYNTHETIC_FNR = "00000000000"
-    }
 }
