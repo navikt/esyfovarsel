@@ -12,12 +12,12 @@
 
 Appen ruter varselhendelser videre til:
 
-- Dine Sykmeldte
+- Dine sykmeldte
 - Ditt sykefravær
-- brukernotifikasjoner
-- arbeidsgivernotifikasjoner
+- Brukernotifikasjoner
+- Arbeidsgivernotifikasjoner
 - Min Side-mikrofronter
-- fysiske brev
+- Fysiske brev
 
 Den håndterer blant annet varsler om dialogmøte, oppfølgingsplan, aktivitetsplikt, arbeidsuførhet, friskmelding til arbeidsformidling, manglende medvirkning, mer veiledning og kartleggingsspørsmål.
 
