@@ -21,10 +21,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.auth.FakeTokenConsumer
+import no.nav.syfo.auth.ITokenConsumer
 import no.nav.syfo.auth.setupLocalRoutesWithAuthentication
 import no.nav.syfo.auth.setupRoutesWithAuthentication
 import no.nav.syfo.consumer.distribuerjournalpost.JournalpostdistribusjonConsumer
 import no.nav.syfo.consumer.dkif.DkifConsumer
+import no.nav.syfo.consumer.narmesteLeder.FakeNarmesteLederConsumer
+import no.nav.syfo.consumer.narmesteLeder.INarmesteLederConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederConsumer
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdl.PdlClient
@@ -44,6 +48,8 @@ import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaPr
 import no.nav.syfo.kafka.producers.minesidemicrofrontend.MinSideMicrofrontendKafkaProducer
 import no.nav.syfo.metrics.registerPrometheusApi
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.FakeArbeidsgiverNotifikasjonProdusent
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.IArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.service.AccessControlService
 import no.nav.syfo.service.AktivitetspliktForhandsvarselService
 import no.nav.syfo.service.ArbeidsgiverNotifikasjonService
@@ -118,21 +124,35 @@ fun createApplicationEnvironment(env: Environment): ApplicationEnvironment =
 @Suppress("LongMethod")
 fun setModule(env: Environment): Application.() -> Unit =
     {
-        val azureAdTokenConsumer = AzureAdTokenConsumer(env.authEnv)
-        val dkifConsumer = getDkifConsumer(env.urlEnv, azureAdTokenConsumer)
-        val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, azureAdTokenConsumer)
-        val narmesteLederConsumer = NarmesteLederConsumer(env.urlEnv, azureAdTokenConsumer)
+        val tokenConsumer: ITokenConsumer =
+            if (isLocal()) {
+                FakeTokenConsumer()
+            } else {
+                AzureAdTokenConsumer(env.authEnv)
+            }
+        val dkifConsumer = DkifConsumer(env.urlEnv, tokenConsumer)
+        val sykmeldingerConsumer = SykmeldingerConsumer(env.urlEnv, tokenConsumer)
+        val narmesteLederConsumer: INarmesteLederConsumer =
+            if (isLocal()) {
+                FakeNarmesteLederConsumer()
+            } else {
+                NarmesteLederConsumer(env.urlEnv, tokenConsumer)
+            }
         val narmesteLederService = NarmesteLederService(narmesteLederConsumer)
-        val arbeidsgiverNotifikasjonProdusent =
-            ArbeidsgiverNotifikasjonProdusent(env.urlEnv, azureAdTokenConsumer)
+        val arbeidsgiverNotifikasjonProdusent: IArbeidsgiverNotifikasjonProdusent =
+            if (isLocal()) {
+                FakeArbeidsgiverNotifikasjonProdusent()
+            } else {
+                ArbeidsgiverNotifikasjonProdusent(env.urlEnv, tokenConsumer)
+            }
         val arbeidsgiverNotifikasjonService =
             ArbeidsgiverNotifikasjonService(
                 arbeidsgiverNotifikasjonProdusent,
                 narmesteLederService,
                 env.urlEnv.baseUrlDineSykmeldte,
             )
-        val pdlClient = PdlClient(env.urlEnv, azureAdTokenConsumer)
-        val journalpostdistribusjonConsumer = JournalpostdistribusjonConsumer(env.urlEnv, azureAdTokenConsumer)
+        val pdlClient = PdlClient(env.urlEnv, tokenConsumer)
+        val journalpostdistribusjonConsumer = JournalpostdistribusjonConsumer(env.urlEnv, tokenConsumer)
 
         val brukernotifikasjonKafkaProducer = BrukernotifikasjonKafkaProducer(env)
         val dineSykmeldteHendelseKafkaProducer = DineSykmeldteHendelseKafkaProducer(env)
@@ -274,15 +294,6 @@ fun setModule(env: Environment): Application.() -> Unit =
         )
     }
 
-private fun getDkifConsumer(
-    urlEnv: UrlEnv,
-    azureADConsumer: AzureAdTokenConsumer,
-): DkifConsumer =
-    when {
-        isLocal() -> DkifConsumer(urlEnv, azureADConsumer)
-        else -> DkifConsumer(urlEnv, azureADConsumer)
-    }
-
 fun Application.serverModule(
     env: Environment,
     mikrofrontendService: MikrofrontendService,
@@ -298,13 +309,15 @@ fun Application.serverModule(
         }
     }
 
-    val electionJobList = emptyList<RunOnElection>()
-    val leaderElection = LeaderElection(electionJobList)
+    if (env.appEnv.remote) {
+        val electionJobList = emptyList<RunOnElection>()
+        val leaderElection = LeaderElection(electionJobList)
 
-    launch(backgroundTasksContext) {
-        while (state.running) {
-            delay(300000)
-            leaderElection.checkIfPodIsLeader()
+        launch(backgroundTasksContext) {
+            while (state.running) {
+                delay(300000)
+                leaderElection.checkIfPodIsLeader()
+            }
         }
     }
 
@@ -339,21 +352,19 @@ fun Application.kafkaModule(
     varselbusService: VarselBusService,
     testdataResetService: TestdataResetService,
 ) {
-    runningRemotely {
+    launch(backgroundTasksContext) {
+        launchKafkaListener(
+            state,
+            VarselBusKafkaConsumer(env, varselbusService),
+        )
+    }
+
+    if (env.isDevGcp()) {
         launch(backgroundTasksContext) {
             launchKafkaListener(
                 state,
-                VarselBusKafkaConsumer(env, varselbusService),
+                TestdataResetConsumer(env, testdataResetService),
             )
-        }
-
-        if (env.isDevGcp()) {
-            launch(backgroundTasksContext) {
-                launchKafkaListener(
-                    state,
-                    TestdataResetConsumer(env, testdataResetService),
-                )
-            }
         }
     }
 }

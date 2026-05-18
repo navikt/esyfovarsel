@@ -1,7 +1,8 @@
 {
   "appEnv": {
-    "applicationPort": "8080",
-    "applicationThreads": "1",
+    "applicationPort": 8080,
+    "applicationThreads": 1,
+    "remote": false,
     "cluster": "local"
   },
   "authEnv": {
@@ -38,13 +39,13 @@
     "baseUrlNavEkstern": "http://nav:8080"
   },
   "kafkaEnv": {
-    "bootstrapServersUrl": "http://localhost:9092",
+    "bootstrapServersUrl": "localhost:9092",
     "schemaRegistry": {
-      "url": "http://localhost:28900",
+      "url": "http://localhost:8081",
       "username": "schema_username",
       "password": "schema_password"
     },
-    "aivenBroker": "http://localhost:9093",
+    "aivenBroker": "localhost:9092",
     "sslConfig": {
       "truststoreLocation": "ts.loc",
       "keystoreLocation": "ks.loc",
@@ -52,10 +53,10 @@
     }
   },
   "dbEnv": {
-    "dbHost": "127.0.0.1",
+    "dbHost": "localhost",
     "dbPort": "5432",
-    "dbName": "esyfovarsel",
-    "dbUsername": "esyfovarsel-admin",
+    "dbName": "esyfovarsel_dev",
+    "dbUsername": "username",
     "dbPassword": "password"
   },
   "toggleEnv": {

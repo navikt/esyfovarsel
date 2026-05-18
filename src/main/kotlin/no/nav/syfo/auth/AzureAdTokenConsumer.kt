@@ -30,7 +30,7 @@ import java.time.Instant
 
 class AzureAdTokenConsumer(
     authEnv: AuthEnv,
-) {
+) : ITokenConsumer {
     private val aadAccessTokenUrl = authEnv.aadAccessTokenUrl
     private val clientId = authEnv.clientId
     private val clientSecret = authEnv.clientSecret
@@ -67,13 +67,13 @@ class AzureAdTokenConsumer(
     @Volatile
     private var tokenMap = HashMap<String, AzureAdAccessToken>()
 
-    suspend fun getToken(resource: String): String {
+    override suspend fun getToken(scope: String): String {
         val omToMinutter = Instant.now().plusSeconds(120L)
 
-        val token: AzureAdAccessToken? = tokenMap.get(resource)
+        val token: AzureAdAccessToken? = tokenMap.get(scope)
 
         if (token == null || token.issuedOn!!.plusSeconds(token.expires_in).isBefore(omToMinutter)) {
-            log.info("Henter nytt token fra Azure AD for scope : $resource")
+            log.info("Henter nytt token fra Azure AD for scope : $scope")
 
             val response =
                 httpClientWithProxy.post(aadAccessTokenUrl) {
@@ -83,7 +83,7 @@ class AzureAdTokenConsumer(
                         FormDataContent(
                             Parameters.build {
                                 append("client_id", clientId)
-                                append("scope", resource)
+                                append("scope", scope)
                                 append("grant_type", "client_credentials")
                                 append("client_secret", clientSecret)
                             },
@@ -91,19 +91,19 @@ class AzureAdTokenConsumer(
                     )
                 }
             if (response.status == HttpStatusCode.OK) {
-                tokenMap[resource] = response.body()
+                tokenMap[scope] = response.body()
             } else {
                 log.error("Could not get token from Azure AD: $response")
             }
         }
-        return tokenMap[resource]!!.access_token
+        return tokenMap[scope]!!.access_token
     }
 
-    suspend fun getOnBehalfOfToken(
-        resource: String,
+    override suspend fun getOnBehalfOfToken(
+        scope: String,
         token: String,
     ): String? {
-        log.info("Henter nytt obo-token fra Azure AD for scope : $resource")
+        log.info("Henter nytt obo-token fra Azure AD for scope : $scope")
 
         val response =
             httpClientWithProxy.post(aadAccessTokenUrl) {
@@ -113,7 +113,7 @@ class AzureAdTokenConsumer(
                     FormDataContent(
                         Parameters.build {
                             append("client_id", clientId)
-                            append("scope", resource)
+                            append("scope", scope)
                             append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
                             append("client_secret", clientSecret)
                             append("assertion", token)

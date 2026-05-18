@@ -1,27 +1,13 @@
 # esyfovarsel
-Varsler for eSYFO. Lytter på topic'en `team-esyfo.varselbus` og videresender varsler til
-relevante kanaler (DineSykmeldte, Brukernotifikasjoner og Arbeidsgivernotifikasjoner).
-Bruker også til å planlegge 39-ukers varsel for sykmeldt.
 
-## Technologies used
-* Kotlin
-* Ktor
-* Gradle
-* Kotest
-* Postgres
-* Kafka
+Varsler for eSYFO. Appen lytter på Kafka-topicet `team-esyfo.varselbus` og videresender varsler til relevante kanaler som Dine Sykmeldte, Brukernotifikasjoner og Arbeidsgivernotifikasjoner.
 
-### Building the application
-Run `./gradlew build`    
+## Lokal utvikling
 
-### Running app locally
+Se [docs/local-development.md](docs/local-development.md) for lokal kjøring, Kafka-test og lokal jobbkjøring.
 
-- Run `docker-compose up` in a terminal at the project root
-- Start BootstrapApplication
+Bruk `mise tasks` for å se tilgjengelige kommandoer.
 
-### Running job locally
+## For Nav-ansatte
 
-- Run `docker-compose up` in a terminal at the project root
-- Start one instance of BootstrapApplication
-- Start another instance of BootStrapApplication with environment variable `JOB=true`
-- This will run the job once
+- [#esyfo på Slack](https://nav-it.slack.com/archives/C012X796B4L)

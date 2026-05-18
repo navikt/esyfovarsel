@@ -2,7 +2,7 @@ package no.nav.syfo.service
 
 import com.apollo.graphql.NySakMutation
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProdusent
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.IArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjonAltinnRessurs
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjonNarmesteLeder
@@ -15,7 +15,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class ArbeidsgiverNotifikasjonService(
-    private val arbeidsgiverNotifikasjonProdusent: ArbeidsgiverNotifikasjonProdusent,
+    private val arbeidsgiverNotifikasjonProdusent: IArbeidsgiverNotifikasjonProdusent,
     private val narmesteLederService: NarmesteLederService,
     private val dineSykmeldteUrl: String,
 ) {

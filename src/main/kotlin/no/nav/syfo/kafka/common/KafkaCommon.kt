@@ -47,18 +47,17 @@ interface KafkaListener {
 
 fun commonProperties(env: Environment): Properties =
     Properties().apply {
-        put(SECURITY_PROTOCOL_CONFIG, SSL)
         put(BOOTSTRAP_SERVERS_CONFIG, env.kafkaEnv.aivenBroker)
-        put(SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "") // Disable server host name verification
-        put(SSL_TRUSTSTORE_TYPE_CONFIG, JAVA_KEYSTORE)
-        put(SSL_KEYSTORE_TYPE_CONFIG, PKCS12)
-        put(SSL_TRUSTSTORE_LOCATION_CONFIG, env.kafkaEnv.sslConfig.truststoreLocation)
-        put(SSL_TRUSTSTORE_PASSWORD_CONFIG, env.kafkaEnv.sslConfig.credstorePassword)
-        put(SSL_KEYSTORE_LOCATION_CONFIG, env.kafkaEnv.sslConfig.keystoreLocation)
-        put(SSL_KEYSTORE_PASSWORD_CONFIG, env.kafkaEnv.sslConfig.credstorePassword)
-        put(SSL_KEY_PASSWORD_CONFIG, env.kafkaEnv.sslConfig.credstorePassword)
-        if (!env.appEnv.remote) {
-            remove(SECURITY_PROTOCOL_CONFIG)
+        if (env.appEnv.remote) {
+            put(SECURITY_PROTOCOL_CONFIG, SSL)
+            put(SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "") // Disable server host name verification
+            put(SSL_TRUSTSTORE_TYPE_CONFIG, JAVA_KEYSTORE)
+            put(SSL_KEYSTORE_TYPE_CONFIG, PKCS12)
+            put(SSL_TRUSTSTORE_LOCATION_CONFIG, env.kafkaEnv.sslConfig.truststoreLocation)
+            put(SSL_TRUSTSTORE_PASSWORD_CONFIG, env.kafkaEnv.sslConfig.credstorePassword)
+            put(SSL_KEYSTORE_LOCATION_CONFIG, env.kafkaEnv.sslConfig.keystoreLocation)
+            put(SSL_KEYSTORE_PASSWORD_CONFIG, env.kafkaEnv.sslConfig.credstorePassword)
+            put(SSL_KEY_PASSWORD_CONFIG, env.kafkaEnv.sslConfig.credstorePassword)
         }
     }
 

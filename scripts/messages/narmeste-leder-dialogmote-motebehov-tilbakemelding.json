@@ -1,0 +1,11 @@
+{
+  "@type": "NarmesteLederHendelse",
+  "type": "NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING",
+  "ferdigstill": false,
+  "data": {
+    "tilbakemelding": "Lokal test"
+  },
+  "narmesteLederFnr": "00000000000",
+  "arbeidstakerFnr": "12345678910",
+  "orgnummer": "999999999"
+}

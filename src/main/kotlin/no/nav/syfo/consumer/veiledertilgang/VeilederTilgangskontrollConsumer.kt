@@ -8,7 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import no.nav.syfo.UrlEnv
-import no.nav.syfo.auth.AzureAdTokenConsumer
+import no.nav.syfo.auth.ITokenConsumer
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.utils.NAV_CALL_ID_HEADER
 import no.nav.syfo.utils.NAV_PERSONIDENT_HEADER
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 
 class VeilederTilgangskontrollConsumer(
     urlEnv: UrlEnv,
-    private val azureAdTokenConsumer: AzureAdTokenConsumer,
+    private val azureAdTokenConsumer: ITokenConsumer,
 ) {
     private val client = httpClient()
     private val basepath = urlEnv.istilgangskontrollUrl
@@ -34,7 +34,7 @@ class VeilederTilgangskontrollConsumer(
         try {
             val onBehalfOfToken =
                 azureAdTokenConsumer.getOnBehalfOfToken(
-                    resource = scope,
+                    scope = scope,
                     token = token,
                 ) ?: throw RuntimeException("Failed to request access to Person: Failed to get OBO token")
 
