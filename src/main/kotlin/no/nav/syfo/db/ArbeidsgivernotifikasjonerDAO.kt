@@ -160,6 +160,36 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
     }
 }
 
+fun DatabaseInterface.countArbeidsgivernotifikasjonerSakerByType(
+    ansattFnr: String,
+    virksomhetsnummer: String,
+    type: String,
+): Int {
+    val queryStatement =
+        """
+        SELECT COUNT(*)
+        FROM ARBEIDSGIVERNOTIFIKASJONER_SAK
+        WHERE ansattFnr = ?
+        AND virksomhetsnummer = ?
+        AND type = ?
+        """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, ansattFnr)
+            it.setString(2, virksomhetsnummer)
+            it.setString(3, type)
+            it.executeQuery().use { resultSet ->
+                if (resultSet.next()) {
+                    resultSet.getInt(1)
+                } else {
+                    0
+                }
+            }
+        }
+    }
+}
+
 fun ResultSet.toPSakInput() =
     PSakInput(
         id = getString("id"),

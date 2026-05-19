@@ -173,7 +173,11 @@ fun setModule(env: Environment): Application.() -> Unit =
                 fysiskBrevUtsendingService,
                 database,
             )
-        val arbeidsgiverVarselService = ArbeidsgiverVarselService()
+        val arbeidsgiverVarselService =
+            ArbeidsgiverVarselService(
+                database = database,
+                arbeidsgiverNotifikasjonService = arbeidsgiverNotifikasjonService,
+            )
         val motebehovVarselService =
             MotebehovVarselService(
                 senderFacade,
@@ -256,6 +260,7 @@ fun setModule(env: Environment): Application.() -> Unit =
                 merVeiledningVarselService = merVeiledningVarselService,
                 kartleggingVarselService = kartleggingssporsmalVarselService,
                 senderFacade = senderFacade,
+                arbeidsgiverVarselService = arbeidsgiverVarselService,
             )
 
         val varselBusService =
