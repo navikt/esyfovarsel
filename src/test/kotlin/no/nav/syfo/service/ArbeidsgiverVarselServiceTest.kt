@@ -23,6 +23,7 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakAltinnInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SAK_TYPE_DIALOGMOTE_UTEN_LEDER
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
 import no.nav.syfo.testutil.EmbeddedDatabase
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -69,7 +70,12 @@ class ArbeidsgiverVarselServiceTest :
                 sak?.ressursId shouldBe hendelse.ressursId
                 inputSlot.single().uuid shouldBe UUID.fromString(hendelse.eksternReferanseId)
                 inputSlot.single().grupperingsid shouldBe sak?.grupperingsid
-                inputSlot.single().hardDeleteDate shouldBe hendelseMotetidspunkt().plusWeeks(4)
+                inputSlot.single().hardDeleteDate shouldBe
+                    LocalDate
+                        .now()
+                        .atStartOfDay()
+                        .plusDays(1)
+                        .plusMonths(4)
             }
 
             it("gjenbruker eksisterende pågående sak") {

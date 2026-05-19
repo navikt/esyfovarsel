@@ -23,6 +23,7 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.nio.charset.StandardCharsets
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -71,7 +72,8 @@ class ArbeidsgiverVarselService(
         val eksternReferanseUuid =
             runCatching { UUID.fromString(hendelse.eksternReferanseId) }
                 .getOrElse {
-                    val exception = ArbeidsgiverVarselPermanentException("ArbeidsgiverHendelse har ugyldig eksternReferanseId-format")
+                    val exception =
+                        ArbeidsgiverVarselPermanentException("ArbeidsgiverHendelse har ugyldig eksternReferanseId-format")
                     if (lagreFeiletUtsending) {
                         lagreIkkeUtsendtArbeidsgiverVarsel(hendelse, exception)
                     }
@@ -104,8 +106,11 @@ class ArbeidsgiverVarselService(
                         "ArbeidsgiverHendelse mangler feltet: data.notifikasjonInnhold",
                     )
             val hardDeleteDate =
-                varselData.motetidspunkt?.tidspunkt?.plusWeeks(WEEKS_BEFORE_DELETE)
-                    ?: LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
+                LocalDate
+                    .now()
+                    .atStartOfDay()
+                    .plusDays(1)
+                    .plusMonths(WEEKS_BEFORE_DELETE)
             val sak = getOrCreateSak(hendelse, hardDeleteDate)
 
             arbeidsgiverNotifikasjonService
@@ -331,7 +336,8 @@ private fun Throwable.toArbeidsgiverVarselResendResult(): ArbeidsgiverVarselRese
 
 private fun PUtsendtVarselFeilet.toResendArbeidsgiverHendelse(): ArbeidsgiverNotifikasjonTilAltinnRessursHendelse {
     val serializedHendelse =
-        hendelseJson ?: throw ArbeidsgiverVarselPermanentException("Mangler hendelseJson for feilet arbeidsgiverhendelse")
+        hendelseJson
+            ?: throw ArbeidsgiverVarselPermanentException("Mangler hendelseJson for feilet arbeidsgiverhendelse")
     val rootNode =
         runCatching { arbeidsgiverVarselObjectMapper.readTree(serializedHendelse) }
             .getOrElse {
