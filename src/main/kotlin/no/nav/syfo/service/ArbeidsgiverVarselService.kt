@@ -16,6 +16,7 @@ import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
 import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverNotifikasjonTilAltinnRessursHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataNotifikasjonInnhold
 import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakAltinnInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SAK_TYPE_DIALOGMOTE_UTEN_LEDER
@@ -70,116 +71,47 @@ class ArbeidsgiverVarselService(
         lagreFeiletUtsending: Boolean,
     ): ArbeidsgiverVarselResendResult {
         val eksternReferanseUuid =
-            runCatching { UUID.fromString(hendelse.eksternReferanseId) }
-                .getOrElse {
-                    val exception =
-                        ArbeidsgiverVarselPermanentException("ArbeidsgiverHendelse har ugyldig eksternReferanseId-format")
-                    if (lagreFeiletUtsending) {
-                        lagreIkkeUtsendtArbeidsgiverVarsel(hendelse, exception)
-                    }
-                    log.warn(
-                        "Avviser arbeidsgivervarsel med ugyldig eksternReferanseId: type={}, orgnummer={}, ressursId={}, kilde={}",
-                        hendelse.type,
-                        hendelse.orgnummer,
-                        hendelse.ressursId,
-                        hendelse.kilde,
-                    )
-                    return ArbeidsgiverVarselResendResult.PERMANENT_FAILURE
-                }
-
-        if (database.isUtsendtVarselStored(hendelse.eksternReferanseId, Kanal.ARBEIDSGIVERNOTIFIKASJON.name)) {
-            log.info(
-                "Arbeidsgivervarsel er allerede lagret som sendt: type={}, orgnummer={}, ressursId={}, kilde={}",
-                hendelse.type,
-                hendelse.orgnummer,
-                hendelse.ressursId,
-                hendelse.kilde,
-            )
-            return ArbeidsgiverVarselResendResult.RESENT
-        }
+            hendelse.parseEksternReferanseUuid(lagreFeiletUtsending)
+                ?: return ArbeidsgiverVarselResendResult.PERMANENT_FAILURE
+        if (hendelse.isAlreadyStoredAsSent()) return ArbeidsgiverVarselResendResult.RESENT
 
         return try {
-            val varselData = hendelse.parseVarselData()
-            val notifikasjonInnhold =
-                varselData.notifikasjonInnhold
-                    ?: throw ArbeidsgiverVarselPermanentException(
-                        "ArbeidsgiverHendelse mangler feltet: data.notifikasjonInnhold",
-                    )
-            val hardDeleteDate =
-                LocalDate
-                    .now()
-                    .atStartOfDay()
-                    .plusDays(1)
-                    .plusMonths(WEEKS_BEFORE_DELETE)
-            val sak = getOrCreateSak(hendelse, hardDeleteDate)
+            sendOgLagreArbeidsgiverVarsel(
+                hendelse = hendelse,
+                eksternReferanseUuid = eksternReferanseUuid,
+            )
+            ArbeidsgiverVarselResendResult.RESENT
+        } catch (exception: Exception) {
+            handleArbeidsgiverVarselFailure(
+                hendelse = hendelse,
+                lagreFeiletUtsending = lagreFeiletUtsending,
+                exception = exception,
+            )
+        }
+    }
 
-            arbeidsgiverNotifikasjonService
-                .sendNotifikasjon(
-                    ArbeidsgiverNotifikasjonAltinnRessursInput(
-                        uuid = eksternReferanseUuid,
-                        virksomhetsnummer = hendelse.orgnummer,
-                        merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
-                        messageText = notifikasjonInnhold.smsTekst,
-                        epostTittel = notifikasjonInnhold.epostTittel,
-                        epostHtmlBody = notifikasjonInnhold.epostBody,
-                        hardDeleteDate = hardDeleteDate,
-                        grupperingsid = sak.grupperingsid,
-                        link = hendelse.ressursUrl,
-                        ressursId = hendelse.ressursId,
-                        ressursUrl = hendelse.ressursUrl,
-                    ),
-                ) ?: throw ArbeidsgiverVarselRetryableException(
+    private suspend fun sendOgLagreArbeidsgiverVarsel(
+        hendelse: ArbeidsgiverNotifikasjonTilAltinnRessursHendelse,
+        eksternReferanseUuid: UUID,
+    ) {
+        val notifikasjonInnhold = hendelse.requireNotifikasjonInnhold()
+        val hardDeleteDate = createHardDeleteDate()
+        val sak = getOrCreateSak(hendelse, hardDeleteDate)
+
+        arbeidsgiverNotifikasjonService
+            .sendNotifikasjon(
+                hendelse.toArbeidsgiverNotifikasjonAltinnRessursInput(
+                    eksternReferanseUuid = eksternReferanseUuid,
+                    notifikasjonInnhold = notifikasjonInnhold,
+                    sak = sak,
+                    hardDeleteDate = hardDeleteDate,
+                ),
+            )
+            ?: throw ArbeidsgiverVarselRetryableException(
                 "ArbeidsgiverNotifikasjonService returnerte null ID ved utsending av arbeidsgivervarsel",
             )
 
-            database.storeUtsendtVarsel(
-                PUtsendtVarsel(
-                    uuid = UUID.randomUUID().toString(),
-                    fnr = hendelse.arbeidstakerFnr,
-                    aktorId = null,
-                    narmesteLederFnr = null,
-                    orgnummer = hendelse.orgnummer,
-                    type = hendelse.type.name,
-                    kanal = Kanal.ARBEIDSGIVERNOTIFIKASJON.name,
-                    utsendtTidspunkt = LocalDateTime.now(),
-                    planlagtVarselId = null,
-                    eksternReferanse = hendelse.eksternReferanseId,
-                    ferdigstiltTidspunkt = null,
-                    arbeidsgivernotifikasjonMerkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
-                    isForcedLetter = false,
-                    journalpostId = null,
-                ),
-            )
-
-            ArbeidsgiverVarselResendResult.RESENT
-        } catch (exception: Exception) {
-            if (lagreFeiletUtsending) {
-                lagreIkkeUtsendtArbeidsgiverVarsel(hendelse, exception)
-            }
-            val sanitizedFeilmelding = exception.toSanitizedArbeidsgiverFeilmelding()
-            when (exception) {
-                is ArbeidsgiverVarselPermanentException ->
-                    log.error(
-                        "Permanent feil ved behandling av arbeidsgivervarsel: type={}, orgnummer={}, ressursId={}, kilde={}, feil={}",
-                        hendelse.type,
-                        hendelse.orgnummer,
-                        hendelse.ressursId,
-                        hendelse.kilde,
-                        sanitizedFeilmelding,
-                    )
-
-                else ->
-                    log.error(
-                        "Feilet ved behandling av arbeidsgivervarsel: type={}, orgnummer={}, ressursId={}, kilde={}, feil={}",
-                        hendelse.type,
-                        hendelse.orgnummer,
-                        hendelse.ressursId,
-                        hendelse.kilde,
-                        sanitizedFeilmelding,
-                    )
-            }
-            exception.toArbeidsgiverVarselResendResult()
-        }
+        database.storeUtsendtVarsel(hendelse.toPUtsendtVarsel())
     }
 
     private suspend fun getOrCreateSak(
@@ -199,24 +131,7 @@ class ArbeidsgiverVarselService(
             )
         }
 
-        val grupperingsid =
-            generateGrupperingsid(
-                arbeidstakerFnr = hendelse.arbeidstakerFnr,
-                virksomhetsnummer = hendelse.orgnummer,
-                saktype = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
-            )
-        val sakInput =
-            NySakAltinnInput(
-                grupperingsid = grupperingsid,
-                merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
-                virksomhetsnummer = hendelse.orgnummer,
-                ansattFnr = hendelse.arbeidstakerFnr,
-                tittel = SAK_TITTEL_DIALOGMOTE,
-                lenke = hendelse.ressursUrl,
-                initiellStatus = SakStatus.MOTTATT,
-                hardDeleteDate = hardDeleteDate,
-                ressursId = hendelse.ressursId,
-            )
+        val sakInput = hendelse.toNySakAltinnInput(SAK_TYPE_DIALOGMOTE_UTEN_LEDER)
         val eksternSakId =
             arbeidsgiverNotifikasjonService.createNewSak(sakInput.toNySakMutation())
                 ?: throw ArbeidsgiverVarselRetryableException(
@@ -230,7 +145,7 @@ class ArbeidsgiverVarselService(
 
         return ArbeidsgiverNotifikasjonSak(
             id = sakId,
-            grupperingsid = grupperingsid,
+            sakInput.grupperingsid,
         )
     }
 
@@ -282,6 +197,141 @@ class ArbeidsgiverVarselService(
                 hendelseJson = hendelse.serializeSafely(),
             ),
         )
+    }
+
+    private fun ArbeidsgiverNotifikasjonTilAltinnRessursHendelse.parseEksternReferanseUuid(lagreFeiletUtsending: Boolean): UUID? =
+        runCatching { UUID.fromString(eksternReferanseId) }
+            .getOrElse {
+                val exception =
+                    ArbeidsgiverVarselPermanentException("ArbeidsgiverHendelse har ugyldig eksternReferanseId-format")
+                if (lagreFeiletUtsending) {
+                    lagreIkkeUtsendtArbeidsgiverVarsel(this, exception)
+                }
+                log.warn(
+                    "Avviser arbeidsgivervarsel med ugyldig eksternReferanseId: type={}, orgnummer={}, ressursId={}, kilde={}",
+                    type,
+                    orgnummer,
+                    ressursId,
+                    kilde,
+                )
+                null
+            }
+
+    private fun ArbeidsgiverNotifikasjonTilAltinnRessursHendelse.isAlreadyStoredAsSent(): Boolean {
+        val isStored = database.isUtsendtVarselStored(eksternReferanseId, Kanal.ARBEIDSGIVERNOTIFIKASJON.name)
+        if (isStored) {
+            log.info(
+                "Arbeidsgivervarsel er allerede lagret som sendt: type={}, orgnummer={}, ressursId={}, kilde={}",
+                type,
+                orgnummer,
+                ressursId,
+                kilde,
+            )
+        }
+        return isStored
+    }
+
+    private fun ArbeidsgiverNotifikasjonTilAltinnRessursHendelse.toNySakAltinnInput(sakType: String) =
+        NySakAltinnInput(
+            grupperingsid = generateGrupperingsid(arbeidstakerFnr, orgnummer, sakType),
+            merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
+            virksomhetsnummer = orgnummer,
+            ansattFnr = arbeidstakerFnr,
+            tittel = SAK_TITTEL_DIALOGMOTE,
+            lenke = ressursUrl,
+            initiellStatus = SakStatus.MOTTATT,
+            hardDeleteDate = createHardDeleteDate(),
+            ressursId = ressursId,
+        )
+
+    private fun ArbeidsgiverNotifikasjonTilAltinnRessursHendelse.requireNotifikasjonInnhold(): VarselDataNotifikasjonInnhold =
+        parseVarselData().notifikasjonInnhold
+            ?: throw ArbeidsgiverVarselPermanentException(
+                "ArbeidsgiverHendelse mangler feltet: data.notifikasjonInnhold",
+            )
+
+    private fun createHardDeleteDate(): LocalDateTime =
+        LocalDate
+            .now()
+            .atStartOfDay()
+            .plusDays(1)
+            .plusMonths(WEEKS_BEFORE_DELETE)
+
+    private fun ArbeidsgiverNotifikasjonTilAltinnRessursHendelse.toArbeidsgiverNotifikasjonAltinnRessursInput(
+        eksternReferanseUuid: UUID,
+        notifikasjonInnhold: VarselDataNotifikasjonInnhold,
+        sak: ArbeidsgiverNotifikasjonSak,
+        hardDeleteDate: LocalDateTime,
+    ) = ArbeidsgiverNotifikasjonAltinnRessursInput(
+        uuid = eksternReferanseUuid,
+        virksomhetsnummer = orgnummer,
+        merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
+        messageText = notifikasjonInnhold.smsTekst,
+        epostTittel = notifikasjonInnhold.epostTittel,
+        epostHtmlBody = notifikasjonInnhold.epostBody,
+        hardDeleteDate = hardDeleteDate,
+        grupperingsid = sak.grupperingsid,
+        link = ressursUrl,
+        ressursId = ressursId,
+        ressursUrl = ressursUrl,
+    )
+
+    private fun ArbeidsgiverNotifikasjonTilAltinnRessursHendelse.toPUtsendtVarsel() =
+        PUtsendtVarsel(
+            uuid = UUID.randomUUID().toString(),
+            fnr = arbeidstakerFnr,
+            aktorId = null,
+            narmesteLederFnr = null,
+            orgnummer = orgnummer,
+            type = type.name,
+            kanal = Kanal.ARBEIDSGIVERNOTIFIKASJON.name,
+            utsendtTidspunkt = LocalDateTime.now(),
+            planlagtVarselId = null,
+            eksternReferanse = eksternReferanseId,
+            ferdigstiltTidspunkt = null,
+            arbeidsgivernotifikasjonMerkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
+            isForcedLetter = false,
+            journalpostId = null,
+        )
+
+    private fun handleArbeidsgiverVarselFailure(
+        hendelse: ArbeidsgiverNotifikasjonTilAltinnRessursHendelse,
+        lagreFeiletUtsending: Boolean,
+        exception: Exception,
+    ): ArbeidsgiverVarselResendResult {
+        if (lagreFeiletUtsending) {
+            lagreIkkeUtsendtArbeidsgiverVarsel(hendelse, exception)
+        }
+        logArbeidsgiverVarselFailure(hendelse, exception)
+        return exception.toArbeidsgiverVarselResendResult()
+    }
+
+    private fun logArbeidsgiverVarselFailure(
+        hendelse: ArbeidsgiverNotifikasjonTilAltinnRessursHendelse,
+        exception: Exception,
+    ) {
+        val sanitizedFeilmelding = exception.toSanitizedArbeidsgiverFeilmelding()
+        when (exception) {
+            is ArbeidsgiverVarselPermanentException ->
+                log.error(
+                    "Permanent feil ved behandling av arbeidsgivervarsel: type={}, orgnummer={}, ressursId={}, kilde={}, feil={}",
+                    hendelse.type,
+                    hendelse.orgnummer,
+                    hendelse.ressursId,
+                    hendelse.kilde,
+                    sanitizedFeilmelding,
+                )
+
+            else ->
+                log.error(
+                    "Feilet ved behandling av arbeidsgivervarsel: type={}, orgnummer={}, ressursId={}, kilde={}, feil={}",
+                    hendelse.type,
+                    hendelse.orgnummer,
+                    hendelse.ressursId,
+                    hendelse.kilde,
+                    sanitizedFeilmelding,
+                )
+        }
     }
 
     private fun ArbeidsgiverNotifikasjonTilAltinnRessursHendelse.parseVarselData() =
