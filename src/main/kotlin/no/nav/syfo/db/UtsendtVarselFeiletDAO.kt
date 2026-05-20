@@ -48,7 +48,6 @@ fun DatabaseInterface.fetchUtsendtArbeidsgivernotifikasjonVarselFeilet(): List<P
             SELECT 1
             FROM UTSENDT_VARSEL UV
             WHERE UV.KANAL = 'ARBEIDSGIVERNOTIFIKASJON'
-            AND UV.UTSENDT_TIDSPUNKT >= '2025-05-19'
             AND UV.EKSTERN_REF = feilet.UUID_EKSTERN_REFERANSE
         )
         ORDER BY feilet.utsendt_forsok_tidspunkt ASC

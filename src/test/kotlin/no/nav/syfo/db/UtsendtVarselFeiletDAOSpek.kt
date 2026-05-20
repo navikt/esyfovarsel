@@ -58,21 +58,35 @@ class UtsendtVarselFeiletDAOSpek :
 
                 embeddedDatabase.storeUtsendtVarselFeilet(varsel)
                 embeddedDatabase.storeUtsendtVarsel(
-                    PUtsendtVarsel(
-                        uuid = UUID.randomUUID().toString(),
+                    utsendtArbeidsgivervarsel(
                         fnr = fnr,
-                        aktorId = null,
-                        narmesteLederFnr = null,
-                        orgnummer = "999888777",
-                        type = HendelseType.AG_VARSEL_ALTINN_RESSURS.name,
-                        kanal = Kanal.ARBEIDSGIVERNOTIFIKASJON.name,
-                        utsendtTidspunkt = LocalDateTime.now(),
-                        planlagtVarselId = null,
                         eksternReferanse = eksternReferanse,
-                        ferdigstiltTidspunkt = null,
                         arbeidsgivernotifikasjonMerkelapp = varsel.arbeidsgivernotifikasjonMerkelapp,
-                        isForcedLetter = false,
-                        journalpostId = null,
+                    ),
+                )
+
+                embeddedDatabase.fetchUtsendtArbeidsgivernotifikasjonVarselFeilet().size shouldBe 0
+            }
+
+            it("Henter ikke AG-feiletvarsel når utsendt varsel med samme ekstern referanse er eldre enn retry-cutoff") {
+                val fnr = "12121212121"
+                val eksternReferanse = UUID.randomUUID().toString()
+                val varsel =
+                    ikkeUtsendtVarsel(fnr, """{"type":"AG_VARSEL_ALTINN_RESSURS","data":{"foo":"bar"}}""")
+                        .copy(
+                            uuidEksternReferanse = eksternReferanse,
+                            orgnummer = "999888777",
+                            kanal = Kanal.ARBEIDSGIVERNOTIFIKASJON.name,
+                            hendelsetypeNavn = HendelseType.AG_VARSEL_ALTINN_RESSURS.name,
+                        )
+
+                embeddedDatabase.storeUtsendtVarselFeilet(varsel)
+                embeddedDatabase.storeUtsendtVarsel(
+                    utsendtArbeidsgivervarsel(
+                        fnr = fnr,
+                        eksternReferanse = eksternReferanse,
+                        arbeidsgivernotifikasjonMerkelapp = varsel.arbeidsgivernotifikasjonMerkelapp,
+                        utsendtTidspunkt = LocalDateTime.of(2025, 5, 18, 23, 59),
                     ),
                 )
 
@@ -101,6 +115,28 @@ private fun ikkeUtsendtVarsel(
         isForcedLetter = false,
         hendelseJson = hendelseJson,
     )
+
+private fun utsendtArbeidsgivervarsel(
+    fnr: String,
+    eksternReferanse: String,
+    arbeidsgivernotifikasjonMerkelapp: String?,
+    utsendtTidspunkt: LocalDateTime = LocalDateTime.now(),
+) = PUtsendtVarsel(
+    uuid = UUID.randomUUID().toString(),
+    fnr = fnr,
+    aktorId = null,
+    narmesteLederFnr = null,
+    orgnummer = "999888777",
+    type = HendelseType.AG_VARSEL_ALTINN_RESSURS.name,
+    kanal = Kanal.ARBEIDSGIVERNOTIFIKASJON.name,
+    utsendtTidspunkt = utsendtTidspunkt,
+    planlagtVarselId = null,
+    eksternReferanse = eksternReferanse,
+    ferdigstiltTidspunkt = null,
+    arbeidsgivernotifikasjonMerkelapp = arbeidsgivernotifikasjonMerkelapp,
+    isForcedLetter = false,
+    journalpostId = null,
+)
 
 private fun DatabaseInterface.skalHaLagretIkkeUtsendtVarsel(
     type: HendelseType,

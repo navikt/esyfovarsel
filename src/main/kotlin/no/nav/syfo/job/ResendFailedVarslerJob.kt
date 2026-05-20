@@ -207,7 +207,11 @@ class ResendFailedVarslerJob(
         }
         if (db.isUtsendtVarselStored(eksternReferanse, Kanal.ARBEIDSGIVERNOTIFIKASJON.name)) {
             db.updateUtsendtVarselFeiletToResendt(failedVarsel.uuid, nullstillHendelseJson = true)
-            return 1
+            log.info(
+                "Skip resending arbeidsgiver Altinn-varsel: varsel er allerede lagret som utsendt for failedVarsel med uuid {}",
+                failedVarsel.uuid,
+            )
+            return 0
         }
 
         return when (arbeidsgiverVarselService.resendVarselTilArbeidsgiver(failedVarsel)) {

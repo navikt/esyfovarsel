@@ -31,7 +31,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-private const val WEEKS_BEFORE_DELETE = 4L
+private const val MONTHS_BEFORE_DELETE = 4L
 private const val SAK_TITTEL_DIALOGMOTE = "Dialogmøte"
 private val arbeidsgiverVarselObjectMapper = createObjectMapper()
 
@@ -288,7 +288,7 @@ class ArbeidsgiverVarselService(
             .now()
             .atStartOfDay()
             .plusDays(1)
-            .plusMonths(WEEKS_BEFORE_DELETE)
+            .plusMonths(MONTHS_BEFORE_DELETE)
 
     private fun ArbeidsgiverNotifikasjonTilAltinnRessursHendelse.toArbeidsgiverNotifikasjonAltinnRessursInput(
         eksternReferanseUuid: UUID,
