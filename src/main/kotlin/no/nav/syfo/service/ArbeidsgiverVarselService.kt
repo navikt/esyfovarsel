@@ -6,6 +6,7 @@ import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.countArbeidsgivernotifikasjonerSakerByType
 import no.nav.syfo.db.domain.Kanal
+import no.nav.syfo.db.domain.PSakInput
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.db.domain.toArbeidsgiverNotifikasjonTilAltinnRessursHendelse
@@ -14,11 +15,13 @@ import no.nav.syfo.db.isUtsendtVarselStored
 import no.nav.syfo.db.storeArbeidsgivernotifikasjonerSak
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
+import no.nav.syfo.db.updateArbeidsgivernotifikasjonerSakStatusAndHardDeleteDate
 import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverNotifikasjonTilAltinnRessursHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataNotifikasjonInnhold
 import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakAltinnInput
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyStatusSakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SAK_TYPE_DIALOGMOTE_UTEN_LEDER
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
 import org.slf4j.Logger
@@ -125,13 +128,17 @@ class ArbeidsgiverVarselService(
                 type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
             )
         if (existingSak != null) {
+            updateExistingSakHardDeleteDate(
+                existingSak = existingSak,
+                hardDeleteDate = hardDeleteDate,
+            )
             return ArbeidsgiverNotifikasjonSak(
                 id = existingSak.id,
                 grupperingsid = existingSak.grupperingsid,
             )
         }
 
-        val sakInput = hendelse.toNySakAltinnInput(SAK_TYPE_DIALOGMOTE_UTEN_LEDER)
+        val sakInput = hendelse.toNySakAltinnInput(SAK_TYPE_DIALOGMOTE_UTEN_LEDER, hardDeleteDate)
         val eksternSakId =
             arbeidsgiverNotifikasjonService.createNewSak(sakInput.toNySakMutation())
                 ?: throw ArbeidsgiverVarselRetryableException(
@@ -146,6 +153,30 @@ class ArbeidsgiverVarselService(
         return ArbeidsgiverNotifikasjonSak(
             id = sakId,
             sakInput.grupperingsid,
+        )
+    }
+
+    private suspend fun updateExistingSakHardDeleteDate(
+        existingSak: PSakInput,
+        hardDeleteDate: LocalDateTime,
+    ) {
+        val sakStatus = SakStatus.valueOf(existingSak.initiellStatus.name)
+
+        arbeidsgiverNotifikasjonService.nyStatusSak(
+            NyStatusSakInput(
+                grupperingsId = existingSak.grupperingsid,
+                merkelapp = existingSak.merkelapp,
+                sakStatus = sakStatus,
+                oppdatertHardDeleteDateTime = hardDeleteDate,
+            ),
+        ) ?: throw ArbeidsgiverVarselRetryableException(
+            "ArbeidsgiverNotifikasjonService returnerte null ID ved oppdatering av hardDeleteDate på sak",
+        )
+
+        database.updateArbeidsgivernotifikasjonerSakStatusAndHardDeleteDate(
+            sakId = existingSak.id,
+            sakStatus = sakStatus,
+            hardDeleteDate = hardDeleteDate,
         )
     }
 
@@ -231,18 +262,20 @@ class ArbeidsgiverVarselService(
         return isStored
     }
 
-    private fun ArbeidsgiverNotifikasjonTilAltinnRessursHendelse.toNySakAltinnInput(sakType: String) =
-        NySakAltinnInput(
-            grupperingsid = generateGrupperingsid(arbeidstakerFnr, orgnummer, sakType),
-            merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
-            virksomhetsnummer = orgnummer,
-            ansattFnr = arbeidstakerFnr,
-            tittel = SAK_TITTEL_DIALOGMOTE,
-            lenke = ressursUrl,
-            initiellStatus = SakStatus.MOTTATT,
-            hardDeleteDate = createHardDeleteDate(),
-            ressursId = ressursId,
-        )
+    private fun ArbeidsgiverNotifikasjonTilAltinnRessursHendelse.toNySakAltinnInput(
+        sakType: String,
+        hardDeleteDate: LocalDateTime,
+    ) = NySakAltinnInput(
+        grupperingsid = generateGrupperingsid(arbeidstakerFnr, orgnummer, sakType),
+        merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
+        virksomhetsnummer = orgnummer,
+        ansattFnr = arbeidstakerFnr,
+        tittel = SAK_TITTEL_DIALOGMOTE,
+        lenke = ressursUrl,
+        initiellStatus = SakStatus.MOTTATT,
+        hardDeleteDate = hardDeleteDate,
+        ressursId = ressursId,
+    )
 
     private fun ArbeidsgiverNotifikasjonTilAltinnRessursHendelse.requireNotifikasjonInnhold(): VarselDataNotifikasjonInnhold =
         parseVarselData().notifikasjonInnhold

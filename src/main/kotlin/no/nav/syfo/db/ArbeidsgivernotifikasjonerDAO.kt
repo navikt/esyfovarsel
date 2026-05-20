@@ -107,6 +107,31 @@ fun DatabaseInterface.updateArbeidsgivernotifikasjonerSakStatus(
     }
 }
 
+fun DatabaseInterface.updateArbeidsgivernotifikasjonerSakStatusAndHardDeleteDate(
+    sakId: String,
+    sakStatus: SakStatus,
+    hardDeleteDate: LocalDateTime,
+) {
+    val updateStatement =
+        """
+        UPDATE ARBEIDSGIVERNOTIFIKASJONER_SAK
+        SET initiellStatus = ?, hardDeleteDate = ?
+        WHERE id = ?
+        """.trimIndent()
+
+    connection.use { connection ->
+        connection.prepareStatement(updateStatement).use { preparedStatement ->
+            preparedStatement.setString(1, sakStatus.name)
+            preparedStatement.setTimestamp(2, Timestamp.valueOf(hardDeleteDate))
+            preparedStatement.setObject(3, UUID.fromString(sakId))
+
+            preparedStatement.executeUpdate()
+        }
+
+        connection.commit()
+    }
+}
+
 fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSak(
     narmestelederId: String,
     merkelapp: String,

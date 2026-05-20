@@ -9,6 +9,7 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.slot
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP
 import no.nav.syfo.db.ARBEIDSTAKER_FNR_1
 import no.nav.syfo.db.ORGNUMMER_1
@@ -70,6 +71,7 @@ class ArbeidsgiverVarselServiceTest :
                 sak?.ressursId shouldBe hendelse.ressursId
                 inputSlot.single().uuid shouldBe UUID.fromString(hendelse.eksternReferanseId)
                 inputSlot.single().grupperingsid shouldBe sak?.grupperingsid
+                sak?.hardDeleteDate shouldBe inputSlot.single().hardDeleteDate
                 inputSlot.single().hardDeleteDate shouldBe
                     LocalDate
                         .now()
@@ -94,13 +96,65 @@ class ArbeidsgiverVarselServiceTest :
                     )
                 embeddedDatabase.storeArbeidsgivernotifikasjonerSak(eksisterendeSak, eksternSakId = "sak-1")
                 val inputSlot = mutableListOf<ArbeidsgiverNotifikasjonAltinnRessursInput>()
+                val nyStatusSakInputSlot = slot<no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyStatusSakInput>()
 
+                coEvery { arbeidsgiverNotifikasjonService.nyStatusSak(capture(nyStatusSakInputSlot)) } returns "sak-1"
                 coEvery { arbeidsgiverNotifikasjonService.sendNotifikasjon(capture(inputSlot)) } returns "notifikasjon-id"
 
                 service.sendVarselTilArbeidsgiver(hendelse)
 
                 coVerify(exactly = 0) { arbeidsgiverNotifikasjonService.createNewSak(any()) }
+                nyStatusSakInputSlot.captured.grupperingsId shouldBe eksisterendeSak.grupperingsid
+                nyStatusSakInputSlot.captured.merkelapp shouldBe eksisterendeSak.merkelapp
+                nyStatusSakInputSlot.captured.sakStatus shouldBe eksisterendeSak.initiellStatus.let { SakStatus.valueOf(it.name) }
+                nyStatusSakInputSlot.captured.oppdatertHardDeleteDateTime shouldBe inputSlot.single().hardDeleteDate
                 inputSlot.single().grupperingsid shouldBe eksisterendeSak.grupperingsid
+                val oppdatertSak =
+                    embeddedDatabase.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
+                        ansattFnr = hendelse.arbeidstakerFnr,
+                        virksomhetsnummer = hendelse.orgnummer,
+                        type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
+                    )
+                oppdatertSak?.hardDeleteDate shouldBe inputSlot.single().hardDeleteDate
+            }
+
+            it("lagrer feilet utsending og avbryter sending når oppdatering av eksisterende sak returnerer null") {
+                val hendelse = arbeidsgiverHendelse()
+                val eksisterendeSak =
+                    NySakAltinnInput(
+                        grupperingsid = UUID.randomUUID().toString(),
+                        merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
+                        virksomhetsnummer = hendelse.orgnummer,
+                        ansattFnr = hendelse.arbeidstakerFnr,
+                        tittel = "Dialogmøte",
+                        lenke = hendelse.ressursUrl,
+                        initiellStatus = SakStatus.MOTTATT,
+                        hardDeleteDate = LocalDateTime.now().plusDays(1),
+                        ressursId = hendelse.ressursId,
+                    )
+                embeddedDatabase.storeArbeidsgivernotifikasjonerSak(eksisterendeSak, eksternSakId = "sak-1")
+
+                coEvery { arbeidsgiverNotifikasjonService.nyStatusSak(any()) } returns null
+
+                service.sendVarselTilArbeidsgiver(hendelse)
+
+                val feiledeVarsler = embeddedDatabase.fetchUtsendtVarselFeiletByFnr(ARBEIDSTAKER_FNR_1)
+                feiledeVarsler shouldHaveSize 1
+                feiledeVarsler.single().feilmelding shouldBe
+                    "ArbeidsgiverNotifikasjonService returnerte null ID ved oppdatering av hardDeleteDate på sak"
+                embeddedDatabase.fetchUtsendtVarselByFnr(ARBEIDSTAKER_FNR_1) shouldHaveSize 0
+                coVerify(exactly = 0) {
+                    arbeidsgiverNotifikasjonService.sendNotifikasjon(
+                        any<ArbeidsgiverNotifikasjonAltinnRessursInput>(),
+                    )
+                }
+                val sakEtterFeil =
+                    embeddedDatabase.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
+                        ansattFnr = hendelse.arbeidstakerFnr,
+                        virksomhetsnummer = hendelse.orgnummer,
+                        type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
+                    )
+                sakEtterFeil?.hardDeleteDate shouldBe eksisterendeSak.hardDeleteDate
             }
 
             it("gjenbruker ikke ferdigstilte saker") {
