@@ -1,6 +1,7 @@
 package no.nav.syfo.job
 
 import io.kotest.core.spec.style.DescribeSpec
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -12,9 +13,15 @@ import no.nav.syfo.db.domain.PUtsendtVarselFeilet
 import no.nav.syfo.db.domain.toArbeidstakerHendelse
 import no.nav.syfo.db.fetchUtsendtBrukernotifikasjonVarselFeilet
 import no.nav.syfo.db.fetchUtsendtDokDistVarselFeilet
+import no.nav.syfo.db.fetchUtsendtVarselFeiletByFnr
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
+import no.nav.syfo.kafka.common.createObjectMapper
+import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverNotifikasjonTilAltinnRessursHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import no.nav.syfo.service.ArbeidsgiverVarselResendResult
+import no.nav.syfo.service.ArbeidsgiverVarselService
 import no.nav.syfo.service.DialogmoteInnkallingSykmeldtVarselService
 import no.nav.syfo.service.KartleggingssporsmalVarselService
 import no.nav.syfo.service.MerVeiledningVarselService
@@ -33,9 +40,11 @@ class ResendFailedVarslerJobTest :
         val merVeiledningVarselService = mockk<MerVeiledningVarselService>(relaxed = true)
         val kartleggingVarselService = mockk<KartleggingssporsmalVarselService>(relaxed = true)
         val senderFacade = mockk<SenderFacade>(relaxed = true)
+        val arbeidsgiverVarselService = mockk<ArbeidsgiverVarselService>(relaxed = true)
 
         beforeTest {
             embeddedDatabase.dropData()
+            clearAllMocks()
             coEvery { motebehovVarselService.resendVarselTilBrukernotifikasjoner(any()) } returns true
             coEvery { motebehovVarselService.resendVarselTilArbeidsgiverNotifikasjon(any()) } returns true
             every {
@@ -43,6 +52,7 @@ class ResendFailedVarslerJobTest :
             } returns true
             coEvery { merVeiledningVarselService.resendDigitaltVarselTilArbeidstaker(any()) } returns true
             coEvery { senderFacade.sendBrevTilFysiskPrint(any(), any(), any(), any(), any()) } returns true
+            coEvery { arbeidsgiverVarselService.resendVarselTilArbeidsgiver(any()) } returns ArbeidsgiverVarselResendResult.RESENT
         }
 
         val job =
@@ -53,6 +63,7 @@ class ResendFailedVarslerJobTest :
                 merVeiledningVarselService = merVeiledningVarselService,
                 kartleggingVarselService = kartleggingVarselService,
                 senderFacade = senderFacade,
+                arbeidsgiverVarselService = arbeidsgiverVarselService,
             )
 
         describe("Resend brukernotifikasjon varsler") {
@@ -437,5 +448,158 @@ class ResendFailedVarslerJobTest :
 
                 result shouldBeEqualTo 0
             }
+
+            it("Resends failed AG_VARSEL_ALTINN_RESSURS and clears hendelseJson after success") {
+                val failedVarsel = failedArbeidsgiverAltinnVarsel()
+
+                embeddedDatabase.storeUtsendtVarselFeilet(failedVarsel)
+
+                val result = runBlocking { job.resendFailedArbeidsgivernotifikasjonVarsler() }
+
+                result shouldBeEqualTo 1
+                val storedFailedVarsel =
+                    embeddedDatabase
+                        .fetchUtsendtVarselFeiletByFnr(failedVarsel.arbeidstakerFnr)
+                        .first { it.uuid == failedVarsel.uuid }
+                storedFailedVarsel.isResendt shouldBeEqualTo true
+                storedFailedVarsel.hendelseJson shouldBeEqualTo null
+                coVerify(exactly = 1) { arbeidsgiverVarselService.resendVarselTilArbeidsgiver(any()) }
+            }
+
+            it("Does not pick failed AG_VARSEL_ALTINN_RESSURS for resend when varsel is already stored as sent") {
+                val failedVarsel = failedArbeidsgiverAltinnVarsel()
+                val utsendtVarsel =
+                    PUtsendtVarsel(
+                        uuid = UUID.randomUUID().toString(),
+                        fnr = failedVarsel.arbeidstakerFnr,
+                        aktorId = null,
+                        narmesteLederFnr = null,
+                        orgnummer = failedVarsel.orgnummer,
+                        type = failedVarsel.hendelsetypeNavn,
+                        kanal = "ARBEIDSGIVERNOTIFIKASJON",
+                        utsendtTidspunkt = LocalDateTime.now(),
+                        planlagtVarselId = null,
+                        eksternReferanse = failedVarsel.uuidEksternReferanse,
+                        ferdigstiltTidspunkt = null,
+                        arbeidsgivernotifikasjonMerkelapp = failedVarsel.arbeidsgivernotifikasjonMerkelapp,
+                        isForcedLetter = false,
+                        journalpostId = null,
+                    )
+
+                embeddedDatabase.storeUtsendtVarselFeilet(failedVarsel)
+                embeddedDatabase.storeUtsendtVarsel(utsendtVarsel)
+
+                val result = runBlocking { job.resendFailedArbeidsgivernotifikasjonVarsler() }
+
+                result shouldBeEqualTo 0
+                val storedFailedVarsel =
+                    embeddedDatabase
+                        .fetchUtsendtVarselFeiletByFnr(failedVarsel.arbeidstakerFnr)
+                        .first { it.uuid == failedVarsel.uuid }
+                storedFailedVarsel.isResendt shouldBeEqualTo false
+                storedFailedVarsel.hendelseJson shouldBeEqualTo failedVarsel.hendelseJson
+                coVerify(exactly = 0) { arbeidsgiverVarselService.resendVarselTilArbeidsgiver(any()) }
+            }
+
+            it("Keeps hendelseJson when resend of AG_VARSEL_ALTINN_RESSURS still fails") {
+                val failedVarsel = failedArbeidsgiverAltinnVarsel()
+                coEvery {
+                    arbeidsgiverVarselService.resendVarselTilArbeidsgiver(any())
+                } returns ArbeidsgiverVarselResendResult.RETRYABLE_FAILURE
+
+                embeddedDatabase.storeUtsendtVarselFeilet(failedVarsel)
+
+                val result = runBlocking { job.resendFailedArbeidsgivernotifikasjonVarsler() }
+
+                result shouldBeEqualTo 0
+                val storedFailedVarsel =
+                    embeddedDatabase
+                        .fetchUtsendtVarselFeiletByFnr(failedVarsel.arbeidstakerFnr)
+                        .first { it.uuid == failedVarsel.uuid }
+                storedFailedVarsel.isResendt shouldBeEqualTo false
+                storedFailedVarsel.hendelseJson shouldBeEqualTo failedVarsel.hendelseJson
+            }
+
+            it("Marks AG_VARSEL_ALTINN_RESSURS as resend exhausted when service returns permanent failure") {
+                val failedVarsel = failedArbeidsgiverAltinnVarsel()
+                coEvery {
+                    arbeidsgiverVarselService.resendVarselTilArbeidsgiver(any())
+                } returns ArbeidsgiverVarselResendResult.PERMANENT_FAILURE
+
+                embeddedDatabase.storeUtsendtVarselFeilet(failedVarsel)
+
+                val result = runBlocking { job.resendFailedArbeidsgivernotifikasjonVarsler() }
+
+                result shouldBeEqualTo 0
+                val storedFailedVarsel =
+                    embeddedDatabase
+                        .fetchUtsendtVarselFeiletByFnr(failedVarsel.arbeidstakerFnr)
+                        .first { it.uuid == failedVarsel.uuid }
+                storedFailedVarsel.resendExhausted shouldBeEqualTo true
+                storedFailedVarsel.isResendt shouldBeEqualTo false
+                storedFailedVarsel.hendelseJson shouldBeEqualTo failedVarsel.hendelseJson
+            }
+
+            it("Marks AG_VARSEL_ALTINN_RESSURS as resend exhausted when uuidEksternReferanse mangler") {
+                val failedVarsel = failedArbeidsgiverAltinnVarsel().copy(uuidEksternReferanse = null)
+
+                embeddedDatabase.storeUtsendtVarselFeilet(failedVarsel)
+
+                val result = runBlocking { job.resendFailedArbeidsgivernotifikasjonVarsler() }
+
+                result shouldBeEqualTo 0
+                val storedFailedVarsel =
+                    embeddedDatabase
+                        .fetchUtsendtVarselFeiletByFnr(failedVarsel.arbeidstakerFnr)
+                        .first { it.uuid == failedVarsel.uuid }
+                storedFailedVarsel.resendExhausted shouldBeEqualTo true
+                storedFailedVarsel.isResendt shouldBeEqualTo false
+                storedFailedVarsel.hendelseJson shouldBeEqualTo failedVarsel.hendelseJson
+                coVerify(exactly = 0) { arbeidsgiverVarselService.resendVarselTilArbeidsgiver(any()) }
+            }
         }
     })
+
+private fun failedArbeidsgiverAltinnVarsel(
+    eksternReferanseId: String = UUID.randomUUID().toString(),
+    hendelseJson: String? = null,
+): PUtsendtVarselFeilet {
+    val hendelse =
+        ArbeidsgiverNotifikasjonTilAltinnRessursHendelse(
+            type = HendelseType.AG_VARSEL_ALTINN_RESSURS,
+            ferdigstill = false,
+            data =
+                createObjectMapper().readTree(
+                    """
+                    {
+                      "notifikasjonInnhold": {
+                        "epostTittel": "Dialogmøte",
+                        "epostBody": "Du har mottatt et nytt dialogmøtevarsel",
+                        "smsTekst": "Du har mottatt et nytt dialogmøtevarsel"
+                      }
+                    }
+                    """.trimIndent(),
+                ),
+            arbeidstakerFnr = "12121212121",
+            eksternReferanseId = eksternReferanseId,
+            kilde = "dokumentporten.dialogmote",
+            orgnummer = "999888777",
+            ressursId = "nav_syfo_dialogmote",
+            ressursUrl = "https://www.altinn.no",
+        )
+    return PUtsendtVarselFeilet(
+        uuid = UUID.randomUUID().toString(),
+        uuidEksternReferanse = hendelse.eksternReferanseId,
+        arbeidstakerFnr = hendelse.arbeidstakerFnr,
+        narmesteLederFnr = null,
+        orgnummer = hendelse.orgnummer,
+        hendelsetypeNavn = hendelse.type.name,
+        arbeidsgivernotifikasjonMerkelapp = "Dialogmøte",
+        brukernotifikasjonerMeldingType = null,
+        journalpostId = null,
+        kanal = "ARBEIDSGIVERNOTIFIKASJON",
+        feilmelding = "noe gikk galt",
+        utsendtForsokTidspunkt = LocalDateTime.now().minusHours(2),
+        hendelseJson = hendelseJson ?: createObjectMapper().writeValueAsString(hendelse),
+    )
+}

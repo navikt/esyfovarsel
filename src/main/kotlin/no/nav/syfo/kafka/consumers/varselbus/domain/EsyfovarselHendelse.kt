@@ -42,7 +42,7 @@ data class ArbeidsgiverNotifikasjonTilAltinnRessursHendelse(
     override val type: HendelseType,
     override val ferdigstill: Boolean?,
     override var data: Any?,
-    val arbeidstakerFnr: String? = null,
+    val arbeidstakerFnr: String,
     val eksternReferanseId: String,
     val kilde: String,
     val orgnummer: String,

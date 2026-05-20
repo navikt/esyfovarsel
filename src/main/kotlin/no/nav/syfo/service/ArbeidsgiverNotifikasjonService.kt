@@ -73,7 +73,7 @@ class ArbeidsgiverNotifikasjonService(
         }
     }
 
-    suspend fun sendNotifikasjon(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonAltinnRessursInput) {
+    suspend fun sendNotifikasjon(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonAltinnRessursInput): String? {
         val arbeidsgiverNotifikasjonAltinnRessurs =
             ArbeidsgiverNotifikasjonAltinnRessurs(
                 varselId = arbeidsgiverNotifikasjon.uuid.toString(),
@@ -87,7 +87,7 @@ class ArbeidsgiverNotifikasjonService(
                 grupperingsid = arbeidsgiverNotifikasjon.grupperingsid,
                 ressursId = arbeidsgiverNotifikasjon.ressursId,
             )
-        when (arbeidsgiverNotifikasjon.meldingstype) {
+        return when (arbeidsgiverNotifikasjon.meldingstype) {
             BESKJED ->
                 arbeidsgiverNotifikasjonProdusent.createNewBeskjedForArbeidsgiver(
                     arbeidsgiverNotifikasjonAltinnRessurs,

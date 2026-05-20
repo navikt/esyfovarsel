@@ -107,6 +107,31 @@ fun DatabaseInterface.updateArbeidsgivernotifikasjonerSakStatus(
     }
 }
 
+fun DatabaseInterface.updateArbeidsgivernotifikasjonerSakStatusAndHardDeleteDate(
+    sakId: String,
+    sakStatus: SakStatus,
+    hardDeleteDate: LocalDateTime,
+) {
+    val updateStatement =
+        """
+        UPDATE ARBEIDSGIVERNOTIFIKASJONER_SAK
+        SET initiellStatus = ?, hardDeleteDate = ?
+        WHERE id = ?
+        """.trimIndent()
+
+    connection.use { connection ->
+        connection.prepareStatement(updateStatement).use { preparedStatement ->
+            preparedStatement.setString(1, sakStatus.name)
+            preparedStatement.setTimestamp(2, Timestamp.valueOf(hardDeleteDate))
+            preparedStatement.setObject(3, UUID.fromString(sakId))
+
+            preparedStatement.executeUpdate()
+        }
+
+        connection.commit()
+    }
+}
+
 fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSak(
     narmestelederId: String,
     merkelapp: String,
@@ -156,6 +181,36 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
             it.setString(2, virksomhetsnummer)
             it.setString(3, type)
             it.executeQuery().toList { toPSakInput() }.firstOrNull()
+        }
+    }
+}
+
+fun DatabaseInterface.countArbeidsgivernotifikasjonerSakerByType(
+    ansattFnr: String,
+    virksomhetsnummer: String,
+    type: String,
+): Int {
+    val queryStatement =
+        """
+        SELECT COUNT(*)
+        FROM ARBEIDSGIVERNOTIFIKASJONER_SAK
+        WHERE ansattFnr = ?
+        AND virksomhetsnummer = ?
+        AND type = ?
+        """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, ansattFnr)
+            it.setString(2, virksomhetsnummer)
+            it.setString(3, type)
+            it.executeQuery().use { resultSet ->
+                if (resultSet.next()) {
+                    resultSet.getInt(1)
+                } else {
+                    0
+                }
+            }
         }
     }
 }
