@@ -91,7 +91,7 @@ class ArbeidsgiverVarselServiceTest :
                         tittel = "Dialogmøte",
                         lenke = hendelse.ressursUrl,
                         initiellStatus = SakStatus.MOTTATT,
-                        hardDeleteDate = LocalDateTime.now().plusDays(1),
+                        hardDeleteDate = existingHardDeleteDate(),
                         ressursId = hendelse.ressursId,
                     )
                 embeddedDatabase.storeArbeidsgivernotifikasjonerSak(eksisterendeSak, eksternSakId = "sak-1")
@@ -129,7 +129,7 @@ class ArbeidsgiverVarselServiceTest :
                         tittel = "Dialogmøte",
                         lenke = hendelse.ressursUrl,
                         initiellStatus = SakStatus.MOTTATT,
-                        hardDeleteDate = LocalDateTime.now().plusDays(1),
+                        hardDeleteDate = existingHardDeleteDate(),
                         ressursId = hendelse.ressursId,
                     )
                 embeddedDatabase.storeArbeidsgivernotifikasjonerSak(eksisterendeSak, eksternSakId = "sak-1")
@@ -168,7 +168,7 @@ class ArbeidsgiverVarselServiceTest :
                         tittel = "Dialogmøte",
                         lenke = hendelse.ressursUrl,
                         initiellStatus = SakStatus.FERDIG,
-                        hardDeleteDate = LocalDateTime.now().plusDays(1),
+                        hardDeleteDate = existingHardDeleteDate(),
                         ressursId = hendelse.ressursId,
                     )
                 embeddedDatabase.storeArbeidsgivernotifikasjonerSak(avsluttetSak, eksternSakId = "sak-avsluttet")
@@ -376,6 +376,8 @@ private fun arbeidsgiverHendelse(
 )
 
 private fun hendelseMotetidspunkt(): LocalDateTime = LocalDateTime.of(2030, 1, 15, 10, 0)
+
+private fun existingHardDeleteDate(): LocalDateTime = LocalDate.now().plusDays(1).atStartOfDay()
 
 private fun arbeidsgiverVarselFeilet(
     eksternReferanseId: String = UUID.randomUUID().toString(),
