@@ -1,5 +1,7 @@
 package no.nav.syfo.service
 
+import com.apollo.graphql.NySakMutation
+import com.apollographql.apollo.api.Optional
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -49,8 +51,9 @@ class ArbeidsgiverVarselServiceTest :
                 val hendelse = arbeidsgiverHendelse()
                 val eksternSakId = UUID.randomUUID().toString()
                 val inputSlot = mutableListOf<ArbeidsgiverNotifikasjonAltinnRessursInput>()
+                val mutationSlot = slot<NySakMutation>()
 
-                coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns eksternSakId
+                coEvery { arbeidsgiverNotifikasjonService.createNewSak(capture(mutationSlot)) } returns eksternSakId
                 coEvery { arbeidsgiverNotifikasjonService.sendNotifikasjon(capture(inputSlot)) } returns "notifikasjon-id"
 
                 service.sendVarselTilArbeidsgiver(hendelse)
@@ -69,6 +72,8 @@ class ArbeidsgiverVarselServiceTest :
                     )
                 sak?.eksternSakId shouldBe eksternSakId
                 sak?.ressursId shouldBe hendelse.ressursId
+                sak?.lenke shouldBe hendelse.ressursUrl
+                mutationSlot.captured.lenke shouldBe Optional.Absent
                 inputSlot.single().uuid shouldBe UUID.fromString(hendelse.eksternReferanseId)
                 inputSlot.single().grupperingsid shouldBe sak?.grupperingsid
                 sak?.hardDeleteDate shouldBe inputSlot.single().hardDeleteDate
@@ -89,10 +94,10 @@ class ArbeidsgiverVarselServiceTest :
                         virksomhetsnummer = hendelse.orgnummer,
                         ansattFnr = hendelse.arbeidstakerFnr,
                         tittel = "Dialogmøte",
-                        lenke = hendelse.ressursUrl,
                         initiellStatus = SakStatus.MOTTATT,
                         hardDeleteDate = existingHardDeleteDate(),
                         ressursId = hendelse.ressursId,
+                        ressursUrl = hendelse.ressursUrl,
                     )
                 embeddedDatabase.storeArbeidsgivernotifikasjonerSak(eksisterendeSak, eksternSakId = "sak-1")
                 val inputSlot = mutableListOf<ArbeidsgiverNotifikasjonAltinnRessursInput>()
@@ -127,10 +132,10 @@ class ArbeidsgiverVarselServiceTest :
                         virksomhetsnummer = hendelse.orgnummer,
                         ansattFnr = hendelse.arbeidstakerFnr,
                         tittel = "Dialogmøte",
-                        lenke = hendelse.ressursUrl,
                         initiellStatus = SakStatus.MOTTATT,
                         hardDeleteDate = existingHardDeleteDate(),
                         ressursId = hendelse.ressursId,
+                        ressursUrl = hendelse.ressursUrl,
                     )
                 embeddedDatabase.storeArbeidsgivernotifikasjonerSak(eksisterendeSak, eksternSakId = "sak-1")
 
@@ -166,10 +171,10 @@ class ArbeidsgiverVarselServiceTest :
                         virksomhetsnummer = hendelse.orgnummer,
                         ansattFnr = hendelse.arbeidstakerFnr,
                         tittel = "Dialogmøte",
-                        lenke = hendelse.ressursUrl,
                         initiellStatus = SakStatus.FERDIG,
                         hardDeleteDate = existingHardDeleteDate(),
                         ressursId = hendelse.ressursId,
+                        ressursUrl = hendelse.ressursUrl,
                     )
                 embeddedDatabase.storeArbeidsgivernotifikasjonerSak(avsluttetSak, eksternSakId = "sak-avsluttet")
                 val inputSlot = mutableListOf<ArbeidsgiverNotifikasjonAltinnRessursInput>()

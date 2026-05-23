@@ -271,10 +271,10 @@ class ArbeidsgiverVarselService(
         virksomhetsnummer = orgnummer,
         ansattFnr = arbeidstakerFnr,
         tittel = SAK_TITTEL_DIALOGMOTE,
-        lenke = ressursUrl,
         initiellStatus = SakStatus.MOTTATT,
         hardDeleteDate = hardDeleteDate,
         ressursId = ressursId,
+        ressursUrl = ressursUrl,
     )
 
     private fun ArbeidsgiverNotifikasjonTilAltinnRessursHendelse.requireNotifikasjonInnhold(): VarselDataNotifikasjonInnhold =

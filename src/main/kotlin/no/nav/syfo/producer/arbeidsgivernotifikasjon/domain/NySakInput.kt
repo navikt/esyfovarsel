@@ -33,6 +33,8 @@ sealed interface NySakInput {
 
     fun toSakType(): String
 
+    fun toLenkeForNySakMutation(): Optional<String?> = Optional.present(lenke)
+
     fun buildNySakMutation(mottakere: List<MottakerInput>): NySakMutation =
         NySakMutation(
             grupperingsid = grupperingsid,
@@ -41,7 +43,7 @@ sealed interface NySakInput {
             mottakere = mottakere,
             tittel = tittel,
             tilleggsinformasjon = Optional.presentIfNotNull(tilleggsinformasjon),
-            lenke = Optional.present(lenke),
+            lenke = toLenkeForNySakMutation(),
             initiellStatus = SaksStatus.valueOf(initiellStatus.name),
             nesteSteg = Optional.presentIfNotNull(nesteSteg),
             overstyrStatustekstMed = Optional.presentIfNotNull(overstyrStatustekstMed),
@@ -102,13 +104,16 @@ data class NySakAltinnInput(
     override val ansattFnr: String,
     override val tittel: String,
     override val tilleggsinformasjon: String? = null,
-    override val lenke: String,
     override val initiellStatus: SakStatus,
     override val nesteSteg: String? = null,
     override val overstyrStatustekstMed: String? = null,
     override val hardDeleteDate: LocalDateTime,
     val ressursId: String,
+    val ressursUrl: String,
 ) : NySakInput {
+    override val lenke: String
+        get() = ressursUrl
+
     override fun toNySakMutation(): NySakMutation =
         buildNySakMutation(
             listOf(
@@ -122,6 +127,8 @@ data class NySakAltinnInput(
                 ),
             ),
         )
+
+    override fun toLenkeForNySakMutation(): Optional<String?> = Optional.Absent
 
     override fun toSakType(): String = SAK_TYPE_DIALOGMOTE_UTEN_LEDER
 }
