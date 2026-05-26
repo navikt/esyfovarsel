@@ -35,6 +35,7 @@ import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.domain.DittSykefravaerVarsel
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.KalenderTilstand
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.MottakerType
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyKalenderInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyStatusSakInput
@@ -223,17 +224,20 @@ class SenderFacade(
         database.getPaagaaendeArbeidsgivernotifikasjonerSak(
             narmestelederId = narmesteLederId,
             merkelapp = merkelapp,
+            mottakerType = MottakerType.NAERMESTE_LEDER,
         )
 
     fun getPaagaaendeSakByType(
         ansattFnr: String,
         virksomhetsnummer: String,
         type: String,
+        mottakerType: MottakerType,
     ): PSakInput? =
         database.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
             ansattFnr = ansattFnr,
             virksomhetsnummer = virksomhetsnummer,
             type = type,
+            mottakerType = mottakerType,
         )
 
     suspend fun nyStatusSak(

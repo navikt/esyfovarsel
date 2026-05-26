@@ -20,6 +20,7 @@ import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverNotifikasjonTilAltinnRessursHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.VarselDataNotifikasjonInnhold
 import no.nav.syfo.kafka.consumers.varselbus.domain.toVarselData
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.MottakerType
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakAltinnInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyStatusSakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SAK_TYPE_DIALOGMOTE_UTEN_LEDER
@@ -126,6 +127,7 @@ class ArbeidsgiverVarselService(
                 ansattFnr = hendelse.arbeidstakerFnr,
                 virksomhetsnummer = hendelse.orgnummer,
                 type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
+                mottakerType = MottakerType.ALTINN,
             )
         if (existingSak != null) {
             updateExistingSakHardDeleteDate(

@@ -212,6 +212,7 @@ class SenderFacadeSpek :
                         ansattFnr = sakInput.ansattFnr,
                         virksomhetsnummer = sakInput.virksomhetsnummer,
                         type = SAK_TYPE_OPPFOLGING_MED_LEDER,
+                        mottakerType = MottakerType.NAERMESTE_LEDER,
                     )
 
                 storedSak?.id shouldBe storedId
@@ -243,6 +244,14 @@ class SenderFacadeSpek :
                         ansattFnr = sakInput.ansattFnr,
                         virksomhetsnummer = sakInput.virksomhetsnummer,
                         type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
+                        mottakerType = MottakerType.ALTINN,
+                    )
+                val storedSakWithWrongMottakerType =
+                    senderFacade.getPaagaaendeSakByType(
+                        ansattFnr = sakInput.ansattFnr,
+                        virksomhetsnummer = sakInput.virksomhetsnummer,
+                        type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
+                        mottakerType = MottakerType.NAERMESTE_LEDER,
                     )
 
                 storedSak?.id shouldBe storedId
@@ -253,6 +262,7 @@ class SenderFacadeSpek :
                 storedSak?.mottakerType shouldBe MottakerType.ALTINN
                 storedSak?.narmestelederId shouldBe null
                 storedSak?.narmesteLederFnr shouldBe null
+                storedSakWithWrongMottakerType shouldBe null
                 mutationSlot.captured.lenke shouldBe Optional.Absent
             }
         }

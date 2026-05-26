@@ -70,6 +70,7 @@ class ArbeidsgiverVarselServiceTest :
                         ansattFnr = hendelse.arbeidstakerFnr,
                         virksomhetsnummer = hendelse.orgnummer,
                         type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
+                        mottakerType = MottakerType.ALTINN,
                     )
                 sak?.eksternSakId shouldBe eksternSakId
                 sak?.ressursId shouldBe hendelse.ressursId
@@ -121,8 +122,51 @@ class ArbeidsgiverVarselServiceTest :
                         ansattFnr = hendelse.arbeidstakerFnr,
                         virksomhetsnummer = hendelse.orgnummer,
                         type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
+                        mottakerType = MottakerType.ALTINN,
                     )
                 oppdatertSak?.hardDeleteDate shouldBe inputSlot.single().hardDeleteDate
+            }
+
+            it("gjenbruker ikke sak med feil mottakertype") {
+                val hendelse = arbeidsgiverHendelse()
+                val sakMedFeilMottakertype =
+                    NySakAltinnInput(
+                        grupperingsid = UUID.randomUUID().toString(),
+                        merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
+                        virksomhetsnummer = hendelse.orgnummer,
+                        ansattFnr = hendelse.arbeidstakerFnr,
+                        tittel = "Dialogmøte",
+                        initiellStatus = SakStatus.MOTTATT,
+                        hardDeleteDate = existingHardDeleteDate(),
+                        ressursId = hendelse.ressursId,
+                    )
+                val lagretSakId =
+                    embeddedDatabase.storeArbeidsgivernotifikasjonerSak(
+                        sakMedFeilMottakertype,
+                        eksternSakId = "sak-feil-mottaker",
+                    )
+                embeddedDatabase.updateArbeidsgivernotifikasjonerSakMottakerType(
+                    sakId = lagretSakId,
+                    mottakerType = MottakerType.NAERMESTE_LEDER,
+                )
+
+                val inputSlot = mutableListOf<ArbeidsgiverNotifikasjonAltinnRessursInput>()
+
+                coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns "sak-ny"
+                coEvery { arbeidsgiverNotifikasjonService.sendNotifikasjon(capture(inputSlot)) } returns "notifikasjon-id"
+
+                service.sendVarselTilArbeidsgiver(hendelse)
+
+                val nySak =
+                    embeddedDatabase.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
+                        ansattFnr = hendelse.arbeidstakerFnr,
+                        virksomhetsnummer = hendelse.orgnummer,
+                        type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
+                        mottakerType = MottakerType.ALTINN,
+                    )
+                coVerify(exactly = 1) { arbeidsgiverNotifikasjonService.createNewSak(any()) }
+                nySak?.grupperingsid shouldBe inputSlot.single().grupperingsid
+                nySak?.grupperingsid shouldNotBe sakMedFeilMottakertype.grupperingsid
             }
 
             it("lagrer feilet utsending og avbryter sending når oppdatering av eksisterende sak returnerer null") {
@@ -159,6 +203,7 @@ class ArbeidsgiverVarselServiceTest :
                         ansattFnr = hendelse.arbeidstakerFnr,
                         virksomhetsnummer = hendelse.orgnummer,
                         type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
+                        mottakerType = MottakerType.ALTINN,
                     )
                 sakEtterFeil?.hardDeleteDate shouldBe eksisterendeSak.hardDeleteDate
             }
@@ -189,6 +234,7 @@ class ArbeidsgiverVarselServiceTest :
                         ansattFnr = hendelse.arbeidstakerFnr,
                         virksomhetsnummer = hendelse.orgnummer,
                         type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
+                        mottakerType = MottakerType.ALTINN,
                     )
                 coVerify(exactly = 1) { arbeidsgiverNotifikasjonService.createNewSak(any()) }
                 nySak?.grupperingsid shouldBe inputSlot.single().grupperingsid
@@ -402,3 +448,24 @@ private fun arbeidsgiverVarselFeilet(
     utsendtForsokTidspunkt = LocalDateTime.now(),
     hendelseJson = hendelseJson,
 )
+
+private fun EmbeddedDatabase.updateArbeidsgivernotifikasjonerSakMottakerType(
+    sakId: String,
+    mottakerType: MottakerType,
+) {
+    connection.use { connection ->
+        connection
+            .prepareStatement(
+                """
+                UPDATE ARBEIDSGIVERNOTIFIKASJONER_SAK
+                SET mottaker_type = ?
+                WHERE id = ?
+                """.trimIndent(),
+            ).use { preparedStatement ->
+                preparedStatement.setString(1, mottakerType.name)
+                preparedStatement.setObject(2, UUID.fromString(sakId))
+                preparedStatement.executeUpdate()
+            }
+        connection.commit()
+    }
+}

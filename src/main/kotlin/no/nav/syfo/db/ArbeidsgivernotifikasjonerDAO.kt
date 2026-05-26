@@ -138,6 +138,7 @@ fun DatabaseInterface.updateArbeidsgivernotifikasjonerSakStatusAndHardDeleteDate
 fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSak(
     narmestelederId: String,
     merkelapp: String,
+    mottakerType: MottakerType,
 ): PSakInput? {
     val queryStatement =
         """
@@ -145,6 +146,7 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSak(
         FROM ARBEIDSGIVERNOTIFIKASJONER_SAK
         WHERE narmestelederId = ?
         AND merkelapp = ?
+        AND mottaker_type = ?
         AND hardDeleteDate > CURRENT_TIMESTAMP
         AND initiellStatus not in ('FERDIG', 'AVHOLDT')
         ORDER BY opprettet DESC
@@ -155,6 +157,7 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSak(
         connection.prepareStatement(queryStatement).use {
             it.setString(1, narmestelederId)
             it.setString(2, merkelapp)
+            it.setString(3, mottakerType.name)
             it.executeQuery().toList { toPSakInput() }.firstOrNull()
         }
     }
@@ -164,6 +167,7 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
     ansattFnr: String,
     virksomhetsnummer: String,
     type: String,
+    mottakerType: MottakerType,
 ): PSakInput? {
     val queryStatement =
         """
@@ -172,6 +176,7 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
         WHERE ansattFnr = ?
         AND virksomhetsnummer = ?
         AND type = ?
+        AND mottaker_type = ?
         AND hardDeleteDate > CURRENT_TIMESTAMP
         AND initiellStatus not in ('FERDIG', 'AVHOLDT')
         ORDER BY opprettet DESC
@@ -183,6 +188,7 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
             it.setString(1, ansattFnr)
             it.setString(2, virksomhetsnummer)
             it.setString(3, type)
+            it.setString(4, mottakerType.name)
             it.executeQuery().toList { toPSakInput() }.firstOrNull()
         }
     }
