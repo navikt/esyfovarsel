@@ -274,7 +274,6 @@ class ArbeidsgiverVarselService(
         initiellStatus = SakStatus.MOTTATT,
         hardDeleteDate = hardDeleteDate,
         ressursId = ressursId,
-        ressursUrl = ressursUrl,
     )
 
     private fun ArbeidsgiverNotifikasjonTilAltinnRessursHendelse.requireNotifikasjonInnhold(): VarselDataNotifikasjonInnhold =

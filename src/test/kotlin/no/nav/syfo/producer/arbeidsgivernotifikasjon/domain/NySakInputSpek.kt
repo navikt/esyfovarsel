@@ -43,7 +43,6 @@ class NySakInputSpek :
                         initiellStatus = SakStatus.MOTTATT,
                         hardDeleteDate = hardDeleteDate,
                         ressursId = "nav_syfo_dialogmote",
-                        ressursUrl = "https://www.altinn.no",
                     )
 
                 val mutation = input.toNySakMutation()

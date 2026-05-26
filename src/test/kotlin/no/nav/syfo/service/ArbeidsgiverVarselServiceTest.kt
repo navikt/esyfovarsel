@@ -22,6 +22,7 @@ import no.nav.syfo.db.storeArbeidsgivernotifikasjonerSak
 import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverNotifikasjonTilAltinnRessursHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.MottakerType
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakAltinnInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SAK_TYPE_DIALOGMOTE_UTEN_LEDER
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
@@ -72,10 +73,12 @@ class ArbeidsgiverVarselServiceTest :
                     )
                 sak?.eksternSakId shouldBe eksternSakId
                 sak?.ressursId shouldBe hendelse.ressursId
-                sak?.lenke shouldBe hendelse.ressursUrl
+                sak?.lenke shouldBe null
+                sak?.mottakerType shouldBe MottakerType.ALTINN
                 mutationSlot.captured.lenke shouldBe Optional.Absent
                 inputSlot.single().uuid shouldBe UUID.fromString(hendelse.eksternReferanseId)
                 inputSlot.single().grupperingsid shouldBe sak?.grupperingsid
+                inputSlot.single().link shouldBe hendelse.ressursUrl
                 sak?.hardDeleteDate shouldBe inputSlot.single().hardDeleteDate
                 inputSlot.single().hardDeleteDate shouldBe
                     LocalDate
@@ -97,7 +100,6 @@ class ArbeidsgiverVarselServiceTest :
                         initiellStatus = SakStatus.MOTTATT,
                         hardDeleteDate = existingHardDeleteDate(),
                         ressursId = hendelse.ressursId,
-                        ressursUrl = hendelse.ressursUrl,
                     )
                 embeddedDatabase.storeArbeidsgivernotifikasjonerSak(eksisterendeSak, eksternSakId = "sak-1")
                 val inputSlot = mutableListOf<ArbeidsgiverNotifikasjonAltinnRessursInput>()
@@ -135,7 +137,6 @@ class ArbeidsgiverVarselServiceTest :
                         initiellStatus = SakStatus.MOTTATT,
                         hardDeleteDate = existingHardDeleteDate(),
                         ressursId = hendelse.ressursId,
-                        ressursUrl = hendelse.ressursUrl,
                     )
                 embeddedDatabase.storeArbeidsgivernotifikasjonerSak(eksisterendeSak, eksternSakId = "sak-1")
 
@@ -174,7 +175,6 @@ class ArbeidsgiverVarselServiceTest :
                         initiellStatus = SakStatus.FERDIG,
                         hardDeleteDate = existingHardDeleteDate(),
                         ressursId = hendelse.ressursId,
-                        ressursUrl = hendelse.ressursUrl,
                     )
                 embeddedDatabase.storeArbeidsgivernotifikasjonerSak(avsluttetSak, eksternSakId = "sak-avsluttet")
                 val inputSlot = mutableListOf<ArbeidsgiverNotifikasjonAltinnRessursInput>()

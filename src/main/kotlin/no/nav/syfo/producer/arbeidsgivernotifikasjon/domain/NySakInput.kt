@@ -23,17 +23,18 @@ sealed interface NySakInput {
     val ansattFnr: String
     val tittel: String
     val tilleggsinformasjon: String?
-    val lenke: String
+    val lenke: String?
     val initiellStatus: SakStatus
     val nesteSteg: String?
     val overstyrStatustekstMed: String?
     val hardDeleteDate: LocalDateTime
+    val mottakerType: MottakerType
 
     fun toNySakMutation(): NySakMutation
 
     fun toSakType(): String
 
-    fun toLenkeForNySakMutation(): Optional<String?> = Optional.present(lenke)
+    fun toLenkeForNySakMutation(): Optional<String?> = Optional.presentIfNotNull(lenke)
 
     fun buildNySakMutation(mottakere: List<MottakerInput>): NySakMutation =
         NySakMutation(
@@ -74,6 +75,8 @@ data class NySakNarmesteLederInput(
     override val overstyrStatustekstMed: String? = null,
     override val hardDeleteDate: LocalDateTime,
 ) : NySakInput {
+    override val mottakerType = MottakerType.NAERMESTE_LEDER
+
     override fun toNySakMutation(): NySakMutation =
         buildNySakMutation(
             listOf(
@@ -109,10 +112,9 @@ data class NySakAltinnInput(
     override val overstyrStatustekstMed: String? = null,
     override val hardDeleteDate: LocalDateTime,
     val ressursId: String,
-    val ressursUrl: String,
 ) : NySakInput {
-    override val lenke: String
-        get() = ressursUrl
+    override val lenke: String? = null
+    override val mottakerType = MottakerType.ALTINN
 
     override fun toNySakMutation(): NySakMutation =
         buildNySakMutation(
@@ -127,8 +129,6 @@ data class NySakAltinnInput(
                 ),
             ),
         )
-
-    override fun toLenkeForNySakMutation(): Optional<String?> = Optional.Absent
 
     override fun toSakType(): String = SAK_TYPE_DIALOGMOTE_UTEN_LEDER
 }

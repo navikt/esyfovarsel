@@ -1,0 +1,5 @@
+ALTER TABLE ARBEIDSGIVERNOTIFIKASJONER_SAK
+    ALTER COLUMN lenke DROP NOT NULL,
+    ADD COLUMN mottaker_type TEXT NOT NULL DEFAULT 'NAERMESTE_LEDER',
+    ADD CONSTRAINT arbeidsgivernotifikasjoner_sak_mottaker_type_check
+        CHECK (mottaker_type IN ('NAERMESTE_LEDER', 'ALTINN')) NOT VALID;

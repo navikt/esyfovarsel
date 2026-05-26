@@ -25,6 +25,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.planner.ARBEIDSTAKER_FNR_1
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.MottakerType
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakAltinnInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakNarmesteLederInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SAK_TYPE_DIALOGMOTE_UTEN_LEDER
@@ -216,6 +217,7 @@ class SenderFacadeSpek :
                 storedSak?.id shouldBe storedId
                 storedSak?.eksternSakId shouldBe createdSakId
                 storedSak?.type shouldBe SAK_TYPE_OPPFOLGING_MED_LEDER
+                storedSak?.mottakerType shouldBe MottakerType.NAERMESTE_LEDER
             }
 
             it("Stores NySakAltinnInput with ressursId and correct type") {
@@ -233,7 +235,6 @@ class SenderFacadeSpek :
                         initiellStatus = SakStatus.MOTTATT,
                         hardDeleteDate = LocalDateTime.now().plusDays(1),
                         ressursId = "nav_sykefravarsoppfolging_arbeidsgiver",
-                        ressursUrl = "https://www.nav.no",
                     )
 
                 val storedId = senderFacade.createNewSak(sakInput)
@@ -248,7 +249,8 @@ class SenderFacadeSpek :
                 storedSak?.eksternSakId shouldBe createdSakId
                 storedSak?.type shouldBe SAK_TYPE_DIALOGMOTE_UTEN_LEDER
                 storedSak?.ressursId shouldBe "nav_sykefravarsoppfolging_arbeidsgiver"
-                storedSak?.lenke shouldBe "https://www.nav.no"
+                storedSak?.lenke shouldBe null
+                storedSak?.mottakerType shouldBe MottakerType.ALTINN
                 storedSak?.narmestelederId shouldBe null
                 storedSak?.narmesteLederFnr shouldBe null
                 mutationSlot.captured.lenke shouldBe Optional.Absent

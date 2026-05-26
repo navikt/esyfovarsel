@@ -4,6 +4,7 @@ import com.apollo.graphql.type.SaksStatus
 import no.nav.syfo.db.domain.PKalenderInput
 import no.nav.syfo.db.domain.PSakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.KalenderTilstand
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.MottakerType
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakAltinnInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakNarmesteLederInput
@@ -22,7 +23,6 @@ fun DatabaseInterface.storeArbeidsgivernotifikasjonerSak(
     val uuid = UUID.randomUUID()
     val narmesteLederInput = sakInput as? NySakNarmesteLederInput
     val altinnInput = sakInput as? NySakAltinnInput
-    val lenkeForDatabase = altinnInput?.ressursUrl ?: sakInput.lenke
     val insertStatement =
         """
         INSERT INTO ARBEIDSGIVERNOTIFIKASJONER_SAK (
@@ -39,12 +39,13 @@ fun DatabaseInterface.storeArbeidsgivernotifikasjonerSak(
             tittel,
             tilleggsinformasjon,
             lenke,
+            mottaker_type,
             initiellStatus,
             nesteSteg,
             overstyrStatustekstMed,
             hardDeleteDate,
             opprettet
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """.trimIndent()
 
     return try {
@@ -62,12 +63,13 @@ fun DatabaseInterface.storeArbeidsgivernotifikasjonerSak(
                 preparedStatement.setString(10, altinnInput?.ressursId)
                 preparedStatement.setString(11, sakInput.tittel)
                 preparedStatement.setString(12, sakInput.tilleggsinformasjon)
-                preparedStatement.setString(13, lenkeForDatabase)
-                preparedStatement.setString(14, sakInput.initiellStatus.name)
-                preparedStatement.setString(15, sakInput.nesteSteg)
-                preparedStatement.setString(16, sakInput.overstyrStatustekstMed)
-                preparedStatement.setTimestamp(17, Timestamp.valueOf(sakInput.hardDeleteDate))
-                preparedStatement.setTimestamp(18, Timestamp.valueOf(LocalDateTime.now()))
+                preparedStatement.setString(13, sakInput.lenke)
+                preparedStatement.setString(14, sakInput.mottakerType.name)
+                preparedStatement.setString(15, sakInput.initiellStatus.name)
+                preparedStatement.setString(16, sakInput.nesteSteg)
+                preparedStatement.setString(17, sakInput.overstyrStatustekstMed)
+                preparedStatement.setTimestamp(18, Timestamp.valueOf(sakInput.hardDeleteDate))
+                preparedStatement.setTimestamp(19, Timestamp.valueOf(LocalDateTime.now()))
 
                 preparedStatement.executeUpdate()
             }
@@ -231,6 +233,7 @@ fun ResultSet.toPSakInput() =
         tittel = getString("tittel"),
         tilleggsinformasjon = getString("tilleggsinformasjon"),
         lenke = getString("lenke"),
+        mottakerType = MottakerType.valueOf(getString("mottaker_type")),
         initiellStatus = SaksStatus.valueOf(getString("initiellStatus")),
         nesteSteg = getString("nesteSteg"),
         overstyrStatustekstMed = getString("overstyrStatustekstMed"),
