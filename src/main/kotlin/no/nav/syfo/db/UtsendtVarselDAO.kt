@@ -140,6 +140,28 @@ fun DatabaseInterface.fetchUtsendtVarselByFnr(fnr: String): List<PUtsendtVarsel>
     }
 }
 
+fun DatabaseInterface.isUtsendtVarselStored(
+    eksternReferanse: String,
+    kanal: String,
+): Boolean {
+    val queryStatement =
+        """
+        SELECT 1
+        FROM UTSENDT_VARSEL
+        WHERE ekstern_ref = ?
+        AND kanal = ?
+        LIMIT 1
+        """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, eksternReferanse)
+            it.setString(2, kanal)
+            it.executeQuery().next()
+        }
+    }
+}
+
 fun DatabaseInterface.setUtsendtVarselToFerdigstilt(eksternRef: String): Int {
     val now = Timestamp.valueOf(LocalDateTime.now())
     val updateStatement =

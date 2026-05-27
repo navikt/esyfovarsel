@@ -4,6 +4,7 @@ import com.apollo.graphql.type.SaksStatus
 import no.nav.syfo.db.domain.PKalenderInput
 import no.nav.syfo.db.domain.PSakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.KalenderTilstand
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.MottakerType
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakAltinnInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakNarmesteLederInput
@@ -38,12 +39,13 @@ fun DatabaseInterface.storeArbeidsgivernotifikasjonerSak(
             tittel,
             tilleggsinformasjon,
             lenke,
+            mottaker_type,
             initiellStatus,
             nesteSteg,
             overstyrStatustekstMed,
             hardDeleteDate,
             opprettet
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """.trimIndent()
 
     return try {
@@ -62,11 +64,12 @@ fun DatabaseInterface.storeArbeidsgivernotifikasjonerSak(
                 preparedStatement.setString(11, sakInput.tittel)
                 preparedStatement.setString(12, sakInput.tilleggsinformasjon)
                 preparedStatement.setString(13, sakInput.lenke)
-                preparedStatement.setString(14, sakInput.initiellStatus.name)
-                preparedStatement.setString(15, sakInput.nesteSteg)
-                preparedStatement.setString(16, sakInput.overstyrStatustekstMed)
-                preparedStatement.setTimestamp(17, Timestamp.valueOf(sakInput.hardDeleteDate))
-                preparedStatement.setTimestamp(18, Timestamp.valueOf(LocalDateTime.now()))
+                preparedStatement.setString(14, sakInput.mottakerType.name)
+                preparedStatement.setString(15, sakInput.initiellStatus.name)
+                preparedStatement.setString(16, sakInput.nesteSteg)
+                preparedStatement.setString(17, sakInput.overstyrStatustekstMed)
+                preparedStatement.setTimestamp(18, Timestamp.valueOf(sakInput.hardDeleteDate))
+                preparedStatement.setTimestamp(19, Timestamp.valueOf(LocalDateTime.now()))
 
                 preparedStatement.executeUpdate()
             }
@@ -107,9 +110,35 @@ fun DatabaseInterface.updateArbeidsgivernotifikasjonerSakStatus(
     }
 }
 
+fun DatabaseInterface.updateArbeidsgivernotifikasjonerSakStatusAndHardDeleteDate(
+    sakId: String,
+    sakStatus: SakStatus,
+    hardDeleteDate: LocalDateTime,
+) {
+    val updateStatement =
+        """
+        UPDATE ARBEIDSGIVERNOTIFIKASJONER_SAK
+        SET initiellStatus = ?, hardDeleteDate = ?
+        WHERE id = ?
+        """.trimIndent()
+
+    connection.use { connection ->
+        connection.prepareStatement(updateStatement).use { preparedStatement ->
+            preparedStatement.setString(1, sakStatus.name)
+            preparedStatement.setTimestamp(2, Timestamp.valueOf(hardDeleteDate))
+            preparedStatement.setObject(3, UUID.fromString(sakId))
+
+            preparedStatement.executeUpdate()
+        }
+
+        connection.commit()
+    }
+}
+
 fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSak(
     narmestelederId: String,
     merkelapp: String,
+    mottakerType: MottakerType,
 ): PSakInput? {
     val queryStatement =
         """
@@ -117,6 +146,7 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSak(
         FROM ARBEIDSGIVERNOTIFIKASJONER_SAK
         WHERE narmestelederId = ?
         AND merkelapp = ?
+        AND mottaker_type = ?
         AND hardDeleteDate > CURRENT_TIMESTAMP
         AND initiellStatus not in ('FERDIG', 'AVHOLDT')
         ORDER BY opprettet DESC
@@ -127,6 +157,7 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSak(
         connection.prepareStatement(queryStatement).use {
             it.setString(1, narmestelederId)
             it.setString(2, merkelapp)
+            it.setString(3, mottakerType.name)
             it.executeQuery().toList { toPSakInput() }.firstOrNull()
         }
     }
@@ -136,6 +167,8 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
     ansattFnr: String,
     virksomhetsnummer: String,
     type: String,
+    mottakerType: MottakerType,
+    ressursId: String? = null,
 ): PSakInput? {
     val queryStatement =
         """
@@ -144,6 +177,11 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
         WHERE ansattFnr = ?
         AND virksomhetsnummer = ?
         AND type = ?
+        AND mottaker_type = ?
+        -- ressursId er valgfri for eksisterende kall; når den er satt skal sak kun gjenbrukes for samme ressursId.
+        -- Så det blir null is null for spørre uten ressursId eller where klaul som matcher feltet ressursId med
+        -- innsendt variable ressurdId.
+        AND (? IS NULL OR ressursId = ?)
         AND hardDeleteDate > CURRENT_TIMESTAMP
         AND initiellStatus not in ('FERDIG', 'AVHOLDT')
         ORDER BY opprettet DESC
@@ -155,6 +193,9 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
             it.setString(1, ansattFnr)
             it.setString(2, virksomhetsnummer)
             it.setString(3, type)
+            it.setString(4, mottakerType.name)
+            it.setString(5, ressursId)
+            it.setString(6, ressursId)
             it.executeQuery().toList { toPSakInput() }.firstOrNull()
         }
     }
@@ -175,6 +216,7 @@ fun ResultSet.toPSakInput() =
         tittel = getString("tittel"),
         tilleggsinformasjon = getString("tilleggsinformasjon"),
         lenke = getString("lenke"),
+        mottakerType = MottakerType.valueOf(getString("mottaker_type")),
         initiellStatus = SaksStatus.valueOf(getString("initiellStatus")),
         nesteSteg = getString("nesteSteg"),
         overstyrStatustekstMed = getString("overstyrStatustekstMed"),

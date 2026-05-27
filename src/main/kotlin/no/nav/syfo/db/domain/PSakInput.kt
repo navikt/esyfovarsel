@@ -1,6 +1,7 @@
 package no.nav.syfo.db.domain
 
 import com.apollo.graphql.type.SaksStatus
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.MottakerType
 import java.time.LocalDateTime
 
 data class PSakInput(
@@ -16,7 +17,8 @@ data class PSakInput(
     val ressursId: String? = null,
     val tittel: String,
     val tilleggsinformasjon: String? = null,
-    val lenke: String,
+    val lenke: String?,
+    val mottakerType: MottakerType,
     val initiellStatus: SaksStatus,
     val nesteSteg: String? = null,
     val overstyrStatustekstMed: String? = null,

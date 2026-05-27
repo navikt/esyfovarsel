@@ -23,15 +23,18 @@ sealed interface NySakInput {
     val ansattFnr: String
     val tittel: String
     val tilleggsinformasjon: String?
-    val lenke: String
+    val lenke: String?
     val initiellStatus: SakStatus
     val nesteSteg: String?
     val overstyrStatustekstMed: String?
     val hardDeleteDate: LocalDateTime
+    val mottakerType: MottakerType
 
     fun toNySakMutation(): NySakMutation
 
     fun toSakType(): String
+
+    fun toLenkeForNySakMutation(): Optional<String?> = Optional.presentIfNotNull(lenke)
 
     fun buildNySakMutation(mottakere: List<MottakerInput>): NySakMutation =
         NySakMutation(
@@ -41,7 +44,7 @@ sealed interface NySakInput {
             mottakere = mottakere,
             tittel = tittel,
             tilleggsinformasjon = Optional.presentIfNotNull(tilleggsinformasjon),
-            lenke = Optional.present(lenke),
+            lenke = toLenkeForNySakMutation(),
             initiellStatus = SaksStatus.valueOf(initiellStatus.name),
             nesteSteg = Optional.presentIfNotNull(nesteSteg),
             overstyrStatustekstMed = Optional.presentIfNotNull(overstyrStatustekstMed),
@@ -72,6 +75,8 @@ data class NySakNarmesteLederInput(
     override val overstyrStatustekstMed: String? = null,
     override val hardDeleteDate: LocalDateTime,
 ) : NySakInput {
+    override val mottakerType = MottakerType.NAERMESTE_LEDER
+
     override fun toNySakMutation(): NySakMutation =
         buildNySakMutation(
             listOf(
@@ -102,13 +107,15 @@ data class NySakAltinnInput(
     override val ansattFnr: String,
     override val tittel: String,
     override val tilleggsinformasjon: String? = null,
-    override val lenke: String,
     override val initiellStatus: SakStatus,
     override val nesteSteg: String? = null,
     override val overstyrStatustekstMed: String? = null,
     override val hardDeleteDate: LocalDateTime,
     val ressursId: String,
 ) : NySakInput {
+    override val lenke: String? = null
+    override val mottakerType = MottakerType.ALTINN
+
     override fun toNySakMutation(): NySakMutation =
         buildNySakMutation(
             listOf(

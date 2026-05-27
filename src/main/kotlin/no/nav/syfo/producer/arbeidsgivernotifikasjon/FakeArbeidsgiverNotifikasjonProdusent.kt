@@ -36,7 +36,7 @@ class FakeArbeidsgiverNotifikasjonProdusent : IArbeidsgiverNotifikasjonProdusent
     override suspend fun nyStatusSak(nyStatusSakInput: NyStatusSakInput): String =
         UUID.randomUUID().toString().also { id ->
             log.info(
-                "Lokal arbeidsgivernotifikasjon sakstatus oppdatert: merkelapp=${nyStatusSakInput.merkelapp}, status=${nyStatusSakInput.sakStatus}, id=$id",
+                "Lokal arbeidsgivernotifikasjon sakstatus oppdatert: merkelapp=${nyStatusSakInput.merkelapp}, status=${nyStatusSakInput.sakStatus}, id=$id, hardDeleteDate=${nyStatusSakInput.oppdatertHardDeleteDateTime}",
             )
         }
 

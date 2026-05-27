@@ -1,11 +1,14 @@
 package no.nav.syfo.service
 
+import com.apollo.graphql.NySakMutation
+import com.apollographql.apollo.api.Optional
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.db.ARBEIDSTAKER_AKTOR_ID_1
@@ -22,6 +25,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.planner.ARBEIDSTAKER_FNR_1
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.MottakerType
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakAltinnInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakNarmesteLederInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SAK_TYPE_DIALOGMOTE_UTEN_LEDER
@@ -208,16 +212,19 @@ class SenderFacadeSpek :
                         ansattFnr = sakInput.ansattFnr,
                         virksomhetsnummer = sakInput.virksomhetsnummer,
                         type = SAK_TYPE_OPPFOLGING_MED_LEDER,
+                        mottakerType = MottakerType.NAERMESTE_LEDER,
                     )
 
                 storedSak?.id shouldBe storedId
                 storedSak?.eksternSakId shouldBe createdSakId
                 storedSak?.type shouldBe SAK_TYPE_OPPFOLGING_MED_LEDER
+                storedSak?.mottakerType shouldBe MottakerType.NAERMESTE_LEDER
             }
 
             it("Stores NySakAltinnInput with ressursId and correct type") {
                 val createdSakId = UUID.randomUUID().toString()
-                coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns createdSakId
+                val mutationSlot = slot<NySakMutation>()
+                coEvery { arbeidsgiverNotifikasjonService.createNewSak(capture(mutationSlot)) } returns createdSakId
 
                 val sakInput =
                     NySakAltinnInput(
@@ -226,7 +233,6 @@ class SenderFacadeSpek :
                         virksomhetsnummer = "999999999",
                         ansattFnr = ARBEIDSTAKER_FNR_1,
                         tittel = "Dialogmøte",
-                        lenke = "https://www.nav.no",
                         initiellStatus = SakStatus.MOTTATT,
                         hardDeleteDate = LocalDateTime.now().plusDays(1),
                         ressursId = "nav_sykefravarsoppfolging_arbeidsgiver",
@@ -238,14 +244,26 @@ class SenderFacadeSpek :
                         ansattFnr = sakInput.ansattFnr,
                         virksomhetsnummer = sakInput.virksomhetsnummer,
                         type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
+                        mottakerType = MottakerType.ALTINN,
+                    )
+                val storedSakWithWrongMottakerType =
+                    senderFacade.getPaagaaendeSakByType(
+                        ansattFnr = sakInput.ansattFnr,
+                        virksomhetsnummer = sakInput.virksomhetsnummer,
+                        type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
+                        mottakerType = MottakerType.NAERMESTE_LEDER,
                     )
 
                 storedSak?.id shouldBe storedId
                 storedSak?.eksternSakId shouldBe createdSakId
                 storedSak?.type shouldBe SAK_TYPE_DIALOGMOTE_UTEN_LEDER
                 storedSak?.ressursId shouldBe "nav_sykefravarsoppfolging_arbeidsgiver"
+                storedSak?.lenke shouldBe null
+                storedSak?.mottakerType shouldBe MottakerType.ALTINN
                 storedSak?.narmestelederId shouldBe null
                 storedSak?.narmesteLederFnr shouldBe null
+                storedSakWithWrongMottakerType shouldBe null
+                mutationSlot.captured.lenke shouldBe Optional.Absent
             }
         }
     })

@@ -43,7 +43,13 @@ fun DatabaseInterface.fetchUtsendtArbeidsgivernotifikasjonVarselFeilet(): List<P
         AND feilet.is_resendt = FALSE
         AND feilet.resend_exhausted IS NOT TRUE
         AND feilet.hendelsetype_navn in 
-        ('NL_DIALOGMOTE_SVAR_MOTEBEHOV')
+        ('NL_DIALOGMOTE_SVAR_MOTEBEHOV', 'AG_VARSEL_ALTINN_RESSURS')
+        AND NOT EXISTS (
+            SELECT 1
+            FROM UTSENDT_VARSEL UV
+            WHERE UV.KANAL = 'ARBEIDSGIVERNOTIFIKASJON'
+            AND UV.EKSTERN_REF = feilet.UUID_EKSTERN_REFERANSE
+        )
         ORDER BY feilet.utsendt_forsok_tidspunkt ASC
         LIMIT 1000
         """.trimIndent()
@@ -131,17 +137,22 @@ fun DatabaseInterface.storeUtsendtVarselFeilet(varsel: PUtsendtVarselFeilet) {
     }
 }
 
-fun DatabaseInterface.updateUtsendtVarselFeiletToResendt(uuid: String) {
+fun DatabaseInterface.updateUtsendtVarselFeiletToResendt(
+    uuid: String,
+    nullstillHendelseJson: Boolean = false,
+) {
     val updateStatement =
         """UPDATE UTSENDING_VARSEL_FEILET
                    SET is_resendt = TRUE,
-                       resendt_tidspunkt = CURRENT_TIMESTAMP
-                   WHERE uuid = ?
+                       resendt_tidspunkt = CURRENT_TIMESTAMP,
+                       hendelse_json = CASE WHEN ? THEN NULL ELSE hendelse_json END
+                    WHERE uuid = ?
         """.trimMargin()
 
     return connection.use { connection ->
         connection.prepareStatement(updateStatement).use {
-            it.setObject(1, UUID.fromString(uuid))
+            it.setBoolean(1, nullstillHendelseJson)
+            it.setObject(2, UUID.fromString(uuid))
             it.executeUpdate()
         }
         connection.commit()

@@ -1,8 +1,13 @@
 package no.nav.syfo.db.domain
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.syfo.kafka.common.createObjectMapper
+import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverNotifikasjonTilAltinnRessursHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import java.time.LocalDateTime
+
+private val objectMapper = createObjectMapper()
 
 data class PUtsendtVarselFeilet(
     val uuid: String,
@@ -31,3 +36,11 @@ fun PUtsendtVarselFeilet.toArbeidstakerHendelse(): ArbeidstakerHendelse =
         ferdigstill = false,
         data = null,
     )
+
+fun PUtsendtVarselFeilet.toArbeidsgiverNotifikasjonTilAltinnRessursHendelse(): ArbeidsgiverNotifikasjonTilAltinnRessursHendelse {
+    val hendelseJson =
+        requireNotNull(hendelseJson) {
+            "Mangler hendelseJson for feilet arbeidsgiverhendelse"
+        }
+    return objectMapper.readValue(hendelseJson)
+}

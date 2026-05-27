@@ -1,6 +1,7 @@
 package no.nav.syfo.kafka.consumers.varselbus.domain
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import no.nav.syfo.kafka.common.createObjectMapper
@@ -47,6 +48,27 @@ class EsyfovarselHendelseTest :
                 val hendelse: EsyfovarselHendelse = objectMapper.readValue(arbeidsgiverHendelseJson)
 
                 hendelse.isArbeidstakerHendelse() shouldBe false
+            }
+
+            it("feiler deserialisering når arbeidstakerFnr mangler for arbeidsgiverhendelse") {
+                val jsonUtenArbeidstakerFnr =
+                    """
+                    {
+                      "@type": "ArbeidsgiverNotifikasjonTilAltinnRessursHendelse",
+                      "type": "AG_VARSEL_ALTINN_RESSURS",
+                      "ferdigstill": false,
+                      "data": {},
+                      "orgnummer": "999888777",
+                      "ressursId": "nav_syfo_dialogmote",
+                      "ressursUrl": "https://www.altinn.no",
+                      "kilde": "dokumentporten.dialogmote",
+                      "eksternReferanseId": "123e4567-e89b-12d3-a456-426614174000"
+                    }
+                    """.trimIndent()
+
+                shouldThrow<Exception> {
+                    objectMapper.readValue<EsyfovarselHendelse>(jsonUtenArbeidstakerFnr)
+                }
             }
         }
     })

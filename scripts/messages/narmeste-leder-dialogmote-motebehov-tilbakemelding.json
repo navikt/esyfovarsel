@@ -1,11 +1,11 @@
 {
   "@type": "NarmesteLederHendelse",
-  "type": "NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING",
+  "type": "NL_OPPFOLGINGSPLAN_FORESPORSEL",
   "ferdigstill": false,
   "data": {
     "tilbakemelding": "Lokal test"
   },
-  "narmesteLederFnr": "00000000000",
-  "arbeidstakerFnr": "12345678910",
+  "narmesteLederFnr": "01987654322",
+  "arbeidstakerFnr": "22345678910",
   "orgnummer": "999999999"
 }
