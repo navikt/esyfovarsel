@@ -178,6 +178,9 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
         AND virksomhetsnummer = ?
         AND type = ?
         AND mottaker_type = ?
+        -- ressursId er valgfri for eksisterende kall; når den er satt skal sak kun gjenbrukes for samme ressursId.
+        -- Så det blir null is null for spørre uten ressursId eller where klaul som matcher feltet ressursId med
+        -- innsendt variable ressurdId.
         AND (? IS NULL OR ressursId = ?)
         AND hardDeleteDate > CURRENT_TIMESTAMP
         AND initiellStatus not in ('FERDIG', 'AVHOLDT')
