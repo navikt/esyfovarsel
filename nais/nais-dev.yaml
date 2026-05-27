@@ -19,6 +19,12 @@ spec:
     initialDelay: 10
     periodSeconds: 5
     timeout: 5
+  startup:
+    path: /isAlive
+    initialDelay: 10
+    periodSeconds: 10
+    timeout: 5
+    failureThreshold: 180
   resources:
     limits:
       memory: 1024Mi
