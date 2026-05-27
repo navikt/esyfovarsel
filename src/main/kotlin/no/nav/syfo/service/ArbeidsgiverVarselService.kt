@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP
 import no.nav.syfo.db.DatabaseInterface
-import no.nav.syfo.db.countArbeidsgivernotifikasjonerSakerByType
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PSakInput
 import no.nav.syfo.db.domain.PUtsendtVarsel
@@ -27,7 +26,6 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SAK_TYPE_DIALOGMOTE_
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -128,6 +126,7 @@ class ArbeidsgiverVarselService(
                 virksomhetsnummer = hendelse.orgnummer,
                 type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
                 mottakerType = MottakerType.ALTINN,
+                ressursId = hendelse.ressursId,
             )
         if (existingSak != null) {
             updateExistingSakHardDeleteDate(
@@ -140,7 +139,7 @@ class ArbeidsgiverVarselService(
             )
         }
 
-        val sakInput = hendelse.toNySakAltinnInput(SAK_TYPE_DIALOGMOTE_UTEN_LEDER, hardDeleteDate)
+        val sakInput = hendelse.toNySakAltinnInput(hardDeleteDate)
         val eksternSakId =
             arbeidsgiverNotifikasjonService.createNewSak(sakInput.toNySakMutation())
                 ?: throw ArbeidsgiverVarselRetryableException(
@@ -180,30 +179,6 @@ class ArbeidsgiverVarselService(
             sakStatus = sakStatus,
             hardDeleteDate = hardDeleteDate,
         )
-    }
-
-    private fun generateGrupperingsid(
-        arbeidstakerFnr: String,
-        virksomhetsnummer: String,
-        saktype: String,
-    ): String {
-        val existingSaker =
-            database.countArbeidsgivernotifikasjonerSakerByType(
-                ansattFnr = arbeidstakerFnr,
-                virksomhetsnummer = virksomhetsnummer,
-                type = saktype,
-            )
-        val seed =
-            buildString {
-                append(virksomhetsnummer)
-                append('|')
-                append(saktype)
-                append('|')
-                append(if (existingSaker == 0) "1" else existingSaker + 1)
-                append('|')
-                append(arbeidstakerFnr)
-            }
-        return UUID.nameUUIDFromBytes(seed.toByteArray(StandardCharsets.UTF_8)).toString()
     }
 
     private fun lagreIkkeUtsendtArbeidsgiverVarsel(
@@ -264,19 +239,17 @@ class ArbeidsgiverVarselService(
         return isStored
     }
 
-    private fun ArbeidsgiverNotifikasjonTilAltinnRessursHendelse.toNySakAltinnInput(
-        sakType: String,
-        hardDeleteDate: LocalDateTime,
-    ) = NySakAltinnInput(
-        grupperingsid = generateGrupperingsid(arbeidstakerFnr, orgnummer, sakType),
-        merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
-        virksomhetsnummer = orgnummer,
-        ansattFnr = arbeidstakerFnr,
-        tittel = SAK_TITTEL_DIALOGMOTE,
-        initiellStatus = SakStatus.MOTTATT,
-        hardDeleteDate = hardDeleteDate,
-        ressursId = ressursId,
-    )
+    private fun ArbeidsgiverNotifikasjonTilAltinnRessursHendelse.toNySakAltinnInput(hardDeleteDate: LocalDateTime) =
+        NySakAltinnInput(
+            grupperingsid = UUID.randomUUID().toString(),
+            merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
+            virksomhetsnummer = orgnummer,
+            ansattFnr = arbeidstakerFnr,
+            tittel = SAK_TITTEL_DIALOGMOTE,
+            initiellStatus = SakStatus.MOTTATT,
+            hardDeleteDate = hardDeleteDate,
+            ressursId = ressursId,
+        )
 
     private fun ArbeidsgiverNotifikasjonTilAltinnRessursHendelse.requireNotifikasjonInnhold(): VarselDataNotifikasjonInnhold =
         parseVarselData().notifikasjonInnhold

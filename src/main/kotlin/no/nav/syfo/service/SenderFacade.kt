@@ -232,12 +232,14 @@ class SenderFacade(
         virksomhetsnummer: String,
         type: String,
         mottakerType: MottakerType,
+        ressursId: String? = null,
     ): PSakInput? =
         database.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
             ansattFnr = ansattFnr,
             virksomhetsnummer = virksomhetsnummer,
             type = type,
             mottakerType = mottakerType,
+            ressursId = ressursId,
         )
 
     suspend fun nyStatusSak(

@@ -168,6 +168,7 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
     virksomhetsnummer: String,
     type: String,
     mottakerType: MottakerType,
+    ressursId: String? = null,
 ): PSakInput? {
     val queryStatement =
         """
@@ -177,6 +178,7 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
         AND virksomhetsnummer = ?
         AND type = ?
         AND mottaker_type = ?
+        AND (? IS NULL OR ressursId = ?)
         AND hardDeleteDate > CURRENT_TIMESTAMP
         AND initiellStatus not in ('FERDIG', 'AVHOLDT')
         ORDER BY opprettet DESC
@@ -189,37 +191,9 @@ fun DatabaseInterface.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
             it.setString(2, virksomhetsnummer)
             it.setString(3, type)
             it.setString(4, mottakerType.name)
+            it.setString(5, ressursId)
+            it.setString(6, ressursId)
             it.executeQuery().toList { toPSakInput() }.firstOrNull()
-        }
-    }
-}
-
-fun DatabaseInterface.countArbeidsgivernotifikasjonerSakerByType(
-    ansattFnr: String,
-    virksomhetsnummer: String,
-    type: String,
-): Int {
-    val queryStatement =
-        """
-        SELECT COUNT(*)
-        FROM ARBEIDSGIVERNOTIFIKASJONER_SAK
-        WHERE ansattFnr = ?
-        AND virksomhetsnummer = ?
-        AND type = ?
-        """.trimIndent()
-
-    return connection.use { connection ->
-        connection.prepareStatement(queryStatement).use {
-            it.setString(1, ansattFnr)
-            it.setString(2, virksomhetsnummer)
-            it.setString(3, type)
-            it.executeQuery().use { resultSet ->
-                if (resultSet.next()) {
-                    resultSet.getInt(1)
-                } else {
-                    0
-                }
-            }
         }
     }
 }

@@ -71,6 +71,7 @@ class ArbeidsgiverVarselServiceTest :
                         virksomhetsnummer = hendelse.orgnummer,
                         type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
                         mottakerType = MottakerType.ALTINN,
+                        ressursId = hendelse.ressursId,
                     )
                 sak?.eksternSakId shouldBe eksternSakId
                 sak?.ressursId shouldBe hendelse.ressursId
@@ -79,6 +80,7 @@ class ArbeidsgiverVarselServiceTest :
                 mutationSlot.captured.lenke shouldBe Optional.Absent
                 inputSlot.single().uuid shouldBe UUID.fromString(hendelse.eksternReferanseId)
                 inputSlot.single().grupperingsid shouldBe sak?.grupperingsid
+                UUID.fromString(inputSlot.single().grupperingsid) shouldNotBe null
                 inputSlot.single().link shouldBe hendelse.ressursUrl
                 sak?.hardDeleteDate shouldBe inputSlot.single().hardDeleteDate
                 inputSlot.single().hardDeleteDate shouldBe
@@ -123,8 +125,49 @@ class ArbeidsgiverVarselServiceTest :
                         virksomhetsnummer = hendelse.orgnummer,
                         type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
                         mottakerType = MottakerType.ALTINN,
+                        ressursId = hendelse.ressursId,
                     )
                 oppdatertSak?.hardDeleteDate shouldBe inputSlot.single().hardDeleteDate
+            }
+
+            it("gjenbruker ikke eksisterende pågående sak med annen ressursId") {
+                val hendelse = arbeidsgiverHendelse()
+                val eksisterendeSakForAnnenRessurs =
+                    NySakAltinnInput(
+                        grupperingsid = UUID.randomUUID().toString(),
+                        merkelapp = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_MERKELAPP,
+                        virksomhetsnummer = hendelse.orgnummer,
+                        ansattFnr = hendelse.arbeidstakerFnr,
+                        tittel = "Dialogmøte",
+                        initiellStatus = SakStatus.MOTTATT,
+                        hardDeleteDate = existingHardDeleteDate(),
+                        ressursId = "annen_altinn_ressurs",
+                    )
+                embeddedDatabase.storeArbeidsgivernotifikasjonerSak(
+                    eksisterendeSakForAnnenRessurs,
+                    eksternSakId = "sak-annen-ressurs",
+                )
+                val inputSlot = mutableListOf<ArbeidsgiverNotifikasjonAltinnRessursInput>()
+
+                coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns "sak-ny"
+                coEvery { arbeidsgiverNotifikasjonService.sendNotifikasjon(capture(inputSlot)) } returns "notifikasjon-id"
+
+                service.sendVarselTilArbeidsgiver(hendelse)
+
+                val nySak =
+                    embeddedDatabase.getPaagaaendeArbeidsgivernotifikasjonerSakByType(
+                        ansattFnr = hendelse.arbeidstakerFnr,
+                        virksomhetsnummer = hendelse.orgnummer,
+                        type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
+                        mottakerType = MottakerType.ALTINN,
+                        ressursId = hendelse.ressursId,
+                    )
+                coVerify(exactly = 1) { arbeidsgiverNotifikasjonService.createNewSak(any()) }
+                coVerify(exactly = 0) { arbeidsgiverNotifikasjonService.nyStatusSak(any()) }
+                nySak?.ressursId shouldBe hendelse.ressursId
+                nySak?.grupperingsid shouldBe inputSlot.single().grupperingsid
+                nySak?.grupperingsid shouldNotBe eksisterendeSakForAnnenRessurs.grupperingsid
+                UUID.fromString(inputSlot.single().grupperingsid) shouldNotBe null
             }
 
             it("gjenbruker ikke sak med feil mottakertype") {
@@ -163,6 +206,7 @@ class ArbeidsgiverVarselServiceTest :
                         virksomhetsnummer = hendelse.orgnummer,
                         type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
                         mottakerType = MottakerType.ALTINN,
+                        ressursId = hendelse.ressursId,
                     )
                 coVerify(exactly = 1) { arbeidsgiverNotifikasjonService.createNewSak(any()) }
                 nySak?.grupperingsid shouldBe inputSlot.single().grupperingsid
@@ -204,6 +248,7 @@ class ArbeidsgiverVarselServiceTest :
                         virksomhetsnummer = hendelse.orgnummer,
                         type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
                         mottakerType = MottakerType.ALTINN,
+                        ressursId = hendelse.ressursId,
                     )
                 sakEtterFeil?.hardDeleteDate shouldBe eksisterendeSak.hardDeleteDate
             }
@@ -235,6 +280,7 @@ class ArbeidsgiverVarselServiceTest :
                         virksomhetsnummer = hendelse.orgnummer,
                         type = SAK_TYPE_DIALOGMOTE_UTEN_LEDER,
                         mottakerType = MottakerType.ALTINN,
+                        ressursId = hendelse.ressursId,
                     )
                 coVerify(exactly = 1) { arbeidsgiverNotifikasjonService.createNewSak(any()) }
                 nySak?.grupperingsid shouldBe inputSlot.single().grupperingsid
