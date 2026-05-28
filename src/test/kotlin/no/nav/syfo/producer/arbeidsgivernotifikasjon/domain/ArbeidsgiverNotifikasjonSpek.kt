@@ -15,6 +15,7 @@ class ArbeidsgiverNotifikasjonSpek :
         val varselId = UUID.randomUUID().toString()
         val grupperingsid = UUID.randomUUID().toString()
         val messageText = "Dette er en tekst"
+        val longMessageText = "a".repeat(350)
         val emailTitle = "Oppfølging"
         val emailBody = "Dette er e-postinnhold"
         val hardDeleteDate = LocalDateTime.now().plusDays(1)
@@ -68,6 +69,28 @@ class ArbeidsgiverNotifikasjonSpek :
                     .getOrThrow() shouldBe hardDeleteDate.formatAsISO8601DateTime()
             }
 
+            it("trunkerer beskjedtekst til 300 tegn") {
+                val notifikasjon =
+                    ArbeidsgiverNotifikasjonNarmesteLeder(
+                        varselId = varselId,
+                        virksomhetsnummer = ORGNUMMER,
+                        url = "https://arbeidsgiver.nav.no",
+                        narmesteLederFnr = FNR_1,
+                        ansattFnr = FNR_2,
+                        messageText = longMessageText,
+                        narmesteLederEpostadresse = "leder@nav.no",
+                        merkelapp = "Oppfølging",
+                        emailTitle = emailTitle,
+                        emailBody = emailBody,
+                        hardDeleteDate = hardDeleteDate,
+                        grupperingsid = grupperingsid,
+                    )
+
+                val mutation = notifikasjon.toNyBeskjedMutation()
+
+                mutation.nyBeskjed.notifikasjon.tekst shouldBe longMessageText.take(300)
+            }
+
             it("mapper altinnressurs til Apollo-input") {
                 val ressursId = "nav_permittering-og-nedbemanning"
                 val notifikasjon =
@@ -112,6 +135,46 @@ class ArbeidsgiverNotifikasjonSpek :
                 altinnressursVarsel.smsTekst shouldBe messageText
                 hardDelete.den
                     .getOrThrow() shouldBe hardDeleteDate.formatAsISO8601DateTime()
+            }
+
+            it("trunkerer oppgavetekst til 300 tegn for nærmeste leder") {
+                val variables =
+                    ArbeidsgiverNotifikasjonNarmesteLeder(
+                        varselId = varselId,
+                        virksomhetsnummer = ORGNUMMER,
+                        url = "https://arbeidsgiver.nav.no",
+                        narmesteLederFnr = FNR_1,
+                        ansattFnr = FNR_2,
+                        messageText = longMessageText,
+                        narmesteLederEpostadresse = "leder@nav.no",
+                        merkelapp = "Oppfølging",
+                        emailTitle = emailTitle,
+                        emailBody = emailBody,
+                        hardDeleteDate = hardDeleteDate,
+                        grupperingsid = grupperingsid,
+                    ).createVariables()
+
+                variables.tekst shouldBe longMessageText.take(300)
+            }
+
+            it("trunkerer oppgavetekst til 300 tegn for altinnressurs") {
+                val ressursId = "nav_permittering-og-nedbemanning"
+                val variables =
+                    ArbeidsgiverNotifikasjonAltinnRessurs(
+                        varselId = varselId,
+                        virksomhetsnummer = ORGNUMMER,
+                        url = "https://arbeidsgiver.nav.no",
+                        messageText = longMessageText,
+                        merkelapp = "Oppfølging",
+                        emailTitle = emailTitle,
+                        emailBody = emailBody,
+                        smsTekst = messageText,
+                        hardDeleteDate = hardDeleteDate,
+                        grupperingsid = grupperingsid,
+                        ressursId = ressursId,
+                    ).createVariables()
+
+                variables.tekst shouldBe longMessageText.take(300)
             }
         }
     })
