@@ -79,10 +79,13 @@ class ArbeidsgiverNotifikasjonService(
                 varselId = arbeidsgiverNotifikasjon.uuid.toString(),
                 virksomhetsnummer = arbeidsgiverNotifikasjon.virksomhetsnummer,
                 url = arbeidsgiverNotifikasjon.ressursUrl,
-                messageText = arbeidsgiverNotifikasjon.messageText,
+                // TODO. Legg til dedikert felt i hendelsen som brukes for messageText
+                // Inntill videre bruker vi første delen av smsBody.
+                messageText = arbeidsgiverNotifikasjon.messageText.split(".").first().plus("."),
                 merkelapp = arbeidsgiverNotifikasjon.merkelapp,
                 emailTitle = arbeidsgiverNotifikasjon.epostTittel,
                 emailBody = arbeidsgiverNotifikasjon.epostHtmlBody,
+                smsTekst = arbeidsgiverNotifikasjon.messageText,
                 hardDeleteDate = arbeidsgiverNotifikasjon.hardDeleteDate,
                 grupperingsid = arbeidsgiverNotifikasjon.grupperingsid,
                 ressursId = arbeidsgiverNotifikasjon.ressursId,

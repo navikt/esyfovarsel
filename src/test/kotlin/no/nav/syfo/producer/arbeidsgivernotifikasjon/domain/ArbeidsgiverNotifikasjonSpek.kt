@@ -79,6 +79,7 @@ class ArbeidsgiverNotifikasjonSpek :
                         merkelapp = "Oppfølging",
                         emailTitle = emailTitle,
                         emailBody = emailBody,
+                        smsTekst = messageText,
                         hardDeleteDate = hardDeleteDate,
                         grupperingsid = grupperingsid,
                         ressursId = ressursId,
