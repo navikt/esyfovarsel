@@ -6,7 +6,7 @@ import no.nav.syfo.arbeidstakervarsel.domain.ArbeidstakerVarselSendResult
 enum class ArbeidstakerKanal {
     BRUKERNOTIFIKASJON,
     DOKUMENTDISTRIBUSJON,
-    DITT_SYKEFRAVAER
+    DITT_SYKEFRAVAER,
 }
 
 class ArbeidstakervarselDao {
@@ -14,11 +14,18 @@ class ArbeidstakervarselDao {
         // TODO: Lagre hendelsen som kom inn fra kafka
     }
 
-    private fun storeUtsendtArbeidstakerVarsel(uuid: String, kanal: ArbeidstakerKanal) {
+    private fun storeUtsendtArbeidstakerVarsel(
+        uuid: String,
+        kanal: ArbeidstakerKanal,
+    ) {
         // TODO: Lagre referanse til varsel/hendelse som gikk bra
     }
 
-    private fun storeUtsendtArbeidstakerVarselFeilet(uuid: String, kanal: ArbeidstakerKanal, error: String) {
+    private fun storeUtsendtArbeidstakerVarselFeilet(
+        uuid: String,
+        kanal: ArbeidstakerKanal,
+        error: String,
+    ) {
         // TODO: Lagre referanse til varsel/hendelse som feilet
     }
 
@@ -26,14 +33,13 @@ class ArbeidstakervarselDao {
         if (sendResult.success) {
             storeUtsendtArbeidstakerVarsel(
                 uuid = sendResult.uuid,
-                kanal = sendResult.kanal
+                kanal = sendResult.kanal,
             )
         } else {
             storeUtsendtArbeidstakerVarselFeilet(
                 uuid = sendResult.uuid,
                 kanal = sendResult.kanal,
-                error = sendResult.exception.toString()
-
+                error = sendResult.exception.toString(),
             )
         }
     }

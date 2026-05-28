@@ -5,7 +5,7 @@ import java.net.URL
 enum class BrukernotifikasjonType {
     OPPGAVE,
     BESKJED,
-    DONE
+    DONE,
 }
 
 sealed class BrukernotifikasjonVarsel {
@@ -14,7 +14,7 @@ sealed class BrukernotifikasjonVarsel {
     abstract val scheduledRetry: Boolean
 
     data class Done(
-        override val uuid: String
+        override val uuid: String,
     ) : BrukernotifikasjonVarsel() {
         override val varseltype = BrukernotifikasjonType.DONE
         override val scheduledRetry: Boolean = true
@@ -38,7 +38,7 @@ sealed class BrukernotifikasjonVarsel {
         val url: URL?,
         val eksternVarsling: Boolean,
         val smsContent: String? = null,
-        val dagerTilDeaktivering: Long? = null
+        val dagerTilDeaktivering: Long? = null,
     ) : BrukernotifikasjonVarsel() {
         override val varseltype = BrukernotifikasjonType.BESKJED
         override val scheduledRetry: Boolean = true

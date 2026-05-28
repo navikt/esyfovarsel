@@ -11,42 +11,41 @@ class DokumentDistribusjonService(
 ) {
     private val log = LoggerFactory.getLogger(DokumentDistribusjonService::class.java)
 
-    suspend fun distribuerJournalpost(
-        dokumentDistribusjonVarsel: DokumentdistribusjonVarsel
-    ): ArbeidstakerVarselSendResult {
+    suspend fun distribuerJournalpost(dokumentDistribusjonVarsel: DokumentdistribusjonVarsel): ArbeidstakerVarselSendResult {
         val uuid = dokumentDistribusjonVarsel.uuid
         return try {
-            val response = journalpostdistribusjonConsumer.distribuerJournalpost(
-                journalpostId = dokumentDistribusjonVarsel.journalpostId,
-                uuid = uuid,
-                distribusjonstype = dokumentDistribusjonVarsel.distribusjonsType,
-                tvingSentralPrint = dokumentDistribusjonVarsel.tvingSentralPrint
-            )
+            val response =
+                journalpostdistribusjonConsumer.distribuerJournalpost(
+                    journalpostId = dokumentDistribusjonVarsel.journalpostId,
+                    uuid = uuid,
+                    distribusjonstype = dokumentDistribusjonVarsel.distribusjonsType,
+                    tvingSentralPrint = dokumentDistribusjonVarsel.tvingSentralPrint,
+                )
             val bestillingsId = response.bestillingsId
             log.info(
                 "Distribuerte journalpost: uuid={}, journalpostId={}, bestillingsId={}",
                 uuid,
                 dokumentDistribusjonVarsel.journalpostId,
-                bestillingsId
+                bestillingsId,
             )
             ArbeidstakerVarselSendResult(
                 success = true,
                 uuid = uuid,
                 kanal = ArbeidstakerKanal.DOKUMENTDISTRIBUSJON,
-                exception = null
+                exception = null,
             )
         } catch (e: Exception) {
             log.error(
                 "Feil ved distribusjon av journalpost: uuid={}, journalpostId={}",
                 uuid,
                 dokumentDistribusjonVarsel.journalpostId,
-                e
+                e,
             )
             ArbeidstakerVarselSendResult(
                 success = false,
                 uuid = uuid,
                 kanal = ArbeidstakerKanal.DOKUMENTDISTRIBUSJON,
-                exception = e
+                exception = e,
             )
         }
     }

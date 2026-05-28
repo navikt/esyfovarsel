@@ -8,38 +8,40 @@ class ArbeidstakervarselService(
     private val arbeidstakervarselDao: ArbeidstakervarselDao,
     private val dokumentDistribusjonService: DokumentDistribusjonService,
     private val dittSykefravaerVarselService: DittSykefravaerVarselService,
-    private val mikrofrontendService: MikrofrontendService
-
+    private val mikrofrontendService: MikrofrontendService,
 ) {
     suspend fun processVarsel(arbeidstakerVarsel: ArbeidstakerVarsel) {
         arbeidstakervarselDao.storeArbeidstakerVarselHendelse(arbeidstakerVarsel)
 
         if (arbeidstakerVarsel.brukernotifikasjonVarsel != null) {
-            brukernotifikasjonService.sendBrukernotifikasjon(
-                mottakerFnr = arbeidstakerVarsel.mottakerFnr,
-                brukernotifikasjonVarsel = arbeidstakerVarsel.brukernotifikasjonVarsel
-            ).also {
-                arbeidstakervarselDao.storeSendResult(it)
-            }
+            brukernotifikasjonService
+                .sendBrukernotifikasjon(
+                    mottakerFnr = arbeidstakerVarsel.mottakerFnr,
+                    brukernotifikasjonVarsel = arbeidstakerVarsel.brukernotifikasjonVarsel,
+                ).also {
+                    arbeidstakervarselDao.storeSendResult(it)
+                }
         }
 
         if (arbeidstakerVarsel.dokumentDistribusjonVarsel != null) {
-            dokumentDistribusjonService.distribuerJournalpost(
-                dokumentDistribusjonVarsel = arbeidstakerVarsel.dokumentDistribusjonVarsel
-            ).also { arbeidstakervarselDao.storeSendResult(it) }
+            dokumentDistribusjonService
+                .distribuerJournalpost(
+                    dokumentDistribusjonVarsel = arbeidstakerVarsel.dokumentDistribusjonVarsel,
+                ).also { arbeidstakervarselDao.storeSendResult(it) }
         }
 
         if (arbeidstakerVarsel.dittSykefravaerVarsel != null) {
-            dittSykefravaerVarselService.sendVarsel(
-                arbeidstakerVarsel.mottakerFnr,
-                arbeidstakerVarsel.dittSykefravaerVarsel
-            ).also { arbeidstakervarselDao.storeSendResult(it) }
+            dittSykefravaerVarselService
+                .sendVarsel(
+                    arbeidstakerVarsel.mottakerFnr,
+                    arbeidstakerVarsel.dittSykefravaerVarsel,
+                ).also { arbeidstakervarselDao.storeSendResult(it) }
         }
 
         if (arbeidstakerVarsel.microfrontendEvent != null) {
             mikrofrontendService.handleMicrofrontendEvent(
                 mottakerFnr = arbeidstakerVarsel.mottakerFnr,
-                event = arbeidstakerVarsel.microfrontendEvent
+                event = arbeidstakerVarsel.microfrontendEvent,
             )
         }
     }

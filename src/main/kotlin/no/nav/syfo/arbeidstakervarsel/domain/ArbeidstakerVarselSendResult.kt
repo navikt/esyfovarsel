@@ -6,5 +6,5 @@ data class ArbeidstakerVarselSendResult(
     val success: Boolean,
     val uuid: String,
     val kanal: ArbeidstakerKanal,
-    val exception: Exception? = null
+    val exception: Exception? = null,
 )

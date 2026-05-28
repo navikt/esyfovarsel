@@ -6,12 +6,14 @@ import no.nav.syfo.arbeidstakervarsel.domain.BrukernotifikasjonVarsel
 import no.nav.syfo.kafka.producers.brukernotifikasjoner.BrukernotifikasjonKafkaProducer
 import org.slf4j.LoggerFactory
 
-class BrukernotifikasjonService(private val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer) {
+class BrukernotifikasjonService(
+    private val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,
+) {
     private val log = LoggerFactory.getLogger(BrukernotifikasjonService::class.java)
 
     fun sendBrukernotifikasjon(
         mottakerFnr: String,
-        brukernotifikasjonVarsel: BrukernotifikasjonVarsel
+        brukernotifikasjonVarsel: BrukernotifikasjonVarsel,
     ): ArbeidstakerVarselSendResult {
         val uuid = brukernotifikasjonVarsel.uuid
 
@@ -24,7 +26,7 @@ class BrukernotifikasjonService(private val brukernotifikasjonKafkaProducer: Bru
                         uuid = uuid,
                         varselUrl = brukernotifikasjonVarsel.url,
                         eksternVarsling = brukernotifikasjonVarsel.eksternVarsling,
-                        dagerTilDeaktivering = brukernotifikasjonVarsel.dagerTilDeaktivering
+                        dagerTilDeaktivering = brukernotifikasjonVarsel.dagerTilDeaktivering,
                     )
                 }
 
@@ -35,13 +37,13 @@ class BrukernotifikasjonService(private val brukernotifikasjonKafkaProducer: Bru
                         uuid = uuid,
                         varselUrl = brukernotifikasjonVarsel.url,
                         smsContent = brukernotifikasjonVarsel.smsContent,
-                        dagerTilDeaktivering = brukernotifikasjonVarsel.dagerTilDeaktivering
+                        dagerTilDeaktivering = brukernotifikasjonVarsel.dagerTilDeaktivering,
                     )
                 }
 
                 is BrukernotifikasjonVarsel.Done -> {
                     brukernotifikasjonKafkaProducer.sendDone(
-                        uuid = uuid
+                        uuid = uuid,
                     )
                 }
             }
@@ -50,7 +52,7 @@ class BrukernotifikasjonService(private val brukernotifikasjonKafkaProducer: Bru
                 success = true,
                 uuid = uuid,
                 kanal = ArbeidstakerKanal.BRUKERNOTIFIKASJON,
-                exception = null
+                exception = null,
             )
         } catch (e: Exception) {
             log.error("Failed to send brukernotifikasjon with uuid: $uuid", e)
@@ -58,7 +60,7 @@ class BrukernotifikasjonService(private val brukernotifikasjonKafkaProducer: Bru
                 success = false,
                 uuid = uuid,
                 kanal = ArbeidstakerKanal.BRUKERNOTIFIKASJON,
-                exception = e
+                exception = e,
             )
         }
     }

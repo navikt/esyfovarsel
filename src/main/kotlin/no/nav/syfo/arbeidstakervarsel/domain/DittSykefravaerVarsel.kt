@@ -1,11 +1,11 @@
 package no.nav.syfo.arbeidstakervarsel.domain
 
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 enum class DittSykefravaerVarselType {
     SEND,
-    FERDIGSTILL
+    FERDIGSTILL,
 }
 
 data class DittSykefravaerVarsel(

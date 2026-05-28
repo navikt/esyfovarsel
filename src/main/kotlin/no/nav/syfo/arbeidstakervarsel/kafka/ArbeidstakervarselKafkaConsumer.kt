@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 
 class ArbeidstakervarselKafkaConsumer(
     val env: Environment,
-    val arbeidstakervarselService: ArbeidstakervarselService
+    val arbeidstakervarselService: ArbeidstakervarselService,
 ) : KafkaListener {
     private val log: Logger = LoggerFactory.getLogger(ArbeidstakervarselKafkaConsumer::class.qualifiedName)
     private val kafkaListener: KafkaConsumer<String, String>
@@ -39,7 +39,7 @@ class ArbeidstakervarselKafkaConsumer(
             } catch (e: Exception) {
                 log.error(
                     "Exception in [$TOPIC_ARBEIDSTAKER_VARSEL]-listener: ${e.message}",
-                    e
+                    e,
                 )
                 kafkaListener.commitSync()
             }
