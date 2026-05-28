@@ -60,7 +60,7 @@ sealed class ArbeidsgiverNotifikasjon {
     private fun createNotifikasjon(): NotifikasjonInput =
         NotifikasjonInput(
             merkelapp = merkelapp,
-            tekst = messageText,
+            tekst = messageText.take(300),
             lenke = url,
         )
 
