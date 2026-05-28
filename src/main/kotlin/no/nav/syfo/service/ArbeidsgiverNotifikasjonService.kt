@@ -13,6 +13,7 @@ import no.nav.syfo.service.Meldingstype.BESKJED
 import no.nav.syfo.service.Meldingstype.OPPGAVE
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import kotlin.text.split
 
 class ArbeidsgiverNotifikasjonService(
     private val arbeidsgiverNotifikasjonProdusent: IArbeidsgiverNotifikasjonProdusent,
@@ -80,12 +81,13 @@ class ArbeidsgiverNotifikasjonService(
                 virksomhetsnummer = arbeidsgiverNotifikasjon.virksomhetsnummer,
                 url = arbeidsgiverNotifikasjon.ressursUrl,
                 // TODO. Legg til dedikert felt i hendelsen som brukes for messageText
-                // Inntill videre bruker vi første delen av smsBody.
+                // Inntill videre kutter vi siste setning og neste siste setning dersom det er fler enn to setninger.
                 messageText =
                     arbeidsgiverNotifikasjon.messageText
                         .split(".")
-                        .first()
-                        .plus("."),
+                        .let {
+                            if (it.count() > 2) it.dropLast(2).joinToString(".") else it.first()
+                        }.plus("."),
                 merkelapp = arbeidsgiverNotifikasjon.merkelapp,
                 emailTitle = arbeidsgiverNotifikasjon.epostTittel,
                 emailBody = arbeidsgiverNotifikasjon.epostHtmlBody,
