@@ -81,6 +81,8 @@ class ArbeidsgiverVarselServiceTest :
                 inputSlot.single().uuid shouldBe UUID.fromString(hendelse.eksternReferanseId)
                 inputSlot.single().grupperingsid shouldBe sak?.grupperingsid
                 UUID.fromString(inputSlot.single().grupperingsid) shouldNotBe null
+                inputSlot.single().messageText shouldBe "Varseltekst"
+                inputSlot.single().smsTekst shouldBe "SMS"
                 inputSlot.single().link shouldBe hendelse.ressursUrl
                 sak?.hardDeleteDate shouldBe inputSlot.single().hardDeleteDate
                 inputSlot.single().hardDeleteDate shouldBe
@@ -455,7 +457,8 @@ private fun arbeidsgiverHendelse(
               "notifikasjonInnhold": {
                 "epostTittel": "Dialogmøte",
                 "epostBody": "Body",
-                "smsTekst": "SMS"
+                "smsTekst": "SMS",
+                "varselTekst": "Varseltekst"
               }
             }
             """.trimIndent(),

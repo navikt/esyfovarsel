@@ -37,6 +37,7 @@ data class ArbeidsgiverNotifikasjonAltinnRessursInput(
     override val virksomhetsnummer: String,
     override val merkelapp: String,
     override val messageText: String,
+    val smsTekst: String,
     override val epostTittel: String,
     override val epostHtmlBody: String,
     override val hardDeleteDate: LocalDateTime?,
