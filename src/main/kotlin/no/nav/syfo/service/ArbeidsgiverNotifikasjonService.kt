@@ -83,6 +83,7 @@ class ArbeidsgiverNotifikasjonService(
                 merkelapp = arbeidsgiverNotifikasjon.merkelapp,
                 emailTitle = arbeidsgiverNotifikasjon.epostTittel,
                 emailBody = arbeidsgiverNotifikasjon.epostHtmlBody,
+                smsTekst = arbeidsgiverNotifikasjon.smsTekst,
                 hardDeleteDate = arbeidsgiverNotifikasjon.hardDeleteDate,
                 grupperingsid = arbeidsgiverNotifikasjon.grupperingsid,
                 ressursId = arbeidsgiverNotifikasjon.ressursId,

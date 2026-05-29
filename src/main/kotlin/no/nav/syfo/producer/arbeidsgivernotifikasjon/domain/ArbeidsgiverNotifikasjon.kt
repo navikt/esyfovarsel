@@ -16,11 +16,14 @@ import com.apollo.graphql.type.NyBeskjedInput
 import com.apollo.graphql.type.SendetidspunktInput
 import com.apollo.graphql.type.Sendevindu
 import com.apollographql.apollo.api.Optional
+import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.syfo.metrics.countArbeidsgiverNotifikasjonMessageTextTruncated
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.AltinnRessursVariablesCreate
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.EpostSendevinduTypes
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.NarmestelederVariablesCreate
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.Variables
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601DateTime
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
 sealed class ArbeidsgiverNotifikasjon {
@@ -35,6 +38,22 @@ sealed class ArbeidsgiverNotifikasjon {
     abstract val grupperingsid: String
 
     abstract fun createVariables(): Variables
+
+    protected fun sanitizedMessageText(mutationType: MutationType): String {
+        if (messageText.length <= MAX_MESSAGE_TEXT_LENGTH) {
+            return messageText
+        }
+
+        log.warn(
+            "Truncating arbeidsgiver notifikasjon messageText over max length",
+            keyValue("varselId", varselId),
+            keyValue("mutationType", mutationType.name.lowercase()),
+            keyValue("messageTextLength", messageText.length),
+            keyValue("maxMessageTextLength", MAX_MESSAGE_TEXT_LENGTH),
+        )
+        countArbeidsgiverNotifikasjonMessageTextTruncated()
+        return messageText.take(MAX_MESSAGE_TEXT_LENGTH)
+    }
 
     fun toNyBeskjedMutation(): NyBeskjedMutation =
         NyBeskjedMutation(
@@ -60,7 +79,7 @@ sealed class ArbeidsgiverNotifikasjon {
     private fun createNotifikasjon(): NotifikasjonInput =
         NotifikasjonInput(
             merkelapp = merkelapp,
-            tekst = messageText,
+            tekst = sanitizedMessageText(MutationType.BESKJED),
             lenke = url,
         )
 
@@ -76,6 +95,16 @@ sealed class ArbeidsgiverNotifikasjon {
                     ),
                 ),
         )
+
+    protected enum class MutationType {
+        BESKJED,
+        OPPGAVE,
+    }
+
+    companion object {
+        private const val MAX_MESSAGE_TEXT_LENGTH = 300
+        private val log = LoggerFactory.getLogger(ArbeidsgiverNotifikasjon::class.qualifiedName)
+    }
 }
 
 data class ArbeidsgiverNotifikasjonNarmesteLeder(
@@ -136,7 +165,7 @@ data class ArbeidsgiverNotifikasjonNarmesteLeder(
             narmesteLederFnr,
             ansattFnr,
             merkelapp,
-            messageText,
+            sanitizedMessageText(MutationType.OPPGAVE),
             narmesteLederEpostadresse,
             emailTitle,
             emailBody,
@@ -154,6 +183,7 @@ data class ArbeidsgiverNotifikasjonAltinnRessurs(
     override val merkelapp: String,
     override val emailTitle: String,
     override val emailBody: String,
+    val smsTekst: String,
     override val hardDeleteDate: LocalDateTime?,
     override val grupperingsid: String,
     val ressursId: String,
@@ -182,7 +212,7 @@ data class ArbeidsgiverNotifikasjonAltinnRessurs(
                                 ),
                             epostTittel = emailTitle,
                             epostHtmlBody = emailBody,
-                            smsTekst = messageText,
+                            smsTekst = smsTekst,
                             sendetidspunkt = createSendetidspunkt(),
                         ),
                     ),
@@ -195,7 +225,7 @@ data class ArbeidsgiverNotifikasjonAltinnRessurs(
             virksomhetsnummer = virksomhetsnummer,
             lenke = url,
             merkelapp = merkelapp,
-            tekst = messageText,
+            tekst = sanitizedMessageText(MutationType.OPPGAVE),
             epostTittel = emailTitle,
             epostHtmlBody = emailBody,
             sendevindu = EpostSendevinduTypes.LOEPENDE,

@@ -64,6 +64,7 @@ data class VarselDataNotifikasjonInnhold(
     val epostTittel: String,
     val epostBody: String,
     val smsTekst: String,
+    val varselTekst: String = smsTekst,
 )
 
 data class VarselDataJournalpost(

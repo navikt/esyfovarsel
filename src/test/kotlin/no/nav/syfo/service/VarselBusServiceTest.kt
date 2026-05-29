@@ -48,7 +48,8 @@ class VarselBusServiceTest :
             ArbeidsgiverNotifikasjonTilAltinnRessursHendelse(
                 type = HendelseType.AG_VARSEL_ALTINN_RESSURS,
                 ferdigstill = false,
-                data = """{"notifikasjonInnhold":{"epostTittel":"Tittel","epostBody":"Body","smsTekst":"SMS"}}""",
+                data =
+                    """{"notifikasjonInnhold":{"epostTittel":"Tittel","epostBody":"Body","smsTekst":"SMS","varselTekst":"Varsel"}}""",
                 orgnummer = "999888777",
                 ressursId = "nav_syfo_dialogmote",
                 ressursUrl = "https://www.altinn.no",

@@ -575,7 +575,8 @@ private fun failedArbeidsgiverAltinnVarsel(
                       "notifikasjonInnhold": {
                         "epostTittel": "Dialogmøte",
                         "epostBody": "Du har mottatt et nytt dialogmøtevarsel",
-                        "smsTekst": "Du har mottatt et nytt dialogmøtevarsel"
+                        "smsTekst": "Du har mottatt et nytt dialogmøtevarsel",
+                        "varselTekst": "Du har fått en ny notifikasjon om dialogmøte i Altinn."
                       }
                     }
                     """.trimIndent(),
