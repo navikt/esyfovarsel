@@ -92,7 +92,9 @@ class ArbeidsgiverNotifikasjonProdusent(
             log.info("Created new beskjed with id ${result.onNyBeskjedVellykket.id}")
             return result.onNyBeskjedVellykket.id
         } else {
-            log.error("Could not create new beskjed")
+            log.error(
+                "Could not create new beskjed for grupperingsid ${arbeidsgiverNotifikasjonInput.grupperingsid} and merkelapp ${arbeidsgiverNotifikasjonInput.merkelapp}",
+            )
             response.errors?.forEach {
                 log.error("createNewBeskjed response error: ${it.message}")
             }
@@ -161,7 +163,7 @@ class ArbeidsgiverNotifikasjonProdusent(
         val result = response.data?.nyStatusSakByGrupperingsid
 
         if (result?.onNyStatusSakVellykket != null) {
-            log.info("Updated sak with id ${result.onNyStatusSakVellykket.id}")
+            log.info("Updated sak with id ${result.onNyStatusSakVellykket.id} and grupperingsid: ${nyStatusSakInput.grupperingsId}")
             return result.onNyStatusSakVellykket.id
         } else {
             log.error("Could not update sak")
