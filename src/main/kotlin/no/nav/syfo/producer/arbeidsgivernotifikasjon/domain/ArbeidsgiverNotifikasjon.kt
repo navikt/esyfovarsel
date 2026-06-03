@@ -89,11 +89,9 @@ sealed class ArbeidsgiverNotifikasjon {
             eksternId = varselId,
             grupperingsid = Optional.present(grupperingsid),
             hardDelete =
-                Optional.present(
-                    FutureTemporalInput(
-                        den = Optional.present(hardDeleteDate?.formatAsISO8601DateTime()),
-                    ),
-                ),
+                hardDeleteDate?.let {
+                    Optional.present(FutureTemporalInput(den = Optional.present(it.formatAsISO8601DateTime())))
+                } ?: Optional.Absent,
         )
 
     protected enum class MutationType {
