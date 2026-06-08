@@ -4,28 +4,24 @@ Denne siden viser hvilke domeneapper som skriver til `team-esyfo.varselbus`, og 
 
 Oversikten bygger på topic-ACL i `nais/topics/varselbus-topic-*.yaml` og rutingen i `VarselBusService`.
 
+## Kommunikasjonsflater
+
+| Kommunikasjonsflate | Mikrotjenester som i dag går via `esyfovarsel` | Hva de må håndtere selv uten `esyfovarsel` |
+| --- | --- | --- |
+| Varsler på Min side arbeidsgiver | `isdialogmote`<br>`syfomotebehov`<br>`syfooppfolgingsplanservice`<br>`syfo-oppfolgingsplan-backend`<br>`isoppfolgingsplan` | Direkte integrasjon mot `notifikasjon-produsent-api`, inkludert oppretting og oppdatering av sak, kalenderavtale og status. |
+| Dine Sykmeldte | `isdialogmote`<br>`syfomotebehov`<br>`syfooppfolgingsplanservice`<br>`syfo-oppfolgingsplan-backend`<br>`isoppfolgingsplan` | Publisering til `team-esyfo.dinesykmeldte-hendelser-v2`, og logikk for å ferdigstille tidligere varsler. |
+| Varsler på Min side for sykmeldt | `isdialogmote`<br>`syfomotebehov`<br>`syfooppfolgingsplanservice`<br>`syfo-oppfolgingsplan-backend`<br>`isoppfolgingsplan`<br>`aktivitetskrav-backend`<br>`meroppfolging-backend`<br>`ismeroppfolging` | Publisering til `min-side.aapen-brukervarsel-v1`, ekstern varsling ved behov og inaktivering av varsler når de er lest eller utløpt. |
+| Ditt sykefravær | `isdialogmote`<br>`syfomotebehov`<br>`meroppfolging-backend`<br>`ismeroppfolging` | Publisering til `flex.ditt-sykefravaer-melding` og logikk for å lukke eller erstatte tidligere meldinger. |
+| Mikrofronter på Min side | `isdialogmote`<br>`syfomotebehov`<br>`aktivitetskrav-backend`<br>`meroppfolging-backend`<br>`ismeroppfolging` | Publisering av `enable` og `disable` til `min-side.aapen-microfrontend-v1`, og egen logikk for synlighet, utløp og mapping til `syfo-dialog`, `syfo-aktivitetskrav` og `syfo-meroppfolging`. |
+| Fysiske brev | `isdialogmote`<br>`aktivitetskrav-backend`<br>`meroppfolging-backend`<br>`isarbeidsuforhet`<br>`isfrisktilarbeid`<br>`ismanglendemedvirkning` | Distribusjon via journalpost, samt fallback når brukeren ikke kan varsles digitalt. |
+
 ## Kort fortalt
 
-| Varslingsdel               | Hvor brukeren ser det            | Teknisk vei                                                          |
-| -------------------------- | -------------------------------- | -------------------------------------------------------------------- |
-| Arbeidsgivernotifikasjoner | Min side arbeidsgiver            | `esyfovarsel` kaller `notifikasjon-produsent-api`                    |
-| Mikrofronter               | Min side                         | `esyfovarsel` publiserer til `min-side.aapen-microfrontend-v1`       |
-| Brukernotifikasjoner       | Min side                         | `esyfovarsel` publiserer til `min-side.aapen-brukervarsel-v1`        |
-| Dine Sykmeldte             | Arbeidsgiverflaten for sykmeldte | `esyfovarsel` publiserer til `team-esyfo.dinesykmeldte-hendelser-v2` |
-| Ditt sykefravær            | Sykmeldtflaten                   | `esyfovarsel` publiserer til `flex.ditt-sykefravaer-melding`         |
-| Fysiske brev               | Brevpost                         | `esyfovarsel` sender til distribusjon via journalpost                |
+`esyfovarsel` gjør i dag tre ting på vegne av domeneappene:
 
-## Hvilken domeneapp bruker hvilken varsling?
-
-| Domeneapp(er) som skriver til varselbussen                                        | Typiske hendelser                            | Varslingsflater som brukes                                                                                                                                                                       |
-| --------------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `isdialogmote`, `syfomotebehov`                                                   | Dialogmøte og møtebehov                      | **Sykmeldt:** Brukernotifikasjoner og Ditt sykefravær. **Arbeidsgiver/nærmeste leder:** Dine Sykmeldte og arbeidsgivernotifikasjoner på Min side arbeidsgiver. **Mikrofrontend:** `syfo-dialog`. |
-| `syfooppfolgingsplanservice`, `syfo-oppfolgingsplan-backend`, `isoppfolgingsplan` | Oppfølgingsplan                              | **Sykmeldt:** Brukernotifikasjoner. **Arbeidsgiver/nærmeste leder:** Dine Sykmeldte og arbeidsgivernotifikasjoner.                                                                               |
-| `aktivitetskrav-backend`                                                          | Aktivitetskrav                               | **Sykmeldt:** Brukernotifikasjoner eller fysisk brev. **Mikrofrontend:** `syfo-aktivitetskrav`.                                                                                                  |
-| `meroppfolging-backend`, `ismeroppfolging`                                        | Mer veiledning og kartleggingsspørsmål       | **Sykmeldt:** Brukernotifikasjoner. **Ditt sykefravær:** Mer veiledning. **Mikrofrontend:** `syfo-meroppfolging`.                                                                                |
-| `isarbeidsuforhet`                                                                | Arbeidsuførhet forhåndsvarsel                | **Sykmeldt:** fysisk brev.                                                                                                                                                                       |
-| `isfrisktilarbeid`                                                                | Vedtak om friskmelding til arbeidsformidling | **Sykmeldt:** fysisk brev.                                                                                                                                                                       |
-| `ismanglendemedvirkning`                                                          | Manglende medvirkning                        | **Sykmeldt:** fysisk brev.                                                                                                                                                                       |
+1. Leser hendelser fra `team-esyfo.varselbus`.
+2. Mapper hver hendelse til riktig kommunikasjonsflate.
+3. Håndterer tilstand rundt utsending, ferdigstilling, retry og noen steder fallback til fysisk brev.
 
 ## Svar på de vanligste spørsmålene
 
