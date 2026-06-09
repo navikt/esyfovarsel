@@ -1,7 +1,9 @@
 UPDATE UTSENDT_VARSEL
 SET ferdigstilt_tidspunkt = now()
-where ferdigstilt_tidspunkt is null
-AND uuid IN (
+WHERE ferdigstilt_tidspunkt IS NULL
+  AND type = 'SM_KARTLEGGINGSSPORSMAL'
+  AND kanal = 'BRUKERNOTIFIKASJON'
+  AND uuid IN (
 '4c01458a-0b5d-452e-bc5c-d21b5ce2ee6e',
 'f59cbc44-4e77-4ba8-926d-f1aec1a876d1',
 '9cad2e11-2f3b-4f3e-af1d-23b96310bb8d',
