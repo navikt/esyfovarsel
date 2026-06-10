@@ -71,6 +71,8 @@ Jobben lukker utløpte mikrofronter, reutsender varsler og sender brev.
 
 Se [lokal utvikling](docs/local-development.md) for lokal kjøring, Kafka-test og lokal jobbkjøring.
 
+Se [varslingsoversikt](docs/varslingsoversikt.md) for koblingen mellom domeneapper og kommunikasjonsflater.
+
 Bruk `mise tasks` for å se tilgjengelige oppgaver.
 
 ## For Nav-ansatte
