@@ -1,6 +1,7 @@
 package no.nav.syfo.consumer.dkif
 
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -9,6 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.append
+import io.ktor.utils.io.CancellationException
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.ITokenConsumer
 import no.nav.syfo.utils.NAV_CALL_ID_HEADER
@@ -34,6 +36,9 @@ class DkifConsumer(
                     }
                     setBody(PostPersonerRequest.createForFnr(fnr))
                 }
+            } catch (e: CancellationException) {
+                log.info("Received cancellation: ${e.message}")
+                throw e
             } catch (e: Exception) {
                 log.error("Error while calling DKIF: ${e.message}", e)
                 return null
