@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.syfo.db.DatabaseInterface
 import org.flywaydb.core.Flyway
+import org.flywaydb.database.postgresql.PostgreSQLConfigurationExtension
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.PostgreSQLContainer
@@ -44,12 +45,21 @@ class EmbeddedDatabase : DatabaseInterface {
                 transactionIsolation = "TRANSACTION_REPEATABLE_READ"
             }
 
-        HikariDataSource(config).also { ds ->
+        HikariDataSource(config).also {
+            // Flyway runs on its own driver-based connection with autoCommit=true (Flyway's default)
+            // so that migrations using CREATE INDEX CONCURRENTLY (which cannot run inside a
+            // transaction block) work correctly. The application pool uses autoCommit=false.
+            //
+            // transactionalLock=false makes Flyway take a session-level advisory lock instead of a
+            // transactional one. A transactional lock keeps a connection idle-in-transaction for the
+            // whole migration run, and that open snapshot blocks CREATE INDEX CONCURRENTLY indefinitely.
             Flyway
                 .configure()
-                .dataSource(ds)
+                .dataSource(postgresContainer.jdbcUrl, postgresContainer.username, postgresContainer.password)
                 .cleanDisabled(false)
-                .load()
+                .apply {
+                    getConfigurationExtension(PostgreSQLConfigurationExtension::class.java).isTransactionalLock = false
+                }.load()
                 .apply {
                     clean()
                     migrate()
