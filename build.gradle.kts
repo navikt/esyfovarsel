@@ -24,6 +24,7 @@ val kafkaVersion = "4.3.0"
 val brukernotifikasjonerBuilderVersion = "2.2.0"
 val kotlinVersion = "2.3.21"
 val graphqlApolloVersion = "4.4.3"
+val nettyVersion = "4.2.15.Final"
 
 val githubUser: String by project
 val githubPassword: String by project
@@ -52,25 +53,8 @@ repositories {
     maven(url = "https://github.com/navikt/vault-jdbc")
 }
 
-configurations.all {
-    resolutionStrategy.eachDependency {
-        if (requested.group == "org.scala-lang" && requested.name == "scala-library" && (requested.version == "2.13.3")) {
-            useVersion("2.13.9")
-            because("fixes critical bug CVE-2022-36944 in 2.13.6")
-        }
-        if (requested.group == "io.netty" && requested.name == "netty-handler" && requested.version == "4.1.92.Final") {
-            useVersion("4.1.94.Final")
-            because("fixes bug CVE-2023-34462")
-        }
-        if (requested.group == "com.google.guava" && requested.name == "guava" && requested.version == "30.1.1-jre") {
-            useVersion("32.0.0-jre")
-            because("fixes bug CVE-2023-2976")
-        }
-    }
-}
-
 dependencies {
-
+    implementation(platform("io.netty:netty-bom:$nettyVersion"))
     // Ktor server
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
