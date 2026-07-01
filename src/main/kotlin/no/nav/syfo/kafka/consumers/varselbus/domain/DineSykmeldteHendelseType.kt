@@ -7,7 +7,7 @@ enum class DineSykmeldteHendelseType {
     DIALOGMOTE_AVLYSNING,
     DIALOGMOTE_ENDRING,
     DIALOGMOTE_REFERAT,
-    OPPFOLGINGSPLAN_PAAMINNELSE
+    OPPFOLGINGSPLAN_PAAMINNELSE,
 }
 
 fun HendelseType.toDineSykmeldteHendelseType(): DineSykmeldteHendelseType =
