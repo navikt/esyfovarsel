@@ -60,6 +60,18 @@ data class VarselData(
     val notifikasjonInnhold: VarselDataNotifikasjonInnhold? = null,
 )
 
+data class OppfolgingsplanVarselbestillingData(
+    val arbeidsgiverMeldingType: String?,
+    val dineSykmeldteHendelseType: String?,
+    val notifikasjonInnhold: OppfolgingsplanNotifikasjonInnhold? = null,
+)
+
+data class OppfolgingsplanNotifikasjonInnhold(
+    val epostTittel: String,
+    val epostBody: String,
+    val varselTekst: String? = null,
+)
+
 data class VarselDataNotifikasjonInnhold(
     val epostTittel: String,
     val epostBody: String,
@@ -108,6 +120,7 @@ data class VarselDataDialogmoteSvar(
  */
 enum class HendelseType {
     AG_VARSEL_ALTINN_RESSURS,
+    NL_OPPFOLGINGSPLAN_VARSELBESTILLING,
     NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
     SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING,
     NL_DIALOGMOTE_SVAR_MOTEBEHOV,
@@ -164,6 +177,12 @@ fun Any.toVarselData(): VarselData =
     objectMapper.readValue(
         this.toString(),
         VarselData::class.java,
+    )
+
+fun Any.toOppfolgingsplanVarselbestillingData(): OppfolgingsplanVarselbestillingData =
+    objectMapper.readValue(
+        this.toString(),
+        OppfolgingsplanVarselbestillingData::class.java,
     )
 
 fun EsyfovarselHendelse.isArbeidstakerHendelse(): Boolean = this is ArbeidstakerHendelse

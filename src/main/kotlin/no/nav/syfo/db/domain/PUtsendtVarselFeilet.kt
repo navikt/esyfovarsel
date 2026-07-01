@@ -5,6 +5,7 @@ import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverNotifikasjonTilAltinnRessursHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import java.time.LocalDateTime
 
 private val objectMapper = createObjectMapper()
@@ -43,4 +44,15 @@ fun PUtsendtVarselFeilet.toArbeidsgiverNotifikasjonTilAltinnRessursHendelse(): A
             "Mangler hendelseJson for feilet arbeidsgiverhendelse"
         }
     return objectMapper.readValue(hendelseJson)
+}
+
+fun PUtsendtVarselFeilet.toNarmesteLederHendelse(): NarmesteLederHendelse {
+    val hendelseJson =
+        requireNotNull(hendelseJson) {
+            "Mangler hendelseJson for feilet nærmeste-leder-hendelse"
+        }
+    val rootNode = objectMapper.readTree(hendelseJson)
+    return objectMapper.readValue<NarmesteLederHendelse>(hendelseJson).also {
+        it.data = rootNode["data"]
+    }
 }

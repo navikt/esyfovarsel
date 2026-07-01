@@ -15,6 +15,7 @@ import no.nav.syfo.db.ARBEIDSTAKER_AKTOR_ID_1
 import no.nav.syfo.db.domain.Kanal
 import no.nav.syfo.db.domain.PUtsendtVarsel
 import no.nav.syfo.db.domain.VarselType
+import no.nav.syfo.db.fetchUtsendtVarselByFnr
 import no.nav.syfo.db.fetchUtsendtVarselFeiletByFnr
 import no.nav.syfo.db.setUtsendtVarselToFerdigstilt
 import no.nav.syfo.db.storeUtsendtVarsel
@@ -22,6 +23,7 @@ import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.exceptions.JournalpostDistribusjonGoneException
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.planner.ARBEIDSTAKER_FNR_1
@@ -264,6 +266,82 @@ class SenderFacadeSpek :
                 storedSak?.narmesteLederFnr shouldBe null
                 storedSakWithWrongMottakerType shouldBe null
                 mutationSlot.captured.lenke shouldBe Optional.Absent
+            }
+
+            it("Does not store arbeidsgivernotifikasjon as sent when sending is skipped") {
+                coEvery {
+                    arbeidsgiverNotifikasjonService.sendNotifikasjon(any<ArbeidsgiverNotifikasjonNarmestelederInput>())
+                } returns false
+
+                senderFacade.sendTilArbeidsgiverNotifikasjon(
+                    varselHendelse =
+                        NarmesteLederHendelse(
+                            type = HendelseType.NL_OPPFOLGINGSPLAN_VARSELBESTILLING,
+                            ferdigstill = false,
+                            data = null,
+                            narmesteLederFnr = "12345678910",
+                            arbeidstakerFnr = ARBEIDSTAKER_FNR_1,
+                            orgnummer = "999999999",
+                        ),
+                    notifikasjon =
+                        ArbeidsgiverNotifikasjonNarmestelederInput(
+                            uuid = UUID.randomUUID(),
+                            virksomhetsnummer = "999999999",
+                            narmesteLederFnr = "12345678910",
+                            ansattFnr = ARBEIDSTAKER_FNR_1,
+                            merkelapp = "merkelapp",
+                            messageText = "tekst",
+                            epostTittel = "tittel",
+                            epostHtmlBody = "body",
+                            hardDeleteDate = LocalDateTime.now().plusDays(1),
+                            grupperingsid = UUID.randomUUID().toString(),
+                        ),
+                )
+
+                embeddedDatabase.fetchUtsendtVarselByFnr(ARBEIDSTAKER_FNR_1).size shouldBe 0
+                embeddedDatabase.fetchUtsendtVarselFeiletByFnr(ARBEIDSTAKER_FNR_1).size shouldBe 0
+            }
+
+            it("Stores failed arbeidsgivernotifikasjon with hendelseJson when sending throws") {
+                val hendelseJson = """{"type":"NL_OPPFOLGINGSPLAN_VARSELBESTILLING","data":{"foo":"bar"}}"""
+                val varselHendelse =
+                    NarmesteLederHendelse(
+                        type = HendelseType.NL_OPPFOLGINGSPLAN_VARSELBESTILLING,
+                        ferdigstill = false,
+                        data = emptyMap<String, Any>(),
+                        narmesteLederFnr = "12345678910",
+                        arbeidstakerFnr = ARBEIDSTAKER_FNR_1,
+                        orgnummer = "999999999",
+                    )
+                val notifikasjon =
+                    ArbeidsgiverNotifikasjonNarmestelederInput(
+                        uuid = UUID.randomUUID(),
+                        virksomhetsnummer = "999999999",
+                        narmesteLederFnr = "12345678910",
+                        ansattFnr = ARBEIDSTAKER_FNR_1,
+                        merkelapp = "merkelapp",
+                        messageText = "tekst",
+                        epostTittel = "tittel",
+                        epostHtmlBody = "body",
+                        hardDeleteDate = LocalDateTime.now().plusDays(1),
+                        grupperingsid = UUID.randomUUID().toString(),
+                    )
+                coEvery { arbeidsgiverNotifikasjonService.sendNotifikasjon(notifikasjon) } throws
+                    IllegalStateException("ArbeidsgiverNotifikasjonProdusent returnerte null ID ved utsending til nærmeste leder")
+
+                val result =
+                    senderFacade.sendTilArbeidsgiverNotifikasjon(
+                        varselHendelse = varselHendelse,
+                        notifikasjon = notifikasjon,
+                        hendelseJson = hendelseJson,
+                    )
+
+                result shouldBe false
+                embeddedDatabase.fetchUtsendtVarselByFnr(ARBEIDSTAKER_FNR_1).size shouldBe 0
+                val feiledeVarsler = embeddedDatabase.fetchUtsendtVarselFeiletByFnr(ARBEIDSTAKER_FNR_1)
+                feiledeVarsler.size shouldBe 1
+                feiledeVarsler.single().hendelseJson shouldBe hendelseJson
+                feiledeVarsler.single().uuidEksternReferanse shouldBe notifikasjon.uuid.toString()
             }
         }
     })

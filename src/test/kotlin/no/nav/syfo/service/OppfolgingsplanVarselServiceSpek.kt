@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -17,10 +18,13 @@ import no.nav.syfo.consumer.pdl.HentPerson
 import no.nav.syfo.consumer.pdl.HentPersonData
 import no.nav.syfo.consumer.pdl.Navn
 import no.nav.syfo.consumer.pdl.PdlClient
+import no.nav.syfo.db.domain.PUtsendtVarselFeilet
+import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
+import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
 import no.nav.syfo.testutil.EmbeddedDatabase
 import no.nav.syfo.testutil.mocks.FNR_1
@@ -28,7 +32,9 @@ import no.nav.syfo.testutil.mocks.FNR_2
 import no.nav.syfo.testutil.mocks.ORGNUMMER
 import org.amshove.kluent.shouldBeEqualTo
 import java.net.URI
+import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.syfo.kafka.consumers.varselbus.domain.DineSykmeldteHendelseType
 
 class OppfolgingsplanVarselServiceSpek :
     DescribeSpec({
@@ -142,7 +148,7 @@ class OppfolgingsplanVarselServiceSpek :
                             ),
                     )
                 coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns UUID.randomUUID().toString()
-                coEvery { arbeidsgiverNotifikasjonService.sendNotifikasjon(any<ArbeidsgiverNotifikasjonNarmestelederInput>()) } returns Unit
+                coEvery { arbeidsgiverNotifikasjonService.sendNotifikasjon(any<ArbeidsgiverNotifikasjonNarmestelederInput>()) } returns true
 
                 val varselHendelse =
                     NarmesteLederHendelse(
@@ -172,5 +178,203 @@ class OppfolgingsplanVarselServiceSpek :
                 notifikasjonInputSlot.captured.link shouldBeEqualTo expectedUrl
                 storedSak?.lenke shouldBeEqualTo expectedUrl
             }
+
+            it("Oppfolgingsplan varselbestilling should map payload texts to Dine Sykmeldte and arbeidsgivernotifikasjon") {
+                val dineSykmeldteVarselSlot = slot<DineSykmeldteVarsel>()
+                val notifikasjonInputSlot = slot<ArbeidsgiverNotifikasjonNarmestelederInput>()
+                justRun { dineSykmeldteHendelseKafkaProducer.sendVarsel(capture(dineSykmeldteVarselSlot)) }
+                coEvery { arbeidsgiverNotifikasjonService.sendNotifikasjon(capture(notifikasjonInputSlot)) } returns true
+
+                oppfolgingsplanVarselService.sendVarselbestillingTilNarmesteLeder(
+                    oppfolgingsplanVarselbestillingHendelse(),
+                )
+                dineSykmeldteVarselSlot.captured.tekst shouldBeEqualTo "Dine Sykmeldte-tekst"
+                notifikasjonInputSlot.captured.messageText shouldBeEqualTo "Dine Sykmeldte-tekst"
+                notifikasjonInputSlot.captured.messageText shouldBeEqualTo "Dine Sykmeldte-tekst"
+                notifikasjonInputSlot.captured.epostTittel shouldBeEqualTo "E-posttittel"
+                notifikasjonInputSlot.captured.epostHtmlBody shouldBeEqualTo "<p>E-postbody</p>"
+                notifikasjonInputSlot.captured.meldingstype shouldBeEqualTo Meldingstype.BESKJED
+            }
+
+            it("Oppfolgingsplan varselbestilling should reject unsupported varselType") {
+                val exception =
+                    shouldThrow<IllegalArgumentException> {
+                        oppfolgingsplanVarselService.sendVarselbestillingTilNarmesteLeder(
+                            oppfolgingsplanVarselbestillingHendelse(arbeidsgiverMeldingType = "KORT_BESKJED"),
+                        )
+                    }
+
+                exception.message shouldBeEqualTo "Oppfølgingsplanvarsel har ugyldig data.varselType=KORT_BESKJED"
+            }
+
+            it("Oppfolgingsplan varselbestilling should reject missing notifikasjonInnhold") {
+                val exception =
+                    shouldThrow<IllegalArgumentException> {
+                        oppfolgingsplanVarselService.sendVarselbestillingTilNarmesteLeder(
+                            oppfolgingsplanVarselbestillingHendelse(
+                                rawData = """{"varselType":"BESKJED"}""",
+                            ),
+                        )
+                    }
+
+                exception.message shouldBeEqualTo "Oppfølgingsplanvarsel mangler feltet: data.notifikasjonInnhold"
+            }
+
+            it("Oppfolgingsplan varselbestilling should reject missing explicit varselTekst") {
+                val exception =
+                    shouldThrow<IllegalArgumentException> {
+                        oppfolgingsplanVarselService.sendVarselbestillingTilNarmesteLeder(
+                            oppfolgingsplanVarselbestillingHendelse(
+                                rawData =
+                                    """
+                                    {
+                                      "arbeidsgiverMeldingType": "BESKJED",
+                                      "notifikasjonInnhold": {
+                                        "epostTittel": "E-posttittel",
+                                        "epostBody": "<p>E-postbody</p>"
+                                      }
+                                    }
+                                    """.trimIndent(),
+                            ),
+                        )
+                    }
+
+                exception.message shouldBeEqualTo
+                    "Oppfølgingsplanvarsel mangler feltet: data.notifikasjonInnhold.varselTekst"
+            }
+
+            it("Oppfolgingsplan varselbestilling retry should reuse uuidEksternReferanse as notifikasjonsuuid") {
+                val notifikasjonInputSlot = slot<ArbeidsgiverNotifikasjonNarmestelederInput>()
+                val eksternReferanse = UUID.randomUUID()
+                coEvery { arbeidsgiverNotifikasjonService.sendNotifikasjon(capture(notifikasjonInputSlot)) } returns true
+
+                val result =
+                    oppfolgingsplanVarselService.resendVarselbestillingTilArbeidsgiverNotifikasjon(
+                        PUtsendtVarselFeilet(
+                            uuid = UUID.randomUUID().toString(),
+                            uuidEksternReferanse = eksternReferanse.toString(),
+                            arbeidstakerFnr = FNR_1,
+                            narmesteLederFnr = FNR_2,
+                            orgnummer = ORGNUMMER,
+                            hendelsetypeNavn = HendelseType.NL_OPPFOLGINGSPLAN_VARSELBESTILLING.name,
+                            arbeidsgivernotifikasjonMerkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                            brukernotifikasjonerMeldingType = null,
+                            journalpostId = null,
+                            kanal = "ARBEIDSGIVERNOTIFIKASJON",
+                            feilmelding = "noe galt",
+                            utsendtForsokTidspunkt = LocalDateTime.now(),
+                            hendelseJson = createObjectMapper().writeValueAsString(
+                                oppfolgingsplanVarselbestillingHendelse()
+                            ),
+                        ),
+                    )
+
+                result shouldBeEqualTo ArbeidsgiverVarselResendResult.RESENT
+                notifikasjonInputSlot.captured.uuid shouldBeEqualTo eksternReferanse
+            }
+
+            it("Oppfolgingsplan varselbestilling retry should stay retryable when narmeste leder info mangler") {
+                coEvery {
+                    arbeidsgiverNotifikasjonService.sendNotifikasjon(any<ArbeidsgiverNotifikasjonNarmestelederInput>())
+                } returns false
+
+                val result =
+                    oppfolgingsplanVarselService.resendVarselbestillingTilArbeidsgiverNotifikasjon(
+                        PUtsendtVarselFeilet(
+                            uuid = UUID.randomUUID().toString(),
+                            uuidEksternReferanse = UUID.randomUUID().toString(),
+                            arbeidstakerFnr = FNR_1,
+                            narmesteLederFnr = FNR_2,
+                            orgnummer = ORGNUMMER,
+                            hendelsetypeNavn = HendelseType.NL_OPPFOLGINGSPLAN_VARSELBESTILLING.name,
+                            arbeidsgivernotifikasjonMerkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                            brukernotifikasjonerMeldingType = null,
+                            journalpostId = null,
+                            kanal = "ARBEIDSGIVERNOTIFIKASJON",
+                            feilmelding = "noe galt",
+                            utsendtForsokTidspunkt = LocalDateTime.now(),
+                            hendelseJson = createObjectMapper().writeValueAsString(
+                                oppfolgingsplanVarselbestillingHendelse()
+                            ),
+                        ),
+                    )
+
+                result shouldBeEqualTo ArbeidsgiverVarselResendResult.RETRYABLE_FAILURE
+            }
+
+            it("Oppfolgingsplan varselbestilling retry should ignore extra smsTekst in stored hendelseJson") {
+                val notifikasjonInputSlot = slot<ArbeidsgiverNotifikasjonNarmestelederInput>()
+                coEvery { arbeidsgiverNotifikasjonService.sendNotifikasjon(capture(notifikasjonInputSlot)) } returns true
+
+                val result =
+                    oppfolgingsplanVarselService.resendVarselbestillingTilArbeidsgiverNotifikasjon(
+                        PUtsendtVarselFeilet(
+                            uuid = UUID.randomUUID().toString(),
+                            uuidEksternReferanse = UUID.randomUUID().toString(),
+                            arbeidstakerFnr = FNR_1,
+                            narmesteLederFnr = FNR_2,
+                            orgnummer = ORGNUMMER,
+                            hendelsetypeNavn = HendelseType.NL_OPPFOLGINGSPLAN_VARSELBESTILLING.name,
+                            arbeidsgivernotifikasjonMerkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                            brukernotifikasjonerMeldingType = null,
+                            journalpostId = null,
+                            kanal = "ARBEIDSGIVERNOTIFIKASJON",
+                            feilmelding = "noe galt",
+                            utsendtForsokTidspunkt = LocalDateTime.now(),
+                            hendelseJson =
+                                """
+                                {
+                                  "@type": "NarmesteLederHendelse",
+                                  "type": "NL_OPPFOLGINGSPLAN_VARSELBESTILLING",
+                                  "ferdigstill": false,
+                                  "narmesteLederFnr": "$FNR_2",
+                                  "arbeidstakerFnr": "$FNR_1",
+                                  "orgnummer": "$ORGNUMMER",
+                                  "data": {
+                                    "arbeidsgiverMeldingType": "BESKJED",
+                                    "dineSykmeldteHendelseType": "OPPFOLGINGSPLAN_OPPRETTET",
+                                    "notifikasjonInnhold": {
+                                      "epostTittel": "E-posttittel",
+                                      "epostBody": "<p>E-postbody</p>",
+                                      "smsTekst": "Gammel sms-tekst",
+                                      "varselTekst": "Dine Sykmeldte-tekst"
+                                    }
+                                  }
+                                }
+                                """.trimIndent(),
+                        ),
+                    )
+
+                result shouldBeEqualTo ArbeidsgiverVarselResendResult.RESENT
+                notifikasjonInputSlot.captured.messageText shouldBeEqualTo "Dine Sykmeldte-tekst"
+            }
         }
     })
+
+private fun oppfolgingsplanVarselbestillingHendelse(
+    arbeidsgiverMeldingType: String? = Meldingstype.BESKJED.name,
+    dineSykmeldteHendelseType: String? = DineSykmeldteHendelseType.OPPFOLGINGSPLAN_PAAMINNELSE.name,
+    rawData: String? = null,
+) = NarmesteLederHendelse(
+    type = HendelseType.NL_OPPFOLGINGSPLAN_VARSELBESTILLING,
+    ferdigstill = false,
+    data =
+        createObjectMapper().readTree(
+            rawData ?: (
+                """
+                {
+                 "arbeidsgiverMeldingType": ${arbeidsgiverMeldingType?.let { "\"$it\"" } ?: "null"},
+                 "dineSykmeldteHendelseType": ${dineSykmeldteHendelseType?.let { "\"$it\"" } ?: "null"},
+                 "notifikasjonInnhold": {
+                   "epostTittel": "E-posttittel",
+                   "epostBody": "<p>E-postbody</p>",
+                   "varselTekst": "Dine Sykmeldte-tekst"
+                 }
+                }
+                """.trimIndent()
+                ),
+        ),
+    narmesteLederFnr = FNR_2,
+    arbeidstakerFnr = FNR_1,
+    orgnummer = ORGNUMMER,
+)

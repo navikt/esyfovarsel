@@ -43,7 +43,7 @@ fun DatabaseInterface.fetchUtsendtArbeidsgivernotifikasjonVarselFeilet(): List<P
         AND feilet.is_resendt = FALSE
         AND feilet.resend_exhausted IS NOT TRUE
         AND feilet.hendelsetype_navn in 
-        ('NL_DIALOGMOTE_SVAR_MOTEBEHOV', 'AG_VARSEL_ALTINN_RESSURS')
+        ('NL_DIALOGMOTE_SVAR_MOTEBEHOV', 'AG_VARSEL_ALTINN_RESSURS', 'NL_OPPFOLGINGSPLAN_VARSELBESTILLING')
         AND NOT EXISTS (
             SELECT 1
             FROM UTSENDT_VARSEL UV
