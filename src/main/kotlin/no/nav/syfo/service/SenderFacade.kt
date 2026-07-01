@@ -163,15 +163,20 @@ class SenderFacade(
     suspend fun sendTilArbeidsgiverNotifikasjon(
         varselHendelse: NarmesteLederHendelse,
         notifikasjon: ArbeidsgiverNotifikasjonNarmestelederInput,
-    ) {
+        hendelseJson: String? = null,
+    ): Boolean {
         try {
-            arbeidsgiverNotifikasjonService.sendNotifikasjon(notifikasjon)
+            val isSent = arbeidsgiverNotifikasjonService.sendNotifikasjon(notifikasjon)
+            if (!isSent) {
+                return false
+            }
             lagreUtsendtNarmesteLederVarsel(
                 ARBEIDSGIVERNOTIFIKASJON,
                 varselHendelse,
                 notifikasjon.uuid.toString(),
                 notifikasjon.merkelapp,
             )
+            return true
         } catch (e: Exception) {
             log.error("Error while sending varsel to ARBEIDSGIVERNOTIFIKASJON: ${e.message}")
             lagreIkkeUtsendtNarmesteLederVarsel(
@@ -180,23 +185,30 @@ class SenderFacade(
                 eksternReferanse = notifikasjon.uuid.toString(),
                 feilmelding = e.message,
                 merkelapp = notifikasjon.merkelapp,
+                hendelseJson = hendelseJson,
             )
+            return false
         }
     }
 
     suspend fun sendTilArbeidsgiverNotifikasjon(
         varselFeilet: PUtsendtVarselFeilet,
         notifikasjon: ArbeidsgiverNotifikasjonNarmestelederInput,
-    ) {
+    ): ArbeidsgiverVarselResendResult {
         try {
-            arbeidsgiverNotifikasjonService.sendNotifikasjon(notifikasjon)
+            val isSent = arbeidsgiverNotifikasjonService.sendNotifikasjon(notifikasjon)
+            if (!isSent) {
+                return ArbeidsgiverVarselResendResult.RETRYABLE_FAILURE
+            }
             lagreUtsendtNarmesteLederVarsel(
                 varselFeilet,
                 notifikasjon.uuid.toString(),
                 notifikasjon.merkelapp,
             )
+            return ArbeidsgiverVarselResendResult.RESENT
         } catch (e: Exception) {
             log.error("Error while resending varsel to ARBEIDSGIVERNOTIFIKASJON: ${e.message}")
+            return ArbeidsgiverVarselResendResult.RETRYABLE_FAILURE
         }
     }
 
@@ -606,6 +618,7 @@ class SenderFacade(
         eksternReferanse: String,
         feilmelding: String?,
         merkelapp: String?,
+        hendelseJson: String? = null,
     ): UUID {
         val uuid = UUID.randomUUID()
         database.storeUtsendtVarselFeilet(
@@ -623,6 +636,7 @@ class SenderFacade(
                 feilmelding = feilmelding,
                 utsendtForsokTidspunkt = LocalDateTime.now(),
                 isForcedLetter = false,
+                hendelseJson = hendelseJson,
             ),
         )
         return uuid

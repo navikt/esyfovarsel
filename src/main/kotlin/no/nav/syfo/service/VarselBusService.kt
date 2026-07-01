@@ -12,6 +12,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_S
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_SVAR_MOTEBEHOV
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_OPPFOLGINGSPLAN_FORESPORSEL
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_OPPFOLGINGSPLAN_VARSELBESTILLING
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_AKTIVITETSPLIKT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_ARBEIDSUFORHET_FORHANDSVARSEL
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_AVLYST
@@ -72,6 +73,11 @@ class VarselBusService(
 
                 NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING ->
                     oppfolgingsplanVarselService.sendVarselTilNarmesteLeder(
+                        varselHendelse.toNarmestelederHendelse(),
+                    )
+
+                NL_OPPFOLGINGSPLAN_VARSELBESTILLING ->
+                    oppfolgingsplanVarselService.sendVarselbestillingTilNarmesteLeder(
                         varselHendelse.toNarmestelederHendelse(),
                     )
 

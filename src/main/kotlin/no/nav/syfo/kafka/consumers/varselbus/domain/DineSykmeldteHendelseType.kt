@@ -7,10 +7,12 @@ enum class DineSykmeldteHendelseType {
     DIALOGMOTE_AVLYSNING,
     DIALOGMOTE_ENDRING,
     DIALOGMOTE_REFERAT,
+    OPPFOLGINGSPLAN_PAAMINNELSE
 }
 
 fun HendelseType.toDineSykmeldteHendelseType(): DineSykmeldteHendelseType =
     when (this) {
+        HendelseType.NL_OPPFOLGINGSPLAN_VARSELBESTILLING -> DineSykmeldteHendelseType.OPPFOLGINGSPLAN_PAAMINNELSE
         HendelseType.NL_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING -> DineSykmeldteHendelseType.OPPFOLGINGSPLAN_TIL_GODKJENNING
         HendelseType.NL_DIALOGMOTE_SVAR_MOTEBEHOV -> DineSykmeldteHendelseType.DIALOGMOTE_SVAR_BEHOV
         HendelseType.NL_DIALOGMOTE_INNKALT -> DineSykmeldteHendelseType.DIALOGMOTE_INNKALLING

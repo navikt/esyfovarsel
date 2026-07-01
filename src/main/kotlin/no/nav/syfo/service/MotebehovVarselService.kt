@@ -76,17 +76,17 @@ class MotebehovVarselService(
         senderFacade.sendTilArbeidsgiverNotifikasjon(
             varselHendelse,
             ArbeidsgiverNotifikasjonNarmestelederInput(
-                UUID.randomUUID(),
-                varselHendelse.orgnummer,
-                varselHendelse.narmesteLederFnr,
-                varselHendelse.arbeidstakerFnr,
-                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
-                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
-                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
-                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
-                LocalDateTime.now().plusWeeks(weeksBeforeDelete),
-                Meldingstype.OPPGAVE,
-                UUID.randomUUID().toString(),
+                uuid = UUID.randomUUID(),
+                virksomhetsnummer = varselHendelse.orgnummer,
+                narmesteLederFnr = varselHendelse.narmesteLederFnr,
+                ansattFnr = varselHendelse.arbeidstakerFnr,
+                merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                messageText = ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
+                epostTittel = ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
+                epostHtmlBody = ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
+                hardDeleteDate = LocalDateTime.now().plusWeeks(weeksBeforeDelete),
+                meldingstype = Meldingstype.OPPGAVE,
+                grupperingsid = UUID.randomUUID().toString(),
             ),
         )
     }
@@ -148,21 +148,20 @@ class MotebehovVarselService(
         }
         val notifikasjon =
             ArbeidsgiverNotifikasjonNarmestelederInput(
-                UUID.randomUUID(),
-                utsendtvarselFeilet.orgnummer,
-                utsendtvarselFeilet.narmesteLederFnr,
-                utsendtvarselFeilet.arbeidstakerFnr,
-                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
-                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
-                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
-                ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
-                LocalDateTime.now().plusWeeks(weeksBeforeDelete),
-                Meldingstype.OPPGAVE,
-                UUID.randomUUID().toString(),
+                uuid = UUID.randomUUID(),
+                virksomhetsnummer = utsendtvarselFeilet.orgnummer,
+                narmesteLederFnr = utsendtvarselFeilet.narmesteLederFnr,
+                ansattFnr = utsendtvarselFeilet.arbeidstakerFnr,
+                merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                messageText = ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_MESSAGE_TEXT,
+                epostTittel = ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_TITLE,
+                epostHtmlBody = ARBEIDSGIVERNOTIFIKASJON_SVAR_MOTEBEHOV_EMAIL_BODY,
+                hardDeleteDate = LocalDateTime.now().plusWeeks(weeksBeforeDelete),
+                meldingstype = Meldingstype.OPPGAVE,
+                grupperingsid = UUID.randomUUID().toString(),
             )
         try {
-            senderFacade.sendTilArbeidsgiverNotifikasjon(utsendtvarselFeilet, notifikasjon)
-            return true
+            return senderFacade.sendTilArbeidsgiverNotifikasjon(utsendtvarselFeilet, notifikasjon) == ArbeidsgiverVarselResendResult.RESENT
         } catch (e: Exception) {
             log.error(
                 "Could not resend arbeidsgiver notifikasjon for feiletVarsel: ${utsendtvarselFeilet.uuid}",

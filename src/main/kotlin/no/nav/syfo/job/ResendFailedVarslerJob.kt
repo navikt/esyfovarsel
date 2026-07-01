@@ -20,6 +20,7 @@ import no.nav.syfo.service.DialogmoteInnkallingSykmeldtVarselService
 import no.nav.syfo.service.KartleggingssporsmalVarselService
 import no.nav.syfo.service.MerVeiledningVarselService
 import no.nav.syfo.service.MotebehovVarselService
+import no.nav.syfo.service.OppfolgingsplanVarselService
 import no.nav.syfo.service.SenderFacade
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -32,6 +33,7 @@ class ResendFailedVarslerJob(
     private val kartleggingVarselService: KartleggingssporsmalVarselService,
     private val senderFacade: SenderFacade,
     private val arbeidsgiverVarselService: ArbeidsgiverVarselService,
+    private val oppfolgingsplanVarselService: OppfolgingsplanVarselService,
 ) {
     private val log = LoggerFactory.getLogger(ResendFailedVarslerJob::class.java)
 
@@ -132,6 +134,7 @@ class ResendFailedVarslerJob(
                     when (failedVarsel.hendelsetypeNavn) {
                         "AG_VARSEL_ALTINN_RESSURS" -> tryResendArbeidsgiverAltinnRessursVarsel(failedVarsel)
                         "NL_DIALOGMOTE_SVAR_MOTEBEHOV" -> tryResendArbeidsgivernotifikasjonMoteBehov(failedVarsel)
+                        "NL_OPPFOLGINGSPLAN_VARSELBESTILLING" -> tryResendOppfolgingsplanVarselbestilling(failedVarsel)
                         else -> {
                             log.warn("Not resending varsel for hendelsetypeNavn: ${failedVarsel.hendelsetypeNavn}")
                             return@map 0
@@ -271,6 +274,21 @@ class ResendFailedVarslerJob(
         }
         return 0
     }
+
+    private suspend fun tryResendOppfolgingsplanVarselbestilling(failedVarsel: PUtsendtVarselFeilet): Int =
+        when (oppfolgingsplanVarselService.resendVarselbestillingTilArbeidsgiverNotifikasjon(failedVarsel)) {
+            ArbeidsgiverVarselResendResult.RESENT -> {
+                db.updateUtsendtVarselFeiletToResendt(failedVarsel.uuid, nullstillHendelseJson = true)
+                1
+            }
+
+            ArbeidsgiverVarselResendResult.PERMANENT_FAILURE -> {
+                db.updateUtsendtVarselFeiletToResendExhausted(failedVarsel.uuid)
+                0
+            }
+
+            ArbeidsgiverVarselResendResult.RETRYABLE_FAILURE -> 0
+        }
 }
 
 private fun HendelseType.toDistribusjonsType() =
