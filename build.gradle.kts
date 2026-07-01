@@ -34,7 +34,7 @@ plugins {
     id("java")
     id("org.jetbrains.kotlin.plugin.allopen") version "2.3.21"
     id("com.gradleup.shadow") version "9.4.2"
-    id("com.apollographql.apollo") version "4.4.3"
+    id("com.apollographql.apollo") version "5.0.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
 
