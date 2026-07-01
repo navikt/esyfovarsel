@@ -1,8 +1,6 @@
 package no.nav.syfo.service
 
 import com.apollo.graphql.NySakMutation
-import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.IArbeidsgiverNotifikasjonProdusent
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverDeleteNotifikasjon
