@@ -196,7 +196,11 @@ class SenderFacade(
                 notifikasjon.merkelapp,
             )
         } catch (e: Exception) {
-            log.error("Error while resending varsel to ARBEIDSGIVERNOTIFIKASJON: ${e.message}")
+            log.error(
+                "Error while resending varsel with id {} to ARBEIDSGIVERNOTIFIKASJON: {}",
+                varselFeilet.uuid,
+                e.message,
+            )
         }
     }
 
