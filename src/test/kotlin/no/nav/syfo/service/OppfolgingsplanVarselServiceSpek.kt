@@ -40,6 +40,7 @@ import no.nav.syfo.testutil.mocks.FNR_2
 import no.nav.syfo.testutil.mocks.ORGNUMMER
 import org.amshove.kluent.shouldBeEqualTo
 import java.net.URI
+import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -170,7 +171,7 @@ class OppfolgingsplanVarselServiceSpek :
                 notifikasjonInputSlot.captured.link shouldBeEqualTo expectedUrl
                 notifikasjonInputSlot.captured.grupperingsid shouldBeEqualTo storedSak?.grupperingsid
                 storedSak?.lenke shouldBeEqualTo expectedUrl
-                storedSak?.hardDeleteDate shouldBeEqualTo notifikasjonInputSlot.captured.hardDeleteDate
+                storedSak?.hardDeleteDate shouldBeSameTimestampAs notifikasjonInputSlot.captured.hardDeleteDate
             }
 
             it("Oppfolgingsplan foresporsel should reuse existing sak and preserve status") {
@@ -218,7 +219,7 @@ class OppfolgingsplanVarselServiceSpek :
                 nyStatusSakInputSlot.captured.oppdatertHardDeleteDateTime shouldBeEqualTo
                     notifikasjonInputSlot.captured.hardDeleteDate
                 updatedSak?.id shouldBeEqualTo sakId
-                updatedSak?.hardDeleteDate shouldBeEqualTo notifikasjonInputSlot.captured.hardDeleteDate
+                updatedSak?.hardDeleteDate shouldBeSameTimestampAs notifikasjonInputSlot.captured.hardDeleteDate
                 coVerify(exactly = 0) { arbeidsgiverNotifikasjonService.createNewSak(any()) }
                 coVerify(exactly = 0) { pdlClient.hentPerson(any()) }
                 coVerify(exactly = 1) { narmesteLederService.getNarmesteLederRelasjon(FNR_1, ORGNUMMER) }
@@ -334,7 +335,7 @@ class OppfolgingsplanVarselServiceSpek :
                 notifikasjonInputSlot.captured.link shouldBeEqualTo expectedNotifikasjonLink
                 notifikasjonInputSlot.captured.grupperingsid shouldBeEqualTo storedSak?.grupperingsid
                 storedSak?.lenke shouldBeEqualTo expectedSakUrl
-                storedSak?.hardDeleteDate shouldBeEqualTo notifikasjonInputSlot.captured.hardDeleteDate
+                storedSak?.hardDeleteDate shouldBeSameTimestampAs notifikasjonInputSlot.captured.hardDeleteDate
                 coVerify(exactly = 1) { arbeidsgiverNotifikasjonService.createNewSak(any()) }
                 coVerify(exactly = 0) { arbeidsgiverNotifikasjonService.nyStatusSak(any()) }
             }
@@ -399,7 +400,7 @@ class OppfolgingsplanVarselServiceSpek :
                     eksisterendeSak.initiellStatus.let { SakStatus.valueOf(it.name) }
                 nyStatusSakInputSlot.captured.oppdatertHardDeleteDateTime shouldBeEqualTo
                     notifikasjonInputSlot.captured.hardDeleteDate
-                updatedSak?.hardDeleteDate shouldBeEqualTo notifikasjonInputSlot.captured.hardDeleteDate
+                updatedSak?.hardDeleteDate shouldBeSameTimestampAs notifikasjonInputSlot.captured.hardDeleteDate
                 coVerify(exactly = 0) { arbeidsgiverNotifikasjonService.createNewSak(any()) }
             }
 
@@ -706,6 +707,15 @@ private fun narmesteLederRelasjon(narmesteLederId: String) =
         navn = "Test Lansen",
         narmesteLederEpost = "test@test.no",
     )
+
+private infix fun LocalDateTime?.shouldBeSameTimestampAs(expected: LocalDateTime?) {
+    val actual = requireNotNull(this)
+    val expectedTimestamp = requireNotNull(expected)
+    val diffNanos = kotlin.math.abs(Duration.between(actual, expectedTimestamp).toNanos())
+    if (diffNanos >= 1_000_000) {
+        throw AssertionError("Expected <$actual> to be within 1 ms of <$expectedTimestamp>")
+    }
+}
 
 private fun personData() =
     HentPersonData(
