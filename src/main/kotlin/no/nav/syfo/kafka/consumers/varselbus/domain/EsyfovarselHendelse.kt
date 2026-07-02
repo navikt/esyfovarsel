@@ -63,6 +63,7 @@ data class VarselData(
 data class OppfolgingsplanVarselbestillingData(
     val arbeidsgiverMeldingType: String?,
     val dineSykmeldteHendelseType: String?,
+    val ressursUrl: String?,
     val notifikasjonInnhold: OppfolgingsplanNotifikasjonInnhold? = null,
 )
 

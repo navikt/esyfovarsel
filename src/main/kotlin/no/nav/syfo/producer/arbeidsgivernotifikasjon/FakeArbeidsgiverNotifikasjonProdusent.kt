@@ -22,7 +22,7 @@ class FakeArbeidsgiverNotifikasjonProdusent : IArbeidsgiverNotifikasjonProdusent
     override suspend fun createNewBeskjedForArbeidsgiver(arbeidsgiverNotifikasjonInput: ArbeidsgiverNotifikasjon): String =
         UUID.randomUUID().toString().also { id ->
             log.info(
-                "Lokal arbeidsgivernotifikasjon beskjed opprettet: merkelapp=${arbeidsgiverNotifikasjonInput.merkelapp}, virksomhetsnummer=${arbeidsgiverNotifikasjonInput.virksomhetsnummer}, id=$id",
+                "Lokal arbeidsgivernotifikasjon beskjed opprettet: merkelapp=${arbeidsgiverNotifikasjonInput.merkelapp}, virksomhetsnummer=${arbeidsgiverNotifikasjonInput.virksomhetsnummer}, id=$id, messageText=${arbeidsgiverNotifikasjonInput.messageText}, epostTitle=${arbeidsgiverNotifikasjonInput.emailTitle}, epostBody=${arbeidsgiverNotifikasjonInput.emailBody}, url=${arbeidsgiverNotifikasjonInput.url}",
             )
         }
 

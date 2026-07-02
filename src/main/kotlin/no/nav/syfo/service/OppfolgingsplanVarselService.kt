@@ -116,7 +116,10 @@ class OppfolgingsplanVarselService(
                         hardDeleteDate = hardDeleteDate,
                     )
                 } catch (exception: OppfolgingsplanVarselRetryableException) {
-                    log.warn("Kunne ikke klargjøre arbeidsgiversak for oppfølgingsplanvarselbestilling: {}", exception.message)
+                    log.warn(
+                        "Kunne ikke klargjøre arbeidsgiversak for oppfølgingsplanvarselbestilling: {}",
+                        exception.message
+                    )
                     senderFacade.lagreIkkeUtsendtArbeidsgiverNotifikasjonForNarmesteLeder(
                         varselHendelse = varselHendelse,
                         eksternReferanse = eksternReferanseUuid.toString(),
@@ -126,6 +129,13 @@ class OppfolgingsplanVarselService(
                     )
                     return
                 }
+            val link =
+                if (varselbestilling.ressursUrl != null && arbeidsgiverSak.narmesteLederRelasjon.narmesteLederId != null) {
+                    varselbestilling.ressursUrl.replace(
+                        "NARMESTE_LEDER_ID",
+                        arbeidsgiverSak.narmesteLederRelasjon.narmesteLederId
+                    )
+                } else arbeidsgiverSak.link
             senderFacade.sendTilArbeidsgiverNotifikasjonMedRetrylagring(
                 varselHendelse = varselHendelse,
                 notifikasjon =
@@ -141,7 +151,7 @@ class OppfolgingsplanVarselService(
                         hardDeleteDate = hardDeleteDate,
                         meldingstype = meldingstype,
                         grupperingsid = arbeidsgiverSak.grupperingsid,
-                        link = arbeidsgiverSak.link,
+                        link = link,
                     ),
                 hendelseJson = hendelseJson,
             )
@@ -182,9 +192,19 @@ class OppfolgingsplanVarselService(
                     hardDeleteDate = hardDeleteDate,
                 )
             } catch (exception: OppfolgingsplanVarselRetryableException) {
-                log.warn("Kunne ikke klargjøre arbeidsgiversak for retry av oppfølgingsplanvarselbestilling: {}", exception.message)
+                log.warn(
+                    "Kunne ikke klargjøre arbeidsgiversak for retry av oppfølgingsplanvarselbestilling: {}",
+                    exception.message
+                )
                 return ArbeidsgiverVarselResendResult.RETRYABLE_FAILURE
             }
+        val link =
+            if (varselbestilling.ressursUrl != null && arbeidsgiverSak.narmesteLederRelasjon.narmesteLederId != null) {
+                varselbestilling.ressursUrl.replace(
+                    "NARMESTE_LEDER_ID",
+                    arbeidsgiverSak.narmesteLederRelasjon.narmesteLederId
+                )
+            } else arbeidsgiverSak.link
         return senderFacade.sendTilArbeidsgiverNotifikasjon(
             varselFeilet = varselFeilet,
             notifikasjon =
@@ -200,7 +220,7 @@ class OppfolgingsplanVarselService(
                     hardDeleteDate = hardDeleteDate,
                     meldingstype = meldingstype,
                     grupperingsid = arbeidsgiverSak.grupperingsid,
-                    link = arbeidsgiverSak.link,
+                    link = link,
                 ),
         )
     }
@@ -323,6 +343,7 @@ class OppfolgingsplanVarselService(
             return OppfolgingsplanArbeidsgiverSak(
                 grupperingsid = eksisterendeSak.grupperingsid,
                 link = eksisterendeSak.lenke ?: link,
+                narmesteLederRelasjon = resolvedNarmesteLederRelasjon
             )
         }
 
@@ -361,6 +382,7 @@ class OppfolgingsplanVarselService(
         return OppfolgingsplanArbeidsgiverSak(
             grupperingsid = sakInput.grupperingsid,
             link = sakInput.lenke,
+            narmesteLederRelasjon = resolvedNarmesteLederRelasjon
         )
     }
 
@@ -397,7 +419,8 @@ class OppfolgingsplanVarselService(
         }
     }
 
-    private fun getDineSykmeldteNarmesteLederLink(narmesteLederId: String): String = "$dinesykmeldteUrl/$narmesteLederId"
+    private fun getDineSykmeldteNarmesteLederLink(narmesteLederId: String): String =
+        "$dinesykmeldteUrl/$narmesteLederId"
 
     private fun NarmesteLederHendelse.requireOppfolgingsplanVarselbestillingData(): OppfolgingsplanVarselbestillingData {
         val payloadDataNode =
@@ -434,6 +457,7 @@ class OppfolgingsplanVarselService(
     private data class OppfolgingsplanArbeidsgiverSak(
         val grupperingsid: String,
         val link: String,
+        val narmesteLederRelasjon: NarmesteLederRelasjon
     )
 
     private class OppfolgingsplanVarselRetryableException(
