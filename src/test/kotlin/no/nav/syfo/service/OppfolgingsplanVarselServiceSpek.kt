@@ -302,9 +302,10 @@ class OppfolgingsplanVarselServiceSpek :
                 coVerify(exactly = 0) { pdlClient.hentPerson(any()) }
             }
 
-            it("Oppfolgingsplan varselbestilling should create new sak, set link and map payload texts") {
+            it("Oppfolgingsplan varselbestilling should substitute NARMESTE_LEDER_ID in ressursUrl for AG-notifikasjon") {
                 val narmesteLederId = "1234"
-                val expectedUrl = "$fakeDinesykmeldteUrl/$narmesteLederId"
+                val expectedSakUrl = "$fakeDinesykmeldteUrl/$narmesteLederId"
+                val expectedNotifikasjonLink = "https://example.com/oppfolgingsplan/$narmesteLederId/detaljer"
                 val dineSykmeldteVarselSlot = slot<DineSykmeldteVarsel>()
                 val notifikasjonInputSlot = slot<ArbeidsgiverNotifikasjonNarmestelederInput>()
                 justRun { dineSykmeldteHendelseKafkaProducer.sendVarsel(capture(dineSykmeldteVarselSlot)) }
@@ -313,7 +314,11 @@ class OppfolgingsplanVarselServiceSpek :
                 coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns UUID.randomUUID().toString()
                 coEvery { arbeidsgiverNotifikasjonService.sendNotifikasjon(capture(notifikasjonInputSlot)) } returns true
 
-                oppfolgingsplanVarselService.sendVarselbestillingTilNarmesteLeder(oppfolgingsplanVarselbestillingHendelse())
+                oppfolgingsplanVarselService.sendVarselbestillingTilNarmesteLeder(
+                    oppfolgingsplanVarselbestillingHendelse(
+                        ressursUrl = "https://example.com/oppfolgingsplan/NARMESTE_LEDER_ID/detaljer",
+                    ),
+                )
 
                 val storedSak =
                     senderFacade.getPaagaaendeSak(
@@ -326,9 +331,9 @@ class OppfolgingsplanVarselServiceSpek :
                 notifikasjonInputSlot.captured.epostTittel shouldBeEqualTo "E-posttittel"
                 notifikasjonInputSlot.captured.epostHtmlBody shouldBeEqualTo "<p>E-postbody</p>"
                 notifikasjonInputSlot.captured.meldingstype shouldBeEqualTo Meldingstype.BESKJED
-                notifikasjonInputSlot.captured.link shouldBeEqualTo expectedUrl
+                notifikasjonInputSlot.captured.link shouldBeEqualTo expectedNotifikasjonLink
                 notifikasjonInputSlot.captured.grupperingsid shouldBeEqualTo storedSak?.grupperingsid
-                storedSak?.lenke shouldBeEqualTo expectedUrl
+                storedSak?.lenke shouldBeEqualTo expectedSakUrl
                 storedSak?.hardDeleteDate shouldBeEqualTo notifikasjonInputSlot.captured.hardDeleteDate
                 coVerify(exactly = 1) { arbeidsgiverNotifikasjonService.createNewSak(any()) }
                 coVerify(exactly = 0) { arbeidsgiverNotifikasjonService.nyStatusSak(any()) }
@@ -652,13 +657,14 @@ class OppfolgingsplanVarselServiceSpek :
 private fun oppfolgingsplanVarselbestillingHendelse(
     arbeidsgiverMeldingType: String? = Meldingstype.BESKJED.name,
     dineSykmeldteHendelseType: String? = DineSykmeldteHendelseType.OPPFOLGINGSPLAN_PAAMINNELSE.name,
+    ressursUrl: String? = null,
     rawData: String? = null,
 ) = NarmesteLederHendelse(
     type = HendelseType.NL_OPPFOLGINGSPLAN_VARSELBESTILLING,
     ferdigstill = false,
     data =
         createObjectMapper().readTree(
-            rawData ?: defaultOppfolgingsplanVarselbestillingData(arbeidsgiverMeldingType, dineSykmeldteHendelseType),
+            rawData ?: defaultOppfolgingsplanVarselbestillingData(arbeidsgiverMeldingType, dineSykmeldteHendelseType, ressursUrl),
         ),
     narmesteLederFnr = FNR_2,
     arbeidstakerFnr = FNR_1,
@@ -678,10 +684,12 @@ private fun oppfolgingsplanForesporselHendelse() =
 private fun defaultOppfolgingsplanVarselbestillingData(
     arbeidsgiverMeldingType: String?,
     dineSykmeldteHendelseType: String?,
+    ressursUrl: String?,
 ) = """
     {
      "arbeidsgiverMeldingType": ${arbeidsgiverMeldingType?.let { "\"$it\"" } ?: "null"},
      "dineSykmeldteHendelseType": ${dineSykmeldteHendelseType?.let { "\"$it\"" } ?: "null"},
+     "ressursUrl": ${ressursUrl?.let { "\"$it\"" } ?: "null"},
      "notifikasjonInnhold": {
        "epostTittel": "E-posttittel",
        "epostBody": "<p>E-postbody</p>",
