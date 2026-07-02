@@ -247,6 +247,7 @@ class SenderFacade(
                 varselFeilet.uuid,
                 e.message,
             )
+            return ArbeidsgiverVarselResendResult.RETRYABLE_FAILURE
         }
     }
 
