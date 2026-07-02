@@ -1,0 +1,8 @@
+{
+  "@type": "NarmesteLederHendelse",
+  "type": "NL_OPPFOLGINGSPLAN_FORESPORSEL",
+  "ferdigstill": false,
+  "narmesteLederFnr": "01987654322",
+  "arbeidstakerFnr": "22345678910",
+  "orgnummer": "999999999"
+}

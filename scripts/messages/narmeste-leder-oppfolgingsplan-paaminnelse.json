@@ -1,0 +1,17 @@
+{
+  "@type": "NarmesteLederHendelse",
+  "type": "NL_OPPFOLGINGSPLAN_VARSELBESTILLING",
+  "ferdigstill": false,
+  "data": {
+    "arbeidsgiverMeldingType": "BESKJED",
+    "dineSykmeldteHendelseType": "OPPFOLGINGSPLAN_PAAMINNELSE",
+    "notifikasjonInnhold": {
+      "epostTittel": "Påminnelse om oppfølgingsplan til Forsiktig Dronning",
+      "epostBody": "Du har bedt oss minne deg på at du skal lage en oppfølgingsplan for Forsiktig Dronning. Du kan lage oppfølgingsplanen ved å logge inn på Dine sykmeldte på navn.no.",
+      "varselTekst": "Lag oppfølgingsplan"
+    }
+  },
+  "narmesteLederFnr": "01987654322",
+  "arbeidstakerFnr": "22345678910",
+  "orgnummer": "999999999"
+}
