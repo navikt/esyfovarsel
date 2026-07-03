@@ -669,7 +669,7 @@ private fun failedArbeidsgiverNotifikasjonForNarmesteLeder(
           "arbeidstakerFnr": "12121212121",
           "orgnummer": "999888777",
           "data": {
-            "varselType": "BESKJED",
+            "arbeidsgiverMeldingType": "BESKJED",
             "notifikasjonInnhold": {
               "epostTittel": "Tittel",
               "epostBody": "<p>Body</p>",

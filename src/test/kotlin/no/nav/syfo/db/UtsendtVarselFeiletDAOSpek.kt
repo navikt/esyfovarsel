@@ -98,7 +98,7 @@ class UtsendtVarselFeiletDAOSpek :
                 val varsel =
                     ikkeUtsendtVarsel(
                         fnr = fnr,
-                        hendelseJson = """{"type":"NL_OPPFOLGINGSPLAN_VARSELBESTILLING","data":{"varselType":"BESKJED"}}""",
+                        hendelseJson = """{"type":"NL_OPPFOLGINGSPLAN_VARSELBESTILLING","data":{"arbeidsgiverMeldingType":"BESKJED"}}""",
                     ).copy(
                         uuidEksternReferanse = UUID.randomUUID().toString(),
                         orgnummer = "999888777",

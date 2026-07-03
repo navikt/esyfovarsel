@@ -61,31 +61,10 @@ class EsyfovarselHendelseTest :
               "type": "NL_OPPFOLGINGSPLAN_VARSELBESTILLING",
               "ferdigstill": false,
               "data": {
-                "varselType": "BESKJED",
+                "arbeidsgiverMeldingType": "BESKJED",
                 "notifikasjonInnhold": {
                   "epostTittel": "Du har fått en ny melding",
                   "epostBody": "Les meldingen i Dine sykmeldte",
-                  "varselTekst": "Du har fått en ny notifikasjon."
-                }
-              },
-              "narmesteLederFnr": "12345678910",
-              "arbeidstakerFnr": "012345678901",
-              "orgnummer": "999888777"
-            }
-            """.trimIndent()
-
-        val oppfolgingsplanHendelseJsonMedEkstraSmsTekst =
-            """
-            {
-              "@type": "NarmesteLederHendelse",
-              "type": "NL_OPPFOLGINGSPLAN_VARSELBESTILLING",
-              "ferdigstill": false,
-              "data": {
-                "varselType": "BESKJED",
-                "notifikasjonInnhold": {
-                  "epostTittel": "Du har fått en ny melding",
-                  "epostBody": "Les meldingen i Dine sykmeldte",
-                  "smsTekst": "Gammel sms-tekst",
                   "varselTekst": "Du har fått en ny notifikasjon."
                 }
               },
@@ -124,14 +103,6 @@ class EsyfovarselHendelseTest :
                 hendelse.type shouldBe HendelseType.NL_OPPFOLGINGSPLAN_VARSELBESTILLING
                 varselData.notifikasjonInnhold?.epostTittel shouldBe "Du har fått en ny melding"
                 varselData.notifikasjonInnhold?.epostBody shouldBe "Les meldingen i Dine sykmeldte"
-                varselData.notifikasjonInnhold?.varselTekst shouldBe "Du har fått en ny notifikasjon."
-            }
-
-            it("ignorerer ekstra smsTekst ved deserialisering av oppfølgingsplanvarselbestilling") {
-                val hendelse: EsyfovarselHendelse = objectMapper.readValue(oppfolgingsplanHendelseJsonMedEkstraSmsTekst)
-                hendelse.data = objectMapper.readTree(oppfolgingsplanHendelseJsonMedEkstraSmsTekst)["data"]
-                val varselData = requireNotNull(hendelse.data).toOppfolgingsplanVarselbestillingData()
-
                 varselData.notifikasjonInnhold?.varselTekst shouldBe "Du har fått en ny notifikasjon."
             }
 

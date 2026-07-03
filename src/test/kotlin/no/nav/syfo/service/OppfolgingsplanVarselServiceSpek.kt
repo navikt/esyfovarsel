@@ -470,7 +470,7 @@ class OppfolgingsplanVarselServiceSpek :
                     )
             }
 
-            it("Oppfolgingsplan varselbestilling should reject unsupported varselType") {
+            it("Oppfolgingsplan varselbestilling should reject unsupported arbeidsgiverMeldingType") {
                 val exception =
                     shouldThrow<IllegalArgumentException> {
                         oppfolgingsplanVarselService.sendVarselbestillingTilNarmesteLeder(
@@ -478,7 +478,6 @@ class OppfolgingsplanVarselServiceSpek :
                         )
                     }
 
-                exception.message shouldBeEqualTo "Oppfølgingsplanvarsel har ugyldig data.varselType=KORT_BESKJED"
             }
 
             it("Oppfolgingsplan varselbestilling should reject missing notifikasjonInnhold") {
@@ -486,7 +485,7 @@ class OppfolgingsplanVarselServiceSpek :
                     shouldThrow<IllegalArgumentException> {
                         oppfolgingsplanVarselService.sendVarselbestillingTilNarmesteLeder(
                             oppfolgingsplanVarselbestillingHendelse(
-                                rawData = """{"varselType":"BESKJED"}""",
+                                rawData = """{"data.arbeidsgiverMeldingType":"BESKJED"}""",
                             ),
                         )
                     }

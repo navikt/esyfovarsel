@@ -465,8 +465,8 @@ class OppfolgingsplanVarselService(
         when (arbeidsgiverMeldingType) {
             Meldingstype.BESKJED.name -> Meldingstype.BESKJED
             Meldingstype.OPPGAVE.name -> Meldingstype.OPPGAVE
-            null -> throw IllegalArgumentException("Oppfølgingsplanvarsel mangler feltet: data.varselType")
-            else -> throw IllegalArgumentException("Oppfølgingsplanvarsel har ugyldig data.varselType=$arbeidsgiverMeldingType")
+            null -> throw IllegalArgumentException("Oppfølgingsplanvarsel mangler feltet: data.arbeidsgiverMeldingType")
+            else -> throw IllegalArgumentException("Oppfølgingsplanvarsel har ugyldig data.arbeidsgiverMeldingType=$arbeidsgiverMeldingType")
         }
 
     private data class OppfolgingsplanArbeidsgiverSak(
