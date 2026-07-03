@@ -116,17 +116,23 @@ const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_BODY =
 const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_MESSAGE_TEXT = "Vi trenger en oppfølgingsplan fra deg"
 const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_TITLE =
     "Nav ber om oppfølgingsplan fra arbeidsgiver"
-const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_BODY = """
-    Hei,
-    <br/><br/>
-    Nav ber om at du sender inn oppfølgingsplan for en av dine ansatte som er sykmeldt.<br/>
-    Logg inn på "Min side - arbeidsgiver". Klikk på varselet i "bjella" for å se hvem det gjelder.
-    <br/><br/>
-    Har du spørsmål, kan du kontakte oss på 55 55 33 36.
-    <br/><br/>
-    Vennlig hilsen Nav.
-    <br/><br/>
-    Du kan ikke svare på denne meldingen."""
+
+const val ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_BODY =
+    """Hei,
+<br /><br />
+Nav ber om at du sender inn oppfølgingsplan for en av dine ansatte som er sykmeldt.
+<br /><br />
+<p style="font-size: 18px; font-weight: 600; margin: 0 0 12px 0;">Slik gjør du det:</p>
+<ol>
+    <li>Logg inn på Min side - arbeidsgiver.</li>
+    <li>&#x1F514; Klikk på bjella. Der finner du meldingen om å lage oppfølgingsplan.</li>
+</ol>
+<hr>
+<p style="font-size: 14px; color: #6f6f6f;">Har du spørsmål? Ring oss på 55 55 33 36.
+<br /><br />
+Du kan ikke svare på denne meldingen.
+<br /><br />
+Vennlig hilsen Nav.</p>"""
 
 const val BRUKERNOTIFIKASJONER_SYKEFRAVAER_KARTLEGGINGSSPORSMAL_MESSAGE_TEXT =
     "Svar på tre spørsmål om ditt sykefravær"
