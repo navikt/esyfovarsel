@@ -1,6 +1,5 @@
 package no.nav.syfo.service
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -31,6 +30,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import no.nav.syfo.kafka.producers.dinesykmeldte.DineSykmeldteHendelseKafkaProducer
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
 import no.nav.syfo.kafka.producers.dittsykefravaer.DittSykefravaerMeldingKafkaProducer
+import no.nav.syfo.metrics.COUNT_OPPFOLGINGSPLAN_VARSEL_UGYLDIG
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakNarmesteLederInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyStatusSakInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
@@ -430,6 +430,7 @@ class OppfolgingsplanVarselServiceSpek :
                 utsendteVarsler.count { it.kanal == "DINE_SYKMELDTE" } shouldBeEqualTo 1
                 feiledeVarsler.size shouldBeEqualTo 1
                 feiledeVarsler.single().kanal shouldBeEqualTo "ARBEIDSGIVERNOTIFIKASJON"
+                feiledeVarsler.single().resendExhausted shouldBeEqualTo false
                 feiledeVarsler.single().hendelseJson shouldBeEqualTo
                     createObjectMapper().writeValueAsString(
                         oppfolgingsplanVarselbestillingHendelse(),
@@ -464,56 +465,105 @@ class OppfolgingsplanVarselServiceSpek :
                 utsendteVarsler.count { it.kanal == "DINE_SYKMELDTE" } shouldBeEqualTo 1
                 utsendteVarsler.count { it.kanal == "ARBEIDSGIVERNOTIFIKASJON" } shouldBeEqualTo 0
                 feiledeVarsler.size shouldBeEqualTo 1
+                feiledeVarsler.single().resendExhausted shouldBeEqualTo false
                 feiledeVarsler.single().hendelseJson shouldBeEqualTo
                     createObjectMapper().writeValueAsString(
                         oppfolgingsplanVarselbestillingHendelse(),
                     )
             }
 
-            it("Oppfolgingsplan varselbestilling should reject unsupported arbeidsgiverMeldingType") {
-                val exception =
-                    shouldThrow<IllegalArgumentException> {
-                        oppfolgingsplanVarselService.sendVarselbestillingTilNarmesteLeder(
-                            oppfolgingsplanVarselbestillingHendelse(arbeidsgiverMeldingType = "KORT_BESKJED"),
-                        )
-                    }
+            it(
+                "Oppfolgingsplan varselbestilling should store permanent failure for unsupported arbeidsgiverMeldingType without side effects",
+            ) {
+                val hendelse =
+                    oppfolgingsplanVarselbestillingHendelse(
+                        arbeidsgiverMeldingType = "KORT_BESKJED",
+                    )
+                val invalidPayloadCountBefore = COUNT_OPPFOLGINGSPLAN_VARSEL_UGYLDIG.count()
 
+                oppfolgingsplanVarselService.sendVarselbestillingTilNarmesteLeder(hendelse)
+
+                val utsendteVarsler = embeddedDatabase.fetchUtsendtVarselByFnr(FNR_1)
+                val feiledeVarsler = embeddedDatabase.fetchUtsendtVarselFeiletByFnr(FNR_1)
+
+                utsendteVarsler.size shouldBeEqualTo 0
+                feiledeVarsler.size shouldBeEqualTo 1
+                feiledeVarsler.single().kanal shouldBeEqualTo "ARBEIDSGIVERNOTIFIKASJON"
+                feiledeVarsler.single().resendExhausted shouldBeEqualTo true
+                feiledeVarsler.single().feilmelding shouldBeEqualTo
+                    "Oppfølgingsplanvarsel har ugyldig data.arbeidsgiverMeldingType=KORT_BESKJED"
+                feiledeVarsler.single().hendelseJson shouldBeEqualTo createObjectMapper().writeValueAsString(hendelse)
+                COUNT_OPPFOLGINGSPLAN_VARSEL_UGYLDIG.count() shouldBeEqualTo invalidPayloadCountBefore + 1.0
+                verify(exactly = 0) { dineSykmeldteHendelseKafkaProducer.sendVarsel(any()) }
+                coVerify(exactly = 0) { narmesteLederService.getNarmesteLederRelasjon(any(), any()) }
+                coVerify(exactly = 0) { pdlClient.hentPerson(any()) }
+                coVerify(exactly = 0) { arbeidsgiverNotifikasjonService.createNewSak(any()) }
+                coVerify(exactly = 0) {
+                    arbeidsgiverNotifikasjonService.sendNotifikasjon(
+                        any<ArbeidsgiverNotifikasjonNarmestelederInput>(),
+                    )
+                }
             }
 
-            it("Oppfolgingsplan varselbestilling should reject missing notifikasjonInnhold") {
-                val exception =
-                    shouldThrow<IllegalArgumentException> {
-                        oppfolgingsplanVarselService.sendVarselbestillingTilNarmesteLeder(
-                            oppfolgingsplanVarselbestillingHendelse(
-                                rawData = """{"data.arbeidsgiverMeldingType":"BESKJED"}""",
-                            ),
-                        )
-                    }
+            it("Oppfolgingsplan varselbestilling should store permanent failure for missing notifikasjonInnhold") {
+                val hendelse =
+                    oppfolgingsplanVarselbestillingHendelse(
+                        rawData = """{"data.arbeidsgiverMeldingType":"BESKJED"}""",
+                    )
 
-                exception.message shouldBeEqualTo "Oppfølgingsplanvarsel mangler feltet: data.notifikasjonInnhold"
+                oppfolgingsplanVarselService.sendVarselbestillingTilNarmesteLeder(hendelse)
+
+                val utsendteVarsler = embeddedDatabase.fetchUtsendtVarselByFnr(FNR_1)
+                val feiledeVarsler = embeddedDatabase.fetchUtsendtVarselFeiletByFnr(FNR_1)
+
+                utsendteVarsler.size shouldBeEqualTo 0
+                feiledeVarsler.size shouldBeEqualTo 1
+                feiledeVarsler.single().resendExhausted shouldBeEqualTo true
+                feiledeVarsler.single().feilmelding shouldBeEqualTo
+                    "Oppfølgingsplanvarsel mangler feltet: data.notifikasjonInnhold"
+                feiledeVarsler.single().hendelseJson shouldBeEqualTo createObjectMapper().writeValueAsString(hendelse)
+                verify(exactly = 0) { dineSykmeldteHendelseKafkaProducer.sendVarsel(any()) }
+                coVerify(exactly = 0) { narmesteLederService.getNarmesteLederRelasjon(any(), any()) }
+                coVerify(exactly = 0) {
+                    arbeidsgiverNotifikasjonService.sendNotifikasjon(
+                        any<ArbeidsgiverNotifikasjonNarmestelederInput>(),
+                    )
+                }
             }
 
-            it("Oppfolgingsplan varselbestilling should reject missing explicit varselTekst") {
-                val exception =
-                    shouldThrow<IllegalArgumentException> {
-                        oppfolgingsplanVarselService.sendVarselbestillingTilNarmesteLeder(
-                            oppfolgingsplanVarselbestillingHendelse(
-                                rawData =
-                                    """
-                                    {
-                                      "arbeidsgiverMeldingType": "BESKJED",
-                                      "notifikasjonInnhold": {
-                                        "epostTittel": "E-posttittel",
-                                        "epostBody": "<p>E-postbody</p>"
-                                      }
-                                    }
-                                    """.trimIndent(),
-                            ),
-                        )
-                    }
+            it("Oppfolgingsplan varselbestilling should store permanent failure for missing explicit varselTekst") {
+                val hendelse =
+                    oppfolgingsplanVarselbestillingHendelse(
+                        rawData =
+                            """
+                            {
+                              "arbeidsgiverMeldingType": "BESKJED",
+                              "notifikasjonInnhold": {
+                                "epostTittel": "E-posttittel",
+                                "epostBody": "<p>E-postbody</p>"
+                              }
+                            }
+                            """.trimIndent(),
+                    )
 
-                exception.message shouldBeEqualTo
+                oppfolgingsplanVarselService.sendVarselbestillingTilNarmesteLeder(hendelse)
+
+                val utsendteVarsler = embeddedDatabase.fetchUtsendtVarselByFnr(FNR_1)
+                val feiledeVarsler = embeddedDatabase.fetchUtsendtVarselFeiletByFnr(FNR_1)
+
+                utsendteVarsler.size shouldBeEqualTo 0
+                feiledeVarsler.size shouldBeEqualTo 1
+                feiledeVarsler.single().resendExhausted shouldBeEqualTo true
+                feiledeVarsler.single().feilmelding shouldBeEqualTo
                     "Oppfølgingsplanvarsel mangler feltet: data.notifikasjonInnhold.varselTekst"
+                feiledeVarsler.single().hendelseJson shouldBeEqualTo createObjectMapper().writeValueAsString(hendelse)
+                verify(exactly = 0) { dineSykmeldteHendelseKafkaProducer.sendVarsel(any()) }
+                coVerify(exactly = 0) { narmesteLederService.getNarmesteLederRelasjon(any(), any()) }
+                coVerify(exactly = 0) {
+                    arbeidsgiverNotifikasjonService.sendNotifikasjon(
+                        any<ArbeidsgiverNotifikasjonNarmestelederInput>(),
+                    )
+                }
             }
 
             it("Oppfolgingsplan varselbestilling retry should reuse uuidEksternReferanse, reuse sak and not resend Dine Sykmeldte") {

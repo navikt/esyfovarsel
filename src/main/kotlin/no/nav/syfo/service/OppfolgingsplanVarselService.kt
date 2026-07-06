@@ -26,6 +26,7 @@ import no.nav.syfo.kafka.consumers.varselbus.domain.OppfolgingsplanVarselbestill
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.toOppfolgingsplanVarselbestillingData
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
+import no.nav.syfo.metrics.countOppfolgingsplanVarselUgyldig
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakNarmesteLederInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.BESKJED
@@ -88,9 +89,16 @@ class OppfolgingsplanVarselService(
     }
 
     suspend fun sendVarselbestillingTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
-        val varselbestilling = varselHendelse.requireOppfolgingsplanVarselbestillingData()
-        val notifikasjonInnhold = requireNotNull(varselbestilling.notifikasjonInnhold)
-        val varselTekst = requireNotNull(notifikasjonInnhold.varselTekst)
+        val validatedVarselbestilling =
+            try {
+                varselHendelse.requireValidOppfolgingsplanVarselbestilling()
+            } catch (exception: OppfolgingsplanVarselPermanentException) {
+                handleInvalidOppfolgingsplanVarselbestilling(varselHendelse, exception)
+                return
+            }
+        val varselbestilling = validatedVarselbestilling.varselbestilling
+        val notifikasjonInnhold = validatedVarselbestilling.notifikasjonInnhold
+        val varselTekst = validatedVarselbestilling.varselTekst
 
         if (varselbestilling.dineSykmeldteHendelseType != null) {
             senderFacade.sendTilDineSykmeldte(
@@ -106,7 +114,7 @@ class OppfolgingsplanVarselService(
             )
         }
         if (varselbestilling.arbeidsgiverMeldingType != null) {
-            val meldingstype = varselbestilling.requireMeldingstype()
+            val meldingstype = requireNotNull(validatedVarselbestilling.meldingstype)
             val hendelseJson = objectMapper.writeValueAsString(varselHendelse)
             val hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
             val eksternReferanseUuid = UUID.randomUUID()
@@ -155,8 +163,8 @@ class OppfolgingsplanVarselService(
                     log.error("Kunne ikke deserialisere feilet oppfølgingsplanvarsel for retry: {}", it.message)
                     return ArbeidsgiverVarselResendResult.PERMANENT_FAILURE
                 }
-        val varselbestilling =
-            runCatching { varselHendelse.requireOppfolgingsplanVarselbestillingData() }
+        val validatedVarselbestilling =
+            runCatching { varselHendelse.requireValidOppfolgingsplanVarselbestilling() }
                 .getOrElse {
                     log.error("Kunne ikke validere feilet oppfølgingsplanvarsel for retry: {}", it.message)
                     return ArbeidsgiverVarselResendResult.PERMANENT_FAILURE
@@ -171,9 +179,10 @@ class OppfolgingsplanVarselService(
                 log.error("Kunne ikke parse uuidEksternReferanse for feilet oppfølgingsplanvarsel: {}", it.message)
                 return ArbeidsgiverVarselResendResult.PERMANENT_FAILURE
             }
-        val notifikasjonInnhold = requireNotNull(varselbestilling.notifikasjonInnhold)
-        val varselTekst = requireNotNull(notifikasjonInnhold.varselTekst)
-        val meldingstype = varselbestilling.requireMeldingstype()
+        val varselbestilling = validatedVarselbestilling.varselbestilling
+        val notifikasjonInnhold = validatedVarselbestilling.notifikasjonInnhold
+        val varselTekst = validatedVarselbestilling.varselTekst
+        val meldingstype = requireNotNull(validatedVarselbestilling.meldingstype)
         val hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
         val arbeidsgiverSak =
             try {
@@ -437,6 +446,30 @@ class OppfolgingsplanVarselService(
         link = link,
     )
 
+    private fun NarmesteLederHendelse.requireValidOppfolgingsplanVarselbestilling(): ValidatedOppfolgingsplanVarselbestilling {
+        val varselbestilling = requireOppfolgingsplanVarselbestillingData()
+        val notifikasjonInnhold =
+            varselbestilling.notifikasjonInnhold
+                ?: throw OppfolgingsplanVarselPermanentException(
+                    "Oppfølgingsplanvarsel mangler feltet: data.notifikasjonInnhold",
+                )
+        val varselTekst =
+            notifikasjonInnhold.varselTekst
+                ?: throw OppfolgingsplanVarselPermanentException(
+                    "Oppfølgingsplanvarsel mangler feltet: data.notifikasjonInnhold.varselTekst",
+                )
+        val meldingstype =
+            varselbestilling.arbeidsgiverMeldingType
+                ?.let { varselbestilling.requireMeldingstype() }
+
+        return ValidatedOppfolgingsplanVarselbestilling(
+            varselbestilling = varselbestilling,
+            notifikasjonInnhold = notifikasjonInnhold,
+            varselTekst = varselTekst,
+            meldingstype = meldingstype,
+        )
+    }
+
     private fun NarmesteLederHendelse.requireOppfolgingsplanVarselbestillingData(): OppfolgingsplanVarselbestillingData {
         val payloadDataNode =
             data?.let {
@@ -445,17 +478,17 @@ class OppfolgingsplanVarselService(
                 } else {
                     objectMapper.valueToTree(it)
                 }
-            } ?: throw IllegalArgumentException("Oppfølgingsplanvarsel mangler feltet: data")
+            } ?: throw OppfolgingsplanVarselPermanentException("Oppfølgingsplanvarsel mangler feltet: data")
 
         val payload =
             runCatching { payloadDataNode.toOppfolgingsplanVarselbestillingData() }
-                .getOrElse { throw IllegalArgumentException("Oppfølgingsplanvarsel har ugyldig format i data-feltet") }
+                .getOrElse { throw OppfolgingsplanVarselPermanentException("Oppfølgingsplanvarsel har ugyldig format i data-feltet") }
 
         if (payload.notifikasjonInnhold == null) {
-            throw IllegalArgumentException("Oppfølgingsplanvarsel mangler feltet: data.notifikasjonInnhold")
+            throw OppfolgingsplanVarselPermanentException("Oppfølgingsplanvarsel mangler feltet: data.notifikasjonInnhold")
         }
         if (!payloadDataNode.path("notifikasjonInnhold").hasNonNull("varselTekst")) {
-            throw IllegalArgumentException("Oppfølgingsplanvarsel mangler feltet: data.notifikasjonInnhold.varselTekst")
+            throw OppfolgingsplanVarselPermanentException("Oppfølgingsplanvarsel mangler feltet: data.notifikasjonInnhold.varselTekst")
         }
 
         return payload
@@ -465,9 +498,42 @@ class OppfolgingsplanVarselService(
         when (arbeidsgiverMeldingType) {
             Meldingstype.BESKJED.name -> Meldingstype.BESKJED
             Meldingstype.OPPGAVE.name -> Meldingstype.OPPGAVE
-            null -> throw IllegalArgumentException("Oppfølgingsplanvarsel mangler feltet: data.arbeidsgiverMeldingType")
-            else -> throw IllegalArgumentException("Oppfølgingsplanvarsel har ugyldig data.arbeidsgiverMeldingType=$arbeidsgiverMeldingType")
+            null -> throw OppfolgingsplanVarselPermanentException("Oppfølgingsplanvarsel mangler feltet: data.arbeidsgiverMeldingType")
+            else ->
+                throw OppfolgingsplanVarselPermanentException(
+                    "Oppfølgingsplanvarsel har ugyldig data.arbeidsgiverMeldingType=$arbeidsgiverMeldingType",
+                )
         }
+
+    private fun handleInvalidOppfolgingsplanVarselbestilling(
+        varselHendelse: NarmesteLederHendelse,
+        exception: OppfolgingsplanVarselPermanentException,
+    ) {
+        countOppfolgingsplanVarselUgyldig()
+        log.warn(
+            "Avviser ugyldig oppfølgingsplanvarselbestilling: type={}, feil={}",
+            varselHendelse.type,
+            exception.message,
+        )
+        senderFacade.lagreIkkeUtsendtArbeidsgiverNotifikasjonForNarmesteLeder(
+            varselHendelse = varselHendelse,
+            eksternReferanse = UUID.randomUUID().toString(),
+            feilmelding = exception.message,
+            merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+            hendelseJson = varselHendelse.serializeSafely(),
+            resendExhausted = true,
+        )
+    }
+
+    private fun NarmesteLederHendelse.serializeSafely(): String? =
+        runCatching { objectMapper.writeValueAsString(this) }
+            .onFailure { exception ->
+                log.error(
+                    "Kunne ikke serialisere oppfølgingsplanvarselbestilling for feillagring: type={}, feil={}",
+                    type,
+                    exception::class.simpleName ?: "UnknownException",
+                )
+            }.getOrNull()
 
     private data class OppfolgingsplanArbeidsgiverSak(
         val grupperingsid: String,
@@ -475,8 +541,19 @@ class OppfolgingsplanVarselService(
         val narmesteLederRelasjon: NarmesteLederRelasjon,
     )
 
+    private data class ValidatedOppfolgingsplanVarselbestilling(
+        val varselbestilling: OppfolgingsplanVarselbestillingData,
+        val notifikasjonInnhold: OppfolgingsplanNotifikasjonInnhold,
+        val varselTekst: String,
+        val meldingstype: Meldingstype?,
+    )
+
     private class OppfolgingsplanVarselRetryableException(
         override val message: String,
         cause: Throwable? = null,
     ) : RuntimeException(message, cause)
+
+    private class OppfolgingsplanVarselPermanentException(
+        override val message: String,
+    ) : RuntimeException(message)
 }

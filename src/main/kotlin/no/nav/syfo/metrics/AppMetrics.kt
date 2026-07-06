@@ -18,6 +18,7 @@ const val KARTLEGGINGSSPORSMAL_NOTICE_SENT = "${METRICS_NS}_kartleggingssporsmal
 const val NOTICE_SENT = "${METRICS_NS}_notice_sent"
 const val CALL_PDL_SUCCESS = "${METRICS_NS}_call_pdl_success_count"
 const val CALL_PDL_FAIL = "${METRICS_NS}_call_pdl_fail_count"
+const val OPPFOLGINGSPLAN_VARSEL_UGYLDIG = "${METRICS_NS}_oppfolgingsplan_varsel_ugyldig_count"
 const val ARBEIDSGIVER_NOTIFIKASJON_MESSAGE_TEXT_TRUNCATED =
     "${METRICS_NS}_arbeidsgiver_notifikasjon_message_text_truncated"
 
@@ -60,6 +61,12 @@ val COUNT_CALL_PDL_FAIL: Counter =
         .description("Counts the number of failed calls to pdl")
         .register(METRICS_REGISTRY)
 
+val COUNT_OPPFOLGINGSPLAN_VARSEL_UGYLDIG: Counter =
+    Counter
+        .builder(OPPFOLGINGSPLAN_VARSEL_UGYLDIG)
+        .description("Counts the number of invalid oppfolgingsplan varsel payloads")
+        .register(METRICS_REGISTRY)
+
 val COUNT_ARBEIDSGIVER_NOTIFIKASJON_MESSAGE_TEXT_TRUNCATED: Counter =
     Counter
         .builder(ARBEIDSGIVER_NOTIFIKASJON_MESSAGE_TEXT_TRUNCATED)
@@ -83,6 +90,10 @@ fun tellSvarMotebehovVarselSendt(varslerSendt: Int) {
 
 fun countArbeidsgiverNotifikasjonMessageTextTruncated() {
     COUNT_ARBEIDSGIVER_NOTIFIKASJON_MESSAGE_TEXT_TRUNCATED.increment()
+}
+
+fun countOppfolgingsplanVarselUgyldig() {
+    COUNT_OPPFOLGINGSPLAN_VARSEL_UGYLDIG.increment()
 }
 
 fun Routing.registerPrometheusApi() {

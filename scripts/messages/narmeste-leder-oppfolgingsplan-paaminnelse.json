@@ -8,7 +8,6 @@
     "ressursUrl": "https://www.ekstern.dev.nav.no/syk/oppfolgingsplan/NARMESTE_LEDER_ID",
     "notifikasjonInnhold": {
       "epostTittel": "Påminnelse om oppfølgingsplan til Forsiktig Dronning",
-      "epostBody": "Du har bedt oss minne deg på at du skal lage en oppfølgingsplan for Forsiktig Dronning. Du kan lage oppfølgingsplanen ved å logge inn på Dine sykmeldte på navn.no.",
       "varselTekst": "Lag oppfølgingsplan"
     }
   },

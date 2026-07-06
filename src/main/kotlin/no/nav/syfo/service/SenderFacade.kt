@@ -663,6 +663,7 @@ class SenderFacade(
         feilmelding: String?,
         merkelapp: String,
         hendelseJson: String? = null,
+        resendExhausted: Boolean = false,
     ) {
         lagreIkkeUtsendtNarmesteLederVarsel(
             kanal = ARBEIDSGIVERNOTIFIKASJON,
@@ -671,6 +672,7 @@ class SenderFacade(
             feilmelding = feilmelding,
             merkelapp = merkelapp,
             hendelseJson = hendelseJson,
+            resendExhausted = resendExhausted,
         )
     }
 
@@ -681,6 +683,7 @@ class SenderFacade(
         feilmelding: String?,
         merkelapp: String?,
         hendelseJson: String? = null,
+        resendExhausted: Boolean = false,
     ): UUID {
         val uuid = UUID.randomUUID()
         database.storeUtsendtVarselFeilet(
@@ -698,6 +701,7 @@ class SenderFacade(
                 feilmelding = feilmelding,
                 utsendtForsokTidspunkt = LocalDateTime.now(),
                 isForcedLetter = false,
+                resendExhausted = resendExhausted,
                 hendelseJson = hendelseJson,
             ),
         )

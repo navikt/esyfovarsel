@@ -33,7 +33,7 @@ fi
 json_payload="$(tr -d '\r\n' < "$json_file")"
 
 printf '%s%s%s\n' "$message_key" "$key_separator" "$json_payload" | \
-  docker exec -i "$docker_container" kafka-console-producer \
+  podman exec -i "$docker_container" kafka-console-producer \
     --bootstrap-server "$bootstrap_server" \
     --topic "$topic" \
     --property parse.key=true \
