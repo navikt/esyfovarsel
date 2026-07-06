@@ -1,5 +1,5 @@
 [tools]
-java = { version = "21" }
+java = { version = "25" }
 
 [tasks.build]
 description = "Run build with gradle"
