@@ -2,7 +2,7 @@
 
 ## Krav
 
-Du trenger Java 21, Docker og [mise](https://mise.jdx.dev/).
+Du trenger Java 25, Docker og [mise](https://mise.jdx.dev/).
 
 ## Start lokale avhengigheter
 
