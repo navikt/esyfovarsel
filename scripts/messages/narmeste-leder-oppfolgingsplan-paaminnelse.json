@@ -1,0 +1,17 @@
+{
+  "@type": "NarmesteLederHendelse",
+  "type": "NL_OPPFOLGINGSPLAN_VARSELBESTILLING",
+  "ferdigstill": false,
+  "data": {
+    "arbeidsgiverMeldingType": "BESKJED",
+    "dineSykmeldteHendelseType": "OPPFOLGINGSPLAN_PAAMINNELSE",
+    "ressursUrl": "https://www.ekstern.dev.nav.no/syk/oppfolgingsplan/NARMESTE_LEDER_ID",
+    "notifikasjonInnhold": {
+      "epostTittel": "Påminnelse om oppfølgingsplan til Forsiktig Dronning",
+      "varselTekst": "Lag oppfølgingsplan"
+    }
+  },
+  "narmesteLederFnr": "01987654322",
+  "arbeidstakerFnr": "22345678910",
+  "orgnummer": "999999999"
+}

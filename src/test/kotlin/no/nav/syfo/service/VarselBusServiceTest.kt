@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidsgiverNotifikasjonTilAltinnRessursHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
 import java.util.UUID
 
 class VarselBusServiceTest :
@@ -77,6 +78,27 @@ class VarselBusServiceTest :
 
                 coVerify(exactly = 0) { senderFacade.ferdigstillArbeidstakerVarsler(any()) }
                 coVerify(exactly = 0) { senderFacade.ferdigstillNarmesteLederVarsler(any()) }
+            }
+
+            it("ruter NL_OPPFOLGINGSPLAN_VARSELBESTILLING til OppfolgingsplanVarselService") {
+                val hendelse =
+                    NarmesteLederHendelse(
+                        type = HendelseType.NL_OPPFOLGINGSPLAN_VARSELBESTILLING,
+                        ferdigstill = false,
+                        data =
+                            """
+                            {"varselType":"BESKJED","notifikasjonInnhold":{"epostTittel":"Tittel","epostBody":"Body","varselTekst":"Varsel"}}
+                            """.trimIndent(),
+                        narmesteLederFnr = "12345678910",
+                        arbeidstakerFnr = "10987654321",
+                        orgnummer = "999888777",
+                    )
+
+                varselBusService.processVarselHendelse(hendelse)
+
+                coVerify(exactly = 1) {
+                    oppfolgingsplanVarselService.sendVarselbestillingTilNarmesteLeder(hendelse)
+                }
             }
         }
     })

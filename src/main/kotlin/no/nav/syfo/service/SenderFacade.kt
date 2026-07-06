@@ -24,6 +24,7 @@ import no.nav.syfo.db.storeArbeidsgivernotifikasjonerSak
 import no.nav.syfo.db.storeUtsendtVarsel
 import no.nav.syfo.db.storeUtsendtVarselFeilet
 import no.nav.syfo.db.updateArbeidsgivernotifikasjonerSakStatus
+import no.nav.syfo.db.updateArbeidsgivernotifikasjonerSakStatusAndHardDeleteDate
 import no.nav.syfo.db.updateUtsendtVarselFeiletToResendExhausted
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.exceptions.JournalpostDistribusjonGoneException
@@ -163,15 +164,54 @@ class SenderFacade(
     suspend fun sendTilArbeidsgiverNotifikasjon(
         varselHendelse: NarmesteLederHendelse,
         notifikasjon: ArbeidsgiverNotifikasjonNarmestelederInput,
-    ) {
+        hendelseJson: String? = null,
+    ): Boolean =
+        sendTilArbeidsgiverNotifikasjon(
+            varselHendelse = varselHendelse,
+            notifikasjon = notifikasjon,
+            hendelseJson = hendelseJson,
+            lagreFeilVedIkkeSendt = false,
+        )
+
+    suspend fun sendTilArbeidsgiverNotifikasjonMedRetrylagring(
+        varselHendelse: NarmesteLederHendelse,
+        notifikasjon: ArbeidsgiverNotifikasjonNarmestelederInput,
+        hendelseJson: String,
+    ): Boolean =
+        sendTilArbeidsgiverNotifikasjon(
+            varselHendelse = varselHendelse,
+            notifikasjon = notifikasjon,
+            hendelseJson = hendelseJson,
+            lagreFeilVedIkkeSendt = true,
+        )
+
+    private suspend fun sendTilArbeidsgiverNotifikasjon(
+        varselHendelse: NarmesteLederHendelse,
+        notifikasjon: ArbeidsgiverNotifikasjonNarmestelederInput,
+        hendelseJson: String?,
+        lagreFeilVedIkkeSendt: Boolean,
+    ): Boolean {
         try {
-            arbeidsgiverNotifikasjonService.sendNotifikasjon(notifikasjon)
+            val isSent = arbeidsgiverNotifikasjonService.sendNotifikasjon(notifikasjon)
+            if (!isSent) {
+                if (lagreFeilVedIkkeSendt) {
+                    lagreIkkeUtsendtArbeidsgiverNotifikasjonForNarmesteLeder(
+                        varselHendelse = varselHendelse,
+                        eksternReferanse = notifikasjon.uuid.toString(),
+                        feilmelding = "ArbeidsgiverNotifikasjonService sendte ikke varsel til nærmeste leder",
+                        merkelapp = notifikasjon.merkelapp,
+                        hendelseJson = hendelseJson,
+                    )
+                }
+                return false
+            }
             lagreUtsendtNarmesteLederVarsel(
                 ARBEIDSGIVERNOTIFIKASJON,
                 varselHendelse,
                 notifikasjon.uuid.toString(),
                 notifikasjon.merkelapp,
             )
+            return true
         } catch (e: Exception) {
             log.error("Error while sending varsel to ARBEIDSGIVERNOTIFIKASJON: ${e.message}")
             lagreIkkeUtsendtNarmesteLederVarsel(
@@ -180,27 +220,34 @@ class SenderFacade(
                 eksternReferanse = notifikasjon.uuid.toString(),
                 feilmelding = e.message,
                 merkelapp = notifikasjon.merkelapp,
+                hendelseJson = hendelseJson,
             )
+            return false
         }
     }
 
     suspend fun sendTilArbeidsgiverNotifikasjon(
         varselFeilet: PUtsendtVarselFeilet,
         notifikasjon: ArbeidsgiverNotifikasjonNarmestelederInput,
-    ) {
+    ): ArbeidsgiverVarselResendResult {
         try {
-            arbeidsgiverNotifikasjonService.sendNotifikasjon(notifikasjon)
+            val isSent = arbeidsgiverNotifikasjonService.sendNotifikasjon(notifikasjon)
+            if (!isSent) {
+                return ArbeidsgiverVarselResendResult.RETRYABLE_FAILURE
+            }
             lagreUtsendtNarmesteLederVarsel(
                 varselFeilet,
                 notifikasjon.uuid.toString(),
                 notifikasjon.merkelapp,
             )
+            return ArbeidsgiverVarselResendResult.RESENT
         } catch (e: Exception) {
             log.error(
                 "Error while resending varsel with id {} to ARBEIDSGIVERNOTIFIKASJON: {}",
                 varselFeilet.uuid,
                 e.message,
             )
+            return ArbeidsgiverVarselResendResult.RETRYABLE_FAILURE
         }
     }
 
@@ -252,7 +299,13 @@ class SenderFacade(
     ) {
         val oppdatertSak = arbeidsgiverNotifikasjonService.nyStatusSak(nyStatusSakInput)
         require(oppdatertSak != null) { "Failed to update sak" }
-        database.updateArbeidsgivernotifikasjonerSakStatus(sakId, nyStatusSakInput.sakStatus)
+        nyStatusSakInput.oppdatertHardDeleteDateTime?.let {
+            database.updateArbeidsgivernotifikasjonerSakStatusAndHardDeleteDate(
+                sakId = sakId,
+                sakStatus = nyStatusSakInput.sakStatus,
+                hardDeleteDate = it,
+            )
+        } ?: database.updateArbeidsgivernotifikasjonerSakStatus(sakId, nyStatusSakInput.sakStatus)
     }
 
     suspend fun updateKalenderavtale(
@@ -604,12 +657,33 @@ class SenderFacade(
         return uuid
     }
 
+    fun lagreIkkeUtsendtArbeidsgiverNotifikasjonForNarmesteLeder(
+        varselHendelse: NarmesteLederHendelse,
+        eksternReferanse: String,
+        feilmelding: String?,
+        merkelapp: String,
+        hendelseJson: String? = null,
+        resendExhausted: Boolean = false,
+    ) {
+        lagreIkkeUtsendtNarmesteLederVarsel(
+            kanal = ARBEIDSGIVERNOTIFIKASJON,
+            varselHendelse = varselHendelse,
+            eksternReferanse = eksternReferanse,
+            feilmelding = feilmelding,
+            merkelapp = merkelapp,
+            hendelseJson = hendelseJson,
+            resendExhausted = resendExhausted,
+        )
+    }
+
     private fun lagreIkkeUtsendtNarmesteLederVarsel(
         kanal: Kanal,
         varselHendelse: NarmesteLederHendelse,
         eksternReferanse: String,
         feilmelding: String?,
         merkelapp: String?,
+        hendelseJson: String? = null,
+        resendExhausted: Boolean = false,
     ): UUID {
         val uuid = UUID.randomUUID()
         database.storeUtsendtVarselFeilet(
@@ -627,6 +701,8 @@ class SenderFacade(
                 feilmelding = feilmelding,
                 utsendtForsokTidspunkt = LocalDateTime.now(),
                 isForcedLetter = false,
+                resendExhausted = resendExhausted,
+                hendelseJson = hendelseJson,
             ),
         )
         return uuid

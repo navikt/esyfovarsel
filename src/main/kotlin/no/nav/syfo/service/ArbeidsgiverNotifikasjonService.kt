@@ -21,7 +21,7 @@ class ArbeidsgiverNotifikasjonService(
 ) {
     private val log: Logger = LoggerFactory.getLogger(ArbeidsgiverNotifikasjonService::class.qualifiedName)
 
-    suspend fun sendNotifikasjon(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonNarmestelederInput) {
+    suspend fun sendNotifikasjon(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonNarmestelederInput): Boolean {
         val narmesteLederRelasjon =
             narmesteLederService.getNarmesteLederRelasjon(
                 arbeidsgiverNotifikasjon.ansattFnr,
@@ -29,17 +29,17 @@ class ArbeidsgiverNotifikasjonService(
             )
 
         if (narmesteLederRelasjon == null || !narmesteLederService.hasNarmesteLederInfo(narmesteLederRelasjon)) {
-            log.warn("Sender ikke varsel til ag-notifikasjon: narmesteLederRelasjon er null eller har ikke kontaktinfo")
-            return
+            log.warn("Sender ikke varsel til ag-notifikasjon: narmesteLederRelasjon er null eller mangler nødvendig kontaktinfo")
+            return false
         }
 
-        if (arbeidsgiverNotifikasjon.narmesteLederFnr !== null &&
+        if (arbeidsgiverNotifikasjon.narmesteLederFnr != null &&
             arbeidsgiverNotifikasjon.narmesteLederFnr != narmesteLederRelasjon.narmesteLederFnr
         ) {
             log.warn(
                 "Sender ikke varsel til ag-notifikasjon: den ansatte har nærmeste leder med annet fnr enn mottaker i varselHendelse",
             )
-            return
+            return false
         }
 
         val url = arbeidsgiverNotifikasjon.link ?: "$dineSykmeldteUrl/${narmesteLederRelasjon.narmesteLederId}"
@@ -60,17 +60,24 @@ class ArbeidsgiverNotifikasjonService(
                 grupperingsid = arbeidsgiverNotifikasjon.grupperingsid,
             )
 
-        when (arbeidsgiverNotifikasjon.meldingstype) {
-            BESKJED ->
-                arbeidsgiverNotifikasjonProdusent.createNewBeskjedForArbeidsgiver(
-                    arbeidsgiverNotifikasjonNarmesteLeder,
-                )
+        val notifikasjonId =
+            when (arbeidsgiverNotifikasjon.meldingstype) {
+                BESKJED ->
+                    arbeidsgiverNotifikasjonProdusent.createNewBeskjedForArbeidsgiver(
+                        arbeidsgiverNotifikasjonNarmesteLeder,
+                    )
 
-            OPPGAVE ->
-                arbeidsgiverNotifikasjonProdusent.createNewOppgaveForArbeidsgiver(
-                    arbeidsgiverNotifikasjonNarmesteLeder,
-                )
+                OPPGAVE ->
+                    arbeidsgiverNotifikasjonProdusent.createNewOppgaveForArbeidsgiver(
+                        arbeidsgiverNotifikasjonNarmesteLeder,
+                    )
+            }
+        if (notifikasjonId == null) {
+            throw IllegalStateException(
+                "ArbeidsgiverNotifikasjonProdusent returnerte null ID ved utsending til nærmeste leder",
+            )
         }
+        return true
     }
 
     suspend fun sendNotifikasjon(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjonAltinnRessursInput): String? {

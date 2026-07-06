@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_TITLE
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_MESSAGE_TEXT
@@ -10,14 +11,22 @@ import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL
 import no.nav.syfo.BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT
 import no.nav.syfo.DINE_SYKMELDTE_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING_TEKST
+import no.nav.syfo.consumer.narmesteLeder.NarmesteLederRelasjon
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdl.PdlClient
 import no.nav.syfo.consumer.pdl.fullName
+import no.nav.syfo.db.domain.PUtsendtVarselFeilet
+import no.nav.syfo.db.domain.toNarmesteLederHendelse
+import no.nav.syfo.kafka.common.createObjectMapper
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_OPPFOLGINGSPLAN_SENDT_TIL_GODKJENNING
 import no.nav.syfo.kafka.consumers.varselbus.domain.NarmesteLederHendelse
+import no.nav.syfo.kafka.consumers.varselbus.domain.OppfolgingsplanNotifikasjonInnhold
+import no.nav.syfo.kafka.consumers.varselbus.domain.OppfolgingsplanVarselbestillingData
 import no.nav.syfo.kafka.consumers.varselbus.domain.toDineSykmeldteHendelseType
+import no.nav.syfo.kafka.consumers.varselbus.domain.toOppfolgingsplanVarselbestillingData
 import no.nav.syfo.kafka.producers.dinesykmeldte.domain.DineSykmeldteVarsel
+import no.nav.syfo.metrics.countOppfolgingsplanVarselUgyldig
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NySakNarmesteLederInput
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.SakStatus
 import no.nav.syfo.service.SenderFacade.InternalBrukernotifikasjonType.BESKJED
@@ -38,6 +47,7 @@ class OppfolgingsplanVarselService(
     companion object {
         private const val WEEKS_BEFORE_DELETE = 4L
         private val log = LoggerFactory.getLogger(OppfolgingsplanVarselService::class.qualifiedName)
+        private val objectMapper = createObjectMapper()
     }
 
     suspend fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
@@ -63,18 +73,143 @@ class OppfolgingsplanVarselService(
         senderFacade.sendTilArbeidsgiverNotifikasjon(
             varselHendelse,
             ArbeidsgiverNotifikasjonNarmestelederInput(
-                UUID.randomUUID(),
-                varselHendelse.orgnummer,
-                varselHendelse.narmesteLederFnr,
-                varselHendelse.arbeidstakerFnr,
-                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
-                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT,
-                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_TITLE,
-                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_BODY,
-                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+                uuid = UUID.randomUUID(),
+                virksomhetsnummer = varselHendelse.orgnummer,
+                narmesteLederFnr = varselHendelse.narmesteLederFnr,
+                ansattFnr = varselHendelse.arbeidstakerFnr,
+                merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                messageText = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT,
+                epostTittel = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_TITLE,
+                epostHtmlBody = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_EMAIL_BODY,
+                hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
                 meldingstype = Meldingstype.BESKJED,
                 grupperingsid = UUID.randomUUID().toString(),
             ),
+        )
+    }
+
+    suspend fun sendVarselbestillingTilNarmesteLeder(varselHendelse: NarmesteLederHendelse) {
+        val validatedVarselbestilling =
+            try {
+                varselHendelse.requireValidOppfolgingsplanVarselbestilling()
+            } catch (exception: OppfolgingsplanVarselPermanentException) {
+                handleInvalidOppfolgingsplanVarselbestilling(varselHendelse, exception)
+                return
+            }
+        val varselbestilling = validatedVarselbestilling.varselbestilling
+        val notifikasjonInnhold = validatedVarselbestilling.notifikasjonInnhold
+        val varselTekst = validatedVarselbestilling.varselTekst
+
+        if (varselbestilling.dineSykmeldteHendelseType != null) {
+            senderFacade.sendTilDineSykmeldte(
+                varselHendelse,
+                DineSykmeldteVarsel(
+                    ansattFnr = varselHendelse.arbeidstakerFnr,
+                    orgnr = varselHendelse.orgnummer,
+                    oppgavetype = varselbestilling.dineSykmeldteHendelseType,
+                    lenke = null,
+                    tekst = varselTekst,
+                    utlopstidspunkt = OffsetDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+                ),
+            )
+        }
+        if (varselbestilling.arbeidsgiverMeldingType != null) {
+            val meldingstype = requireNotNull(validatedVarselbestilling.meldingstype)
+            val hendelseJson = objectMapper.writeValueAsString(varselHendelse)
+            val hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
+            val eksternReferanseUuid = UUID.randomUUID()
+            val arbeidsgiverSak =
+                try {
+                    getOrCreateOppfolgingsplanSak(
+                        varselHendelse = varselHendelse,
+                        hardDeleteDate = hardDeleteDate,
+                    )
+                } catch (exception: OppfolgingsplanVarselRetryableException) {
+                    log.warn(
+                        "Kunne ikke klargjøre arbeidsgiversak for oppfølgingsplanvarselbestilling: {}",
+                        exception.message,
+                    )
+                    senderFacade.lagreIkkeUtsendtArbeidsgiverNotifikasjonForNarmesteLeder(
+                        varselHendelse = varselHendelse,
+                        eksternReferanse = eksternReferanseUuid.toString(),
+                        feilmelding = exception.message,
+                        merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                        hendelseJson = hendelseJson,
+                    )
+                    return
+                }
+            senderFacade.sendTilArbeidsgiverNotifikasjonMedRetrylagring(
+                varselHendelse = varselHendelse,
+                notifikasjon =
+                    createOppfolgingsplanVarselbestillingNotifikasjonInput(
+                        eksternReferanseUuid = eksternReferanseUuid,
+                        varselHendelse = varselHendelse,
+                        notifikasjonInnhold = notifikasjonInnhold,
+                        varselTekst = varselTekst,
+                        meldingstype = meldingstype,
+                        hardDeleteDate = hardDeleteDate,
+                        arbeidsgiverSak = arbeidsgiverSak,
+                        link = resolveOppfolgingsplanVarselbestillingLink(varselbestilling, arbeidsgiverSak),
+                    ),
+                hendelseJson = hendelseJson,
+            )
+        }
+    }
+
+    suspend fun resendVarselbestillingTilArbeidsgiverNotifikasjon(varselFeilet: PUtsendtVarselFeilet): ArbeidsgiverVarselResendResult {
+        val varselHendelse =
+            runCatching { varselFeilet.toNarmesteLederHendelse() }
+                .getOrElse {
+                    log.error("Kunne ikke deserialisere feilet oppfølgingsplanvarsel for retry: {}", it.message)
+                    return ArbeidsgiverVarselResendResult.PERMANENT_FAILURE
+                }
+        val validatedVarselbestilling =
+            runCatching { varselHendelse.requireValidOppfolgingsplanVarselbestilling() }
+                .getOrElse {
+                    log.error("Kunne ikke validere feilet oppfølgingsplanvarsel for retry: {}", it.message)
+                    return ArbeidsgiverVarselResendResult.PERMANENT_FAILURE
+                }
+        val eksternReferanseUuid =
+            runCatching {
+                UUID.fromString(
+                    varselFeilet.uuidEksternReferanse
+                        ?: throw IllegalArgumentException("Mangler uuidEksternReferanse for feilet oppfølgingsplanvarsel"),
+                )
+            }.getOrElse {
+                log.error("Kunne ikke parse uuidEksternReferanse for feilet oppfølgingsplanvarsel: {}", it.message)
+                return ArbeidsgiverVarselResendResult.PERMANENT_FAILURE
+            }
+        val varselbestilling = validatedVarselbestilling.varselbestilling
+        val notifikasjonInnhold = validatedVarselbestilling.notifikasjonInnhold
+        val varselTekst = validatedVarselbestilling.varselTekst
+        val meldingstype = requireNotNull(validatedVarselbestilling.meldingstype)
+        val hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
+        val arbeidsgiverSak =
+            try {
+                getOrCreateOppfolgingsplanSak(
+                    varselHendelse = varselHendelse,
+                    hardDeleteDate = hardDeleteDate,
+                )
+            } catch (exception: OppfolgingsplanVarselRetryableException) {
+                log.warn(
+                    "Kunne ikke klargjøre arbeidsgiversak for retry av oppfølgingsplanvarselbestilling: {}",
+                    exception.message,
+                )
+                return ArbeidsgiverVarselResendResult.RETRYABLE_FAILURE
+            }
+        return senderFacade.sendTilArbeidsgiverNotifikasjon(
+            varselFeilet = varselFeilet,
+            notifikasjon =
+                createOppfolgingsplanVarselbestillingNotifikasjonInput(
+                    eksternReferanseUuid = eksternReferanseUuid,
+                    varselHendelse = varselHendelse,
+                    notifikasjonInnhold = notifikasjonInnhold,
+                    varselTekst = varselTekst,
+                    meldingstype = meldingstype,
+                    hardDeleteDate = hardDeleteDate,
+                    arbeidsgiverSak = arbeidsgiverSak,
+                    link = resolveOppfolgingsplanVarselbestillingLink(varselbestilling, arbeidsgiverSak),
+                ),
         )
     }
 
@@ -96,40 +231,28 @@ class OppfolgingsplanVarselService(
             return
         }
 
-        val url = "$dinesykmeldteUrl/${narmesteLederRelasjon.narmesteLederId}"
-        val personData = pdlClient.hentPerson(personIdent = varselHendelse.arbeidstakerFnr)
-        val grupperingsid = UUID.randomUUID().toString()
-
-        val sakInput =
-            NySakNarmesteLederInput(
-                grupperingsid = grupperingsid,
-                narmestelederId = narmesteLederRelasjon.narmesteLederId,
-                merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
-                virksomhetsnummer = varselHendelse.orgnummer,
-                narmesteLederFnr = varselHendelse.narmesteLederFnr,
-                ansattFnr = varselHendelse.arbeidstakerFnr,
-                tittel = personData?.fullName()?.let { "Oppfølging av $it" } ?: "Oppfølging av sykmeldt",
-                lenke = url,
-                initiellStatus = SakStatus.MOTTATT,
-                hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
+        val hardDeleteDate = LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE)
+        val arbeidsgiverSak =
+            getOrCreateOppfolgingsplanSak(
+                varselHendelse = varselHendelse,
+                hardDeleteDate = hardDeleteDate,
+                narmesteLederRelasjon = narmesteLederRelasjon,
             )
-
-        senderFacade.createNewSak(sakInput)
         senderFacade.sendTilArbeidsgiverNotifikasjon(
             varselHendelse,
             ArbeidsgiverNotifikasjonNarmestelederInput(
-                UUID.randomUUID(),
-                varselHendelse.orgnummer,
-                varselHendelse.narmesteLederFnr,
-                varselHendelse.arbeidstakerFnr,
-                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
-                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_MESSAGE_TEXT,
-                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_TITLE,
-                ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_BODY,
-                LocalDateTime.now().plusWeeks(WEEKS_BEFORE_DELETE),
-                Meldingstype.BESKJED,
-                grupperingsid,
-                url,
+                uuid = UUID.randomUUID(),
+                virksomhetsnummer = varselHendelse.orgnummer,
+                narmesteLederFnr = varselHendelse.narmesteLederFnr,
+                ansattFnr = varselHendelse.arbeidstakerFnr,
+                merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                messageText = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_MESSAGE_TEXT,
+                epostTittel = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_TITLE,
+                epostHtmlBody = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGINGSPLAN_FORESPORSEL_EMAIL_BODY,
+                hardDeleteDate = hardDeleteDate,
+                meldingstype = Meldingstype.BESKJED,
+                grupperingsid = arbeidsgiverSak.grupperingsid,
+                link = arbeidsgiverSak.link,
             ),
         )
     }
@@ -162,4 +285,275 @@ class OppfolgingsplanVarselService(
                 null
             }
         }
+
+    private suspend fun getOrCreateOppfolgingsplanSak(
+        varselHendelse: NarmesteLederHendelse,
+        hardDeleteDate: LocalDateTime,
+        narmesteLederRelasjon: NarmesteLederRelasjon? = null,
+    ): OppfolgingsplanArbeidsgiverSak {
+        val resolvedNarmesteLederRelasjon =
+            narmesteLederRelasjon
+                ?: try {
+                    narmesteLederService.getNarmesteLederRelasjon(
+                        varselHendelse.arbeidstakerFnr,
+                        varselHendelse.orgnummer,
+                    )
+                } catch (exception: RuntimeException) {
+                    throw OppfolgingsplanVarselRetryableException(
+                        "Kunne ikke hente nærmeste-lederrelasjon for oppfølgingsplansak",
+                        exception,
+                    )
+                }
+        val narmesteLederId =
+            resolvedNarmesteLederRelasjon?.narmesteLederId
+                ?: throw OppfolgingsplanVarselRetryableException(
+                    "Mangler nærmeste-lederrelasjon med narmesteLederId for oppfølgingsplansak",
+                )
+        val link = getDineSykmeldteNarmesteLederLink(narmesteLederId)
+        val eksisterendeSak =
+            try {
+                senderFacade.getPaagaaendeSak(
+                    narmesteLederId = narmesteLederId,
+                    merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                )
+            } catch (exception: RuntimeException) {
+                throw OppfolgingsplanVarselRetryableException(
+                    "Kunne ikke hente pågående oppfølgingsplansak",
+                    exception,
+                )
+            }
+
+        if (eksisterendeSak != null) {
+            bumpHardDeleteDateForEksisterendeSak(
+                eksisterendeSak = eksisterendeSak,
+                hardDeleteDate = hardDeleteDate,
+            )
+            return OppfolgingsplanArbeidsgiverSak(
+                grupperingsid = eksisterendeSak.grupperingsid,
+                link = eksisterendeSak.lenke ?: link,
+                narmesteLederRelasjon = resolvedNarmesteLederRelasjon,
+            )
+        }
+
+        val personData =
+            try {
+                pdlClient.hentPerson(personIdent = varselHendelse.arbeidstakerFnr)
+            } catch (exception: RuntimeException) {
+                throw OppfolgingsplanVarselRetryableException(
+                    "Kunne ikke hente persondata for oppfølgingsplansak",
+                    exception,
+                )
+            }
+        val sakInput =
+            NySakNarmesteLederInput(
+                grupperingsid = UUID.randomUUID().toString(),
+                narmestelederId = narmesteLederId,
+                merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+                virksomhetsnummer = varselHendelse.orgnummer,
+                narmesteLederFnr = varselHendelse.narmesteLederFnr,
+                ansattFnr = varselHendelse.arbeidstakerFnr,
+                tittel = personData?.fullName()?.let { "Oppfølging av $it" } ?: "Oppfølging av sykmeldt",
+                lenke = link,
+                initiellStatus = SakStatus.MOTTATT,
+                hardDeleteDate = hardDeleteDate,
+            )
+
+        try {
+            senderFacade.createNewSak(sakInput)
+        } catch (exception: RuntimeException) {
+            throw OppfolgingsplanVarselRetryableException(
+                "Kunne ikke opprette oppfølgingsplansak",
+                exception,
+            )
+        }
+
+        return OppfolgingsplanArbeidsgiverSak(
+            grupperingsid = sakInput.grupperingsid,
+            link = sakInput.lenke,
+            narmesteLederRelasjon = resolvedNarmesteLederRelasjon,
+        )
+    }
+
+    private suspend fun bumpHardDeleteDateForEksisterendeSak(
+        eksisterendeSak: no.nav.syfo.db.domain.PSakInput,
+        hardDeleteDate: LocalDateTime,
+    ) {
+        val sakStatus =
+            try {
+                SakStatus.valueOf(eksisterendeSak.initiellStatus.name)
+            } catch (exception: IllegalArgumentException) {
+                throw OppfolgingsplanVarselRetryableException(
+                    "Kunne ikke tolke saksstatus for eksisterende oppfølgingsplansak",
+                    exception,
+                )
+            }
+
+        try {
+            senderFacade.nyStatusSak(
+                sakId = eksisterendeSak.id,
+                nyStatusSakInput =
+                    no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.NyStatusSakInput(
+                        grupperingsId = eksisterendeSak.grupperingsid,
+                        merkelapp = eksisterendeSak.merkelapp,
+                        sakStatus = sakStatus,
+                        oppdatertHardDeleteDateTime = hardDeleteDate,
+                    ),
+            )
+        } catch (exception: RuntimeException) {
+            throw OppfolgingsplanVarselRetryableException(
+                "Kunne ikke oppdatere hardDeleteDate for eksisterende oppfølgingsplansak",
+                exception,
+            )
+        }
+    }
+
+    private fun getDineSykmeldteNarmesteLederLink(narmesteLederId: String): String = "$dinesykmeldteUrl/$narmesteLederId"
+
+    private fun resolveOppfolgingsplanVarselbestillingLink(
+        varselbestilling: OppfolgingsplanVarselbestillingData,
+        arbeidsgiverSak: OppfolgingsplanArbeidsgiverSak,
+    ): String =
+        if (varselbestilling.ressursUrl != null && arbeidsgiverSak.narmesteLederRelasjon.narmesteLederId != null) {
+            varselbestilling.ressursUrl.replace(
+                "NARMESTE_LEDER_ID",
+                arbeidsgiverSak.narmesteLederRelasjon.narmesteLederId,
+            )
+        } else {
+            arbeidsgiverSak.link
+        }
+
+    private fun createOppfolgingsplanVarselbestillingNotifikasjonInput(
+        eksternReferanseUuid: UUID,
+        varselHendelse: NarmesteLederHendelse,
+        notifikasjonInnhold: OppfolgingsplanNotifikasjonInnhold,
+        varselTekst: String,
+        meldingstype: Meldingstype,
+        hardDeleteDate: LocalDateTime,
+        arbeidsgiverSak: OppfolgingsplanArbeidsgiverSak,
+        link: String,
+    ) = ArbeidsgiverNotifikasjonNarmestelederInput(
+        uuid = eksternReferanseUuid,
+        virksomhetsnummer = varselHendelse.orgnummer,
+        narmesteLederFnr = varselHendelse.narmesteLederFnr,
+        ansattFnr = varselHendelse.arbeidstakerFnr,
+        merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+        messageText = varselTekst,
+        epostTittel = notifikasjonInnhold.epostTittel,
+        epostHtmlBody = notifikasjonInnhold.epostBody,
+        hardDeleteDate = hardDeleteDate,
+        meldingstype = meldingstype,
+        grupperingsid = arbeidsgiverSak.grupperingsid,
+        link = link,
+    )
+
+    private fun NarmesteLederHendelse.requireValidOppfolgingsplanVarselbestilling(): ValidatedOppfolgingsplanVarselbestilling {
+        val varselbestilling = requireOppfolgingsplanVarselbestillingData()
+        val notifikasjonInnhold =
+            varselbestilling.notifikasjonInnhold
+                ?: throw OppfolgingsplanVarselPermanentException(
+                    "Oppfølgingsplanvarsel mangler feltet: data.notifikasjonInnhold",
+                )
+        val varselTekst =
+            notifikasjonInnhold.varselTekst
+                ?: throw OppfolgingsplanVarselPermanentException(
+                    "Oppfølgingsplanvarsel mangler feltet: data.notifikasjonInnhold.varselTekst",
+                )
+        val meldingstype =
+            varselbestilling.arbeidsgiverMeldingType
+                ?.let { varselbestilling.requireMeldingstype() }
+
+        return ValidatedOppfolgingsplanVarselbestilling(
+            varselbestilling = varselbestilling,
+            notifikasjonInnhold = notifikasjonInnhold,
+            varselTekst = varselTekst,
+            meldingstype = meldingstype,
+        )
+    }
+
+    private fun NarmesteLederHendelse.requireOppfolgingsplanVarselbestillingData(): OppfolgingsplanVarselbestillingData {
+        val payloadDataNode =
+            data?.let {
+                if (it is JsonNode) {
+                    it
+                } else {
+                    objectMapper.valueToTree(it)
+                }
+            } ?: throw OppfolgingsplanVarselPermanentException("Oppfølgingsplanvarsel mangler feltet: data")
+
+        val payload =
+            runCatching { payloadDataNode.toOppfolgingsplanVarselbestillingData() }
+                .getOrElse { throw OppfolgingsplanVarselPermanentException("Oppfølgingsplanvarsel har ugyldig format i data-feltet") }
+
+        if (payload.notifikasjonInnhold == null) {
+            throw OppfolgingsplanVarselPermanentException("Oppfølgingsplanvarsel mangler feltet: data.notifikasjonInnhold")
+        }
+        if (!payloadDataNode.path("notifikasjonInnhold").hasNonNull("varselTekst")) {
+            throw OppfolgingsplanVarselPermanentException("Oppfølgingsplanvarsel mangler feltet: data.notifikasjonInnhold.varselTekst")
+        }
+
+        return payload
+    }
+
+    private fun OppfolgingsplanVarselbestillingData.requireMeldingstype(): Meldingstype =
+        when (arbeidsgiverMeldingType) {
+            Meldingstype.BESKJED.name -> Meldingstype.BESKJED
+            Meldingstype.OPPGAVE.name -> Meldingstype.OPPGAVE
+            null -> throw OppfolgingsplanVarselPermanentException("Oppfølgingsplanvarsel mangler feltet: data.arbeidsgiverMeldingType")
+            else ->
+                throw OppfolgingsplanVarselPermanentException(
+                    "Oppfølgingsplanvarsel har ugyldig data.arbeidsgiverMeldingType=$arbeidsgiverMeldingType",
+                )
+        }
+
+    private fun handleInvalidOppfolgingsplanVarselbestilling(
+        varselHendelse: NarmesteLederHendelse,
+        exception: OppfolgingsplanVarselPermanentException,
+    ) {
+        countOppfolgingsplanVarselUgyldig()
+        log.warn(
+            "Avviser ugyldig oppfølgingsplanvarselbestilling: type={}, feil={}",
+            varselHendelse.type,
+            exception.message,
+        )
+        senderFacade.lagreIkkeUtsendtArbeidsgiverNotifikasjonForNarmesteLeder(
+            varselHendelse = varselHendelse,
+            eksternReferanse = UUID.randomUUID().toString(),
+            feilmelding = exception.message,
+            merkelapp = ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP,
+            hendelseJson = varselHendelse.serializeSafely(),
+            resendExhausted = true,
+        )
+    }
+
+    private fun NarmesteLederHendelse.serializeSafely(): String? =
+        runCatching { objectMapper.writeValueAsString(this) }
+            .onFailure { exception ->
+                log.error(
+                    "Kunne ikke serialisere oppfølgingsplanvarselbestilling for feillagring: type={}, feil={}",
+                    type,
+                    exception::class.simpleName ?: "UnknownException",
+                )
+            }.getOrNull()
+
+    private data class OppfolgingsplanArbeidsgiverSak(
+        val grupperingsid: String,
+        val link: String,
+        val narmesteLederRelasjon: NarmesteLederRelasjon,
+    )
+
+    private data class ValidatedOppfolgingsplanVarselbestilling(
+        val varselbestilling: OppfolgingsplanVarselbestillingData,
+        val notifikasjonInnhold: OppfolgingsplanNotifikasjonInnhold,
+        val varselTekst: String,
+        val meldingstype: Meldingstype?,
+    )
+
+    private class OppfolgingsplanVarselRetryableException(
+        override val message: String,
+        cause: Throwable? = null,
+    ) : RuntimeException(message, cause)
+
+    private class OppfolgingsplanVarselPermanentException(
+        override val message: String,
+    ) : RuntimeException(message)
 }

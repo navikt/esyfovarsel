@@ -261,6 +261,7 @@ fun setModule(env: Environment): Application.() -> Unit =
                 kartleggingVarselService = kartleggingssporsmalVarselService,
                 senderFacade = senderFacade,
                 arbeidsgiverVarselService = arbeidsgiverVarselService,
+                oppfolgingsplanVarselService = oppfolgingsplanVarselService,
             )
 
         val varselBusService =

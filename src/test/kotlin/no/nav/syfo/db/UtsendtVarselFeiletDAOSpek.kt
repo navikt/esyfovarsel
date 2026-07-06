@@ -92,6 +92,24 @@ class UtsendtVarselFeiletDAOSpek :
 
                 embeddedDatabase.fetchUtsendtArbeidsgivernotifikasjonVarselFeilet().size shouldBe 0
             }
+
+            it("Henter AG-feiletvarsel for NL_OPPFOLGINGSPLAN_VARSELBESTILLING") {
+                val fnr = "12121212121"
+                val varsel =
+                    ikkeUtsendtVarsel(
+                        fnr = fnr,
+                        hendelseJson = """{"type":"NL_OPPFOLGINGSPLAN_VARSELBESTILLING","data":{"arbeidsgiverMeldingType":"BESKJED"}}""",
+                    ).copy(
+                        uuidEksternReferanse = UUID.randomUUID().toString(),
+                        orgnummer = "999888777",
+                        kanal = Kanal.ARBEIDSGIVERNOTIFIKASJON.name,
+                        hendelsetypeNavn = HendelseType.NL_OPPFOLGINGSPLAN_VARSELBESTILLING.name,
+                    )
+
+                embeddedDatabase.storeUtsendtVarselFeilet(varsel)
+
+                embeddedDatabase.fetchUtsendtArbeidsgivernotifikasjonVarselFeilet().size shouldBe 1
+            }
         }
     })
 
