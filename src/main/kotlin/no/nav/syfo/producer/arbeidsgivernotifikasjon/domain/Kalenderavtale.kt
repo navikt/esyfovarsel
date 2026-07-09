@@ -19,6 +19,8 @@ import no.nav.syfo.db.domain.PKalenderInput
 import no.nav.syfo.kafka.consumers.varselbus.domain.DialogmoteSvarType
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601DateTime
 import java.time.LocalDateTime
+import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon.Companion.log
 
 data class NyKalenderInput(
     val sakId: String,
@@ -71,8 +73,15 @@ private fun NyKalenderInput.createMottakere(): List<MottakerInput> =
         ),
     )
 
-private fun NyKalenderInput.createEksterneVarsler(): List<EksterntVarselInput> =
-    listOf(
+private fun NyKalenderInput.createEksterneVarsler(): List<EksterntVarselInput> {
+    val adresses = ledersEpost.split(";")
+    if (adresses.size > 1) {
+        log.info(
+            "Narmeste leder epostadresse inneholder flere adresser, sender varsel til alle",
+            keyValue("eksternId", eksternId),
+        )
+    }
+    return adresses.map {
         EksterntVarselInput(
             epost =
                 Optional.presentIfNotNull(
@@ -82,7 +91,7 @@ private fun NyKalenderInput.createEksterneVarsler(): List<EksterntVarselInput> =
                                 kontaktinfo =
                                     Optional.present(
                                         EpostKontaktInfoInput(
-                                            epostadresse = ledersEpost,
+                                            epostadresse = it,
                                         ),
                                     ),
                             ),
@@ -95,8 +104,9 @@ private fun NyKalenderInput.createEksterneVarsler(): List<EksterntVarselInput> =
                             ),
                     ),
                 ),
-        ),
-    )
+        )
+    }.toList()
+}
 
 private fun NyKalenderInput.createHardDelete(): Optional<FutureTemporalInput> =
     hardDeleteDate?.let {

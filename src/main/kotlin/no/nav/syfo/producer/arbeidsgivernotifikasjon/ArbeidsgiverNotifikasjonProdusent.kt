@@ -194,7 +194,7 @@ class ArbeidsgiverNotifikasjonProdusent(
         val result = response.data?.nyKalenderavtale
 
         if (result?.onNyKalenderavtaleVellykket != null) {
-            log.info("Opprettet ny kalenderavtale!")
+            log.info("Opprettet ny kalenderavtale: ${result.onNyKalenderavtaleVellykket.id}")
             return result.onNyKalenderavtaleVellykket.id
         } else {
             log.error("Feil ved oppretting av kalenderavtale")
