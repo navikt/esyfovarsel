@@ -101,7 +101,7 @@ sealed class ArbeidsgiverNotifikasjon {
 
     companion object {
         private const val MAX_MESSAGE_TEXT_LENGTH = 300
-        private val log = LoggerFactory.getLogger(ArbeidsgiverNotifikasjon::class.qualifiedName)
+        val log = LoggerFactory.getLogger(ArbeidsgiverNotifikasjon::class.qualifiedName)
     }
 }
 
@@ -132,8 +132,15 @@ data class ArbeidsgiverNotifikasjonNarmesteLeder(
             ),
         )
 
-    override fun createEksterneVarsler(): List<EksterntVarselInput> =
-        listOf(
+    override fun createEksterneVarsler(): List<EksterntVarselInput> {
+        val adresses = narmesteLederEpostadresse.split(";")
+        if (adresses.size > 1) {
+            log.info(
+                "Narmeste leder epostadresse inneholder flere adresser, sender varsel til alle",
+                keyValue("varselId", varselId),
+            )
+        }
+        return adresses.map {
             EksterntVarselInput(
                 epost =
                     Optional.present(
@@ -143,7 +150,7 @@ data class ArbeidsgiverNotifikasjonNarmesteLeder(
                                     kontaktinfo =
                                         Optional.present(
                                             EpostKontaktInfoInput(
-                                                epostadresse = narmesteLederEpostadresse,
+                                                epostadresse = it,
                                             ),
                                         ),
                                 ),
@@ -152,8 +159,9 @@ data class ArbeidsgiverNotifikasjonNarmesteLeder(
                             sendetidspunkt = createSendetidspunkt(),
                         ),
                     ),
-            ),
-        )
+            )
+        }.toList()
+    }
 
     override fun createVariables() =
         NarmestelederVariablesCreate(

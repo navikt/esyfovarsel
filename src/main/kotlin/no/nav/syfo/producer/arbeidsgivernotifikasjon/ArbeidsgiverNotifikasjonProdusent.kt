@@ -69,7 +69,7 @@ class ArbeidsgiverNotifikasjonProdusent(
         val resultat = nyOppgave?.__typename
         if (resultat == NY_OPPGAVE_VELLYKKET.status) {
             log.info(
-                "Have send new task with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api",
+                "Have sent new task with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api",
             )
             return nyOppgave.id
         } else {
