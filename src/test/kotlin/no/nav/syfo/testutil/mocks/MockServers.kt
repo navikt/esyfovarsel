@@ -92,7 +92,7 @@ class MockServers(
             """
             post("/") {
                 val body = call.receiveText()
-                if (body.contains("OpprettNyOppgave")) {
+                if (body.contains("OpprettNyOppgave") || body.contains("\"operationName\":\"nyOppgave\"")) {
                     if (body.contains("force-error")) {
                         call.respondText(responseNyOppgaveMedFeil, ContentType.Application.Json)
                     } else {

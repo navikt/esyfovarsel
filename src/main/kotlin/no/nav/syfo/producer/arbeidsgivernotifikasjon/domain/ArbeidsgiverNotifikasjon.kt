@@ -1,6 +1,7 @@
 package no.nav.syfo.producer.arbeidsgivernotifikasjon.domain
 
 import com.apollo.graphql.NyBeskjedMutation
+import com.apollo.graphql.NyOppgaveMutation
 import com.apollo.graphql.type.AltinnRessursMottakerInput
 import com.apollo.graphql.type.EksterntVarselAltinnressursInput
 import com.apollo.graphql.type.EksterntVarselEpostInput
@@ -13,6 +14,7 @@ import com.apollo.graphql.type.MottakerInput
 import com.apollo.graphql.type.NaermesteLederMottakerInput
 import com.apollo.graphql.type.NotifikasjonInput
 import com.apollo.graphql.type.NyBeskjedInput
+import com.apollo.graphql.type.NyOppgaveInput
 import com.apollo.graphql.type.SendetidspunktInput
 import com.apollo.graphql.type.Sendevindu
 import com.apollographql.apollo.api.Optional
@@ -60,26 +62,39 @@ sealed class ArbeidsgiverNotifikasjon {
             nyBeskjed =
                 NyBeskjedInput(
                     mottakere = Optional.present(createMottakere()),
-                    notifikasjon = createNotifikasjon(),
+                    notifikasjon = createNotifikasjon(MutationType.BESKJED),
                     metadata = createMetadata(),
                     eksterneVarsler = Optional.present(createEksterneVarsler()),
                 ),
         )
 
-    protected abstract fun createMottakere(): List<MottakerInput>
-
-    protected abstract fun createEksterneVarsler(): List<EksterntVarselInput>
-
-    protected fun createSendetidspunkt(): SendetidspunktInput =
-        SendetidspunktInput(
-            tidspunkt = Optional.Absent,
-            sendevindu = Optional.present(Sendevindu.NKS_AAPNINGSTID),
+    fun toNyOppgaveMutation(): NyOppgaveMutation =
+        NyOppgaveMutation(
+            nyOppgave =
+                NyOppgaveInput(
+                    mottakere = Optional.present(createMottakere()),
+                    notifikasjon = createNotifikasjon(MutationType.OPPGAVE),
+                    frist = Optional.Absent,
+                    metadata = createMetadata(),
+                    eksterneVarsler = Optional.present(createEksterneVarsler(Sendevindu.LOEPENDE)),
+                    paaminnelse = Optional.Absent,
+                ),
         )
 
-    private fun createNotifikasjon(): NotifikasjonInput =
+    protected abstract fun createMottakere(): List<MottakerInput>
+
+    protected abstract fun createEksterneVarsler(sendevindu: Sendevindu = Sendevindu.NKS_AAPNINGSTID): List<EksterntVarselInput>
+
+    protected fun createSendetidspunkt(sendevindu: Sendevindu = Sendevindu.NKS_AAPNINGSTID): SendetidspunktInput =
+        SendetidspunktInput(
+            tidspunkt = Optional.Absent,
+            sendevindu = Optional.present(sendevindu),
+        )
+
+    private fun createNotifikasjon(mutationType: MutationType): NotifikasjonInput =
         NotifikasjonInput(
             merkelapp = merkelapp,
-            tekst = sanitizedMessageText(MutationType.BESKJED),
+            tekst = sanitizedMessageText(mutationType),
             lenke = url,
         )
 
@@ -132,7 +147,7 @@ data class ArbeidsgiverNotifikasjonNarmesteLeder(
             ),
         )
 
-    override fun createEksterneVarsler(): List<EksterntVarselInput> {
+    override fun createEksterneVarsler(sendevindu: Sendevindu): List<EksterntVarselInput> {
         val adresses = narmesteLederEpostadresse.split(";")
         if (adresses.size > 1) {
             log.info(
@@ -140,27 +155,28 @@ data class ArbeidsgiverNotifikasjonNarmesteLeder(
                 keyValue("varselId", varselId),
             )
         }
-        return adresses.map {
-            EksterntVarselInput(
-                epost =
-                    Optional.present(
-                        EksterntVarselEpostInput(
-                            mottaker =
-                                EpostMottakerInput(
-                                    kontaktinfo =
-                                        Optional.present(
-                                            EpostKontaktInfoInput(
-                                                epostadresse = it,
+        return adresses
+            .map {
+                EksterntVarselInput(
+                    epost =
+                        Optional.present(
+                            EksterntVarselEpostInput(
+                                mottaker =
+                                    EpostMottakerInput(
+                                        kontaktinfo =
+                                            Optional.present(
+                                                EpostKontaktInfoInput(
+                                                    epostadresse = it,
+                                                ),
                                             ),
-                                        ),
-                                ),
-                            epostTittel = emailTitle,
-                            epostHtmlBody = emailBody,
-                            sendetidspunkt = createSendetidspunkt(),
+                                    ),
+                                epostTittel = emailTitle,
+                                epostHtmlBody = emailBody,
+                                sendetidspunkt = createSendetidspunkt(sendevindu),
+                            ),
                         ),
-                    ),
-            )
-        }.toList()
+                )
+            }.toList()
     }
 
     override fun createVariables() =
@@ -206,7 +222,7 @@ data class ArbeidsgiverNotifikasjonAltinnRessurs(
             ),
         )
 
-    override fun createEksterneVarsler(): List<EksterntVarselInput> =
+    override fun createEksterneVarsler(sendevindu: Sendevindu): List<EksterntVarselInput> =
         listOf(
             EksterntVarselInput(
                 altinnressurs =
@@ -219,7 +235,7 @@ data class ArbeidsgiverNotifikasjonAltinnRessurs(
                             epostTittel = emailTitle,
                             epostHtmlBody = emailBody,
                             smsTekst = smsTekst,
-                            sendetidspunkt = createSendetidspunkt(),
+                            sendetidspunkt = createSendetidspunkt(sendevindu),
                         ),
                     ),
             ),

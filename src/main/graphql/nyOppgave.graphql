@@ -1,0 +1,26 @@
+mutation nyOppgave($nyOppgave: NyOppgaveInput!) {
+    nyOppgave(nyOppgave: $nyOppgave) {
+        ... on NyOppgaveVellykket {
+            id
+        }
+        ... on UgyldigMerkelapp {
+            feilmelding
+        }
+        ... on UgyldigMottaker {
+            feilmelding
+        }
+        ... on DuplikatEksternIdOgMerkelapp {
+            feilmelding
+            idTilEksisterende
+        }
+        ... on UkjentProdusent {
+            feilmelding
+        }
+        ... on UkjentRolle {
+            feilmelding
+        }
+        ... on UgyldigPaaminnelseTidspunkt {
+            feilmelding
+        }
+    }
+}

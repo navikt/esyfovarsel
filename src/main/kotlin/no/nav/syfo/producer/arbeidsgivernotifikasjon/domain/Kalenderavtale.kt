@@ -15,12 +15,12 @@ import com.apollo.graphql.type.NyTidStrategi
 import com.apollo.graphql.type.SendetidspunktInput
 import com.apollo.graphql.type.Sendevindu
 import com.apollographql.apollo.api.Optional
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.syfo.db.domain.PKalenderInput
 import no.nav.syfo.kafka.consumers.varselbus.domain.DialogmoteSvarType
+import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon.Companion.log
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601DateTime
 import java.time.LocalDateTime
-import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon.Companion.log
 
 data class NyKalenderInput(
     val sakId: String,
@@ -81,31 +81,32 @@ private fun NyKalenderInput.createEksterneVarsler(): List<EksterntVarselInput> {
             keyValue("eksternId", eksternId),
         )
     }
-    return adresses.map {
-        EksterntVarselInput(
-            epost =
-                Optional.presentIfNotNull(
-                    EksterntVarselEpostInput(
-                        mottaker =
-                            EpostMottakerInput(
-                                kontaktinfo =
-                                    Optional.present(
-                                        EpostKontaktInfoInput(
-                                            epostadresse = it,
+    return adresses
+        .map {
+            EksterntVarselInput(
+                epost =
+                    Optional.presentIfNotNull(
+                        EksterntVarselEpostInput(
+                            mottaker =
+                                EpostMottakerInput(
+                                    kontaktinfo =
+                                        Optional.present(
+                                            EpostKontaktInfoInput(
+                                                epostadresse = it,
+                                            ),
                                         ),
-                                    ),
-                            ),
-                        epostTittel = epostTittel,
-                        epostHtmlBody = epostHtmlBody,
-                        sendetidspunkt =
-                            SendetidspunktInput(
-                                tidspunkt = Optional.Absent,
-                                sendevindu = Optional.present(Sendevindu.NKS_AAPNINGSTID),
-                            ),
+                                ),
+                            epostTittel = epostTittel,
+                            epostHtmlBody = epostHtmlBody,
+                            sendetidspunkt =
+                                SendetidspunktInput(
+                                    tidspunkt = Optional.Absent,
+                                    sendevindu = Optional.present(Sendevindu.NKS_AAPNINGSTID),
+                                ),
+                        ),
                     ),
-                ),
-        )
-    }.toList()
+            )
+        }.toList()
 }
 
 private fun NyKalenderInput.createHardDelete(): Optional<FutureTemporalInput> =
