@@ -84,7 +84,7 @@ class ArbeidsgiverNotifikasjonProdusent(
         }
 
         throw RuntimeException(
-            "Could not send task to arbeidsgiver: httpStatus=200, errorsEmpty=${response.errors.isNullOrEmpty()}, firstError=${response.errors?.firstOrNull()?.message ?: "unknown error"}, dataWasNull=${response.data == null}",
+            "Could not send task to arbeidsgiver: errorsEmpty=${response.errors.isNullOrEmpty()}, firstError=${response.errors?.firstOrNull()?.message ?: "unknown error"}, dataWasNull=${response.data == null}",
         )
     }
 

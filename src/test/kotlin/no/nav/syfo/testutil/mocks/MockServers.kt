@@ -28,6 +28,9 @@ class MockServers(
     val urlEnv: UrlEnv,
     val authEnv: AuthEnv,
 ) {
+    private val nyOppgaveOperationRegex = Regex("\"operationName\"\\s*:\\s*\"nyOppgave\"")
+    private val nyBeskjedOperationRegex = Regex("\"operationName\"\\s*:\\s*\"nyBeskjed\"")
+
     fun mockDkifServer(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> =
         mockServer(urlEnv.dkifUrl) {
             val jsonMapper = jacksonObjectMapper()
@@ -92,13 +95,13 @@ class MockServers(
             """
             post("/") {
                 val body = call.receiveText()
-                if (body.contains("OpprettNyOppgave") || body.contains("\"operationName\":\"nyOppgave\"")) {
+                if (body.contains("OpprettNyOppgave") || nyOppgaveOperationRegex.containsMatchIn(body)) {
                     if (body.contains("force-error")) {
                         call.respondText(responseNyOppgaveMedFeil, ContentType.Application.Json)
                     } else {
                         call.respondText(responseNyOppgave, ContentType.Application.Json)
                     }
-                } else if (body.contains("OpprettNyBeskjed") || body.contains("\"operationName\":\"nyBeskjed\"")) {
+                } else if (body.contains("OpprettNyBeskjed") || nyBeskjedOperationRegex.containsMatchIn(body)) {
                     call.respondText(responseNyBeskjed, ContentType.Application.Json)
                 } else {
                     call.respond(HttpStatusCode.InternalServerError)

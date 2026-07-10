@@ -18,9 +18,11 @@ import com.apollographql.apollo.api.Optional
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.syfo.db.domain.PKalenderInput
 import no.nav.syfo.kafka.consumers.varselbus.domain.DialogmoteSvarType
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.ArbeidsgiverNotifikasjon.Companion.log
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601DateTime
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+
+private val log = LoggerFactory.getLogger(NyKalenderInput::class.qualifiedName)
 
 data class NyKalenderInput(
     val sakId: String,
@@ -74,7 +76,7 @@ private fun NyKalenderInput.createMottakere(): List<MottakerInput> =
     )
 
 private fun NyKalenderInput.createEksterneVarsler(): List<EksterntVarselInput> {
-    val adresses = ledersEpost.split(";")
+    val adresses = ledersEpost.splitEpostadresser()
     if (adresses.size > 1) {
         log.info(
             "Narmeste leder epostadresse inneholder flere adresser, sender varsel til alle",
@@ -146,31 +148,40 @@ data class OppdaterKalenderInput(
 fun OppdaterKalenderInput.toOppdaterKalenderavtaleMutation(): OppdaterKalenderavtaleMutation {
     val eksterneVarslerData =
         if (ledersEpost != null && epostTittel != null && epostHtmlBody != null) {
-            listOf(
-                EksterntVarselInput(
-                    epost =
-                        Optional.present(
-                            EksterntVarselEpostInput(
-                                mottaker =
-                                    EpostMottakerInput(
-                                        kontaktinfo =
-                                            Optional.present(
-                                                EpostKontaktInfoInput(
-                                                    epostadresse = ledersEpost,
+            ledersEpost
+                .splitEpostadresser()
+                .also {
+                    if (it.size > 1) {
+                        log.info(
+                            "Narmeste leder epostadresse inneholder flere adresser, sender varsel til alle",
+                            keyValue("kalenderId", id),
+                        )
+                    }
+                }.map { epostadresse ->
+                    EksterntVarselInput(
+                        epost =
+                            Optional.present(
+                                EksterntVarselEpostInput(
+                                    mottaker =
+                                        EpostMottakerInput(
+                                            kontaktinfo =
+                                                Optional.present(
+                                                    EpostKontaktInfoInput(
+                                                        epostadresse = epostadresse,
+                                                    ),
                                                 ),
-                                            ),
-                                    ),
-                                epostTittel = epostTittel,
-                                epostHtmlBody = epostHtmlBody,
-                                sendetidspunkt =
-                                    SendetidspunktInput(
-                                        tidspunkt = Optional.Absent,
-                                        sendevindu = Optional.present(Sendevindu.NKS_AAPNINGSTID),
-                                    ),
+                                        ),
+                                    epostTittel = epostTittel,
+                                    epostHtmlBody = epostHtmlBody,
+                                    sendetidspunkt =
+                                        SendetidspunktInput(
+                                            tidspunkt = Optional.Absent,
+                                            sendevindu = Optional.present(Sendevindu.NKS_AAPNINGSTID),
+                                        ),
+                                ),
                             ),
-                        ),
-                ),
-            )
+                    )
+                }
         } else {
             emptyList()
         }

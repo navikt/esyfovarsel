@@ -28,6 +28,9 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.formatAsISO8601DateTime
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
+private const val MAX_MESSAGE_TEXT_LENGTH = 300
+private val log = LoggerFactory.getLogger(ArbeidsgiverNotifikasjon::class.qualifiedName)
+
 sealed class ArbeidsgiverNotifikasjon {
     abstract val varselId: String
     abstract val virksomhetsnummer: String
@@ -113,11 +116,6 @@ sealed class ArbeidsgiverNotifikasjon {
         BESKJED,
         OPPGAVE,
     }
-
-    companion object {
-        private const val MAX_MESSAGE_TEXT_LENGTH = 300
-        val log = LoggerFactory.getLogger(ArbeidsgiverNotifikasjon::class.qualifiedName)
-    }
 }
 
 data class ArbeidsgiverNotifikasjonNarmesteLeder(
@@ -148,7 +146,7 @@ data class ArbeidsgiverNotifikasjonNarmesteLeder(
         )
 
     override fun createEksterneVarsler(sendevindu: Sendevindu): List<EksterntVarselInput> {
-        val adresses = narmesteLederEpostadresse.split(";")
+        val adresses = narmesteLederEpostadresse.splitEpostadresser()
         if (adresses.size > 1) {
             log.info(
                 "Narmeste leder epostadresse inneholder flere adresser, sender varsel til alle",
