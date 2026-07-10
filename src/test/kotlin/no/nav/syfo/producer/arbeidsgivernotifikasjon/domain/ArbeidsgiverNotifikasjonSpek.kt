@@ -177,4 +177,69 @@ class ArbeidsgiverNotifikasjonSpek :
                 variables.tekst shouldBe longMessageText.take(300)
             }
         }
+
+        describe("toNyOppgaveMutation") {
+            it("splitter narmeste leder epost paa semikolon og oppretter to eksterne varsler") {
+                val notifikasjon =
+                    ArbeidsgiverNotifikasjonNarmesteLeder(
+                        varselId = varselId,
+                        virksomhetsnummer = ORGNUMMER,
+                        url = "https://arbeidsgiver.nav.no",
+                        narmesteLederFnr = FNR_1,
+                        ansattFnr = FNR_2,
+                        messageText = messageText,
+                        narmesteLederEpostadresse = "leder1@nav.no; leder2@nav.no; ",
+                        merkelapp = "Oppfølging",
+                        emailTitle = emailTitle,
+                        emailBody = emailBody,
+                        hardDeleteDate = hardDeleteDate,
+                        grupperingsid = grupperingsid,
+                    )
+
+                val eksterneVarsler =
+                    notifikasjon
+                        .toNyOppgaveMutation()
+                        .nyOppgave
+                        .eksterneVarsler
+                        .getOrThrow()
+                val kontaktinfo1 =
+                    requireNotNull(
+                        requireNotNull(eksterneVarsler[0].epost.getOrThrow()).mottaker.kontaktinfo.getOrThrow(),
+                    )
+                val kontaktinfo2 =
+                    requireNotNull(
+                        requireNotNull(eksterneVarsler[1].epost.getOrThrow()).mottaker.kontaktinfo.getOrThrow(),
+                    )
+
+                eksterneVarsler.size shouldBe 2
+                kontaktinfo1.epostadresse shouldBe "leder1@nav.no"
+                kontaktinfo2.epostadresse shouldBe "leder2@nav.no"
+            }
+        }
+
+        describe("toOppdaterKalenderavtaleMutation") {
+            it("splitter og normaliserer flere epostadresser for eksterne varsler") {
+                val mutation =
+                    OppdaterKalenderInput(
+                        id = UUID.randomUUID().toString(),
+                        ledersEpost = "leder1@nav.no; leder2@nav.no; ",
+                        epostTittel = emailTitle,
+                        epostHtmlBody = emailBody,
+                    ).toOppdaterKalenderavtaleMutation()
+
+                val eksterneVarsler = mutation.eksterneVarsler
+                val kontaktinfo1 =
+                    requireNotNull(
+                        requireNotNull(eksterneVarsler[0].epost.getOrThrow()).mottaker.kontaktinfo.getOrThrow(),
+                    )
+                val kontaktinfo2 =
+                    requireNotNull(
+                        requireNotNull(eksterneVarsler[1].epost.getOrThrow()).mottaker.kontaktinfo.getOrThrow(),
+                    )
+
+                eksterneVarsler.size shouldBe 2
+                kontaktinfo1.epostadresse shouldBe "leder1@nav.no"
+                kontaktinfo2.epostadresse shouldBe "leder2@nav.no"
+            }
+        }
     })

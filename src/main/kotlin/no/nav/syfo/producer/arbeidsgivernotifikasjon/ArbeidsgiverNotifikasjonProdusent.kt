@@ -2,6 +2,7 @@ package no.nav.syfo.producer.arbeidsgivernotifikasjon
 
 import com.apollo.graphql.NyBeskjedMutation
 import com.apollo.graphql.NyKalenderavtaleMutation
+import com.apollo.graphql.NyOppgaveMutation
 import com.apollo.graphql.NySakMutation
 import com.apollo.graphql.NyStatusSakByGrupperingsidMutation
 import com.apollo.graphql.OppdaterKalenderavtaleMutation
@@ -11,7 +12,6 @@ import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
-import io.ktor.client.call.body
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -35,8 +35,6 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.OppdaterKalenderInpu
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toNyKalenderavtaleMutation
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toNyStatusSakByGrupperingsidMutation
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toOppdaterKalenderavtaleMutation
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyOppgaveResponse
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyoppgaveMutationStatus.NY_OPPGAVE_VELLYKKET
 import no.nav.syfo.utils.httpClientWithRetry
 import org.slf4j.LoggerFactory
 
@@ -55,31 +53,39 @@ class ArbeidsgiverNotifikasjonProdusent(
             .addInterceptor(BearerTokenInterceptor { azureAdTokenConsumer.getToken(scope) })
             .build()
 
-    override suspend fun createNewOppgaveForArbeidsgiver(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? {
+    override suspend fun createNewOppgaveForArbeidsgiver(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? =
+        createNewOppgaveForArbeidsgiverViaApollo(arbeidsgiverNotifikasjon)
+
+    private suspend fun createNewOppgaveForArbeidsgiverViaApollo(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? {
         log.info(
             "About to send new task with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api",
         )
-        val response: HttpResponse =
-            callArbeidsgiverNotifikasjonProdusent(
-                CREATE_TASK_AG_MUTATION,
-                arbeidsgiverNotifikasjon.createVariables(),
-            )
-        val nyOppgaveResponse = response.body<NyOppgaveResponse>()
-        val nyOppgave = nyOppgaveResponse.data?.nyOppgave
-        val resultat = nyOppgave?.__typename
-        if (resultat == NY_OPPGAVE_VELLYKKET.status) {
+        val response: ApolloResponse<NyOppgaveMutation.Data> =
+            apolloClient.mutation(arbeidsgiverNotifikasjon.toNyOppgaveMutation()).execute()
+        val nyOppgave = response.data?.nyOppgave
+
+        if (nyOppgave?.onNyOppgaveVellykket != null) {
             log.info(
-                "Have send new task with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api",
+                "Have sent new task with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api",
             )
-            return nyOppgave.id
-        } else {
-            if (resultat != null) {
-                throw RuntimeException(nyOppgave.feilmelding)
-            }
-            throw RuntimeException(
-                "Could not send task to arbeidsgiver: httpStatus=${response.status.value}, errorsEmpty=${nyOppgaveResponse.errors.isNullOrEmpty()}, firstError=${nyOppgaveResponse.errors?.firstOrNull()?.message ?: "unknown error"}, dataWasNull=${nyOppgaveResponse.data == null}",
-            )
+            return nyOppgave.onNyOppgaveVellykket.id
         }
+
+        val feilmelding =
+            nyOppgave?.onUgyldigMerkelapp?.feilmelding
+                ?: nyOppgave?.onUgyldigMottaker?.feilmelding
+                ?: nyOppgave?.onDuplikatEksternIdOgMerkelapp?.feilmelding
+                ?: nyOppgave?.onUkjentProdusent?.feilmelding
+                ?: nyOppgave?.onUkjentRolle?.feilmelding
+                ?: nyOppgave?.onUgyldigPaaminnelseTidspunkt?.feilmelding
+
+        if (feilmelding != null) {
+            throw RuntimeException(feilmelding)
+        }
+
+        throw RuntimeException(
+            "Could not send task to arbeidsgiver: errorsEmpty=${response.errors.isNullOrEmpty()}, firstError=${response.errors?.firstOrNull()?.message ?: "unknown error"}, dataWasNull=${response.data == null}",
+        )
     }
 
     override suspend fun createNewBeskjedForArbeidsgiver(arbeidsgiverNotifikasjonInput: ArbeidsgiverNotifikasjon): String? {
@@ -194,7 +200,7 @@ class ArbeidsgiverNotifikasjonProdusent(
         val result = response.data?.nyKalenderavtale
 
         if (result?.onNyKalenderavtaleVellykket != null) {
-            log.info("Opprettet ny kalenderavtale!")
+            log.info("Opprettet ny kalenderavtale: ${result.onNyKalenderavtaleVellykket.id}")
             return result.onNyKalenderavtaleVellykket.id
         } else {
             log.error("Feil ved oppretting av kalenderavtale")
