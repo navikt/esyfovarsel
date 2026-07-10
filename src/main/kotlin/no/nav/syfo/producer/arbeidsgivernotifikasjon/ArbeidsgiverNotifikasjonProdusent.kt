@@ -12,7 +12,6 @@ import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
-import io.ktor.client.call.body
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -36,8 +35,6 @@ import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.OppdaterKalenderInpu
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toNyKalenderavtaleMutation
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toNyStatusSakByGrupperingsidMutation
 import no.nav.syfo.producer.arbeidsgivernotifikasjon.domain.toOppdaterKalenderavtaleMutation
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyOppgaveResponse
-import no.nav.syfo.producer.arbeidsgivernotifikasjon.response.nyoppgave.NyoppgaveMutationStatus.NY_OPPGAVE_VELLYKKET
 import no.nav.syfo.utils.httpClientWithRetry
 import org.slf4j.LoggerFactory
 
@@ -88,35 +85,6 @@ class ArbeidsgiverNotifikasjonProdusent(
 
         throw RuntimeException(
             "Could not send task to arbeidsgiver: httpStatus=200, errorsEmpty=${response.errors.isNullOrEmpty()}, firstError=${response.errors?.firstOrNull()?.message ?: "unknown error"}, dataWasNull=${response.data == null}",
-        )
-    }
-
-    @Suppress("unused")
-    private suspend fun createNewOppgaveForArbeidsgiverViaRawGraphql(arbeidsgiverNotifikasjon: ArbeidsgiverNotifikasjon): String? {
-        log.info(
-            "About to send new task with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api",
-        )
-        val response: HttpResponse =
-            callArbeidsgiverNotifikasjonProdusent(
-                CREATE_TASK_AG_MUTATION,
-                arbeidsgiverNotifikasjon.createVariables(),
-            )
-        val nyOppgaveResponse = response.body<NyOppgaveResponse>()
-        val nyOppgave = nyOppgaveResponse.data?.nyOppgave
-        val resultat = nyOppgave?.__typename
-        if (resultat == NY_OPPGAVE_VELLYKKET.status) {
-            log.info(
-                "Have sent new task with uuid ${arbeidsgiverNotifikasjon.varselId} to ag-notifikasjon-produsent-api",
-            )
-            return nyOppgave.id
-        }
-
-        if (resultat != null) {
-            throw RuntimeException(nyOppgave.feilmelding)
-        }
-
-        throw RuntimeException(
-            "Could not send task to arbeidsgiver: httpStatus=${response.status.value}, errorsEmpty=${nyOppgaveResponse.errors.isNullOrEmpty()}, firstError=${nyOppgaveResponse.errors?.firstOrNull()?.message ?: "unknown error"}, dataWasNull=${nyOppgaveResponse.data == null}",
         )
     }
 

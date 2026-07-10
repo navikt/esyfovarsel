@@ -197,7 +197,10 @@ class ArbeidsgiverNotifikasjonSpek :
                     )
 
                 val eksterneVarsler =
-                    notifikasjon.toNyOppgaveMutation().nyOppgave.eksterneVarsler
+                    notifikasjon
+                        .toNyOppgaveMutation()
+                        .nyOppgave
+                        .eksterneVarsler
                         .getOrThrow()
                 val kontaktinfo1 =
                     requireNotNull(
