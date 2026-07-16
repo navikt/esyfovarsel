@@ -24,7 +24,7 @@ val kafkaVersion = "4.3.1"
 val brukernotifikasjonerBuilderVersion = "2.2.0"
 val kotlinVersion = "2.3.21"
 val graphqlApolloVersion = "4.4.3"
-val nettyVersion = "4.2.15.Final"
+val nettyVersion = "4.2.16.Final"
 
 val githubUser: String by project
 val githubPassword: String by project
