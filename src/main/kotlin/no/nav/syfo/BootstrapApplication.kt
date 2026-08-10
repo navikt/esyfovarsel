@@ -8,6 +8,7 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationEnvironment
+import io.ktor.server.application.ApplicationStopping
 import io.ktor.server.application.install
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEnvironment
@@ -358,18 +359,32 @@ fun Application.kafkaModule(
     varselbusService: VarselBusService,
     testdataResetService: TestdataResetService,
 ) {
+    val varselBusKafkaConsumer = VarselBusKafkaConsumer(env, varselbusService)
+    val testdataResetConsumer =
+        if (env.isDevGcp()) {
+            TestdataResetConsumer(env, testdataResetService)
+        } else {
+            null
+        }
+
+    monitor.subscribe(ApplicationStopping) {
+        state.shutdownApplication()
+        varselBusKafkaConsumer.wakeup()
+        testdataResetConsumer?.wakeup()
+    }
+
     launch(backgroundTasksContext) {
         launchKafkaListener(
             state,
-            VarselBusKafkaConsumer(env, varselbusService),
+            varselBusKafkaConsumer,
         )
     }
 
-    if (env.isDevGcp()) {
+    if (testdataResetConsumer != null) {
         launch(backgroundTasksContext) {
             launchKafkaListener(
                 state,
-                TestdataResetConsumer(env, testdataResetService),
+                testdataResetConsumer,
             )
         }
     }

@@ -40,9 +40,12 @@ const val PKCS12 = "PKCS12"
 const val SSL = "SSL"
 
 val pollDurationInMillis = Duration.ofMillis(1000L)
+val kafkaConsumerCloseDuration = Duration.ofSeconds(3)
 
 interface KafkaListener {
     suspend fun listen(applicationState: ApplicationState)
+
+    fun wakeup() {}
 }
 
 fun commonProperties(env: Environment): Properties =
