@@ -40,7 +40,7 @@ class FriskmeldingTilArbeidsformidlingVedtakServiceTest :
                         journalpostUuid,
                         hendelse,
                         journalpostId,
-                        DistibusjonsType.VIKTIG,
+                        DistibusjonsType.VEDTAK,
                     )
                 }
             }
