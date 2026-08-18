@@ -19,7 +19,7 @@ class FriskmeldingTilArbeidsformidlingVedtakService(
             uuid = data.journalpost.uuid,
             varselHendelse = varselHendelse,
             journalpostId = data.journalpost.id,
-            distribusjonsType = DistibusjonsType.VIKTIG,
+            distribusjonsType = DistibusjonsType.VEDTAK,
         )
     }
 
