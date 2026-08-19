@@ -294,7 +294,7 @@ class ResendFailedVarslerJob(
 private fun HendelseType.toDistribusjonsType() =
     when (this) {
         HendelseType.SM_MER_VEILEDNING -> DistibusjonsType.VIKTIG
-        HendelseType.SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING -> DistibusjonsType.VIKTIG
+        HendelseType.SM_VEDTAK_FRISKMELDING_TIL_ARBEIDSFORMIDLING -> DistibusjonsType.VEDTAK
         HendelseType.SM_AKTIVITETSPLIKT -> DistibusjonsType.VIKTIG
         HendelseType.SM_FORHANDSVARSEL_MANGLENDE_MEDVIRKNING -> DistibusjonsType.VIKTIG
         HendelseType.SM_ARBEIDSUFORHET_FORHANDSVARSEL -> DistibusjonsType.VIKTIG
