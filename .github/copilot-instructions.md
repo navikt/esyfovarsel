@@ -37,44 +37,6 @@ These standards apply across Nav projects. Project-specific guidelines follow be
 - OpenTelemetry auto-instrumentation for observability
 - Separate dev/prod manifests
 
-### Writing Effective Agents
-
-Based on [GitHub's analysis of 2,500+ repositories](https://github.blog/ai-and-ml/github-copilot/how-to-write-a-great-agents-md-lessons-from-over-2500-repositories/), follow these patterns when creating or updating agents in `.github/agents/`:
-
-**Structure (in order):**
-
-1. **Frontmatter** - Name and description in YAML
-2. **Persona** - One sentence: who you are and what you specialize in
-3. **Commands** - Executable commands early, with flags and expected output
-4. **Related Agents** - Table of agents to delegate to
-5. **Core Content** - Code examples over explanations (show, don't tell)
-6. **Boundaries** - Three-tier system at the end
-
-**Three-Tier Boundaries:**
-
-```markdown
-## Boundaries
-
-### ✅ Always
-- Run `./gradlew build` after changes
-- Use parameterized queries
-
-### ⚠️ Ask First
-- Modifying production configs
-- Changing auth mechanisms
-
-### 🚫 Never
-- Commit secrets to git
-- Skip input validation
-```
-
-**Key Principles:**
-
-- **Commands early**: Put executable commands near the top, not buried at the bottom
-- **Code over prose**: Show real code examples, not descriptions of what code should do
-- **Specific stack**: Include versions and specifics (Java 21, Kotest DescribeSpec, Ktor)
-- **Actionable boundaries**: "Never commit secrets" not "I cannot access secrets"
-
 ---
 
 # Application-Specific Guidelines
@@ -268,40 +230,26 @@ Helper functions `isLocal()` and `isDevGcp()` control environment-specific behav
 
 NAIS platform (Kubernetes). Config in `nais/` directory with separate dev/prod manifests. CI via shared GitHub Actions workflow (`navikt/teamesyfo-github-actions-workflows`).
 
-## Documentation and Working Notes
+## Documentation
 
-This project uses three tiers for storing written artifacts:
+Keep temporary working notes in `.local-notes/`, which is ignored by Git.
+Maintain durable service documentation in `README.md` and the existing `docs/` layout as
+part of the authorized change. Record an ADR for a lasting architectural
+tradeoff or a change to an earlier architectural decision, following existing
+ADR paths and numbering when present. The task scope determines which docs
+need updating; ask only when a material decision or authority is missing.
 
-| Tier | Location | Purpose | Persists across sessions | Checked in |
-|------|----------|---------|--------------------------|------------|
-| **Session** | `~/.copilot/session-state/` | Scratch work for one task (todos, intermediate results) | No | No |
-| **Local notes** | `.local-notes/` | Plans, architecture drafts, research, implementation notes, AI reviews | Yes | No |
-| **Permanent docs** | `docs/` | Finalized documentation (ADRs, API docs, onboarding guides) | Yes | Yes |
+## Repository guidance
 
-### Defaults (do not ask)
+This repository owns `.github/copilot-instructions.md`, applicable files under
+`.github/instructions/`, and retained local agents and skills. Update affected
+repository guidance together with an authorized change, preserving service
+facts, build commands, data rules, and operational constraints.
 
-- **Planning, research, architecture drafts, reviews** → `.local-notes/` (create subdirectories as needed, e.g. `.local-notes/architecture/`, `.local-notes/research/`)
-- **Finalized documentation explicitly requested for the repo** → `docs/`
-- **Throwaway task tracking within a single session** → session state
-
-### When to ask
-
-If it's genuinely unclear whether the user wants a permanent doc or a working note (e.g., "write an ADR" — should it mature in `.local-notes/` first, or go straight to `docs/`?), ask.
-
-## Keeping Copilot Config in Sync
-
-When making changes that affect the patterns described in `.github/` config files (agents, instructions, skills), **suggest** updating the relevant files — but do not update them automatically.
-
-Examples of changes that should trigger a suggestion:
-- Upgrading or replacing frameworks (e.g., Ktor version bump, switching libraries)
-- Changing test framework or patterns
-- Adding/removing authentication mechanisms
-- Changing database access patterns
-- Adding new Kafka topics or changing consumer setup
-- Modifying build tooling or commands
-- Adding new HendelseType or output channels
-
-Format the suggestion as: *"This change affects patterns documented in `.github/instructions/<file>` — want me to update it?"*
+Portable agents and task workflows come from the selected nav-pilot package.
+Use the exact component identities offered by the active session. Check local
+and user components for name collisions when a skill is missing or resolves to
+unexpected content.
 
 ## Boundaries
 
