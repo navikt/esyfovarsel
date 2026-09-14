@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.api.artifacts.dsl.DependencyConstraintHandler
 
 group = "no.nav.syfo"
 version = "1.0"
@@ -24,7 +25,6 @@ val kafkaVersion = "4.3.1"
 val brukernotifikasjonerBuilderVersion = "2.2.0"
 val kotlinVersion = "2.4.20"
 val graphqlApolloVersion = "4.4.3"
-val nettyVersion = "4.2.16.Final"
 
 val githubUser: String by project
 val githubPassword: String by project
@@ -54,7 +54,6 @@ repositories {
 }
 
 dependencies {
-    implementation(platform("io.netty:netty-bom:$nettyVersion"))
     // Ktor server
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
@@ -117,13 +116,22 @@ dependencies {
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
 
     constraints {
-        implementation("org.apache.zookeeper:zookeeper") {
-            because("CVE-2023-44981")
-            version {
-                require("3.8.3")
-            }
-        }
+        implementationWithKtorVersionCheck(
+            dependencyNotation = "io.netty:netty-handler:4.2.17.Final",
+            expectedKtorVersion = "3.5.2",
+        )
     }
+}
+
+fun DependencyConstraintHandler.implementationWithKtorVersionCheck(
+    dependencyNotation: String,
+    expectedKtorVersion: String,
+) {
+    check(ktorVersion == expectedKtorVersion) {
+        "Ktor version changed from $expectedKtorVersion to $ktorVersion. " +
+            "Review the dependency constraint for $dependencyNotation."
+    }
+    add("implementation", dependencyNotation)
 }
 
 configurations.implementation {
