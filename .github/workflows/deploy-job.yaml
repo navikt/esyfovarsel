@@ -39,7 +39,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Deploy jobb
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: dev-gcp
           RESOURCE: nais/job-trigger-dev.yaml
@@ -55,7 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Deploy jobb
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: prod-gcp
           RESOURCE: nais/job-trigger-prod.yaml
