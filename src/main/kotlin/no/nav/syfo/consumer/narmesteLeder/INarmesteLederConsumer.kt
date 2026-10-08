@@ -4,5 +4,5 @@ interface INarmesteLederConsumer {
     suspend fun getNarmesteLeder(
         ansattFnr: String,
         orgnummer: String,
-    ): NarmestelederResponse?
+    ): NarmesteLederRelasjon?
 }

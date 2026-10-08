@@ -6,7 +6,7 @@ class NarmesteLederService(
     suspend fun getNarmesteLederRelasjon(
         fnr: String,
         orgnummer: String,
-    ): NarmesteLederRelasjon? = narmesteLederConsumer.getNarmesteLeder(fnr, orgnummer)?.narmesteLederRelasjon
+    ): NarmesteLederRelasjon? = narmesteLederConsumer.getNarmesteLeder(fnr, orgnummer)
 
     fun hasNarmesteLederInfo(narmesteLederRelasjon: NarmesteLederRelasjon?): Boolean =
         (narmesteLederRelasjon !== null) &&

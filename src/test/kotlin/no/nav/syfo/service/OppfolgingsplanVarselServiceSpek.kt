@@ -12,7 +12,6 @@ import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_OPPFOLGING_MERKELAPP
 import no.nav.syfo.BRUKERNOTIFIKASJONER_OPPFOLGINGSPLANER_SYKMELDT_URL
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederRelasjon
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
-import no.nav.syfo.consumer.narmesteLeder.Tilgang
 import no.nav.syfo.consumer.pdl.Foedselsdato
 import no.nav.syfo.consumer.pdl.HentPerson
 import no.nav.syfo.consumer.pdl.HentPersonData
@@ -281,8 +280,6 @@ class OppfolgingsplanVarselServiceSpek :
                     NarmesteLederRelasjon(
                         narmesteLederId = "1234",
                         narmesteLederFnr = FNR_2,
-                        tilganger = listOf(Tilgang.SYKMELDING),
-                        navn = "Test Lansen",
                         narmesteLederEpost = null,
                     )
 
@@ -752,8 +749,6 @@ private fun narmesteLederRelasjon(narmesteLederId: String) =
     NarmesteLederRelasjon(
         narmesteLederId = narmesteLederId,
         narmesteLederFnr = FNR_2,
-        tilganger = listOf(Tilgang.SYKMELDING),
-        navn = "Test Lansen",
         narmesteLederEpost = "test@test.no",
     )
 
