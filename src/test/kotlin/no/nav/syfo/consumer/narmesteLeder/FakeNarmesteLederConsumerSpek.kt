@@ -8,15 +8,14 @@ class FakeNarmesteLederConsumerSpek :
         describe("FakeNarmesteLederConsumer") {
             it("returns synthetic fnr values instead of reflecting input fnr") {
                 val ansattFnr = "12345678910"
-                val response =
+                val relasjon =
                     FakeNarmesteLederConsumer().getNarmesteLeder(
                         ansattFnr = ansattFnr,
                         orgnummer = "999999999",
                     )
-                val relasjon = response.narmesteLederRelasjon
-
-                relasjon?.fnr shouldBeEqualTo ansattFnr
-                relasjon?.narmesteLederFnr shouldBeEqualTo ansattFnr.reversed()
+                relasjon.narmesteLederFnr shouldBeEqualTo ansattFnr.reversed()
+                relasjon.narmesteLederId shouldBeEqualTo "local-narmeste-leder"
+                relasjon.narmesteLederEpost shouldBeEqualTo "narmeste.leder@example.invalid"
             }
         }
     })

@@ -75,9 +75,6 @@ class ArbeidsgiverNotifikasjonServiceTest :
                     NarmesteLederRelasjon(
                         narmesteLederFnr = input.narmesteLederFnr,
                         narmesteLederEpost = "leder@test.no",
-                        narmesteLederTelefonnummer = "99999999",
-                        tilganger = emptyList(),
-                        navn = "Leder",
                     )
                 every { narmesteLederService.hasNarmesteLederInfo(any()) } returns true
                 coEvery {
@@ -109,9 +106,6 @@ class ArbeidsgiverNotifikasjonServiceTest :
                     NarmesteLederRelasjon(
                         narmesteLederFnr = input.narmesteLederFnr,
                         narmesteLederEpost = "leder@test.no",
-                        narmesteLederTelefonnummer = null,
-                        tilganger = emptyList(),
-                        navn = "Leder",
                     )
                 every { narmesteLederService.hasNarmesteLederInfo(any()) } returns true
                 coEvery {
@@ -141,9 +135,6 @@ class ArbeidsgiverNotifikasjonServiceTest :
                     NarmesteLederRelasjon(
                         narmesteLederFnr = input.narmesteLederFnr,
                         narmesteLederEpost = "leder@test.no",
-                        narmesteLederTelefonnummer = "99999999",
-                        tilganger = emptyList(),
-                        navn = "Leder",
                     )
                 every { narmesteLederService.hasNarmesteLederInfo(any()) } returns true
                 coEvery {

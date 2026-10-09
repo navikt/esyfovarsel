@@ -70,8 +70,8 @@ spec:
           namespace: fager
         - application: syfosmregister
           namespace: teamsykmelding
-        - application: narmesteleder
-          namespace: teamsykmelding
+        - application: esyfo-narmesteleder
+          namespace: team-esyfo
         - application: istilgangskontroll
           namespace: teamsykefravr
   gcp:
@@ -141,9 +141,9 @@ spec:
     - name: AG_NOTIFIKASJON_PRODUSENT_API_SCOPE
       value: api://prod-gcp.fager.notifikasjon-produsent-api/.default
     - name: NARMESTELEDER_URL
-      value: http://narmesteleder.teamsykmelding
+      value: http://esyfo-narmesteleder.team-esyfo
     - name: NARMESTELEDER_SCOPE
-      value: api://prod-gcp.teamsykmelding.narmesteleder/.default
+      value: api://prod-gcp.team-esyfo.esyfo-narmesteleder/.default
     - name: BASE_URL_DINE_SYKMELDTE
       value: https://www.nav.no/arbeidsgiver/sykmeldte
     - name: DOKDIST_FORDELING_URL

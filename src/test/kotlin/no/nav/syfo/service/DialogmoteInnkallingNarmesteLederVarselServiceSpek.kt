@@ -8,7 +8,6 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederRelasjon
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
-import no.nav.syfo.consumer.narmesteLeder.Tilgang
 import no.nav.syfo.consumer.pdl.Foedselsdato
 import no.nav.syfo.consumer.pdl.HentPerson
 import no.nav.syfo.consumer.pdl.HentPersonData
@@ -70,8 +69,6 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
                 coEvery { narmesteLederService.getNarmesteLederRelasjon(any(), any()) } returns
                     NarmesteLederRelasjon(
                         narmesteLederId = "1234",
-                        tilganger = listOf(Tilgang.SYKMELDING),
-                        navn = "Hest hestesen",
                         narmesteLederEpost = "egg@egg.no",
                     )
                 coEvery { pdlClient.hentPerson(any()) } returns

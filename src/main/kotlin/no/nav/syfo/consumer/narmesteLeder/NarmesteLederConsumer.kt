@@ -1,12 +1,14 @@
 package no.nav.syfo.consumer.narmesteLeder
 
 import io.ktor.client.call.body
-import io.ktor.client.request.get
 import io.ktor.client.request.headers
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.append
+import kotlinx.coroutines.CancellationException
 import no.nav.syfo.UrlEnv
 import no.nav.syfo.auth.ITokenConsumer
 import no.nav.syfo.utils.httpClient
@@ -24,42 +26,60 @@ class NarmesteLederConsumer(
     override suspend fun getNarmesteLeder(
         ansattFnr: String,
         orgnummer: String,
-    ): NarmestelederResponse? {
-        log.info("Kaller narmesteleder for orgnummer: $orgnummer")
-        val requestURL = "$basepath/sykmeldt/narmesteleder?orgnummer=$orgnummer"
+    ): NarmesteLederRelasjon? {
+        val requestURL = "$basepath/internal/api/v1/lookup"
         try {
             val token = azureAdTokenConsumer.getToken(scope)
             val response =
-                client.get(requestURL) {
+                client.post(requestURL) {
                     headers {
                         append(HttpHeaders.Accept, ContentType.Application.Json)
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                         append(HttpHeaders.Authorization, "Bearer $token")
-                        append("Sykmeldt-Fnr", ansattFnr)
                     }
+                    setBody(LineManagerLookupRequest(ansattFnr, orgnummer))
                 }
 
             return when (response.status) {
                 HttpStatusCode.OK -> {
-                    response.body<NarmestelederResponse>()
-                }
-
-                HttpStatusCode.Unauthorized -> {
-                    log.error("Could not get nærmeste leder: Unable to authorize")
-                    null
+                    response.body<LineManagerLookupResponse>().lineManager?.let { leader ->
+                        NarmesteLederRelasjon(
+                            narmesteLederId = leader.id,
+                            narmesteLederFnr = leader.nationalIdentificationNumber,
+                            // An empty list means no valid address; null makes callers stop the varsel.
+                            narmesteLederEpost = leader.emailAddresses.takeIf { it.isNotEmpty() }?.joinToString(";"),
+                        )
+                    }
                 }
 
                 else -> {
-                    log.error("Could not get nærmeste leder: $response")
+                    log.atError().addKeyValue("status", response.status.value).log("Could not get nærmeste leder")
                     null
                 }
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            log.error("Encountered exception during call to narmesteleder: ${e.message}")
+            log.atError().addKeyValue("exception", e.javaClass.name).log("Could not look up nærmeste leder")
             return null
         } catch (e: Error) {
-            log.error("Encountered error!!: ${e.message}")
+            log.atError().addKeyValue("exception", e.javaClass.name).log("Error during lookup of nærmeste leder")
             throw e
         }
     }
 }
+
+internal data class LineManagerLookupRequest(
+    val employeeNationalIdentificationNumber: String,
+    val organizationNumber: String,
+)
+
+internal data class LineManagerLookupResponse(
+    val lineManager: LineManager?,
+)
+
+internal data class LineManager(
+    val id: String,
+    val nationalIdentificationNumber: String,
+    val emailAddresses: List<String>,
+)
