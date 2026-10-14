@@ -1,11 +1,10 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.gradle.api.artifacts.dsl.DependencyConstraintHandler
 
 group = "no.nav.syfo"
 version = "1.0"
 
 val kluentVersion = "1.73"
-val ktorVersion = "3.5.2"
+val ktorVersion = "3.6.0"
 val prometheusVersion = "0.16.0"
 val micrometerVersion = "1.17.1"
 val kotestVersion = "6.2.5"
@@ -114,24 +113,6 @@ dependencies {
     testImplementation("io.kotest:kotest-property:$kotestVersion")
     testImplementation("io.kotest.extensions:kotest-assertions-ktor:$kotestExtensionsVersion")
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
-
-    constraints {
-        implementationWithKtorVersionCheck(
-            dependencyNotation = "io.netty:netty-handler:4.2.19.Final",
-            expectedKtorVersion = "3.5.2",
-        )
-    }
-}
-
-fun DependencyConstraintHandler.implementationWithKtorVersionCheck(
-    dependencyNotation: String,
-    expectedKtorVersion: String,
-) {
-    check(ktorVersion == expectedKtorVersion) {
-        "Ktor version changed from $expectedKtorVersion to $ktorVersion. " +
-            "Review the dependency constraint for $dependencyNotation."
-    }
-    add("implementation", dependencyNotation)
 }
 
 configurations.implementation {
