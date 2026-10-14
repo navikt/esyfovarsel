@@ -23,7 +23,7 @@ val jacksonVersion = "2.22.3"
 val kafkaVersion = "4.3.1"
 val brukernotifikasjonerBuilderVersion = "2.2.0"
 val kotlinVersion = "2.4.20"
-val graphqlApolloVersion = "4.4.3"
+val graphqlApolloVersion = "5.2.0"
 
 val githubUser: String by project
 val githubPassword: String by project
@@ -33,7 +33,7 @@ plugins {
     id("java")
     id("org.jetbrains.kotlin.plugin.allopen") version "2.4.20"
     id("com.gradleup.shadow") version "9.6.1"
-    id("com.apollographql.apollo") version "4.4.3"
+    id("com.apollographql.apollo") version "5.2.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
 
