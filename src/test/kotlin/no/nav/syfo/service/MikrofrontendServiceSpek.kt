@@ -158,6 +158,19 @@ class MikrofrontendServiceSpek :
                 assertEquals(entrySynligTom, today.toLocalDate())
             }
 
+            it("DM-Endret event should update 'synligTom' for MF entry") {
+                mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+                mikrofrontendService.updateMikrofrontendForUserByHendelse(
+                    arbeidstakerHendelseDialogmoteNyttTidSted.copy(type = HendelseType.SM_DIALOGMOTE_ENDRET),
+                )
+                val entrySynligTom =
+                    embeddedDatabase
+                        .fetchMikrofrontendSynlighetEntriesByFnr(arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr)
+                        .first()
+                        .synligTom!!
+                assertEquals(entrySynligTom, today.toLocalDate())
+            }
+
             it("Expired entries should not be persisted") {
                 mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
                 mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkaltIdag)

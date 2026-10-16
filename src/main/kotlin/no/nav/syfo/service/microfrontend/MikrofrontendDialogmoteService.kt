@@ -29,7 +29,9 @@ class MikrofrontendDialogmoteService(
 
     fun updateDialogmoteFrontendForUserByHendelse(hendelse: ArbeidstakerHendelse): MinSideRecord? =
         when (hendelse.type) {
-            HendelseType.SM_DIALOGMOTE_NYTT_TID_STED -> setNewDateForMikrofrontendUser(hendelse)
+            HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
+            HendelseType.SM_DIALOGMOTE_ENDRET,
+            -> setNewDateForMikrofrontendUser(hendelse)
             HendelseType.SM_DIALOGMOTE_AVLYST,
             HendelseType.SM_DIALOGMOTE_REFERAT,
             -> minSideRecordDisabled(hendelse.arbeidstakerFnr)

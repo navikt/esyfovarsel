@@ -3,6 +3,9 @@ package no.nav.syfo.service
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_TITLE
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_MESSAGE_TEXT
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_EMAIL_BODY
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_EMAIL_TITLE
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_MESSAGE_TEXT
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_EMAIL_TITLE
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_INNKALT_MESSAGE_TEXT
@@ -14,6 +17,7 @@ import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_BODY
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_TITLE
 import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_MESSAGE_TEXT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_AVLYST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_ENDRET
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_INNKALT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_NYTT_TID_STED
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_REFERAT
@@ -103,6 +107,13 @@ class DialogmoteInnkallingNarmestelederVarselServiceOLD(
                     emailBodyKey to getEmailBody(hendelse),
                 )
 
+            NL_DIALOGMOTE_ENDRET ->
+                hashMapOf(
+                    smsKey to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_MESSAGE_TEXT,
+                    emailTitleKey to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_EMAIL_TITLE,
+                    emailBodyKey to getEmailBody(hendelse),
+                )
+
             NL_DIALOGMOTE_REFERAT ->
                 hashMapOf(
                     smsKey to ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_MESSAGE_TEXT,
@@ -126,6 +137,7 @@ class DialogmoteInnkallingNarmestelederVarselServiceOLD(
             NL_DIALOGMOTE_AVLYST -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_AVLYST_EMAIL_BODY
             NL_DIALOGMOTE_REFERAT -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_REFERAT_EMAIL_BODY
             NL_DIALOGMOTE_NYTT_TID_STED -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_BODY
+            NL_DIALOGMOTE_ENDRET -> greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_EMAIL_BODY
             else -> ""
         }
     }
