@@ -28,6 +28,7 @@ Tabellen under viser verifisert mapping mellom `HendelseType` i `esyfovarsel` og
 | ---------------------------------------------- | --------------------------------------- |
 | `AG_VARSEL_ALTINN_RESSURS`                     | `isdialogmote`<br>`syfo-dokumentporten` |
 | `NL_DIALOGMOTE_AVLYST`                         | `isdialogmote`                          |
+| `NL_DIALOGMOTE_ENDRET`                         | `isdialogmote`                          |
 | `NL_DIALOGMOTE_INNKALT`                        | `isdialogmote`                          |
 | `NL_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING`       | `syfomotebehov`                         |
 | `NL_DIALOGMOTE_NYTT_TID_STED`                  | `isdialogmote`                          |
@@ -39,6 +40,7 @@ Tabellen under viser verifisert mapping mellom `HendelseType` i `esyfovarsel` og
 | `SM_AKTIVITETSPLIKT`                           | `aktivitetskrav-backend`                |
 | `SM_ARBEIDSUFORHET_FORHANDSVARSEL`             | `isarbeidsuforhet`                      |
 | `SM_DIALOGMOTE_AVLYST`                         | `isdialogmote`                          |
+| `SM_DIALOGMOTE_ENDRET`                         | `isdialogmote`                          |
 | `SM_DIALOGMOTE_INNKALT`                        | `isdialogmote`                          |
 | `SM_DIALOGMOTE_LEST`                           | `isdialogmote`                          |
 | `SM_DIALOGMOTE_MOTEBEHOV_TILBAKEMELDING`       | `syfomotebehov`                         |

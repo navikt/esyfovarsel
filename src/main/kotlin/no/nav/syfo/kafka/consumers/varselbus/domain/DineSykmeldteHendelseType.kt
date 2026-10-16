@@ -18,6 +18,7 @@ fun HendelseType.toDineSykmeldteHendelseType(): DineSykmeldteHendelseType =
         HendelseType.NL_DIALOGMOTE_INNKALT -> DineSykmeldteHendelseType.DIALOGMOTE_INNKALLING
         HendelseType.NL_DIALOGMOTE_AVLYST -> DineSykmeldteHendelseType.DIALOGMOTE_AVLYSNING
         HendelseType.NL_DIALOGMOTE_NYTT_TID_STED -> DineSykmeldteHendelseType.DIALOGMOTE_ENDRING
+        HendelseType.NL_DIALOGMOTE_ENDRET -> DineSykmeldteHendelseType.DIALOGMOTE_ENDRING
         HendelseType.NL_DIALOGMOTE_REFERAT -> DineSykmeldteHendelseType.DIALOGMOTE_REFERAT
         else -> {
             throw IllegalArgumentException("Kan ikke mappe ${this.name} til en DineSykmeldteHendelsesType")

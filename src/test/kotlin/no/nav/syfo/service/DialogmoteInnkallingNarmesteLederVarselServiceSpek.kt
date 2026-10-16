@@ -6,6 +6,8 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_EMAIL_TITLE
+import no.nav.syfo.ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_MESSAGE_TEXT
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederRelasjon
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederService
 import no.nav.syfo.consumer.pdl.Foedselsdato
@@ -162,6 +164,31 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
                 }
             }
 
+            it("Endret should delete existing kalenderavtale and create new with endret-tekst") {
+                val varselHendelseInnkalling = createHendelse(type = HendelseType.NL_DIALOGMOTE_INNKALT)
+                dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelseInnkalling)
+
+                val varselHendelseEndring = createHendelse(type = HendelseType.NL_DIALOGMOTE_ENDRET)
+                dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelseEndring)
+
+                coVerify(exactly = 1) {
+                    arbeidsgiverNotifikasjonService.updateKalenderavtale(
+                        withArg { input ->
+                            input.nyTilstand shouldBeEqualTo KalenderTilstand.AVLYST
+                            input.epostTittel shouldBeEqualTo ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_EMAIL_TITLE
+                        },
+                    )
+                }
+                coVerify(exactly = 1) {
+                    arbeidsgiverNotifikasjonService.createNewKalenderavtale(
+                        match { it.tekst == "Dialogmøte med Test er endret" },
+                    )
+                }
+                coVerify(exactly = 2) {
+                    arbeidsgiverNotifikasjonService.createNewKalenderavtale(any())
+                }
+            }
+
             it("Should avlysning should not create notifikasjon, but should update kalenderavtale") {
                 val varselHendelseInnkalling = createHendelse(type = HendelseType.NL_DIALOGMOTE_INNKALT)
                 dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelseInnkalling)
@@ -185,6 +212,25 @@ class DialogmoteInnkallingNarmesteLederVarselServiceSpek :
 
                 coVerify(exactly = 1) {
                     arbeidsgiverNotifikasjonService.sendNotifikasjon(any<ArbeidsgiverNotifikasjonNarmestelederInput>())
+                }
+                coVerify(exactly = 0) {
+                    arbeidsgiverNotifikasjonService.createNewKalenderavtale(any())
+                }
+            }
+
+            it("Sends endret varsel the old way, if there is no sak") {
+                coEvery { arbeidsgiverNotifikasjonService.createNewSak(any()) } returns null
+
+                val varselHendelseEndring = createHendelse(type = HendelseType.NL_DIALOGMOTE_ENDRET)
+                dialogmoteInnkallingNarmesteLederVarselService.sendVarselTilNarmesteLeder(varselHendelseEndring)
+
+                coVerify(exactly = 1) {
+                    arbeidsgiverNotifikasjonService.sendNotifikasjon(
+                        withArg { input: ArbeidsgiverNotifikasjonNarmestelederInput ->
+                            input.messageText shouldBeEqualTo ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_MESSAGE_TEXT
+                            input.epostTittel shouldBeEqualTo ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_EMAIL_TITLE
+                        },
+                    )
                 }
                 coVerify(exactly = 0) {
                     arbeidsgiverNotifikasjonService.createNewKalenderavtale(any())

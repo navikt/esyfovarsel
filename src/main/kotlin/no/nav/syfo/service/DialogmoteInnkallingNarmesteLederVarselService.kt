@@ -9,6 +9,7 @@ import no.nav.syfo.consumer.pdl.fullName
 import no.nav.syfo.db.domain.PSakInput
 import no.nav.syfo.dialogmoteNarmesteLederTexts
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_AVLYST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_ENDRET
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_INNKALT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_NYTT_TID_STED
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_REFERAT
@@ -89,8 +90,10 @@ class DialogmoteInnkallingNarmesteLederVarselService(
                     narmesteLederId = narmesteLederId,
                 )
 
-            NL_DIALOGMOTE_NYTT_TID_STED ->
-                handleNyttTidSted(
+            NL_DIALOGMOTE_NYTT_TID_STED,
+            NL_DIALOGMOTE_ENDRET,
+            ->
+                handleEndring(
                     varselHendelse = varselHendelse,
                     personData = personData,
                     lenkeTilDialogmoteLanding = lenkeTilDialogmoteLanding,
@@ -156,7 +159,7 @@ class DialogmoteInnkallingNarmesteLederVarselService(
         )
     }
 
-    private suspend fun handleNyttTidSted(
+    private suspend fun handleEndring(
         varselHendelse: NarmesteLederHendelse,
         personData: HentPersonData?,
         lenkeTilDialogmoteLanding: String,
@@ -166,7 +169,7 @@ class DialogmoteInnkallingNarmesteLederVarselService(
         sendVarselTilDineSykmeldte(varselHendelse)
         val sak = getPaagaaendeSak(narmesteLederId)
         if (sak == null) {
-            log.warn("handleNyttTidSted: Fant ikke sak for narmesteLederId: $narmesteLederId. Sender på gammel måte")
+            log.warn("handleEndring: Fant ikke sak for narmesteLederId: $narmesteLederId. Sender på gammel måte")
             oldVarselService.sendVarselTilNarmesteLeder(varselHendelse)
             return
         }
@@ -189,8 +192,11 @@ class DialogmoteInnkallingNarmesteLederVarselService(
             grupperingsId = sak.grupperingsid,
             varselHendelse = varselHendelse,
             innkallingTekst =
-                personData?.let { "Dialogmøte med ${it.firstName()} er flyttet" }
-                    ?: "Dialogmøtet er flyttet",
+                if (varselHendelse.type == NL_DIALOGMOTE_ENDRET) {
+                    personData?.let { "Dialogmøte med ${it.firstName()} er endret" } ?: "Dialogmøtet er endret"
+                } else {
+                    personData?.let { "Dialogmøte med ${it.firstName()} er flyttet" } ?: "Dialogmøtet er flyttet"
+                },
             lenkeTilDialogmoteLanding = lenkeTilDialogmoteLanding,
             ledersEpost = ledersEpost,
             epostTittel = texts.epostTittel,

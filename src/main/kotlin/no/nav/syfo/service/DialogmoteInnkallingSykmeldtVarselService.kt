@@ -1,6 +1,7 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST
+import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_ENDRET_TEKST
 import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST
 import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST
 import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST
@@ -15,6 +16,7 @@ import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_AVLYST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_ENDRET
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_INNKALT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_LEST
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.SM_DIALOGMOTE_NYTT_TID_STED
@@ -39,6 +41,7 @@ enum class DittSykefravaerHendelsetypeDialogmoteInnkalling : Serializable {
     ESYFOVARSEL_DIALOGMOTE_AVLYST,
     ESYFOVARSEL_DIALOGMOTE_REFERAT,
     ESYFOVARSEL_DIALOGMOTE_NYTT_TID_STED,
+    ESYFOVARSEL_DIALOGMOTE_ENDRET,
     ESYFOVARSEL_DIALOGMOTE_LEST,
 }
 
@@ -49,6 +52,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
     val database: DatabaseInterface,
 ) {
     val weeksBeforeDelete = 4L
+    private val endringHendelseTyper = setOf(SM_DIALOGMOTE_NYTT_TID_STED, SM_DIALOGMOTE_ENDRET)
     private val log = LoggerFactory.getLogger(DialogmoteInnkallingSykmeldtVarselService::class.qualifiedName)
 
     suspend fun sendVarselTilArbeidstaker(varselHendelse: ArbeidstakerHendelse) {
@@ -140,6 +144,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
             SM_DIALOGMOTE_INNKALT -> BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST
             SM_DIALOGMOTE_AVLYST -> BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST
             SM_DIALOGMOTE_NYTT_TID_STED -> BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST
+            SM_DIALOGMOTE_ENDRET -> BRUKERNOTIFIKASJONER_DIALOGMOTE_ENDRET_TEKST
             SM_DIALOGMOTE_REFERAT -> BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST
             SM_DIALOGMOTE_LEST -> ""
             else -> {
@@ -152,6 +157,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
             SM_DIALOGMOTE_INNKALT -> InternalBrukernotifikasjonType.OPPGAVE
             SM_DIALOGMOTE_AVLYST -> InternalBrukernotifikasjonType.BESKJED
             SM_DIALOGMOTE_NYTT_TID_STED -> InternalBrukernotifikasjonType.OPPGAVE
+            SM_DIALOGMOTE_ENDRET -> InternalBrukernotifikasjonType.OPPGAVE
             SM_DIALOGMOTE_REFERAT -> InternalBrukernotifikasjonType.BESKJED
             SM_DIALOGMOTE_LEST -> InternalBrukernotifikasjonType.DONE
             else -> {
@@ -178,6 +184,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
             SM_DIALOGMOTE_AVLYST -> DITT_SYKEFRAVAER_DIALOGMOTE_AVLYSNING_MESSAGE_TEXT
             SM_DIALOGMOTE_REFERAT -> DITT_SYKEFRAVAER_DIALOGMOTE_REFERAT_MESSAGE_TEXT
             SM_DIALOGMOTE_NYTT_TID_STED -> DITT_SYKEFRAVAER_DIALOGMOTE_ENDRING_MESSAGE_TEXT
+            SM_DIALOGMOTE_ENDRET -> DITT_SYKEFRAVAER_DIALOGMOTE_ENDRING_MESSAGE_TEXT
             SM_DIALOGMOTE_LEST -> ""
             else -> {
                 log.error(
@@ -193,6 +200,7 @@ class DialogmoteInnkallingSykmeldtVarselService(
             SM_DIALOGMOTE_AVLYST -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_AVLYST.toString()
             SM_DIALOGMOTE_REFERAT -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_REFERAT.toString()
             SM_DIALOGMOTE_NYTT_TID_STED -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_NYTT_TID_STED.toString()
+            SM_DIALOGMOTE_ENDRET -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_ENDRET.toString()
             SM_DIALOGMOTE_LEST -> DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_LEST.toString()
             else -> {
                 log.error(
@@ -214,27 +222,19 @@ class DialogmoteInnkallingSykmeldtVarselService(
         val melding = opprettDittSykefravaerMelding(arbeidstakerHendelse, varselUuid)
 
         if (utsendteVarsler.isNotEmpty() &&
-            listOf(SM_DIALOGMOTE_INNKALT, SM_DIALOGMOTE_NYTT_TID_STED, SM_DIALOGMOTE_AVLYST, SM_DIALOGMOTE_REFERAT)
-                .contains(arbeidstakerHendelse.type)
+            listOf(
+                SM_DIALOGMOTE_INNKALT,
+                SM_DIALOGMOTE_NYTT_TID_STED,
+                SM_DIALOGMOTE_ENDRET,
+                SM_DIALOGMOTE_AVLYST,
+                SM_DIALOGMOTE_REFERAT,
+            ).contains(arbeidstakerHendelse.type)
         ) {
             senderFacade.ferdigstillDittSykefravaerVarsler(arbeidstakerHendelse) // ferdigstille seg selv
-            if (arbeidstakerHendelse.type == SM_DIALOGMOTE_INNKALT) {
-                senderFacade.ferdigstillDittSykefravaerVarslerAvTyper(
-                    arbeidstakerHendelse,
-                    setOf(SM_DIALOGMOTE_NYTT_TID_STED),
-                )
-            }
-            if (arbeidstakerHendelse.type == SM_DIALOGMOTE_NYTT_TID_STED) {
-                senderFacade.ferdigstillDittSykefravaerVarslerAvTyper(
-                    arbeidstakerHendelse,
-                    setOf(SM_DIALOGMOTE_INNKALT),
-                )
-            } else {
-                senderFacade.ferdigstillDittSykefravaerVarslerAvTyper(
-                    arbeidstakerHendelse,
-                    setOf(SM_DIALOGMOTE_INNKALT, SM_DIALOGMOTE_NYTT_TID_STED),
-                )
-            }
+            senderFacade.ferdigstillDittSykefravaerVarslerAvTyper(
+                arbeidstakerHendelse,
+                setOf(SM_DIALOGMOTE_INNKALT) + endringHendelseTyper,
+            )
         }
 
         if (melding != null) {

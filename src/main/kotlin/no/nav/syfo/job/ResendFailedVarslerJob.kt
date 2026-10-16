@@ -80,7 +80,9 @@ class ResendFailedVarslerJob(
                     }
                 }
 
-                "SM_DIALOGMOTE_NYTT_TID_STED" -> {
+                "SM_DIALOGMOTE_NYTT_TID_STED",
+                "SM_DIALOGMOTE_ENDRET",
+                -> {
                     val isResendt =
                         dialogmoteInnkallingSykmeldtVarselService.revarsleArbeidstakerViaBrukernotifikasjoner(
                             failedVarsel,

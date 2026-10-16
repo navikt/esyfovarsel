@@ -8,6 +8,7 @@ import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.syfo.BRUKERNOTIFIKASJONER_DIALOGMOTE_ENDRET_TEKST
 import no.nav.syfo.access.domain.UserAccessStatus
 import no.nav.syfo.consumer.distribuerjournalpost.DistibusjonsType
 import no.nav.syfo.consumer.narmesteLeder.NarmesteLederRelasjon
@@ -321,6 +322,61 @@ class DialogmoteInnkallingSykmeldtVarselServiceSpek :
                 endringer3 shouldNotBeEqualTo null
 
                 verify(exactly = 2) { dittSykefravaerMeldingKafkaProducer.ferdigstillMelding("123", "66666666666") }
+            }
+
+            it("Endret hendelse skal varsle med endret-tekst og ferdigstille tidligere innkalling og nytt tid/sted") {
+                coEvery { accessControlService.getUserAccessStatus("66666666666") } returns
+                    UserAccessStatus("66666666666", true)
+                coEvery { dittSykefravaerMeldingKafkaProducer.sendMelding(any(), any()) } returns "789"
+
+                listOf(HendelseType.SM_DIALOGMOTE_INNKALT, HendelseType.SM_DIALOGMOTE_NYTT_TID_STED).forEach { type ->
+                    dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(
+                        ArbeidstakerHendelse(type, false, varselData(journalpostUuid, journalpostId), "66666666666", ORGNUMMER),
+                    )
+                }
+
+                val varselHendelseEndret =
+                    ArbeidstakerHendelse(
+                        HendelseType.SM_DIALOGMOTE_ENDRET,
+                        false,
+                        varselData(journalpostUuid, journalpostId),
+                        "66666666666",
+                        ORGNUMMER,
+                    )
+                dialogmoteInnkallingSykmeldtVarselService.sendVarselTilArbeidstaker(varselHendelseEndret)
+
+                verify(exactly = 1) {
+                    brukernotifikasjonerService.sendBrukernotifikasjonVarsel(
+                        uuid = any(),
+                        mottakerFnr = "66666666666",
+                        content = BRUKERNOTIFIKASJONER_DIALOGMOTE_ENDRET_TEKST,
+                        url = any(),
+                        smsContent = null,
+                        varseltype = any(),
+                        eksternVarsling = true,
+                    )
+                }
+                verify(exactly = 1) {
+                    dittSykefravaerMeldingKafkaProducer.sendMelding(
+                        match {
+                            it.opprettMelding?.meldingType ==
+                                DittSykefravaerHendelsetypeDialogmoteInnkalling.ESYFOVARSEL_DIALOGMOTE_ENDRET.name
+                        },
+                        any(),
+                    )
+                }
+
+                val uferdigstilte =
+                    senderFacade
+                        .fetchUferdigstilteVarsler(
+                            arbeidstakerFnr = PersonIdent("66666666666"),
+                            kanal = Kanal.DITT_SYKEFRAVAER,
+                        ).map { it.type }
+
+                uferdigstilte shouldBeEqualTo listOf(HendelseType.SM_DIALOGMOTE_ENDRET.name)
+                dialogmoteInnkallingSykmeldtVarselService.getMeldingTypeForSykmeldtVarsling(
+                    HendelseType.SM_DIALOGMOTE_ENDRET,
+                ) shouldBeEqualTo SenderFacade.InternalBrukernotifikasjonType.OPPGAVE
             }
 
             it("Avlysning hendelse skal ferdigstille tidligere innkalling") {

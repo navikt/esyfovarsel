@@ -15,7 +15,7 @@ fun DatabaseInterface.fetchUtsendtBrukernotifikasjonVarselFeilet(): List<PUtsend
         AND feilet.is_resendt = FALSE
         AND feilet.resend_exhausted IS NOT TRUE
         AND feilet.hendelsetype_navn in 
-        ('SM_DIALOGMOTE_SVAR_MOTEBEHOV', 'SM_DIALOGMOTE_INNKALT', 'SM_DIALOGMOTE_AVLYST', 'SM_DIALOGMOTE_NYTT_TID_STED', 'SM_MER_VEILEDNING')
+        ('SM_DIALOGMOTE_SVAR_MOTEBEHOV', 'SM_DIALOGMOTE_INNKALT', 'SM_DIALOGMOTE_AVLYST', 'SM_DIALOGMOTE_NYTT_TID_STED', 'SM_DIALOGMOTE_ENDRET', 'SM_MER_VEILEDNING')
         AND feilet.UUID_EKSTERN_REFERANSE NOT IN (
             SELECT EKSTERN_REF
             FROM UTSENDT_VARSEL UV
