@@ -1,9 +1,11 @@
 package no.nav.syfo.service
 
 import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.justRun
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.syfo.db.ARBEIDSTAKER_FNR_1
 import no.nav.syfo.db.ARBEIDSTAKER_FNR_2
@@ -16,6 +18,7 @@ import no.nav.syfo.exceptions.VeilederAlreadyBookedMeetingException
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.producers.minesidemicrofrontend.MinSideMicrofrontendKafkaProducer
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MinSideRecord
 import no.nav.syfo.kafka.producers.minesidemicrofrontend.Tjeneste
 import no.nav.syfo.service.microfrontend.MikrofrontendAktivitetskravService
 import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
@@ -41,6 +44,14 @@ class MikrofrontendServiceSpek :
             MikrofrontendService(
                 minSideMicrofrontendKafkaProducer,
                 mikrofrontendDialogmoteService,
+                mikrofrontendAktivitetskravService,
+                mikrofrontendMerOppfolgingService,
+                embeddedDatabase,
+            )
+        val mikrofrontendServiceUtenMotebehov =
+            MikrofrontendService(
+                minSideMicrofrontendKafkaProducer,
+                MikrofrontendDialogmoteService(embeddedDatabase, motebehovViaBudstikka = true),
                 mikrofrontendAktivitetskravService,
                 mikrofrontendMerOppfolgingService,
                 embeddedDatabase,
@@ -251,6 +262,78 @@ class MikrofrontendServiceSpek :
                     arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr,
                     Tjeneste.DIALOGMOTE,
                 )
+            }
+
+            describe("Når syfomotebehov styrer sin del av syfo-dialog via Budstikka") {
+                it("Svar på møtebehov påvirker ikke mikrofrontenden") {
+                    mikrofrontendServiceUtenMotebehov.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
+                    mikrofrontendServiceUtenMotebehov.updateMikrofrontendForUserByHendelse(
+                        arbeidstakerHendelseSvarMotebehovFerdigstill,
+                    )
+
+                    verify(exactly = 0) { minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(any()) }
+                    embeddedDatabase.shouldNotContainMikrofrontendEntryForUser(ARBEIDSTAKER_FNR_1)
+                }
+
+                it("Ferdigstilt møtebehov skjuler ikke kortet etter innkalling") {
+                    mikrofrontendServiceUtenMotebehov.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+                    mikrofrontendServiceUtenMotebehov.updateMikrofrontendForUserByHendelse(
+                        arbeidstakerHendelseSvarMotebehovFerdigstill,
+                    )
+
+                    verify(exactly = 1) {
+                        minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(
+                            match { it.eventType == MikrofrontendService.actionEnabled },
+                        )
+                    }
+                    verify(exactly = 0) {
+                        minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(
+                            match { it.eventType == MikrofrontendService.actionDisabled },
+                        )
+                    }
+                    embeddedDatabase.shouldContainMikrofrontendEntryWithSynligTom(ARBEIDSTAKER_FNR_1, Tjeneste.DIALOGMOTE)
+                }
+
+                it("Innkalling sender enable selv om det finnes en gammel møtebehov-rad") {
+                    mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
+                    clearAllMocks()
+                    val record = slot<MinSideRecord>()
+                    justRun { minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(capture(record)) }
+
+                    mikrofrontendServiceUtenMotebehov.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+
+                    record.captured.eventType shouldBe MikrofrontendService.actionEnabled
+                    record.captured.microfrontendId shouldBe MikrofrontendDialogmoteService.DIALOGMOTE_MIKROFRONTEND_ID
+                    val entries = embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(ARBEIDSTAKER_FNR_1)
+                    entries.single().synligTom shouldBe tomorrow.toLocalDate()
+                }
+
+                it("Nytt tid og sted sender enable og flytter utløpet") {
+                    mikrofrontendServiceUtenMotebehov.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+                    mikrofrontendServiceUtenMotebehov.updateMikrofrontendForUserByHendelse(
+                        arbeidstakerHendelseDialogmoteNyttTidSted,
+                    )
+
+                    verify(exactly = 2) {
+                        minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(
+                            match { it.eventType == MikrofrontendService.actionEnabled },
+                        )
+                    }
+                    val entries = embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(ARBEIDSTAKER_FNR_1)
+                    entries.single().synligTom shouldBe today.toLocalDate()
+                }
+
+                it("Avlysning skjuler kortet") {
+                    mikrofrontendServiceUtenMotebehov.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+                    mikrofrontendServiceUtenMotebehov.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteAvlyst)
+
+                    verify(exactly = 1) {
+                        minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(
+                            match { it.eventType == MikrofrontendService.actionDisabled },
+                        )
+                    }
+                    embeddedDatabase.shouldNotContainMikrofrontendEntryForUser(ARBEIDSTAKER_FNR_1)
+                }
             }
         }
     })

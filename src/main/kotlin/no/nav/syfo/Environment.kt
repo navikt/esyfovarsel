@@ -89,6 +89,7 @@ fun getEnv(): Environment =
             ),
             ToggleEnv(
                 sendAktivitetspliktForhandsvarsel = getBooleanEnvVar("TOGGLE_SEND_AKTIVITETSPLIKT_FORHANDSVARSEL"),
+                motebehovMikrofrontendViaBudstikka = getBooleanEnvVar("TOGGLE_MOTEBEHOV_MIKROFRONTEND_VIA_BUDSTIKKA"),
             ),
         )
     }
@@ -175,6 +176,7 @@ data class DbEnv(
 
 data class ToggleEnv(
     val sendAktivitetspliktForhandsvarsel: Boolean,
+    val motebehovMikrofrontendViaBudstikka: Boolean = false,
 )
 
 data class JobEnv(

@@ -1,6 +1,7 @@
 package no.nav.syfo.service.microfrontend
 
 import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste
 import no.nav.syfo.db.domain.toMikrofrontendSynlighet
 import no.nav.syfo.db.fetchFnrsWithExpiredMicrofrontendEntries
 import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
@@ -18,8 +19,13 @@ import no.nav.syfo.service.microfrontend.MikrofrontendService.Companion.actionDi
 import no.nav.syfo.service.microfrontend.MikrofrontendService.Companion.actionEnabled
 import org.slf4j.LoggerFactory
 
+/**
+ * @param motebehovViaBudstikka når true, styrer syfomotebehov sin del av syfo-dialog via Budstikka. Da påvirker
+ *   SM_DIALOGMOTE_SVAR_MOTEBEHOV ikke lenger mikrofrontenden her, og innkalling og nytt tid/sted sender alltid enable.
+ */
 class MikrofrontendDialogmoteService(
     val database: DatabaseInterface,
+    private val motebehovViaBudstikka: Boolean = false,
 ) {
     private val log = LoggerFactory.getLogger(MikrofrontendDialogmoteService::class.qualifiedName)
 
@@ -28,6 +34,33 @@ class MikrofrontendDialogmoteService(
     }
 
     fun updateDialogmoteFrontendForUserByHendelse(hendelse: ArbeidstakerHendelse): MinSideRecord? =
+        if (motebehovViaBudstikka) {
+            updateDialogmoteFrontendUtenMotebehov(hendelse)
+        } else {
+            updateDialogmoteFrontendMedMotebehov(hendelse)
+        }
+
+    private fun updateDialogmoteFrontendUtenMotebehov(hendelse: ArbeidstakerHendelse): MinSideRecord? =
+        when (hendelse.type) {
+            HendelseType.SM_DIALOGMOTE_INNKALT,
+            HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
+            -> enableForDialogmote(hendelse.arbeidstakerFnr)
+            HendelseType.SM_DIALOGMOTE_AVLYST,
+            HendelseType.SM_DIALOGMOTE_REFERAT,
+            -> minSideRecordDisabled(hendelse.arbeidstakerFnr)
+            else -> null
+        }
+
+    /**
+     * Erstatter eventuelle eldre rader, også en møtebehov-rad uten synligTom, slik at bare møtet styrer utløpet.
+     * Raden for møtet lagres med synligTom når enable sendes.
+     */
+    private fun enableForDialogmote(fnr: String): MinSideRecord {
+        database.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste(fnr, Tjeneste.DIALOGMOTE)
+        return minSideRecordEnabled(fnr)
+    }
+
+    private fun updateDialogmoteFrontendMedMotebehov(hendelse: ArbeidstakerHendelse): MinSideRecord? =
         when (hendelse.type) {
             HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
             HendelseType.SM_DIALOGMOTE_ENDRET,

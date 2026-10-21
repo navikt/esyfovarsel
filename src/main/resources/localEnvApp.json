@@ -60,6 +60,7 @@
     "dbPassword": "password"
   },
   "toggleEnv": {
-    "sendAktivitetspliktForhandsvarsel": false
+    "sendAktivitetspliktForhandsvarsel": false,
+    "motebehovMikrofrontendViaBudstikka": false
   }
 }
