@@ -1,14 +1,11 @@
 package no.nav.syfo.service.microfrontend
 
 import no.nav.syfo.db.DatabaseInterface
+import no.nav.syfo.db.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste
 import no.nav.syfo.db.domain.toMikrofrontendSynlighet
 import no.nav.syfo.db.fetchFnrsWithExpiredMicrofrontendEntries
 import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
 import no.nav.syfo.db.updateMikrofrontendEntrySynligTomByExistingEntry
-import no.nav.syfo.db.updateMikrofrontendEntrySynligTomByFnrAndTjeneste
-import no.nav.syfo.exceptions.DuplicateMotebehovException
-import no.nav.syfo.exceptions.MotebehovAfterBookingException
-import no.nav.syfo.exceptions.VeilederAlreadyBookedMeetingException
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
 import no.nav.syfo.kafka.consumers.varselbus.domain.getSynligTom
@@ -25,6 +22,7 @@ class MikrofrontendDialogmoteService(
 
     companion object {
         const val DIALOGMOTE_MIKROFRONTEND_ID = "syfo-dialog"
+        const val MOTEBEHOV_MIKROFRONTEND_ID = "syfo-motebehov"
     }
 
     fun updateDialogmoteFrontendForUserByHendelse(hendelse: ArbeidstakerHendelse): MinSideRecord? =
@@ -33,10 +31,20 @@ class MikrofrontendDialogmoteService(
             HendelseType.SM_DIALOGMOTE_AVLYST,
             HendelseType.SM_DIALOGMOTE_REFERAT,
             -> minSideRecordDisabled(hendelse.arbeidstakerFnr)
-            HendelseType.SM_DIALOGMOTE_INNKALT,
-            HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
-            -> setMikrofrontendSynlighet(hendelse)
+            HendelseType.SM_DIALOGMOTE_INNKALT -> {
+                // Erstatter eventuelle tidligere rader, slik at bare synligTom for siste innkalling gjelder
+                database.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste(hendelse.arbeidstakerFnr, Tjeneste.DIALOGMOTE)
+                minSideRecordEnabled(hendelse.arbeidstakerFnr)
+            }
             else -> null
+        }
+
+    fun updateMotebehovFrontendForUserByHendelse(hendelse: ArbeidstakerHendelse): MinSideRecord =
+        if (hendelse.ferdigstill == true) {
+            motebehovRecordDisabled(hendelse.arbeidstakerFnr)
+        } else {
+            database.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste(hendelse.arbeidstakerFnr, Tjeneste.MOTEBEHOV)
+            motebehovRecordEnabled(hendelse.arbeidstakerFnr)
         }
 
     fun findExpiredDialogmoteMikrofrontends(): List<Triple<String, String, Tjeneste>> =
@@ -64,82 +72,6 @@ class MikrofrontendDialogmoteService(
             }
     }
 
-    private fun setMikrofrontendSynlighet(hendelse: ArbeidstakerHendelse): MinSideRecord? {
-        val ferdigstill = hendelse.ferdigstill ?: false
-
-        val (userHasExistingDMEntries, userHasExistingMBEntries) =
-            userHasExistingMikrofrontendEntries(hendelse.arbeidstakerFnr)
-
-        throwExceptionOnIllegalDialogmoteUserState(
-            userHasExistingDMEntries,
-            userHasExistingMBEntries,
-            ferdigstill,
-            hendelse.type,
-        )
-
-        if (hendelse.type == HendelseType.SM_DIALOGMOTE_INNKALT) {
-            if (userHasExistingMBEntries) {
-                setExpiryDateForMikrofrontendUser(hendelse)
-            } else {
-                return minSideRecordEnabled(hendelse.arbeidstakerFnr)
-            }
-        } else {
-            if (!ferdigstill) {
-                return minSideRecordEnabled(hendelse.arbeidstakerFnr)
-            } else if (userHasExistingMBEntries) {
-                return minSideRecordDisabled(hendelse.arbeidstakerFnr)
-            }
-        }
-        return null
-    }
-
-    private fun setExpiryDateForMikrofrontendUser(hendelse: ArbeidstakerHendelse) {
-        database.updateMikrofrontendEntrySynligTomByFnrAndTjeneste(
-            hendelse.arbeidstakerFnr,
-            Tjeneste.DIALOGMOTE,
-            hendelse.getSynligTom()!!.toLocalDate(),
-        )
-    }
-
-    private fun throwExceptionOnIllegalDialogmoteUserState(
-        existingDM: Boolean,
-        existingMB: Boolean,
-        ferdigstill: Boolean,
-        hendelseType: HendelseType,
-    ) {
-        if (existingDM) {
-            when (hendelseType) {
-                HendelseType.SM_DIALOGMOTE_INNKALT -> throw VeilederAlreadyBookedMeetingException()
-                HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV -> if (!ferdigstill) throw MotebehovAfterBookingException() else return
-                else -> return
-            }
-        }
-        if (existingMB &&
-            hendelseType == HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV &&
-            !ferdigstill
-        ) {
-            throw DuplicateMotebehovException()
-        }
-    }
-
-    private fun userHasExistingMikrofrontendEntries(fnr: String) =
-        Pair(userHasExistingMikrofrontDialogmoteEntries(fnr), userHasExistingMikrofrontSyfomotebehovEntries(fnr))
-
-    private fun userHasExistingMikrofrontSyfomotebehovEntries(fnr: String) =
-        existingMikrofrontendEntries(fnr, Tjeneste.DIALOGMOTE)
-            .any { it.synligTom == null }
-
-    private fun userHasExistingMikrofrontDialogmoteEntries(fnr: String) =
-        existingMikrofrontendEntries(fnr, Tjeneste.DIALOGMOTE)
-            .any { it.synligTom != null }
-
-    private fun existingMikrofrontendEntries(
-        fnr: String,
-        tjeneste: Tjeneste,
-    ) = database
-        .fetchMikrofrontendSynlighetEntriesByFnr(fnr)
-        .filter { it.tjeneste == tjeneste.name }
-
     private fun minSideRecordEnabled(fnr: String) =
         MinSideRecord(
             eventType = actionEnabled,
@@ -152,5 +84,19 @@ class MikrofrontendDialogmoteService(
             eventType = actionDisabled,
             fnr = fnr,
             microfrontendId = DIALOGMOTE_MIKROFRONTEND_ID,
+        )
+
+    fun motebehovRecordEnabled(fnr: String) =
+        MinSideRecord(
+            eventType = actionEnabled,
+            fnr = fnr,
+            microfrontendId = MOTEBEHOV_MIKROFRONTEND_ID,
+        )
+
+    fun motebehovRecordDisabled(fnr: String) =
+        MinSideRecord(
+            eventType = actionDisabled,
+            fnr = fnr,
+            microfrontendId = MOTEBEHOV_MIKROFRONTEND_ID,
         )
 }

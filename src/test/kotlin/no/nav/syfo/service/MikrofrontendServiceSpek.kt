@@ -9,13 +9,13 @@ import no.nav.syfo.db.ARBEIDSTAKER_FNR_1
 import no.nav.syfo.db.ARBEIDSTAKER_FNR_2
 import no.nav.syfo.db.ORGNUMMER_1
 import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
+import no.nav.syfo.db.storeMikrofrontendSynlighetEntry
 import no.nav.syfo.domain.PersonIdent
-import no.nav.syfo.exceptions.DuplicateMotebehovException
-import no.nav.syfo.exceptions.MotebehovAfterBookingException
-import no.nav.syfo.exceptions.VeilederAlreadyBookedMeetingException
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MikrofrontendSynlighet
 import no.nav.syfo.kafka.producers.minesidemicrofrontend.MinSideMicrofrontendKafkaProducer
+import no.nav.syfo.kafka.producers.minesidemicrofrontend.MinSideRecord
 import no.nav.syfo.kafka.producers.minesidemicrofrontend.Tjeneste
 import no.nav.syfo.service.microfrontend.MikrofrontendAktivitetskravService
 import no.nav.syfo.service.microfrontend.MikrofrontendDialogmoteService
@@ -26,9 +26,9 @@ import no.nav.syfo.testutil.shouldContainMikrofrontendEntry
 import no.nav.syfo.testutil.shouldContainMikrofrontendEntryWithSynligTom
 import no.nav.syfo.testutil.shouldContainMikrofrontendEntryWithoutSynligTom
 import no.nav.syfo.testutil.shouldNotContainMikrofrontendEntryForUser
+import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 class MikrofrontendServiceSpek :
     DescribeSpec({
@@ -50,6 +50,17 @@ class MikrofrontendServiceSpek :
             clearAllMocks()
             embeddedDatabase.dropData()
         }
+
+        fun verifySent(
+            action: String,
+            fnr: String,
+            microfrontendId: String,
+            times: Int = 1,
+        ) = verify(exactly = times) {
+            minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(MinSideRecord(action, fnr, microfrontendId))
+        }
+
+        fun entriesFor(fnr: String) = embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(fnr)
 
         describe("MikrofrontendServiceSpek") {
             justRun { minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(any()) }
@@ -124,16 +135,17 @@ class MikrofrontendServiceSpek :
             }
 
             it(
-                "Enabling MF with a syfomotebehov event should result entry without synligTom in DB and publication on min-side topic",
+                "Enabling MF with a syfomotebehov event should store MOTEBEHOV entry without synligTom and enable syfo-motebehov",
             ) {
                 mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
                 embeddedDatabase.shouldContainMikrofrontendEntryWithoutSynligTom(
-                    arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr,
-                    Tjeneste.DIALOGMOTE,
+                    arbeidstakerHendelseSvarMotebehov.arbeidstakerFnr,
+                    Tjeneste.MOTEBEHOV,
                 )
                 verify(exactly = 1) {
                     minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(any())
                 }
+                verifySent(MikrofrontendService.actionEnabled, ARBEIDSTAKER_FNR_1, MOTEBEHOV_ID)
             }
 
             it("Disabling MF should result in removal of entry from DB and publication on min-side topic") {
@@ -167,25 +179,27 @@ class MikrofrontendServiceSpek :
                 )
             }
 
-            it("In absence of an DM-innkalling, MF-entry should be deleted upon receiving MB-competion event") {
+            it("MB-completion event should delete MOTEBEHOV entry and disable syfo-motebehov") {
                 mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
                 mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehovFerdigstill)
                 embeddedDatabase.shouldNotContainMikrofrontendEntryForUser(
-                    arbeidstakerHendelseDialogmoteInnkaltIdag.arbeidstakerFnr,
+                    arbeidstakerHendelseSvarMotebehov.arbeidstakerFnr,
                 )
+                verifySent(MikrofrontendService.actionDisabled, ARBEIDSTAKER_FNR_1, MOTEBEHOV_ID)
             }
 
-            it("Receving DM-innkalling event after MB-event, should result in 'synligTom' being set") {
+            it("DM-innkalling after MB-event should enable syfo-dialog and leave syfo-motebehov to syfomotebehov") {
                 mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
-                embeddedDatabase.shouldContainMikrofrontendEntryWithoutSynligTom(
-                    arbeidstakerHendelseSvarMotebehov.arbeidstakerFnr,
-                    Tjeneste.DIALOGMOTE,
-                )
                 mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
-                embeddedDatabase.shouldContainMikrofrontendEntryWithSynligTom(
-                    arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr,
-                    Tjeneste.DIALOGMOTE,
-                )
+                embeddedDatabase.shouldContainMikrofrontendEntryWithoutSynligTom(ARBEIDSTAKER_FNR_1, Tjeneste.MOTEBEHOV)
+                embeddedDatabase.shouldContainMikrofrontendEntryWithSynligTom(ARBEIDSTAKER_FNR_1, Tjeneste.DIALOGMOTE)
+                verifySent(MikrofrontendService.actionEnabled, ARBEIDSTAKER_FNR_1, MOTEBEHOV_ID)
+                verifySent(MikrofrontendService.actionEnabled, ARBEIDSTAKER_FNR_1, DIALOGMOTE_ID)
+                verify(exactly = 0) {
+                    minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(
+                        match { it.eventType == MikrofrontendService.actionDisabled },
+                    )
+                }
             }
 
             it("Should store MER_OPPFOLGING event in DB with synligTom set") {
@@ -204,24 +218,83 @@ class MikrofrontendServiceSpek :
                 )
             }
 
-            it("Duplicate veileder booking events should lead to an exception") {
-                assertFailsWith(VeilederAlreadyBookedMeetingException::class) {
-                    mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
-                    mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
-                }
+            it("DM-innkalling should always enable syfo-dialog and replace existing DIALOGMOTE entry") {
+                mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+                mikrofrontendService.updateMikrofrontendForUserByHendelse(
+                    arbeidstakerHendelseDialogmoteInnkalt.copy(data = dataTidspunktToday),
+                )
+                verifySent(MikrofrontendService.actionEnabled, ARBEIDSTAKER_FNR_1, DIALOGMOTE_ID, times = 2)
+                val entries = entriesFor(ARBEIDSTAKER_FNR_1)
+                assertEquals(1, entries.size)
+                assertEquals(today.toLocalDate(), entries.single().synligTom)
             }
 
-            it("Motebehov event received after veileder booking event should lead to an exception") {
-                assertFailsWith(MotebehovAfterBookingException::class) {
-                    mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
-                    mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
-                }
+            it("Repeated motebehov events should enable syfo-motebehov and keep one MOTEBEHOV entry") {
+                mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
+                mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
+                verifySent(MikrofrontendService.actionEnabled, ARBEIDSTAKER_FNR_1, MOTEBEHOV_ID, times = 2)
+                assertEquals(1, entriesFor(ARBEIDSTAKER_FNR_1).count { it.tjeneste == Tjeneste.MOTEBEHOV.name })
             }
 
-            it("Two consecutive motebehov events should raise an exception") {
-                assertFailsWith(DuplicateMotebehovException::class) {
-                    mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
-                    mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehov)
+            it("MB-completion after DM-innkalling should not touch syfo-dialog") {
+                mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+                mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseSvarMotebehovFerdigstill)
+                embeddedDatabase.shouldContainMikrofrontendEntryWithSynligTom(ARBEIDSTAKER_FNR_1, Tjeneste.DIALOGMOTE)
+                verifySent(MikrofrontendService.actionDisabled, ARBEIDSTAKER_FNR_1, DIALOGMOTE_ID, times = 0)
+                verifySent(MikrofrontendService.actionDisabled, ARBEIDSTAKER_FNR_1, MOTEBEHOV_ID)
+            }
+
+            describe("Backfill av møtebehov fra syfo-dialog") {
+                fun storeLegacyMotebehovEntry(fnr: String) =
+                    embeddedDatabase.storeMikrofrontendSynlighetEntry(MikrofrontendSynlighet(fnr, Tjeneste.DIALOGMOTE, null))
+
+                it("moves motebehov entry, enables syfo-motebehov and disables syfo-dialog for user without dialogmote") {
+                    storeLegacyMotebehovEntry(ARBEIDSTAKER_FNR_1)
+
+                    mikrofrontendService.moveMotebehovToOwnMikrofrontend()
+
+                    embeddedDatabase.shouldContainMikrofrontendEntryWithoutSynligTom(ARBEIDSTAKER_FNR_1, Tjeneste.MOTEBEHOV)
+                    assertEquals(0, entriesFor(ARBEIDSTAKER_FNR_1).count { it.tjeneste == Tjeneste.DIALOGMOTE.name })
+                    verifySent(MikrofrontendService.actionEnabled, ARBEIDSTAKER_FNR_1, MOTEBEHOV_ID)
+                    verifySent(MikrofrontendService.actionDisabled, ARBEIDSTAKER_FNR_1, DIALOGMOTE_ID)
+                }
+
+                it("keeps syfo-dialog for user with dialogmote entry") {
+                    storeLegacyMotebehovEntry(ARBEIDSTAKER_FNR_2)
+                    embeddedDatabase.storeMikrofrontendSynlighetEntry(
+                        MikrofrontendSynlighet(ARBEIDSTAKER_FNR_2, Tjeneste.DIALOGMOTE, LocalDate.now().plusDays(1L)),
+                    )
+
+                    mikrofrontendService.moveMotebehovToOwnMikrofrontend()
+
+                    embeddedDatabase.shouldContainMikrofrontendEntryWithoutSynligTom(ARBEIDSTAKER_FNR_2, Tjeneste.MOTEBEHOV)
+                    embeddedDatabase.shouldContainMikrofrontendEntryWithSynligTom(ARBEIDSTAKER_FNR_2, Tjeneste.DIALOGMOTE)
+                    verifySent(MikrofrontendService.actionEnabled, ARBEIDSTAKER_FNR_2, MOTEBEHOV_ID)
+                    verifySent(MikrofrontendService.actionDisabled, ARBEIDSTAKER_FNR_2, DIALOGMOTE_ID, times = 0)
+                }
+
+                it("is idempotent") {
+                    storeLegacyMotebehovEntry(ARBEIDSTAKER_FNR_1)
+
+                    mikrofrontendService.moveMotebehovToOwnMikrofrontend()
+                    mikrofrontendService.moveMotebehovToOwnMikrofrontend()
+
+                    verify(exactly = 2) {
+                        minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(any())
+                    }
+                    assertEquals(1, entriesFor(ARBEIDSTAKER_FNR_1).size)
+                }
+
+                it("does not touch dialogmote entries with synligTom") {
+                    mikrofrontendService.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+                    clearAllMocks()
+
+                    mikrofrontendService.moveMotebehovToOwnMikrofrontend()
+
+                    embeddedDatabase.shouldContainMikrofrontendEntryWithSynligTom(ARBEIDSTAKER_FNR_1, Tjeneste.DIALOGMOTE)
+                    verify(exactly = 0) {
+                        minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(any())
+                    }
                 }
             }
 
@@ -238,6 +311,11 @@ class MikrofrontendServiceSpek :
                     arbeidstakerHendelseDialogmoteInnkalt.arbeidstakerFnr,
                     Tjeneste.DIALOGMOTE,
                 )
+                verifySent(MikrofrontendService.actionDisabled, ARBEIDSTAKER_FNR_2, DIALOGMOTE_ID)
+                verifySent(MikrofrontendService.actionDisabled, ARBEIDSTAKER_FNR_2, MOTEBEHOV_ID)
             }
         }
     })
+
+private const val DIALOGMOTE_ID = MikrofrontendDialogmoteService.DIALOGMOTE_MIKROFRONTEND_ID
+private const val MOTEBEHOV_ID = MikrofrontendDialogmoteService.MOTEBEHOV_MIKROFRONTEND_ID

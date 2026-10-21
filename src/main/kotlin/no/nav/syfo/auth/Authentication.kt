@@ -15,6 +15,7 @@ import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.routing.routing
 import no.nav.syfo.AuthEnv
 import no.nav.syfo.api.job.registerJobTriggerApi
+import no.nav.syfo.api.job.registerMotebehovMikrofrontendBackfillApi
 import no.nav.syfo.job.ResendFailedVarslerJob
 import no.nav.syfo.job.SendAktivitetspliktLetterToSentralPrintJob
 import no.nav.syfo.service.microfrontend.MikrofrontendService
@@ -135,6 +136,7 @@ fun Application.setupLocalRoutesWithAuthentication(
                 sendAktivitetspliktLetterToSentralPrintJob,
                 resendFailedVarslerJob,
             )
+            registerMotebehovMikrofrontendBackfillApi(mikrofrontendService)
         }
     }
 }
@@ -161,6 +163,7 @@ fun Application.setupRoutesWithAuthentication(
                 sendAktivitetspliktLetterToSentralPrintJob,
                 resendFailedVarslerJob,
             )
+            registerMotebehovMikrofrontendBackfillApi(mikrofrontendService)
         }
     }
 }

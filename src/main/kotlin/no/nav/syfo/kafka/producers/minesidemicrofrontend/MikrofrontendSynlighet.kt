@@ -10,6 +10,7 @@ data class MikrofrontendSynlighet(
 
 enum class Tjeneste {
     DIALOGMOTE,
+    MOTEBEHOV,
     AKTIVITETSKRAV,
     MER_OPPFOLGING,
 }

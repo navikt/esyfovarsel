@@ -124,6 +124,43 @@ fun DatabaseInterface.fetchFnrsWithExpiredMicrofrontendEntries(tjeneste: Tjenest
     }
 }
 
+fun DatabaseInterface.fetchFnrsWithMotebehovEntriesUnderDialogmote(): List<String> {
+    val queryStatement =
+        """
+        SELECT DISTINCT synlig_for
+        FROM MIKROFRONTEND_SYNLIGHET
+        WHERE tjeneste = ? AND synlig_tom IS NULL
+        """.trimIndent()
+
+    return connection.use { connection ->
+        connection.prepareStatement(queryStatement).use {
+            it.setString(1, Tjeneste.DIALOGMOTE.name)
+            it.executeQuery().toList { getString("synlig_for") }
+        }
+    }
+}
+
+fun DatabaseInterface.moveMotebehovEntriesFromDialogmote(fnr: String) {
+    val updateStatement =
+        """
+        UPDATE MIKROFRONTEND_SYNLIGHET
+        SET tjeneste = ?,
+            sist_endret = ?
+        WHERE synlig_for = ? AND tjeneste = ? AND synlig_tom IS NULL
+        """.trimIndent()
+
+    connection.use { connection ->
+        connection.prepareStatement(updateStatement).use {
+            it.setString(1, Tjeneste.MOTEBEHOV.name)
+            it.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()))
+            it.setString(3, fnr)
+            it.setString(4, Tjeneste.DIALOGMOTE.name)
+            it.executeUpdate()
+        }
+        connection.commit()
+    }
+}
+
 fun DatabaseInterface.deleteMikrofrontendSynlighetByFnr(fnr: PersonIdent) {
     val updateStatement =
         """DELETE 

@@ -2,6 +2,9 @@ package no.nav.syfo.service.microfrontend
 
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.deleteMikrofrontendSynlighetEntryByFnrAndTjeneste
+import no.nav.syfo.db.fetchFnrsWithMotebehovEntriesUnderDialogmote
+import no.nav.syfo.db.fetchMikrofrontendSynlighetEntriesByFnr
+import no.nav.syfo.db.moveMotebehovEntriesFromDialogmote
 import no.nav.syfo.db.storeMikrofrontendSynlighetEntry
 import no.nav.syfo.domain.PersonIdent
 import no.nav.syfo.kafka.consumers.varselbus.domain.ArbeidstakerHendelse
@@ -42,6 +45,9 @@ class MikrofrontendService(
                 Tjeneste.DIALOGMOTE,
                 -> mikrofrontendDialogmoteService.updateDialogmoteFrontendForUserByHendelse(hendelse)
 
+                Tjeneste.MOTEBEHOV,
+                -> mikrofrontendDialogmoteService.updateMotebehovFrontendForUserByHendelse(hendelse)
+
                 Tjeneste.AKTIVITETSKRAV,
                 -> mikrofrontendAktivitetskravService.createOrUpdateAktivitetskravMicrofrontendByHendelse(hendelse)
 
@@ -76,6 +82,43 @@ class MikrofrontendService(
             fnr.value,
             mikrofrontendDialogmoteService.minSideRecordDisabled(fnr.value),
             Tjeneste.DIALOGMOTE,
+        )
+        disableMikrofrontendForUser(
+            fnr.value,
+            mikrofrontendDialogmoteService.motebehovRecordDisabled(fnr.value),
+            Tjeneste.MOTEBEHOV,
+        )
+    }
+
+    /**
+     * Engangsjobb: flytter møtebehov-rader (DIALOGMOTE uten synligTom) til MOTEBEHOV,
+     * aktiverer syfo-motebehov og deaktiverer syfo-dialog for brukere uten dialogmøterad.
+     * Idempotent: rader som er flyttet, plukkes ikke opp igjen.
+     */
+    fun moveMotebehovToOwnMikrofrontend() {
+        val fnrs = database.fetchFnrsWithMotebehovEntriesUnderDialogmote()
+        var dialogDisabledCount = 0
+
+        fnrs.forEach { fnr ->
+            minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(
+                mikrofrontendDialogmoteService.motebehovRecordEnabled(fnr),
+            )
+            val hasDialogmoteEntry =
+                database
+                    .fetchMikrofrontendSynlighetEntriesByFnr(fnr)
+                    .any { it.tjeneste == Tjeneste.DIALOGMOTE.name && it.synligTom != null }
+            if (!hasDialogmoteEntry) {
+                minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(
+                    mikrofrontendDialogmoteService.minSideRecordDisabled(fnr),
+                )
+                dialogDisabledCount++
+            }
+            database.moveMotebehovEntriesFromDialogmote(fnr)
+        }
+
+        log.info(
+            "[MIKROFRONTEND_BACKFILL]: Flyttet møtebehov til ${Tjeneste.MOTEBEHOV} for ${fnrs.size} brukere, " +
+                "deaktiverte ${MikrofrontendDialogmoteService.DIALOGMOTE_MIKROFRONTEND_ID} for $dialogDisabledCount brukere",
         )
     }
 
@@ -115,10 +158,12 @@ class MikrofrontendService(
             HendelseType.SM_DIALOGMOTE_INNKALT,
             HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
             HendelseType.SM_DIALOGMOTE_LEST,
-            HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
             HendelseType.SM_DIALOGMOTE_REFERAT,
             HendelseType.SM_DIALOGMOTE_AVLYST,
             -> Tjeneste.DIALOGMOTE
+
+            HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
+            -> Tjeneste.MOTEBEHOV
 
             HendelseType.SM_AKTIVITETSPLIKT,
             -> Tjeneste.AKTIVITETSKRAV
