@@ -1,6 +1,7 @@
 package no.nav.syfo
 
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_AVLYST
+import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_ENDRET
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_INNKALT
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_NYTT_TID_STED
 import no.nav.syfo.kafka.consumers.varselbus.domain.HendelseType.NL_DIALOGMOTE_REFERAT
@@ -43,6 +44,13 @@ fun NarmesteLederHendelse.dialogmoteNarmesteLederTexts(): DialogmoteNarmesteLede
                 epostTittel = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_TITLE,
                 emailBody = greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_BODY,
                 dineSykmeldteText = DINE_SYKMELDTE_DIALOGMOTE_NYTT_TID_STED_TEKST,
+            )
+        NL_DIALOGMOTE_ENDRET ->
+            DialogmoteNarmesteLederTexts(
+                messageText = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_MESSAGE_TEXT,
+                epostTittel = ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_EMAIL_TITLE,
+                emailBody = greeting + ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_EMAIL_BODY,
+                dineSykmeldteText = DINE_SYKMELDTE_DIALOGMOTE_ENDRET_TEKST,
             )
         NL_DIALOGMOTE_REFERAT ->
             DialogmoteNarmesteLederTexts(

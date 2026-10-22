@@ -5,6 +5,7 @@ const val DINE_SYKMELDTE_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST = "1 ny forespørsel om
 const val DINE_SYKMELDTE_DIALOGMOTE_INNKALT_TEKST = "Innkalling til dialogmøte"
 const val DINE_SYKMELDTE_DIALOGMOTE_AVLYST_TEKST = "Avlysning av dialogmøte"
 const val DINE_SYKMELDTE_DIALOGMOTE_NYTT_TID_STED_TEKST = "Endring av dialogmøte"
+const val DINE_SYKMELDTE_DIALOGMOTE_ENDRET_TEKST = "Endring av dialogmøte"
 const val DINE_SYKMELDTE_DIALOGMOTE_REFERAT_TEKST = "Referat fra dialogmøte"
 
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_SVAR_MOTEBEHOV_TEKST = "Nav ønsker svar på om du trenger et dialogmøte"
@@ -13,6 +14,7 @@ const val BRUKERNOTIFIKASJONER_MER_VEILEDNING_MESSAGE_TEXT =
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_INNKALT_TEKST = "Du er innkalt til dialogmøte - vi trenger svaret ditt"
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_AVLYST_TEKST = "Dialogmøtet med Nav er avlyst"
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_NYTT_TID_STED_TEKST = "Dialogmøtet med Nav er flyttet"
+const val BRUKERNOTIFIKASJONER_DIALOGMOTE_ENDRET_TEKST = "Dialogmøtet med Nav er endret"
 const val BRUKERNOTIFIKASJONER_DIALOGMOTE_REFERAT_TEKST = "Du har mottatt et referat fra dialogmøte"
 const val BRUKERNOTIFIKASJON_OPPFOLGINGSPLAN_GODKJENNING_MESSAGE_TEXT =
     "Du har en oppfølgingsplan som venter på godkjenning av deg"
@@ -84,6 +86,17 @@ const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_TITLE = "Dialo
 @Suppress("ktlint:standard:max-line-length")
 const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_NYTT_TID_STED_EMAIL_BODY =
     "Du er innkalt til et dialogmøte med Nav i forbindelse med en av dine ansatte sitt sykefravær. Tidspunktet eller stedet for et dialogmøte har blitt endret.<br>\n" +
+        "Du kan lese og svare på endringen ved å logge inn på “Min side – arbeidsgiver” og trykke på “Sykmeldte”. Da vil du også se hvem det gjelder.<br><br>\n" +
+        "Har du spørsmål, kan du kontakte oss på 55 55 33 36.<br>\n" +
+        "Vennlig hilsen Nav<br>\n" +
+        "Du kan ikke svare på denne meldingen.</body>"
+
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_MESSAGE_TEXT = "Dialogmøtet med Nav er endret"
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_EMAIL_TITLE = "Dialogmøtet med Nav er endret"
+
+@Suppress("ktlint:standard:max-line-length")
+const val ARBEIDSGIVERNOTIFIKASJON_DIALOGMOTE_ENDRET_EMAIL_BODY =
+    "Du er innkalt til et dialogmøte med Nav i forbindelse med en av dine ansatte sitt sykefravær. Det er gjort endringer i dialogmøtet.<br>\n" +
         "Du kan lese og svare på endringen ved å logge inn på “Min side – arbeidsgiver” og trykke på “Sykmeldte”. Da vil du også se hvem det gjelder.<br><br>\n" +
         "Har du spørsmål, kan du kontakte oss på 55 55 33 36.<br>\n" +
         "Vennlig hilsen Nav<br>\n" +

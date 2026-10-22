@@ -187,6 +187,36 @@ class ResendFailedVarslerJobTest :
                 val failedVarslerAfterResend = embeddedDatabase.fetchUtsendtBrukernotifikasjonVarselFeilet()
                 failedVarslerAfterResend.size shouldBeEqualTo 0
             }
+
+            it("Resends failed SM_DIALOGMOTE_ENDRET varsler to brukernotifikasjoner") {
+                val dialogmoteEndretVarselFeilet =
+                    PUtsendtVarselFeilet(
+                        uuid = UUID.randomUUID().toString(),
+                        uuidEksternReferanse = UUID.randomUUID().toString(),
+                        arbeidstakerFnr = "12121212121",
+                        orgnummer = null,
+                        hendelsetypeNavn = "SM_DIALOGMOTE_ENDRET",
+                        kanal = "BRUKERNOTIFIKASJON",
+                        arbeidsgivernotifikasjonMerkelapp = null,
+                        isForcedLetter = false,
+                        journalpostId = "111",
+                        narmesteLederFnr = null,
+                        brukernotifikasjonerMeldingType = SenderFacade.InternalBrukernotifikasjonType.OPPGAVE.name,
+                        feilmelding = "noe galt skjedde",
+                        utsendtForsokTidspunkt = LocalDateTime.now().minusDays(1),
+                    )
+                embeddedDatabase.storeUtsendtVarselFeilet(dialogmoteEndretVarselFeilet)
+
+                val result = runBlocking { job.resendFailedBrukernotifikasjonVarsler() }
+
+                result shouldBeEqualTo 1
+                coVerify(exactly = 1) {
+                    dialogmoteInnkallingSykmeldtVarselService.revarsleArbeidstakerViaBrukernotifikasjoner(
+                        match { it.hendelsetypeNavn == "SM_DIALOGMOTE_ENDRET" },
+                    )
+                }
+                embeddedDatabase.fetchUtsendtBrukernotifikasjonVarselFeilet().size shouldBeEqualTo 0
+            }
         }
 
         describe("Resend dokdist varsler") {

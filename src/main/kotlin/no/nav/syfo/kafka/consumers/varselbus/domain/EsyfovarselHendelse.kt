@@ -137,6 +137,8 @@ enum class HendelseType {
     SM_DIALOGMOTE_REFERAT,
     NL_DIALOGMOTE_NYTT_TID_STED,
     SM_DIALOGMOTE_NYTT_TID_STED,
+    NL_DIALOGMOTE_ENDRET,
+    SM_DIALOGMOTE_ENDRET,
     SM_DIALOGMOTE_LEST,
     SM_AKTIVITETSPLIKT,
     SM_ARBEIDSUFORHET_FORHANDSVARSEL,
@@ -232,6 +234,7 @@ fun HendelseType.isDialogmoteInnkallingType() =
         listOf(
             HendelseType.SM_DIALOGMOTE_INNKALT,
             HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
+            HendelseType.SM_DIALOGMOTE_ENDRET,
             HendelseType.SM_DIALOGMOTE_SVAR_MOTEBEHOV,
         )
 
