@@ -323,6 +323,21 @@ class MikrofrontendServiceSpek :
                     entries.single().synligTom shouldBe today.toLocalDate()
                 }
 
+                it("Endring sender enable og flytter utløpet") {
+                    mikrofrontendServiceUtenMotebehov.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
+                    mikrofrontendServiceUtenMotebehov.updateMikrofrontendForUserByHendelse(
+                        arbeidstakerHendelseDialogmoteNyttTidSted.copy(type = HendelseType.SM_DIALOGMOTE_ENDRET),
+                    )
+
+                    verify(exactly = 2) {
+                        minSideMicrofrontendKafkaProducer.sendRecordToMinSideTopic(
+                            match { it.eventType == MikrofrontendService.actionEnabled },
+                        )
+                    }
+                    val entries = embeddedDatabase.fetchMikrofrontendSynlighetEntriesByFnr(ARBEIDSTAKER_FNR_1)
+                    entries.single().synligTom shouldBe today.toLocalDate()
+                }
+
                 it("Avlysning skjuler kortet") {
                     mikrofrontendServiceUtenMotebehov.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteInnkalt)
                     mikrofrontendServiceUtenMotebehov.updateMikrofrontendForUserByHendelse(arbeidstakerHendelseDialogmoteAvlyst)

@@ -21,7 +21,8 @@ import org.slf4j.LoggerFactory
 
 /**
  * @param motebehovViaBudstikka når true, styrer syfomotebehov sin del av syfo-dialog via Budstikka. Da påvirker
- *   SM_DIALOGMOTE_SVAR_MOTEBEHOV ikke lenger mikrofrontenden her, og innkalling og nytt tid/sted sender alltid enable.
+ *   SM_DIALOGMOTE_SVAR_MOTEBEHOV ikke lenger mikrofrontenden her, og innkalling, nytt tid/sted og endring sender
+ *   alltid enable.
  */
 class MikrofrontendDialogmoteService(
     val database: DatabaseInterface,
@@ -44,6 +45,7 @@ class MikrofrontendDialogmoteService(
         when (hendelse.type) {
             HendelseType.SM_DIALOGMOTE_INNKALT,
             HendelseType.SM_DIALOGMOTE_NYTT_TID_STED,
+            HendelseType.SM_DIALOGMOTE_ENDRET,
             -> enableForDialogmote(hendelse.arbeidstakerFnr)
             HendelseType.SM_DIALOGMOTE_AVLYST,
             HendelseType.SM_DIALOGMOTE_REFERAT,
