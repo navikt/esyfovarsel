@@ -238,7 +238,11 @@ fun setModule(env: Environment): Application.() -> Unit =
                 env = env,
                 accessControlService = accessControlService,
             )
-        val mikrofrontendDialogmoteService = MikrofrontendDialogmoteService(database)
+        val mikrofrontendDialogmoteService =
+            MikrofrontendDialogmoteService(
+                database = database,
+                motebehovViaBudstikka = env.toggleEnv.motebehovMikrofrontendViaBudstikka,
+            )
         val mikrofrontendAktivitetskravService = MikrofrontendAktivitetskravService(database)
         val mikrofrontendMerOppfolgingService = MikrofrontendMerOppfolgingService(database)
         val mikrofrontendService =
