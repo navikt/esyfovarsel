@@ -130,6 +130,8 @@ spec:
       value: "false"
     - name: TOGGLE_SEND_AKTIVITETSPLIKT_FORHANDSVARSEL
       value: "true"
+    - name: TOGGLE_MOTEBEHOV_MIKROFRONTEND_VIA_BUDSTIKKA
+      value: "false"
     - name: BASE_URL_DIALOGMOTER
       value: https://www.nav.no/syk/dialogmoter
     - name: BASE_URL_OPPFOLGINGSPLANER
